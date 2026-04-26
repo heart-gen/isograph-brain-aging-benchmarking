@@ -1,0 +1,16 @@
+# Install these into the existing IsoGraph analysis environment if missing:
+#   source ~/.venvs/isograph/bin/activate
+#   pip install -r requirements-analysis.txt
+#
+# IsoGraph itself should come from PyPI in ~/.venvs/isograph.
+
+pyarrow>=15
+pandas>=2.2
+numpy>=1.26
+pyyaml>=6
+scipy>=1.13
+statsmodels>=0.14
+scikit-learn>=1.5
+pyhere>=1.0
+pytest>=8
+ruff>=0.6
