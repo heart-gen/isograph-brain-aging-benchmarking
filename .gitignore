@@ -1,0 +1,23 @@
+# Raw source copies are local-only and must never be tracked.
+inputs/raw/
+
+# Generated and scratch outputs.
+logs/
+scratch/
+tmp/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Large/intermediate model outputs not selected for release.
+benchmark/**/_m/tmp/
+benchmark/**/_m/logs/
+real_data/**/_m/tmp/
+real_data/**/_m/logs/
+
+# Local settings.
+.env
+settings.local.*
+

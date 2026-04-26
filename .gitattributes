@@ -1,0 +1,9 @@
+# Track intentional large reproducibility artifacts with Git LFS.
+inputs/processed/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+inputs/bundles/**/*.npz filter=lfs diff=lfs merge=lfs -text
+inputs/bundles/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+benchmark/**/_m/*.parquet filter=lfs diff=lfs merge=lfs -text
+real_data/**/_m/*.parquet filter=lfs diff=lfs merge=lfs -text
+reports/**/*.parquet filter=lfs diff=lfs merge=lfs -text
+figures/**/*.{pdf,png,svg} filter=lfs diff=lfs merge=lfs -text
+
