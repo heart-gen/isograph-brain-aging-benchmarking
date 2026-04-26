@@ -14,10 +14,11 @@ tmp/
 # Large/intermediate model outputs not selected for release.
 benchmark/**/_m/tmp/
 benchmark/**/_m/logs/
+benchmark/**/_o/
 real_data/**/_m/tmp/
 real_data/**/_m/logs/
+real_data/**/_o/
 
 # Local settings.
 .env
 settings.local.*
-
