@@ -1,0 +1,33 @@
+{
+  "dataset_name": "gtex_v11_cortex_v1",
+  "description": "GTEx v11 cortex transcript TPM IsoGraph bundle",
+  "feature_tables": [
+    {
+      "filename": "genes.parquet",
+      "kind": "gene",
+      "n_rows": 78724
+    },
+    {
+      "filename": "transcripts.parquet",
+      "kind": "transcript",
+      "n_rows": 385659
+    }
+  ],
+  "matrices": [
+    {
+      "assay_name": "transcript_counts",
+      "encoding": "dense_npz",
+      "filename": "transcript_counts.npz",
+      "n_features": 385659,
+      "n_samples": 270
+    }
+  ],
+  "provenance": {
+    "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
+    "region": "cortex",
+    "source": "GTEx v11"
+  },
+  "sample_table": "samples.parquet",
+  "suite_name": "gtex_v11_brain",
+  "truth_tables": []
+}
