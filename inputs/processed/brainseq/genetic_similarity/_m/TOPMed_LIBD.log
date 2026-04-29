@@ -1,0 +1,26 @@
+PLINK v2.0.0-a.6.9LM 64-bit Intel (29 Jan 2025)
+Options in effect:
+  --out TOPMed_LIBD
+  --pca 10
+  --pfile tmp_pca/merged_pruned
+
+Hostname: quser44
+Working directory: /gpfs/projects/b1213/resources/processed-data/genotypes/qtl/genetic_similarity/all_samples
+Start time: Sun Apr 26 16:53:07 2026
+
+Random number seed: 1777240387
+515028 MiB RAM detected, ~416970 available; reserving 257514 MiB for main
+workspace.
+Using up to 256 threads (change this with --threads).
+2438 samples (0 females, 0 males, 2438 ambiguous; 2438 founders) loaded from
+tmp_pca/merged_pruned.psam.
+189594 variants loaded from tmp_pca/merged_pruned.pvar.
+Note: No phenotype data present.
+Calculating allele frequencies... done.
+Constructing GRM: done.
+Correcting for missingness... done.
+Extracting eigenvalues and eigenvectors... done.
+--pca: Eigenvectors written to TOPMed_LIBD.eigenvec , and eigenvalues written
+to TOPMed_LIBD.eigenval .
+
+End time: Sun Apr 26 17:22:57 2026
