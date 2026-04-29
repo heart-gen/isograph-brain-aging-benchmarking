@@ -14,6 +14,22 @@ from isograph_benchmark.paths import ensure_dir, rel
 AGE_PROBS = np.array([0.10, 0.25, 0.50, 0.75, 0.90])
 AGE_LABELS = ["p10", "p25", "p50", "p75", "p90"]
 
+GTEX_REGIONS = [
+    "amygdala",
+    "anterior_cingulate_cortex_ba24",
+    "caudate_basal_ganglia",
+    "cerebellar_hemisphere",
+    "cerebellum",
+    "cortex",
+    "frontal_cortex_ba9",
+    "hippocampus",
+    "hypothalamus",
+    "nucleus_accumbens_basal_ganglia",
+    "putamen_basal_ganglia",
+    "spinal_cord_cervical_c_1",
+    "substantia_nigra",
+]
+
 
 def _standardize(x: np.ndarray) -> np.ndarray:
     return (x - x.mean()) / x.std()
@@ -30,11 +46,11 @@ def _natural_spline_basis(age_z: np.ndarray, knots: np.ndarray, boundary: np.nda
 
 
 def linear_age_association(
-    eigengenes: pd.DataFrame, sample_table: pd.DataFrame
+    eigengenes: pd.DataFrame, sample_table: pd.DataFrame, age_col: str = "Age"
 ) -> pd.DataFrame:
-    """Pearson correlation of each module eigengene with Age."""
-    merged = eigengenes.merge(sample_table[["sample_id", "Age"]], on="sample_id", how="inner")
-    age = merged["Age"].to_numpy(dtype=float)
+    """Pearson correlation of each module eigengene with the age column."""
+    merged = eigengenes.merge(sample_table[["sample_id", age_col]], on="sample_id", how="inner")
+    age = merged[age_col].to_numpy(dtype=float)
     module_cols = [c for c in eigengenes.columns if c != "sample_id"]
     rows = []
     for col in module_cols:
@@ -46,13 +62,15 @@ def linear_age_association(
         rows.append({"module_id": col, "trait": "Age_linear", "effect": r, "pvalue": p, "n": mask.sum()})
     result = pd.DataFrame(rows)
     if not result.empty:
-        _, fdr, _, _ = stats.false_discovery_control(result["pvalue"], method="bh"), None, None, None
         result["fdr"] = stats.false_discovery_control(result["pvalue"], method="bh")
     return result
 
 
 def spline_age_association(
-    eigengenes: pd.DataFrame, sample_table: pd.DataFrame, covariate_cols: list[str]
+    eigengenes: pd.DataFrame,
+    sample_table: pd.DataFrame,
+    covariate_cols: list[str],
+    age_col: str = "Age",
 ) -> pd.DataFrame:
     """
     Non-linear age association via natural cubic spline, projected to 5 age points.
@@ -60,37 +78,32 @@ def spline_age_association(
     Fits: eigengene ~ ns(age_z, knots=[q1/3, q2/3]) + covariates
     Projects spline coefficients to age_eval = qnorm([0.10, 0.25, 0.50, 0.75, 0.90]).
     """
-    keep_cols = ["sample_id", "Age"] + [c for c in covariate_cols if c in sample_table.columns]
+    keep_cols = ["sample_id", age_col] + [c for c in covariate_cols if c in sample_table.columns]
     merged = eigengenes.merge(sample_table[keep_cols], on="sample_id", how="inner")
-    merged = merged.dropna(subset=["Age"])
+    merged = merged.dropna(subset=[age_col])
 
-    age_z = _standardize(merged["Age"].to_numpy(dtype=float))
+    age_z = _standardize(merged[age_col].to_numpy(dtype=float))
     ns_knots = np.quantile(age_z, [1 / 3, 2 / 3])
     ns_boundary = np.array([age_z.min(), age_z.max()])
 
     # Build spline basis for observed samples
     B_obs = _natural_spline_basis(age_z, ns_knots, ns_boundary)
     n_spline = B_obs.shape[1]
-    spline_cols = [f"age_ns{i+1}" for i in range(n_spline)]
 
     # Build projection basis at 5 evaluation points
     age_eval = stats.norm.ppf(AGE_PROBS)
-    # Clip eval points to boundary to avoid extrapolation warnings
     age_eval_clipped = np.clip(age_eval, ns_boundary[0], ns_boundary[1])
     B_proj = _natural_spline_basis(age_eval_clipped, ns_knots, ns_boundary)
 
-    # Build covariate design matrix (drop any all-NaN covariates)
-    available_covariates = [c for c in covariate_cols if c in merged.columns and c != "Age"]
+    # Build covariate design matrix
+    available_covariates = [c for c in covariate_cols if c in merged.columns and c != age_col]
     covariate_df = merged[available_covariates].copy()
-    # One-hot encode categorical columns; include intercept via patsy-style drop_first
     covariate_df = pd.get_dummies(covariate_df, drop_first=True)
     covariate_arr = covariate_df.to_numpy(dtype=float)
 
-    # Full design matrix: intercept first, then spline basis, then covariates
-    # Intercept placed first so spline_idx cleanly indexes spline columns
     intercept = np.ones((len(merged), 1))
     X = np.hstack([intercept, B_obs, covariate_arr])
-    spline_idx = slice(1, 1 + n_spline)  # columns 1..n_spline (after intercept)
+    spline_idx = slice(1, 1 + n_spline)
 
     module_cols = [c for c in eigengenes.columns if c != "sample_id"]
     rows = []
@@ -105,7 +118,6 @@ def spline_age_association(
         residuals = y_fit - X_fit @ coef
         df_res = max(rank - 1, 1)
         sigma2 = (residuals @ residuals) / df_res
-        # Use pseudoinverse to handle near-collinear designs gracefully
         V = sigma2 * np.linalg.pinv(X_fit.T @ X_fit)
 
         beta_spline = coef[spline_idx]
@@ -140,6 +152,27 @@ def spline_age_association(
     return result
 
 
+def _save_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
+    artifacts.module_table.to_parquet(out / "modules.parquet", index=False, compression="zstd")
+    artifacts.edge_table.to_parquet(out / "edges.parquet", index=False, compression="zstd")
+    artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
+    pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
+
+    eigengenes = artifacts.eigengene_table
+    if eigengenes is not None and not eigengenes.empty:
+        eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
+        eg_long.columns.name = None
+
+        linear = linear_age_association(eg_long, bundle.sample_table, age_col=age_col)
+        linear.to_parquet(out / "age_linear.parquet", index=False, compression="zstd")
+
+        spline = spline_age_association(eg_long, bundle.sample_table, covariate_cols, age_col=age_col)
+        spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
+
+        print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
+              f"linear n={len(linear)} | spline n={len(spline)}")
+
+
 def run_brainseq_region(region: str) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
 
@@ -162,32 +195,44 @@ def run_brainseq_region(region: str) -> None:
     )
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
-    artifacts.module_table.to_parquet(out / "modules.parquet", index=False, compression="zstd")
-    artifacts.edge_table.to_parquet(out / "edges.parquet", index=False, compression="zstd")
-    artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
-    pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
+    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label=region)
 
-    # Eigengenes: rows = modules, columns = samples → transpose to sample_id rows
-    eigengenes = artifacts.eigengene_table
-    if eigengenes is not None and not eigengenes.empty:
-        eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
-        eg_long.columns.name = None
 
-        # Linear age association
-        linear = linear_age_association(eg_long, bundle.sample_table)
-        linear.to_parquet(out / "age_linear.parquet", index=False, compression="zstd")
+def run_gtex_region(region_dir_name: str) -> None:
+    bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name))
 
-        # Spline age association (5 projected age points)
-        spline = spline_age_association(eg_long, bundle.sample_table, covariate_cols)
-        spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
+    # GTEx QC covariates: RIN (SMRIN), ischemic time (SMTSISCH), mapping rate (SMMAPRT), sex (SEX)
+    covariate_cols = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
 
-        print(f"  {region}: {len(artifacts.module_table['module_id'].unique())} modules | "
-              f"linear n={len(linear)} | spline n={len(spline)}")
+    cfg = VaeModelConfig(
+        hidden_dim=256,
+        latent_dim=8,
+        n_epochs=500,
+        residualize_covariates=covariate_cols,
+        trait_columns=["AGE"],
+    )
+    artifacts = VaeNetworkModel(cfg).fit(
+        transcript_counts=bundle.matrices["transcript_counts"],
+        transcript_table=bundle.feature_tables["transcript"],
+        sample_table=bundle.sample_table,
+    )
+
+    out = ensure_dir(rel("real_data", "gtex_v11_brain", region_dir_name, "_m", "isograph_vae"))
+    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
 
 
 def main() -> None:
+    print("BrainSEQ regions:")
     for region in ["caudate", "hippocampus", "dlpfc"]:
         run_brainseq_region(region)
+
+    print("\nGTEx v11 brain regions:")
+    gtex_bundle_root = rel("inputs", "bundles", "gtex_v11_brain")
+    if gtex_bundle_root.exists():
+        for region_dir in sorted(path for path in gtex_bundle_root.iterdir() if path.is_dir()):
+            run_gtex_region(region_dir.name)
+    else:
+        print("  No GTEx bundles found; skipping.")
 
 
 if __name__ == "__main__":
