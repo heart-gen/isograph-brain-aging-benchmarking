@@ -1,0 +1,2 @@
+"""Synthetic benchmark workflows."""
+

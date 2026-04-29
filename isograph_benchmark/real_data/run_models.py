@@ -1,0 +1,194 @@
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+from patsy import dmatrix
+from scipy import stats
+
+from isograph.io.artifacts import load_dataset_bundle
+from isograph.models.vae import VaeNetworkModel
+from isograph.workflow.config import VaeModelConfig
+from isograph_benchmark.paths import ensure_dir, rel
+
+# Age evaluation probabilities for spline projection (p10, p25, p50, p75, p90)
+AGE_PROBS = np.array([0.10, 0.25, 0.50, 0.75, 0.90])
+AGE_LABELS = ["p10", "p25", "p50", "p75", "p90"]
+
+
+def _standardize(x: np.ndarray) -> np.ndarray:
+    return (x - x.mean()) / x.std()
+
+
+def _natural_spline_basis(age_z: np.ndarray, knots: np.ndarray, boundary: np.ndarray) -> np.ndarray:
+    """Natural cubic spline basis via patsy cr() — linear beyond boundary knots."""
+    basis = dmatrix(
+        f"cr(age_z, knots={list(knots)}, lower_bound={boundary[0]}, upper_bound={boundary[1]}) - 1",
+        {"age_z": age_z},
+        return_type="matrix",
+    )
+    return np.asarray(basis)
+
+
+def linear_age_association(
+    eigengenes: pd.DataFrame, sample_table: pd.DataFrame
+) -> pd.DataFrame:
+    """Pearson correlation of each module eigengene with Age."""
+    merged = eigengenes.merge(sample_table[["sample_id", "Age"]], on="sample_id", how="inner")
+    age = merged["Age"].to_numpy(dtype=float)
+    module_cols = [c for c in eigengenes.columns if c != "sample_id"]
+    rows = []
+    for col in module_cols:
+        eg = merged[col].to_numpy(dtype=float)
+        mask = np.isfinite(eg) & np.isfinite(age)
+        if mask.sum() < 10:
+            continue
+        r, p = stats.pearsonr(age[mask], eg[mask])
+        rows.append({"module_id": col, "trait": "Age_linear", "effect": r, "pvalue": p, "n": mask.sum()})
+    result = pd.DataFrame(rows)
+    if not result.empty:
+        _, fdr, _, _ = stats.false_discovery_control(result["pvalue"], method="bh"), None, None, None
+        result["fdr"] = stats.false_discovery_control(result["pvalue"], method="bh")
+    return result
+
+
+def spline_age_association(
+    eigengenes: pd.DataFrame, sample_table: pd.DataFrame, covariate_cols: list[str]
+) -> pd.DataFrame:
+    """
+    Non-linear age association via natural cubic spline, projected to 5 age points.
+
+    Fits: eigengene ~ ns(age_z, knots=[q1/3, q2/3]) + covariates
+    Projects spline coefficients to age_eval = qnorm([0.10, 0.25, 0.50, 0.75, 0.90]).
+    """
+    keep_cols = ["sample_id", "Age"] + [c for c in covariate_cols if c in sample_table.columns]
+    merged = eigengenes.merge(sample_table[keep_cols], on="sample_id", how="inner")
+    merged = merged.dropna(subset=["Age"])
+
+    age_z = _standardize(merged["Age"].to_numpy(dtype=float))
+    ns_knots = np.quantile(age_z, [1 / 3, 2 / 3])
+    ns_boundary = np.array([age_z.min(), age_z.max()])
+
+    # Build spline basis for observed samples
+    B_obs = _natural_spline_basis(age_z, ns_knots, ns_boundary)
+    n_spline = B_obs.shape[1]
+    spline_cols = [f"age_ns{i+1}" for i in range(n_spline)]
+
+    # Build projection basis at 5 evaluation points
+    age_eval = stats.norm.ppf(AGE_PROBS)
+    # Clip eval points to boundary to avoid extrapolation warnings
+    age_eval_clipped = np.clip(age_eval, ns_boundary[0], ns_boundary[1])
+    B_proj = _natural_spline_basis(age_eval_clipped, ns_knots, ns_boundary)
+
+    # Build covariate design matrix (drop any all-NaN covariates)
+    available_covariates = [c for c in covariate_cols if c in merged.columns and c != "Age"]
+    covariate_df = merged[available_covariates].copy()
+    # One-hot encode categorical columns; include intercept via patsy-style drop_first
+    covariate_df = pd.get_dummies(covariate_df, drop_first=True)
+    covariate_arr = covariate_df.to_numpy(dtype=float)
+
+    # Full design matrix: intercept first, then spline basis, then covariates
+    # Intercept placed first so spline_idx cleanly indexes spline columns
+    intercept = np.ones((len(merged), 1))
+    X = np.hstack([intercept, B_obs, covariate_arr])
+    spline_idx = slice(1, 1 + n_spline)  # columns 1..n_spline (after intercept)
+
+    module_cols = [c for c in eigengenes.columns if c != "sample_id"]
+    rows = []
+
+    for col in module_cols:
+        y = merged[col].to_numpy(dtype=float)
+        mask = np.isfinite(y) & np.all(np.isfinite(X), axis=1)
+        if mask.sum() < 10:
+            continue
+        X_fit, y_fit = X[mask], y[mask]
+        coef, _, rank, _ = np.linalg.lstsq(X_fit, y_fit, rcond=None)
+        residuals = y_fit - X_fit @ coef
+        df_res = max(rank - 1, 1)
+        sigma2 = (residuals @ residuals) / df_res
+        # Use pseudoinverse to handle near-collinear designs gracefully
+        V = sigma2 * np.linalg.pinv(X_fit.T @ X_fit)
+
+        beta_spline = coef[spline_idx]
+        V_spline = V[spline_idx, :][:, spline_idx]
+
+        beta_proj = B_proj @ beta_spline
+        V_proj = B_proj @ V_spline @ B_proj.T
+        se_proj = np.sqrt(np.maximum(np.diag(V_proj), 0))
+        z_proj = np.where(se_proj > 0, beta_proj / se_proj, 0.0)
+        p_proj = 2 * stats.norm.sf(np.abs(z_proj))
+
+        for label, age_p, beta, se, z, p in zip(
+            AGE_LABELS, AGE_PROBS, beta_proj, se_proj, z_proj, p_proj
+        ):
+            rows.append({
+                "module_id": col,
+                "trait": "Age_spline",
+                "age_label": label,
+                "age_prob": age_p,
+                "effect": beta,
+                "se": se,
+                "z": z,
+                "pvalue": p,
+                "n": int(mask.sum()),
+            })
+
+    result = pd.DataFrame(rows)
+    if not result.empty:
+        result["fdr"] = result.groupby("age_label")["pvalue"].transform(
+            lambda pv: stats.false_discovery_control(pv, method="bh")
+        )
+    return result
+
+
+def run_brainseq_region(region: str) -> None:
+    bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
+
+    covariate_cols = [
+        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+    ]
+
+    cfg = VaeModelConfig(
+        hidden_dim=256,
+        latent_dim=8,
+        n_epochs=500,
+        residualize_covariates=covariate_cols,
+        trait_columns=["Age"],
+    )
+    artifacts = VaeNetworkModel(cfg).fit(
+        transcript_counts=bundle.matrices["transcript_counts"],
+        transcript_table=bundle.feature_tables["transcript"],
+        sample_table=bundle.sample_table,
+    )
+
+    out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
+    artifacts.module_table.to_parquet(out / "modules.parquet", index=False, compression="zstd")
+    artifacts.edge_table.to_parquet(out / "edges.parquet", index=False, compression="zstd")
+    artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
+    pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
+
+    # Eigengenes: rows = modules, columns = samples → transpose to sample_id rows
+    eigengenes = artifacts.eigengene_table
+    if eigengenes is not None and not eigengenes.empty:
+        eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
+        eg_long.columns.name = None
+
+        # Linear age association
+        linear = linear_age_association(eg_long, bundle.sample_table)
+        linear.to_parquet(out / "age_linear.parquet", index=False, compression="zstd")
+
+        # Spline age association (5 projected age points)
+        spline = spline_age_association(eg_long, bundle.sample_table, covariate_cols)
+        spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
+
+        print(f"  {region}: {len(artifacts.module_table['module_id'].unique())} modules | "
+              f"linear n={len(linear)} | spline n={len(spline)}")
+
+
+def main() -> None:
+    for region in ["caudate", "hippocampus", "dlpfc"]:
+        run_brainseq_region(region)
+
+
+if __name__ == "__main__":
+    main()
