@@ -75,9 +75,28 @@ def convert_gtex_gct(file_name: str, output_name: str) -> None:
         write_parquet(df, rel("inputs", "processed", "gtex_v11", _safe_region(tissue), f"{output_name}.parquet"))
 
 
+_V8_SUBJECT_COLS = ["SUBJID", "AGE", "RACE", "ETHNCTY", "BMI", "COHORT", "DTHCOD"]
+
+
 def _age_midpoint(age_bin: str) -> float:
     lo, hi = age_bin.split("-")
     return (int(lo) + int(hi)) / 2
+
+
+def _load_v8_phenotypes() -> pd.DataFrame:
+    path = rel(
+        "inputs", "raw", "gtex_v11", "metadata_v8",
+        "phs000424.v8.pht002742.v8.p2.c1.GTEx_Subject_Phenotypes.GRU.txt.gz",
+    )
+    return pd.read_csv(path, sep="\t", comment="#", usecols=_V8_SUBJECT_COLS)
+
+
+def _load_tissue_changes() -> pd.DataFrame:
+    path = rel(
+        "inputs", "raw", "gtex_v11", "metadata",
+        "GTEx_Analysis_v11_Sample_Tissue_Changes_From_v8.txt",
+    )
+    return pd.read_csv(path, sep="\t", usecols=["SAMPID", "SMTSD_V8"])
 
 
 def convert_gtex_sample_metadata() -> None:
@@ -89,11 +108,21 @@ def convert_gtex_sample_metadata() -> None:
     subj = pd.read_csv(
         rel("inputs", "raw", "gtex_v11", "metadata", "GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"),
         sep="\t",
-        usecols=["SUBJID", "SEX", "AGE"],
+        usecols=["SUBJID", "SEX", "AGE", "DTHHRDY"],
     )
-    subj["AGE"] = subj["AGE"].apply(_age_midpoint)
+    subj = subj.rename(columns={"AGE": "AGE_RANGE"})
+    subj["AGE"] = subj["AGE_RANGE"].apply(_age_midpoint)
+
+    v8 = _load_v8_phenotypes().rename(columns={"AGE": "AGE_V8"})
+    subj = subj.merge(v8, on="SUBJID", how="left")
+    subj["AGE"] = subj["AGE_V8"].combine_first(subj["AGE"])
+
     attrs["SUBJID"] = attrs["SAMPID"].str.split("-").str[:2].str.join("-")
     attrs = attrs.merge(subj, on="SUBJID", how="left")
+
+    tissue_changes = _load_tissue_changes()
+    attrs = attrs.merge(tissue_changes, on="SAMPID", how="left")
+
     brain = attrs.loc[attrs["SMTSD"].astype(str).str.startswith("Brain -")].copy()
     for tissue, group in brain.groupby("SMTSD", sort=True):
         write_parquet(group, rel("inputs", "processed", "gtex_v11", _safe_region(tissue), "sample_attributes.parquet"))
