@@ -10,3 +10,5 @@ feature_scores.parquet filter=lfs diff=lfs merge=lfs -text
 gene_counts.parquet filter=lfs diff=lfs merge=lfs -text
 psi_events.parquet filter=lfs diff=lfs merge=lfs -text
 tx_counts.parquet filter=lfs diff=lfs merge=lfs -text
+gene_tpm.parquet filter=lfs diff=lfs merge=lfs -text
+transcript_tpm.parquet filter=lfs diff=lfs merge=lfs -text
