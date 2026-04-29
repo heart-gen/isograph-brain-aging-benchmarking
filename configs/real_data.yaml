@@ -1,0 +1,25 @@
+brainseq:
+  regions: [caudate, hippocampus, dlpfc]
+  exclude_regions: [bsp1-dlpfc]
+  filters: {Dx: Control, dropped: "f", age_min: 18}
+  covariates: [Sex, MoD, RIN, mapping_rate, mito_rate, SNP_PC1, SNP_PC2, SNP_PC3, SNP_PC4, SNP_PC5]
+  aging_models:
+    - linear_age_eigengene_correlation
+    - spline_age_eigengene_association
+  spline:
+    df: 4
+    compare_to_linear: true
+  sensitivities:
+    - all_samples_adjusted_for_dx
+    - controls_only
+gtex_v11:
+  tissue_column: SMTSD
+  tissue_prefix: "Brain -"
+  covariates: [SEX, SMRIN, SMTSISCH, SMMAPRT]
+  aging_models:
+    - linear_age_eigengene_correlation
+    - spline_age_eigengene_association
+  spline:
+    df: 4
+    compare_to_linear: true
+  required_columns: [AGE, SEX]

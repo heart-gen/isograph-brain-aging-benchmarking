@@ -1,0 +1,28 @@
+brainseq:
+  source_root: /projects/b1213/resources/processed-data/text-files
+  metadata:
+    rnaseq: /projects/b1213/resources/libd_data/phenodata/libd_rnaseq_metadata.tab
+    metrics:
+      caudate:
+        - /projects/b1213/resources/libd_data/metadata/bsp3/_m/clean_rnaseq_metrics.tsv
+      hippocampus:
+        - /projects/b1213/resources/libd_data/metadata/bsp2_hippo/_m/clean_rnaseq_metrics.tsv
+      dlpfc:
+        - /projects/b1213/resources/libd_data/metadata/bsp2_dlpfc/_m/clean_rnaseq_metrics.tsv
+  regions:
+    - caudate
+    - hippocampus
+    - dlpfc
+  exclude_regions:
+    - bsp1-dlpfc
+gtex_v11:
+  counts_root: /home/kynon/Documents/github/projects/bsvae-benchmarking/inputs/gtex_v11/counts
+  metadata_root: /home/kynon/Documents/github/projects/bsvae-benchmarking/inputs/gtex_v11/metadata
+  files:
+    transcript_tpm: GTEx_Analysis_2025-08-22_v11_RSEMv1.3.3_transcripts_tpm.txt.gz
+    gene_reads: GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_reads.gct.gz
+    gene_tpm: GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz
+    sample_attributes: GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt
+  required_external:
+    subject_phenotypes: "GTEx subject phenotype data table with age and sex; not present in inspected metadata directory."
+
