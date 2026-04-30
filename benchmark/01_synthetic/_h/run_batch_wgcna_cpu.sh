@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
 #SBATCH --partition=RM-shared
-#SBATCH --job-name=isograph-synth
+#SBATCH --job-name=isograph-synth-wgcna-cpu
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=32
-#SBATCH --array=1-789%50
+#SBATCH --cpus-per-task=50
+#SBATCH --array=1-228%20
 #SBATCH --time=02:00:00
 #SBATCH --output=benchmark/01_synthetic/_m/logs/%x-%A_%a.log
 
@@ -29,7 +29,7 @@ module list
 log_message "**** Loading mamba environment ****"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
-BATCH_FILE="${BATCH_FILE:-benchmark/01_synthetic/_m/synthetic_batches.parquet}"
+BATCH_FILE="${BATCH_FILE:-benchmark/01_synthetic/_m/batches_wgcna_cpu.tsv}"
 BATCH_INDEX="${SLURM_ARRAY_TASK_ID:-1}"
 
 log_message "**** Subsetting benchmark run ****"
