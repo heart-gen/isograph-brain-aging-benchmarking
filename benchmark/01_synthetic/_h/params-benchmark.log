@@ -1,0 +1,7 @@
+Wrote 1,118 batches to /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/benchmark/01_synthetic/_m/synthetic_batches.parquet
+cpu_short: 227 array tasks
+gpu: 250 array tasks
+gpu_scale: 79 array tasks
+scale: 144 array tasks
+vae: 190 array tasks
+wgcna_cpu: 228 array tasks
