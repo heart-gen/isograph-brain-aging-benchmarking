@@ -20,7 +20,7 @@ mkdir -p benchmark/02_metrics/_m/logs
 module purge
 module load anaconda3/2024.10-1
 
-log_message "Activating R_env (ggplot2 + patchwork + arrow)"
+log_message "Activating R_env (ggpubr + ggplot2 + patchwork + arrow)"
 conda activate /ocean/projects/bio250020p/shared/opt/env/R_env
 
 log_message "Running R figure script"

@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 # Publication-quality figures for the IsoGraph synthetic benchmark.
-# Requires: ggplot2, patchwork, dplyr, tidyr, arrow, scales
+# Requires: ggpubr, ggplot2, patchwork, dplyr, tidyr, arrow, scales
 
 suppressPackageStartupMessages({
   library(arrow)
   library(dplyr)
   library(tidyr)
   library(ggplot2)
+  library(ggpubr)
   library(patchwork)
   library(scales)
 })
@@ -110,6 +111,12 @@ MAIN_METRICS <- c(
   "metrics_module_recovery",
   "metrics_switch_gene_detection_rate",
   "metrics_nonswitch_gene_module_rate"
+)
+
+PWC_LABEL <- "{p.adj.signif}"
+PWC_SYMNUM_ARGS <- list(
+  cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf),
+  symbols = c("****", "***", "**", "*", "ns")
 )
 
 # ---------------------------------------------------------------------------
@@ -255,16 +262,24 @@ metric_box_data <- function(long_df, metric_name, methods = MAIN_METHOD_ORDER,
 box_metric_panel <- function(long_df, metric_name, y_label, tag,
                              show_x_labels = FALSE) {
   sub <- metric_box_data(long_df, metric_name)
+  stat_sub <- sub |>
+    filter(.data$method %in% c("isograph_vae", "wgcna_gene"))
 
-  p <- ggplot(sub, aes(x = .data$method, y = .data$value_plot,
-                       fill = .data$method)) +
-    geom_boxplot(
-      width = 0.62,
-      linewidth = 0.35,
-      outlier.size = 0.45,
-      outlier.alpha = 0.25,
-      color = "grey25"
-    ) +
+  p <- ggpubr::ggboxplot(
+    sub,
+    x = "method",
+    y = "value_plot",
+    fill = "method",
+    palette = METHOD_COLORS[MAIN_METHOD_ORDER],
+    width = 0.62,
+    outliers = TRUE,
+    outlier.size = 0.45,
+    outlier.alpha = 0.25,
+    color = "grey25",
+    xlab = FALSE,
+    ylab = y_label,
+    ggtheme = theme_pub()
+  ) +
     facet_wrap(~ scenario_label, nrow = 1) +
     scale_x_discrete(labels = METHOD_LABELS_SHORT[MAIN_METHOD_ORDER]) +
     scale_fill_manual(
@@ -273,12 +288,29 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
       breaks = MAIN_METHOD_ORDER
     ) +
     scale_y_continuous(
-      limits = c(0, 1),
       breaks = c(0, 0.25, 0.5, 0.75, 1),
-      expand = expansion(mult = c(0.02, 0.04))
+      expand = expansion(mult = c(0.02, 0.08))
     ) +
+    ggpubr::geom_pwc(
+      data = stat_sub,
+      mapping = aes(x = .data$method, y = .data$value_plot,
+                    group = .data$method),
+      method = "wilcox_test",
+      label = PWC_LABEL,
+      p.adjust.method = "BH",
+      p.adjust.by = "panel",
+      symnum.args = PWC_SYMNUM_ARGS,
+      hide.ns = TRUE,
+      y.position = 1.01,
+      tip.length = 0.01,
+      bracket.nudge.y = 0,
+      bracket.shorten = 0.04,
+      size = 0.25,
+      label.size = 2.6,
+      inherit.aes = FALSE
+    ) +
+    coord_cartesian(ylim = c(0, 1.08), clip = "off") +
     labs(x = NULL, y = y_label, fill = NULL, tag = tag) +
-    theme_pub() +
     theme(
       legend.position = "right",
       axis.text.x = element_text(angle = 35, hjust = 1, size = 7),
@@ -373,6 +405,20 @@ response_dot_fig <- function(long_df, scenario, x_col, facet_col,
       )
     )
 
+  stat_df <- sub |>
+    filter(.data$method %in% c("isograph_vae", "wgcna_gene")) |>
+    mutate(
+      x_value = .data[[x_col]],
+      facet_value = .data[[facet_col]],
+      x_plot = factor(.data$x_value, levels = x_levels,
+                      labels = format_param(x_levels)),
+      facet_label = factor(
+        facet_labels[as.character(.data$facet_value)],
+        levels = facet_labels[as.character(facet_levels)]
+      ),
+      method = factor(.data$method, levels = methods)
+    )
+
   ggplot(plot_df, aes(x = .data$x_plot, y = .data$mean_val,
                       color = .data$method, group = .data$method)) +
     geom_errorbar(
@@ -389,10 +435,30 @@ response_dot_fig <- function(long_df, scenario, x_col, facet_col,
       breaks = methods
     ) +
     scale_y_continuous(
-      limits = c(0, 1),
       breaks = c(0, 0.25, 0.5, 0.75, 1),
-      expand = expansion(mult = c(0.02, 0.04))
+      expand = expansion(mult = c(0.02, 0.08))
     ) +
+    ggpubr::geom_pwc(
+      data = stat_df,
+      mapping = aes(x = .data$x_plot, y = .data$value,
+                    group = .data$method),
+      method = "wilcox_test",
+      group.by = "x.var",
+      label = PWC_LABEL,
+      p.adjust.method = "BH",
+      p.adjust.by = "panel",
+      symnum.args = PWC_SYMNUM_ARGS,
+      hide.ns = TRUE,
+      y.position = 1.01,
+      dodge = 0.52,
+      tip.length = 0.01,
+      bracket.nudge.y = 0,
+      bracket.shorten = 0.04,
+      size = 0.25,
+      label.size = 2.4,
+      inherit.aes = FALSE
+    ) +
+    coord_cartesian(ylim = c(0, 1.08), clip = "off") +
     labs(
       x = x_label,
       y = "Module recovery (AUC; 1 = perfect)",
@@ -477,23 +543,45 @@ compute_box_panel <- function(plot_df, y_label, tag,
 
   if (nrow(sub) == 0) return(NULL)
 
-  p <- ggplot(sub, aes(x = .data$n_genes, y = .data$value,
-                       fill = .data$method)) +
-    geom_boxplot(
-      width = 0.68,
-      linewidth = 0.35,
-      outlier.size = 0.45,
-      outlier.alpha = 0.25,
-      color = "grey25",
-      position = position_dodge(width = 0.78)
-    ) +
+  p <- ggpubr::ggboxplot(
+    sub,
+    x = "n_genes",
+    y = "value",
+    fill = "method",
+    palette = METHOD_COLORS[COMPUTE_METHOD_ORDER],
+    width = 0.68,
+    outliers = TRUE,
+    outlier.size = 0.45,
+    outlier.alpha = 0.25,
+    color = "grey25",
+    xlab = "Number of genes",
+    ylab = y_label,
+    ggtheme = theme_pub()
+  ) +
     scale_fill_manual(
       values = METHOD_COLORS[COMPUTE_METHOD_ORDER],
       labels = METHOD_LABELS[COMPUTE_METHOD_ORDER],
       breaks = COMPUTE_METHOD_ORDER
     ) +
+    ggpubr::geom_pwc(
+      mapping = aes(x = .data$n_genes, y = .data$value,
+                    group = .data$method),
+      method = "wilcox_test",
+      group.by = "x.var",
+      ref.group = "isograph_vae",
+      label = PWC_LABEL,
+      p.adjust.method = "BH",
+      p.adjust.by = "panel",
+      symnum.args = PWC_SYMNUM_ARGS,
+      hide.ns = TRUE,
+      dodge = 0.78,
+      tip.length = 0.01,
+      bracket.nudge.y = 0.04,
+      bracket.shorten = 0.03,
+      size = 0.25,
+      label.size = 2.4
+    ) +
     labs(x = "Number of genes", y = y_label, fill = NULL, tag = tag) +
-    theme_pub() +
     theme(
       legend.position = "right",
       plot.tag = element_text(size = 10, face = "bold")

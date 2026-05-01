@@ -90,7 +90,7 @@ Current analysis uses the **9,440 completed runs** covering all planned CPU and 
 ## Results
 
 See generated figures in `figures/`, the main summary table `_m/table1_benchmark_summary.csv`, and the scale compute table `_m/tableS_scale_compute_summary.csv`.
-All figures were regenerated with R, ggplot2, and patchwork.
+All figures were regenerated with R, ggpubr, ggplot2, and patchwork.
 
 **Primary metrics:**
 
@@ -132,6 +132,8 @@ The CPU/GPU latent backend variants were completed as engineering comparisons bu
 All metric summaries report the mean and 95% bootstrap confidence interval (10,000 resampling iterations per group).
 Groups are defined by scenario x method for the main summaries and by scenario x method x parameter combination in parameter-resolved supplemental panels.
 Multiple comparison correction uses the Benjamini-Hochberg procedure [@doi:10.1111/j.2517-6161.1995.tb02031.x] where applicable.
+Figure significance annotations use `ggpubr::geom_pwc()` with Wilcoxon tests and Benjamini-Hochberg adjusted p-values.
+Main benchmark and parameter-sweep annotations compare IsoGraph VAE with WGCNA; scale compute annotations compare VAE GPU and WGCNA with VAE CPU.
 
 ### Compute environment
 
