@@ -14,16 +14,20 @@ RESOURCE_DEFAULTS = {
     "vae": {"requested_cpus": 32, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 64, "target_minutes": 90},
     "wgcna_cpu": {"requested_cpus": 50, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 100, "target_minutes": 90},
     "scale": {"requested_cpus": 64, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 128, "target_minutes": 240},
+    "gpu": {"requested_cpus": 8, "requested_gpus": 1, "mem_per_cpu_gb": 8, "requested_mem_gb": 64, "target_minutes": 90},
+    "gpu_scale": {"requested_cpus": 8, "requested_gpus": 1, "mem_per_cpu_gb": 16, "requested_mem_gb": 128, "target_minutes": 240},
 }
 
 
 def resource_class(method: str, scenario: str) -> str:
+    if method in ("isograph_gpu_latent", "isograph_vae_gpu"):
+        return "gpu_scale" if scenario == "scale" else "gpu"
     if scenario == "scale":
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
-    if method == "isograph_vae":
-        return "vae"
+    if method in ("isograph_vae", "isograph_cpu_latent"):
+        return "vae" if method == "isograph_vae" else "cpu_short"
     return "cpu_short"
 
 

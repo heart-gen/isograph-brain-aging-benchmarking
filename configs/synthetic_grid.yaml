@@ -4,14 +4,18 @@ seed_count_scale: 8
 base_seed: 13
 methods:
   - isograph_vae
+  - isograph_vae_gpu
   - isograph_gpu_latent
+  - isograph_cpu_latent
   - isograph_latent
   - isograph_graph
   - isograph_baseline
   - wgcna_gene
 scale_methods:
   - isograph_vae
+  - isograph_vae_gpu
   - isograph_gpu_latent
+  - isograph_cpu_latent
   - wgcna_gene
 scenarios:
   idealized_switching:

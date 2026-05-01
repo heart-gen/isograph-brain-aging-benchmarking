@@ -1,10 +1,30 @@
 from __future__ import annotations
 
+import re
+
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.config import load_yaml
 from isograph_benchmark.paths import ensure_dir, rel
+
+
+def _load_stats_config(yaml_path: str) -> dict:
+    """Extract bootstrap_iterations and confidence_level from YAML without PyYAML."""
+    from isograph_benchmark.paths import rel as _rel
+    text = _rel(yaml_path).read_text()
+    n_iter = int(re.search(r"bootstrap_iterations\s*:\s*(\d+)", text).group(1))
+    conf = float(re.search(r"confidence_level\s*:\s*([\d.]+)", text).group(1))
+    return {"bootstrap_iterations": n_iter, "confidence_level": conf}
+
+
+METRICS = [
+    "metrics_module_recovery",
+    "metrics_switch_gene_detection_rate",
+    "metrics_nonswitch_gene_module_rate",
+    "metrics_n_predicted_modules",
+    "metrics_n_edges",
+    "measurement_elapsed_sec",
+]
 
 
 def bootstrap_ci(values: np.ndarray, n_iter: int, alpha: float, seed: int = 0) -> tuple[float, float]:
@@ -29,15 +49,18 @@ def benjamini_hochberg(pvalues: pd.Series) -> pd.Series:
     return q
 
 
-def summarize_metrics(input_path: str, metric: str = "metrics_module_recovery") -> pd.DataFrame:
-    cfg = load_yaml("configs/synthetic_grid.yaml")
-    df = pd.read_parquet(rel(input_path))
-    n_iter = int(cfg["statistics"]["bootstrap_iterations"])
-    alpha = 1 - float(cfg["statistics"]["confidence_level"])
-    rows = []
+def summarize_metrics(
+    df: pd.DataFrame,
+    metric: str,
+    n_iter: int,
+    alpha: float,
+) -> pd.DataFrame:
     scenario_col = "run_scenario" if "run_scenario" in df.columns else "scenario"
     method_col = "run_method" if "run_method" in df.columns else "method"
+    rows = []
     for keys, group in df.groupby([scenario_col, method_col], dropna=False):
+        if metric not in group.columns:
+            continue
         vals = group[metric].to_numpy(dtype=float)
         lo, hi = bootstrap_ci(vals, n_iter=n_iter, alpha=alpha)
         rows.append(
@@ -56,15 +79,33 @@ def summarize_metrics(input_path: str, metric: str = "metrics_module_recovery") 
 
 
 def main() -> None:
-    metrics = rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
-    if not metrics.exists():
-        raise SystemExit(f"Missing metrics file: {metrics}")
-    out = rel("reports", "synthetic_metric_summary.parquet")
+    results_path = rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
+    if not results_path.exists():
+        raise SystemExit(f"Missing results file: {results_path}\nRun collect_results first.")
+
+    cfg = _load_stats_config("configs/synthetic_grid.yaml")
+    n_iter = int(cfg["bootstrap_iterations"])
+    alpha = 1 - float(cfg["confidence_level"])
+
+    df = pd.read_parquet(results_path)
+    df = df[df["status"] == "completed"].copy()
+    print(f"Summarizing {len(df):,} completed runs across {len(METRICS)} metrics")
+
+    parts = []
+    for metric in METRICS:
+        if metric not in df.columns:
+            print(f"  Skipping {metric} (column not found)")
+            continue
+        part = summarize_metrics(df, metric=metric, n_iter=n_iter, alpha=alpha)
+        parts.append(part)
+        print(f"  {metric}: {len(part)} group combinations")
+
+    summary = pd.concat(parts, ignore_index=True)
+
+    out = rel("benchmark", "02_metrics", "_m", "synthetic_metric_summary.parquet")
     ensure_dir(out.parent)
-    summarize_metrics("benchmark/01_synthetic/_m/synthetic_results.parquet").to_parquet(
-        out, index=False, compression="zstd"
-    )
-    print(out)
+    summary.to_parquet(out, index=False, compression="zstd")
+    print(f"Wrote {len(summary):,} rows to {out}")
 
 
 if __name__ == "__main__":
