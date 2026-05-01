@@ -15,6 +15,7 @@ tmp/
 benchmark/**/_m/tmp/
 benchmark/**/_m/logs/
 benchmark/**/_o/
+benchmark/01_synthetic/_m/datasets/
 real_data/**/_m/tmp/
 real_data/**/_m/logs/
 real_data/**/_o/
