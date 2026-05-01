@@ -16,6 +16,7 @@ log_message() {
 log_message "**** Step 3: Generate figures and tables (R/ggplot2) ****"
 echo "User: ${USER}"
 echo "Host: ${HOSTNAME}"
+mkdir -p benchmark/02_metrics/_m/logs
 
 module purge
 module load anaconda3/2024.10-1

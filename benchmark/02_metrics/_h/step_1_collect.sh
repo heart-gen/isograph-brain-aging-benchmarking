@@ -16,6 +16,7 @@ log_message() {
 log_message "**** Step 1: Collect benchmark results ****"
 echo "User: ${USER}"
 echo "Host: ${HOSTNAME}"
+mkdir -p benchmark/02_metrics/_m/logs
 
 module purge
 module load anaconda3/2024.10-1
