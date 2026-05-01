@@ -49,6 +49,35 @@ def benjamini_hochberg(pvalues: pd.Series) -> pd.Series:
     return q
 
 
+_RUN_ID_COLS = [
+    "run_run_id",
+    "run_replicate",
+    "run_seed",
+    "run_n_genes",
+    "run_n_samples",
+    "run_noise_sd",
+    "run_switching_fraction",
+    "run_abundance_imbalance",
+    "run_count_dispersion",
+    "run_interaction_fraction",
+    "run_interaction_strength",
+]
+
+
+def make_long_metrics(df: pd.DataFrame) -> pd.DataFrame:
+    scenario_col = "run_scenario" if "run_scenario" in df.columns else "scenario"
+    method_col = "run_method" if "run_method" in df.columns else "method"
+    id_cols = [scenario_col, method_col] + [c for c in _RUN_ID_COLS if c in df.columns]
+    available = [m for m in METRICS if m in df.columns]
+    long = (
+        df[id_cols + available]
+        .melt(id_vars=id_cols, value_vars=available, var_name="metric", value_name="value")
+        .rename(columns={scenario_col: "scenario", method_col: "method"})
+        .reset_index(drop=True)
+    )
+    return long
+
+
 def summarize_metrics(
     df: pd.DataFrame,
     metric: str,
@@ -105,7 +134,12 @@ def main() -> None:
     out = rel("benchmark", "02_metrics", "_m", "synthetic_metric_summary.parquet")
     ensure_dir(out.parent)
     summary.to_parquet(out, index=False, compression="zstd")
-    print(f"Wrote {len(summary):,} rows to {out}")
+    print(f"Wrote {len(summary):,} rows to {out.name}")
+
+    long = make_long_metrics(df)
+    out_long = rel("benchmark", "02_metrics", "_m", "synthetic_metric_long.parquet")
+    long.to_parquet(out_long, index=False, compression="zstd")
+    print(f"Wrote {len(long):,} rows to {out_long.name}")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
 #SBATCH --time=01:00:00
 #SBATCH --output=benchmark/02_metrics/_m/logs/collect-%j.log
 
