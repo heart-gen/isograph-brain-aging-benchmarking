@@ -4,11 +4,11 @@
 #SBATCH --job-name=isograph-synth-gpu-scale
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=8
-#SBATCH --gpus-per-task=1
-#SBATCH --mem-per-cpu=16G
-#SBATCH --array=1-64%10
-#SBATCH --time=48:00:00
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=5
+#SBATCH --gres=gpu:1
+#SBATCH --array=1-79%50
+#SBATCH --time=02:00:00
 #SBATCH --output=benchmark/01_synthetic/_m/logs/%x-%A_%a.log
 
 log_message() {
@@ -26,6 +26,7 @@ echo "Hostname: ${HOSTNAME}"
 
 module purge
 module load anaconda3/2024.10-1
+module load cuda
 module list
 
 log_message "**** Loading mamba environment ****"
