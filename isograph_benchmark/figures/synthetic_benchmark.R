@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
 })
 
 # ---------------------------------------------------------------------------
-# Paths — resolve project root via .here marker
+# Paths - resolve project root via .here marker
 # ---------------------------------------------------------------------------
 find_root <- function() {
   d <- normalizePath(getwd(), mustWork = FALSE)
@@ -40,18 +40,39 @@ METHOD_ORDER <- c(
   "isograph_latent",
   "isograph_graph",
   "isograph_cpu_latent",
+  "isograph_gpu_latent",
   "isograph_vae",
+  "isograph_vae_gpu",
   "wgcna_gene"
 )
-SCALE_METHOD_ORDER <- c("isograph_cpu_latent", "isograph_vae", "wgcna_gene")
+SCALE_METHOD_ORDER <- c(
+  "isograph_cpu_latent",
+  "isograph_gpu_latent",
+  "isograph_vae",
+  "isograph_vae_gpu",
+  "wgcna_gene"
+)
 
 METHOD_LABELS <- c(
   isograph_baseline   = "IsoGraph Baseline",
   isograph_latent     = "IsoGraph Latent",
   isograph_graph      = "IsoGraph Graph",
   isograph_cpu_latent = "IsoGraph CPU Latent",
+  isograph_gpu_latent = "IsoGraph GPU Latent",
   isograph_vae        = "IsoGraph VAE",
+  isograph_vae_gpu    = "IsoGraph VAE GPU",
   wgcna_gene          = "WGCNA"
+)
+
+COMPUTE_LABELS <- c(
+  isograph_baseline   = "CPU",
+  isograph_latent     = "CPU",
+  isograph_graph      = "CPU",
+  isograph_cpu_latent = "CPU",
+  isograph_gpu_latent = "GPU",
+  isograph_vae        = "CPU",
+  isograph_vae_gpu    = "GPU",
+  wgcna_gene          = "CPU"
 )
 
 # Okabe-Ito colorblind-safe palette
@@ -60,8 +81,10 @@ METHOD_COLORS <- c(
   isograph_latent     = "#E69F00",
   isograph_graph      = "#009E73",
   isograph_cpu_latent = "#56B4E9",
+  isograph_gpu_latent = "#F0E442",
   isograph_vae        = "#D55E00",
-  wgcna_gene          = "#CC79A7"
+  isograph_vae_gpu    = "#CC79A7",
+  wgcna_gene          = "#666666"
 )
 
 SCENARIO_ORDER <- c(
@@ -81,9 +104,9 @@ SCENARIO_LABELS <- c(
 )
 
 METRIC_LABELS <- c(
-  metrics_module_recovery           = "Module recovery [0–1]",
-  metrics_switch_gene_detection_rate = "Switch gene detection rate [0–1]",
-  metrics_nonswitch_gene_module_rate = "Non-switching gene\nmodule rate [0–1]"
+  metrics_module_recovery           = "Module recovery [0-1]",
+  metrics_switch_gene_detection_rate = "Switch gene detection rate [0-1]",
+  metrics_nonswitch_gene_module_rate = "Non-switching gene\nmodule rate [0-1]"
 )
 
 # ---------------------------------------------------------------------------
@@ -106,9 +129,11 @@ theme_pub <- function(base_size = 8) {
 }
 
 scale_color_method <- function()
-  scale_color_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER])
+  scale_color_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER],
+                     breaks = METHOD_ORDER)
 scale_fill_method <- function()
-  scale_fill_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER])
+  scale_fill_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER],
+                    breaks = METHOD_ORDER)
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -160,13 +185,14 @@ dot_ci_panel <- function(summary_df, metric_name, metric_label,
 
   ggplot(sub, aes(x = .data$method, y = .data$mean, color = .data$method)) +
     geom_hline(yintercept = 0, linewidth = 0.4, linetype = "dashed",
-               color = "grey60", inherit.aes = FALSE) +
+               color = "grey60") +
     geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
                   width = 0.25, linewidth = 0.6) +
     geom_point(size = 2.2) +
     facet_wrap(~ scenario, nrow = 1) +
     scale_x_discrete(labels = METHOD_LABELS[METHOD_ORDER]) +
-    scale_color_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER]) +
+    scale_color_manual(values = METHOD_COLORS, labels = METHOD_LABELS[METHOD_ORDER],
+                       breaks = METHOD_ORDER) +
     scale_y_continuous(limits = c(0, 1), expand = expansion(mult = c(0.02, 0.05))) +
     labs(x = NULL, y = metric_label, color = NULL) +
     theme_pub() +
@@ -186,34 +212,12 @@ runtime_violin <- function(raw_df) {
     scale_fill_manual(values = METHOD_COLORS,
                       labels = METHOD_LABELS[METHOD_ORDER]) +
     scale_y_log10(labels = label_comma()) +
-    labs(x = NULL, y = "Runtime (s, log₁₀ scale)", fill = NULL) +
+    labs(x = NULL, y = "Runtime (s, log10 scale)", fill = NULL) +
     theme_pub() +
     theme(
       axis.text.x  = element_text(angle = 30, hjust = 1),
       legend.position = "none"
     )
-}
-
-# ---------------------------------------------------------------------------
-# Shared legend
-# ---------------------------------------------------------------------------
-make_legend <- function(method_order = METHOD_ORDER) {
-  d <- data.frame(
-    method = factor(method_order, levels = method_order),
-    y = 1
-  )
-  p <- ggplot(d, aes(x = method, y = y, color = method)) +
-    geom_point(size = 3) +
-    scale_color_manual(values = METHOD_COLORS, labels = METHOD_LABELS[method_order]) +
-    theme_void() +
-    theme(
-      legend.position  = "right",
-      legend.direction = "vertical",
-      legend.text      = element_text(size = 7),
-      legend.key.size  = unit(0.35, "cm")
-    ) +
-    guides(color = guide_legend(ncol = 1))
-  cowplot::get_legend(p)  # use patchwork guide_area() instead
 }
 
 # ---------------------------------------------------------------------------
@@ -231,35 +235,24 @@ make_fig1 <- function(raw, summary) {
                      METRIC_LABELS["metrics_nonswitch_gene_module_rate"], scenarios)
   pD <- runtime_violin(raw)
 
-  # Label panels
-  label_kw <- list(size = 10 / .pt, fontface = "bold")
   pA <- pA + labs(tag = "A")
   pB <- pB + labs(tag = "B")
   pC <- pC + labs(tag = "C")
-  pD <- pD + labs(tag = "D")
-
-  # Legend from panel D (re-enable legend there just for extraction)
-  pD_leg <- pD +
-    scale_fill_manual(values  = METHOD_COLORS[methods],
-                      labels  = METHOD_LABELS[methods]) +
-    theme(legend.position = "right",
-          legend.text     = element_text(size = 7),
-          legend.key.size = unit(0.35, "cm"))
-  leg <- cowplot::get_legend(pD_leg)
+  pD <- pD +
+    labs(tag = "D") +
+    theme(legend.position = "right")
 
   fig <- (pA / pB / pC / pD) +
-    plot_layout(heights = c(1, 1, 1, 0.75)) &
-    theme(plot.tag = element_text(size = 10, face = "bold"))
-
-  fig + inset_element(
-    patchwork::wrap_elements(full = leg),
-    left = 1.01, bottom = 0.5, right = 1.16, top = 1.0,
-    align_to = "full", clip = FALSE
-  )
+    plot_layout(heights = c(1, 1, 1, 0.75), guides = "collect") &
+    theme(
+      plot.tag = element_text(size = 10, face = "bold"),
+      legend.position = "right"
+    )
+  fig
 }
 
 # ---------------------------------------------------------------------------
-# Heatmap helper for S1–S3
+# Heatmap helper for S1-S3
 # ---------------------------------------------------------------------------
 heatmap_fig <- function(raw, scenario, metric, row_col, col_col,
                         row_label, col_label,
@@ -351,7 +344,7 @@ save_fig <- function(p, name, width, height) {
          device = cairo_pdf)
   ggsave(png_path, plot = p, width = width, height = height, units = "in",
          dpi = 300)
-  cat("  ", name, "saved\n", sep = "")
+  cat("  ", name, " saved\n", sep = "")
 }
 
 # ---------------------------------------------------------------------------
@@ -362,9 +355,9 @@ make_table1 <- function(summary) {
   methods   <- METHOD_ORDER[METHOD_ORDER %in% unique(summary$method)]
 
   metric_map <- c(
-    metrics_module_recovery            = "Module Recovery",
-    metrics_switch_gene_detection_rate = "Switch Detection",
-    metrics_nonswitch_gene_module_rate = "False Positive Rate"
+    metrics_module_recovery            = "Module recovery",
+    metrics_switch_gene_detection_rate = "Switch detection",
+    metrics_nonswitch_gene_module_rate = "False positive rate"
   )
 
   rows <- list()
@@ -372,14 +365,15 @@ make_table1 <- function(summary) {
     for (meth in methods) {
       row <- list(
         Scenario = gsub("_", " ", scen) |> tools::toTitleCase(),
-        Method   = METHOD_LABELS[[meth]]
+        Method   = METHOD_LABELS[[meth]],
+        Compute  = COMPUTE_LABELS[[meth]]
       )
       for (metric in names(metric_map)) {
         sub <- summary |>
           filter(scenario == scen, method == meth, .data$metric == !!metric)
-        col_name <- paste0(metric_map[[metric]], " (mean [95% CI])")
+        col_name <- paste0(metric_map[[metric]], ", mean (95% CI)")
         if (nrow(sub) == 0) {
-          row[[col_name]] <- "—"
+          row[[col_name]] <- "NA"
           row[["N"]] <- NA_integer_
         } else {
           row[["N"]] <- sub$n
@@ -389,8 +383,8 @@ make_table1 <- function(summary) {
       }
       rt <- summary |>
         filter(scenario == scen, method == meth, .data$metric == "measurement_elapsed_sec")
-      row[["Runtime s (median)"]] <- if (nrow(rt) > 0) sprintf("%.1f", rt$median) else "—"
-      rows[[length(rows) + 1]] <- as.data.frame(row)
+      row[["Runtime, s median"]] <- if (nrow(rt) > 0) sprintf("%.1f", rt$median) else "NA"
+      rows[[length(rows) + 1]] <- as.data.frame(row, check.names = FALSE)
     }
   }
 
@@ -413,13 +407,13 @@ cat("  Completed runs:", nrow(raw), " | Summary rows:", nrow(summary), "\n")
 
 cat("Generating figures...\n")
 
-# Fig 1 — Main overview
+# Fig 1 - Main overview
 tryCatch({
   fig1 <- make_fig1(raw, summary)
   save_fig(fig1, "fig1_benchmark_overview", width = 14, height = 12)
 }, error = function(e) warning("fig1 error: ", conditionMessage(e)))
 
-# FigS1 — Idealized switching heatmap
+# FigS1 - Idealized switching heatmap
 tryCatch({
   p <- heatmap_fig(raw, "idealized_switching", "metrics_module_recovery",
                    "run_switching_fraction", "run_noise_sd",
@@ -428,7 +422,7 @@ tryCatch({
   else cat("  figS1: no data, skipping\n")
 }, error = function(e) warning("figS1 error: ", conditionMessage(e)))
 
-# FigS2 — Noise stress heatmap
+# FigS2 - Noise stress heatmap
 tryCatch({
   p <- heatmap_fig(raw, "noise_stress", "metrics_module_recovery",
                    "run_count_dispersion", "run_noise_sd",
@@ -437,7 +431,7 @@ tryCatch({
   else cat("  figS2: no data, skipping\n")
 }, error = function(e) warning("figS2 error: ", conditionMessage(e)))
 
-# FigS3 — Feature interactions heatmap
+# FigS3 - Feature interactions heatmap
 tryCatch({
   p <- heatmap_fig(raw, "feature_space_interactions", "metrics_module_recovery",
                    "run_interaction_strength", "run_interaction_fraction",
@@ -446,43 +440,43 @@ tryCatch({
   else cat("  figS3: no data, skipping\n")
 }, error = function(e) warning("figS3 error: ", conditionMessage(e)))
 
-# FigS4 — Non-switching background
+# FigS4 - Non-switching background
 tryCatch({
   p <- line_ci_fig(
     raw, "non_switching_background", "run_switching_fraction",
     "Background switching fraction",
     metrics = c("metrics_module_recovery", "metrics_nonswitch_gene_module_rate"),
-    metric_labels = c("Module recovery [0–1]", "Non-switching gene module rate [0–1]")
+    metric_labels = c("Module recovery [0-1]", "Non-switching gene module rate [0-1]")
   )
   if (!is.null(p)) save_fig(p, "figS4_nonswitching_background", width = 9, height = 3.8)
   else cat("  figS4: no data, skipping\n")
 }, error = function(e) warning("figS4 error: ", conditionMessage(e)))
 
-# FigS5 — Unequal abundance
+# FigS5 - Unequal abundance
 tryCatch({
   p <- line_ci_fig(
     raw, "unequal_isoform_abundance", "run_abundance_imbalance",
     "Abundance imbalance ratio",
     metrics = c("metrics_module_recovery", "metrics_switch_gene_detection_rate"),
-    metric_labels = c("Module recovery [0–1]", "Switch gene detection rate [0–1]")
+    metric_labels = c("Module recovery [0-1]", "Switch gene detection rate [0-1]")
   )
   if (!is.null(p)) save_fig(p, "figS5_unequal_abundance", width = 9, height = 3.8)
   else cat("  figS5: no data, skipping\n")
 }, error = function(e) warning("figS5 error: ", conditionMessage(e)))
 
-# FigS6 — Scale (n_genes)
+# FigS6 - Scale (n_genes)
 tryCatch({
   scale_raw <- raw |> filter(run_method %in% SCALE_METHOD_ORDER)
   p <- line_ci_fig(
     scale_raw, "scale", "run_n_genes",
     "Number of genes",
     metrics = c("metrics_module_recovery", "measurement_elapsed_sec"),
-    metric_labels = c("Module recovery [0–1]", "Runtime (s)"),
+    metric_labels = c("Module recovery [0-1]", "Runtime (s)"),
     method_order = SCALE_METHOD_ORDER,
     y_log = FALSE
   )
   if (!is.null(p)) {
-    # Runtime panel should be log scale — rebuild with mixed scales
+    # Runtime panel should be log scale - rebuild with mixed scales
     sub_rt <- scale_raw |>
       filter(run_scenario == "scale", !is.na(run_n_genes)) |>
       group_by(run_method, run_n_genes) |>
@@ -513,7 +507,7 @@ tryCatch({
       scale_fill_manual(values  = METHOD_COLORS[SCALE_METHOD_ORDER],
                         labels = METHOD_LABELS[SCALE_METHOD_ORDER]) +
       scale_y_continuous(limits = c(0, 1), expand = expansion(mult = c(0.02, 0.05))) +
-      labs(x = "Number of genes", y = "Module recovery [0–1]",
+      labs(x = "Number of genes", y = "Module recovery [0-1]",
            color = NULL, fill = NULL) +
       theme_pub() + theme(legend.position = "none")
 
@@ -528,7 +522,7 @@ tryCatch({
       scale_fill_manual(values  = METHOD_COLORS[SCALE_METHOD_ORDER],
                         labels = METHOD_LABELS[SCALE_METHOD_ORDER]) +
       scale_y_log10(labels = label_comma()) +
-      labs(x = "Number of genes", y = "Runtime (s, log₁₀ scale)",
+      labs(x = "Number of genes", y = "Runtime (s, log10 scale)",
            color = NULL, fill = NULL) +
       theme_pub() + theme(legend.position = "right")
 

@@ -21,6 +21,35 @@ def flatten(prefix: str, value: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def add_compute_fields(row: dict[str, Any]) -> None:
+    requested_gpus = row.get("run_requested_gpus")
+    slurm_gpus = row.get("slurm_slurm_gpus") or row.get("slurm_slurm_job_gpus")
+    cuda_available = row.get("torch_cuda_available")
+    gpu_query = row.get("hardware_nvidia_smi_gpu_query")
+
+    has_gpu = False
+    if requested_gpus not in (None, "", 0, "0"):
+        has_gpu = True
+    if slurm_gpus not in (None, "", "0"):
+        has_gpu = True
+    if cuda_available is True or str(cuda_available).lower() == "true":
+        has_gpu = True
+    if gpu_query not in (None, ""):
+        has_gpu = True
+
+    row["compute_backend"] = "GPU" if has_gpu else "CPU"
+    row["accelerator_name"] = None
+    if gpu_query:
+        row["accelerator_name"] = str(gpu_query).split(",", 1)[0].strip()
+    row["cpu_model"] = row.get("hardware_cpu_model")
+    row["requested_cpus"] = row.get("run_requested_cpus")
+    row["requested_gpus"] = row.get("run_requested_gpus")
+    row["requested_mem_gb"] = row.get("run_requested_mem_gb")
+    row["max_rss_mb"] = row.get("measurement_max_rss_mb")
+    row["gpu_peak_allocated_mb"] = row.get("torch_gpu_peak_allocated_mb")
+    row["gpu_peak_reserved_mb"] = row.get("torch_gpu_peak_reserved_mb")
+
+
 def collect(run_root: Path) -> pd.DataFrame:
     rows: list[dict[str, Any]] = []
     for telemetry_path in sorted(run_root.glob("*/telemetry.json")):
@@ -35,6 +64,7 @@ def collect(run_root: Path) -> pd.DataFrame:
         if isinstance(error, dict):
             row["error_type"] = error.get("type")
             row["error_message"] = error.get("message")
+        add_compute_fields(row)
         rows.append(row)
     return pd.DataFrame(rows)
 
