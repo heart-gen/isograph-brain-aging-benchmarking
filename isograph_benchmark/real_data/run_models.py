@@ -217,14 +217,43 @@ def run_gtex_region(region_dir_name: str) -> None:
         sample_table=bundle.sample_table,
     )
 
-    out = ensure_dir(rel("real_data", "gtex_v11_brain", region_dir_name, "_m", "isograph_vae"))
+    out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
     _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
+
+
+def run_brainseq_caudate_sczd() -> None:
+    """Run IsoGraph VAE on the SCZD+Control caudate bundle (Dx as trait)."""
+    bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
+
+    covariate_cols = [
+        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+    ]
+
+    cfg = VaeModelConfig(
+        hidden_dim=256,
+        latent_dim=8,
+        n_epochs=500,
+        residualize_covariates=covariate_cols,
+        trait_columns=["Age", "Dx"],
+    )
+    artifacts = VaeNetworkModel(cfg).fit(
+        transcript_counts=bundle.matrices["transcript_counts"],
+        transcript_table=bundle.feature_tables["transcript"],
+        sample_table=bundle.sample_table,
+    )
+
+    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae"))
+    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label="caudate_sczd")
 
 
 def main() -> None:
     print("BrainSEQ regions:")
     for region in ["caudate", "hippocampus", "dlpfc"]:
         run_brainseq_region(region)
+
+    print("\nBrainSEQ caudate SCZD+Control:")
+    run_brainseq_caudate_sczd()
 
     print("\nGTEx v11 brain regions:")
     gtex_bundle_root = rel("inputs", "bundles", "gtex_v11_brain")
