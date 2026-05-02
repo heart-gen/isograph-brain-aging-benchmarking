@@ -1,6 +1,6 @@
 {
   "dataset_name": "brainseq_caudate_v1",
-  "description": "BrainSEQ caudate IsoGraph bundle \u2014 controls only, adults (Age\u226518.0), QC-passed, with SNP PCs",
+  "description": "BrainSEQ caudate IsoGraph bundle \u2014 Dx=Control, adults (Age\u226518.0), QC-passed, with SNP PCs",
   "feature_tables": [
     {
       "filename": "genes.parquet",
@@ -30,7 +30,7 @@
     }
   ],
   "provenance": {
-    "filters": "Dx=Control, dropped=f, Age>=18",
+    "filters": "Dx=Control, dropped=f, Age>=18.0",
     "region": "caudate",
     "snp_pcs": "TOPMed-imputed, computed via inputs/_h/compute_snp_pcs.sh",
     "source": "BrainSEQ"

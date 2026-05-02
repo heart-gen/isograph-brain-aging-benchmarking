@@ -36,13 +36,11 @@
 #   Python  >= 3.11  (with isograph-brain-aging-benchmarking env active)
 #   R       >= 4.3   (WGCNA, arrow, dplyr — for downstream analyses)
 #   plink2  >= 2.00  (for Step 2; path: ~/.local/bin/plink2)
-#   HPC access for Steps 0 and 2 (storage paths at /projects/b1213/... and
-#                                  /ocean/projects/bio250020p/...)
 #
 # REPRODUCIBILITY NOTE
 # --------------------
 # Raw data files are intentionally excluded from git (.gitignore).
-# They will be archived on Zenodo with DOI <pending>.
+# They will be archived on Zenodo with DOI <pending>. SNP PCs will be included.
 # Steps 1–3 are fully reproducible from the Zenodo deposit.
 # =============================================================================
 
@@ -77,11 +75,6 @@ check_dir()    { [[ -d "$1" ]] && ok "$1" || warn "Not found: $1"; }
 # STEP 0 — Copy raw data from HPC storage
 # =============================================================================
 # Source paths (defined in configs/data_sources.yaml):
-#
-#   BrainSEQ counts    /projects/b1213/resources/processed-data/text-files/
-#   BrainSEQ metadata  /projects/b1213/resources/libd_data/
-#   GTEx v11 counts    /home/kynon/Documents/github/projects/bsvae-benchmarking/inputs/gtex_v11/counts/
-#   GTEx v11 metadata  /home/kynon/Documents/github/projects/bsvae-benchmarking/inputs/gtex_v11/metadata/
 #
 # Key raw files produced:
 #   inputs/raw/brainseq/counts/{caudate,hippocampus,dlpfc}/tx-counts.tsv
@@ -141,8 +134,7 @@ ok "Processed Parquet files in inputs/processed/"
 # =============================================================================
 # STEP 2 — Compute BrainSEQ SNP principal components
 # =============================================================================
-# Genotype source: TOPMed-imputed per-chromosome pgen files on HPC.
-#   /projects/b1213/resources/processed-data/genotypes/qtl/all_samples/
+# Genotype source: TOPMed-imputed per-chromosome pgen files (controlled access).
 #
 # Steps inside compute_snp_pcs.sh:
 #   1. LD prune each autosome (MAF>=0.05, geno<=0.05, HWE p>1e-6, r²<0.2)
@@ -235,5 +227,5 @@ echo "    GTEx aging:                 bash real_data/gtex/_h/01.run_isograph.sh"
 echo "    GTEx WGCNA comparison:      Rscript real_data/gtex/_h/02.wgcna_gene.R"
 echo "    BrainSEQ SCZD WGCNA:        Rscript real_data/brainseq/_h/02.run_wgcna_sczd.R"
 echo "    DRD2 case study:            Rscript real_data/brainseq/_h/03.drd2_case_study.R"
-echo "    MAGMA gene sets:            Rscript real_data/gwas/_h/01.prep_module_gene_sets.R"
+echo "    MAGMA gene sets (HPC):      Rscript real_data/gwas/_h/01.prep_module_gene_sets.R"
 echo "    MAGMA enrichment (HPC):     sbatch real_data/gwas/_h/02.run_magma.sh"
