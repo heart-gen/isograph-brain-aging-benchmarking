@@ -65,7 +65,19 @@ def _load_brainseq_qc_metrics(region: str) -> pd.DataFrame:
     return metrics[["sample_rnum", "mapping_rate", "mito_rate", "r_rna_rate"]]
 
 
-def build_brainseq_bundle(region: str) -> None:
+def build_brainseq_bundle(
+    region: str,
+    allowed_diagnoses: list[str] | None = None,
+    suite_name: str | None = None,
+    out_bundle_name: str | None = None,
+) -> None:
+    if allowed_diagnoses is None:
+        allowed_diagnoses = ["Control"]
+    if suite_name is None:
+        suite_name = "brainseq_v1"
+    if out_bundle_name is None:
+        out_bundle_name = region
+
     src = rel("inputs", "processed", "brainseq", region)
     tx = pd.read_parquet(src / "tx_counts.parquet")
     gene = pd.read_parquet(src / "gene_counts.parquet")
@@ -78,17 +90,15 @@ def build_brainseq_bundle(region: str) -> None:
     pcs = _load_snp_pcs()
     metrics = _load_brainseq_qc_metrics(region)
 
-    # Filter: controls only, not QC-dropped, adults, correct BSP dataset
     dataset_name = _REGION_DATASET[region]
     samples = meta.loc[meta["RNum"].isin(all_sample_ids)].copy()
     samples = samples[
         (samples["Dataset"] == dataset_name)
-        & (samples["Dx"] == "Control")
+        & (samples["Dx"].isin(allowed_diagnoses))
         & (samples["dropped"] == "f")
         & (samples["Age"] >= ADULT_AGE_MIN)
     ].copy()
 
-    # Recode MoD: collapse 'No autopsy performed' and '.' → 'Undetermined'
     samples["MoD"] = (
         samples["MoD"]
         .replace("No autopsy performed", "Undetermined")
@@ -96,14 +106,10 @@ def build_brainseq_bundle(region: str) -> None:
         .fillna("Undetermined")
     )
 
-    # Merge SNP PCs (left join; samples without genotypes get NaN)
     samples = samples.merge(pcs, on="BrNum", how="left")
-
-    # Merge per-region QC metrics
     samples = samples.merge(metrics, left_on="RNum", right_on="sample_rnum", how="left")
     samples = samples.drop(columns=["sample_rnum"], errors="ignore")
 
-    # Preserve original tx-count column order for filtered samples
     filtered_ids = [r for r in all_sample_ids if r in set(samples["RNum"])]
     samples = samples.set_index("RNum").loc[filtered_ids].reset_index().rename(columns={"RNum": "sample_id"})
 
@@ -120,11 +126,12 @@ def build_brainseq_bundle(region: str) -> None:
     gene_feature, gene_matrix = _matrix_from_wide_subset(gene, ["Geneid", "Chr", "Start", "End", "Strand", "Length"], filtered_ids)
     gene_feature = gene_feature.rename(columns={"Geneid": "gene_id"})
 
+    dx_label = "+".join(sorted(allowed_diagnoses))
     manifest = DatasetManifest(
-        dataset_name=f"brainseq_{region}_v1",
-        suite_name="brainseq_v1",
+        dataset_name=f"brainseq_{out_bundle_name}_v1",
+        suite_name=suite_name,
         description=(
-            f"BrainSEQ {region} IsoGraph bundle — controls only, adults (Age≥{ADULT_AGE_MIN}), "
+            f"BrainSEQ {region} IsoGraph bundle — Dx={dx_label}, adults (Age≥{ADULT_AGE_MIN}), "
             "QC-passed, with SNP PCs"
         ),
         sample_table="samples.parquet",
@@ -139,7 +146,7 @@ def build_brainseq_bundle(region: str) -> None:
         provenance={
             "region": region,
             "source": "BrainSEQ",
-            "filters": "Dx=Control, dropped=f, Age>=18",
+            "filters": f"Dx={dx_label}, dropped=f, Age>={ADULT_AGE_MIN}",
             "snp_pcs": "TOPMed-imputed, computed via inputs/_h/compute_snp_pcs.sh",
         },
     )
@@ -150,10 +157,10 @@ def build_brainseq_bundle(region: str) -> None:
         matrices={"gene_counts": gene_matrix, "transcript_counts": tx_matrix},
         truth_tables={},
     )
-    out_path = ensure_dir(rel("inputs", "bundles", "brainseq_v1", region))
+    out_path = ensure_dir(rel("inputs", "bundles", suite_name, out_bundle_name))
     save_dataset_bundle(bundle, out_path)
     n_snp = samples[SNP_PC_COLS[0]].notna().sum()
-    print(f"  {region}: {len(samples)} samples ({n_snp} with SNP PCs) → {out_path}")
+    print(f"  {out_bundle_name}: {len(samples)} samples ({n_snp} with SNP PCs) → {out_path}")
 
 
 def build_gtex_bundle(region_dir_name: str) -> None:
@@ -199,9 +206,16 @@ def build_gtex_bundle(region_dir_name: str) -> None:
 
 
 def main() -> None:
-    print("Building BrainSEQ bundles...")
+    print("Building BrainSEQ bundles (controls only)...")
     for region in ["caudate", "hippocampus", "dlpfc"]:
         build_brainseq_bundle(region)
+    print("\nBuilding BrainSEQ SCZD+Control bundle (caudate)...")
+    build_brainseq_bundle(
+        "caudate",
+        allowed_diagnoses=["Control", "SCZD"],
+        suite_name="brainseq_sczd",
+        out_bundle_name="caudate",
+    )
     print("\nBuilding GTEx v11 bundles...")
     gtex_root = rel("inputs", "processed", "gtex_v11")
     if gtex_root.exists():
