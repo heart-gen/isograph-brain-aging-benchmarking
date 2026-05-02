@@ -137,10 +137,18 @@ run_gtex_wgcna <- function(region) {
 
     # Load sample list from bundle to match IsoGraph exactly
     bundle_samples <- read_parquet(file.path(bundle_dir, "samples.parquet"))
+    bundle_genes <- read_parquet(file.path(bundle_dir, "genes.parquet"))
     keep_ids <- bundle_samples$sample_id
+    keep_gene_ids <- bundle_genes$gene_id
 
     # Load gene TPM
     gene_tpm <- read_parquet(file.path(proc_dir, "gene_tpm.parquet"))
+    gene_ids_avail <- intersect(keep_gene_ids, gene_tpm$Name)
+    if (length(gene_ids_avail) < MIN_MODULE_SIZE) {
+        warning(sprintf("  %s: only %d matching bundle-filtered genes; skipping.", region, length(gene_ids_avail)))
+        return(invisible(NULL))
+    }
+    gene_tpm <- gene_tpm[match(gene_ids_avail, gene_tpm$Name), ]
     gene_ids <- gene_tpm$Name
     sample_cols <- intersect(keep_ids, names(gene_tpm))
     if (length(sample_cols) < 30) {
@@ -151,10 +159,7 @@ run_gtex_wgcna <- function(region) {
     expr_mat <- as.matrix(gene_tpm[, sample_cols])
     rownames(expr_mat) <- gene_ids
     expr_mat <- log2(expr_mat + 1)
-
-    # Filter low-expression genes (keep top 50% by mean expression)
-    gene_means <- rowMeans(expr_mat)
-    expr_mat <- expr_mat[gene_means >= median(gene_means), ]
+    cat(sprintf("  Bundle expression filter retained %d genes for WGCNA\n", nrow(expr_mat)))
 
     # Samples × genes for WGCNA
     datExpr <- t(expr_mat)

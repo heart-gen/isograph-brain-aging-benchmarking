@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+
 import numpy as np
 import pandas as pd
 from patsy import dmatrix
@@ -155,6 +157,7 @@ def spline_age_association(
 def _save_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
     artifacts.module_table.to_parquet(out / "modules.parquet", index=False, compression="zstd")
     artifacts.edge_table.to_parquet(out / "edges.parquet", index=False, compression="zstd")
+    artifacts.trait_table.to_parquet(out / "traits.parquet", index=False, compression="zstd")
     artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
     pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
 
@@ -171,6 +174,22 @@ def _save_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
 
         print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
               f"linear n={len(linear)} | spline n={len(spline)}")
+
+
+def run_brainseq_aging(regions: list[str] | None = None) -> None:
+    for region in regions or ["caudate", "hippocampus", "dlpfc"]:
+        run_brainseq_region(region)
+
+
+def run_gtex_aging(regions: list[str] | None = None) -> None:
+    gtex_bundle_root = rel("inputs", "bundles", "gtex_v11_brain")
+    if regions is None:
+        if gtex_bundle_root.exists():
+            regions = sorted(path.name for path in gtex_bundle_root.iterdir() if path.is_dir())
+        else:
+            regions = GTEX_REGIONS
+    for region in regions:
+        run_gtex_region(region)
 
 
 def run_brainseq_region(region: str) -> None:
@@ -248,20 +267,35 @@ def run_brainseq_caudate_sczd() -> None:
 
 
 def main() -> None:
-    print("BrainSEQ regions:")
-    for region in ["caudate", "hippocampus", "dlpfc"]:
-        run_brainseq_region(region)
+    parser = argparse.ArgumentParser(description="Run real-data IsoGraph analyses.")
+    parser.add_argument(
+        "analysis",
+        nargs="?",
+        default="all",
+        choices=["all", "brainseq-aging", "brainseq-sczd", "gtex-aging"],
+    )
+    parser.add_argument(
+        "--region",
+        action="append",
+        help="Run only the named region. Can be repeated for brainseq-aging or gtex-aging.",
+    )
+    args = parser.parse_args()
 
-    print("\nBrainSEQ caudate SCZD+Control:")
-    run_brainseq_caudate_sczd()
-
-    print("\nGTEx v11 brain regions:")
-    gtex_bundle_root = rel("inputs", "bundles", "gtex_v11_brain")
-    if gtex_bundle_root.exists():
-        for region_dir in sorted(path for path in gtex_bundle_root.iterdir() if path.is_dir()):
-            run_gtex_region(region_dir.name)
+    if args.analysis == "brainseq-aging":
+        run_brainseq_aging(args.region)
+    elif args.analysis == "brainseq-sczd":
+        run_brainseq_caudate_sczd()
+    elif args.analysis == "gtex-aging":
+        run_gtex_aging(args.region)
     else:
-        print("  No GTEx bundles found; skipping.")
+        print("BrainSEQ aging regions:")
+        run_brainseq_aging()
+
+        print("\nBrainSEQ caudate SCZD+Control:")
+        run_brainseq_caudate_sczd()
+
+        print("\nGTEx v11 brain aging regions:")
+        run_gtex_aging()
 
 
 if __name__ == "__main__":

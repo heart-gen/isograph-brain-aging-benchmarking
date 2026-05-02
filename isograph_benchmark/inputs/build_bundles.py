@@ -9,6 +9,10 @@ from isograph_benchmark.paths import ensure_dir, rel
 
 ADULT_AGE_MIN = 18.0
 SNP_PC_COLS = [f"SNP_PC{i}" for i in range(1, 11)]
+BRAINSEQ_MIN_GENE_CPM = 1.0
+GTEX_MIN_GENE_TPM = 0.1
+MIN_EXPR_SAMPLE_PROP = 0.10
+MIN_EXPR_SAMPLES = 10
 
 # Map region name → per-region QC metrics parquet
 _REGION_METRICS = {
@@ -40,6 +44,59 @@ def _matrix_from_wide_subset(
     feature = df[id_cols].copy()
     matrix = df[keep_samples].to_numpy(dtype=float)
     return feature, matrix
+
+
+def _min_expr_samples(n_samples: int) -> int:
+    return max(MIN_EXPR_SAMPLES, int(np.ceil(n_samples * MIN_EXPR_SAMPLE_PROP)))
+
+
+def _expression_filter_note(assay: str, threshold: float, min_samples: int) -> str:
+    return f"{assay}>={threshold:g} in >={min_samples} samples"
+
+
+def _brainseq_expressed_genes(gene_matrix: np.ndarray) -> tuple[np.ndarray, str]:
+    lib_sizes = gene_matrix.sum(axis=0)
+    scale = np.clip(lib_sizes / 1e6, 1e-12, None)
+    cpm = gene_matrix / scale
+    min_samples = _min_expr_samples(gene_matrix.shape[1])
+    keep = (cpm >= BRAINSEQ_MIN_GENE_CPM).sum(axis=1) >= min_samples
+    note = _expression_filter_note("gene CPM", BRAINSEQ_MIN_GENE_CPM, min_samples)
+    return keep, note
+
+
+def _gtex_expressed_genes(gene_tpm_matrix: np.ndarray) -> tuple[np.ndarray, str]:
+    min_samples = _min_expr_samples(gene_tpm_matrix.shape[1])
+    keep = (gene_tpm_matrix >= GTEX_MIN_GENE_TPM).sum(axis=1) >= min_samples
+    note = _expression_filter_note("gene TPM", GTEX_MIN_GENE_TPM, min_samples)
+    return keep, note
+
+
+def _restrict_to_expressed_genes(
+    gene_feature: pd.DataFrame,
+    gene_matrix: np.ndarray | None,
+    tx_feature: pd.DataFrame,
+    tx_matrix: np.ndarray,
+    gene_keep: np.ndarray,
+) -> tuple[pd.DataFrame, np.ndarray | None, pd.DataFrame, np.ndarray, dict[str, int]]:
+    expressed_gene_ids = set(gene_feature.loc[gene_keep, "gene_id"].dropna())
+    tx_keep = tx_feature["gene_id"].isin(expressed_gene_ids).to_numpy()
+    retained_gene_ids = set(tx_feature.loc[tx_keep, "gene_id"].dropna())
+    final_gene_keep = gene_feature["gene_id"].isin(retained_gene_ids).to_numpy()
+
+    filtered_gene_feature = gene_feature.loc[final_gene_keep].reset_index(drop=True)
+    filtered_gene_matrix = None if gene_matrix is None else gene_matrix[final_gene_keep, :]
+    filtered_tx_feature = tx_feature.loc[tx_keep].reset_index(drop=True)
+    filtered_tx_matrix = tx_matrix[tx_keep, :]
+
+    stats = {
+        "n_genes_before": int(len(gene_feature)),
+        "n_genes_after": int(len(filtered_gene_feature)),
+        "n_transcripts_before": int(len(tx_feature)),
+        "n_transcripts_after": int(len(filtered_tx_feature)),
+    }
+    if stats["n_genes_after"] == 0 or stats["n_transcripts_after"] == 0:
+        raise ValueError("Expression filtering removed all genes or transcripts.")
+    return filtered_gene_feature, filtered_gene_matrix, filtered_tx_feature, filtered_tx_matrix, stats
 
 
 def _load_snp_pcs() -> pd.DataFrame:
@@ -125,6 +182,10 @@ def build_brainseq_bundle(
 
     gene_feature, gene_matrix = _matrix_from_wide_subset(gene, ["Geneid", "Chr", "Start", "End", "Strand", "Length"], filtered_ids)
     gene_feature = gene_feature.rename(columns={"Geneid": "gene_id"})
+    gene_keep, expr_note = _brainseq_expressed_genes(gene_matrix)
+    gene_feature, gene_matrix, tx_feature, tx_matrix, expr_stats = _restrict_to_expressed_genes(
+        gene_feature, gene_matrix, tx_feature, tx_matrix, gene_keep
+    )
 
     dx_label = "+".join(sorted(allowed_diagnoses))
     manifest = DatasetManifest(
@@ -147,6 +208,11 @@ def build_brainseq_bundle(
             "region": region,
             "source": "BrainSEQ",
             "filters": f"Dx={dx_label}, dropped=f, Age>={ADULT_AGE_MIN}",
+            "expression_filter": expr_note,
+            "n_genes_before_expression_filter": str(expr_stats["n_genes_before"]),
+            "n_genes_after_expression_filter": str(expr_stats["n_genes_after"]),
+            "n_transcripts_before_expression_filter": str(expr_stats["n_transcripts_before"]),
+            "n_transcripts_after_expression_filter": str(expr_stats["n_transcripts_after"]),
             "snp_pcs": "TOPMed-imputed, computed via inputs/_h/compute_snp_pcs.sh",
         },
     )
@@ -160,22 +226,33 @@ def build_brainseq_bundle(
     out_path = ensure_dir(rel("inputs", "bundles", suite_name, out_bundle_name))
     save_dataset_bundle(bundle, out_path)
     n_snp = samples[SNP_PC_COLS[0]].notna().sum()
-    print(f"  {out_bundle_name}: {len(samples)} samples ({n_snp} with SNP PCs) → {out_path}")
+    print(
+        f"  {out_bundle_name}: {len(samples)} samples ({n_snp} with SNP PCs), "
+        f"{expr_stats['n_genes_after']}/{expr_stats['n_genes_before']} genes, "
+        f"{expr_stats['n_transcripts_after']}/{expr_stats['n_transcripts_before']} transcripts → {out_path}"
+    )
 
 
 def build_gtex_bundle(region_dir_name: str) -> None:
     src = rel("inputs", "processed", "gtex_v11", region_dir_name)
     tx = pd.read_parquet(src / "transcript_tpm.parquet")
+    gene_tpm = pd.read_parquet(src / "gene_tpm.parquet")
     samples = pd.read_parquet(src / "sample_attributes.parquet").rename(columns={"SAMPID": "sample_id"})
     sample_ids = [col for col in tx.columns if col not in {"transcript_id", "gene_id"}]
     samples = samples.set_index("sample_id").loc[sample_ids].reset_index()
     tx_feature, tx_matrix = _matrix_from_wide(tx, ["transcript_id", "gene_id"])
-    gene_feature = (
-        tx_feature[["gene_id"]]
-        .dropna()
-        .drop_duplicates()
-        .sort_values("gene_id")
-        .reset_index(drop=True)
+
+    gene_sample_ids = [sample_id for sample_id in sample_ids if sample_id in gene_tpm.columns]
+    if gene_sample_ids != sample_ids:
+        missing = sorted(set(sample_ids) - set(gene_sample_ids))
+        raise ValueError(f"{region_dir_name}: gene TPM is missing {len(missing)} transcript samples")
+    gene_feature = gene_tpm[["Name", "Description"]].rename(
+        columns={"Name": "gene_id", "Description": "gene_name"}
+    )
+    gene_matrix = gene_tpm[sample_ids].to_numpy(dtype=float)
+    gene_keep, expr_note = _gtex_expressed_genes(gene_matrix)
+    gene_feature, _, tx_feature, tx_matrix, expr_stats = _restrict_to_expressed_genes(
+        gene_feature, None, tx_feature, tx_matrix, gene_keep
     )
     manifest = DatasetManifest(
         dataset_name=f"gtex_v11_{region_dir_name}_v1",
@@ -193,6 +270,11 @@ def build_gtex_bundle(region_dir_name: str) -> None:
             "region": region_dir_name,
             "source": "GTEx v11",
             "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
+            "expression_filter": expr_note,
+            "n_genes_before_expression_filter": str(expr_stats["n_genes_before"]),
+            "n_genes_after_expression_filter": str(expr_stats["n_genes_after"]),
+            "n_transcripts_before_expression_filter": str(expr_stats["n_transcripts_before"]),
+            "n_transcripts_after_expression_filter": str(expr_stats["n_transcripts_after"]),
         },
     )
     bundle = DatasetBundle(
@@ -203,6 +285,11 @@ def build_gtex_bundle(region_dir_name: str) -> None:
         truth_tables={},
     )
     save_dataset_bundle(bundle, ensure_dir(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name)))
+    print(
+        f"  {region_dir_name}: {len(samples)} samples, "
+        f"{expr_stats['n_genes_after']}/{expr_stats['n_genes_before']} genes, "
+        f"{expr_stats['n_transcripts_after']}/{expr_stats['n_transcripts_before']} transcripts"
+    )
 
 
 def main() -> None:
@@ -221,7 +308,6 @@ def main() -> None:
     if gtex_root.exists():
         for region_dir in sorted(path for path in gtex_root.iterdir() if path.is_dir()):
             build_gtex_bundle(region_dir.name)
-            print(f"  {region_dir.name}: done")
 
 
 if __name__ == "__main__":
