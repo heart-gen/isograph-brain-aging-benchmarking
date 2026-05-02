@@ -179,6 +179,9 @@ fi
 #   transcripts.parquet    Transcript feature table (transcript_id → gene_id)
 #   gene_counts.npz        Gene count matrix [genes × samples]
 #   transcript_counts.npz  Transcript count matrix [transcripts × samples]
+#   Expression filtering is applied while building bundles:
+#     BrainSEQ gene CPM>=1 in >=max(10, 10% of samples)
+#     GTEx gene TPM>=0.1 in >=max(10, 10% of samples)
 #
 # Bundles produced:
 #
@@ -222,7 +225,8 @@ print(len(s))
 done
 echo ""
 echo "  Next steps:"
-echo "    BrainSEQ aging (controls):  python3 -m isograph_benchmark.real_data.run_models"
+echo "    BrainSEQ aging (controls):  bash real_data/brainseq/_h/01.run_isograph_aging.sh"
+echo "    BrainSEQ SCZD IsoGraph:     bash real_data/brainseq/_h/02.run_isograph_sczd.sh"
 echo "    GTEx aging:                 bash real_data/gtex/_h/01.run_isograph.sh"
 echo "    GTEx WGCNA comparison:      Rscript real_data/gtex/_h/02.wgcna_gene.R"
 echo "    BrainSEQ SCZD WGCNA:        Rscript real_data/brainseq/_h/02.run_wgcna_sczd.R"
