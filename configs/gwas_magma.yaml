@@ -1,0 +1,62 @@
+traits:
+  scz:
+    label: SCZ
+    path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/SCZ/CLOZUK_PGC2/primary.qc1_filt_hg38
+    sep: whitespace
+    snp_col: SNP
+    p_col: P
+    fixed_n: 105318
+    chr_col: CHR
+    pos_col: BP
+  mdd:
+    label: MDD
+    path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/mdd2019edinburgh/hg38/PGC_UKB_depression_genome-wide_hg38
+    sep: whitespace
+    snp_col: MarkerName
+    p_col: P
+    fixed_n: 500199
+    chr_col: chr
+    pos_col: pos
+  bp:
+    label: BP
+    path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/BP3/hg38/BP3_hg38
+    sep: whitespace
+    snp_col: ID
+    p_col: PVAL
+    n_sum_cols: [NCAS, NCON]
+    chr_col: "#CHROM"
+    pos_col: POS
+  ad:
+    label: AD
+    path: /ocean/projects/bio250020p/shared/resources/gwas/alz/bellenguez2022/35379992-GCST90027158-MONDO_0004975.h.tsv.gz
+    sep: tab
+    snp_col: hm_rsid
+    p_col: p_value
+    n_sum_cols: [n_cas, n_con]
+    chr_col: hm_chrom
+    pos_col: hm_pos
+  pd:
+    label: PD
+    path: /ocean/projects/bio250020p/shared/resources/gwas/PD/data/GCST009325.h.tsv.gz
+    sep: tab
+    snp_col: rsid
+    p_col: p_value
+    n_sum_cols: [N_cases, N_controls]
+    chr_col: chromosome
+    pos_col: base_pair_location
+  stroke:
+    label: Stroke
+    path: /ocean/projects/bio250020p/shared/resources/gwas/imputed_gwas_hg38_1.1/imputed_ISGC_Malik_2016_METASTROKE_all_strokes.txt.gz
+    sep: tab
+    snp_col: variant_id
+    p_col: pvalue
+    n_col: sample_size
+    chr_col: chromosome
+    pos_col: position
+
+output_dir: real_data/gwas/_m/tmp/magma_pvals
+mhc:
+  chromosome: 6
+  start: 25000000
+  end: 34000000
+chunksize: 500000

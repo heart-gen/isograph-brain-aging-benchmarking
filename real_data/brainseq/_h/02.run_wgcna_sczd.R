@@ -8,7 +8,9 @@ suppressPackageStartupMessages({
 })
 
 options(stringsAsFactors = FALSE)
-enableWGCNAThreads(nThreads = 4)
+WGCNA_THREADS <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = "4"))
+if (is.na(WGCNA_THREADS) || WGCNA_THREADS < 1) WGCNA_THREADS <- 4L
+enableWGCNAThreads(nThreads = WGCNA_THREADS)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 script_dir <- dirname(normalizePath(if (interactive()) getwd() else commandArgs()[4], mustWork = FALSE))

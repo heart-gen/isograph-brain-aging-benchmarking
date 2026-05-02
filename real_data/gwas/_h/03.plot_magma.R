@@ -19,7 +19,15 @@ res_dir <- file.path(project_root, "real_data", "gwas", "_m", "results")
 out_dir <- file.path(project_root, "real_data", "gwas", "_m", "figures")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-TRAITS   <- c("scz", "mdd", "bp")
+TRAITS   <- c("scz", "mdd", "bp", "ad", "pd", "stroke")
+TRAIT_LABELS <- c(
+    scz = "SCZ",
+    mdd = "MDD",
+    bp = "BP",
+    ad = "AD",
+    pd = "PD",
+    stroke = "Stroke"
+)
 BACKENDS <- c("isograph_vae", "wgcna_gene")
 FDR_THRESHOLD <- 0.05
 TOP_N <- 20
@@ -32,7 +40,7 @@ load_gsa <- function() {
             path <- file.path(res_dir, sprintf("%s_noMHC_%s.gsa.out", trait, backend))
             if (!file.exists(path)) next
             df <- read.table(path, header = TRUE, comment.char = "#", stringsAsFactors = FALSE)
-            df$trait   <- toupper(trait)
+            df$trait   <- TRAIT_LABELS[[trait]]
             df$backend <- backend
             rows[[length(rows) + 1]] <- df
         }
@@ -42,6 +50,7 @@ load_gsa <- function() {
 }
 
 gsa <- load_gsa()
+gsa$trait <- factor(gsa$trait, levels = unname(TRAIT_LABELS))
 cat(sprintf("Loaded %d rows from %d files\n", nrow(gsa), length(unique(paste(gsa$backend, gsa$trait)))))
 
 # ── FDR correction across all tests per backend ───────────────────────────────

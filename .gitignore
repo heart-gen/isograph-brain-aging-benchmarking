@@ -17,7 +17,9 @@ benchmark/**/_m/logs/
 benchmark/**/_o/
 benchmark/01_synthetic/_m/datasets/
 real_data/**/_m/tmp/
-real_data/**/_m/logs/
+real_data/**/_m/logs/*
+!real_data/**/_m/logs/
+!real_data/**/_m/logs/.gitkeep
 real_data/**/_o/
 
 # Local settings.

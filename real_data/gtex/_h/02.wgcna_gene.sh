@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
 #SBATCH --partition=RM-shared
-#SBATCH --job-name=gtex-iso-aging
+#SBATCH --job-name=gtex-wgcna
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=16
 #SBATCH --array=1-13
-#SBATCH --time=04:00:00
+#SBATCH --time=08:00:00
 #SBATCH --output=real_data/gtex/_m/logs/%x-%A_%a.log
-# Run IsoGraph VAE on all 13 GTEx v11 brain aging regions.
-# Outputs land in: real_data/gtex/<region>/_m/isograph_vae/
+
 set -euo pipefail
 
 log_message() {
@@ -21,10 +20,10 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 cd "${PROJECT_ROOT}"
 mkdir -p real_data/gtex/_m/logs
 
-log_message "**** GTEx IsoGraph job starts ****"
+log_message "**** GTEx WGCNA job starts ****"
 echo "User: ${USER}"
 echo "Job id: ${SLURM_JOBID:-local}"
-echo "Job name: ${SLURM_JOB_NAME:-gtex-iso-aging}"
+echo "Job name: ${SLURM_JOB_NAME:-gtex-wgcna}"
 echo "Node name: ${SLURM_NODENAME:-local}"
 echo "Hostname: ${HOSTNAME}"
 
@@ -32,8 +31,8 @@ module purge
 module load anaconda3/2024.10-1
 module list
 
-log_message "Activating IsoGraph environment"
-conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+log_message "Activating R environment"
+conda activate /ocean/projects/bio250020p/shared/opt/env/R_env
 
 REGIONS=(
     amygdala anterior_cingulate_cortex_ba24 caudate_basal_ganglia
@@ -44,11 +43,11 @@ REGIONS=(
 RUN_ARGS=("$@")
 if [[ -n "${SLURM_ARRAY_TASK_ID:-}" ]]; then
     REGION="${REGIONS[$((SLURM_ARRAY_TASK_ID - 1))]}"
-    RUN_ARGS=(--region "${REGION}" "$@")
+    RUN_ARGS=("${REGION}" "$@")
     log_message "Running region ${REGION}"
 fi
 
-python -m isograph_benchmark.real_data.run_models gtex-aging "${RUN_ARGS[@]}"
+Rscript real_data/gtex/_h/02.wgcna_gene.R "${RUN_ARGS[@]}"
 
 conda deactivate
-log_message "**** GTEx IsoGraph job ends ****"
+log_message "**** GTEx WGCNA job ends ****"
