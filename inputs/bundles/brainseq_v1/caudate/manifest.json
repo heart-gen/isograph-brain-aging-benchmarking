@@ -5,12 +5,12 @@
     {
       "filename": "genes.parquet",
       "kind": "gene",
-      "n_rows": 78932
+      "n_rows": 20365
     },
     {
       "filename": "transcripts.parquet",
       "kind": "transcript",
-      "n_rows": 384354
+      "n_rows": 232176
     }
   ],
   "matrices": [
@@ -18,19 +18,24 @@
       "assay_name": "gene_counts",
       "encoding": "dense_npz",
       "filename": "gene_counts.npz",
-      "n_features": 78932,
+      "n_features": 20365,
       "n_samples": 238
     },
     {
       "assay_name": "transcript_counts",
       "encoding": "dense_npz",
       "filename": "transcript_counts.npz",
-      "n_features": 384354,
+      "n_features": 232176,
       "n_samples": 238
     }
   ],
   "provenance": {
+    "expression_filter": "gene CPM>=1 in >=24 samples",
     "filters": "Dx=Control, dropped=f, Age>=18.0",
+    "n_genes_after_expression_filter": "20365",
+    "n_genes_before_expression_filter": "78932",
+    "n_transcripts_after_expression_filter": "232176",
+    "n_transcripts_before_expression_filter": "384354",
     "region": "caudate",
     "snp_pcs": "TOPMed-imputed, computed via inputs/_h/compute_snp_pcs.sh",
     "source": "BrainSEQ"

@@ -5,12 +5,12 @@
     {
       "filename": "genes.parquet",
       "kind": "gene",
-      "n_rows": 78724
+      "n_rows": 35170
     },
     {
       "filename": "transcripts.parquet",
       "kind": "transcript",
-      "n_rows": 385659
+      "n_rows": 269714
     }
   ],
   "matrices": [
@@ -18,12 +18,17 @@
       "assay_name": "transcript_counts",
       "encoding": "dense_npz",
       "filename": "transcript_counts.npz",
-      "n_features": 385659,
+      "n_features": 269714,
       "n_samples": 254
     }
   ],
   "provenance": {
     "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
+    "expression_filter": "gene TPM>=0.1 in >=26 samples",
+    "n_genes_after_expression_filter": "35170",
+    "n_genes_before_expression_filter": "74628",
+    "n_transcripts_after_expression_filter": "269714",
+    "n_transcripts_before_expression_filter": "385659",
     "region": "putamen_basal_ganglia",
     "source": "GTEx v11"
   },
