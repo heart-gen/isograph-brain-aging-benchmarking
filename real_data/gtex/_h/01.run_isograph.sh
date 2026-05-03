@@ -16,9 +16,19 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
+if [[ ! -d "${PROJECT_ROOT}" ]]; then
+    echo "ERROR: project root does not exist: ${PROJECT_ROOT}"
+    exit 1
+fi
 cd "${PROJECT_ROOT}"
+if [[ ! -f .here || ! -d isograph_benchmark ]]; then
+    echo "ERROR: submit from the isograph-brain-aging-benchmarking repo root or set ISOGRAPH_BENCHMARK_ROOT."
+    echo "Current project root candidate: ${PROJECT_ROOT}"
+    exit 1
+fi
+export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
+export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p real_data/gtex/_m/logs
 
 log_message "**** GTEx IsoGraph job starts ****"
@@ -34,6 +44,9 @@ module list
 
 log_message "Activating IsoGraph environment"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+
+log_message "Checking Python analysis dependencies"
+python -c "import isograph_benchmark, numpy, pandas, scipy, patsy"
 
 REGIONS=(
     amygdala anterior_cingulate_cortex_ba24 caudate_basal_ganglia

@@ -14,9 +14,19 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
+if [[ ! -d "${PROJECT_ROOT}" ]]; then
+    echo "ERROR: project root does not exist: ${PROJECT_ROOT}"
+    exit 1
+fi
 cd "${PROJECT_ROOT}"
+if [[ ! -f .here || ! -d isograph_benchmark ]]; then
+    echo "ERROR: submit from the isograph-brain-aging-benchmarking repo root or set ISOGRAPH_BENCHMARK_ROOT."
+    echo "Current project root candidate: ${PROJECT_ROOT}"
+    exit 1
+fi
+export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
+export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 MAGMA_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/magma
 GENE_LOC_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/NCBI38.gene.loc
@@ -54,6 +64,9 @@ module list
 
 log_message "Activating IsoGraph environment"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+
+log_message "Checking Python analysis dependencies"
+python -c "import isograph_benchmark, numpy, pandas, scipy, patsy"
 
 log_message "Preparing MAGMA SNP p-value inputs"
 python -m isograph_benchmark.gwas.prepare_magma_inputs --config "${CONFIG}"

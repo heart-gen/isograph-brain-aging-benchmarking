@@ -9,6 +9,7 @@ pandas>=2.2
 numpy>=1.26
 pyyaml>=6
 scipy>=1.13
+patsy>=0.5
 statsmodels>=0.14
 scikit-learn>=1.5
 pyhere>=1.0
