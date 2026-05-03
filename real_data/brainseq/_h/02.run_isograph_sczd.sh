@@ -4,8 +4,8 @@
 #SBATCH --job-name=brainseq-iso-sczd
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=32
-#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=16
+#SBATCH --time=02:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/%x-%j.log
 # Run IsoGraph VAE on BrainSEQ caudate Control+SCZD bundle.
 set -euo pipefail
@@ -14,9 +14,19 @@ log_message() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
+if [[ ! -d "${PROJECT_ROOT}" ]]; then
+    echo "ERROR: project root does not exist: ${PROJECT_ROOT}"
+    exit 1
+fi
 cd "${PROJECT_ROOT}"
+if [[ ! -f .here || ! -d isograph_benchmark ]]; then
+    echo "ERROR: submit from the isograph-brain-aging-benchmarking repo root or set ISOGRAPH_BENCHMARK_ROOT."
+    echo "Current project root candidate: ${PROJECT_ROOT}"
+    exit 1
+fi
+export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
+export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p real_data/brainseq/_m/logs
 
 log_message "**** BrainSEQ SCZD IsoGraph job starts ****"
@@ -32,6 +42,9 @@ module list
 
 log_message "Activating IsoGraph environment"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+
+log_message "Checking Python analysis dependencies"
+python -c "import isograph_benchmark, numpy, pandas, scipy, patsy"
 
 python -m isograph_benchmark.real_data.run_models brainseq-sczd "$@"
 
