@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -69,9 +70,7 @@ def linear_age_association(
 
 
 def spline_age_association(
-    eigengenes: pd.DataFrame,
-    sample_table: pd.DataFrame,
-    covariate_cols: list[str],
+    eigengenes: pd.DataFrame, sample_table: pd.DataFrame, covariate_cols: list[str],
     age_col: str = "Age",
 ) -> pd.DataFrame:
     """
@@ -154,26 +153,132 @@ def spline_age_association(
     return result
 
 
-def _save_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
+def diagnosis_association(
+    eigengenes: pd.DataFrame, sample_table: pd.DataFrame, covariate_cols: list[str],
+    dx_col: str = "Dx", control_label: str = "Control", case_label: str = "SCZD",
+) -> pd.DataFrame:
+    """Module eigengene association with case/control diagnosis."""
+    if dx_col not in sample_table.columns:
+        raise ValueError(f"Missing diagnosis column: {dx_col}")
+
+    keep_cols = ["sample_id", dx_col] + [c for c in covariate_cols if c in sample_table.columns]
+    merged = eigengenes.merge(sample_table[keep_cols], on="sample_id", how="inner")
+    merged = merged.loc[merged[dx_col].isin([control_label, case_label])].copy()
+    merged[dx_col] = pd.Categorical(merged[dx_col], categories=[control_label, case_label])
+    if merged[dx_col].nunique(dropna=True) < 2:
+        raise ValueError(f"Diagnosis association requires both {control_label} and {case_label} samples.")
+
+    available_covariates = [c for c in covariate_cols if c in merged.columns]
+    module_cols = [c for c in eigengenes.columns if c != "sample_id"]
+    rows = []
+    for col in module_cols:
+        analysis = pd.DataFrame(
+            {
+                "eigengene": pd.to_numeric(merged[col], errors="coerce"),
+                "Diagnosis": merged[dx_col],
+            }
+        )
+        if available_covariates:
+            analysis = pd.concat([analysis, merged[available_covariates].copy()], axis=1)
+        analysis = analysis.replace([np.inf, -np.inf], np.nan).dropna()
+        if len(analysis) < 10 or analysis["Diagnosis"].nunique(dropna=True) < 2:
+            continue
+
+        y = analysis["eigengene"].to_numpy(dtype=float)
+        dx = (analysis["Diagnosis"] == case_label).astype(float).to_numpy()[:, None]
+        covariate_df = pd.get_dummies(analysis[available_covariates], drop_first=True)
+        covariate_arr = covariate_df.to_numpy(dtype=float) if not covariate_df.empty else np.empty((len(analysis), 0))
+        X = np.hstack([np.ones((len(analysis), 1)), dx, covariate_arr])
+        finite = np.isfinite(y) & np.all(np.isfinite(X), axis=1)
+        y_fit = y[finite]
+        X_fit = X[finite]
+        if len(y_fit) < 10 or np.linalg.matrix_rank(X_fit) < 2:
+            continue
+
+        coef, _, rank, _ = np.linalg.lstsq(X_fit, y_fit, rcond=None)
+        residuals = y_fit - X_fit @ coef
+        df_res = max(len(y_fit) - rank, 1)
+        sigma2 = (residuals @ residuals) / df_res
+        V = sigma2 * np.linalg.pinv(X_fit.T @ X_fit)
+        se = float(np.sqrt(max(V[1, 1], 0.0)))
+        effect = float(coef[1])
+        t_stat = effect / se if se > 0 else np.nan
+        pvalue = float(2 * stats.t.sf(abs(t_stat), df_res)) if np.isfinite(t_stat) else np.nan
+        used_dx = analysis.loc[finite, "Diagnosis"]
+        rows.append(
+            {
+                "module_id": col,
+                "trait": f"{dx_col}_{case_label}_vs_{control_label}",
+                "effect": effect,
+                "se": se,
+                "t": t_stat,
+                "pvalue": pvalue,
+                "n": int(len(y_fit)),
+                "n_control": int((used_dx == control_label).sum()),
+                "n_case": int((used_dx == case_label).sum()),
+            }
+        )
+
+    result = pd.DataFrame(rows)
+    if not result.empty:
+        result["fdr"] = stats.false_discovery_control(result["pvalue"], method="bh")
+    return result
+
+
+def _eigengenes_to_sample_table(artifacts) -> pd.DataFrame | None:
+    eigengenes = artifacts.eigengene_table
+    if eigengenes is None or eigengenes.empty:
+        return None
+    eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
+    eg_long.columns.name = None
+    return eg_long
+
+
+def _save_core_artifacts(artifacts, out: Path) -> None:
     artifacts.module_table.to_parquet(out / "modules.parquet", index=False, compression="zstd")
     artifacts.edge_table.to_parquet(out / "edges.parquet", index=False, compression="zstd")
     artifacts.trait_table.to_parquet(out / "traits.parquet", index=False, compression="zstd")
     artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
     pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
 
-    eigengenes = artifacts.eigengene_table
-    if eigengenes is not None and not eigengenes.empty:
-        eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
-        eg_long.columns.name = None
 
-        linear = linear_age_association(eg_long, bundle.sample_table, age_col=age_col)
+def _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
+    _save_core_artifacts(artifacts, out)
+    eigengenes = _eigengenes_to_sample_table(artifacts)
+    if eigengenes is not None:
+        linear = linear_age_association(eigengenes, bundle.sample_table, age_col=age_col)
         linear.to_parquet(out / "age_linear.parquet", index=False, compression="zstd")
 
-        spline = spline_age_association(eg_long, bundle.sample_table, covariate_cols, age_col=age_col)
+        spline = spline_age_association(eigengenes, bundle.sample_table, covariate_cols, age_col=age_col)
         spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
 
         print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
               f"linear n={len(linear)} | spline n={len(spline)}")
+
+
+def _save_diagnosis_artifacts(
+    artifacts, out: Path, bundle, covariate_cols: list[str], label: str,
+    dx_col: str = "Dx", control_label: str = "Control", case_label: str = "SCZD",
+) -> None:
+    _save_core_artifacts(artifacts, out)
+    for stale in ("age_linear.parquet", "age_spline.parquet"):
+        path = out / stale
+        if path.exists():
+            path.unlink()
+
+    eigengenes = _eigengenes_to_sample_table(artifacts)
+    if eigengenes is not None:
+        diagnosis = diagnosis_association(
+            eigengenes,
+            bundle.sample_table,
+            covariate_cols=covariate_cols,
+            dx_col=dx_col,
+            control_label=control_label,
+            case_label=case_label,
+        )
+        diagnosis.to_parquet(out / "diagnosis_assoc.parquet", index=False, compression="zstd")
+        print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
+              f"diagnosis n={len(diagnosis)}")
 
 
 def run_brainseq_aging(regions: list[str] | None = None) -> None:
@@ -201,11 +306,9 @@ def run_brainseq_region(region: str) -> None:
     ]
 
     cfg = VaeModelConfig(
-        hidden_dim=256,
-        latent_dim=8,
-        n_epochs=500,
+        hidden_dim=256, latent_dim=8, n_epochs=500,
         residualize_covariates=covariate_cols,
-        trait_columns=["Age"],
+        min_module_size=30, trait_columns=["Age"], random_state=13,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -214,7 +317,7 @@ def run_brainseq_region(region: str) -> None:
     )
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
-    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label=region)
+    _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label=region)
 
 
 def run_gtex_region(region_dir_name: str) -> None:
@@ -224,11 +327,9 @@ def run_gtex_region(region_dir_name: str) -> None:
     covariate_cols = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
 
     cfg = VaeModelConfig(
-        hidden_dim=256,
-        latent_dim=8,
-        n_epochs=500,
+        hidden_dim=256, latent_dim=8, n_epochs=500,
         residualize_covariates=covariate_cols,
-        trait_columns=["AGE"],
+        min_module_size=30, trait_columns=["AGE"], random_state=13,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -237,7 +338,7 @@ def run_gtex_region(region_dir_name: str) -> None:
     )
 
     out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
-    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
+    _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
 
 
 def run_brainseq_caudate_sczd() -> None:
@@ -250,11 +351,10 @@ def run_brainseq_caudate_sczd() -> None:
     ]
 
     cfg = VaeModelConfig(
-        hidden_dim=256,
-        latent_dim=8,
-        n_epochs=500,
+        hidden_dim=256, latent_dim=8, n_epochs=500,
         residualize_covariates=covariate_cols,
-        trait_columns=["Age", "Dx"],
+        min_module_size=30, trait_columns=["Dx"],
+        random_state=13,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -263,20 +363,20 @@ def run_brainseq_caudate_sczd() -> None:
     )
 
     out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae"))
-    _save_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label="caudate_sczd")
+    diagnosis_covariates = ["Age"] + covariate_cols
+    _save_diagnosis_artifacts(
+        artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd",
+    )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run real-data IsoGraph analyses.")
     parser.add_argument(
-        "analysis",
-        nargs="?",
-        default="all",
+        "analysis", nargs="?", default="all",
         choices=["all", "brainseq-aging", "brainseq-sczd", "gtex-aging"],
     )
     parser.add_argument(
-        "--region",
-        action="append",
+        "--region", action="append",
         help="Run only the named region. Can be repeated for brainseq-aging or gtex-aging.",
     )
     args = parser.parse_args()

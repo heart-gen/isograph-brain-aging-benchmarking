@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=16
 #SBATCH --array=1-13
-#SBATCH --time=08:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=real_data/gtex/_m/logs/%x-%A_%a.log
 
 set -euo pipefail

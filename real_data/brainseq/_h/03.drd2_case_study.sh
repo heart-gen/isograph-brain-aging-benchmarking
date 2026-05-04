@@ -20,12 +20,7 @@ if [[ ! -d "${PROJECT_ROOT}" ]]; then
     exit 1
 fi
 cd "${PROJECT_ROOT}"
-if [[ ! -f .here || ! -d isograph_benchmark ]]; then
-    echo "ERROR: submit from the isograph-brain-aging-benchmarking repo root or set ISOGRAPH_BENCHMARK_ROOT."
-    echo "Current project root candidate: ${PROJECT_ROOT}"
-    exit 1
-fi
-export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
+
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p real_data/brainseq/_m/logs
 
