@@ -1,0 +1,21 @@
+{
+  "annotation_columns": [],
+  "annotation_provided": false,
+  "ig_attribution_available": false,
+  "isograph_version": "0.1.0",
+  "module_ids": [
+    "M000",
+    "M001",
+    "M002",
+    "M003",
+    "M004"
+  ],
+  "n_modules": 5,
+  "plot_files": [],
+  "tables_per_module": [
+    "gene_driver_table.parquet",
+    "transcript_polarity_table.parquet",
+    "high_vs_low_table.parquet"
+  ],
+  "vae_attribution_available": false
+}
