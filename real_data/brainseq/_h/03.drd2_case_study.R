@@ -21,8 +21,7 @@ suppressPackageStartupMessages({
     library(patchwork)
 })
 
-script_dir <- dirname(normalizePath(if (interactive()) getwd() else commandArgs()[4], mustWork = FALSE))
-project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
+project_root <- here::here()
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 iso_dir   <- file.path(project_root, "real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae")

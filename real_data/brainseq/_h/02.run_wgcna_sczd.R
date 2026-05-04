@@ -13,8 +13,7 @@ if (is.na(WGCNA_THREADS) || WGCNA_THREADS < 1) WGCNA_THREADS <- 4L
 enableWGCNAThreads(nThreads = WGCNA_THREADS)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-script_dir <- dirname(normalizePath(if (interactive()) getwd() else commandArgs()[4], mustWork = FALSE))
-project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
+project_root <- here::here()
 
 COVARIATE_COLS <- c("Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
                     "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5")

@@ -15,8 +15,7 @@ if (is.na(WGCNA_THREADS) || WGCNA_THREADS < 1) WGCNA_THREADS <- 4L
 enableWGCNAThreads(nThreads = WGCNA_THREADS)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-script_dir <- dirname(normalizePath(if (interactive()) getwd() else commandArgs()[4], mustWork = FALSE))
-project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
+project_root <- here::here()
 if (!file.exists(file.path(project_root, ".here"))) {
     stop("Cannot locate project root (.here file missing). Run from isograph-brain-aging-benchmarking/.")
 }

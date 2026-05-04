@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=16
-#SBATCH --time=08:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/%x-%j.log
 
 set -euo pipefail

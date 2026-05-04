@@ -4,9 +4,9 @@
 #SBATCH --job-name=gtex-iso-aging
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=32
+#SBATCH --cpus-per-task=16
 #SBATCH --array=1-13
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
 #SBATCH --output=real_data/gtex/_m/logs/%x-%A_%a.log
 # Run IsoGraph VAE on all 13 GTEx v11 brain aging regions.
 # Outputs land in: real_data/gtex/<region>/_m/isograph_vae/

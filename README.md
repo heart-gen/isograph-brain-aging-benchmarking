@@ -23,3 +23,23 @@ Real-data spline aging analyses refer to spline models of age against module eig
 The synthetic benchmark uses a reduced paired grid. All methods share the same
 `dataset_id` values so confidence intervals and method deltas can be computed
 over paired synthetic datasets.
+
+## Module Interpretation
+
+Synthetic module interpretation accuracy is evaluated in `benchmark/03_interpret/`
+against ground-truth synthetic modules and switching genes.
+
+Real-data module interpretation is run with:
+
+```bash
+sbatch real_data/brainseq/_h/04.interpret_modules.sh
+sbatch real_data/gtex/_h/04.interpret_modules.sh
+```
+
+By default, real-data interpretation uses the GENCODE v47 primary-assembly GTF
+at `/ocean/projects/bio250020p/shared/resources/genomes/human/gencode-v47/gtf/gencode.v47.primary_assembly.annotation.gtf`
+to add structural transcript annotations for selected module genes. The GTF
+parse cache is written under ignored `real_data/_m/tmp/`.
+
+BrainSEQ `caudate_sczd` is diagnosis-focused: IsoGraph is fit with `Dx` as the
+trait and downstream module associations are written to `diagnosis_assoc.parquet`.
