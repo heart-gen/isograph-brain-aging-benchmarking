@@ -26,8 +26,8 @@ def resource_class(method: str, scenario: str) -> str:
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
-    if method in ("isograph_vae", "isograph_cpu_latent"):
-        return "vae" if method == "isograph_vae" else "cpu_short"
+    if method in ("isograph_vae", "isograph_vae_multiplex", "isograph_cpu_latent"):
+        return "vae" if method in ("isograph_vae", "isograph_vae_multiplex") else "cpu_short"
     return "cpu_short"
 
 
@@ -36,8 +36,36 @@ def stable_id(values: dict[str, object], keys: list[str]) -> str:
     return hashlib.sha1(payload.encode("utf-8")).hexdigest()[:16]
 
 
+_SCENARIO_DATASET_KEYS = [
+    "scenario",
+    "n_genes",
+    "n_samples",
+    "switching_fraction",
+    "noise_sd",
+    "abundance_imbalance",
+    "count_dispersion",
+    "interaction_strength",
+    "interaction_fraction",
+    "seed",
+]
+
+# abundance_switch_mixed datasets additionally hash on abundance_fraction so that
+# datasets with the same base params but different abundance_fraction get distinct IDs.
+# Existing scenario hashes are intentionally unchanged (backward compatible).
+_MULTIPLEX_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["abundance_fraction"]
+
+
+def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
+    if scenario == "scale":
+        return cfg["scale_methods"]
+    if scenario == "abundance_switch_mixed":
+        return cfg.get("multiplex_methods", cfg["methods"])
+    return cfg["methods"]
+
+
 def expand_grid() -> pd.DataFrame:
     cfg = load_yaml("configs/synthetic_grid.yaml")
+    all_known_methods = list(dict.fromkeys(cfg["methods"] + cfg.get("multiplex_methods", [])))
     rows: list[dict[str, object]] = []
     for scenario, params in cfg["scenarios"].items():
         scenario_seed_count = params.get("seed_count")
@@ -50,7 +78,7 @@ def expand_grid() -> pd.DataFrame:
                 else (cfg["seed_count_scale"] if scenario == "scale" else cfg["seed_count_core"])
             )
             parameter_values = dict(zip(keys, values, strict=True))
-            methods = cfg["scale_methods"] if scenario == "scale" else cfg["methods"]
+            methods = _scenario_methods(cfg, scenario)
             for seed_idx in range(seed_count):
                 dataset_seed = int(cfg["base_seed"]) + seed_idx
                 dataset = {
@@ -59,22 +87,9 @@ def expand_grid() -> pd.DataFrame:
                     "seed": dataset_seed,
                     "replicate": seed_idx,
                 }
-                dataset_id = stable_id(
-                    dataset,
-                    [
-                        "scenario",
-                        "n_genes",
-                        "n_samples",
-                        "switching_fraction",
-                        "noise_sd",
-                        "abundance_imbalance",
-                        "count_dispersion",
-                        "interaction_strength",
-                        "interaction_fraction",
-                        "seed",
-                    ],
-                )
-                for method in cfg["methods"]:
+                hash_keys = _MULTIPLEX_SCENARIO_DATASET_KEYS if scenario == "abundance_switch_mixed" else _SCENARIO_DATASET_KEYS
+                dataset_id = stable_id(dataset, hash_keys)
+                for method in all_known_methods:
                     if method not in methods:
                         continue
                     row = dict(dataset)

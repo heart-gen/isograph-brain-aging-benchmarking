@@ -13,7 +13,7 @@ from isograph_benchmark.interpretation import explain_artifact_modules
 from isograph_benchmark.paths import ensure_dir, rel
 
 
-DEFAULT_METHODS = ["isograph_vae", "isograph_vae_gpu"]
+DEFAULT_METHODS = ["isograph_vae", "isograph_vae_gpu", "isograph_vae_multiplex"]
 METRIC_COLUMNS = [
     "gene_driver_truth_module_auroc",
     "gene_driver_switch_auroc",
@@ -21,6 +21,9 @@ METRIC_COLUMNS = [
     "top10_switch_precision",
     "switch_strength_auroc",
     "opposite_polarity_rate",
+    "switch_driver_recall",
+    "abundance_driver_recall",
+    "explanation_fidelity",
 ]
 
 
@@ -73,6 +76,43 @@ def _best_truth_module(predicted_genes: set[str], truth_modules: pd.DataFrame) -
     return best_module, best_genes
 
 
+def _role_attribution_metrics(
+    module_gene_roles_path: Path,
+    switching_genes: set[str],
+    abundance_genes: set[str],
+    predicted_genes: set[str],
+) -> dict[str, float]:
+    """Compute role attribution fidelity using module_gene_roles.parquet if available."""
+    metrics: dict[str, float] = {
+        "switch_driver_recall": np.nan,
+        "abundance_driver_recall": np.nan,
+        "explanation_fidelity": np.nan,
+    }
+    if not module_gene_roles_path.exists():
+        return metrics
+    roles = pd.read_parquet(module_gene_roles_path)
+    if roles.empty or "module_role" not in roles.columns or "gene_id" not in roles.columns:
+        return metrics
+    roles = roles[roles["gene_id"].isin(predicted_genes)].copy()
+
+    switch_role_genes = set(roles.loc[roles["module_role"].isin(("switch_only", "coupled")), "gene_id"].astype(str))
+    abund_role_genes = set(roles.loc[roles["module_role"].isin(("abundance_only", "coupled")), "gene_id"].astype(str))
+
+    switch_in_pred = switching_genes & predicted_genes
+    abund_in_pred = abundance_genes & predicted_genes
+
+    if switch_in_pred:
+        metrics["switch_driver_recall"] = len(switch_role_genes & switch_in_pred) / len(switch_in_pred)
+    if abund_in_pred:
+        metrics["abundance_driver_recall"] = len(abund_role_genes & abund_in_pred) / len(abund_in_pred)
+
+    correct = len(switch_role_genes & switch_in_pred) + len(abund_role_genes & abund_in_pred)
+    total = len(switch_in_pred) + len(abund_in_pred)
+    if total > 0:
+        metrics["explanation_fidelity"] = correct / total
+    return metrics
+
+
 def evaluate_interpret_output(
     artifact_dir: Path,
     explain_dir: Path,
@@ -82,12 +122,19 @@ def evaluate_interpret_output(
     bundle = load_dataset_bundle(dataset_path)
     truth_modules = bundle.truth_tables.get("truth_modules.parquet", pd.DataFrame())
     truth_switch = bundle.truth_tables.get("truth_switch.parquet", pd.DataFrame())
+    truth_abundance = bundle.truth_tables.get("truth_abundance.parquet", pd.DataFrame())
     switching_genes = set(truth_switch.loc[truth_switch["has_switch"], "gene_id"].astype(str))
+    abundance_genes = set(truth_abundance.loc[truth_abundance["has_abundance"], "gene_id"].astype(str)) if not truth_abundance.empty else set()
 
     modules = pd.read_parquet(artifact_dir / "modules.parquet")
     if modules.empty or "module_id" not in modules.columns:
         return pd.DataFrame()
     module_sizes = modules.groupby("module_id")["gene_id"].nunique().to_dict()
+
+    # Load module_gene_roles once for the whole run (used for role attribution metrics)
+    roles_path = artifact_dir / "module_gene_roles.parquet"
+    all_predicted_genes = set(modules["gene_id"].astype(str))
+    run_role_metrics = _role_attribution_metrics(roles_path, switching_genes, abundance_genes, all_predicted_genes)
 
     rows: list[dict[str, Any]] = []
     for module_id in sorted(modules["module_id"].astype(str).unique()):
@@ -142,6 +189,7 @@ def evaluate_interpret_output(
                 "top10_switch_precision": _precision_at(gene_table, switching_genes, k=10),
                 "switch_strength_auroc": switch_strength_auc,
                 "opposite_polarity_rate": opposite_polarity_rate,
+                **run_role_metrics,
             }
         )
     return pd.DataFrame(rows)

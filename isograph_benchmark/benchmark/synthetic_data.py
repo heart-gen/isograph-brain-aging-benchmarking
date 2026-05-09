@@ -37,6 +37,8 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     n_genes = _as_int(row, "n_genes", 400)
     n_samples = _as_int(row, "n_samples", 160)
     switching_fraction = np.clip(_as_float(row, "switching_fraction", 0.25), 0.0, 1.0)
+    # fraction of module genes driven by abundance rather than switching [0,1]
+    abundance_fraction = np.clip(_as_float(row, "abundance_fraction", 0.0), 0.0, 1.0)
     noise_sd = max(_as_float(row, "noise_sd", 0.20), 0.0)
     abundance_imbalance = max(_as_float(row, "abundance_imbalance", 1.0), 1.0)
     count_dispersion = max(_as_float(row, "count_dispersion", 15.0), 1.0)
@@ -44,17 +46,33 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     interaction_fraction = np.clip(_as_float(row, "interaction_fraction", 0.0), 0.0, 1.0)
 
     n_modules = max(2, min(8, n_genes // 50))
-    n_switching = max(1, int(round(n_genes * switching_fraction)))
+    n_module_genes = max(1, int(round(n_genes * switching_fraction)))
     gene_ids = [f"G{i:05d}" for i in range(n_genes)]
     sample_ids = [f"S{i:04d}" for i in range(n_samples)]
-    switching_mask = np.zeros(n_genes, dtype=bool)
-    switching_mask[:n_switching] = True
-    rng.shuffle(switching_mask)
+
+    # Partition module genes into switch-driven vs abundance-driven
+    module_mask = np.zeros(n_genes, dtype=bool)
+    module_mask[:n_module_genes] = True
+    rng.shuffle(module_mask)
+
+    n_abundance_genes = int(round(n_module_genes * abundance_fraction))
+    n_switch_genes = n_module_genes - n_abundance_genes
+
+    module_indices = np.where(module_mask)[0]
+    rng.shuffle(module_indices)
+    abundance_gene_set = set(module_indices[:n_abundance_genes].tolist())
+
+    switching_mask = module_mask.copy()
+    abundance_mask = np.zeros(n_genes, dtype=bool)
+    for idx in module_indices[:n_abundance_genes]:
+        switching_mask[idx] = False
+        abundance_mask[idx] = True
 
     module_index = np.full(n_genes, -1, dtype=int)
-    switching_modules = np.arange(n_switching) % n_modules
-    rng.shuffle(switching_modules)
-    module_index[switching_mask] = switching_modules
+    all_module_assignments = np.arange(n_module_genes) % n_modules
+    rng.shuffle(all_module_assignments)
+    for i, gene_idx in enumerate(module_indices):
+        module_index[gene_idx] = all_module_assignments[i]
 
     dx = np.where(np.arange(n_samples) < n_samples / 2, "Control", "SCZD")
     age = np.linspace(25, 85, n_samples) + rng.normal(0, 3, n_samples)
@@ -65,6 +83,7 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     module_latent += ((age - age.mean()) / age.std())[None, :] * rng.normal(0.15, 0.05, (n_modules, 1))
     module_latent += (dx == "SCZD")[None, :] * rng.normal(0.15, 0.05, (n_modules, 1))
 
+    # PSI signal: only switch genes get latent signal in PSI proportions
     signal = rng.normal(0, noise_sd, size=(n_genes, n_samples))
     for gene_idx in np.where(switching_mask)[0]:
         signal[gene_idx] += module_latent[module_index[gene_idx]]
@@ -79,14 +98,24 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
 
     baseline_logit = np.log(abundance_imbalance)
     p1 = 1.0 / (1.0 + np.exp(-(signal + baseline_logit)))
-    p1[~switching_mask] = 1.0 / (1.0 + abundance_imbalance)
+    # Abundance-driven genes get PSI ≈ 0.5 (no isoform switching)
+    p1[abundance_mask] = 0.5
+    p1[~module_mask & ~abundance_mask] = 1.0 / (1.0 + abundance_imbalance)
     p1 = np.clip(p1 + rng.normal(0, noise_sd * 0.15, p1.shape), 1e-4, 1 - 1e-4)
 
     gene_means = rng.lognormal(mean=np.log(80), sigma=0.8, size=(n_genes, 1))
     sample_depth = rng.lognormal(mean=0.0, sigma=0.25, size=(1, n_samples))
     expected_total = gene_means * sample_depth
+
+    # Abundance-driven genes: total count modulated by module latent (signal strength ~0.5 SD)
+    abundance_multiplier = np.ones((n_genes, n_samples))
+    for gene_idx in np.where(abundance_mask)[0]:
+        latent = module_latent[module_index[gene_idx]]
+        latent_z = (latent - latent.mean()) / (latent.std() + 1e-8)
+        abundance_multiplier[gene_idx] = np.exp(0.5 * latent_z)
+
     gamma_shape = count_dispersion
-    gamma_scale = expected_total / gamma_shape
+    gamma_scale = (expected_total * abundance_multiplier) / gamma_shape
     total_rate = rng.gamma(shape=gamma_shape, scale=gamma_scale)
     totals = rng.poisson(np.maximum(total_rate, 1.0)).astype(float)
 
@@ -111,12 +140,16 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     psi_table = pd.DataFrame({"psi_uid": [f"PSI_{gene_id}" for gene_id in gene_ids], "gene_id": gene_ids})
     truth_modules = pd.DataFrame(
         {
-            "gene_id": [gene_ids[i] for i in np.where(switching_mask)[0]],
-            "module_id": [f"M{module_index[i]:03d}" for i in np.where(switching_mask)[0]],
+            "gene_id": [gene_ids[i] for i in module_indices],
+            "module_id": [f"M{module_index[i]:03d}" for i in module_indices],
         }
     )
     truth_switch = pd.DataFrame({"gene_id": gene_ids, "has_switch": switching_mask})
+    truth_abundance = pd.DataFrame({"gene_id": gene_ids, "has_abundance": abundance_mask})
 
+    extra_feature_specs = [
+        build_feature_spec("truth_abundance", "truth_abundance.parquet", truth_abundance),
+    ]
     manifest = DatasetManifest(
         dataset_name=str(row["dataset_id"]),
         suite_name="isograph_brain_aging_synthetic",
@@ -128,18 +161,19 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             build_feature_spec("psi", "psi.parquet", psi_table),
             build_feature_spec("truth_module", "truth_modules.parquet", truth_modules),
             build_feature_spec("truth_switch", "truth_switch.parquet", truth_switch),
-        ],
+        ] + extra_feature_specs,
         matrices=[
             build_matrix_spec("gene_counts", "gene_counts.npz", gene_counts),
             build_matrix_spec("transcript_counts", "transcript_counts.npz", transcript_counts),
             build_matrix_spec("psi", "psi.npz", psi),
         ],
         provenance={
-            "generator": "isograph_brain_aging_benchmark_v1",
+            "generator": "isograph_brain_aging_benchmark_v2",
             "scenario": str(row["scenario"]),
             "seed": str(row["seed"]),
+            "abundance_fraction": str(_as_float(row, "abundance_fraction", 0.0)),
         },
-        truth_tables=["truth_modules.parquet", "truth_switch.parquet"],
+        truth_tables=["truth_modules.parquet", "truth_switch.parquet", "truth_abundance.parquet"],
     )
     return DatasetBundle(
         manifest=manifest,
@@ -150,9 +184,14 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             "psi": psi_table,
             "truth_module": truth_modules,
             "truth_switch": truth_switch,
+            "truth_abundance": truth_abundance,
         },
         matrices={"gene_counts": gene_counts, "transcript_counts": transcript_counts, "psi": psi},
-        truth_tables={"truth_modules.parquet": truth_modules, "truth_switch.parquet": truth_switch},
+        truth_tables={
+            "truth_modules.parquet": truth_modules,
+            "truth_switch.parquet": truth_switch,
+            "truth_abundance.parquet": truth_abundance,
+        },
     )
 
 

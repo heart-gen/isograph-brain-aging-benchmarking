@@ -240,6 +240,8 @@ def _save_core_artifacts(artifacts, out: Path) -> None:
     artifacts.trait_table.to_parquet(out / "traits.parquet", index=False, compression="zstd")
     artifacts.feature_scores.to_parquet(out / "feature_scores.parquet", index=False, compression="zstd")
     pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
+    if artifacts.module_gene_roles is not None and not artifacts.module_gene_roles.empty:
+        artifacts.module_gene_roles.to_parquet(out / "module_gene_roles.parquet", index=False, compression="zstd")
 
 
 def _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
@@ -297,6 +299,9 @@ def run_gtex_aging(regions: list[str] | None = None) -> None:
         run_gtex_region(region)
 
 
+_MULTIPLEX_ABUNDANCE_GRID = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+
+
 def run_brainseq_region(region: str) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
 
@@ -309,6 +314,9 @@ def run_brainseq_region(region: str) -> None:
         hidden_dim=256, latent_dim=8, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["Age"], random_state=13,
+        allow_abundance_abundance=True,
+        alpha_switch=0.70,
+        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -330,6 +338,9 @@ def run_gtex_region(region_dir_name: str) -> None:
         hidden_dim=256, latent_dim=8, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["AGE"], random_state=13,
+        allow_abundance_abundance=True,
+        alpha_switch=0.70,
+        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -339,6 +350,38 @@ def run_gtex_region(region_dir_name: str) -> None:
 
     out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
     _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
+
+
+def _drd2_gene_id(transcript_table: pd.DataFrame) -> str | None:
+    """Resolve DRD2 ENSEMBL gene_id from transcript names (e.g. 'DRD2-201')."""
+    if "transcript_name" not in transcript_table.columns:
+        return None
+    mask = transcript_table["transcript_name"].str.startswith("DRD2-", na=False)
+    matches = transcript_table.loc[mask, "gene_id"]
+    return str(matches.iloc[0]) if not matches.empty else None
+
+
+def check_drd2(artifacts, transcript_table: pd.DataFrame) -> bool:
+    """Return True if DRD2 is assigned to any module; print a pass/fail summary."""
+    gene_id = _drd2_gene_id(transcript_table)
+    if gene_id is None:
+        print("WARNING: DRD2 check — could not resolve gene_id from transcript_name column")
+        return False
+    if artifacts.module_table.empty or "gene_id" not in artifacts.module_table.columns:
+        print("WARNING: DRD2 check — module_table is empty or missing gene_id")
+        return False
+    hits = artifacts.module_table[artifacts.module_table["gene_id"] == gene_id]
+    if hits.empty:
+        print(f"WARNING: DRD2 check FAILED — {gene_id} not found in any module")
+        return False
+    module_ids = hits["module_id"].unique().tolist()
+    role = None
+    if artifacts.module_gene_roles is not None and not artifacts.module_gene_roles.empty:
+        role_hits = artifacts.module_gene_roles[artifacts.module_gene_roles["gene_id"] == gene_id]
+        if not role_hits.empty:
+            role = role_hits["module_role"].iloc[0]
+    print(f"DRD2 check PASSED — {gene_id} found in module(s): {module_ids} (role: {role})")
+    return True
 
 
 def run_brainseq_caudate_sczd() -> None:
@@ -355,6 +398,9 @@ def run_brainseq_caudate_sczd() -> None:
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["Dx"],
         random_state=13,
+        allow_abundance_abundance=True,
+        alpha_switch=0.70,
+        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -367,6 +413,7 @@ def run_brainseq_caudate_sczd() -> None:
     _save_diagnosis_artifacts(
         artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd",
     )
+    check_drd2(artifacts, bundle.feature_tables["transcript"])
 
 
 def main() -> None:

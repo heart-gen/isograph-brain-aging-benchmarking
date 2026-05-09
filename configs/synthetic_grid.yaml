@@ -4,12 +4,17 @@ seed_count_scale: 8
 base_seed: 13
 methods:
   - isograph_vae
+  - isograph_vae_multiplex
   - isograph_vae_gpu
   - isograph_gpu_latent
   - isograph_cpu_latent
   - isograph_latent
   - isograph_graph
   - isograph_baseline
+  - wgcna_gene
+multiplex_methods:
+  - isograph_vae
+  - isograph_vae_multiplex
   - wgcna_gene
 scale_methods:
   - isograph_vae
@@ -48,6 +53,13 @@ scenarios:
     interaction_strength: [0.0, 0.5, 1.0, 2.0, 3.0]
     interaction_fraction: [0.25, 0.50, 0.75]
     noise_sd: [0.25]
+  abundance_switch_mixed:
+    n_genes: [200, 500]
+    n_samples: [100, 200]
+    switching_fraction: [0.25]
+    abundance_fraction: [0.0, 0.3, 0.5, 0.7, 1.0]
+    noise_sd: [0.25]
+    seed_count: 20
   scale:
     n_genes: [1000, 3000, 6000, 12000]
     n_samples: [240]
