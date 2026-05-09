@@ -14,7 +14,7 @@ fi
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 echo "=== Step 1: Regenerate full synthetic grid ==="
-python -m isograph_benchmark.benchmark.build_synthetic_grid
+python -m isograph_benchmark.benchmark.run_synthetic
 
 echo ""
 echo "=== Step 2: Create multiplex-only batch files ==="
