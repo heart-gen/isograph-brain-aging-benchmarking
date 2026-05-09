@@ -17,6 +17,7 @@ DEFAULT_MINUTES = {
     "isograph_cpu_latent": 4.0,
     "isograph_vae": 12.0,
     "isograph_vae_gpu": 12.0,
+    "isograph_vae_multiplex": 16.0,
     "wgcna_gene": 15.0,
 }
 
@@ -28,7 +29,7 @@ def estimate_minutes(row: pd.Series) -> float:
     size_factor = (n_genes / 400.0) * math.sqrt(n_samples / 160.0)
     if row["method"] == "wgcna_gene":
         size_factor = (n_genes / 400.0) ** 2 * math.sqrt(n_samples / 160.0)
-    if row["method"] == "isograph_vae":
+    if row["method"] in ("isograph_vae", "isograph_vae_multiplex"):
         size_factor = (n_genes / 400.0) * (n_samples / 160.0)
     return max(0.5, base * size_factor)
 
@@ -94,10 +95,10 @@ def make_batches(grid: pd.DataFrame, target_fraction: float = 0.85) -> pd.DataFr
     return pd.DataFrame(rows)
 
 
-def write_class_tsvs(batches: pd.DataFrame, out_dir: Path) -> None:
+def write_class_tsvs(batches: pd.DataFrame, out_dir: Path, prefix: str = "batches") -> None:
     ensure_dir(out_dir)
     for resource_class, group in batches.groupby("resource_class", sort=True):
-        group.reset_index(drop=True).to_csv(out_dir / f"batches_{resource_class}.tsv", sep="\t", index=False)
+        group.reset_index(drop=True).to_csv(out_dir / f"{prefix}_{resource_class}.tsv", sep="\t", index=False)
 
 
 def main() -> None:
@@ -105,17 +106,30 @@ def main() -> None:
     parser.add_argument("--grid", default="benchmark/00_design/_m/synthetic_run_grid.parquet")
     parser.add_argument("--runtime-estimates", default="benchmark/00_design/_m/runtime_estimates.parquet")
     parser.add_argument("--out", default="benchmark/01_synthetic/_m/synthetic_batches.parquet")
+    parser.add_argument(
+        "--method-filter", action="append", dest="method_filter",
+        help="Include only these method(s). Can be repeated. Default: all methods.",
+    )
+    parser.add_argument(
+        "--scenario-filter", action="append", dest="scenario_filter",
+        help="Include only these scenario(s). Can be repeated. Default: all scenarios.",
+    )
     args = parser.parse_args()
 
     grid_path = rel(args.grid)
     runtime_path = rel(args.runtime_estimates)
     grid = pd.read_parquet(grid_path)
+    if args.method_filter:
+        grid = grid[grid["method"].isin(args.method_filter)].copy()
+    if args.scenario_filter:
+        grid = grid[grid["scenario"].isin(args.scenario_filter)].copy()
     grid = apply_runtime_estimates(grid, load_runtime_estimates(runtime_path))
     batches = make_batches(grid)
     out = rel(args.out)
     ensure_dir(out.parent)
     batches.to_parquet(out, index=False, compression="zstd")
-    write_class_tsvs(batches, out.parent)
+    tsv_prefix = out.stem  # e.g. "synthetic_batches" or "multiplex_batches"
+    write_class_tsvs(batches, out.parent, prefix=tsv_prefix)
     print(f"Wrote {len(batches):,} batches to {out}")
     for resource_class, count in batches["resource_class"].value_counts().sort_index().items():
         print(f"{resource_class}: {count} array tasks")
