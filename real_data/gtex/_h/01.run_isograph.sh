@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
-#SBATCH --partition=RM-shared
+#SBATCH --partition=GPU-shared
+#SBATCH --gres=gpu:v100-16:1
 #SBATCH --job-name=gtex-iso-aging
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=4
 #SBATCH --array=1-13
 #SBATCH --time=02:00:00
 #SBATCH --output=real_data/gtex/_m/logs/%x-%A_%a.log

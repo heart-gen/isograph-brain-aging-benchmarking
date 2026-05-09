@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import logging
+import time
 from pathlib import Path
 
 import numpy as np
@@ -318,11 +320,14 @@ def run_brainseq_region(region: str) -> None:
         alpha_switch=0.70,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
+    print(f"[{region}] fitting model ...", flush=True)
+    _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
         transcript_table=bundle.feature_tables["transcript"],
         sample_table=bundle.sample_table,
     )
+    print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
     _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label=region)
@@ -342,11 +347,14 @@ def run_gtex_region(region_dir_name: str) -> None:
         alpha_switch=0.70,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
+    print(f"[{region_dir_name}] fitting model ...", flush=True)
+    _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
         transcript_table=bundle.feature_tables["transcript"],
         sample_table=bundle.sample_table,
     )
+    print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
     _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
@@ -402,11 +410,14 @@ def run_brainseq_caudate_sczd() -> None:
         alpha_switch=0.70,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
+    print("[caudate_sczd] fitting model ...", flush=True)
+    _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
         transcript_table=bundle.feature_tables["transcript"],
         sample_table=bundle.sample_table,
     )
+    print(f"[caudate_sczd] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae"))
     diagnosis_covariates = ["Age"] + covariate_cols
@@ -417,6 +428,11 @@ def run_brainseq_caudate_sczd() -> None:
 
 
 def main() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)-8s %(name)s  %(message)s",
+        datefmt="%H:%M:%S",
+    )
     parser = argparse.ArgumentParser(description="Run real-data IsoGraph analyses.")
     parser.add_argument(
         "analysis", nargs="?", default="all",
