@@ -302,6 +302,7 @@ def run_gtex_aging(regions: list[str] | None = None) -> None:
 
 
 _MULTIPLEX_ABUNDANCE_GRID = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
+_MULTIPLEX_SWITCH_GRID = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
 
 
 def run_brainseq_region(region: str) -> None:
@@ -313,11 +314,11 @@ def run_brainseq_region(region: str) -> None:
     ]
 
     cfg = VaeModelConfig(
-        hidden_dim=256, latent_dim=8, n_epochs=500,
+        hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["Age"], random_state=13,
         allow_abundance_abundance=True,
-        alpha_switch=0.70,
+        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     print(f"[{region}] fitting model ...", flush=True)
@@ -340,11 +341,11 @@ def run_gtex_region(region_dir_name: str) -> None:
     covariate_cols = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
 
     cfg = VaeModelConfig(
-        hidden_dim=256, latent_dim=8, n_epochs=500,
+        hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["AGE"], random_state=13,
         allow_abundance_abundance=True,
-        alpha_switch=0.70,
+        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     print(f"[{region_dir_name}] fitting model ...", flush=True)
@@ -402,12 +403,12 @@ def run_brainseq_caudate_sczd() -> None:
     ]
 
     cfg = VaeModelConfig(
-        hidden_dim=256, latent_dim=8, n_epochs=500,
+        hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=30, trait_columns=["Dx"],
         random_state=13,
         allow_abundance_abundance=True,
-        alpha_switch=0.70,
+        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
         alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
     )
     print("[caudate_sczd] fitting model ...", flush=True)
