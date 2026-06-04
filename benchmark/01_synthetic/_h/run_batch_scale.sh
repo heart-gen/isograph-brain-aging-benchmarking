@@ -4,7 +4,7 @@
 #SBATCH --job-name=isograph-synth-scale
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=64
+#SBATCH --cpus-per-task=8
 #SBATCH --array=1-271%20
 #SBATCH --time=04:00:00
 #SBATCH --output=benchmark/01_synthetic/_m/logs/%x-%A_%a.log
