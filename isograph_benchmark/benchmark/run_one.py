@@ -23,6 +23,7 @@ from isograph.workflow.config import (
     WgcnaModelConfig,
 )
 
+from isograph_benchmark.benchmark.spearman_leiden import SpearmanLeidenConfig, SpearmanLeidenModel
 from isograph_benchmark.benchmark.synthetic_data import ensure_dataset
 from isograph_benchmark.benchmark.telemetry import (
     hardware_info,
@@ -112,6 +113,8 @@ def build_model(row: pd.Series):
                 device="cpu",
             )
         )
+    if method == "isograph_spearman_leiden":
+        return SpearmanLeidenModel(SpearmanLeidenConfig(min_r=0.30, leiden_resolution=1.0, min_module_size=2))
     if method == "wgcna_gene":
         threads = _wgcna_threads(row)
         _set_thread_env(threads)

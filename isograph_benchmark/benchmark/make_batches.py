@@ -18,6 +18,7 @@ DEFAULT_MINUTES = {
     "isograph_vae": 12.0,
     "isograph_vae_gpu": 12.0,
     "isograph_vae_multiplex": 16.0,
+    "isograph_spearman_leiden": 3.0,
     "wgcna_gene": 15.0,
 }
 

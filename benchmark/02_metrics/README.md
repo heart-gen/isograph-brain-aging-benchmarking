@@ -11,7 +11,7 @@ keywords:
 ## Overview
 
 This directory contains the downstream metric analysis for the IsoGraph synthetic benchmark described in `benchmark/01_synthetic/`.
-The benchmark evaluates IsoGraph and WGCNA [@doi:10.1186/1471-2105-9-559] across six parameterized synthetic scenarios designed to stress-test network recovery under conditions relevant to brain-aging transcriptomics.
+The benchmark evaluates IsoGraph, a Spearman-Leiden baseline, and WGCNA [@doi:10.1186/1471-2105-9-559] across eight parameterized synthetic scenarios designed to stress-test network recovery under conditions relevant to brain-aging transcriptomics.
 Figures and tables here are intended for inclusion in the IsoGraph manuscript targeting *Nature Methods*.
 The collected result table includes CPU, SLURM, memory, runtime, software, and hardware metadata for every completed run.
 Scale and scale_realistic scenarios are complete; `abundance_switch_mixed` and `isograph_vae_multiplex` runs are pending.
@@ -35,12 +35,13 @@ The `abundance_switch_mixed` scenario uses the multiplex method set.
 
 | Scenario | Key parameters | Seeds | Methods |
 |---|---|---:|---:|
-| **Idealized switching** | `switching_fraction` in {0.10, 0.25, 0.50, 0.75}; `noise_sd` in {0.10, 0.25, 0.40} | 30 | 7 (excl. multiplex) |
-| **Noise stress** | `count_dispersion` in {3, 7, 15, 30}; `noise_sd` in {0.05, 0.10, 0.25, 0.50} | 20 | 7 |
-| **Feature space interactions** | `interaction_strength` in {0.0, 0.5, 1.0, 2.0, 3.0}; `interaction_fraction` in {0.25, 0.50, 0.75} | 20 | 7 |
-| **Non-switching background** | `switching_fraction` in {0.05, 0.10, 0.25, 0.50} | 20 | 7 |
-| **Unequal isoform abundance** | `abundance_imbalance` in {1, 4, 10, 25} | 20 | 7 |
+| **Idealized switching** | `switching_fraction` in {0.10, 0.25, 0.50, 0.75}; `noise_sd` in {0.10, 0.25, 0.40} | 30 | 8 (excl. multiplex) |
+| **Noise stress** | `count_dispersion` in {3, 7, 15, 30}; `noise_sd` in {0.05, 0.10, 0.25, 0.50} | 20 | 8 |
+| **Feature space interactions** | `interaction_strength` in {0.0, 0.5, 1.0, 2.0, 3.0}; `interaction_fraction` in {0.25, 0.50, 0.75} | 20 | 8 |
+| **Non-switching background** | `switching_fraction` in {0.05, 0.10, 0.25, 0.50} | 20 | 8 |
+| **Unequal isoform abundance** | `abundance_imbalance` in {1, 4, 10, 25} | 20 | 8 |
 | **Abundance switch mixed** | `abundance_fraction` in {0.0, 0.3, 0.5, 0.7, 1.0}; `n_genes` in {200, 500} | 20 | 3 (multiplex set) |
+| **Negative control noise** | `switching_fraction` = 0.0; `noise_sd` in {0.5, 1.0} | 20 | 8 |
 | **Scale** | `n_genes` in {1000, 3000, 6000, 12000}; `switching_fraction` in {0.15, 0.25} | 15 | 2 |
 | **Scale realistic** | `n_genes` = 16000; `n_samples` = 300; `switching_fraction` in {0.15, 0.25} | 15 | 2 |
 
@@ -54,9 +55,10 @@ The `abundance_switch_mixed` scenario uses the multiplex method set.
 | `isograph_cpu_latent` | IsoGraph latent-space model (LatentNetworkModel, `alpha = 0.10`) | CPU | all except scale, multiplex |
 | `isograph_vae` | Variational autoencoder network model | CPU | all |
 | `isograph_vae_multiplex` | IsoGraph VAE with multiplex (abundance + switch) features | CPU | multiplex only |
+| `isograph_spearman_leiden` | Spearman r on PSI switch coordinates + Leiden clustering (`min_r = 0.30`) | CPU | all except scale, multiplex |
 | `wgcna_gene` | WGCNA gene-level coexpression [@doi:10.1186/1471-2105-9-559] | CPU | all |
 
-Total planned runs: **9,480** across 7 scenarios.
+Total planned runs: **10,940** across 9 scenarios.
 
 ## Run Status
 
@@ -64,21 +66,24 @@ Scale and scale_realistic scenarios are fully complete. The `abundance_switch_mi
 
 | Scenario | Methods | Planned | Completed |
 |---|---|---:|---:|
-| Idealized switching | 7 (excl. multiplex) | 2,520 | 2,520 |
-| Noise stress | 7 | 2,240 | 2,240 |
-| Feature space interactions | 7 | 2,100 | 1,800 |
-| Non-switching background | 7 | 560 | 560 |
-| Unequal isoform abundance | 7 | 560 | 560 |
+| Idealized switching | 8 (excl. multiplex) | 2,880 | 2,520 |
+| Noise stress | 8 | 2,560 | 2,240 |
+| Feature space interactions | 8 | 2,400 | 1,800 |
+| Non-switching background | 8 | 640 | 560 |
+| Unequal isoform abundance | 8 | 640 | 560 |
 | Abundance switch mixed | 3 | 1,200 | 0 |
+| Negative control noise | 8 | 320 | 0 |
 | Scale | 2 (VAE + WGCNA) | 240 | 240 |
 | Scale realistic | 2 (VAE + WGCNA) | 60 | 60 |
-| **Total** | | **9,480** | **7,980** |
+| **Total** | | **10,940** | **7,980** |
 
-**Pending runs (2,340):**
+**Pending runs (2,960):**
+- `isograph_spearman_leiden` across all non-scale, non-multiplex scenarios (1,180 runs)
 - `isograph_vae_multiplex` across all non-scale, non-multiplex scenarios (1,140 runs)
 - `abundance_switch_mixed` for all three multiplex methods (1,200 runs)
+- `negative_control_noise` scenario for all 8 methods (320 runs)
 
-Current figures and tables use the **7,140 completed runs** in the current grid that cover the five non-multiplex CPU methods and both scale scenarios.
+Current figures and tables use the **7,980 completed runs** covering the five original CPU methods and both scale scenarios.
 
 ## Results
 

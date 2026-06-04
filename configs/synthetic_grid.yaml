@@ -9,6 +9,7 @@ methods:
   - isograph_latent
   - isograph_graph
   - isograph_baseline
+  - isograph_spearman_leiden
   - wgcna_gene
 multiplex_methods:
   - isograph_vae
@@ -55,6 +56,13 @@ scenarios:
     abundance_fraction: [0.0, 0.3, 0.5, 0.7, 1.0]
     noise_sd: [0.25]
     seed_count: 20
+  negative_control_noise:
+    # Pure noise: switching_fraction=0 ensures no true module signal.
+    # Verifies that methods produce ~0 module recovery under null conditions.
+    n_genes: [400]
+    n_samples: [160]
+    switching_fraction: [0.0]
+    noise_sd: [0.5, 1.0]
   scale:
     n_genes: [1000, 3000, 6000, 12000]
     n_samples: [240]
