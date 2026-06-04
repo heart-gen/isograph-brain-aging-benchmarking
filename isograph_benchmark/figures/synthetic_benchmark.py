@@ -19,8 +19,6 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # Design constants
 # ---------------------------------------------------------------------------
 
-# All CPU-complete methods; GPU methods (isograph_gpu_latent, isograph_vae_gpu) added
-# to this list once their runs finish.
 METHOD_ORDER = [
     "isograph_baseline",
     "isograph_latent",
@@ -44,9 +42,6 @@ METHOD_LABELS: dict[str, str] = {
     "isograph_cpu_latent": "IsoGraph\nCPU Latent",
     "isograph_vae":        "IsoGraph\nVAE",
     "wgcna_gene":          "WGCNA",
-    # GPU variants (pending) — kept for forward-compatibility
-    "isograph_gpu_latent": "IsoGraph\nGPU Latent",
-    "isograph_vae_gpu":    "IsoGraph\nVAE GPU",
 }
 
 METHOD_LABELS_SHORT: dict[str, str] = {
@@ -56,11 +51,9 @@ METHOD_LABELS_SHORT: dict[str, str] = {
     "isograph_cpu_latent": "CPU Latent",
     "isograph_vae":        "VAE",
     "wgcna_gene":          "WGCNA",
-    "isograph_gpu_latent": "GPU Latent",
-    "isograph_vae_gpu":    "VAE GPU",
 }
 
-# Okabe-Ito colorblind-safe palette (7 distinct + black)
+# Okabe-Ito colorblind-safe palette (7 distinct)
 METHOD_COLORS: dict[str, str] = {
     "isograph_baseline":   "#0072B2",  # blue
     "isograph_latent":     "#E69F00",  # orange
@@ -68,8 +61,6 @@ METHOD_COLORS: dict[str, str] = {
     "isograph_cpu_latent": "#56B4E9",  # sky blue
     "isograph_vae":        "#D55E00",  # vermillion
     "wgcna_gene":          "#CC79A7",  # reddish purple
-    "isograph_gpu_latent": "#F0E442",  # yellow (pending)
-    "isograph_vae_gpu":    "#000000",  # black (pending)
 }
 
 SCENARIO_ORDER = [
