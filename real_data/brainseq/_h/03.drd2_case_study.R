@@ -40,10 +40,15 @@ iso_mods   <- read_parquet(file.path(iso_dir, "modules.parquet"))
 wgcna_mods <- read_parquet(file.path(wgcna_dir, "modules.parquet"))
 tx_tbl     <- read_parquet(tx_path)
 
+# Strip version suffixes so lookups work regardless of whether IDs are versioned
+strip_ver <- function(ids) sub("\\.[0-9]+$", "", ids)
+iso_mods$gene_id_base   <- strip_ver(iso_mods$gene_id)
+wgcna_mods$gene_id_base <- strip_ver(wgcna_mods$gene_id)
+
 # ── DRD2 module lookup ─────────────────────────────────────────────────────────
 # Verify DRD2 is in each module set
-iso_drd2   <- iso_mods[iso_mods$gene_id == DRD2_GENE, ]
-wgcna_drd2 <- wgcna_mods[wgcna_mods$gene_id == DRD2_GENE, ]
+iso_drd2   <- iso_mods[iso_mods$gene_id_base == DRD2_GENE, ]
+wgcna_drd2 <- wgcna_mods[wgcna_mods$gene_id_base == DRD2_GENE, ]
 
 if (nrow(iso_drd2) == 0)   stop("DRD2 not found in IsoGraph modules. Check gene ID.")
 if (nrow(wgcna_drd2) == 0) stop("DRD2 not found in WGCNA modules. Check gene ID.")
@@ -54,13 +59,10 @@ wgcna_mod_id <- wgcna_drd2$module_id[1]
 cat(sprintf("DRD2 module: IsoGraph = %s | WGCNA = %s\n", iso_mod_id, wgcna_mod_id))
 
 # ── Module gene lists ──────────────────────────────────────────────────────────
-iso_genes   <- iso_mods$gene_id[iso_mods$module_id == iso_mod_id]
-wgcna_genes <- wgcna_mods$gene_id[wgcna_mods$module_id == wgcna_mod_id]
-
-# Strip version suffixes for gprofiler (ENSG00000149295.14 → ENSG00000149295)
-strip_ver <- function(ids) sub("\\.[0-9]+$", "", ids)
-iso_genes_clean   <- strip_ver(iso_genes)
-wgcna_genes_clean <- strip_ver(wgcna_genes)
+iso_genes_clean   <- iso_mods$gene_id_base[iso_mods$module_id == iso_mod_id]
+wgcna_genes_clean <- wgcna_mods$gene_id_base[wgcna_mods$module_id == wgcna_mod_id]
+iso_genes         <- iso_mods$gene_id[iso_mods$module_id == iso_mod_id]
+wgcna_genes       <- wgcna_mods$gene_id[wgcna_mods$module_id == wgcna_mod_id]
 
 # ── Summary table ──────────────────────────────────────────────────────────────
 comparison <- data.frame(

@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
-#SBATCH --partition=GPU-shared
-#SBATCH --gres=gpu:1
+#SBATCH --partition=RM-shared
 #SBATCH --job-name=brainseq-iso-sczd
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=5
-#SBATCH --mem=32G
+#SBATCH --cpus-per-task=16
 #SBATCH --time=02:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/%x-%j.log
 # Run IsoGraph VAE on BrainSEQ caudate Control+SCZD bundle.

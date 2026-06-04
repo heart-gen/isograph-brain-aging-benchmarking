@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
-#SBATCH --partition=GPU-shared
-#SBATCH --gres=gpu:v100-16:1
+#SBATCH --partition=RM-shared
 #SBATCH --job-name=brainseq-iso-aging
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=32
 #SBATCH --array=1-3
 #SBATCH --time=02:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/%x-%A_%a.log
@@ -49,6 +48,27 @@ conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 log_message "Checking Python analysis dependencies"
 python -c "import isograph_benchmark, numpy, pandas, scipy, patsy"
 
+log_message "CUDA diagnostics"
+nvidia-smi || echo "nvidia-smi not found or no GPU"
+python - <<'PYEOF'
+import torch
+print(f"PyTorch version  : {torch.__version__}")
+print(f"PyTorch CUDA ver : {torch.version.cuda}")
+print(f"CUDA available   : {torch.cuda.is_available()}")
+if torch.cuda.is_available():
+    print(f"GPU count        : {torch.cuda.device_count()}")
+    for i in range(torch.cuda.device_count()):
+        props = torch.cuda.get_device_properties(i)
+        print(f"  GPU {i}: {torch.cuda.get_device_name(i)}, {props.total_memory/1e9:.1f} GB")
+    try:
+        torch.zeros(1).cuda()
+        print("CUDA smoke test  : PASSED")
+    except Exception as e:
+        print(f"CUDA smoke test  : FAILED — {e}")
+else:
+    print("WARNING: CUDA not available — check driver/toolkit compatibility")
+PYEOF
+
 REGIONS=(caudate hippocampus dlpfc)
 RUN_ARGS=("$@")
 if [[ -n "${SLURM_ARRAY_TASK_ID:-}" ]]; then
@@ -56,6 +76,13 @@ if [[ -n "${SLURM_ARRAY_TASK_ID:-}" ]]; then
     RUN_ARGS=(--region "${REGION}" "$@")
     log_message "Running region ${REGION}"
 fi
+
+# Limit BLAS/OpenMP threads to avoid per-thread workspace accumulation
+# over the 17k+ SVD calls in gene_switch_coordinates (main CPU OOM cause).
+# 8 threads balances memory footprint with training throughput on RM-shared.
+export OMP_NUM_THREADS=8
+export OPENBLAS_NUM_THREADS=8
+export MKL_NUM_THREADS=8
 
 python -m isograph_benchmark.real_data.run_models brainseq-aging "${RUN_ARGS[@]}"
 
