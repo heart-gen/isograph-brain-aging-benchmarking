@@ -30,7 +30,6 @@ METHOD_ORDER = [
 
 # Methods available in the scale scenario (subset of METHOD_ORDER)
 SCALE_METHOD_ORDER = [
-    "isograph_cpu_latent",
     "isograph_vae",
     "wgcna_gene",
 ]

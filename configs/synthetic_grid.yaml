@@ -16,7 +16,6 @@ multiplex_methods:
   - wgcna_gene
 scale_methods:
   - isograph_vae
-  - isograph_cpu_latent
   - wgcna_gene
 scenarios:
   idealized_switching:
