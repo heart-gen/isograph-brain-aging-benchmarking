@@ -1,6 +1,6 @@
 seed_count_core: 20
 seed_count_main_figure: 30
-seed_count_scale: 8
+seed_count_scale: 15
 base_seed: 13
 methods:
   - isograph_vae
@@ -63,6 +63,14 @@ scenarios:
   scale:
     n_genes: [1000, 3000, 6000, 12000]
     n_samples: [240]
+    switching_fraction: [0.15, 0.25]
+    noise_sd: [0.25]
+  scale_realistic:
+    # BrainSEQ-scale validation: ~17k genes x 300 samples matches real data dimensions.
+    # Separate from "scale" to preserve existing run hashes while adding the
+    # larger point needed for Nature Methods reviewers.
+    n_genes: [16000]
+    n_samples: [300]
     switching_fraction: [0.15, 0.25]
     noise_sd: [0.25]
 statistics:

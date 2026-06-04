@@ -18,11 +18,16 @@ RESOURCE_DEFAULTS = {
     "gpu_scale": {"requested_cpus": 8, "requested_gpus": 1, "mem_per_cpu_gb": 16, "requested_mem_gb": 128, "target_minutes": 240},
 }
 
+# Scenarios that use scale resources and scale_methods.
+# scale_realistic is kept separate from scale so existing run hashes are
+# preserved while adding the BrainSEQ-scale (16k genes / 300 samples) point.
+_SCALE_SCENARIOS = frozenset({"scale", "scale_realistic"})
+
 
 def resource_class(method: str, scenario: str) -> str:
     if method in ("isograph_gpu_latent", "isograph_vae_gpu"):
-        return "gpu_scale" if scenario == "scale" else "gpu"
-    if scenario == "scale":
+        return "gpu_scale" if scenario in _SCALE_SCENARIOS else "gpu"
+    if scenario in _SCALE_SCENARIOS:
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
@@ -56,7 +61,7 @@ _MULTIPLEX_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["abundance_fraction
 
 
 def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
-    if scenario == "scale":
+    if scenario in _SCALE_SCENARIOS:
         return cfg["scale_methods"]
     if scenario == "abundance_switch_mixed":
         return cfg.get("multiplex_methods", cfg["methods"])
@@ -75,7 +80,7 @@ def expand_grid() -> pd.DataFrame:
             seed_count = int(
                 scenario_seed_count
                 if scenario_seed_count is not None
-                else (cfg["seed_count_scale"] if scenario == "scale" else cfg["seed_count_core"])
+                else (cfg["seed_count_scale"] if scenario in _SCALE_SCENARIOS else cfg["seed_count_core"])
             )
             parameter_values = dict(zip(keys, values, strict=True))
             methods = _scenario_methods(cfg, scenario)
