@@ -17,6 +17,37 @@ from isograph_benchmark.paths import ensure_dir, rel
 
 # Age evaluation probabilities for spline projection (p10, p25, p50, p75, p90)
 AGE_PROBS = np.array([0.10, 0.25, 0.50, 0.75, 0.90])
+
+
+def _filter_expressed_transcripts(
+    transcript_counts: np.ndarray,
+    transcript_table: pd.DataFrame,
+    min_count: float = 10.0,
+    min_fraction: float = 0.70,
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """Keep transcripts with count > min_count in >= min_fraction of samples.
+
+    Mirrors the filterByExpr-style filter used in the SCZD bundle creation,
+    adapted for a continuous covariate (aging spline) by treating all samples
+    as a single group.  Drops lowly-expressed isoforms that add noise to the
+    switch-coordinate computation and would otherwise inflate the (n_features²)
+    similarity matrix.
+    """
+    n_samples = transcript_counts.shape[1]
+    n_pass = int(min_fraction * n_samples)
+    tx_pass = (transcript_counts > min_count).sum(axis=1) >= n_pass
+    n_orig_tx = len(transcript_table)
+    n_kept_tx = int(tx_pass.sum())
+    n_orig_genes = transcript_table["gene_id"].nunique()
+    n_kept_genes = transcript_table.loc[tx_pass, "gene_id"].nunique()
+    print(
+        f"  transcript filter (count>{min_count:.0f}, ≥{min_fraction:.0%} of {n_samples} samples): "
+        f"{n_kept_tx}/{n_orig_tx} transcripts, {n_kept_genes}/{n_orig_genes} genes retained",
+        flush=True,
+    )
+    return transcript_counts[tx_pass], transcript_table.loc[tx_pass].reset_index(drop=True)
+
+
 AGE_LABELS = ["p10", "p25", "p50", "p75", "p90"]
 
 GTEX_REGIONS = [
@@ -80,6 +111,10 @@ def spline_age_association(
 
     Fits: eigengene ~ ns(age_z, knots=[q1/3, q2/3]) + covariates
     Projects spline coefficients to age_eval = qnorm([0.10, 0.25, 0.50, 0.75, 0.90]).
+
+    Returns one row per (module, age_label) with per-point effect/se/z plus F-test
+    columns (pvalue_ftest, fdr_ftest) that test the joint spline component against
+    the covariate-only reduced model. Use fdr_ftest for module-level significance.
     """
     keep_cols = ["sample_id", age_col] + [c for c in covariate_cols if c in sample_table.columns]
     merged = eigengenes.merge(sample_table[keep_cols], on="sample_id", how="inner")
@@ -106,20 +141,25 @@ def spline_age_association(
 
     intercept = np.ones((len(merged), 1))
     X = np.hstack([intercept, B_obs, covariate_arr])
+    X_reduced = np.hstack([intercept, covariate_arr])
     spline_idx = slice(1, 1 + n_spline)
 
     module_cols = [c for c in eigengenes.columns if c != "sample_id"]
     rows = []
+    # Per-module F-test accumulator for later BH correction
+    ftest_pvals: dict[str, float] = {}
 
     for col in module_cols:
         y = merged[col].to_numpy(dtype=float)
         mask = np.isfinite(y) & np.all(np.isfinite(X), axis=1)
-        if mask.sum() < 10:
+        n_obs = int(mask.sum())
+        if n_obs < 10:
             continue
         X_fit, y_fit = X[mask], y[mask]
         coef, _, rank, _ = np.linalg.lstsq(X_fit, y_fit, rcond=None)
         residuals = y_fit - X_fit @ coef
-        df_res = max(rank - 1, 1)
+        # Correct residual df: n_obs - rank (not rank - 1)
+        df_res = max(n_obs - rank, 1)
         sigma2 = (residuals @ residuals) / df_res
         V = sigma2 * np.linalg.pinv(X_fit.T @ X_fit)
 
@@ -131,6 +171,16 @@ def spline_age_association(
         se_proj = np.sqrt(np.maximum(np.diag(V_proj), 0))
         z_proj = np.where(se_proj > 0, beta_proj / se_proj, 0.0)
         p_proj = 2 * stats.norm.sf(np.abs(z_proj))
+
+        # F-test: full (spline + covariates) vs reduced (covariates only)
+        X_red_fit = X_reduced[mask]
+        coef_red, _, rank_red, _ = np.linalg.lstsq(X_red_fit, y_fit, rcond=None)
+        rss_full = float(residuals @ residuals)
+        rss_red = float(((y_fit - X_red_fit @ coef_red) ** 2).sum())
+        df_num = max(rank - rank_red, 1)
+        f_stat = ((rss_red - rss_full) / df_num) / (rss_full / df_res)
+        p_ftest = float(stats.f.sf(f_stat, df_num, df_res)) if np.isfinite(f_stat) else np.nan
+        ftest_pvals[col] = p_ftest
 
         for label, age_p, beta, se, z, p in zip(
             AGE_LABELS, AGE_PROBS, beta_proj, se_proj, z_proj, p_proj
@@ -144,7 +194,8 @@ def spline_age_association(
                 "se": se,
                 "z": z,
                 "pvalue": p,
-                "n": int(mask.sum()),
+                "pvalue_ftest": p_ftest,
+                "n": n_obs,
             })
 
     result = pd.DataFrame(rows)
@@ -152,6 +203,13 @@ def spline_age_association(
         result["fdr"] = result.groupby("age_label")["pvalue"].transform(
             lambda pv: stats.false_discovery_control(pv, method="bh")
         )
+        # Module-level FDR using the F-test p-value (one p-value per module)
+        mod_ids = list(ftest_pvals.keys())
+        fdr_vals = stats.false_discovery_control(
+            [ftest_pvals[m] for m in mod_ids], method="bh"
+        )
+        fdr_ftest_map = dict(zip(mod_ids, fdr_vals))
+        result["fdr_ftest"] = result["module_id"].map(fdr_ftest_map)
     return result
 
 
@@ -231,9 +289,11 @@ def _eigengenes_to_sample_table(artifacts) -> pd.DataFrame | None:
     eigengenes = artifacts.eigengene_table
     if eigengenes is None or eigengenes.empty:
         return None
-    eg_long = eigengenes.T.reset_index().rename(columns={"index": "sample_id"})
-    eg_long.columns.name = None
-    return eg_long
+    # eigengene_table: rows=modules, cols=[module_id, sample1, sample2, ...]
+    # Pivot to: rows=samples, cols=[sample_id, M000, M001, ...]
+    eg_pivot = eigengenes.set_index("module_id").T.reset_index().rename(columns={"index": "sample_id"})
+    eg_pivot.columns.name = None
+    return eg_pivot
 
 
 def _save_core_artifacts(artifacts, out: Path) -> None:
@@ -246,14 +306,14 @@ def _save_core_artifacts(artifacts, out: Path) -> None:
         artifacts.module_gene_roles.to_parquet(out / "module_gene_roles.parquet", index=False, compression="zstd")
 
 
-def _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col, label):
+def _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col, label):
     _save_core_artifacts(artifacts, out)
     eigengenes = _eigengenes_to_sample_table(artifacts)
     if eigengenes is not None:
-        linear = linear_age_association(eigengenes, bundle.sample_table, age_col=age_col)
+        linear = linear_age_association(eigengenes, sample_table, age_col=age_col)
         linear.to_parquet(out / "age_linear.parquet", index=False, compression="zstd")
 
-        spline = spline_age_association(eigengenes, bundle.sample_table, covariate_cols, age_col=age_col)
+        spline = spline_age_association(eigengenes, sample_table, covariate_cols, age_col=age_col)
         spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
 
         print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
@@ -301,12 +361,16 @@ def run_gtex_aging(regions: list[str] | None = None) -> None:
         run_gtex_region(region)
 
 
-_MULTIPLEX_ABUNDANCE_GRID = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
-_MULTIPLEX_SWITCH_GRID = [0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90]
 
 
 def run_brainseq_region(region: str) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
+    sample_table = bundle.sample_table
+    tc, tt = _filter_expressed_transcripts(
+        bundle.matrices["transcript_counts"],
+        bundle.feature_tables["transcript"],
+    )
+    del bundle  # free ~415 MB transcript_counts before VAE feature computation
 
     covariate_cols = [
         "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
@@ -316,22 +380,67 @@ def run_brainseq_region(region: str) -> None:
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
-        min_module_size=30, trait_columns=["Age"], random_state=13,
-        allow_abundance_abundance=True,
-        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
-        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
+        min_module_size=20, trait_columns=["Age"], random_state=13,
+        allow_abundance_abundance=False,
+        alpha_switch=0.5,
+        leiden_resolution=2.0,
     )
     print(f"[{region}] fitting model ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
-        transcript_counts=bundle.matrices["transcript_counts"],
-        transcript_table=bundle.feature_tables["transcript"],
-        sample_table=bundle.sample_table,
+        transcript_counts=tc,
+        transcript_table=tt,
+        sample_table=sample_table,
     )
+    del tc, tt  # free filtered transcript data; no longer needed after fit
     print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
-    _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="Age", label=region)
+    _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region)
+
+
+def run_brainseq_region_with_abundance(region: str, leiden_resolution: float = 2.0) -> None:
+    """Re-enable abundance-abundance edges (with grid calibration) for a BrainSEQ aging region.
+
+    Writes artifacts to isograph_vae_with_abundance/ (separate from the standard run)
+    so results can be compared without overwriting the baseline.
+    """
+    bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
+    sample_table = bundle.sample_table
+    tc, tt = _filter_expressed_transcripts(
+        bundle.matrices["transcript_counts"],
+        bundle.feature_tables["transcript"],
+    )
+    del bundle
+
+    covariate_cols = [
+        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+    ]
+
+    cfg = VaeModelConfig(
+        hidden_dim=256, latent_dim=32, n_epochs=500,
+        residualize_covariates=covariate_cols,
+        min_module_size=20, trait_columns=["Age"], random_state=13,
+        allow_abundance_abundance=True,
+        alpha_switch=0.5,
+        alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
+        leiden_resolution=leiden_resolution,
+    )
+    print(f"[{region}+abundance] fitting model ...", flush=True)
+    _t0 = time.time()
+    artifacts = VaeNetworkModel(cfg).fit(
+        transcript_counts=tc,
+        transcript_table=tt,
+        sample_table=sample_table,
+    )
+    del tc, tt
+    print(f"[{region}+abundance] fit done in {time.time() - _t0:.0f}s | "
+          f"alpha_abundance={artifacts.calibration.get('alpha_abundance') if artifacts.calibration else 'n/a'}", flush=True)
+
+    out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae_with_abundance"))
+    _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age",
+                        label=f"{region}+abundance")
 
 
 def run_gtex_region(region_dir_name: str) -> None:
@@ -343,10 +452,10 @@ def run_gtex_region(region_dir_name: str) -> None:
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
-        min_module_size=30, trait_columns=["AGE"], random_state=13,
-        allow_abundance_abundance=True,
-        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
-        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
+        min_module_size=20, trait_columns=["AGE"], random_state=13,
+        allow_abundance_abundance=False,
+        alpha_switch=0.5,
+        leiden_resolution=2.0,
     )
     print(f"[{region_dir_name}] fitting model ...", flush=True)
     _t0 = time.time()
@@ -358,7 +467,7 @@ def run_gtex_region(region_dir_name: str) -> None:
     print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
-    _save_age_artifacts(artifacts, out, bundle, covariate_cols, age_col="AGE", label=region_dir_name)
+    _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE", label=region_dir_name)
 
 
 def _drd2_gene_id(transcript_table: pd.DataFrame) -> str | None:
@@ -405,11 +514,11 @@ def run_brainseq_caudate_sczd() -> None:
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
-        min_module_size=30, trait_columns=["Dx"],
+        min_module_size=20, trait_columns=["Dx"],
         random_state=13,
-        allow_abundance_abundance=True,
-        alpha_switch_grid=_MULTIPLEX_SWITCH_GRID,
-        alpha_abundance_grid=_MULTIPLEX_ABUNDANCE_GRID,
+        allow_abundance_abundance=False,
+        alpha_switch=0.5,
+        leiden_resolution=10.0,
     )
     print("[caudate_sczd] fitting model ...", flush=True)
     _t0 = time.time()
@@ -443,10 +552,25 @@ def main() -> None:
         "--region", action="append",
         help="Run only the named region. Can be repeated for brainseq-aging or gtex-aging.",
     )
+    parser.add_argument(
+        "--variant", default="standard", choices=["standard", "with-abundance"],
+        help="standard: default config (allow_abundance_abundance=False). "
+             "with-abundance: re-enable abundance edges with alpha_abundance_grid calibration. "
+             "Only applies to brainseq-aging.",
+    )
+    parser.add_argument(
+        "--leiden-resolution", type=float, default=None,
+        help="Override leiden_resolution for the with-abundance variant (default: 2.0).",
+    )
     args = parser.parse_args()
 
     if args.analysis == "brainseq-aging":
-        run_brainseq_aging(args.region)
+        if args.variant == "with-abundance":
+            resolution = args.leiden_resolution or 2.0
+            for region in (args.region or ["caudate", "hippocampus", "dlpfc"]):
+                run_brainseq_region_with_abundance(region, leiden_resolution=resolution)
+        else:
+            run_brainseq_aging(args.region)
     elif args.analysis == "brainseq-sczd":
         run_brainseq_caudate_sczd()
     elif args.analysis == "gtex-aging":
