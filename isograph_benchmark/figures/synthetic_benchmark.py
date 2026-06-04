@@ -570,7 +570,20 @@ def make_figS6(raw: pd.DataFrame, out_dir: Path) -> None:
 # Table 1
 # ---------------------------------------------------------------------------
 
-def make_table1(summary: pd.DataFrame, out_dir: Path) -> None:
+def make_table1(
+    summary: pd.DataFrame,
+    out_dir: Path,
+    tests: pd.DataFrame | None = None,
+) -> None:
+    """Write Table 1.
+
+    When *tests* (pairwise Wilcoxon results from hypothesis_tests.py) is
+    provided, each metric cell is annotated with a significance marker:
+      **   BH-adjusted p < 0.05
+      *    BH-adjusted p < 0.10
+    A blank marker means the comparison was not significant or not available.
+    Direction is encoded as ↑ (method better) or ↓ (method worse vs. WGCNA).
+    """
     scenarios = [s for s in SCENARIO_ORDER if s in summary["scenario"].unique()]
     methods = _active_methods(summary, col="method")
 
@@ -579,6 +592,25 @@ def make_table1(summary: pd.DataFrame, out_dir: Path) -> None:
         "metrics_switch_gene_detection_rate":  "Switch Detection",
         "metrics_nonswitch_gene_module_rate":  "False Positive Rate",
     }
+
+    # Build a lookup: (scenario, metric, method) → (p_adj, direction)
+    test_lookup: dict[tuple, tuple[float, str]] = {}
+    if tests is not None and not tests.empty:
+        for _, tr in tests.iterrows():
+            test_lookup[(tr["scenario"], tr["metric"], tr["method"])] = (
+                float(tr["p_adj"]) if pd.notna(tr["p_adj"]) else np.nan,
+                str(tr["direction"]),
+            )
+
+    def _sig_marker(p_adj: float, direction: str) -> str:
+        arrow = "↑" if direction == "method_better" else ("↓" if direction == "ref_better" else "")
+        if np.isnan(p_adj):
+            return ""
+        if p_adj < 0.05:
+            return f"**{arrow}"
+        if p_adj < 0.10:
+            return f"*{arrow}"
+        return ""
 
     rows = []
     for scenario in scenarios:
@@ -595,12 +627,17 @@ def make_table1(summary: pd.DataFrame, out_dir: Path) -> None:
                 ]
                 if sub.empty:
                     row[f"{col_label} (mean [95% CI])"] = "—"
+                    row[f"{col_label} sig."] = ""
                 else:
                     r = sub.iloc[0]
                     row["N"] = int(r["n"])
                     row[f"{col_label} (mean [95% CI])"] = (
                         f"{r['mean']:.3f} [{r['ci_low']:.3f}, {r['ci_high']:.3f}]"
                     )
+                    p_adj, direction = test_lookup.get(
+                        (scenario, metric, method), (np.nan, "")
+                    )
+                    row[f"{col_label} sig."] = _sig_marker(p_adj, direction)
 
             rt_sub = summary[
                 (summary["scenario"] == scenario) &
@@ -616,6 +653,9 @@ def make_table1(summary: pd.DataFrame, out_dir: Path) -> None:
     out_path = out_dir / "table1_benchmark_summary.csv"
     table.to_csv(out_path, index=False)
     print(f"  table1_benchmark_summary.csv: {len(table)} rows")
+    if tests is not None and not tests.empty:
+        n_sig = (tests["p_adj"] < 0.05).sum()
+        print(f"  Significance annotations applied ({n_sig} FDR<0.05 tests marked)")
 
 
 # ---------------------------------------------------------------------------
@@ -640,10 +680,11 @@ def _save(fig: plt.Figure, out_dir: Path, name: str) -> None:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    raw_path = rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
-    summary_path = rel("benchmark", "02_metrics", "_m", "synthetic_metric_summary.parquet")
-    out_dir = rel("benchmark", "02_metrics", "figures")
-    table_dir = rel("benchmark", "02_metrics", "_m")
+    raw_path     = rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
+    summary_path = rel("benchmark", "02_metrics",   "_m", "synthetic_metric_summary.parquet")
+    tests_path   = rel("benchmark", "02_metrics",   "_m", "synthetic_pairwise_tests.parquet")
+    out_dir      = rel("benchmark", "02_metrics", "figures")
+    table_dir    = rel("benchmark", "02_metrics", "_m")
 
     if not raw_path.exists():
         raise SystemExit(f"Missing: {raw_path}\nRun step_1_collect.sh first.")
@@ -653,6 +694,9 @@ def main() -> None:
     print("Loading data...")
     raw = load_raw(raw_path)
     summary = load_summary(summary_path)
+    tests = pd.read_parquet(tests_path) if tests_path.exists() else None
+    if tests is None:
+        print("  Note: pairwise tests file not found — Table 1 will have no significance markers.")
     print(f"  Completed runs: {len(raw):,}  |  Summary rows: {len(summary):,}")
 
     print("Generating figures...")
@@ -663,7 +707,7 @@ def main() -> None:
     make_figS4(raw, out_dir)
     make_figS5(raw, out_dir)
     make_figS6(raw, out_dir)
-    make_table1(summary, table_dir)
+    make_table1(summary, table_dir, tests=tests)
 
     print(f"Done. Outputs in {out_dir}")
 

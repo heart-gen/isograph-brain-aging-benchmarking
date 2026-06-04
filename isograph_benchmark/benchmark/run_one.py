@@ -153,6 +153,11 @@ def compute_metrics(artifacts, bundle) -> dict[str, Any]:
     nonswitching_genes = set(truth_switch.loc[~truth_switch["has_switch"], "gene_id"]) if not truth_switch.empty else set()
     abundance_genes = set(truth_abundance.loc[truth_abundance["has_abundance"], "gene_id"]) if not truth_abundance.empty else set()
 
+    # module_recovery_score: mean best-Jaccard over truth modules.
+    # For each ground-truth module T_i, find the predicted module P_j that
+    # maximises |T_i ∩ P_j| / |T_i ∪ P_j|, then average over all T_i.
+    # Score ∈ [0, 1]; 1 = perfect recovery of all truth modules.
+    # See docs/metrics.md for the full formula and interpretation.
     metrics: dict[str, Any] = {
         "module_recovery": module_recovery_score(artifacts.module_table, truth_modules),
         "n_predicted_modules": int(artifacts.module_table["module_id"].nunique()) if not artifacts.module_table.empty else 0,

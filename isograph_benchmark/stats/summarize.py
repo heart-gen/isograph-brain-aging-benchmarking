@@ -141,6 +141,22 @@ def main() -> None:
     long.to_parquet(out_long, index=False, compression="zstd")
     print(f"Wrote {len(long):,} rows to {out_long.name}")
 
+    # Paired statistical tests (Wilcoxon + BH FDR) — all methods vs. WGCNA
+    from isograph_benchmark.stats.hypothesis_tests import paired_tests
+    print("Running paired Wilcoxon tests (vs. wgcna_gene) ...")
+    tests = paired_tests(df)
+    if not tests.empty:
+        out_tests = rel("benchmark", "02_metrics", "_m", "synthetic_pairwise_tests.parquet")
+        tests.to_parquet(out_tests, index=False, compression="zstd")
+        n_sig05 = tests["significant_05"].sum()
+        n_sig10 = tests["significant_10"].sum()
+        print(
+            f"  {len(tests):,} tests | FDR<0.05: {n_sig05} | FDR<0.10: {n_sig10}"
+        )
+        print(f"  Wrote {out_tests.name}")
+    else:
+        print("  No paired tests produced (check that wgcna_gene runs are present).")
+
 
 if __name__ == "__main__":
     main()
