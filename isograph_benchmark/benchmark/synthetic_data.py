@@ -36,6 +36,7 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     rng = np.random.default_rng(_as_int(row, "seed", 13))
     n_genes = _as_int(row, "n_genes", 400)
     n_samples = _as_int(row, "n_samples", 160)
+    n_transcripts_per_gene = _as_int(row, "n_transcripts_per_gene", 2)
     switching_fraction = np.clip(_as_float(row, "switching_fraction", 0.25), 0.0, 1.0)
     # fraction of module genes driven by abundance rather than switching [0,1]
     abundance_fraction = np.clip(_as_float(row, "abundance_fraction", 0.0), 0.0, 1.0)
@@ -119,21 +120,34 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     total_rate = rng.gamma(shape=gamma_shape, scale=gamma_scale)
     totals = rng.poisson(np.maximum(total_rate, 1.0)).astype(float)
 
-    transcript_counts = np.zeros((n_genes * 2, n_samples), dtype=float)
+    n_tx = max(2, n_transcripts_per_gene)
+    transcript_counts = np.zeros((n_genes * n_tx, n_samples), dtype=float)
     transcript_rows: list[dict[str, object]] = []
     for gene_idx, gene_id in enumerate(gene_ids):
-        tx1 = rng.binomial(totals[gene_idx].astype(int), p1[gene_idx]).astype(float)
-        tx2 = np.maximum(totals[gene_idx] - tx1, 0.0)
-        transcript_counts[gene_idx * 2] = tx1
-        transcript_counts[gene_idx * 2 + 1] = tx2
-        transcript_rows.extend(
-            [
-                {"transcript_id": f"{gene_id}_T1", "gene_id": gene_id, "length": 1000},
-                {"transcript_id": f"{gene_id}_T2", "gene_id": gene_id, "length": 900},
-            ]
-        )
+        # Distribute total counts across n_tx transcripts.
+        # For the first two transcripts, use the PSI-driven split; remaining get
+        # uniform shares of a small residual so that multi-isoform genes have
+        # realistic sparsity without adding independent switching signal.
+        total = totals[gene_idx].astype(int)
+        tx1 = rng.binomial(total, p1[gene_idx]).astype(float)
+        remainder = np.maximum(total - tx1, 0)
+        if n_tx == 2:
+            tx_counts = [tx1, remainder.astype(float)]
+        else:
+            # Distribute remainder across the n_tx-1 secondary transcripts via a
+            # multinomial draw with equal probabilities.  Each transcript gets an
+            # independent vector of per-sample counts that sum to remainder.
+            probs = np.full(n_tx - 1, 1.0 / (n_tx - 1))
+            secondary = rng.multinomial(remainder.astype(int), probs).T.astype(float)
+            # secondary shape: (n_tx-1, n_samples)
+            tx_counts = [tx1] + [secondary[i] for i in range(n_tx - 1)]
+        for t_idx, tx_vec in enumerate(tx_counts):
+            transcript_counts[gene_idx * n_tx + t_idx] = tx_vec
+            transcript_rows.append(
+                {"transcript_id": f"{gene_id}_T{t_idx + 1}", "gene_id": gene_id, "length": 1000 - t_idx * 50}
+            )
 
-    gene_counts = transcript_counts.reshape(n_genes, 2, n_samples).sum(axis=1)
+    gene_counts = transcript_counts.reshape(n_genes, n_tx, n_samples).sum(axis=1)
     psi = p1
     gene_table = pd.DataFrame({"gene_id": gene_ids})
     transcript_table = pd.DataFrame(transcript_rows)
