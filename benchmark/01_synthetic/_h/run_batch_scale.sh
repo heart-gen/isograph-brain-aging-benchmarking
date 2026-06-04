@@ -5,8 +5,8 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=64
-#SBATCH --array=1-144%20
-#SBATCH --time=48:00:00
+#SBATCH --array=1-271%20
+#SBATCH --time=04:00:00
 #SBATCH --output=benchmark/01_synthetic/_m/logs/%x-%A_%a.log
 
 log_message() {
@@ -29,7 +29,7 @@ module list
 log_message "**** Loading mamba environment ****"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
-BATCH_FILE="${BATCH_FILE:-benchmark/01_synthetic/_m/batches_scale.tsv}"
+BATCH_FILE="${BATCH_FILE:-benchmark/01_synthetic/_m/batches_scale_new_scale.tsv}"
 BATCH_INDEX="${SLURM_ARRAY_TASK_ID:-1}"
 
 log_message "**** Subsetting benchmark run ****"
