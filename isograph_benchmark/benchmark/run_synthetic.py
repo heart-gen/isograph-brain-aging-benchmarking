@@ -10,12 +10,10 @@ from isograph_benchmark.paths import ensure_dir, rel
 
 
 RESOURCE_DEFAULTS = {
-    "cpu_short": {"requested_cpus": 16, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 32, "target_minutes": 90},
-    "vae": {"requested_cpus": 32, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 64, "target_minutes": 90},
-    "wgcna_cpu": {"requested_cpus": 50, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 100, "target_minutes": 90},
-    "scale": {"requested_cpus": 64, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 128, "target_minutes": 240},
-    "gpu": {"requested_cpus": 8, "requested_gpus": 1, "mem_per_cpu_gb": 8, "requested_mem_gb": 64, "target_minutes": 90},
-    "gpu_scale": {"requested_cpus": 8, "requested_gpus": 1, "mem_per_cpu_gb": 16, "requested_mem_gb": 128, "target_minutes": 240},
+    "cpu_short": {"requested_cpus": 4, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 8, "target_minutes": 90},
+    "vae": {"requested_cpus": 4, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 8, "target_minutes": 90},
+    "wgcna_cpu": {"requested_cpus": 4, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 8, "target_minutes": 90},
+    "scale": {"requested_cpus": 8, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 16, "target_minutes": 240},
 }
 
 # Scenarios that use scale resources and scale_methods.
@@ -25,14 +23,12 @@ _SCALE_SCENARIOS = frozenset({"scale", "scale_realistic"})
 
 
 def resource_class(method: str, scenario: str) -> str:
-    if method in ("isograph_gpu_latent", "isograph_vae_gpu"):
-        return "gpu_scale" if scenario in _SCALE_SCENARIOS else "gpu"
     if scenario in _SCALE_SCENARIOS:
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
-    if method in ("isograph_vae", "isograph_vae_multiplex", "isograph_cpu_latent"):
-        return "vae" if method in ("isograph_vae", "isograph_vae_multiplex") else "cpu_short"
+    if method in ("isograph_vae", "isograph_vae_multiplex"):
+        return "vae"
     return "cpu_short"
 
 

@@ -12,13 +12,11 @@ from isograph.evaluation.metrics import module_recovery_score
 from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.baseline import BaselineNetworkModel
 from isograph.models.graph import GraphNetworkModel
-from isograph.models.gpu_latent import GpuLatentNetworkModel
 from isograph.models.latent import LatentNetworkModel
 from isograph.models.vae import VaeNetworkModel
 from isograph.models.wgcna import WgcnaNetworkModel
 from isograph.workflow.config import (
     BaselineModelConfig,
-    GpuLatentModelConfig,
     GraphModelConfig,
     LatentModelConfig,
     VaeModelConfig,
@@ -83,10 +81,8 @@ def build_model(row: pd.Series):
         return LatentNetworkModel(LatentModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
     if method == "isograph_graph":
         return GraphNetworkModel(GraphModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
-    if method == "isograph_gpu_latent":
-        return GpuLatentNetworkModel(GpuLatentModelConfig(alpha=0.10, min_module_size=2, random_state=seed))
     if method == "isograph_cpu_latent":
-        return GpuLatentNetworkModel(GpuLatentModelConfig(alpha=0.10, min_module_size=2, random_state=seed, device="cpu"))
+        return LatentNetworkModel(LatentModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
     if method == "isograph_vae":
         return VaeNetworkModel(
             VaeModelConfig(
@@ -98,18 +94,6 @@ def build_model(row: pd.Series):
                 min_module_size=2,
                 random_state=seed,
                 device="cpu",
-            )
-        )
-    if method == "isograph_vae_gpu":
-        return VaeNetworkModel(
-            VaeModelConfig(
-                latent_dim_grid=[2, 4, 6, 8, 12],
-                hidden_dim=128 if int(row["n_genes"]) <= 1000 else 256,
-                n_epochs=300,
-                patience=35,
-                alpha=0.70,
-                min_module_size=2,
-                random_state=seed,
             )
         )
     if method == "isograph_vae_multiplex":
