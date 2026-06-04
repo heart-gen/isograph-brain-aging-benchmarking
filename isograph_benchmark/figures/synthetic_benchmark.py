@@ -78,6 +78,7 @@ SCENARIO_ORDER = [
     "feature_space_interactions",
     "non_switching_background",
     "unequal_isoform_abundance",
+    "scale_realistic",
 ]
 
 SCENARIO_LABELS: dict[str, str] = {
@@ -86,6 +87,7 @@ SCENARIO_LABELS: dict[str, str] = {
     "feature_space_interactions": "Feature\nInteractions",
     "non_switching_background":   "Non-Switching\nBackground",
     "unequal_isoform_abundance":  "Unequal\nAbundance",
+    "scale_realistic":            "BrainSEQ\nScale (16k)",
 }
 
 # Matplotlib global style
@@ -529,8 +531,8 @@ def make_figS5(raw: pd.DataFrame, out_dir: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def make_figS6(raw: pd.DataFrame, out_dir: Path) -> None:
-    scenario = "scale"
-    sub = raw[raw["run_scenario"] == scenario].copy()
+    # Combine scale and scale_realistic so the scaling curve extends to 16k genes.
+    sub = raw[raw["run_scenario"].isin({"scale", "scale_realistic"})].copy()
     if sub.empty:
         print("  figS6: no scale data, skipping"); return
 
