@@ -55,7 +55,7 @@ The `abundance_switch_mixed` scenario uses the multiplex method set.
 | `isograph_cpu_latent` | IsoGraph latent-space model (LatentNetworkModel, `alpha = 0.10`) | CPU | all except scale, multiplex |
 | `isograph_vae` | Variational autoencoder network model | CPU | all |
 | `isograph_vae_multiplex` | IsoGraph VAE with multiplex (abundance + switch) features | CPU | multiplex only |
-| `isograph_spearman_leiden` | Spearman r on PSI switch coordinates + Leiden clustering (`min_r = 0.30`) | CPU | all except scale, multiplex |
+| `isograph_spearman_leiden` | Spearman r on the shared abundance+switch feature matrix + Leiden clustering (`min_r = 0.30`); same input and feature→gene mapping as WGCNA | CPU | all except scale, multiplex |
 | `wgcna_gene` | WGCNA gene-level coexpression [@doi:10.1186/1471-2105-9-559] | CPU | all |
 
 Total planned runs: **10,940** across 9 scenarios.
