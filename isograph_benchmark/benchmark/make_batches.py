@@ -106,7 +106,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--grid", default="benchmark/00_design/_m/synthetic_run_grid.parquet")
     parser.add_argument("--runtime-estimates", default="benchmark/00_design/_m/runtime_estimates.parquet")
-    parser.add_argument("--out", default="benchmark/01_synthetic/_m/synthetic_batches.parquet")
+    parser.add_argument("--out", default="benchmark/01_synthetic/_m/batches.parquet")
     parser.add_argument(
         "--method-filter", action="append", dest="method_filter",
         help="Include only these method(s). Can be repeated. Default: all methods.",
