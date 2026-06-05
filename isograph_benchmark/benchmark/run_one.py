@@ -95,6 +95,21 @@ def build_model(row: pd.Series):
                 device="cpu",
             )
         )
+    if method == "isograph_vae_gpu":
+        # Same VAE model/config as isograph_vae, run on GPU. Kept for the
+        # supplementary "what VAE GPU does" figure; not a core comparator.
+        return VaeNetworkModel(
+            VaeModelConfig(
+                latent_dim_grid=[2, 4, 6, 8, 12],
+                hidden_dim=128 if int(row["n_genes"]) <= 1000 else 256,
+                n_epochs=300,
+                patience=35,
+                alpha=0.70,
+                min_module_size=2,
+                random_state=seed,
+                device="cuda",
+            )
+        )
     if method == "isograph_vae_multiplex":
         return VaeNetworkModel(
             VaeModelConfig(

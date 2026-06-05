@@ -14,6 +14,9 @@ RESOURCE_DEFAULTS = {
     "vae": {"requested_cpus": 4, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 8, "target_minutes": 90},
     "wgcna_cpu": {"requested_cpus": 4, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 8, "target_minutes": 90},
     "scale": {"requested_cpus": 8, "requested_gpus": 0, "mem_per_cpu_gb": 2, "requested_mem_gb": 16, "target_minutes": 240},
+    # GPU classes serve only isograph_vae_gpu (supplementary "what VAE GPU does" figure).
+    "gpu": {"requested_cpus": 5, "requested_gpus": 1, "mem_per_cpu_gb": 8, "requested_mem_gb": 40, "target_minutes": 90},
+    "gpu_scale": {"requested_cpus": 5, "requested_gpus": 1, "mem_per_cpu_gb": 16, "requested_mem_gb": 80, "target_minutes": 240},
 }
 
 # Scenarios that use scale resources and scale_methods.
@@ -23,6 +26,8 @@ _SCALE_SCENARIOS = frozenset({"scale", "scale_realistic"})
 
 
 def resource_class(method: str, scenario: str) -> str:
+    if method == "isograph_vae_gpu":
+        return "gpu_scale" if scenario in _SCALE_SCENARIOS else "gpu"
     if scenario in _SCALE_SCENARIOS:
         return "scale"
     if method == "wgcna_gene":

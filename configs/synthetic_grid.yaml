@@ -4,6 +4,7 @@ seed_count_scale: 15
 base_seed: 13
 methods:
   - isograph_vae
+  - isograph_vae_gpu
   - isograph_vae_multiplex
   - isograph_latent
   - isograph_graph
@@ -16,6 +17,7 @@ multiplex_methods:
   - wgcna_gene
 scale_methods:
   - isograph_vae
+  - isograph_vae_gpu
   - wgcna_gene
 scenarios:
   idealized_switching:

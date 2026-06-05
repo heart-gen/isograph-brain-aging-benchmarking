@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=5
 #SBATCH --gres=gpu:1
-#SBATCH --array=1-250%50
+#SBATCH --array=1-197%50
 #SBATCH --time=01:00:00
 #SBATCH --output=benchmark/01_synthetic/_m/logs/%x-%A_%a.log
 

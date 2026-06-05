@@ -39,6 +39,7 @@ METHOD_LABELS: dict[str, str] = {
     "isograph_latent":     "IsoGraph\nLatent",
     "isograph_graph":      "IsoGraph\nGraph",
     "isograph_vae":        "IsoGraph\nVAE",
+    "isograph_vae_gpu":    "IsoGraph\nVAE (GPU)",
     "isograph_spearman_leiden": "Spearman\nLeiden",
     "wgcna_gene":          "WGCNA",
 }
@@ -48,16 +49,20 @@ METHOD_LABELS_SHORT: dict[str, str] = {
     "isograph_latent":     "Latent",
     "isograph_graph":      "Graph",
     "isograph_vae":        "VAE",
+    "isograph_vae_gpu":    "VAE (GPU)",
     "isograph_spearman_leiden": "Spearman-Leiden",
     "wgcna_gene":          "WGCNA",
 }
 
 # Okabe-Ito colorblind-safe palette (7 distinct)
+# isograph_vae_gpu is excluded from the main METHOD_ORDER (supplementary only);
+# it shares the VAE vermillion hue, lightened, since it is the same model on GPU.
 METHOD_COLORS: dict[str, str] = {
     "isograph_baseline":   "#0072B2",  # blue
     "isograph_latent":     "#E69F00",  # orange
     "isograph_graph":      "#009E73",  # bluish green
     "isograph_vae":        "#D55E00",  # vermillion
+    "isograph_vae_gpu":    "#F0A080",  # light vermillion (same model, GPU)
     "isograph_spearman_leiden": "#56B4E9",  # sky blue
     "wgcna_gene":          "#CC79A7",  # reddish purple
 }

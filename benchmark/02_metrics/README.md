@@ -29,21 +29,24 @@ Each dataset is identified by a SHA1 hash of its scenario parameters and seed, e
 ## Benchmark Design
 
 Nine scenarios are evaluated across the applicable method sets.
-All non-scale scenarios are run for the full set of seven CPU methods (including `isograph_vae_multiplex`).
-The scale scenarios are run for IsoGraph VAE and WGCNA only (other methods are memory-prohibitive at 16k genes).
-The `abundance_switch_mixed` scenario uses the three-method multiplex set.
+All non-scale scenarios are run for the full set of eight methods: seven CPU methods
+(including `isograph_vae_multiplex`) plus the GPU-only `isograph_vae_gpu`, which is the same
+VAE model run on GPU and reported only as a supplementary compute comparison.
+The scale scenarios are run for IsoGraph VAE (CPU and GPU) and WGCNA only (other methods are
+memory-prohibitive at 16k genes). The `abundance_switch_mixed` scenario uses the three-method
+multiplex set.
 
 | Scenario | Key parameters | Seeds | Methods |
 |---|---|---:|---:|
-| **Idealized switching** | `switching_fraction` in {0.10, 0.25, 0.50, 0.75}; `noise_sd` in {0.10, 0.25, 0.40} | 30 | 7 |
-| **Noise stress** | `count_dispersion` in {3, 7, 15, 30}; `noise_sd` in {0.05, 0.10, 0.25, 0.50} | 20 | 7 |
-| **Feature space interactions** | `interaction_strength` in {0.0, 0.5, 1.0, 2.0, 3.0}; `interaction_fraction` in {0.25, 0.50, 0.75} | 20 | 7 |
-| **Non-switching background** | `switching_fraction` in {0.05, 0.10, 0.25, 0.50} | 20 | 7 |
-| **Unequal isoform abundance** | `abundance_imbalance` in {1, 4, 10, 25} | 20 | 7 |
+| **Idealized switching** | `switching_fraction` in {0.10, 0.25, 0.50, 0.75}; `noise_sd` in {0.10, 0.25, 0.40} | 30 | 8 |
+| **Noise stress** | `count_dispersion` in {3, 7, 15, 30}; `noise_sd` in {0.05, 0.10, 0.25, 0.50} | 20 | 8 |
+| **Feature space interactions** | `interaction_strength` in {0.0, 0.5, 1.0, 2.0, 3.0}; `interaction_fraction` in {0.25, 0.50, 0.75} | 20 | 8 |
+| **Non-switching background** | `switching_fraction` in {0.05, 0.10, 0.25, 0.50} | 20 | 8 |
+| **Unequal isoform abundance** | `abundance_imbalance` in {1, 4, 10, 25} | 20 | 8 |
 | **Abundance switch mixed** | `abundance_fraction` in {0.0, 0.3, 0.5, 0.7, 1.0}; `n_genes` in {200, 500} | 20 | 3 (multiplex set) |
-| **Negative control noise** | `switching_fraction` = 0.0; `noise_sd` in {0.5, 1.0} | 20 | 7 |
-| **Scale** | `n_genes` in {1000, 3000, 6000, 12000}; `switching_fraction` in {0.15, 0.25} | 15 | 2 |
-| **Scale realistic** | `n_genes` = 16000; `n_samples` = 300; `switching_fraction` in {0.15, 0.25} | 15 | 2 |
+| **Negative control noise** | `switching_fraction` = 0.0; `noise_sd` in {0.5, 1.0} | 20 | 8 |
+| **Scale** | `n_genes` in {1000, 3000, 6000, 12000}; `switching_fraction` in {0.15, 0.25} | 15 | 3 |
+| **Scale realistic** | `n_genes` = 16000; `n_samples` = 300; `switching_fraction` in {0.15, 0.25} | 15 | 3 |
 
 **Methods evaluated:**
 
@@ -53,39 +56,43 @@ The `abundance_switch_mixed` scenario uses the three-method multiplex set.
 | `isograph_latent` | IsoGraph latent-space model (3-fold CV for components, `alpha = 0.10`) | CPU | all except scale, multiplex |
 | `isograph_graph` | IsoGraph graph-regularized model (3-fold CV, `alpha = 0.10`) | CPU | all except scale, multiplex |
 | `isograph_vae` | Variational autoencoder network model | CPU | all |
+| `isograph_vae_gpu` | Same VAE model and config as `isograph_vae`, run on GPU; supplementary compute comparison only | GPU | all except multiplex |
 | `isograph_vae_multiplex` | IsoGraph VAE with multiplex (abundance + switch) features | CPU | multiplex only |
 | `isograph_spearman_leiden` | Spearman r on the shared abundance+switch feature matrix + Leiden clustering (`min_r = 0.30`); same input and feature→gene mapping as WGCNA | CPU | all except scale, multiplex |
 | `wgcna_gene` | WGCNA gene-level coexpression [@doi:10.1186/1471-2105-9-559] | CPU | all |
 
-Total planned runs: **9,760** across 9 scenarios.
+Total planned runs: **11,090** across 9 scenarios.
 
 ## Run Status
 
-Scale and scale_realistic scenarios are fully complete. The remaining work is the
-`isograph_vae_multiplex` sweep across the non-multiplex scenarios plus a small tail of
-`isograph_spearman_leiden`, `isograph_vae`, and `isograph_latent` runs.
+The remaining work is the `isograph_vae_multiplex` sweep across the non-multiplex scenarios,
+the new `isograph_vae_gpu` runs for the scenarios added since its telemetry was captured
+(negative control and the expanded scale grids), plus a small tail of
+`isograph_spearman_leiden` and `isograph_vae` runs.
 
 | Scenario | Methods | Planned | Completed |
 |---|---|---:|---:|
-| Idealized switching | 7 | 2,520 | 2,160 |
-| Noise stress | 7 | 2,240 | 1,920 |
-| Feature space interactions | 7 | 2,100 | 1,865 |
-| Non-switching background | 7 | 560 | 475 |
-| Unequal isoform abundance | 7 | 560 | 400 |
+| Idealized switching | 8 | 2,880 | 2,520 |
+| Noise stress | 8 | 2,560 | 2,240 |
+| Feature space interactions | 8 | 2,400 | 2,165 |
+| Non-switching background | 8 | 640 | 555 |
+| Unequal isoform abundance | 8 | 640 | 480 |
 | Abundance switch mixed | 3 | 1,200 | 1,199 |
-| Negative control noise | 7 | 280 | 193 |
-| Scale | 2 (VAE + WGCNA) | 240 | 240 |
-| Scale realistic | 2 (VAE + WGCNA) | 60 | 60 |
-| **Total** | | **9,760** | **8,512** |
+| Negative control noise | 8 | 320 | 200 |
+| Scale | 3 (VAE CPU/GPU + WGCNA) | 360 | 304 |
+| Scale realistic | 3 (VAE CPU/GPU + WGCNA) | 90 | 60 |
+| **Total** | | **11,090** | **9,723** |
 
-**Pending runs (1,248):**
+**Pending runs (1,367):**
 - `isograph_vae_multiplex` across the non-multiplex scenarios (1,116 runs) — `vae` resource class
+- `isograph_vae_gpu` new scenarios (40 `gpu` + 86 `gpu_scale` = 126 runs) — GPU resource classes
 - `isograph_spearman_leiden` tail (85 runs) — `cpu_short` resource class
-- `isograph_vae` (40, negative-control) and `isograph_latent` (7) — `vae`/`cpu_short`
+- `isograph_vae` (40, negative-control) — `vae` resource class
 
-Submit the remaining work with `run_batch_vae.sh` (1,156 missing) and `run_batch_cpu_short.sh`
-(92 missing); both skip runs that already have a `done.json`. Current figures and tables are
-regenerated by the collect → summarize → figures pipeline over whatever runs are complete.
+Submit the remaining work with `run_batch_vae.sh` (1,156 missing), `run_batch_cpu_short.sh`
+(85 missing), `run_batch_gpu.sh` (40 missing), and `run_batch_gpu_scale.sh` (86 missing); all
+skip runs that already have a `done.json`. Current figures and tables are regenerated by the
+collect → summarize → figures pipeline over whatever runs are complete.
 
 ## Results
 
