@@ -5,7 +5,6 @@ base_seed: 13
 methods:
   - isograph_vae
   - isograph_vae_multiplex
-  - isograph_cpu_latent
   - isograph_latent
   - isograph_graph
   - isograph_baseline

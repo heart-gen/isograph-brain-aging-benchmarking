@@ -23,8 +23,8 @@ METHOD_ORDER = [
     "isograph_baseline",
     "isograph_latent",
     "isograph_graph",
-    "isograph_cpu_latent",
     "isograph_vae",
+    "isograph_spearman_leiden",
     "wgcna_gene",
 ]
 
@@ -38,8 +38,8 @@ METHOD_LABELS: dict[str, str] = {
     "isograph_baseline":   "IsoGraph\nBaseline",
     "isograph_latent":     "IsoGraph\nLatent",
     "isograph_graph":      "IsoGraph\nGraph",
-    "isograph_cpu_latent": "IsoGraph\nCPU Latent",
     "isograph_vae":        "IsoGraph\nVAE",
+    "isograph_spearman_leiden": "Spearman\nLeiden",
     "wgcna_gene":          "WGCNA",
 }
 
@@ -47,8 +47,8 @@ METHOD_LABELS_SHORT: dict[str, str] = {
     "isograph_baseline":   "Baseline",
     "isograph_latent":     "Latent",
     "isograph_graph":      "Graph",
-    "isograph_cpu_latent": "CPU Latent",
     "isograph_vae":        "VAE",
+    "isograph_spearman_leiden": "Spearman-Leiden",
     "wgcna_gene":          "WGCNA",
 }
 
@@ -57,8 +57,8 @@ METHOD_COLORS: dict[str, str] = {
     "isograph_baseline":   "#0072B2",  # blue
     "isograph_latent":     "#E69F00",  # orange
     "isograph_graph":      "#009E73",  # bluish green
-    "isograph_cpu_latent": "#56B4E9",  # sky blue
     "isograph_vae":        "#D55E00",  # vermillion
+    "isograph_spearman_leiden": "#56B4E9",  # sky blue
     "wgcna_gene":          "#CC79A7",  # reddish purple
 }
 

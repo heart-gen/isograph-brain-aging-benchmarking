@@ -14,7 +14,6 @@ DEFAULT_MINUTES = {
     "isograph_latent": 4.0,
     "isograph_graph": 5.0,
     "isograph_gpu_latent": 4.0,
-    "isograph_cpu_latent": 4.0,
     "isograph_vae": 12.0,
     "isograph_vae_gpu": 12.0,
     "isograph_vae_multiplex": 16.0,

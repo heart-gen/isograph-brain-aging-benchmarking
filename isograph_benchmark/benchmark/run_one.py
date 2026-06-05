@@ -82,8 +82,6 @@ def build_model(row: pd.Series):
         return LatentNetworkModel(LatentModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
     if method == "isograph_graph":
         return GraphNetworkModel(GraphModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
-    if method == "isograph_cpu_latent":
-        return LatentNetworkModel(LatentModelConfig(alpha=0.10, min_module_size=2, n_components_cv_folds=3))
     if method == "isograph_vae":
         return VaeNetworkModel(
             VaeModelConfig(
