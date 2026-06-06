@@ -24,6 +24,16 @@ METRICS = [
     "metrics_n_predicted_modules",
     "metrics_n_edges",
     "measurement_elapsed_sec",
+    # Abundance / isoform-role metrics (populated for the abundance scenarios;
+    # missing columns are skipped automatically until a benchmark re-run emits
+    # them — see compute_metrics() in benchmark/run_one.py).
+    "metrics_abundance_gene_detection_rate",
+    "metrics_role_switch_recall",
+    "metrics_role_abundance_recall",
+    "metrics_role_switch_only_n",
+    "metrics_role_abundance_only_n",
+    "metrics_role_coupled_n",
+    "metrics_role_discordant_n",
 ]
 
 
@@ -58,6 +68,7 @@ _RUN_ID_COLS = [
     "run_noise_sd",
     "run_switching_fraction",
     "run_abundance_imbalance",
+    "run_abundance_fraction",
     "run_count_dispersion",
     "run_interaction_fraction",
     "run_interaction_strength",

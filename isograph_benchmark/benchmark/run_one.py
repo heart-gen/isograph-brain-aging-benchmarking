@@ -110,6 +110,24 @@ def build_model(row: pd.Series):
                 device="cuda",
             )
         )
+    if method == "isograph_vae_residual":
+        # Gap #6 ablation: identical to isograph_vae but residualizes the recorded
+        # nuisance covariates (RNA degradation, cell composition, batch, library
+        # depth). The isograph_vae vs isograph_vae_residual contrast on confounded
+        # scenarios is the WITH/WITHOUT residualization headline result.
+        return VaeNetworkModel(
+            VaeModelConfig(
+                latent_dim_grid=[2, 4, 6, 8, 12],
+                hidden_dim=128 if int(row["n_genes"]) <= 1000 else 256,
+                n_epochs=300,
+                patience=35,
+                alpha=0.70,
+                min_module_size=2,
+                random_state=seed,
+                device="cpu",
+                residualize_covariates=["RIN", "neuron_frac", "batch", "library_size"],
+            )
+        )
     if method == "isograph_vae_multiplex":
         return VaeNetworkModel(
             VaeModelConfig(

@@ -24,6 +24,19 @@ RESOURCE_DEFAULTS = {
 # preserved while adding the BrainSEQ-scale (16k genes / 300 samples) point.
 _SCALE_SCENARIOS = frozenset({"scale", "scale_realistic"})
 
+# Gap #6: real-data confound scenarios. Each isolates one confound (RNA degradation,
+# cell-type composition, batch, library depth) and runs the WITH/WITHOUT
+# residualization ablation (isograph_vae vs isograph_vae_residual) plus wgcna_gene.
+_CONFOUND_SCENARIOS = frozenset(
+    {"rna_degradation", "cell_composition", "batch_effects", "library_depth"}
+)
+_CONFOUND_PARAM_KEYS = [
+    "degradation_3p_bias",
+    "cell_composition_cv",
+    "batch_effect_sd",
+    "library_depth_cv",
+]
+
 
 def resource_class(method: str, scenario: str) -> str:
     if method == "isograph_vae_gpu":
@@ -32,7 +45,7 @@ def resource_class(method: str, scenario: str) -> str:
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
-    if method in ("isograph_vae", "isograph_vae_multiplex"):
+    if method in ("isograph_vae", "isograph_vae_multiplex", "isograph_vae_residual"):
         return "vae"
     return "cpu_short"
 
@@ -60,18 +73,38 @@ _SCENARIO_DATASET_KEYS = [
 # Existing scenario hashes are intentionally unchanged (backward compatible).
 _MULTIPLEX_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["abundance_fraction"]
 
+# Confound scenarios hash on their confound knobs so that points along each sweep get
+# distinct dataset IDs. Other scenarios keep _SCENARIO_DATASET_KEYS (unchanged hashes).
+_CONFOUND_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + _CONFOUND_PARAM_KEYS
+
+
+def _dataset_hash_keys(scenario: str) -> list[str]:
+    if scenario == "abundance_switch_mixed":
+        return _MULTIPLEX_SCENARIO_DATASET_KEYS
+    if scenario in _CONFOUND_SCENARIOS:
+        return _CONFOUND_SCENARIO_DATASET_KEYS
+    return _SCENARIO_DATASET_KEYS
+
 
 def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
     if scenario in _SCALE_SCENARIOS:
         return cfg["scale_methods"]
     if scenario == "abundance_switch_mixed":
         return cfg.get("multiplex_methods", cfg["methods"])
+    if scenario in _CONFOUND_SCENARIOS:
+        return cfg.get("confound_methods", cfg["methods"])
     return cfg["methods"]
 
 
 def expand_grid() -> pd.DataFrame:
     cfg = load_yaml("configs/synthetic_grid.yaml")
-    all_known_methods = list(dict.fromkeys(cfg["methods"] + cfg.get("multiplex_methods", [])))
+    all_known_methods = list(
+        dict.fromkeys(
+            cfg["methods"]
+            + cfg.get("multiplex_methods", [])
+            + cfg.get("confound_methods", [])
+        )
+    )
     rows: list[dict[str, object]] = []
     for scenario, params in cfg["scenarios"].items():
         scenario_seed_count = params.get("seed_count")
@@ -93,8 +126,7 @@ def expand_grid() -> pd.DataFrame:
                     "seed": dataset_seed,
                     "replicate": seed_idx,
                 }
-                hash_keys = _MULTIPLEX_SCENARIO_DATASET_KEYS if scenario == "abundance_switch_mixed" else _SCENARIO_DATASET_KEYS
-                dataset_id = stable_id(dataset, hash_keys)
+                dataset_id = stable_id(dataset, _dataset_hash_keys(scenario))
                 for method in all_known_methods:
                     if method not in methods:
                         continue
