@@ -150,8 +150,7 @@ Scale and scale_realistic jobs used 8 CPU cores (16 GB total) with a 4-hour time
 
 Observed CPU hardware included AMD EPYC 7742, Intel Xeon Gold 6248, and Intel Xeon Platinum 8470 nodes.
 The IsoGraph conda environment is at `/ocean/projects/bio260021p/shared/opt/envs/isograph`.
-The Python figure-generation environment used by the metric script is the same IsoGraph conda environment.
-The R figure-generation environment (alternative) is at `/ocean/projects/bio250020p/shared/opt/env/R_env`.
+The R figure-generation environment is at `/ocean/projects/bio250020p/shared/opt/env/R_env`.
 
 ## Reproduction
 
@@ -173,14 +172,18 @@ bash benchmark/02_metrics/_h/step_1_collect.sh
 bash benchmark/02_metrics/_h/step_2_summarize.sh
 # or: sbatch benchmark/02_metrics/_h/step_2_summarize.sh
 
-# Step 3 - Generate figures and Table 1 (Python/matplotlib or R/ggplot2)
+# Step 3 - Generate figures and Table 1 (R/ggplot2)
 bash benchmark/02_metrics/_h/step_3_figures.sh
 # or: sbatch benchmark/02_metrics/_h/step_3_figures.sh
 ```
 
-Step 3 has two implementations:
-- `isograph_benchmark/figures/synthetic_benchmark.py` — primary Python/matplotlib figures (used by `step_3_figures.sh`)
-- `isograph_benchmark/figures/synthetic_benchmark.R` — alternative R/ggplot2 figures (requires `R_env`)
+Step 3 runs a single publication-quality figure script,
+`isograph_benchmark/figures/synthetic_benchmark.R`
+(ggpubr/ggplot2/patchwork, requires `R_env`). It is data-driven: methods and
+scenarios are drawn from whatever completed runs are present, so newly added
+methods (e.g. `isograph_spearman_leiden`, `isograph_vae_multiplex`) and
+scenarios (`negative_control_noise`, `abundance_switch_mixed`) appear
+automatically once the benchmark is re-run; absent ones are skipped.
 
 All three steps complete in under 30 minutes on a login node with at least 4 CPU cores and 8 GB RAM.
 When run through SLURM, the scripts write logs as `collect-<jobid>.log`, `summarize-<jobid>.log`, and `figures-<jobid>.log` in `_m/logs/`.
@@ -205,7 +208,8 @@ When run through SLURM, the scripts write logs as `collect-<jobid>.log`, `summar
 | `figures/figS3_feature_interactions.pdf` | Response dot plot: interaction strength by interaction fraction |
 | `figures/figS4_nonswitching_background.pdf` | Module recovery and non-switching specificity vs. switching fraction |
 | `figures/figS5_unequal_abundance.pdf` | Module recovery and switch detection vs. isoform abundance imbalance |
-| `figures/figS6_scale_compute.pdf` | Runtime and peak host RAM vs. number of genes (scale scenario) |
+| `figures/figS6_scale_compute.pdf` | Runtime and peak host RAM vs. number of genes (scale + scale_realistic) |
+| `figures/figS7_abundance_roles.pdf` | Abundance-shift gene detection and isoform-role composition (abundance_switch_mixed; written only when those runs exist) |
 
 PNG versions of all figures are written alongside the PDF files for quick inspection.
 
