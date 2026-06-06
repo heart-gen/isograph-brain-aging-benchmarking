@@ -18,6 +18,18 @@ from isograph_benchmark.paths import ensure_dir, rel
 # Age evaluation probabilities for spline projection (p10, p25, p50, p75, p90)
 AGE_PROBS = np.array([0.10, 0.25, 0.50, 0.75, 0.90])
 
+# Best Leiden resolution per region, selected data-driven by the Part 1 sweep
+# (isograph_benchmark.real_data.sweep_leiden --write-best; GO-enrichment count
+# under the giant_fraction <= 0.30 constraint). Used as the default resolution
+# for the with-abundance refit so it matches the chosen standard partition.
+# Override per run with --leiden-resolution. Keys: brainseq region dir names.
+BEST_LEIDEN_RESOLUTION = {
+    "caudate": 2.25,       # brainseq aging caudate
+    "hippocampus": 2.0,    # brainseq aging hippocampus
+    "dlpfc": 3.0,          # brainseq aging dlpfc
+    "caudate_sczd": 2.0,   # brainseq SCZD+Control caudate
+}
+
 
 def _filter_expressed_transcripts(
     transcript_counts: np.ndarray,
@@ -399,12 +411,15 @@ def run_brainseq_region(region: str) -> None:
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region)
 
 
-def run_brainseq_region_with_abundance(region: str, leiden_resolution: float = 2.0) -> None:
+def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | None = None) -> None:
     """Re-enable abundance-abundance edges (with grid calibration) for a BrainSEQ aging region.
 
     Writes artifacts to isograph_vae_with_abundance/ (separate from the standard run)
-    so results can be compared without overwriting the baseline.
+    so results can be compared without overwriting the baseline. When
+    leiden_resolution is None, uses the region's BEST_LEIDEN_RESOLUTION (Part 1 sweep).
     """
+    if leiden_resolution is None:
+        leiden_resolution = BEST_LEIDEN_RESOLUTION.get(region, 2.0)
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
     sample_table = bundle.sample_table
     tc, tt = _filter_expressed_transcripts(
@@ -537,6 +552,51 @@ def run_brainseq_caudate_sczd() -> None:
     check_drd2(artifacts, bundle.feature_tables["transcript"])
 
 
+def run_brainseq_caudate_sczd_with_abundance(leiden_resolution: float | None = None) -> None:
+    """Re-enable abundance-abundance edges for the SCZD+Control caudate bundle.
+
+    Writes artifacts to isograph_vae_with_abundance/ (separate from the baseline)
+    so the with-abundance partition can be compared without overwriting it. When
+    leiden_resolution is None, uses BEST_LEIDEN_RESOLUTION["caudate_sczd"] (Part 1 sweep).
+    """
+    if leiden_resolution is None:
+        leiden_resolution = BEST_LEIDEN_RESOLUTION.get("caudate_sczd", 2.0)
+    bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
+
+    covariate_cols = [
+        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+    ]
+
+    cfg = VaeModelConfig(
+        hidden_dim=256, latent_dim=32, n_epochs=500,
+        residualize_covariates=covariate_cols,
+        min_module_size=20, trait_columns=["Dx"],
+        random_state=13,
+        allow_abundance_abundance=True,
+        alpha_switch=0.5,
+        alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
+        leiden_resolution=leiden_resolution,
+    )
+    print("[caudate_sczd+abundance] fitting model ...", flush=True)
+    _t0 = time.time()
+    artifacts = VaeNetworkModel(cfg).fit(
+        transcript_counts=bundle.matrices["transcript_counts"],
+        transcript_table=bundle.feature_tables["transcript"],
+        sample_table=bundle.sample_table,
+    )
+    print(f"[caudate_sczd+abundance] fit done in {time.time() - _t0:.0f}s | "
+          f"alpha_abundance={artifacts.calibration.get('alpha_abundance') if artifacts.calibration else 'n/a'}",
+          flush=True)
+
+    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae_with_abundance"))
+    diagnosis_covariates = ["Age"] + covariate_cols
+    _save_diagnosis_artifacts(
+        artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd+abundance",
+    )
+    check_drd2(artifacts, bundle.feature_tables["transcript"])
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
@@ -556,23 +616,26 @@ def main() -> None:
         "--variant", default="standard", choices=["standard", "with-abundance"],
         help="standard: default config (allow_abundance_abundance=False). "
              "with-abundance: re-enable abundance edges with alpha_abundance_grid calibration. "
-             "Only applies to brainseq-aging.",
+             "Applies to brainseq-aging and brainseq-sczd.",
     )
     parser.add_argument(
         "--leiden-resolution", type=float, default=None,
-        help="Override leiden_resolution for the with-abundance variant (default: 2.0).",
+        help="Override leiden_resolution for the with-abundance variant. "
+             "Default: per-region BEST_LEIDEN_RESOLUTION from the Part 1 sweep.",
     )
     args = parser.parse_args()
 
     if args.analysis == "brainseq-aging":
         if args.variant == "with-abundance":
-            resolution = args.leiden_resolution or 2.0
             for region in (args.region or ["caudate", "hippocampus", "dlpfc"]):
-                run_brainseq_region_with_abundance(region, leiden_resolution=resolution)
+                run_brainseq_region_with_abundance(region, leiden_resolution=args.leiden_resolution)
         else:
             run_brainseq_aging(args.region)
     elif args.analysis == "brainseq-sczd":
-        run_brainseq_caudate_sczd()
+        if args.variant == "with-abundance":
+            run_brainseq_caudate_sczd_with_abundance(leiden_resolution=args.leiden_resolution)
+        else:
+            run_brainseq_caudate_sczd()
     elif args.analysis == "gtex-aging":
         run_gtex_aging(args.region)
     else:
