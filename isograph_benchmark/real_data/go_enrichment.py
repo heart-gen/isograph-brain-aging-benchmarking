@@ -223,3 +223,34 @@ class GoAnnotations:
 
         density = n_enriched / n_tested if n_tested > 0 else np.nan
         return float(density), int(n_enriched)
+
+    def enrich_gene_set(
+        self, gene_ids: list[str], max_terms: int | None = None
+    ) -> pd.DataFrame:
+        """GO:BP enrichment for a single gene set against the prepared background.
+
+        Returns a DataFrame (term_id, term_name, p_value, p_fdr_bh,
+        study_count, study_n) of enriched BP terms (FDR ≤ GO_FDR_ALPHA), sorted
+        by FDR.  Empty DataFrame if the set is too small or nothing is enriched.
+        """
+        if self._study_obj is None:
+            raise RuntimeError("Call prepare() before enrich_gene_set().")
+        cols = ["term_id", "term_name", "p_value", "p_fdr_bh", "study_count", "study_n"]
+        study = {g.split(".")[0] for g in gene_ids if g.split(".")[0] in self._bg_set}
+        if len(study) < _MIN_STUDY_GENES:
+            return pd.DataFrame(columns=cols)
+        results = self._study_obj.run_study(study, prt=None)
+        rows = [
+            {
+                "term_id": r.GO,
+                "term_name": r.name,
+                "p_value": float(r.p_uncorrected),
+                "p_fdr_bh": float(r.p_fdr_bh),
+                "study_count": int(r.ratio_in_study[0]),
+                "study_n": int(r.ratio_in_study[1]),
+            }
+            for r in results
+            if r.enrichment == "e" and r.NS == "BP" and r.p_fdr_bh <= GO_FDR_ALPHA
+        ]
+        out = pd.DataFrame(rows, columns=cols).sort_values("p_fdr_bh").reset_index(drop=True)
+        return out.head(max_terms) if max_terms else out
