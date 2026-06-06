@@ -57,11 +57,39 @@ multiplex set.
 | `isograph_graph` | IsoGraph graph-regularized model (3-fold CV, `alpha = 0.10`) | CPU | all except scale, multiplex |
 | `isograph_vae` | Variational autoencoder network model | CPU | all |
 | `isograph_vae_gpu` | Same VAE model and config as `isograph_vae`, run on GPU; supplementary compute comparison only | GPU | all except multiplex |
-| `isograph_vae_multiplex` | IsoGraph VAE with multiplex (abundance + switch) features | CPU | multiplex only |
+| `isograph_vae_residual` | `isograph_vae` that regresses recorded nuisance covariates (RIN, neuron_frac, batch, library_size) out of the features before graph construction | CPU | confound scenarios |
+| `isograph_vae_multiplex` | IsoGraph VAE with multiplex (abundance + switch) features; `leiden_resolution = 2.0` to prevent the dense abundance channel fusing modules into one giant component | CPU | multiplex, rna_degradation_coupled |
+| `isograph_vae_reliability` | `isograph_vae_multiplex` plus degradation-aware switch reliability: per-gene switch edges are downweighted by alignment with an observed 3' coverage covariate (`median_tin`), so degradation-corrupted genes fall back to the abundance channel (approach #3) | CPU | rna_degradation_coupled |
 | `isograph_spearman_leiden` | Spearman r on the shared abundance+switch feature matrix + Leiden clustering (`min_r = 0.30`); same input and feature→gene mapping as WGCNA | CPU | all except scale, multiplex |
 | `wgcna_gene` | WGCNA gene-level coexpression [@doi:10.1186/1471-2105-9-559] | CPU | all |
 
-Total planned runs: **11,090** across 9 scenarios.
+Total planned runs: **12,450**.
+
+### Degradation robustness (rna_degradation vs rna_degradation_coupled)
+
+`rna_degradation` sweeps a one-sided per-gene 3' coverage bias on pure-switch
+modules (`abundance_fraction = 0`): with no abundance channel to fall back to it
+shows IsoGraph's domain-of-validity limit. `rna_degradation_coupled` adds a
+degradation-robust abundance channel (`abundance_fraction = 0.4`,
+`dual_signal_fraction = 0.5`) and the generator records `median_tin`, an observed
+sample-level 3' coverage metric that is a sharper proxy of the artifact than RIN.
+Spot-test (mean module recovery, fast config; full-config sweep pending):
+
+| bias | vae | vae_residual | multiplex | reliability | wgcna |
+|---|---|---|---|---|---|
+| 0.0 | 0.220 | 0.220 | 0.676 | 0.676 | 0.876 |
+| 1.0 | 0.201 | 0.201 | 0.685 | 0.687 | 0.885 |
+| 2.0 | 0.166 | 0.166 | 0.678 | 0.682 | 0.780 |
+
+Takeaways: (1) regressing RIN out does nothing (`vae_residual ≡ vae`) — one-sided
+per-gene degradation is ~orthogonal to the RIN axis; (2) the abundance channel is
+the dominant lever (0.22→0.68), but only after `leiden_resolution` fixes a
+giant-module collapse the dense abundance edges otherwise cause under connected
+components; (3) reliability via `median_tin` adds a small, consistent edge over
+multiplex that grows with degradation and never hurts (identical at bias 0);
+(4) IsoGraph holds ~0.68 while WGCNA degrades (0.885→0.780), so the gap is smallest
+under heavy degradation. The residual ~0.20 gap at bias 0 is background/grey
+rejection, not degradation.
 
 ## Run Status
 

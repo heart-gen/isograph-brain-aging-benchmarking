@@ -26,6 +26,16 @@ confound_methods:
   - isograph_vae
   - isograph_vae_residual
   - wgcna_gene
+# Approach #3: the coupled-degradation scenario adds the abundance-channel methods
+# (multiplex, and multiplex+reliability) because reliability weighting only helps
+# once an abundance fallback path exists. isograph_vae (single channel) and
+# isograph_vae_residual (RIN regression) are kept as the negative controls.
+degradation_methods:
+  - isograph_vae
+  - isograph_vae_residual
+  - isograph_vae_multiplex
+  - isograph_vae_reliability
+  - wgcna_gene
 scenarios:
   idealized_switching:
     n_genes: [400]
@@ -74,9 +84,27 @@ scenarios:
   rna_degradation:
     # Gap #6: RIN-like 3' coverage bias distorts isoform ratios (the switching signal).
     # 0.0 is the matched in-scenario clean baseline; strength rises across the sweep.
+    # abundance_fraction=0 (pure switch modules) -> no abundance channel to fall back
+    # to, so this scenario shows the domain-of-validity limit, not the fallback.
     n_genes: [400]
     n_samples: [160]
     switching_fraction: [0.25]
+    noise_sd: [0.25]
+    degradation_3p_bias: [0.0, 0.5, 1.0, 2.0]
+    seed_count: 20
+  rna_degradation_coupled:
+    # Approach #3: degraded switch signal WITH a degradation-robust abundance channel
+    # to fall back on. Module genes are part switch-driven, part abundance-driven, and
+    # half the switch-driven genes are dual-signal (carry abundance for the same module).
+    # The generator records median_tin (observed 3' coverage) as a sharper degradation
+    # covariate than RIN; isograph_vae_reliability uses it to downweight corrupted
+    # switch edges so dual-signal genes hold the module via abundance. Verified: this
+    # helps only with the abundance channel enabled (multiplex), never at bias=0.
+    n_genes: [400]
+    n_samples: [160]
+    switching_fraction: [0.25]
+    abundance_fraction: [0.4]
+    dual_signal_fraction: [0.5]
     noise_sd: [0.25]
     degradation_3p_bias: [0.0, 0.5, 1.0, 2.0]
     seed_count: 20

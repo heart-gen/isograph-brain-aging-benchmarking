@@ -37,6 +37,12 @@ _CONFOUND_PARAM_KEYS = [
     "library_depth_cv",
 ]
 
+# Approach #3: coupled degradation scenario (degraded switch + abundance fallback).
+# Handled separately from _CONFOUND_SCENARIOS so its dataset IDs additionally hash on
+# abundance_fraction/dual_signal_fraction WITHOUT changing the other confound scenarios'
+# hash keys (which would alter their existing dataset IDs).
+_COUPLED_DEGRADATION_SCENARIO = "rna_degradation_coupled"
+
 
 def resource_class(method: str, scenario: str) -> str:
     if method == "isograph_vae_gpu":
@@ -45,7 +51,12 @@ def resource_class(method: str, scenario: str) -> str:
         return "scale"
     if method == "wgcna_gene":
         return "wgcna_cpu"
-    if method in ("isograph_vae", "isograph_vae_multiplex", "isograph_vae_residual"):
+    if method in (
+        "isograph_vae",
+        "isograph_vae_multiplex",
+        "isograph_vae_residual",
+        "isograph_vae_reliability",
+    ):
         return "vae"
     return "cpu_short"
 
@@ -78,9 +89,19 @@ _MULTIPLEX_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["abundance_fraction
 _CONFOUND_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + _CONFOUND_PARAM_KEYS
 
 
+# Coupled degradation also hashes on the abundance/dual-signal knobs so its sweep
+# points are distinct; built on the confound keys (which include degradation_3p_bias).
+_COUPLED_DEGRADATION_DATASET_KEYS = _CONFOUND_SCENARIO_DATASET_KEYS + [
+    "abundance_fraction",
+    "dual_signal_fraction",
+]
+
+
 def _dataset_hash_keys(scenario: str) -> list[str]:
     if scenario == "abundance_switch_mixed":
         return _MULTIPLEX_SCENARIO_DATASET_KEYS
+    if scenario == _COUPLED_DEGRADATION_SCENARIO:
+        return _COUPLED_DEGRADATION_DATASET_KEYS
     if scenario in _CONFOUND_SCENARIOS:
         return _CONFOUND_SCENARIO_DATASET_KEYS
     return _SCENARIO_DATASET_KEYS
@@ -91,6 +112,8 @@ def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
         return cfg["scale_methods"]
     if scenario == "abundance_switch_mixed":
         return cfg.get("multiplex_methods", cfg["methods"])
+    if scenario == _COUPLED_DEGRADATION_SCENARIO:
+        return cfg.get("degradation_methods", cfg["methods"])
     if scenario in _CONFOUND_SCENARIOS:
         return cfg.get("confound_methods", cfg["methods"])
     return cfg["methods"]
@@ -103,6 +126,7 @@ def expand_grid() -> pd.DataFrame:
             cfg["methods"]
             + cfg.get("multiplex_methods", [])
             + cfg.get("confound_methods", [])
+            + cfg.get("degradation_methods", [])
         )
     )
     rows: list[dict[str, object]] = []

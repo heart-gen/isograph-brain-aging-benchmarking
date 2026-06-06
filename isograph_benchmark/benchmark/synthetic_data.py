@@ -131,22 +131,30 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     neuron_frac = np.full(n_samples, 0.5)
     batch_label = np.zeros(n_samples, dtype=int)
     depth_factor: np.ndarray | None = None
+    median_tin: np.ndarray | None = None
 
     if degradation_3p_bias > 0:
-        # Faithful 3' coverage bias (postmortem RNA degradation). Low-RIN samples
-        # lose 5' coverage, so each gene's longer/5' isoform loses compositional
-        # share. The shift is (a) gene-specific via an all-positive per-gene 3'
-        # sensitivity (NOT a single shared linear axis) and (b) one-sided (only
-        # degraded, low-RIN samples shift). Because it is not a single RIN axis it
-        # is NOT cleanly removed by regressing RIN out post-PC1 -- it genuinely
-        # corrupts the switch coordinate, motivating the degradation-aware
-        # reliability weighting / multiplex abundance fallback. RIN is recorded so
-        # those features (and residualization) can attempt to recover it.
-        rin = rng.normal(7.5, 1.2, n_samples)
-        deg = -(rin - rin.mean()) / (rin.std() + 1e-8)
-        deg_pos = np.clip(deg, 0.0, None)
+        # Faithful 3' coverage bias (postmortem RNA degradation). A latent per-sample
+        # degradation severity drives 5' coverage loss, so each gene's longer/5'
+        # isoform loses compositional share. The shift is (a) gene-specific via an
+        # all-positive per-gene 3' sensitivity and (b) one-sided (only degraded
+        # samples shift). It is NOT a single recorded axis, so regressing RIN out
+        # post-PC1 cannot cleanly remove it -- it genuinely corrupts the switch
+        # coordinate, motivating degradation-aware reliability / abundance fallback.
+        deg_latent = rng.normal(0.0, 1.0, n_samples)
+        deg_pos = np.clip(deg_latent - deg_latent.mean(), 0.0, None)
         sens = np.abs(rng.normal(0.0, 1.0, n_genes))
         signal -= degradation_3p_bias * sens[:, None] * deg_pos[None, :]
+        # Two OBSERVED covariates of the same latent severity, differing in fidelity:
+        #   RIN        - blunt bench RNA-integrity score; weak, noisy anti-correlation
+        #                with the true coverage artifact (the usual postmortem case).
+        #   median_tin - RSeQC median Transcript Integrity Number, a direct gene-body
+        #                3' coverage metric; a SHARPER observation of the same artifact.
+        # median_tin lets switch-reliability localize degradation better than RIN while
+        # staying a single sample-level vector (approach #3). Both are drawn from the
+        # main rng so a fixed seed reproduces them exactly.
+        rin = np.clip(7.5 - 1.2 * deg_latent + rng.normal(0.0, 1.1, n_samples), 1.0, 10.0)
+        median_tin = 75.0 - 12.0 * deg_pos + rng.normal(0.0, 2.0, n_samples)
 
     if cell_composition_cv > 0:
         # Bulk brain is a neuron/glia mixture; proportions shift between samples.
@@ -197,6 +205,10 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             "library_size": library_size,
         }
     )
+    # median_tin is recorded only under active 3' degradation, so non-degradation
+    # scenarios keep an unchanged sample_table schema (byte-identical parquet).
+    if median_tin is not None:
+        sample_table["median_tin"] = median_tin
 
     # Abundance-driven genes: total count modulated by module latent (signal strength ~0.5 SD)
     abundance_multiplier = np.ones((n_genes, n_samples))

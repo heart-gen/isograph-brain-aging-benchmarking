@@ -128,6 +128,38 @@ def build_model(row: pd.Series):
                 residualize_covariates=["RIN", "neuron_frac", "batch", "library_size"],
             )
         )
+    if method == "isograph_vae_reliability":
+        # Approach #3: degradation-aware switch reliability driven by an OBSERVED
+        # sample-level 3' coverage covariate (median TIN) -- a sharper proxy of the
+        # degradation artifact than raw RIN, while staying one vector per sample.
+        # Per-gene switch reliability downweights switch-switch edges from
+        # degradation-aligned genes so they fall back to the abundance channel.
+        # CRITICAL: this requires the abundance channel to be enabled (multiplex);
+        # without an abundance fallback, downweighting switch edges only fragments
+        # modules and can HURT under heavy degradation (verified). The contrast vs
+        # isograph_vae_multiplex therefore isolates the reliability contribution on
+        # top of an enabled abundance channel.
+        return VaeNetworkModel(
+            VaeModelConfig(
+                latent_dim_grid=[2, 4, 6, 8, 12],
+                hidden_dim=128 if int(row["n_genes"]) <= 1000 else 256,
+                n_epochs=300,
+                patience=35,
+                alpha=0.70,
+                alpha_switch=0.70,
+                allow_abundance_abundance=True,
+                alpha_abundance_grid=[0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90],
+                min_module_size=2,
+                random_state=seed,
+                device="cpu",
+                switch_reliability_weighting=True,
+                degradation_covariate="median_tin",
+                # Match isograph_vae_multiplex so the contrast isolates reliability
+                # weighting (not clustering). Leiden also prevents the giant-module
+                # collapse the dense abundance channel triggers under connected components.
+                leiden_resolution=2.0,
+            )
+        )
     if method == "isograph_vae_multiplex":
         return VaeNetworkModel(
             VaeModelConfig(
@@ -142,6 +174,12 @@ def build_model(row: pd.Series):
                 min_module_size=2,
                 random_state=seed,
                 device="cpu",
+                # Dense abundance edges can fuse distinct modules into one giant
+                # component under connected-components clustering (verified giant-module
+                # collapse, ~62% on some seeds). Resolution-controlled Leiden splits
+                # them (the same fix WGCNA's dynamic tree cut applies), lifting coupled-
+                # scenario recovery 0.53->0.68 with no effect when no giant forms.
+                leiden_resolution=2.0,
             )
         )
     if method == "isograph_spearman_leiden":

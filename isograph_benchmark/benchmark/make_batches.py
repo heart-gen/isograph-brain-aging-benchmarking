@@ -16,7 +16,9 @@ DEFAULT_MINUTES = {
     "isograph_gpu_latent": 4.0,
     "isograph_vae": 12.0,
     "isograph_vae_gpu": 12.0,
+    "isograph_vae_residual": 12.0,
     "isograph_vae_multiplex": 16.0,
+    "isograph_vae_reliability": 16.0,
     "isograph_spearman_leiden": 3.0,
     "wgcna_gene": 15.0,
 }
@@ -29,7 +31,12 @@ def estimate_minutes(row: pd.Series) -> float:
     size_factor = (n_genes / 400.0) * math.sqrt(n_samples / 160.0)
     if row["method"] == "wgcna_gene":
         size_factor = (n_genes / 400.0) ** 2 * math.sqrt(n_samples / 160.0)
-    if row["method"] in ("isograph_vae", "isograph_vae_multiplex"):
+    if row["method"] in (
+        "isograph_vae",
+        "isograph_vae_multiplex",
+        "isograph_vae_residual",
+        "isograph_vae_reliability",
+    ):
         size_factor = (n_genes / 400.0) * (n_samples / 160.0)
     return max(0.5, base * size_factor)
 
