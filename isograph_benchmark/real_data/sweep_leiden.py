@@ -120,12 +120,15 @@ def _select_best_resolution(results: pd.DataFrame) -> float:
     return float(df.loc[best_idx, "leiden_resolution"])
 
 
-def _artifact_dir(analysis: str, region: str | None) -> Path:
+def _artifact_dir(analysis: str, region: str | None, variant: str = "standard") -> Path:
+    # variant "with-abundance" sweeps the abundance-channel refit (separate dir),
+    # so both IsoGraph variants can be resolution-selected by the same GO criterion.
+    subdir = "isograph_vae_with_abundance" if variant == "with-abundance" else "isograph_vae"
     if analysis == "brainseq-sczd":
-        return rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae")
+        return rel("real_data", "brainseq", "caudate_sczd", "_m", subdir)
     if analysis == "brainseq-aging":
         assert region is not None
-        return rel("real_data", "brainseq", region, "_m", "isograph_vae")
+        return rel("real_data", "brainseq", region, "_m", subdir)
     raise ValueError(f"Unknown analysis: {analysis!r}")
 
 
@@ -214,9 +217,12 @@ def sweep_one(
     write_best: bool = False,
     go_cache_dir: Path | None = None,
     skip_go: bool = False,
+    variant: str = "standard",
 ) -> pd.DataFrame:
-    artifact_dir = _artifact_dir(analysis, region)
+    artifact_dir = _artifact_dir(analysis, region, variant)
     label = f"{analysis}/{region}" if region else analysis
+    if variant != "standard":
+        label = f"{label}[{variant}]"
 
     edges_path = artifact_dir / "edges.parquet"
     fs_path = artifact_dir / "feature_scores.parquet"
@@ -489,6 +495,13 @@ def main() -> None:
         "--no-go", action="store_true",
         help="Skip GO enrichment (falls back to trait-association criterion for --write-best).",
     )
+    parser.add_argument(
+        "--variant", choices=["standard", "with-abundance"], default="standard",
+        help=(
+            "Which saved artifact set to sweep: 'standard' (isograph_vae/) or "
+            "'with-abundance' (isograph_vae_with_abundance/). Default: standard."
+        ),
+    )
     args = parser.parse_args()
 
     go_kws = dict(go_cache_dir=args.go_cache_dir, skip_go=args.no_go)
@@ -499,6 +512,7 @@ def main() -> None:
             "brainseq-sczd", None, resolutions,
             seed=args.seed, min_module_size=args.min_module_size,
             dry_run=args.dry_run, write_best=args.write_best,
+            variant=args.variant,
             **go_kws,
         )
     elif args.analysis == "brainseq-aging":
@@ -509,6 +523,7 @@ def main() -> None:
                 "brainseq-aging", region, resolutions,
                 seed=args.seed, min_module_size=args.min_module_size,
                 dry_run=args.dry_run, write_best=args.write_best,
+                variant=args.variant,
                 **go_kws,
             )
 
