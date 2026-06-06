@@ -16,7 +16,7 @@ from isograph.workflow.config import VaeModelConfig
 from isograph_benchmark.paths import ensure_dir, rel
 
 # Age evaluation probabilities for spline projection (p10, p25, p50, p75, p90)
-AGE_PROBS = np.array([0.10, 0.25, 0.50, 0.75, 0.90])
+AGE_PROBS = np.array([0.25, 0.50, 0.75])
 
 # Best Leiden resolution per region, selected data-driven by the Part 1 sweep
 # (isograph_benchmark.real_data.sweep_leiden --write-best; GO-enrichment count
@@ -60,7 +60,7 @@ def _filter_expressed_transcripts(
     return transcript_counts[tx_pass], transcript_table.loc[tx_pass].reset_index(drop=True)
 
 
-AGE_LABELS = ["p10", "p25", "p50", "p75", "p90"]
+AGE_LABELS = ["p25", "p50", "p75"]
 
 GTEX_REGIONS = [
     "amygdala",
@@ -119,21 +119,29 @@ def spline_age_association(
     age_col: str = "Age",
 ) -> pd.DataFrame:
     """
-    Non-linear age association via natural cubic spline, projected to 5 age points.
+    Non-linear age association via natural cubic spline, projected to 3 age points.
 
-    Fits: eigengene ~ ns(age_z, knots=[q1/3, q2/3]) + covariates
-    Projects spline coefficients to age_eval = qnorm([0.10, 0.25, 0.50, 0.75, 0.90]).
+    Fits: eigengene ~ cr(age_z, knots=[median]) + covariates  (df=3, K=3 coeffs)
+    Projects spline coefficients to age_eval = qnorm([0.25, 0.50, 0.75]) = early/mid/late.
 
-    Returns one row per (module, age_label) with per-point effect/se/z plus F-test
-    columns (pvalue_ftest, fdr_ftest) that test the joint spline component against
-    the covariate-only reduced model. Use fdr_ftest for module-level significance.
+    df=3 (one interior knot) was selected empirically: it matches df=4 and beats
+    df=5 on module-level F-test power across all three aging regions while being the
+    most parsimonious / interpretable trajectory (one bend). See AGE_PROBS/AGE_LABELS.
+
+    Returns one row per (module, age_label) with per-point effect/se/z, the F-test
+    columns (pvalue_ftest, fdr_ftest) testing the joint spline component against the
+    covariate-only reduced model (USE fdr_ftest for module-level significance — the
+    per-point z-test is over-conservative because the points are one spline), and
+    the raw spline coefficients (coef_1..K) + full coefficient covariance
+    (cov_age_ij), repeated per module row, so the trajectory can be re-projected to
+    any age grid (or fed to mash) downstream.
     """
     keep_cols = ["sample_id", age_col] + [c for c in covariate_cols if c in sample_table.columns]
     merged = eigengenes.merge(sample_table[keep_cols], on="sample_id", how="inner")
     merged = merged.dropna(subset=[age_col])
 
     age_z = _standardize(merged[age_col].to_numpy(dtype=float))
-    ns_knots = np.quantile(age_z, [1 / 3, 2 / 3])
+    ns_knots = np.quantile(age_z, [0.5])
     ns_boundary = np.array([age_z.min(), age_z.max()])
 
     # Build spline basis for observed samples
@@ -178,6 +186,15 @@ def spline_age_association(
         beta_spline = coef[spline_idx]
         V_spline = V[spline_idx, :][:, spline_idx]
 
+        # Persist raw coefficients + full covariance (repeated per module row) so the
+        # trajectory can be re-projected to any age grid / fed to mash downstream.
+        coef_cols = {f"coef_{i + 1}": float(beta_spline[i]) for i in range(n_spline)}
+        cov_cols = {
+            f"cov_age_{i + 1}{j + 1}": float(V_spline[i, j])
+            for i in range(n_spline)
+            for j in range(n_spline)
+        }
+
         beta_proj = B_proj @ beta_spline
         V_proj = B_proj @ V_spline @ B_proj.T
         se_proj = np.sqrt(np.maximum(np.diag(V_proj), 0))
@@ -208,6 +225,8 @@ def spline_age_association(
                 "pvalue": p,
                 "pvalue_ftest": p_ftest,
                 "n": n_obs,
+                **coef_cols,
+                **cov_cols,
             })
 
     result = pd.DataFrame(rows)
