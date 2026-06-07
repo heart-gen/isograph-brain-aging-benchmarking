@@ -263,8 +263,30 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     truth_switch = pd.DataFrame({"gene_id": gene_ids, "has_switch": switching_mask})
     truth_abundance = pd.DataFrame({"gene_id": gene_ids, "has_abundance": abundance_mask})
 
+    # Transcript-level switch-event truth (for interpretation accuracy benchmarking).
+    # By construction transcript T1 carries the PSI signal p1 (driven by the gene's
+    # module_latent); the remaining transcripts split a residual. So T1 is the
+    # ground-truth switch-driver isoform, and the switch amplitude is the spread of
+    # p1 across samples. Computed purely from already-drawn quantities (no RNG draws),
+    # so the count/PSI matrices and every existing dataset stay byte-identical; this
+    # table is only DISCRIMINATIVE when n_transcripts_per_gene >= 3 (at n_tx=2 the two
+    # isoforms are mirror images). switch_transcript_id matches the transcript_table
+    # ids ("{gene_id}_T1").
+    switch_gene_idx = np.where(switching_mask)[0]
+    truth_switch_event = pd.DataFrame(
+        {
+            "gene_id": [gene_ids[i] for i in switch_gene_idx],
+            "module_id": [f"M{module_index[i]:03d}" for i in switch_gene_idx],
+            "switch_transcript_id": [f"{gene_ids[i]}_T1" for i in switch_gene_idx],
+            "n_transcripts": [n_tx] * len(switch_gene_idx),
+            "true_delta_psi": [float(p1[i].max() - p1[i].min()) for i in switch_gene_idx],
+            "true_psi_std": [float(p1[i].std()) for i in switch_gene_idx],
+        }
+    )
+
     extra_feature_specs = [
         build_feature_spec("truth_abundance", "truth_abundance.parquet", truth_abundance),
+        build_feature_spec("truth_switch_event", "truth_switch_event.parquet", truth_switch_event),
     ]
     manifest = DatasetManifest(
         dataset_name=str(row["dataset_id"]),
@@ -293,7 +315,10 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             "batch_effect_sd": str(batch_effect_sd),
             "library_depth_cv": str(library_depth_cv),
         },
-        truth_tables=["truth_modules.parquet", "truth_switch.parquet", "truth_abundance.parquet"],
+        truth_tables=[
+            "truth_modules.parquet", "truth_switch.parquet", "truth_abundance.parquet",
+            "truth_switch_event.parquet",
+        ],
     )
     return DatasetBundle(
         manifest=manifest,
@@ -305,12 +330,14 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             "truth_module": truth_modules,
             "truth_switch": truth_switch,
             "truth_abundance": truth_abundance,
+            "truth_switch_event": truth_switch_event,
         },
         matrices={"gene_counts": gene_counts, "transcript_counts": transcript_counts, "psi": psi},
         truth_tables={
             "truth_modules.parquet": truth_modules,
             "truth_switch.parquet": truth_switch,
             "truth_abundance.parquet": truth_abundance,
+            "truth_switch_event.parquet": truth_switch_event,
         },
     )
 

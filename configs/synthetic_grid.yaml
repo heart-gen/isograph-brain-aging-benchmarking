@@ -36,6 +36,12 @@ degradation_methods:
   - isograph_vae_multiplex
   - isograph_vae_reliability
   - wgcna_gene
+# Interpretation-accuracy scenario uses multi-isoform genes so the built-in switch
+# interpretation must identify WHICH transcript drives the switch (degenerate at 2
+# isoforms). Only the isograph methods that stage 03 interprets are run.
+interpret_methods:
+  - isograph_vae
+  - isograph_vae_multiplex
 scenarios:
   idealized_switching:
     n_genes: [400]
@@ -107,6 +113,20 @@ scenarios:
     dual_signal_fraction: [0.5]
     noise_sd: [0.25]
     degradation_3p_bias: [0.0, 0.5, 1.0, 2.0]
+    seed_count: 20
+  multi_isoform_switch:
+    # Interpretation-accuracy benchmark: genes have 4 isoforms, so the built-in
+    # switch interpretation must pick the true switch-driver transcript (T1) out of
+    # 4 (chance = 25%), not just confirm a binary flip. truth_switch_event records
+    # the driver transcript + true delta-PSI; metrics switch_transcript_top1_accuracy
+    # and switch_magnitude_spearman score the interpretation against them. Sweeps
+    # noise so accuracy can be reported vs switch SNR. n_transcripts_per_gene is part
+    # of the dataset hash, so these are fresh datasets (no existing IDs touched).
+    n_genes: [400]
+    n_samples: [160]
+    switching_fraction: [0.25]
+    noise_sd: [0.10, 0.25]
+    n_transcripts_per_gene: [4]
     seed_count: 20
   cell_composition:
     # Gap #6: neuron/glia mixture proportions vary between samples (cv of neuron_frac).

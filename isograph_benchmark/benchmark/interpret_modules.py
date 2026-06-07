@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy.stats import rankdata
+from scipy.stats import rankdata, spearmanr
 
 from isograph.io.artifacts import load_dataset_bundle
 from isograph_benchmark.interpretation import explain_artifact_modules
@@ -21,6 +21,8 @@ METRIC_COLUMNS = [
     "top10_switch_precision",
     "switch_strength_auroc",
     "opposite_polarity_rate",
+    "switch_transcript_top1_accuracy",
+    "switch_magnitude_spearman",
     "switch_driver_recall",
     "abundance_driver_recall",
     "explanation_fidelity",
@@ -123,6 +125,14 @@ def evaluate_interpret_output(
     truth_modules = bundle.truth_tables.get("truth_modules.parquet", pd.DataFrame())
     truth_switch = bundle.truth_tables.get("truth_switch.parquet", pd.DataFrame())
     truth_abundance = bundle.truth_tables.get("truth_abundance.parquet", pd.DataFrame())
+    # Transcript-level switch-event truth (interpretation accuracy; only present /
+    # discriminative when datasets are generated with n_transcripts_per_gene >= 3).
+    truth_event = bundle.truth_tables.get("truth_switch_event.parquet", pd.DataFrame())
+    event_tx = {}      # gene_id -> ground-truth switch-driver transcript_id
+    event_dpsi = {}    # gene_id -> true switch magnitude (delta PSI)
+    if not truth_event.empty:
+        event_tx = dict(zip(truth_event["gene_id"].astype(str), truth_event["switch_transcript_id"].astype(str)))
+        event_dpsi = dict(zip(truth_event["gene_id"].astype(str), pd.to_numeric(truth_event["true_delta_psi"], errors="coerce")))
     switching_genes = set(truth_switch.loc[truth_switch["has_switch"], "gene_id"].astype(str))
     abundance_genes = set(truth_abundance.loc[truth_abundance["has_abundance"], "gene_id"].astype(str)) if not truth_abundance.empty else set()
 
@@ -156,6 +166,8 @@ def evaluate_interpret_output(
 
         switch_strength_auc = np.nan
         opposite_polarity_rate = np.nan
+        switch_tx_top1_acc = np.nan
+        switch_magnitude_spearman = np.nan
         if not tx_table.empty and {"gene_id", "r", "switch_strength"}.issubset(tx_table.columns):
             tx_tmp = tx_table.copy()
             tx_tmp["abs_switch_strength"] = pd.to_numeric(tx_tmp["switch_strength"], errors="coerce").abs()
@@ -165,15 +177,36 @@ def evaluate_interpret_output(
             switch_strength_auc = _auc(strength_labels, per_gene_strength.to_numpy(dtype=float))
 
             polarity_rows = []
+            identity_hits: list[bool] = []      # n_tx>=3 switching genes: argmax|r| tx == truth driver
+            mag_pred: list[float] = []          # predicted switch_strength vs true delta-PSI
+            mag_true: list[float] = []
+            has_tx_id = "transcript_id" in tx_tmp.columns
             for gene_id, frame in tx_tmp.groupby("gene_id"):
-                if str(gene_id) not in switching_genes or len(frame) < 2:
+                gid = str(gene_id)
+                if gid not in switching_genes or len(frame) < 2:
                     continue
                 r = pd.to_numeric(frame["r"], errors="coerce").to_numpy(dtype=float)
-                r = r[np.isfinite(r)]
-                if len(r) >= 2:
-                    polarity_rows.append(bool(r.min() < 0 and r.max() > 0))
+                rfin = r[np.isfinite(r)]
+                if len(rfin) >= 2:
+                    polarity_rows.append(bool(rfin.min() < 0 and rfin.max() > 0))
+                # Transcript-identity accuracy: only meaningful when the gene has >=3
+                # transcripts (at 2 the isoforms are mirror images -> tie).
+                if has_tx_id and gid in event_tx and len(frame) >= 3:
+                    fr = frame.assign(_absr=np.abs(pd.to_numeric(frame["r"], errors="coerce")))
+                    pred_tx = str(fr.loc[fr["_absr"].idxmax(), "transcript_id"])
+                    identity_hits.append(pred_tx == event_tx[gid])
+                # Switch-magnitude calibration: predicted strength vs true delta-PSI.
+                if gid in event_dpsi and np.isfinite(event_dpsi[gid]):
+                    mag_pred.append(float(per_gene_strength.get(gid, np.nan)))
+                    mag_true.append(float(event_dpsi[gid]))
             if polarity_rows:
                 opposite_polarity_rate = float(np.mean(polarity_rows))
+            if identity_hits:
+                switch_tx_top1_acc = float(np.mean(identity_hits))
+            mp = np.array(mag_pred, float); mt = np.array(mag_true, float)
+            ok = np.isfinite(mp) & np.isfinite(mt)
+            if ok.sum() >= 4 and np.unique(mp[ok]).size > 1 and np.unique(mt[ok]).size > 1:
+                switch_magnitude_spearman = float(spearmanr(mp[ok], mt[ok]).statistic)
 
         rows.append(
             {
@@ -189,6 +222,8 @@ def evaluate_interpret_output(
                 "top10_switch_precision": _precision_at(gene_table, switching_genes, k=10),
                 "switch_strength_auroc": switch_strength_auc,
                 "opposite_polarity_rate": opposite_polarity_rate,
+                "switch_transcript_top1_accuracy": switch_tx_top1_acc,
+                "switch_magnitude_spearman": switch_magnitude_spearman,
                 **run_role_metrics,
             }
         )

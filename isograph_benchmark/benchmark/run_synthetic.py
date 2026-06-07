@@ -43,6 +43,10 @@ _CONFOUND_PARAM_KEYS = [
 # hash keys (which would alter their existing dataset IDs).
 _COUPLED_DEGRADATION_SCENARIO = "rna_degradation_coupled"
 
+# Interpretation-accuracy scenario: multi-isoform genes so transcript-identity is
+# non-degenerate. n_transcripts_per_gene is part of its dataset hash (fresh IDs).
+_INTERPRET_SCENARIO = "multi_isoform_switch"
+
 
 def resource_class(method: str, scenario: str) -> str:
     if method == "isograph_vae_gpu":
@@ -96,12 +100,18 @@ _COUPLED_DEGRADATION_DATASET_KEYS = _CONFOUND_SCENARIO_DATASET_KEYS + [
     "dual_signal_fraction",
 ]
 
+# Interpretation scenario hashes on n_transcripts_per_gene (its defining knob) so the
+# multi-isoform datasets are distinct; other scenarios keep their existing hashes.
+_INTERPRET_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["n_transcripts_per_gene"]
+
 
 def _dataset_hash_keys(scenario: str) -> list[str]:
     if scenario == "abundance_switch_mixed":
         return _MULTIPLEX_SCENARIO_DATASET_KEYS
     if scenario == _COUPLED_DEGRADATION_SCENARIO:
         return _COUPLED_DEGRADATION_DATASET_KEYS
+    if scenario == _INTERPRET_SCENARIO:
+        return _INTERPRET_SCENARIO_DATASET_KEYS
     if scenario in _CONFOUND_SCENARIOS:
         return _CONFOUND_SCENARIO_DATASET_KEYS
     return _SCENARIO_DATASET_KEYS
@@ -114,6 +124,8 @@ def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
         return cfg.get("multiplex_methods", cfg["methods"])
     if scenario == _COUPLED_DEGRADATION_SCENARIO:
         return cfg.get("degradation_methods", cfg["methods"])
+    if scenario == _INTERPRET_SCENARIO:
+        return cfg.get("interpret_methods", cfg["methods"])
     if scenario in _CONFOUND_SCENARIOS:
         return cfg.get("confound_methods", cfg["methods"])
     return cfg["methods"]
@@ -127,6 +139,7 @@ def expand_grid() -> pd.DataFrame:
             + cfg.get("multiplex_methods", [])
             + cfg.get("confound_methods", [])
             + cfg.get("degradation_methods", [])
+            + cfg.get("interpret_methods", [])
         )
     )
     rows: list[dict[str, object]] = []
