@@ -10,7 +10,6 @@ from isograph_benchmark.paths import ensure_dir, rel
 ADULT_AGE_MIN = 18.0
 SNP_PC_COLS = [f"SNP_PC{i}" for i in range(1, 11)]
 BRAINSEQ_MIN_GENE_CPM = 1.0
-GTEX_MIN_GENE_TPM = 0.1
 MIN_EXPR_SAMPLE_PROP = 0.10
 MIN_EXPR_SAMPLES = 10
 
@@ -61,13 +60,6 @@ def _brainseq_expressed_genes(gene_matrix: np.ndarray) -> tuple[np.ndarray, str]
     min_samples = _min_expr_samples(gene_matrix.shape[1])
     keep = (cpm >= BRAINSEQ_MIN_GENE_CPM).sum(axis=1) >= min_samples
     note = _expression_filter_note("gene CPM", BRAINSEQ_MIN_GENE_CPM, min_samples)
-    return keep, note
-
-
-def _gtex_expressed_genes(gene_tpm_matrix: np.ndarray) -> tuple[np.ndarray, str]:
-    min_samples = _min_expr_samples(gene_tpm_matrix.shape[1])
-    keep = (gene_tpm_matrix >= GTEX_MIN_GENE_TPM).sum(axis=1) >= min_samples
-    note = _expression_filter_note("gene TPM", GTEX_MIN_GENE_TPM, min_samples)
     return keep, note
 
 
