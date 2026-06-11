@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 #SBATCH --account=bio260021p
-#SBATCH --partition=GPU-shared
-#SBATCH --gres=gpu:1
+#SBATCH --partition=RM-shared
 #SBATCH --job-name=gtex-iso-aging
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=5
+#SBATCH --cpus-per-task=32
 #SBATCH --array=1-13
-#SBATCH --time=02:00:00
+#SBATCH --time=04:00:00
 #SBATCH --output=real_data/gtex/_m/logs/%x-%A_%a.log
 # Run IsoGraph VAE on all 13 GTEx v11 brain aging regions.
+# CPU (RM-shared, 32 cpus -> 64GB at 2000M/cpu), matching the brainseq aging runs;
+# the VAE fits on CPU so no GPU is required.
 # Outputs land in: real_data/gtex/<region>/_m/isograph_vae/
 set -euo pipefail
 
