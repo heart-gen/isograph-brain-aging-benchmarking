@@ -27,10 +27,13 @@ ROOT <- find_root()
 rel <- function(...) file.path(ROOT, ...)
 
 RAW_PATH     <- rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
-LONG_PATH    <- rel("benchmark", "02_metrics", "_m", "synthetic_metric_long.parquet")
-SUMMARY_PATH <- rel("benchmark", "02_metrics", "_m", "synthetic_metric_summary.parquet")
-FIG_DIR      <- rel("benchmark", "02_metrics", "figures")
-TABLE_DIR    <- rel("benchmark", "02_metrics", "_m")
+LONG_PATH    <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
+SUMMARY_PATH <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
+# Stage-03 interpretation accuracy (multi_isoform_switch); optional - figures that
+# read it skip cleanly when the file is absent (its array job may still be running).
+INTERPRET_SUMMARY_PATH <- rel("benchmark", "02_interpret", "_m", "synthetic_interpret_summary.parquet")
+FIG_DIR      <- rel("benchmark", "03_metrics", "figures")
+TABLE_DIR    <- rel("benchmark", "03_metrics", "_m")
 dir.create(FIG_DIR,   showWarnings = FALSE, recursive = TRUE)
 dir.create(TABLE_DIR, showWarnings = FALSE, recursive = TRUE)
 
@@ -61,8 +64,33 @@ COMPUTE_METHOD_ORDER <- c(
   "wgcna_gene"
 )
 
+# Confound-robustness ablation (gap #6): IsoGraph VAE with vs. without nuisance
+# residualization, against the WGCNA comparator.
+CONFOUND_METHOD_ORDER <- c(
+  "isograph_vae",
+  "isograph_vae_residual",
+  "wgcna_gene"
+)
+
+# Coupled-degradation scenario adds the abundance-channel methods (multiplex,
+# multiplex+reliability) that provide a degradation-robust fallback path.
+DEGRADATION_METHOD_ORDER <- c(
+  "isograph_vae",
+  "isograph_vae_residual",
+  "isograph_vae_multiplex",
+  "isograph_vae_reliability",
+  "wgcna_gene"
+)
+
+# Methods scored in the multi-isoform interpretation-accuracy scenario (stage 03).
+INTERPRET_METHOD_ORDER <- c(
+  "isograph_vae",
+  "isograph_vae_multiplex"
+)
+
 METHOD_ORDER <- unique(c(MAIN_METHOD_ORDER, MULTIPLEX_METHOD_ORDER,
-                         COMPUTE_METHOD_ORDER))
+                         COMPUTE_METHOD_ORDER, CONFOUND_METHOD_ORDER,
+                         DEGRADATION_METHOD_ORDER, INTERPRET_METHOD_ORDER))
 
 METHOD_LABELS <- c(
   isograph_baseline        = "IsoGraph Baseline",
@@ -71,6 +99,8 @@ METHOD_LABELS <- c(
   isograph_vae             = "IsoGraph VAE",
   isograph_vae_gpu         = "IsoGraph VAE GPU",
   isograph_vae_multiplex   = "IsoGraph VAE Multiplex",
+  isograph_vae_residual    = "IsoGraph VAE Residual",
+  isograph_vae_reliability = "IsoGraph VAE Reliability",
   isograph_spearman_leiden = "Spearman-Leiden",
   wgcna_gene               = "WGCNA"
 )
@@ -82,6 +112,8 @@ METHOD_LABELS_SHORT <- c(
   isograph_vae             = "VAE",
   isograph_vae_gpu         = "VAE GPU",
   isograph_vae_multiplex   = "VAE Multiplex",
+  isograph_vae_residual    = "VAE Residual",
+  isograph_vae_reliability = "VAE Reliability",
   isograph_spearman_leiden = "Spearman-Leiden",
   wgcna_gene               = "WGCNA"
 )
@@ -93,6 +125,8 @@ COMPUTE_LABELS <- c(
   isograph_vae             = "CPU",
   isograph_vae_gpu         = "GPU",
   isograph_vae_multiplex   = "CPU",
+  isograph_vae_residual    = "CPU",
+  isograph_vae_reliability = "CPU",
   isograph_spearman_leiden = "CPU",
   wgcna_gene               = "CPU"
 )
@@ -106,6 +140,8 @@ METHOD_COLORS <- c(
   isograph_vae             = "#D55E00",  # vermillion
   isograph_vae_gpu         = "#F0A080",  # light vermillion (same model, GPU)
   isograph_vae_multiplex   = "#F0E442",  # yellow (multiplex scenario only)
+  isograph_vae_residual    = "#882255",  # wine (residualization ablation)
+  isograph_vae_reliability = "#44AA99",  # teal (degradation-robust fallback)
   isograph_spearman_leiden = "#56B4E9",  # sky blue
   wgcna_gene               = "#CC79A7"   # reddish purple
 )
@@ -136,6 +172,12 @@ SCENARIO_LABELS <- c(
   unequal_isoform_abundance  = "Unequal abundance",
   negative_control_noise     = "Negative control",
   abundance_switch_mixed     = "Abundance-switch mixed",
+  rna_degradation            = "RNA degradation",
+  rna_degradation_coupled    = "RNA degradation (coupled)",
+  cell_composition           = "Cell composition",
+  batch_effects              = "Batch effects",
+  library_depth              = "Library depth",
+  multi_isoform_switch       = "Multi-isoform switch",
   scale                      = "Scale",
   scale_realistic            = "Scale (BrainSEQ 16k)"
 )
@@ -853,6 +895,302 @@ make_figS7 <- function(long_df) {
 }
 
 # ---------------------------------------------------------------------------
+# Confound robustness supplement (gap #6): residualization ablation
+# ---------------------------------------------------------------------------
+# One free-x panel per confound scenario; module recovery vs. confound severity,
+# one line per method. Headline: IsoGraph VAE Residual stays flat while the
+# un-residualized VAE and WGCNA degrade as the confound strengthens. Renders only
+# once the long table is regenerated with the confound sweep columns retained.
+CONFOUND_SPECS <- list(
+  rna_degradation  = list(param = "run_degradation_3p_bias",
+                          label = "RNA degradation\n(3' coverage bias)"),
+  cell_composition = list(param = "run_cell_composition_cv",
+                          label = "Cell composition\n(neuron-frac CV)"),
+  batch_effects    = list(param = "run_batch_effect_sd",
+                          label = "Batch effects\n(batch SD)"),
+  library_depth    = list(param = "run_library_depth_cv",
+                          label = "Library depth\n(depth CV)")
+)
+
+confound_long <- function(long_df, methods = CONFOUND_METHOD_ORDER,
+                          specs = CONFOUND_SPECS) {
+  parts <- list()
+  for (scen in names(specs)) {
+    param_col <- specs[[scen]]$param
+    if (!param_col %in% names(long_df)) next
+    sub <- long_df |>
+      filter(
+        .data$scenario == scen,
+        .data$method %in% methods,
+        .data$metric == "metrics_module_recovery",
+        !is.na(.data[[param_col]]),
+        is.finite(.data$value)
+      ) |>
+      transmute(
+        method = as.character(.data$method),
+        confound_strength = .data[[param_col]],
+        panel = specs[[scen]]$label,
+        value = .data$value
+      )
+    if (nrow(sub) > 0) parts[[scen]] <- sub
+  }
+  if (length(parts) == 0) return(NULL)
+  bind_rows(parts)
+}
+
+make_confound_robustness_fig <- function(long_df, methods = CONFOUND_METHOD_ORDER) {
+  combined <- confound_long(long_df, methods)
+  if (is.null(combined)) return(NULL)
+  methods <- methods[methods %in% unique(combined$method)]
+  if (length(methods) == 0) return(NULL)
+
+  panel_levels <- vapply(CONFOUND_SPECS, function(s) s$label, character(1))
+  panel_levels <- panel_levels[panel_levels %in% unique(combined$panel)]
+
+  plot_df <- combined |>
+    group_by(.data$panel, .data$method, .data$confound_strength) |>
+    ci_summary() |>
+    mutate(
+      method = factor(.data$method, levels = methods),
+      panel = factor(.data$panel, levels = panel_levels)
+    )
+
+  ggplot(plot_df, aes(x = .data$confound_strength, y = .data$mean_val,
+                      color = .data$method, group = .data$method)) +
+    geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
+                  width = 0, linewidth = 0.4) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 1.9) +
+    facet_wrap(~ panel, nrow = 1, scales = "free_x") +
+    scale_color_manual(
+      values = METHOD_COLORS[methods],
+      labels = METHOD_LABELS[methods],
+      breaks = methods
+    ) +
+    scale_y_continuous(
+      limits = c(0, 1),
+      breaks = c(0, 0.25, 0.5, 0.75, 1),
+      expand = expansion(mult = c(0.02, 0.04))
+    ) +
+    labs(x = "Confound severity",
+         y = "Module recovery (AUC; 1 = perfect)",
+         color = NULL) +
+    theme_pub() +
+    theme(legend.position = "right")
+}
+
+# ---------------------------------------------------------------------------
+# Degradation fallback supplement: abundance channel rescues the switch signal
+# ---------------------------------------------------------------------------
+DEGRADATION_PANEL_LABELS <- c(
+  rna_degradation         = "Pure switch\n(no abundance fallback)",
+  rna_degradation_coupled = "Coupled\n(abundance fallback)"
+)
+
+make_degradation_fallback_fig <- function(long_df,
+                                          methods = DEGRADATION_METHOD_ORDER) {
+  param_col <- "run_degradation_3p_bias"
+  if (!param_col %in% names(long_df)) return(NULL)
+  scenarios <- names(DEGRADATION_PANEL_LABELS)
+
+  sub <- long_df |>
+    filter(
+      .data$scenario %in% scenarios,
+      .data$method %in% methods,
+      .data$metric == "metrics_module_recovery",
+      !is.na(.data[[param_col]]),
+      is.finite(.data$value)
+    ) |>
+    transmute(
+      method = as.character(.data$method),
+      degradation = .data[[param_col]],
+      panel = DEGRADATION_PANEL_LABELS[as.character(.data$scenario)],
+      value = .data$value
+    )
+  if (nrow(sub) == 0) return(NULL)
+  methods <- methods[methods %in% unique(sub$method)]
+  if (length(methods) == 0) return(NULL)
+
+  present_panels <- unname(DEGRADATION_PANEL_LABELS)
+  present_panels <- present_panels[present_panels %in% unique(sub$panel)]
+
+  plot_df <- sub |>
+    group_by(.data$panel, .data$method, .data$degradation) |>
+    ci_summary() |>
+    mutate(
+      method = factor(.data$method, levels = methods),
+      panel = factor(.data$panel, levels = present_panels)
+    )
+
+  ggplot(plot_df, aes(x = .data$degradation, y = .data$mean_val,
+                      color = .data$method, group = .data$method)) +
+    geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
+                  width = 0, linewidth = 0.4) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 1.9) +
+    facet_wrap(~ panel, nrow = 1) +
+    scale_color_manual(
+      values = METHOD_COLORS[methods],
+      labels = METHOD_LABELS[methods],
+      breaks = methods
+    ) +
+    scale_y_continuous(
+      limits = c(0, 1),
+      breaks = c(0, 0.25, 0.5, 0.75, 1),
+      expand = expansion(mult = c(0.02, 0.04))
+    ) +
+    labs(x = "3' degradation bias",
+         y = "Module recovery (AUC; 1 = perfect)",
+         color = NULL) +
+    theme_pub() +
+    theme(legend.position = "right")
+}
+
+# ---------------------------------------------------------------------------
+# Specificity / Type-I error supplement: false discovery under the null
+# ---------------------------------------------------------------------------
+specificity_box_panel <- function(long_df, methods = MAIN_METHOD_ORDER, tag = "A") {
+  methods <- present_methods(
+    filter(long_df, .data$scenario == "negative_control_noise"), methods)
+  if (length(methods) == 0) return(NULL)
+
+  sub <- long_df |>
+    filter(
+      .data$scenario == "negative_control_noise",
+      .data$method %in% methods,
+      .data$metric == "metrics_module_recovery",
+      is.finite(.data$value)
+    ) |>
+    mutate(
+      method = factor(.data$method, levels = methods),
+      noise_label = paste0("Noise SD = ", format_param(.data$run_noise_sd))
+    )
+  if (nrow(sub) == 0) return(NULL)
+
+  ggpubr::ggboxplot(
+    sub, x = "method", y = "value", fill = "method",
+    palette = METHOD_COLORS[methods], width = 0.62,
+    outlier.size = 0.45, outlier.alpha = 0.25, color = "grey25",
+    xlab = FALSE, ylab = "False module recovery (AUC; 0 = ideal)",
+    ggtheme = theme_pub()
+  ) +
+    facet_wrap(~ noise_label, nrow = 1) +
+    scale_x_discrete(labels = METHOD_LABELS_SHORT[methods]) +
+    scale_fill_manual(values = METHOD_COLORS[methods],
+                      labels = METHOD_LABELS[methods], breaks = methods) +
+    scale_y_continuous(expand = expansion(mult = c(0.02, 0.08))) +
+    labs(x = NULL, fill = NULL, tag = tag) +
+    theme(
+      legend.position = "right",
+      axis.text.x = element_text(angle = 35, hjust = 1, size = 7),
+      plot.tag = element_text(size = 10, face = "bold")
+    )
+}
+
+false_positive_panel <- function(long_df, methods = MAIN_METHOD_ORDER, tag = "B") {
+  param_col <- "run_switching_fraction"
+  if (!param_col %in% names(long_df)) return(NULL)
+
+  sub <- long_df |>
+    filter(
+      .data$scenario == "non_switching_background",
+      .data$method %in% methods,
+      .data$metric == "metrics_nonswitch_gene_module_rate",
+      !is.na(.data[[param_col]]),
+      is.finite(.data$value)
+    ) |>
+    mutate(param_value = .data[[param_col]])
+  if (nrow(sub) == 0) return(NULL)
+  methods <- methods[methods %in% unique(as.character(sub$method))]
+
+  plot_df <- sub |>
+    group_by(.data$method, .data$param_value) |>
+    ci_summary() |>
+    mutate(method = factor(.data$method, levels = methods))
+
+  ggplot(plot_df, aes(x = .data$param_value, y = .data$mean_val,
+                      color = .data$method, group = .data$method)) +
+    geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
+                  width = 0.01, linewidth = 0.4) +
+    geom_line(linewidth = 0.8) +
+    geom_point(size = 1.9) +
+    scale_color_manual(values = METHOD_COLORS[methods],
+                       labels = METHOD_LABELS[methods], breaks = methods) +
+    scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.25, 0.5, 0.75, 1),
+                       expand = expansion(mult = c(0.02, 0.04))) +
+    labs(x = "Switching gene fraction",
+         y = "Non-switching genes in modules (false-positive rate)",
+         color = NULL, tag = tag) +
+    theme_pub() +
+    theme(legend.position = "right",
+          plot.tag = element_text(size = 10, face = "bold"))
+}
+
+make_specificity_fig <- function(long_df) {
+  pA <- specificity_box_panel(long_df, MAIN_METHOD_ORDER, "A")
+  pB <- false_positive_panel(long_df, MAIN_METHOD_ORDER, "B")
+  if (is.null(pA) && is.null(pB)) return(NULL)
+  if (is.null(pA)) return(pB)
+  if (is.null(pB)) return(pA)
+  (pA / pB) + plot_layout(guides = "collect") &
+    theme(legend.position = "right")
+}
+
+# ---------------------------------------------------------------------------
+# Interpretation accuracy supplement (stage 03; multi_isoform_switch)
+# ---------------------------------------------------------------------------
+INTERPRET_METRICS <- c(
+  switch_transcript_top1_accuracy = "Switch-transcript top-1 accuracy",
+  switch_magnitude_spearman       = "Switch-magnitude Spearman"
+)
+# Dashed reference line per metric: chance for top-1 (1/4 isoforms), 0 for Spearman.
+INTERPRET_CHANCE <- c(
+  switch_transcript_top1_accuracy = 0.25,
+  switch_magnitude_spearman       = 0.0
+)
+
+make_interpretation_fig <- function(interp_df, methods = INTERPRET_METHOD_ORDER) {
+  if (is.null(interp_df) || nrow(interp_df) == 0) return(NULL)
+  methods <- methods[methods %in% unique(as.character(interp_df$method))]
+  if (length(methods) == 0) return(NULL)
+
+  sub <- interp_df |>
+    filter(
+      .data$scenario == "multi_isoform_switch",
+      .data$method %in% methods,
+      .data$metric %in% names(INTERPRET_METRICS),
+      is.finite(.data$mean)
+    ) |>
+    mutate(
+      method = factor(.data$method, levels = methods),
+      metric_label = factor(INTERPRET_METRICS[as.character(.data$metric)],
+                            levels = unname(INTERPRET_METRICS))
+    )
+  if (nrow(sub) == 0) return(NULL)
+
+  chance_df <- data.frame(
+    metric_label = factor(unname(INTERPRET_METRICS),
+                          levels = unname(INTERPRET_METRICS)),
+    yintercept = unname(INTERPRET_CHANCE[names(INTERPRET_METRICS)])
+  )
+
+  ggplot(sub, aes(x = .data$method, y = .data$mean, fill = .data$method)) +
+    geom_hline(data = chance_df, aes(yintercept = .data$yintercept),
+               linetype = "dashed", colour = "grey45", linewidth = 0.4) +
+    geom_col(width = 0.62, colour = "grey25", linewidth = 0.15) +
+    geom_errorbar(aes(ymin = .data$ci_low, ymax = .data$ci_high),
+                  width = 0.18, linewidth = 0.4) +
+    facet_wrap(~ metric_label, nrow = 1, scales = "free_y") +
+    scale_x_discrete(labels = METHOD_LABELS_SHORT[methods]) +
+    scale_fill_manual(values = METHOD_COLORS[methods],
+                      labels = METHOD_LABELS[methods], breaks = methods) +
+    labs(x = NULL, y = "Mean (95% CI)", fill = NULL) +
+    theme_pub() +
+    theme(legend.position = "right",
+          axis.text.x = element_text(angle = 35, hjust = 1, size = 7))
+}
+
+# ---------------------------------------------------------------------------
 # Tables
 # ---------------------------------------------------------------------------
 make_table1 <- function(summary) {
@@ -979,6 +1317,13 @@ if (!file.exists(SUMMARY_PATH)) stop("Missing: ", SUMMARY_PATH)
 raw     <- load_raw(RAW_PATH)
 long    <- load_long(LONG_PATH)
 summary <- load_summary(SUMMARY_PATH)
+# Stage-03 interpretation summary is optional (its array job may still be running).
+interp  <- if (file.exists(INTERPRET_SUMMARY_PATH)) {
+  read_parquet(INTERPRET_SUMMARY_PATH)
+} else {
+  cat("  (interpretation summary not found - figS11 will skip)\n")
+  NULL
+}
 cat("  Completed runs:", nrow(raw),
     " | Long metric rows:", nrow(long),
     " | Summary rows:", nrow(summary), "\n")
@@ -1064,6 +1409,30 @@ tryCatch({
   if (!is.null(p)) save_fig(p, "figS7_abundance_roles", width = 9, height = 7)
   else cat("  figS7: no abundance/role data yet, skipping\n")
 }, error = function(e) warning("figS7 error: ", conditionMessage(e)))
+
+tryCatch({
+  p <- make_confound_robustness_fig(long)
+  if (!is.null(p)) save_fig(p, "figS8_confound_robustness", width = 11, height = 3.9)
+  else cat("  figS8: no confound-scenario data yet, skipping\n")
+}, error = function(e) warning("figS8 error: ", conditionMessage(e)))
+
+tryCatch({
+  p <- make_degradation_fallback_fig(long)
+  if (!is.null(p)) save_fig(p, "figS9_degradation_fallback", width = 8, height = 4)
+  else cat("  figS9: no degradation-scenario data yet, skipping\n")
+}, error = function(e) warning("figS9 error: ", conditionMessage(e)))
+
+tryCatch({
+  p <- make_specificity_fig(long)
+  if (!is.null(p)) save_fig(p, "figS10_specificity_null", width = 9, height = 7)
+  else cat("  figS10: no negative-control/background data yet, skipping\n")
+}, error = function(e) warning("figS10 error: ", conditionMessage(e)))
+
+tryCatch({
+  p <- make_interpretation_fig(interp)
+  if (!is.null(p)) save_fig(p, "figS11_interpretation_accuracy", width = 7.5, height = 3.6)
+  else cat("  figS11: no interpretation summary yet, skipping\n")
+}, error = function(e) warning("figS11 error: ", conditionMessage(e)))
 
 tryCatch(make_table1(summary), error = function(e) warning("table1 error: ", conditionMessage(e)))
 tryCatch(make_compute_table(raw, long), error = function(e) warning("compute table error: ", conditionMessage(e)))

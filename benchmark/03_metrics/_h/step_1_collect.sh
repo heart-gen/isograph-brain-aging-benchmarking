@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+#SBATCH --account=bio260021p
+#SBATCH --partition=RM-shared
+#SBATCH --job-name=isograph-collect
+#SBATCH --mail-type=FAIL
+#SBATCH --mail-user=kj.benjamin90@gmail.com
+#SBATCH --cpus-per-task=4
+#SBATCH --time=01:00:00
+#SBATCH --output=benchmark/03_metrics/_m/logs/collect-%j.log
+
+log_message() {
+    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"
+}
+
+log_message "**** Step 1: Collect benchmark results ****"
+echo "User: ${USER}"
+echo "Host: ${HOSTNAME}"
+mkdir -p benchmark/03_metrics/_m/logs
+
+module purge
+module load anaconda3/2024.10-1
+
+log_message "Activating isograph environment"
+conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+
+log_message "Collecting telemetry into parquet"
+python -m isograph_benchmark.benchmark.collect_results \
+  --run-root benchmark/01_synthetic/_o/runs \
+  --out benchmark/01_synthetic/_m/synthetic_results.parquet
+
+if [ $? -ne 0 ]; then
+    log_message "ERROR: collect_results failed"
+    exit 1
+fi
+
+conda deactivate
+log_message "**** Step 1 complete ****"

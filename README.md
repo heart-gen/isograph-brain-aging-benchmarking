@@ -26,7 +26,7 @@ over paired synthetic datasets.
 
 ## Module Interpretation
 
-Synthetic module interpretation accuracy is evaluated in `benchmark/03_interpret/`
+Synthetic module interpretation accuracy is evaluated in `benchmark/02_interpret/`
 against ground-truth synthetic modules and switching genes.
 
 Real-data module interpretation is run with:

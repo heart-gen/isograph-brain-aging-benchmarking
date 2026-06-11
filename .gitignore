@@ -25,3 +25,4 @@ real_data/**/_o/
 # Local settings.
 .env
 settings.local.*
+benchmark/**/_m/_shards/

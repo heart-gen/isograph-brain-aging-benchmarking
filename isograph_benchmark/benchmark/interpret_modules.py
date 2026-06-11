@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+import pyarrow as pa
 from scipy.stats import rankdata, spearmanr
 
 from isograph.io.artifacts import load_dataset_bundle
@@ -153,9 +154,13 @@ def evaluate_interpret_output(
         tx_path = module_dir / "transcript_polarity_table.parquet"
         if not gene_path.exists() or not tx_path.exists():
             continue
-
-        gene_table = pd.read_parquet(gene_path)
-        tx_table = pd.read_parquet(tx_path)
+        # Tolerate truncated/0-byte parquet from a job killed mid-write (SLURM
+        # timeout/OOM): skip the module rather than aborting the whole sweep.
+        try:
+            gene_table = pd.read_parquet(gene_path)
+            tx_table = pd.read_parquet(tx_path)
+        except (OSError, pa.ArrowInvalid):
+            continue
         predicted_genes = set(modules.loc[modules["module_id"].astype(str) == module_id, "gene_id"].astype(str))
         truth_module_id, truth_module_genes = _best_truth_module(predicted_genes, truth_modules)
 
@@ -250,14 +255,23 @@ def run_interpretation(
     methods: list[str],
     force: bool = False,
     limit: int | None = None,
+    shard: int | None = None,
+    n_shards: int | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     results = pd.read_parquet(results_path)
     if "status" in results.columns:
         results = results.loc[results["status"] == "completed"].copy()
     method_col = "run_method" if "run_method" in results.columns else "method"
     results = results.loc[results[method_col].isin(methods)].copy()
+    # Deterministic order so array shards partition the same set every run.
+    id_col = "run_run_id" if "run_run_id" in results.columns else "run_id"
+    if id_col in results.columns:
+        results = results.sort_values(id_col, kind="stable").reset_index(drop=True)
     if limit is not None:
         results = results.head(limit)
+    if shard is not None and n_shards:
+        # Round-robin slice balances big/small runs across shards.
+        results = results.iloc[shard::n_shards].copy()
 
     ensure_dir(output_root)
     ensure_dir(out_dir)
@@ -302,6 +316,28 @@ def run_interpretation(
 
     run_df = pd.DataFrame(run_rows)
     module_df = pd.concat(module_parts, ignore_index=True) if module_parts else pd.DataFrame()
+    if shard is not None and n_shards:
+        # Array-task mode: write per-shard partials; a later collect step merges
+        # them and runs the bootstrap summary once over the full set.
+        shard_dir = ensure_dir(out_dir / "_shards")
+        run_df.to_parquet(shard_dir / f"results.shard{shard:03d}.parquet", index=False, compression="zstd")
+        module_df.to_parquet(shard_dir / f"module_metrics.shard{shard:03d}.parquet", index=False, compression="zstd")
+    else:
+        run_df.to_parquet(out_dir / "synthetic_interpret_results.parquet", index=False, compression="zstd")
+        module_df.to_parquet(out_dir / "synthetic_interpret_module_metrics.parquet", index=False, compression="zstd")
+    return run_df, module_df
+
+
+def collect_shards(out_dir: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Merge per-shard partials written by array tasks into the canonical outputs."""
+    shard_dir = out_dir / "_shards"
+    if not shard_dir.exists():
+        raise FileNotFoundError(f"no shard directory at {shard_dir}; run the array tasks first")
+    # iterdir (not glob) per Ocean FS convention.
+    run_files = sorted(p for p in shard_dir.iterdir() if p.name.startswith("results.shard") and p.suffix == ".parquet")
+    mod_files = sorted(p for p in shard_dir.iterdir() if p.name.startswith("module_metrics.shard") and p.suffix == ".parquet")
+    run_df = pd.concat([pd.read_parquet(p) for p in run_files], ignore_index=True) if run_files else pd.DataFrame()
+    module_df = pd.concat([pd.read_parquet(p) for p in mod_files], ignore_index=True) if mod_files else pd.DataFrame()
     run_df.to_parquet(out_dir / "synthetic_interpret_results.parquet", index=False, compression="zstd")
     module_df.to_parquet(out_dir / "synthetic_interpret_module_metrics.parquet", index=False, compression="zstd")
     return run_df, module_df
@@ -357,14 +393,29 @@ def main() -> None:
     parser.add_argument("--results", default="benchmark/01_synthetic/_m/synthetic_results.parquet")
     parser.add_argument("--run-root", default="benchmark/01_synthetic/_o/runs")
     parser.add_argument("--dataset-root", default="benchmark/01_synthetic/_m/datasets")
-    parser.add_argument("--output-root", default="benchmark/03_interpret/_o/runs")
-    parser.add_argument("--out-dir", default="benchmark/03_interpret/_m")
+    parser.add_argument("--output-root", default="benchmark/02_interpret/_o/runs")
+    parser.add_argument("--out-dir", default="benchmark/02_interpret/_m")
     parser.add_argument("--method", action="append", dest="methods", help="Method to evaluate. Can be repeated.")
     parser.add_argument("--force", action="store_true", help="Regenerate existing explain-module outputs.")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of completed runs for smoke tests.")
     parser.add_argument("--bootstrap-iterations", type=int, default=10000)
     parser.add_argument("--confidence-level", type=float, default=0.95)
+    parser.add_argument("--shard", type=int, default=None, help="Array-task index; processes runs[shard::n_shards].")
+    parser.add_argument("--n-shards", type=int, default=None, help="Total number of array shards.")
+    parser.add_argument("--collect", action="store_true", help="Merge per-shard partials + write the bootstrap summary.")
     args = parser.parse_args()
+
+    out_dir = ensure_dir(rel(args.out_dir))
+
+    if args.collect:
+        run_df, _ = collect_shards(out_dir)
+        summary = summarize_interpretation(
+            run_df, out_dir=out_dir,
+            bootstrap_iterations=args.bootstrap_iterations,
+            confidence_level=args.confidence_level,
+        )
+        print(f"Collected {len(run_df):,} run rows and wrote {len(summary):,} summary rows to {out_dir}")
+        return
 
     methods = args.methods or DEFAULT_METHODS
     run_df, _ = run_interpretation(
@@ -372,18 +423,23 @@ def main() -> None:
         run_root=rel(args.run_root),
         dataset_root=rel(args.dataset_root),
         output_root=rel(args.output_root),
-        out_dir=ensure_dir(rel(args.out_dir)),
+        out_dir=out_dir,
         methods=methods,
         force=args.force,
         limit=args.limit,
+        shard=args.shard,
+        n_shards=args.n_shards,
     )
+    if args.shard is not None:
+        print(f"shard {args.shard}/{args.n_shards}: wrote {len(run_df):,} run rows to {out_dir / '_shards'}")
+        return
+
     summary = summarize_interpretation(
-        run_df,
-        out_dir=ensure_dir(rel(args.out_dir)),
+        run_df, out_dir=out_dir,
         bootstrap_iterations=args.bootstrap_iterations,
         confidence_level=args.confidence_level,
     )
-    print(f"Wrote {len(run_df):,} run rows and {len(summary):,} summary rows to {rel(args.out_dir)}")
+    print(f"Wrote {len(run_df):,} run rows and {len(summary):,} summary rows to {out_dir}")
 
 
 if __name__ == "__main__":

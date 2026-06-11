@@ -72,6 +72,15 @@ _RUN_ID_COLS = [
     "run_count_dispersion",
     "run_interaction_fraction",
     "run_interaction_strength",
+    # Gap #6 confound-scenario sweep parameters + interpretation/degradation knobs;
+    # retained so the long table can facet the confound-robustness, degradation
+    # fallback, and multi-isoform interpretation figures.
+    "run_degradation_3p_bias",
+    "run_cell_composition_cv",
+    "run_batch_effect_sd",
+    "run_library_depth_cv",
+    "run_dual_signal_fraction",
+    "run_n_transcripts_per_gene",
 ]
 
 
@@ -142,27 +151,30 @@ def main() -> None:
 
     summary = pd.concat(parts, ignore_index=True)
 
-    out = rel("benchmark", "02_metrics", "_m", "synthetic_metric_summary.parquet")
+    out = rel("benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
     ensure_dir(out.parent)
     summary.to_parquet(out, index=False, compression="zstd")
     print(f"Wrote {len(summary):,} rows to {out.name}")
 
     long = make_long_metrics(df)
-    out_long = rel("benchmark", "02_metrics", "_m", "synthetic_metric_long.parquet")
+    out_long = rel("benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
     long.to_parquet(out_long, index=False, compression="zstd")
     print(f"Wrote {len(long):,} rows to {out_long.name}")
 
-    # Paired statistical tests (Wilcoxon + BH FDR) — all methods vs. WGCNA
+    # Paired statistical tests (Wilcoxon + effect sizes + BH FDR) vs. WGCNA
     from isograph_benchmark.stats.hypothesis_tests import paired_tests
     print("Running paired Wilcoxon tests (vs. wgcna_gene) ...")
     tests = paired_tests(df)
     if not tests.empty:
-        out_tests = rel("benchmark", "02_metrics", "_m", "synthetic_pairwise_tests.parquet")
+        out_tests = rel("benchmark", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
         tests.to_parquet(out_tests, index=False, compression="zstd")
         n_sig05 = tests["significant_05"].sum()
         n_sig10 = tests["significant_10"].sum()
+        n_large = (tests["cliffs_magnitude"] == "large").sum()
+        fam = int(tests["family_size"].iloc[0])
         print(
-            f"  {len(tests):,} tests | FDR<0.05: {n_sig05} | FDR<0.10: {n_sig10}"
+            f"  {len(tests):,} tests (family={fam}) | FDR<0.05: {n_sig05} | "
+            f"FDR<0.10: {n_sig10} | large |Cliff's d|: {n_large}"
         )
         print(f"  Wrote {out_tests.name}")
     else:
