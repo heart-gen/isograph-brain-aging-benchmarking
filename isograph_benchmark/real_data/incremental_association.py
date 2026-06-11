@@ -35,11 +35,14 @@ from isograph.io.artifacts import load_dataset_bundle
 
 from isograph_benchmark.paths import ensure_dir
 from isograph_benchmark.real_data.run_models import (
+    GTEX_REGIONS,
     diagnosis_association,
     spline_age_association,
 )
 from isograph_benchmark.real_data.sweep_leiden import (
     AGING_COVARIATE_COLS,
+    GTEX_AGE_COL,
+    GTEX_COVARIATE_COLS,
     SCZD_COVARIATE_COLS,
     _artifact_dir,
     _bundle_path,
@@ -47,6 +50,18 @@ from isograph_benchmark.real_data.sweep_leiden import (
 )
 
 _META_COLS = ("feature_id", "gene_id", "feature_type", "n_transcripts")
+
+
+def _covariate_cols(analysis: str) -> list[str]:
+    if analysis == "brainseq-sczd":
+        return SCZD_COVARIATE_COLS
+    if analysis == "gtex-aging":
+        return GTEX_COVARIATE_COLS
+    return AGING_COVARIATE_COLS
+
+
+def _age_col(analysis: str) -> str:
+    return GTEX_AGE_COL if analysis == "gtex-aging" else "Age"
 
 
 def _load(analysis: str, region: str | None, variant: str):
@@ -120,7 +135,7 @@ def gene_level_deconfounded(
     sample_ids = set(st["sample_id"].astype(str))
     samp = _sample_cols(fs, sample_ids)
     st = st.set_index(st["sample_id"].astype(str)).loc[samp]
-    covs = SCZD_COVARIATE_COLS if analysis == "brainseq-sczd" else AGING_COVARIATE_COLS
+    covs = _covariate_cols(analysis)
 
     SW = _channel_matrix(fs, "switch", samp)
     AB = _channel_matrix(fs, "abundance", samp)
@@ -146,7 +161,7 @@ def gene_level_deconfounded(
             pA[j] = _ols_coef_p(np.hstack([C[m], pheno[m], ya[m, None]]), ys[m], dx_idx)
             pB[j] = _ols_coef_p(np.hstack([C[m], pheno[m], ys[m, None]]), ya[m], dx_idx)
     else:
-        age = st["Age"].to_numpy(float)
+        age = st[_age_col(analysis)].to_numpy(float)
         age_z = (age - age.mean()) / age.std()
         knots = np.quantile(age_z, [0.5])
         bd = [age_z.min(), age_z.max()]
@@ -190,7 +205,7 @@ def module_level_incremental(
     st = bundle.sample_table
     sample_ids = set(st["sample_id"].astype(str))
     samp = _sample_cols(fs, sample_ids)
-    covs = SCZD_COVARIATE_COLS if analysis == "brainseq-sczd" else AGING_COVARIATE_COLS
+    covs = _covariate_cols(analysis)
 
     eg_switch = _pivot_eigengenes(_eigengene_table(_channel_matrix(fs, "switch", samp), modules, samp))
     eg_abund = _pivot_eigengenes(_eigengene_table(_channel_matrix(fs, "abundance", samp), modules, samp))
@@ -199,7 +214,7 @@ def module_level_incremental(
         if analysis == "brainseq-sczd":
             d = diagnosis_association(egp, st, covariate_cols=covs)
             return d.set_index("module_id")["fdr"]
-        d = spline_age_association(egp, st, covariate_cols=covs, age_col="Age")
+        d = spline_age_association(egp, st, covariate_cols=covs, age_col=_age_col(analysis))
         return d.drop_duplicates("module_id").set_index("module_id")["fdr_ftest"]
 
     res = pd.DataFrame({"switch_fdr": assoc(eg_switch), "abund_fdr": assoc(eg_abund)}).dropna()
@@ -250,15 +265,19 @@ def run_analysis(analysis: str, region: str | None, variant: str, fdr_alpha: flo
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("analysis", choices=["brainseq-sczd", "brainseq-aging"])
+    parser.add_argument("analysis", choices=["brainseq-sczd", "brainseq-aging", "gtex-aging"])
     parser.add_argument("--region", action="append", dest="regions",
-                        help="For brainseq-aging: region(s). Repeatable. Default: all 3.")
+                        help="For brainseq-aging/gtex-aging: region(s). Repeatable. "
+                             "Default: all brainseq (3) or all gtex (13) regions.")
     parser.add_argument("--variant", choices=["standard", "with-abundance"], default="standard")
     parser.add_argument("--fdr", type=float, default=0.10)
     args = parser.parse_args()
 
     if args.analysis == "brainseq-sczd":
         run_analysis("brainseq-sczd", None, args.variant, args.fdr)
+    elif args.analysis == "gtex-aging":
+        for region in (args.regions or GTEX_REGIONS):
+            run_analysis("gtex-aging", region, args.variant, args.fdr)
     else:
         for region in (args.regions or ["caudate", "hippocampus", "dlpfc"]):
             run_analysis("brainseq-aging", region, args.variant, args.fdr)

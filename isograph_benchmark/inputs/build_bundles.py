@@ -235,41 +235,47 @@ def build_brainseq_bundle(
 
 def build_gtex_bundle(region_dir_name: str) -> None:
     src = rel("inputs", "processed", "gtex_v11", region_dir_name)
-    tx = pd.read_parquet(src / "transcript_tpm.parquet")
-    gene_tpm = pd.read_parquet(src / "gene_tpm.parquet")
+    # Use RSEM expected_count (count scale), not TPM: the IsoGraph VAE expects
+    # counts (library-size meaningful), matching the BrainSEQ Salmon-count bundles.
+    tx = pd.read_parquet(src / "transcript_reads.parquet")
+    gene_reads = pd.read_parquet(src / "gene_reads.parquet")
     samples = pd.read_parquet(src / "sample_attributes.parquet").rename(columns={"SAMPID": "sample_id"})
     sample_ids = [col for col in tx.columns if col not in {"transcript_id", "gene_id"}]
     samples = samples.set_index("sample_id").loc[sample_ids].reset_index()
     tx_feature, tx_matrix = _matrix_from_wide(tx, ["transcript_id", "gene_id"])
 
-    gene_sample_ids = [sample_id for sample_id in sample_ids if sample_id in gene_tpm.columns]
+    gene_sample_ids = [sample_id for sample_id in sample_ids if sample_id in gene_reads.columns]
     if gene_sample_ids != sample_ids:
         missing = sorted(set(sample_ids) - set(gene_sample_ids))
-        raise ValueError(f"{region_dir_name}: gene TPM is missing {len(missing)} transcript samples")
-    gene_feature = gene_tpm[["Name", "Description"]].rename(
+        raise ValueError(f"{region_dir_name}: gene reads is missing {len(missing)} transcript samples")
+    gene_feature = gene_reads[["Name", "Description"]].rename(
         columns={"Name": "gene_id", "Description": "gene_name"}
     )
-    gene_matrix = gene_tpm[sample_ids].to_numpy(dtype=float)
-    gene_keep, expr_note = _gtex_expressed_genes(gene_matrix)
-    gene_feature, _, tx_feature, tx_matrix, expr_stats = _restrict_to_expressed_genes(
-        gene_feature, None, tx_feature, tx_matrix, gene_keep
+    gene_matrix = gene_reads[sample_ids].to_numpy(dtype=float)
+    # CPM>=1 filter on gene read counts, matching the BrainSEQ bundles (parity in
+    # feature count keeps the VAE numerically stable and memory tractable; the prior
+    # TPM>=0.1 filter kept ~2x the genes and diverged the model).
+    gene_keep, expr_note = _brainseq_expressed_genes(gene_matrix)
+    gene_feature, gene_matrix, tx_feature, tx_matrix, expr_stats = _restrict_to_expressed_genes(
+        gene_feature, gene_matrix, tx_feature, tx_matrix, gene_keep
     )
     manifest = DatasetManifest(
         dataset_name=f"gtex_v11_{region_dir_name}_v1",
         suite_name="gtex_v11_brain",
-        description=f"GTEx v11 {region_dir_name} transcript TPM IsoGraph bundle",
+        description=f"GTEx v11 {region_dir_name} transcript-count IsoGraph bundle",
         sample_table="samples.parquet",
         feature_tables=[
             build_feature_spec("gene", "genes.parquet", gene_feature),
             build_feature_spec("transcript", "transcripts.parquet", tx_feature),
         ],
         matrices=[
+            build_matrix_spec("gene_counts", "gene_counts.npz", gene_matrix),
             build_matrix_spec("transcript_counts", "transcript_counts.npz", tx_matrix),
         ],
         provenance={
             "region": region_dir_name,
             "source": "GTEx v11",
-            "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
+            "assay_note": "transcript_counts = RSEM expected_count; gene_counts = RNASeQC gene reads",
             "expression_filter": expr_note,
             "n_genes_before_expression_filter": str(expr_stats["n_genes_before"]),
             "n_genes_after_expression_filter": str(expr_stats["n_genes_after"]),
@@ -281,7 +287,7 @@ def build_gtex_bundle(region_dir_name: str) -> None:
         manifest=manifest,
         sample_table=samples,
         feature_tables={"gene": gene_feature, "transcript": tx_feature},
-        matrices={"transcript_counts": tx_matrix},
+        matrices={"gene_counts": gene_matrix, "transcript_counts": tx_matrix},
         truth_tables={},
     )
     save_dataset_bundle(bundle, ensure_dir(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name)))

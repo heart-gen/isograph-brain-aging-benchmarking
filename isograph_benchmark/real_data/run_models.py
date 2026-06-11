@@ -485,6 +485,11 @@ def run_gtex_region(region_dir_name: str) -> None:
 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
+        # GTEx brain regions have fewer samples (181-300) than BrainSEQ (238-390);
+        # the default lr=1e-3 destabilizes VAE training at this scale (val ELBO
+        # diverges to ~1e8, rmse 1.62). lr=3e-4 restores stable training
+        # (rmse 1.08, ELBO 4.8e4 — in BrainSEQ's range). See smoke-test diagnosis.
+        lr=3e-4,
         residualize_covariates=covariate_cols,
         min_module_size=20, trait_columns=["AGE"], random_state=13,
         allow_abundance_abundance=False,

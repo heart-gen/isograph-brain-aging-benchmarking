@@ -170,7 +170,7 @@ def run_analysis(analysis, region, variant, methods, skip_go) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("analysis", choices=["brainseq-sczd", "brainseq-aging"])
+    parser.add_argument("analysis", choices=["brainseq-sczd", "brainseq-aging", "gtex-aging"])
     parser.add_argument("--region", action="append", dest="regions")
     parser.add_argument("--variant", choices=["standard", "with-abundance"], default="standard")
     parser.add_argument("--method", choices=["isograph", "wgcna", "both"], default="both")
@@ -180,6 +180,10 @@ def main() -> None:
 
     if args.analysis == "brainseq-sczd":
         run_analysis("brainseq-sczd", None, args.variant, methods, args.no_go)
+    elif args.analysis == "gtex-aging":
+        from isograph_benchmark.real_data.run_models import GTEX_REGIONS
+        for region in (args.regions or GTEX_REGIONS):
+            run_analysis("gtex-aging", region, args.variant, methods, args.no_go)
     else:
         for region in (args.regions or ["caudate", "hippocampus", "dlpfc"]):
             run_analysis("brainseq-aging", region, args.variant, methods, args.no_go)

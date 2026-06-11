@@ -52,17 +52,32 @@ def brain_sample_ids() -> dict[str, list[str]]:
     }
 
 
-def convert_gtex_transcript_tpm() -> None:
+def _convert_gtex_transcript_matrix(raw_file_name: str, output_name: str) -> None:
+    """Subset an RSEM transcript matrix (plain TSV: transcript_id, gene_id, <samples>)
+    to each GTEx brain tissue and write a wide per-region Parquet."""
     ids_by_tissue = brain_sample_ids()
-    raw_path = rel(
-        "inputs", "raw", "gtex_v11", "counts",
-        "GTEx_Analysis_2025-08-22_v11_RSEMv1.3.3_transcripts_tpm.txt.gz",
-    )
+    raw_path = rel("inputs", "raw", "gtex_v11", "counts", raw_file_name)
     header = pd.read_csv(raw_path, sep="\t", nrows=0).columns.tolist()
     for tissue, sample_ids in ids_by_tissue.items():
         cols = ["transcript_id", "gene_id", *[s for s in sample_ids if s in header]]
         df = pd.read_csv(raw_path, sep="\t", usecols=cols)
-        write_parquet(df, rel("inputs", "processed", "gtex_v11", _safe_region(tissue), "transcript_tpm.parquet"))
+        write_parquet(df, rel("inputs", "processed", "gtex_v11", _safe_region(tissue), f"{output_name}.parquet"))
+
+
+def convert_gtex_transcript_tpm() -> None:
+    _convert_gtex_transcript_matrix(
+        "GTEx_Analysis_2025-08-22_v11_RSEMv1.3.3_transcripts_tpm.txt.gz", "transcript_tpm"
+    )
+
+
+def convert_gtex_transcript_reads() -> None:
+    # RSEM expected_count = count-scale transcript quantification (library-size
+    # meaningful), the analogue of BrainSEQ's Salmon transcript counts. Required so
+    # the IsoGraph VAE receives counts, not the already-normalized TPM.
+    _convert_gtex_transcript_matrix(
+        "GTEx_Analysis_2025-08-22_v11_RSEMv1.3.3_transcripts_expected_count.txt.gz",
+        "transcript_reads",
+    )
 
 
 def convert_gtex_gct(file_name: str, output_name: str) -> None:
@@ -134,6 +149,7 @@ def main() -> None:
     convert_brainseq_metadata()
     convert_gtex_sample_metadata()
     convert_gtex_transcript_tpm()
+    convert_gtex_transcript_reads()
     convert_gtex_gct("GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_reads.gct.gz", "gene_reads")
     convert_gtex_gct("GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz", "gene_tpm")
 

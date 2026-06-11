@@ -61,6 +61,10 @@ AGING_COVARIATE_COLS = [
     "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
     "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
 ]
+# GTEx v11 has no genotype PCs in the bundle; QC covariates mirror run_gtex_region.
+# AGE is the continuous trait (years), handled by the same df=3 spline path as aging.
+GTEX_COVARIATE_COLS = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
+GTEX_AGE_COL = "AGE"
 
 
 def _compute_nmi(mt_a: pd.DataFrame, mt_b: pd.DataFrame) -> float:
@@ -129,6 +133,9 @@ def _artifact_dir(analysis: str, region: str | None, variant: str = "standard") 
     if analysis == "brainseq-aging":
         assert region is not None
         return rel("real_data", "brainseq", region, "_m", subdir)
+    if analysis == "gtex-aging":
+        assert region is not None
+        return rel("real_data", "gtex", region, "_m", subdir)
     raise ValueError(f"Unknown analysis: {analysis!r}")
 
 
@@ -138,6 +145,9 @@ def _bundle_path(analysis: str, region: str | None) -> Path:
     if analysis == "brainseq-aging":
         assert region is not None
         return rel("inputs", "bundles", "brainseq_v1", region)
+    if analysis == "gtex-aging":
+        assert region is not None
+        return rel("inputs", "bundles", "gtex_v11_brain", region)
     raise ValueError(f"Unknown analysis: {analysis!r}")
 
 
