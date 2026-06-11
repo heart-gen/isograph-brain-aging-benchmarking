@@ -22,6 +22,9 @@ real_data/**/_m/logs/*
 !real_data/**/_m/logs/.gitkeep
 real_data/**/_o/
 
+# Local scratch / troubleshooting (not part of the published pipeline).
+develop/
+
 # Local settings.
 .env
 settings.local.*

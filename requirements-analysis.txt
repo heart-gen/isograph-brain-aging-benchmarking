@@ -3,8 +3,12 @@
 #   pip install -r requirements-analysis.txt
 #
 # IsoGraph itself should come from PyPI in ~/.venvs/isograph.
+#
+# The shared packages below track IsoGraph's supported dependency ranges
+# (see IsoGraph pyproject.toml); statsmodels, pyhere, pytest, and ruff are
+# analysis/dev extras that IsoGraph does not require.
 
-pyarrow>=15
+pyarrow>=17
 pandas>=2.2
 numpy>=1.26
 pyyaml>=6

@@ -213,7 +213,7 @@ def compute_metrics(artifacts, bundle) -> dict[str, Any]:
     # For each ground-truth module T_i, find the predicted module P_j that
     # maximises |T_i ∩ P_j| / |T_i ∪ P_j|, then average over all T_i.
     # Score ∈ [0, 1]; 1 = perfect recovery of all truth modules.
-    # See docs/metrics.md for the full formula and interpretation.
+    # See benchmark/README.md (Methods → Metrics) for the full formula and interpretation.
     metrics: dict[str, Any] = {
         "module_recovery": module_recovery_score(artifacts.module_table, truth_modules),
         "n_predicted_modules": int(artifacts.module_table["module_id"].nunique()) if not artifacts.module_table.empty else 0,
