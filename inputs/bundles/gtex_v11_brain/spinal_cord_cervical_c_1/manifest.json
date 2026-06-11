@@ -1,33 +1,40 @@
 {
   "dataset_name": "gtex_v11_spinal_cord_cervical_c_1_v1",
-  "description": "GTEx v11 spinal_cord_cervical_c_1 transcript TPM IsoGraph bundle",
+  "description": "GTEx v11 spinal_cord_cervical_c_1 transcript-count IsoGraph bundle",
   "feature_tables": [
     {
       "filename": "genes.parquet",
       "kind": "gene",
-      "n_rows": 38124
+      "n_rows": 18299
     },
     {
       "filename": "transcripts.parquet",
       "kind": "transcript",
-      "n_rows": 282329
+      "n_rows": 218640
     }
   ],
   "matrices": [
     {
+      "assay_name": "gene_counts",
+      "encoding": "dense_npz",
+      "filename": "gene_counts.npz",
+      "n_features": 18299,
+      "n_samples": 204
+    },
+    {
       "assay_name": "transcript_counts",
       "encoding": "dense_npz",
       "filename": "transcript_counts.npz",
-      "n_features": 282329,
+      "n_features": 218640,
       "n_samples": 204
     }
   ],
   "provenance": {
-    "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
-    "expression_filter": "gene TPM>=0.1 in >=21 samples",
-    "n_genes_after_expression_filter": "38124",
+    "assay_note": "transcript_counts = RSEM expected_count; gene_counts = RNASeQC gene reads",
+    "expression_filter": "gene CPM>=1 in >=21 samples",
+    "n_genes_after_expression_filter": "18299",
     "n_genes_before_expression_filter": "74628",
-    "n_transcripts_after_expression_filter": "282329",
+    "n_transcripts_after_expression_filter": "218640",
     "n_transcripts_before_expression_filter": "385659",
     "region": "spinal_cord_cervical_c_1",
     "source": "GTEx v11"

@@ -1,33 +1,40 @@
 {
   "dataset_name": "gtex_v11_substantia_nigra_v1",
-  "description": "GTEx v11 substantia_nigra transcript TPM IsoGraph bundle",
+  "description": "GTEx v11 substantia_nigra transcript-count IsoGraph bundle",
   "feature_tables": [
     {
       "filename": "genes.parquet",
       "kind": "gene",
-      "n_rows": 36108
+      "n_rows": 18229
     },
     {
       "filename": "transcripts.parquet",
       "kind": "transcript",
-      "n_rows": 275691
+      "n_rows": 218208
     }
   ],
   "matrices": [
     {
+      "assay_name": "gene_counts",
+      "encoding": "dense_npz",
+      "filename": "gene_counts.npz",
+      "n_features": 18229,
+      "n_samples": 183
+    },
+    {
       "assay_name": "transcript_counts",
       "encoding": "dense_npz",
       "filename": "transcript_counts.npz",
-      "n_features": 275691,
+      "n_features": 218208,
       "n_samples": 183
     }
   ],
   "provenance": {
-    "assay_note": "transcript TPM is stored as transcript_counts for IsoGraph compatibility",
-    "expression_filter": "gene TPM>=0.1 in >=19 samples",
-    "n_genes_after_expression_filter": "36108",
+    "assay_note": "transcript_counts = RSEM expected_count; gene_counts = RNASeQC gene reads",
+    "expression_filter": "gene CPM>=1 in >=19 samples",
+    "n_genes_after_expression_filter": "18229",
     "n_genes_before_expression_filter": "74628",
-    "n_transcripts_after_expression_filter": "275691",
+    "n_transcripts_after_expression_filter": "218208",
     "n_transcripts_before_expression_filter": "385659",
     "region": "substantia_nigra",
     "source": "GTEx v11"
