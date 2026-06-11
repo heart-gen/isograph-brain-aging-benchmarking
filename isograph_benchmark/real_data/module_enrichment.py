@@ -88,19 +88,38 @@ def _network_metrics(edges: pd.DataFrame, modules: pd.DataFrame) -> dict:
     return out
 
 
-def _module_go(modules: pd.DataFrame, helper: GoAnnotations | None) -> dict:
+_GO_LONG_COLS = ["module_id", "term_id", "term_name", "p_value", "p_fdr_bh", "study_count", "study_n"]
+
+
+def _module_go(modules: pd.DataFrame, helper: GoAnnotations | None) -> tuple[dict, pd.DataFrame]:
+    """Per-module GO summary plus the full enriched-term long table.
+
+    Returns (summary_by_module, full_go_long).  ``summary_by_module`` keeps the
+    compact per-module row (n_genes, n_go_terms = full enriched count, top_go_terms
+    capped for readability, min_go_fdr).  ``full_go_long`` has one row per
+    (module, enriched BP term) so downstream analyses (e.g. cross-cohort GO
+    overlap) can use the complete enriched set rather than the top-N names.
+    """
     out: dict = {}
+    full_rows: list[pd.DataFrame] = []
     for mid, grp in modules.groupby("module_id"):
         genes = grp["gene_id"].tolist()
         rec = {"n_genes": len(genes), "n_go_terms": 0, "top_go_terms": [], "min_go_fdr": np.nan}
         if helper is not None:
-            terms = helper.enrich_gene_set(genes, max_terms=_TOP_GO)
+            terms = helper.enrich_gene_set(genes, max_terms=None)   # full enriched BP set
             if not terms.empty:
                 rec["n_go_terms"] = int(len(terms))
-                rec["top_go_terms"] = terms["term_name"].tolist()
+                rec["top_go_terms"] = terms["term_name"].tolist()[:_TOP_GO]
                 rec["min_go_fdr"] = float(terms["p_fdr_bh"].min())
+                t = terms.copy()
+                t.insert(0, "module_id", mid)
+                full_rows.append(t)
         out[mid] = rec
-    return out
+    full = (
+        pd.concat(full_rows, ignore_index=True)[_GO_LONG_COLS]
+        if full_rows else pd.DataFrame(columns=_GO_LONG_COLS)
+    )
+    return out, full
 
 
 def characterize_method(analysis, region, method, variant, helper) -> pd.DataFrame | None:
@@ -110,7 +129,7 @@ def characterize_method(analysis, region, method, variant, helper) -> pd.DataFra
         print(f"  [{method}] no modules.parquet at {md} — skipping")
         return None
     modules = pd.read_parquet(mfile)
-    go = _module_go(modules, helper)
+    go, go_full = _module_go(modules, helper)
     rows = []
     pheno = _phenotype_fdr(analysis, md)
     net = {}
@@ -126,6 +145,7 @@ def characterize_method(analysis, region, method, variant, helper) -> pd.DataFra
     df = pd.DataFrame(rows)
     out = ensure_dir(md.parent / "module_enrichment")
     df.to_parquet(out / f"{method}_modules.parquet", index=False, compression="zstd")
+    go_full.to_parquet(out / f"{method}_module_go.parquet", index=False, compression="zstd")
     return df
 
 
