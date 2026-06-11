@@ -1,7 +1,14 @@
 #!/usr/bin/env Rscript
-# Gene-level WGCNA comparison baseline on GTEx v11 brain regions.
+# Gene-level WGCNA aging baseline on BrainSEQ control regions (caudate,
+# hippocampus, dlpfc). Parallels real_data/gtex/_h/02.wgcna_gene.R and provides
+# the BrainSEQ WGCNA arm needed for cross-cohort replication against GTEx.
 # Outputs (per region): modules.parquet, age_linear.parquet, age_spline.parquet
-# in real_data/gtex/<region>/_m/wgcna_gene/
+# in real_data/brainseq/<region>/_m/wgcna_gene/
+#
+# Differences from the GTEx baseline: BrainSEQ provides gene *counts* (converted
+# here to log2(CPM+1), the count-scale analogue of GTEx's log2(TPM+1)), and the
+# covariates include categorical terms (Sex, MoD) plus SNP PCs that may be NA for
+# a few samples, so the spline design is built on complete-covariate samples only.
 suppressPackageStartupMessages({
     library(arrow)
     library(WGCNA)
@@ -11,7 +18,7 @@ suppressPackageStartupMessages({
 
 options(stringsAsFactors = FALSE)
 WGCNA_THREADS <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = "4"))
-if (is.na(WGCNA_THREADS) || WGCNA_THREADS < 1) WGCNA_THREADS <- 4L
+if (is.na(WGCNA_THREADS) || WGCNA_THREADS < 2) WGCNA_THREADS <- 2L  # enableWGCNAThreads needs >=2
 enableWGCNAThreads(nThreads = WGCNA_THREADS)
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
@@ -20,15 +27,11 @@ if (!file.exists(file.path(project_root, ".here"))) {
     stop("Cannot locate project root (.here file missing). Run from isograph-brain-aging-benchmarking/.")
 }
 
-GTEX_REGIONS <- c(
-    "amygdala", "anterior_cingulate_cortex_ba24", "caudate_basal_ganglia",
-    "cerebellar_hemisphere", "cerebellum", "cortex", "frontal_cortex_ba9",
-    "hippocampus", "hypothalamus", "nucleus_accumbens_basal_ganglia",
-    "putamen_basal_ganglia", "spinal_cord_cervical_c_1", "substantia_nigra"
-)
+BRAINSEQ_REGIONS <- c("caudate", "hippocampus", "dlpfc")
 
-COVARIATE_COLS <- c("SEX", "SMRIN", "SMTSISCH", "SMMAPRT")
-AGE_COL <- "AGE"
+COVARIATE_COLS <- c("Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+                    "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5")
+AGE_COL <- "Age"
 MIN_MODULE_SIZE <- 30
 R2_THRESHOLD <- 0.85
 AGE_PROBS <- c(0.10, 0.25, 0.50, 0.75, 0.90)
@@ -60,15 +63,18 @@ linear_age_assoc <- function(eigengenes, sample_tbl, age_col) {
 }
 
 spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
-    keep <- c("sample_id", age_col, intersect(covariate_cols, names(sample_tbl)))
+    available_covs <- intersect(covariate_cols, names(sample_tbl))
+    available_covs <- available_covs[available_covs != age_col]
+    keep <- c("sample_id", age_col, available_covs)
     merged <- merge(eigengenes, sample_tbl[, keep], by = "sample_id")
-    merged <- merged[!is.na(merged[[age_col]]), ]
+    # Restrict to samples with complete age + covariates so the spline design and
+    # the covariate model matrix stay row-aligned (BrainSEQ SNP PCs can be NA).
+    merged <- merged[complete.cases(merged[, c(age_col, available_covs)]), ]
+    if (nrow(merged) < 10) return(NULL)
 
     age_z <- standardize(as.numeric(merged[[age_col]]))
     knots <- quantile(age_z, c(1/3, 2/3))
 
-    available_covs <- intersect(covariate_cols, names(merged))
-    available_covs <- available_covs[available_covs != age_col]
     cov_df <- merged[, available_covs, drop = FALSE]
     cov_df <- model.matrix(~ ., data = cov_df)[, -1, drop = FALSE]
 
@@ -110,10 +116,7 @@ spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
     })
     result <- do.call(rbind, Filter(Negate(is.null), rows))
     if (!is.null(result) && nrow(result) > 0) {
-        # BH-correct within each age_label across modules. ave() applies fdr_bh
-        # per group and returns a vector aligned to result's rows; the previous
-        # list-index/unlist approach silently produced a length-N*k vector and
-        # only ran when WGCNA collapsed to a single module.
+        # BH within each age_label across modules (ave keeps row alignment).
         result$fdr <- ave(result$pvalue, result$age_label, FUN = fdr_bh)
     }
     result
@@ -121,10 +124,8 @@ spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
 
 select_soft_power <- function(datExpr) {
     powers <- 1:20
-    # Pick the soft power for the SAME topology blockwiseModules builds (signed).
-    # pickSoftThreshold defaults to an unsigned network; on a signed network that
-    # underestimates the power (often 1), which collapses every gene into one
-    # giant module. Evaluating signed scale-free fit yields the correct power.
+    # Select for the signed topology blockwiseModules builds; pickSoftThreshold's
+    # default unsigned network underestimates the power (collapsing all modules).
     sft <- pickSoftThreshold(datExpr, powerVector = powers,
                              networkType = "signed",
                              RsquaredCut = R2_THRESHOLD, verbose = 0)
@@ -133,45 +134,45 @@ select_soft_power <- function(datExpr) {
         warning("Scale-free fit below threshold; defaulting to power=12 (signed)")
         power <- 12L
     }
-    # Floor at WGCNA's recommended minimum for signed networks (>=12 for the
-    # ~100-250-sample regions here), guarding against a spuriously low estimate.
     power <- max(as.integer(power), 12L)
     as.integer(power)
 }
 
 # ── Per-region runner ──────────────────────────────────────────────────────────
-run_gtex_wgcna <- function(region) {
+run_brainseq_wgcna <- function(region) {
     cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), region))
 
-    proc_dir <- file.path(project_root, "inputs", "processed", "gtex_v11", region)
-    bundle_dir <- file.path(project_root, "inputs", "bundles", "gtex_v11_brain", region)
-    out_dir <- file.path(project_root, "real_data", "gtex", region, "_m", "wgcna_gene")
+    proc_dir <- file.path(project_root, "inputs", "processed", "brainseq", region)
+    bundle_dir <- file.path(project_root, "inputs", "bundles", "brainseq_v1", region)
+    out_dir <- file.path(project_root, "real_data", "brainseq", region, "_m", "wgcna_gene")
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-    # Load sample list from bundle to match IsoGraph exactly
+    # Sample + gene lists from the bundle so WGCNA matches IsoGraph exactly.
     bundle_samples <- read_parquet(file.path(bundle_dir, "samples.parquet"))
     bundle_genes <- read_parquet(file.path(bundle_dir, "genes.parquet"))
     keep_ids <- bundle_samples$sample_id
     keep_gene_ids <- bundle_genes$gene_id
 
-    # Load gene TPM
-    gene_tpm <- read_parquet(file.path(proc_dir, "gene_tpm.parquet"))
-    gene_ids_avail <- intersect(keep_gene_ids, gene_tpm$Name)
+    # Gene counts -> bundle-filtered genes -> log2(CPM + 1).
+    gene_counts <- read_parquet(file.path(proc_dir, "gene_counts.parquet"))
+    gene_ids_avail <- intersect(keep_gene_ids, gene_counts$Geneid)
     if (length(gene_ids_avail) < MIN_MODULE_SIZE) {
         warning(sprintf("  %s: only %d matching bundle-filtered genes; skipping.", region, length(gene_ids_avail)))
         return(invisible(NULL))
     }
-    gene_tpm <- gene_tpm[match(gene_ids_avail, gene_tpm$Name), ]
-    gene_ids <- gene_tpm$Name
-    sample_cols <- intersect(keep_ids, names(gene_tpm))
+    gene_counts <- gene_counts[match(gene_ids_avail, gene_counts$Geneid), ]
+    gene_ids <- gene_counts$Geneid
+    sample_cols <- intersect(keep_ids, names(gene_counts))
     if (length(sample_cols) < 30) {
         warning(sprintf("  %s: only %d matching samples; skipping.", region, length(sample_cols)))
         return(invisible(NULL))
     }
 
-    expr_mat <- as.matrix(gene_tpm[, sample_cols])
-    rownames(expr_mat) <- gene_ids
-    expr_mat <- log2(expr_mat + 1)
+    counts <- as.matrix(gene_counts[, sample_cols])
+    rownames(counts) <- gene_ids
+    lib_sizes <- colSums(counts)
+    cpm <- sweep(counts, 2, lib_sizes / 1e6, FUN = "/")
+    expr_mat <- log2(cpm + 1)
     cat(sprintf("  Bundle expression filter retained %d genes for WGCNA\n", nrow(expr_mat)))
 
     # Samples × genes for WGCNA
@@ -218,7 +219,6 @@ run_gtex_wgcna <- function(region) {
     colnames(me) <- label_map[sub("^ME", "", colnames(me))]
     me_df <- cbind(data.frame(sample_id = rownames(me), stringsAsFactors = FALSE), me)
 
-    # Sample table (subset to samples used)
     sample_tbl <- bundle_samples[bundle_samples$sample_id %in% rownames(me), ]
 
     linear <- linear_age_assoc(me_df, sample_tbl, AGE_COL)
@@ -228,15 +228,15 @@ run_gtex_wgcna <- function(region) {
     if (!is.null(spline)) write_parquet(spline, file.path(out_dir, "age_spline.parquet"))
 
     n_modules <- length(unique(modules_df$module_id))
-    cat(sprintf("  → %d modules | %d genes | power=%d\n", n_modules, nrow(datExpr), power))
+    cat(sprintf("  -> %d modules | %d samples | power=%d\n", n_modules, nrow(datExpr), power))
 }
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 args <- commandArgs(trailingOnly = TRUE)
-regions_to_run <- if (length(args) > 0) args else GTEX_REGIONS
+regions_to_run <- if (length(args) > 0) args else BRAINSEQ_REGIONS
 for (region in regions_to_run) {
     tryCatch(
-        run_gtex_wgcna(region),
+        run_brainseq_wgcna(region),
         error = function(e) message(sprintf("ERROR in %s: %s", region, conditionMessage(e)))
     )
 }
