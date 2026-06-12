@@ -29,6 +29,11 @@ rel <- function(...) file.path(ROOT, ...)
 RAW_PATH     <- rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
 LONG_PATH    <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
 SUMMARY_PATH <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
+# Precomputed paired tests with FULL-FAMILY (scenario x metric x method) BH adjustment.
+# The main figure's significance brackets are driven by this table's p_adj so the
+# stars match the reported full-family FDR exactly (rather than ggpubr recomputing a
+# per-panel correction). See full_family_brackets() and box_metric_panel().
+PAIRWISE_PATH <- rel("benchmark", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
 # Stage-03 interpretation accuracy (multi_isoform_switch); optional - figures that
 # read it skip cleanly when the file is absent (its array job may still be running).
 INTERPRET_SUMMARY_PATH <- rel("benchmark", "02_interpret", "_m", "synthetic_interpret_summary.parquet")
@@ -188,6 +193,14 @@ MAIN_METRICS <- c(
   "metrics_nonswitch_gene_module_rate"
 )
 
+# Star tiers for the geom_pwc SUPPLEMENTS (dose-response, compute). Threshold is
+# FDR < 0.05: the lowest star ("*") covers 0.01 <= p.adj < 0.05, and the top cutpoint
+# at 0.05 sends everything above it to "ns", which geom_pwc(hide.ns = TRUE) then drops.
+# No bracket is ever shown for p.adj >= 0.05. (The main figure does NOT use this; it
+# reads the full-family p_adj via stat_pvalue_manual + signif_stars(), so its stars use
+# the identical thresholds but the manuscript's full-family correction. The
+# 0.05 <= FDR < 0.10 "suggestive" band lives only in the significant_10 column of
+# synthetic_pairwise_tests.parquet, as a table-only sensitivity analysis.)
 PWC_LABEL <- "{p.adj.signif}"
 PWC_SYMNUM_ARGS <- list(
   cutpoints = c(0, 0.0001, 0.001, 0.01, 0.05, Inf),
@@ -296,6 +309,57 @@ present_scenarios <- function(df, order, col = "scenario") {
 }
 
 # ---------------------------------------------------------------------------
+# Full-family significance brackets for the MAIN figure.
+#
+# The main accuracy/specificity figure brackets a single comparison per scenario
+# facet (isograph_vae vs WGCNA). Instead of letting geom_pwc recompute a per-panel
+# Wilcoxon + local BH, we read the precomputed full-family adjusted p-value
+# (`p_adj`, BH over all 468 scenario x metric x method comparisons) from
+# synthetic_pairwise_tests.parquet, so the figure stars correspond exactly to the
+# FDR reported in the manuscript and tables. (The dose-response and compute
+# supplements test finer-grained per-parameter / per-gene-count comparisons that are
+# NOT part of this family, so they retain local geom_pwc stars — see those panels.)
+# ---------------------------------------------------------------------------
+
+# Map an adjusted p-value to ggpubr-style stars; NA (and p_adj >= 0.05) -> no bracket.
+signif_stars <- function(p) {
+  ifelse(is.na(p), NA_character_,
+  ifelse(p < 0.0001, "****",
+  ifelse(p < 0.001,  "***",
+  ifelse(p < 0.01,   "**",
+  ifelse(p < 0.05,   "*", NA_character_)))))
+}
+
+# Build a stat_pvalue_manual-ready data frame of significant (full-family FDR < 0.05)
+# brackets for one metric, keyed to the facet variable `scenario_label`. Returns NULL
+# when the pairwise table is unavailable or nothing is significant.
+full_family_brackets <- function(metric_name, scenarios, scenario_labels,
+                                  group1 = "isograph_vae", group2 = "wgcna_gene",
+                                  y_position = 1.01) {
+  if (!exists("PAIRWISE") || is.null(PAIRWISE)) return(NULL)
+  bdf <- PAIRWISE |>
+    filter(
+      .data$metric == metric_name,
+      .data$method == group1,
+      .data$method_ref == group2,
+      .data$scenario %in% scenarios
+    ) |>
+    mutate(label = signif_stars(.data$p_adj)) |>
+    filter(!is.na(.data$label))
+  if (nrow(bdf) == 0) return(NULL)
+  bdf |>
+    mutate(
+      group1 = group1,
+      group2 = group2,
+      y.position = y_position,
+      scenario_label = factor(
+        unname(scenario_labels[as.character(.data$scenario)]),
+        levels = unname(scenario_labels[scenarios])
+      )
+    )
+}
+
+# ---------------------------------------------------------------------------
 # Main figure: CPU accuracy and specificity benchmark
 # ---------------------------------------------------------------------------
 scenario_count_labels <- function(long_df, methods = MAIN_METHOD_ORDER,
@@ -355,8 +419,10 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
                              scenarios = MAIN_SCENARIO_ORDER) {
   sub <- metric_box_data(long_df, metric_name, methods = methods,
                          scenarios = scenarios)
-  stat_sub <- sub |>
-    filter(.data$method %in% c("isograph_vae", "wgcna_gene"))
+  # Full-family FDR < 0.05 brackets (isograph_vae vs WGCNA), one per scenario facet,
+  # read from the precomputed paired-test table so the stars match the reported FDR.
+  scenario_labels <- scenario_count_labels(long_df, methods, scenarios)
+  pwc_df <- full_family_brackets(metric_name, scenarios, scenario_labels)
 
   p <- ggpubr::ggboxplot(
     sub,
@@ -384,24 +450,6 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
       breaks = c(0, 0.25, 0.5, 0.75, 1),
       expand = expansion(mult = c(0.02, 0.08))
     ) +
-    ggpubr::geom_pwc(
-      data = stat_sub,
-      mapping = aes(x = .data$method, y = .data$value_plot,
-                    group = .data$method),
-      method = "wilcox_test",
-      label = PWC_LABEL,
-      p.adjust.method = "BH",
-      p.adjust.by = "panel",
-      symnum.args = PWC_SYMNUM_ARGS,
-      hide.ns = TRUE,
-      y.position = 1.01,
-      tip.length = 0.01,
-      bracket.nudge.y = 0,
-      bracket.shorten = 0.04,
-      size = 0.25,
-      label.size = 2.6,
-      inherit.aes = FALSE
-    ) +
     coord_cartesian(ylim = c(0, 1.08), clip = "off") +
     labs(x = NULL, y = y_label, fill = NULL, tag = tag) +
     theme(
@@ -409,6 +457,23 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
       axis.text.x = element_text(angle = 35, hjust = 1, size = 7),
       plot.tag = element_text(size = 10, face = "bold")
     )
+
+  # Significance brackets driven by the full-family adjusted p-value (FDR < 0.05).
+  # pre-filtered to significant comparisons, so no hide.ns logic is needed here.
+  if (!is.null(pwc_df)) {
+    p <- p + ggpubr::stat_pvalue_manual(
+      pwc_df,
+      label = "label",
+      xmin = "group1",
+      xmax = "group2",
+      y.position = "y.position",
+      tip.length = 0.01,
+      bracket.shorten = 0.04,
+      bracket.size = 0.25,
+      label.size = 2.6,
+      vjust = 0
+    )
+  }
 
   if (!show_x_labels) {
     p <- p + theme(axis.text.x = element_blank(),
@@ -540,6 +605,9 @@ response_dot_fig <- function(long_df, scenario, x_col, facet_col,
       breaks = c(0, 0.25, 0.5, 0.75, 1),
       expand = expansion(mult = c(0.02, 0.08))
     ) +
+    # SUPPLEMENT: per-parameter-bin Wilcoxon (isograph_vae vs WGCNA at each x level).
+    # These finer-grained comparisons are NOT part of the full-family FDR set used by
+    # the main figure; they are local, per-panel BH stars for visual guidance only.
     ggpubr::geom_pwc(
       data = stat_df,
       mapping = aes(x = .data$x_plot, y = .data$value,
@@ -675,6 +743,9 @@ compute_box_panel <- function(plot_df, y_label, tag,
     )
 
   # Significance brackets vs. the VAE CPU reference require >= 2 methods.
+  # SUPPLEMENT: per-gene-count runtime/memory Wilcoxon (each method vs isograph_vae).
+  # These compute comparisons are NOT part of the main full-family FDR set; they are
+  # local, per-panel BH stars for visual guidance only.
   if (length(methods) > 1 && "isograph_vae" %in% methods) {
     p <- p +
       ggpubr::geom_pwc(
@@ -1317,6 +1388,14 @@ if (!file.exists(SUMMARY_PATH)) stop("Missing: ", SUMMARY_PATH)
 raw     <- load_raw(RAW_PATH)
 long    <- load_long(LONG_PATH)
 summary <- load_summary(SUMMARY_PATH)
+# Full-family paired tests drive the main figure's significance brackets (FDR < 0.05).
+# Optional: if absent, the main-figure brackets are skipped (a warning is emitted).
+PAIRWISE <- if (file.exists(PAIRWISE_PATH)) {
+  read_parquet(PAIRWISE_PATH)
+} else {
+  cat("  (pairwise tests not found - main-figure FDR brackets will be skipped)\n")
+  NULL
+}
 # Stage-03 interpretation summary is optional (its array job may still be running).
 interp  <- if (file.exists(INTERPRET_SUMMARY_PATH)) {
   read_parquet(INTERPRET_SUMMARY_PATH)
