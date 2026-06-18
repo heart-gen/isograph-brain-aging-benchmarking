@@ -91,15 +91,38 @@ def _split_indices(n: int, seed: int) -> tuple[np.ndarray, np.ndarray]:
     return perm[:h], perm[h:]
 
 
-def _vae_config(spec: dict, consensus_runs: int = 1) -> VaeModelConfig:
+def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
+                min_minor_usage: float = 0.1, tin: bool = False,
+                reliability_floor: float = 0.0,
+                extra_covariates: list[str] | None = None) -> VaeModelConfig:
+    covariates = list(spec["covariates"]) + list(extra_covariates or [])
     kw = dict(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=spec["covariates"],
+        residualize_covariates=covariates,
         min_module_size=20, trait_columns=[spec["age_col"]], random_state=VAE_SEED,
         allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=2.0,
     )
     if consensus_runs and consensus_runs >= 2:
         kw["consensus_runs"] = consensus_runs
+    if reliability:
+        # Covariate-free isoform-estimability downweighting of switch-switch edges:
+        # genes whose minor isoform lacks read support carry a noise switch
+        # coordinate that flips between split-halves; downweighting their edges
+        # should stabilise the surviving module structure.
+        kw["switch_reliability_weighting"] = True
+        kw["switch_reliability_source"] = "estimability"
+        kw["switch_estimability_min_minor_usage"] = min_minor_usage
+    if tin:
+        # Per-gene differential transcript-integrity (TIN) downweighting: genes whose
+        # isoform composition tracks within-gene differential degradation are switch
+        # artifacts -> downweight their switch-switch edges (needs transcript_tin).
+        kw["switch_reliability_weighting"] = True
+        kw["switch_reliability_source"] = "tin_differential"
+    if reliability_floor > 0:
+        # Cap the per-gene downweight at this floor (reliability in [floor, 1]) so a
+        # noisy/degraded gene keeps a minimum switch contribution instead of being
+        # fully pruned -- guards n_common against over-aggressive edge removal.
+        kw["switch_reliability_floor"] = reliability_floor
     if spec["lr"] is not None:
         kw["lr"] = spec["lr"]
     return VaeModelConfig(**kw)
@@ -115,7 +138,10 @@ def _write_partition(modules: pd.DataFrame, cohort, region, method, seed, half) 
 
 
 def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = None,
-                 only_half: str | None = None, consensus_runs: int = 1) -> None:
+                 only_half: str | None = None, consensus_runs: int = 1,
+                 reliability: bool = False, min_minor_usage: float = 0.1,
+                 tin: bool = False, median_tin_covariate: bool = False,
+                 reliability_floor: float = 0.0) -> None:
     """Fit IsoGraph on both split-halves for every seed in ``range(seeds)``, or for a
     single ``only_seed`` / ``only_half`` when given.
 
@@ -134,7 +160,17 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
     if cohort not in COHORTS:
         raise SystemExit(f"unknown cohort {cohort!r} (expected one of {list(COHORTS)})")
     spec = COHORTS[cohort]
-    method = "isograph_consensus" if consensus_runs and consensus_runs >= 2 else "isograph"
+    method = "isograph"
+    if consensus_runs and consensus_runs >= 2:
+        method += "_consensus"
+    if reliability:
+        method += "_reliability"
+    if tin:
+        method += "_tin"
+    if median_tin_covariate:
+        method += "_mediantin"
+    if reliability_floor > 0:
+        method += f"_f{int(round(reliability_floor * 100)):02d}"
     bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
     sample_table = bundle.sample_table.reset_index(drop=True)
     tc = bundle.matrices["transcript_counts"]
@@ -146,7 +182,27 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         tc = np.asarray(tc)
     del bundle
     n = sample_table.shape[0]
-    cfg = _vae_config(spec, consensus_runs=consensus_runs)
+
+    # Optional TIN inputs (brainseq caudate pilot). tin_mat is aligned row-for-row to
+    # the (filtered) transcript table and column-for-column to sample_table order, so
+    # it can be sliced by the same half index as tc.
+    tin_mat = None
+    extra_covariates: list[str] = []
+    if tin or median_tin_covariate:
+        from isograph_benchmark.real_data.tin import load_tin_aligned, load_sample_median_tin
+        sample_ids = sample_table["sample_id"].astype(str).tolist()
+        if tin:
+            tin_mat = load_tin_aligned(cohort, region,
+                                       tt["transcript_id"].astype(str).tolist(), sample_ids)
+        if median_tin_covariate:
+            sample_table = sample_table.copy()
+            sample_table["median_tin"] = load_sample_median_tin(cohort, region, sample_ids)
+            extra_covariates.append("median_tin")
+
+    cfg = _vae_config(spec, consensus_runs=consensus_runs,
+                      reliability=reliability, min_minor_usage=min_minor_usage,
+                      tin=tin, reliability_floor=reliability_floor,
+                      extra_covariates=extra_covariates)
     ks = [only_seed] if only_seed is not None else list(range(seeds))
     print(f"[{cohort}/{region}] {n} samples, {tc.shape[0]} transcripts | "
           f"method={method} | seeds {ks}", flush=True)
@@ -157,11 +213,17 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         if only_half is not None:
             halves = tuple(h for h in halves if h[0] == only_half)
         for half, idx in halves:
+            out = _partitions_dir() / f"{method}__{cohort}__{region}__seed{k}__{half}.parquet"
+            if out.exists():
+                print(f"  seed{k} {half}: exists, skipping", flush=True)
+                continue
             t0 = time.time()
             try:
                 st = sample_table.iloc[idx].reset_index(drop=True)
+                tin_half = tin_mat[:, idx] if tin_mat is not None else None
                 art = VaeNetworkModel(cfg).fit(
                     transcript_counts=tc[:, idx], transcript_table=tt, sample_table=st,
+                    transcript_tin=tin_half,
                 )
                 mods = art.module_table[["gene_id", "module_id"]]
                 _write_partition(mods, cohort, region, method, k, half)
@@ -279,13 +341,32 @@ def main() -> None:
     fi.add_argument("--consensus", type=int, default=1, metavar="N",
                     help="consensus Leiden over N seeded runs (>=2 enables; tags "
                          "partitions 'isograph_consensus' for A/B vs baseline)")
+    fi.add_argument("--reliability", action="store_true",
+                    help="covariate-free isoform-estimability downweighting of "
+                         "switch-switch edges (tags partitions 'isograph_reliability')")
+    fi.add_argument("--min-minor-usage", type=float, default=0.1, metavar="U",
+                    help="minor-isoform usage floor for --reliability (default 0.1)")
+    fi.add_argument("--tin", action="store_true",
+                    help="per-gene differential-TIN switch-edge downweighting "
+                         "(needs cached TIN; tags partitions 'isograph_tin')")
+    fi.add_argument("--median-tin-covariate", action="store_true",
+                    help="add per-sample median TIN to residualization covariates "
+                         "(tags partitions 'isograph_mediantin')")
+    fi.add_argument("--reliability-floor", type=float, default=0.0, metavar="F",
+                    help="floor for the per-gene reliability weight (reliability in "
+                         "[F,1]); caps downweighting. Tags partitions '_fNN'.")
     sub.add_parser("aggregate", help="compute ARI/NMI over all partitions and summarize")
     args = ap.parse_args()
 
     if args.cmd == "fit-isograph":
         fit_isograph(args.cohort, args.region, args.seeds,
                      only_seed=args.seed, only_half=args.half,
-                     consensus_runs=args.consensus)
+                     consensus_runs=args.consensus,
+                     reliability=args.reliability,
+                     min_minor_usage=args.min_minor_usage,
+                     tin=args.tin,
+                     median_tin_covariate=args.median_tin_covariate,
+                     reliability_floor=args.reliability_floor)
     else:
         aggregate()
 

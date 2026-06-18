@@ -44,12 +44,28 @@ SEEDS="${STABILITY_SEEDS:-5}"
 # 'isograph_consensus' for an A/B against the baseline 'isograph' partitions). Set via
 #   sbatch --export=ALL,STABILITY_CONSENSUS=10 ...
 CONSENSUS="${STABILITY_CONSENSUS:-1}"
+# Covariate-free isoform-estimability switch-edge downweighting (1 enables; partitions
+# tagged 'isograph_reliability' for an A/B against the baseline 'isograph' partitions).
+# Set via:  sbatch --export=ALL,STABILITY_RELIABILITY=1 ...
+RELIABILITY="${STABILITY_RELIABILITY:-0}"
+RELIABILITY_FLAG=""
+if [[ "${RELIABILITY}" == "1" ]]; then RELIABILITY_FLAG="--reliability"; fi
+# Per-gene differential-TIN downweighting (needs cached TIN; tags 'isograph_tin') and/or
+# per-sample median-TIN covariate (tags 'isograph_mediantin'). brainseq caudate pilot.
+#   sbatch --export=ALL,STABILITY_TIN=1 ...   /   --export=ALL,STABILITY_MEDIAN_TIN=1 ...
+TIN_FLAG=""
+if [[ "${STABILITY_TIN:-0}" == "1" ]]; then TIN_FLAG="--tin"; fi
+MEDIAN_TIN_FLAG=""
+if [[ "${STABILITY_MEDIAN_TIN:-0}" == "1" ]]; then MEDIAN_TIN_FLAG="--median-tin-covariate"; fi
+# Reliability-weight floor (reliability in [F,1]); caps downweighting / guards n_common.
+FLOOR_FLAG=""
+if [[ -n "${STABILITY_RELIABILITY_FLOOR:-}" ]]; then FLOOR_FLAG="--reliability-floor ${STABILITY_RELIABILITY_FLOOR}"; fi
 
 module purge
 module load anaconda3/2024.10-1
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
-log_message "**** IsoGraph split-half: ${COHORT}/${REGION} (${SEEDS} seeds, consensus=${CONSENSUS}) starts ****"
+log_message "**** IsoGraph split-half: ${COHORT}/${REGION} (${SEEDS} seeds, consensus=${CONSENSUS}, reliability=${RELIABILITY}) starts ****"
 # One process per FIT (seed x half): each VAE fit's allocations are not fully reclaimed
 # in-process, and a single fit on the largest region (~18k genes) peaks near 16G, so
 # even two fits in one process OOM-kill at 32G. Isolating to one fit per process keeps
@@ -60,7 +76,7 @@ for ((k = 0; k < SEEDS; k++)); do
         log_message "  seed ${k} half ${half} ..."
         python -m isograph_benchmark.real_data.stability fit-isograph \
             --cohort "${COHORT}" --region "${REGION}" --seed "${k}" --half "${half}" \
-            --consensus "${CONSENSUS}"
+            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${TIN_FLAG} ${MEDIAN_TIN_FLAG} ${FLOOR_FLAG}
     done
 done
 conda deactivate
