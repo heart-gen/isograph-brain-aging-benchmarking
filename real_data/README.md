@@ -255,6 +255,32 @@ intrinsically noisier, sparser switch signal — and the honest framing is the o
 analysis already supports: IsoGraph is a complementary DTU-without-DGE layer, not a method
 that recovers more reproducible modules than WGCNA.
 
+**Caveat — this measures reproducibility, not accuracy, and is not a head-to-head verdict
+against WGCNA.** There is no ground truth on real data, so ARI/NMI here compare the *two
+split-halves to each other* (self-consistency), never to a true labeling. That is a
+different quantity from the synthetic benchmark, where ARI is module *recovery* against the
+planted modules and IsoGraph scores well because the switch signal is injected at clean,
+high effect size. The synthetic-vs-real gap therefore reflects real-data SNR, not a defect:
+the real switch signal is subtle (n≈110/half), confounded, and gated to multi-isoform genes.
+Three reasons WGCNA's higher numbers do **not** mean it is "better" at IsoGraph's task:
+
+- **Different signal SNR.** WGCNA clusters gene **abundance** (log-CPM) — smooth, high-SNR,
+  partitions near-identically on any half regardless of biological meaning. IsoGraph clusters
+  within-gene **isoform-switch coordinates** (PC1 of CLR composition) — low-SNR by
+  construction. Lower split-half agreement is the *expected* cost of measuring a harder
+  signal, not evidence the method is broken.
+- **Different gene sets.** The two ARI/NMI values are computed over different `n_common`
+  (~8–9k switch-capable genes vs ~18–19k) and different partition granularities, so they are
+  not strictly comparable point-for-point.
+- **Different biology.** WGCNA's stability reflects abundance co-expression and says nothing
+  about isoform usage; IsoGraph is the only layer measuring switch (DTU-without-DGE)
+  structure. "WGCNA is more reproducible" ≠ "WGCNA captures what IsoGraph captures."
+
+The proper use of this test is as a *relative* instrument: A/B-ing changes to IsoGraph
+against its **own** baseline (e.g. covariate-free isoform-estimability edge downweighting
+improves within-cohort ARI in 5/6 regions and NMI in 6/6; consensus Leiden did not), not as
+a cross-method ranking.
+
 ## WGCNA fixes
 
 Two bugs were fixed in `real_data/gtex/_h/02.wgcna_gene.R`:
