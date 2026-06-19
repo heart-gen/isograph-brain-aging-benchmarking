@@ -269,6 +269,93 @@ def replication(pair: str, method: str, k: int, sig: float) -> None:
     print(f"\nwrote {path}", flush=True)
 
 
+def _composition_unique_genes(cohort: str, region: str) -> set:
+    """Genes flagged DTU-without-DGE (switch significant, abundance not) -- invisible to
+    an abundance method like WGCNA."""
+    root = PROD_ROOTS[(cohort, region)]
+    path = rel(*root, "isograph_vae", "composition_unique", "genes.parquet")
+    if not path.exists():
+        return set()
+    df = pd.read_parquet(path)
+    return set(df.loc[df["category"] == "composition_unique", "gene_id"].astype(str))
+
+
+def _wgcna_age_genes(cohort: str, region: str, fdr: float) -> set:
+    """Union of genes in age-associated WGCNA modules (the abundance-based age signal)."""
+    root = PROD_ROOTS[(cohort, region)]
+    mods = pd.read_parquet(rel(*root, "wgcna_gene", "modules.parquet"))
+    mods["gene_id"] = mods["gene_id"].astype(str)
+    age = pd.read_parquet(rel(*root, "wgcna_gene", "age_linear.parquet"))
+    sig = set(age.loc[age["fdr"] < fdr, "module_id"].astype(str))
+    return set(mods.loc[mods["module_id"].astype(str).isin(sig), "gene_id"])
+
+
+def _structure_flags(cohort: str, region: str) -> pd.DataFrame:
+    root = PROD_ROOTS[(cohort, region)]
+    path = rel(*root, "isograph_vae", "module_interpret", "structure_annotations.parquet")
+    df = pd.read_parquet(path)
+    df["transcript_id"] = df["transcript_id"].astype(str)
+    return df.set_index("transcript_id")
+
+
+def complementarity(cohort: str, region: str, method: str, k: int, fdr: float) -> None:
+    """Q4: for trusted modules, quantify the biology WGCNA cannot see -- DTU-without-DGE
+    gene fraction, (non-)overlap with age-associated WGCNA modules, and the splicing-level
+    structural switches of their driver transcripts."""
+    stab = pd.read_parquet(
+        _out_dir() / f"module_stability__{cohort}__{region}__{method}.parquet")
+    trusted = stab.loc[stab["trusted"], "module_id"].astype(str).tolist()
+    genes = _module_genes(cohort, region)
+    drivers = _module_drivers(cohort, region, k)
+    dtu = _composition_unique_genes(cohort, region)
+    wgcna_age = _wgcna_age_genes(cohort, region, fdr)
+    age = _age_effects(cohort, region)
+    struct = _structure_flags(cohort, region)
+    sflags = ["cds_changed", "utr_changed", "biotype_switch", "coding_status_change"]
+    print(f"[{cohort}/{region}/{method}] {len(trusted)} trusted modules | "
+          f"{len(dtu)} DTU-without-DGE genes | {len(wgcna_age)} genes in age-WGCNA modules",
+          flush=True)
+
+    rows = []
+    for m in trusted:
+        g = genes.get(m, set())
+        drv = [t for t in drivers.get(m, set()) if t in struct.index]
+        srow = {f"drv_{f}": (float(struct.loc[drv, f].mean()) if drv else float("nan"))
+                for f in sflags}
+        eb = age.loc[m] if m in age.index else None
+        rows.append({
+            "cohort": cohort, "region": region, "module_id": m, "n_genes": len(g),
+            "n_dtu_without_dge": len(g & dtu),
+            "frac_dtu_without_dge": len(g & dtu) / len(g) if g else 0.0,
+            "frac_in_wgcna_age_modules": len(g & wgcna_age) / len(g) if g else 0.0,
+            "age_effect": float(eb["effect"]) if eb is not None else np.nan,
+            "age_fdr": float(eb["fdr"]) if eb is not None else np.nan,
+            "age_sig": bool(eb is not None and eb["fdr"] < fdr),
+            **srow,
+        })
+    out = pd.DataFrame(rows).sort_values(
+        ["age_sig", "n_dtu_without_dge"], ascending=False).reset_index(drop=True)
+    path = _out_dir() / f"module_complementarity__{cohort}__{region}__{method}.parquet"
+    out.to_parquet(path, index=False)
+
+    n_dtu_mod = int((out["n_dtu_without_dge"] > 0).sum())
+    headline = out[out["age_sig"]]
+    print(f"\n=== Q4 WGCNA-complementarity ({cohort}/{region}) ===", flush=True)
+    print(f"trusted modules carrying DTU-without-DGE genes: {n_dtu_mod}/{len(out)} | "
+          f"total DTU-without-DGE genes in trusted modules: {int(out['n_dtu_without_dge'].sum())}",
+          flush=True)
+    print(f"trusted & age-associated modules (the headline set): {len(headline)}", flush=True)
+    with pd.option_context("display.float_format", lambda x: f"{x:.3f}",
+                           "display.max_rows", None):
+        cols = ["module_id", "n_genes", "n_dtu_without_dge", "frac_dtu_without_dge",
+                "frac_in_wgcna_age_modules", "age_effect", "age_sig",
+                "drv_cds_changed", "drv_biotype_switch"]
+        print(out[cols].head(15).to_string(index=False), flush=True)
+    print(f"\nwrote {path}", flush=True)
+    print("NOTE: per-module GO enrichment not yet wired (raw GO files in "
+          "inputs/go_annotations/); add as a follow-on.", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -285,11 +372,19 @@ def main() -> None:
     rp.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     rp.add_argument("--k", type=int, default=5, help="top-k driver transcripts for matching")
     rp.add_argument("--sig", type=float, default=0.05, help="Age p-value cutoff for 'both_sig'")
+    cm = sub.add_parser("complementarity", help="Q4: DTU-without-DGE / WGCNA-complementarity")
+    cm.add_argument("--cohort", default="brainseq")
+    cm.add_argument("--region", default="caudate")
+    cm.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
+    cm.add_argument("--k", type=int, default=5, help="top-k driver transcripts for structure")
+    cm.add_argument("--fdr", type=float, default=0.05)
     args = ap.parse_args()
     if args.cmd == "stability":
         stability(args.cohort, args.region, args.method, args.n_perm, args.seed, args.fdr)
     elif args.cmd == "replication":
         replication(args.pair, args.method, args.k, args.sig)
+    elif args.cmd == "complementarity":
+        complementarity(args.cohort, args.region, args.method, args.k, args.fdr)
 
 
 if __name__ == "__main__":
