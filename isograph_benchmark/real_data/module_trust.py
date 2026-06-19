@@ -35,6 +35,16 @@ PROD_ROOTS = {
     ("brainseq", "caudate"): ("real_data", "brainseq", "caudate", "_m"),
     ("brainseq", "hippocampus"): ("real_data", "brainseq", "hippocampus", "_m"),
     ("brainseq", "dlpfc"): ("real_data", "brainseq", "dlpfc", "_m"),
+    ("gtex", "caudate_basal_ganglia"): ("real_data", "gtex", "caudate_basal_ganglia", "_m"),
+    ("gtex", "hippocampus"): ("real_data", "gtex", "hippocampus", "_m"),
+    ("gtex", "frontal_cortex_ba9"): ("real_data", "gtex", "frontal_cortex_ba9", "_m"),
+}
+
+# cross-cohort caudate-matched pairs (BrainSEQ region, GTEx region) for Q3 replication
+REGION_PAIRS = {
+    "caudate": (("brainseq", "caudate"), ("gtex", "caudate_basal_ganglia")),
+    "hippocampus": (("brainseq", "hippocampus"), ("gtex", "hippocampus")),
+    "dlpfc_ba9": (("brainseq", "dlpfc"), ("gtex", "frontal_cortex_ba9")),
 }
 
 
@@ -161,6 +171,104 @@ def stability(cohort: str, region: str, method: str, n_perm: int, seed: int,
     print(f"\nwrote {path}", flush=True)
 
 
+def _module_drivers(cohort: str, region: str, k: int) -> dict[str, set]:
+    """Top-k driver transcripts per production module (top |r| in the explain-module
+    transcript_polarity_table, i.e. isoforms whose usage tracks the module)."""
+    root = PROD_ROOTS[(cohort, region)]
+    interp = rel(*root, "isograph_vae", "module_interpret")
+    out: dict[str, set] = {}
+    if not interp.exists():
+        return out
+    for mdir in interp.iterdir():
+        tp = mdir / "transcript_polarity_table.parquet"
+        if not (mdir.is_dir() and tp.exists()):
+            continue
+        df = pd.read_parquet(tp, columns=["transcript_id", "r"]).dropna(subset=["r"])
+        if df.empty:
+            continue
+        top = df.reindex(df["r"].abs().sort_values(ascending=False).index).head(k)
+        out[mdir.name] = set(top["transcript_id"].astype(str))
+    return out
+
+
+def _module_genes(cohort: str, region: str) -> dict[str, set]:
+    """gene set per production module (quantifier-robust matching key)."""
+    return _load_production_modules(cohort, region, "isograph")
+
+
+def _age_effects(cohort: str, region: str) -> pd.DataFrame:
+    root = PROD_ROOTS[(cohort, region)]
+    df = pd.read_parquet(rel(*root, "isograph_vae", "age_linear.parquet"))
+    df["module_id"] = df["module_id"].astype(str)
+    return df.set_index("module_id")[["effect", "pvalue", "fdr"]]
+
+
+def _trusted_set(cohort: str, region: str, method: str) -> set:
+    path = _out_dir() / f"module_stability__{cohort}__{region}__{method}.parquet"
+    if not path.exists():
+        raise SystemExit(f"run Q1 `stability` for {cohort}/{region}/{method} first ({path})")
+    df = pd.read_parquet(path)
+    return set(df.loc[df["trusted"], "module_id"].astype(str))
+
+
+def replication(pair: str, method: str, k: int, sig: float) -> None:
+    """Q3 cross-cohort aging replication: match trusted modules across cohorts by driver-
+    transcript overlap, then test Age-effect sign/significance concordance."""
+    (bc, br), (gc, gr) = REGION_PAIRS[pair]
+    bs_trust = _trusted_set(bc, br, method)
+    gt_trust = _trusted_set(gc, gr, method)
+    bs_genes, gt_genes = _module_genes(bc, br), _module_genes(gc, gr)
+    bs_drv, gt_drv = _module_drivers(bc, br, k), _module_drivers(gc, gr, k)
+    bs_age, gt_age = _age_effects(bc, br), _age_effects(gc, gr)
+    print(f"[{pair}] {bc}/{br} ({len(bs_trust)} trusted) <-> {gc}/{gr} "
+          f"({len(gt_trust)} trusted) | gene-set matching (driver Jaccard reported "
+          f"separately; isoform drivers are quantifier-sensitive)", flush=True)
+
+    rows = []
+    for m in sorted(bs_trust):
+        gm = bs_genes.get(m, set())
+        # best-matching GTEx module by GENE-set Jaccard (genes are quantifier-robust;
+        # top driver isoforms are not, so they cannot key the cross-cohort match)
+        best, bestj = None, 0.0
+        for g, gg in gt_genes.items():
+            j = len(gm & gg) / len(gm | gg) if (gm | gg) else 0.0
+            if j > bestj:
+                best, bestj = g, j
+        dm, dg = bs_drv.get(m, set()), gt_drv.get(best, set())
+        drv_j = len(dm & dg) / len(dm | dg) if (best and (dm | dg)) else 0.0
+        eb = bs_age.loc[m] if m in bs_age.index else None
+        eg = gt_age.loc[best] if (best is not None and best in gt_age.index) else None
+        sign_match = bool(eb is not None and eg is not None
+                          and np.sign(eb["effect"]) == np.sign(eg["effect"]))
+        both_sig = bool(eb is not None and eg is not None
+                        and eb["pvalue"] < sig and eg["pvalue"] < sig)
+        rows.append({
+            "pair": pair, "bs_module": m, "gtex_match": best, "gene_jaccard": bestj,
+            "driver_jaccard": drv_j, "match_trusted": best in gt_trust if best else False,
+            "age_effect_bs": float(eb["effect"]) if eb is not None else np.nan,
+            "age_p_bs": float(eb["pvalue"]) if eb is not None else np.nan,
+            "age_effect_gtex": float(eg["effect"]) if eg is not None else np.nan,
+            "age_p_gtex": float(eg["pvalue"]) if eg is not None else np.nan,
+            "sign_match": sign_match, "both_sig": both_sig,
+            "replicates": bool(sign_match and both_sig and bestj > 0),
+        })
+    out = pd.DataFrame(rows).sort_values("gene_jaccard", ascending=False).reset_index(drop=True)
+    path = _out_dir() / f"module_aging_replication__{pair}__{method}.parquet"
+    out.to_parquet(path, index=False)
+
+    n_match = int((out["gene_jaccard"] > 0).sum())
+    n_rep = int(out["replicates"].sum())
+    print(f"\n=== Q3 cross-cohort aging replication ({pair}) ===", flush=True)
+    print(f"trusted BrainSEQ modules: {len(out)} | gene-matched to GTEx: {n_match} | "
+          f"aging replicates (sign+both p<{sig}): {n_rep}", flush=True)
+    with pd.option_context("display.float_format", lambda x: f"{x:.3f}",
+                           "display.max_rows", None):
+        print(out[["bs_module", "gtex_match", "gene_jaccard", "driver_jaccard",
+                   "match_trusted", "age_effect_bs", "age_effect_gtex", "sign_match",
+                   "both_sig", "replicates"]].to_string(index=False), flush=True)
+    print(f"\nwrote {path}", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -172,9 +280,16 @@ def main() -> None:
     st.add_argument("--n-perm", type=int, default=1000)
     st.add_argument("--seed", type=int, default=0)
     st.add_argument("--fdr", type=float, default=0.05)
+    rp = sub.add_parser("replication", help="Q3: cross-cohort aging replication of trusted modules")
+    rp.add_argument("--pair", default="caudate", choices=list(REGION_PAIRS))
+    rp.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
+    rp.add_argument("--k", type=int, default=5, help="top-k driver transcripts for matching")
+    rp.add_argument("--sig", type=float, default=0.05, help="Age p-value cutoff for 'both_sig'")
     args = ap.parse_args()
     if args.cmd == "stability":
         stability(args.cohort, args.region, args.method, args.n_perm, args.seed, args.fdr)
+    elif args.cmd == "replication":
+        replication(args.pair, args.method, args.k, args.sig)
 
 
 if __name__ == "__main__":
