@@ -27,6 +27,9 @@ import numpy as np
 import pandas as pd
 
 from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.real_data.stability import (
+    COHORTS, SEED_BASE, _filter_expressed_transcripts, _split_indices,
+)
 
 # production output dir name <- split-half partition method tag
 METHOD_DIRS = {"isograph": "isograph_vae", "wgcna": "wgcna_gene"}
@@ -356,6 +359,185 @@ def complementarity(cohort: str, region: str, method: str, k: int, fdr: float) -
           "inputs/go_annotations/); add as a follow-on.", flush=True)
 
 
+def _meta_dir():
+    return ensure_dir(rel("real_data", "stability", "_m", "modules_meta"))
+
+
+def meta(cohort: str, region: str, method: str, k: int) -> None:
+    """Step 0 (post-hoc, no re-fit): for each split-half partition, reconstruct the
+    module eigengenes + Age effect (faithfully, via the same feature construction the fit
+    used) and the per-module top-k driver transcripts (from switch-axis loadings). The
+    module assignment is taken from the saved partition; everything else is a deterministic
+    function of the bundle + the seeded split, so no VAE re-run is needed.
+    """
+    from isograph.features.channels import gene_feature_channels, make_feature_scores
+    from isograph.features.residualize import build_design_matrix, residualize_rows
+    from isograph.features.switch import gene_switch_loadings
+    from isograph.io.artifacts import load_dataset_bundle
+    from isograph.models.base import compute_trait_associations
+
+    spec = COHORTS[cohort]
+    age_col = spec["age_col"]
+    bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
+    sample_table = bundle.sample_table.reset_index(drop=True)
+    tc = bundle.matrices["transcript_counts"]
+    tt = bundle.feature_tables["transcript"]
+    if spec["filter_transcripts"]:
+        tc, tt = _filter_expressed_transcripts(tc, tt)
+    else:
+        tc = np.asarray(tc)
+    del bundle
+    n = sample_table.shape[0]
+
+    pdir = rel("real_data", "stability", "_m", "partitions")
+    prefix = f"{method}__{cohort}__{region}__"
+    parts = sorted(p for p in pdir.iterdir()
+                   if p.name.startswith(prefix) and p.suffix == ".parquet")
+    print(f"[{cohort}/{region}/{method}] reconstructing meta for {len(parts)} half-fits",
+          flush=True)
+
+    out_rows = []
+    for p in parts:
+        # parse seed + half from <method>__<cohort>__<region>__seed<k>__<half>.parquet
+        stem = p.stem[len(prefix):]
+        seedtok, half = stem.split("__")
+        seed = int(seedtok.replace("seed", ""))
+        a_idx, b_idx = _split_indices(n, SEED_BASE + seed)
+        idx = a_idx if half == "A" else b_idx
+        st = sample_table.iloc[idx].reset_index(drop=True)
+        part = pd.read_parquet(p)[["gene_id", "module_id"]]
+        part["gene_id"] = part["gene_id"].astype(str)
+
+        switch_matrix, feature_info = gene_feature_channels(tc[:, idx], tt)
+        if switch_matrix.size:
+            design = build_design_matrix(st, spec["covariates"])
+            switch_matrix = residualize_rows(switch_matrix, design)
+        fs = make_feature_scores(switch_matrix, feature_info, st)
+        assoc, _ = compute_trait_associations(part, fs, st, [age_col])
+        age = assoc[assoc["trait"] == age_col].set_index("module_id")
+
+        load = gene_switch_loadings(tc[:, idx], tt)
+        load["abs"] = load["loading"].abs()
+        gene2mod = dict(zip(part["gene_id"], part["module_id"].astype(str)))
+        load["module_id"] = load["gene_id"].map(gene2mod)
+        for mid, grp in load.dropna(subset=["module_id"]).groupby("module_id"):
+            drivers = grp.sort_values("abs", ascending=False)["transcript_id"].head(k).tolist()
+            a = age.loc[mid] if mid in age.index else None
+            out_rows.append({
+                "cohort": cohort, "region": region, "method": method,
+                "seed": seed, "half": half, "module_id": str(mid),
+                "age_effect": float(a["effect"]) if a is not None else np.nan,
+                "age_pvalue": float(a["pvalue"]) if a is not None else np.nan,
+                "drivers": ";".join(drivers),
+            })
+        print(f"  {p.name}: {part['module_id'].nunique()} modules", flush=True)
+
+    out = pd.DataFrame(out_rows)
+    path = _meta_dir() / f"modules_meta__{cohort}__{region}__{method}.parquet"
+    out.to_parquet(path, index=False)
+    n_sig = int((out["age_pvalue"] < 0.05).sum())
+    print(f"\n=== Step-0 meta: {len(out)} (module,half) rows | "
+          f"age p<0.05 in {n_sig} ({100*n_sig/max(len(out),1):.0f}%) ===", flush=True)
+    print(f"wrote {path}", flush=True)
+
+
+def _halffit_module_genes(cohort: str, region: str, method: str) -> dict:
+    """(seed, half) -> {module_id: set(gene_id)} for each split-half partition. Module
+    labels match the meta parquet (both read module_id straight from the partition)."""
+    pdir = rel("real_data", "stability", "_m", "partitions")
+    prefix = f"{method}__{cohort}__{region}__"
+    out: dict = {}
+    for p in sorted(pdir.iterdir()):
+        if not (p.name.startswith(prefix) and p.suffix == ".parquet"):
+            continue
+        seedtok, half = p.stem[len(prefix):].split("__")
+        seed = int(seedtok.replace("seed", ""))
+        df = pd.read_parquet(p)[["gene_id", "module_id"]]
+        df["gene_id"] = df["gene_id"].astype(str)
+        out[(seed, half)] = {str(m): set(g) for m, g in df.groupby("module_id")["gene_id"]}
+    return out
+
+
+def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float) -> None:
+    """Within-cohort Q3 (aging-sign concordance) + Q2 (driver reproducibility). For each
+    seed the two independent halves are matched module-to-module by best gene-set Jaccard;
+    a pair is *reproducible* when that Jaccard >= ``min_jaccard``. Q3: among reproducible
+    pairs, do the two halves agree on the sign of the module-Age effect (overall, and among
+    pairs where both halves are age-nominal)? Q2: cross-half top-k driver-transcript Jaccard
+    on the same matched pairs. Pure post-hoc arithmetic over the meta parquet + partitions."""
+    mpath = _meta_dir() / f"modules_meta__{cohort}__{region}__{method}.parquet"
+    if not mpath.exists():
+        raise SystemExit(f"run `meta` for {cohort}/{region}/{method} first ({mpath})")
+    meta_df = pd.read_parquet(mpath)
+    meta_df["module_id"] = meta_df["module_id"].astype(str)
+    # (seed, half, module_id) -> (age_effect, age_pvalue, driver set)
+    rec: dict = {}
+    for r in meta_df.itertuples(index=False):
+        drv = set(str(r.drivers).split(";")) if isinstance(r.drivers, str) and r.drivers else set()
+        rec[(int(r.seed), r.half, str(r.module_id))] = (r.age_effect, r.age_pvalue, drv)
+
+    genes = _halffit_module_genes(cohort, region, method)
+    seeds = sorted({s for (s, _) in genes})
+    print(f"[{cohort}/{region}/{method}] within-cohort A<->B matching over {len(seeds)} seeds "
+          f"| reproducible = gene Jaccard >= {min_jaccard}", flush=True)
+
+    rows = []
+    for seed in seeds:
+        ga, gb = genes.get((seed, "A")), genes.get((seed, "B"))
+        if not ga or not gb:
+            continue
+        for ma, gset_a in ga.items():
+            best, bestj = None, 0.0
+            for mb, gset_b in gb.items():
+                j = len(gset_a & gset_b) / len(gset_a | gset_b) if (gset_a | gset_b) else 0.0
+                if j > bestj:
+                    best, bestj = mb, j
+            if best is None:
+                continue
+            ea, pa, da = rec.get((seed, "A", ma), (np.nan, np.nan, set()))
+            eb, pb, db = rec.get((seed, "B", best), (np.nan, np.nan, set()))
+            drv_j = len(da & db) / len(da | db) if (da | db) else np.nan
+            rows.append({
+                "cohort": cohort, "region": region, "method": method, "seed": seed,
+                "module_a": ma, "module_b": best, "gene_jaccard": bestj,
+                "reproducible": bestj >= min_jaccard,
+                "age_effect_a": ea, "age_effect_b": eb,
+                "age_p_a": pa, "age_p_b": pb,
+                "sign_concordant": bool(np.sign(ea) == np.sign(eb))
+                                   if (pd.notna(ea) and pd.notna(eb)) else False,
+                "both_age_sig": bool(pd.notna(pa) and pd.notna(pb) and pa < sig and pb < sig),
+                "driver_jaccard": drv_j,
+            })
+    out = pd.DataFrame(rows).sort_values(["seed", "gene_jaccard"],
+                                         ascending=[True, False]).reset_index(drop=True)
+    path = _out_dir() / f"within_cohort__{cohort}__{region}__{method}.parquet"
+    out.to_parquet(path, index=False)
+
+    repro = out[out["reproducible"]]
+    both = repro[repro["both_age_sig"]]
+    n_conc_repro = int(repro["sign_concordant"].sum())
+    n_conc_both = int(both["sign_concordant"].sum())
+    # binomial sign-test p (one-sided, H0: p=0.5) on the both-age-sig pairs
+    from math import comb as _comb
+    nb = len(both)
+    sign_p = (sum(_comb(nb, i) for i in range(n_conc_both, nb + 1)) / 2 ** nb
+              if nb else float("nan"))
+    print(f"\n=== within-cohort Q3 aging concordance ({cohort}/{region}) ===", flush=True)
+    print(f"A<->B matched pairs: {len(out)} | reproducible (J>={min_jaccard}): {len(repro)} "
+          f"| median gene Jaccard (repro): {repro['gene_jaccard'].median():.3f}", flush=True)
+    print(f"sign-concordant among reproducible: {n_conc_repro}/{len(repro)} "
+          f"({100*n_conc_repro/max(len(repro),1):.0f}%)", flush=True)
+    print(f"sign-concordant among reproducible & both-halves-age-nominal: "
+          f"{n_conc_both}/{nb} ({100*n_conc_both/max(nb,1):.0f}%) | sign-test p={sign_p:.3g}",
+          flush=True)
+    print(f"\n=== Q2 driver-transcript reproducibility ({cohort}/{region}) ===", flush=True)
+    dj = repro["driver_jaccard"].dropna()
+    print(f"cross-half top-k driver Jaccard over reproducible pairs: "
+          f"median={dj.median():.3f} mean={dj.mean():.3f} | pairs with any shared driver: "
+          f"{int((dj > 0).sum())}/{len(dj)}", flush=True)
+    print(f"\nwrote {path}", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -378,6 +560,17 @@ def main() -> None:
     cm.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     cm.add_argument("--k", type=int, default=5, help="top-k driver transcripts for structure")
     cm.add_argument("--fdr", type=float, default=0.05)
+    mt = sub.add_parser("meta", help="Step 0: per-half module eigengene Age effect + drivers")
+    mt.add_argument("--cohort", default="brainseq")
+    mt.add_argument("--region", default="caudate")
+    mt.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
+    mt.add_argument("--k", type=int, default=5)
+    wn = sub.add_parser("within", help="within-cohort Q3 aging concordance + Q2 driver reproducibility")
+    wn.add_argument("--cohort", default="brainseq")
+    wn.add_argument("--region", default="caudate")
+    wn.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
+    wn.add_argument("--sig", type=float, default=0.05)
+    wn.add_argument("--min-jaccard", type=float, default=0.25)
     args = ap.parse_args()
     if args.cmd == "stability":
         stability(args.cohort, args.region, args.method, args.n_perm, args.seed, args.fdr)
@@ -385,6 +578,10 @@ def main() -> None:
         replication(args.pair, args.method, args.k, args.sig)
     elif args.cmd == "complementarity":
         complementarity(args.cohort, args.region, args.method, args.k, args.fdr)
+    elif args.cmd == "meta":
+        meta(args.cohort, args.region, args.method, args.k)
+    elif args.cmd == "within":
+        within(args.cohort, args.region, args.method, args.sig, args.min_jaccard)
 
 
 if __name__ == "__main__":
