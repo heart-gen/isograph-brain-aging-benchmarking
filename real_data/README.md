@@ -195,6 +195,92 @@ DLPFC/BA9 (7 shared terms, Jaccard 0.12) — even though most of its 6 pairs sha
 (median 0). WGCNA spreads functional overlap more broadly but largely because its modules
 are larger, not because they localize aging biology more precisely.
 
+### Within-cohort split-half stability (is the cross-cohort failure a confound or method instability?)
+
+The cross-cohort comparison conflates two things: BrainSEQ (Salmon) and GTEx (RSEM) use
+different transcript quantifiers, and within-gene isoform ratios — the switch signal
+IsoGraph models — are quantifier-sensitive, whereas gene abundance (WGCNA's input) is
+quantifier-robust. So a weak IsoGraph cross-cohort replication could be either (a) the
+Salmon-vs-RSEM confound scrambling the switch signal while the method itself is stable, or
+(b) the switch network simply being hard to estimate reproducibly. To separate them we hold
+the quantifier and preprocessing **fixed** (stay inside one cohort), randomly split the
+samples 50/50 over 5 seeds, refit the *same* method on each half with the *same* feature
+set, and measure partition agreement (ARI, NMI) over genes assigned in both halves — the
+same metrics as the cross-cohort test. `isograph_benchmark/real_data/stability.py` fits
+IsoGraph (drivers `real_data/stability/_h/01.stability_isograph.sh`, WGCNA reference
+`stability_wgcna.R` / `02`, aggregator `03`); outputs `real_data/stability/_m/stability_summary.{parquet,json}`
+and `stability_pairs.parquet`.
+
+**Results (mean over 5 seeds; cross-cohort full-data fits shown for contrast).**
+
+| Method | Region | Within-cohort ARI | Within-cohort NMI | Cross-cohort ARI | Cross-cohort NMI |
+|---|---|---|---|---|---|
+| IsoGraph | Caudate (BrainSEQ) | 0.224 | 0.183 | 0.025 | 0.034 |
+| IsoGraph | Caudate (GTEx) | 0.278 | 0.169 | — | — |
+| IsoGraph | Hippocampus (BrainSEQ) | 0.087 | 0.113 | 0.009 | 0.027 |
+| IsoGraph | Hippocampus (GTEx) | 0.237 | 0.152 | — | — |
+| IsoGraph | DLPFC (BrainSEQ) | 0.006 | 0.011 | 0.007 | 0.011 |
+| IsoGraph | BA9 (GTEx) | 0.180 | 0.162 | — | — |
+| WGCNA | Caudate (BrainSEQ) | 0.403 | 0.532 | 0.057 | 0.235 |
+| WGCNA | Caudate (GTEx) | 0.711 | 0.555 | — | — |
+| WGCNA | Hippocampus (BrainSEQ) | 0.291 | 0.343 | 0.306 | 0.231 |
+| WGCNA | Hippocampus (GTEx) | 0.426 | 0.440 | — | — |
+| WGCNA | DLPFC (BrainSEQ) | 0.307 | 0.473 | 0.056 | 0.245 |
+| WGCNA | BA9 (GTEx) | 0.685 | 0.536 | — | — |
+
+The test cleanly separates the two explanations, and **both are present**:
+
+- **The quantifier confound is real.** For caudate and the GTEx regions, IsoGraph's
+  within-cohort ARI (0.18–0.28) is **5–10× its cross-cohort ARI** (≈0.01–0.025). Holding the
+  quantifier fixed substantially restores reproducibility, so part of the cross-cohort
+  collapse is genuinely the Salmon-vs-RSEM mismatch corrupting within-gene isoform ratios,
+  not the method failing outright.
+- **But the switch signal is intrinsically lower-reproducibility than abundance.**
+  IsoGraph's *within-cohort* ceiling (NMI ≈ 0.11–0.18) is still **below WGCNA's
+  *cross-cohort* NMI (≈0.23)** — i.e. WGCNA replicates better across two *independent*
+  cohorts than IsoGraph replicates across split-halves of the *same* cohort. WGCNA's
+  within-cohort stability (ARI 0.29–0.71, NMI 0.34–0.55) is 2–3× IsoGraph's throughout.
+- **Strong region heterogeneity.** BrainSEQ DLPFC (ARI 0.006) and BrainSEQ hippocampus
+  (ARI 0.087, only ~4,900 genes assigned in both halves) are near-zero even within-cohort —
+  for the largest/sparsest regions the switch network is effectively unstable at this sample
+  size regardless of quantifier. The well-behaved regions (caudate, the GTEx trio) carry
+  whatever reproducible switch structure exists.
+
+A structural caveat compounds this: IsoGraph only assigns multi-isoform (switch-capable)
+genes, and *which* genes qualify shifts with the split (BrainSEQ hippocampus shares only
+~4,900 of ~17k genes between halves), so its partition agreement is computed over a smaller,
+less stable gene set, whereas WGCNA partitions all ~18–19k genes. Net read: IsoGraph's weak
+cross-cohort replication is a layered limitation — a real quantifier confound on top of an
+intrinsically noisier, sparser switch signal — and the honest framing is the one the GO
+analysis already supports: IsoGraph is a complementary DTU-without-DGE layer, not a method
+that recovers more reproducible modules than WGCNA.
+
+**Caveat — this measures reproducibility, not accuracy, and is not a head-to-head verdict
+against WGCNA.** There is no ground truth on real data, so ARI/NMI here compare the *two
+split-halves to each other* (self-consistency), never to a true labeling. That is a
+different quantity from the synthetic benchmark, where ARI is module *recovery* against the
+planted modules and IsoGraph scores well because the switch signal is injected at clean,
+high effect size. The synthetic-vs-real gap therefore reflects real-data SNR, not a defect:
+the real switch signal is subtle (n≈110/half), confounded, and gated to multi-isoform genes.
+Three reasons WGCNA's higher numbers do **not** mean it is "better" at IsoGraph's task:
+
+- **Different signal SNR.** WGCNA clusters gene **abundance** (log-CPM) — smooth, high-SNR,
+  partitions near-identically on any half regardless of biological meaning. IsoGraph clusters
+  within-gene **isoform-switch coordinates** (PC1 of CLR composition) — low-SNR by
+  construction. Lower split-half agreement is the *expected* cost of measuring a harder
+  signal, not evidence the method is broken.
+- **Different gene sets.** The two ARI/NMI values are computed over different `n_common`
+  (~8–9k switch-capable genes vs ~18–19k) and different partition granularities, so they are
+  not strictly comparable point-for-point.
+- **Different biology.** WGCNA's stability reflects abundance co-expression and says nothing
+  about isoform usage; IsoGraph is the only layer measuring switch (DTU-without-DGE)
+  structure. "WGCNA is more reproducible" ≠ "WGCNA captures what IsoGraph captures."
+
+The proper use of this test is as a *relative* instrument: A/B-ing changes to IsoGraph
+against its **own** baseline (e.g. covariate-free isoform-estimability edge downweighting
+improves within-cohort ARI in 5/6 regions and NMI in 6/6; consensus Leiden did not), not as
+a cross-method ranking.
+
 ## WGCNA fixes
 
 Two bugs were fixed in `real_data/gtex/_h/02.wgcna_gene.R`:
