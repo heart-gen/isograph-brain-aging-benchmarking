@@ -110,20 +110,32 @@ spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
     })
     result <- do.call(rbind, Filter(Negate(is.null), rows))
     if (!is.null(result) && nrow(result) > 0) {
-        result$fdr <- unlist(lapply(split(result$pvalue, result$age_label), fdr_bh)[result$age_label])
+        # BH-correct within each age_label across modules. ave() applies fdr_bh
+        # per group and returns a vector aligned to result's rows; the previous
+        # list-index/unlist approach silently produced a length-N*k vector and
+        # only ran when WGCNA collapsed to a single module.
+        result$fdr <- ave(result$pvalue, result$age_label, FUN = fdr_bh)
     }
     result
 }
 
 select_soft_power <- function(datExpr) {
     powers <- 1:20
+    # Pick the soft power for the SAME topology blockwiseModules builds (signed).
+    # pickSoftThreshold defaults to an unsigned network; on a signed network that
+    # underestimates the power (often 1), which collapses every gene into one
+    # giant module. Evaluating signed scale-free fit yields the correct power.
     sft <- pickSoftThreshold(datExpr, powerVector = powers,
+                             networkType = "signed",
                              RsquaredCut = R2_THRESHOLD, verbose = 0)
     power <- sft$powerEstimate
     if (is.na(power)) {
-        warning("Scale-free fit below threshold; defaulting to power=6")
-        power <- 6L
+        warning("Scale-free fit below threshold; defaulting to power=12 (signed)")
+        power <- 12L
     }
+    # Floor at WGCNA's recommended minimum for signed networks (>=12 for the
+    # ~100-250-sample regions here), guarding against a spuriously low estimate.
+    power <- max(as.integer(power), 12L)
     as.integer(power)
 }
 
