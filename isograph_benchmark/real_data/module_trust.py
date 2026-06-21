@@ -25,6 +25,7 @@ from math import comb
 
 import numpy as np
 import pandas as pd
+from scipy.stats import chi2, hypergeom, norm, spearmanr
 
 from isograph_benchmark.paths import ensure_dir, rel
 from isograph_benchmark.real_data.stability import (
@@ -214,9 +215,10 @@ def _trusted_set(cohort: str, region: str, method: str) -> set:
     return set(df.loc[df["trusted"], "module_id"].astype(str))
 
 
-def replication(pair: str, method: str, k: int, sig: float) -> None:
-    """Q3 cross-cohort aging replication: match trusted modules across cohorts by driver-
-    transcript overlap, then test Age-effect sign/significance concordance."""
+def _crosscohort_rows(pair: str, method: str, k: int, sig: float) -> list[dict]:
+    """One row per trusted discovery (BrainSEQ) module: its best gene-Jaccard match in the
+    replication (GTEx) cohort, with both cohorts' module-Age effect/p and driver overlap.
+    Shared by per-pair ``replication`` and pooled ``replication_pooled``."""
     (bc, br), (gc, gr) = REGION_PAIRS[pair]
     bs_trust = _trusted_set(bc, br, method)
     gt_trust = _trusted_set(gc, gr, method)
@@ -255,6 +257,13 @@ def replication(pair: str, method: str, k: int, sig: float) -> None:
             "sign_match": sign_match, "both_sig": both_sig,
             "replicates": bool(sign_match and both_sig and bestj > 0),
         })
+    return rows
+
+
+def replication(pair: str, method: str, k: int, sig: float) -> None:
+    """Q3 cross-cohort aging replication: match trusted modules across cohorts by driver-
+    transcript overlap, then test Age-effect sign/significance concordance."""
+    rows = _crosscohort_rows(pair, method, k, sig)
     out = pd.DataFrame(rows).sort_values("gene_jaccard", ascending=False).reset_index(drop=True)
     path = _out_dir() / f"module_aging_replication__{pair}__{method}.parquet"
     out.to_parquet(path, index=False)
@@ -270,6 +279,131 @@ def replication(pair: str, method: str, k: int, sig: float) -> None:
                    "match_trusted", "age_effect_bs", "age_effect_gtex", "sign_match",
                    "both_sig", "replicates"]].to_string(index=False), flush=True)
     print(f"\nwrote {path}", flush=True)
+
+
+def _stouffer_z(disc_sign: np.ndarray, rep_eff: np.ndarray, rep_p: np.ndarray) -> float:
+    """Directional Stouffer Z: for each discovery-significant module, convert the *replication*
+    cohort's two-sided Age p-value into a one-sided p in the discovery effect direction, map to
+    z = Phi^-1(1 - p_one), and combine as sum(z)/sqrt(K). Continuous per-module evidence, so it
+    does not floor at the binomial sign-test's 0.5^K (the wall that sank the per-pair arm)."""
+    if len(disc_sign) == 0:
+        return float("nan")
+    p2 = np.clip(rep_p, 1e-300, 1.0)
+    same = np.sign(rep_eff) == disc_sign
+    p_one = np.where(same, p2 / 2.0, 1.0 - p2 / 2.0)
+    z = norm.isf(p_one)  # Phi^-1(1 - p_one)
+    return float(z.sum() / np.sqrt(len(z)))
+
+
+def replication_pooled(method: str, k: int, sig: float, min_jaccard: float,
+                       n_perm: int, seed: int) -> None:
+    """Pooled cross-cohort aging replication across ALL homologous region pairs.
+
+    The per-pair ``replication`` arm is structurally underpowered: with only ~3 reproducible
+    matched modules per pair, the binomial sign-test floor is 0.5^3 = 0.125, so even perfect
+    concordance cannot reach p<0.05. Pooling the matched modules from every region pair into a
+    single test breaks that floor in three complementary, increasingly assumption-light ways:
+
+      (1) Stouffer directional meta-Z  -- HEADLINE. Among discovery (BrainSEQ) age-significant
+          modules pooled across pairs, combine each module's *replication*-cohort directional z.
+          Continuous evidence per module, so K=3 strong replications (p~0.01 each, in-direction)
+          give Z~4 -> p~3e-5; the sign floor is gone. Reported with an analytic normal p AND a
+          label-permutation p (shuffling which GTEx module pairs with each BrainSEQ module),
+          which is robust to any within-region eigengene correlation that would violate the
+          analytic independence assumption.
+      (2) Sign-concordance permutation test -- shuffles the GTEx->BrainSEQ pairing, preserving
+          each cohort's marginal sign distribution, so it controls for any global directional
+          bias in aging (a bias that would inflate a naive binomial-vs-0.5 sign test).
+      (3) Spearman magnitude concordance -- correlates discovery vs replication Age effect sizes
+          across pooled pairs; uses magnitude, not just sign, with a permutation null.
+
+    Pooling is valid because modules across region pairs are independent and gene sets within a
+    pair are largely disjoint; the permutation nulls in (1)-(3) make no parametric independence
+    claim. No new model fits -- reuses the trusted sets, production modules and Age effects."""
+    frames, used, skipped = [], [], []
+    for p in REGION_PAIRS:
+        try:
+            frames.append(pd.DataFrame(_crosscohort_rows(p, method, k, sig)))
+            used.append(p)
+        except SystemExit as e:  # missing Q1 trusted set / inputs for this pair -> skip
+            print(f"[skip {p}] {e}", flush=True)
+            skipped.append(p)
+    if not frames:
+        raise SystemExit("no region pairs have the required Q1 trusted sets + inputs yet")
+    if len(used) < 2:
+        print(f"\n!! WARNING: only {len(used)} region pair available ({used}); pooling needs "
+              f">=2-3 pairs to clear the binomial sign floor. Run Q1 `stability` for the "
+              f"missing pairs ({skipped}) for the powered result.", flush=True)
+    allm = pd.concat(frames, ignore_index=True)
+    rep = allm[(allm["gene_jaccard"] >= min_jaccard)
+               & allm["age_effect_bs"].notna()
+               & allm["age_effect_gtex"].notna()].reset_index(drop=True)
+    path = _out_dir() / f"module_aging_replication_pooled__{method}.parquet"
+    rep.to_parquet(path, index=False)
+
+    n = len(rep)
+    if n == 0:
+        raise SystemExit(f"no reproducible matched pairs (gene Jaccard >= {min_jaccard}) "
+                         f"pooled across {list(REGION_PAIRS)}")
+    eb = rep["age_effect_bs"].to_numpy()
+    eg = rep["age_effect_gtex"].to_numpy()
+    pg = rep["age_p_gtex"].to_numpy()
+    rng = np.random.default_rng(seed)
+
+    # (1) Stouffer directional meta-Z among discovery (BrainSEQ) age-significant modules
+    disc = rep[rep["age_p_bs"] < sig]
+    d = np.sign(disc["age_effect_bs"].to_numpy())
+    deg = disc["age_effect_gtex"].to_numpy()
+    dpg = disc["age_p_gtex"].to_numpy()
+    K = len(disc)
+    Zs = _stouffer_z(d, deg, dpg)
+    p_stouffer_norm = float(norm.sf(Zs)) if K else float("nan")
+    if K:
+        z_perm = np.array([_stouffer_z(d, deg[i := rng.permutation(K)], dpg[i])
+                           for _ in range(n_perm)])
+        p_stouffer_perm = float((1 + np.sum(z_perm >= Zs)) / (n_perm + 1))
+    else:
+        p_stouffer_perm = float("nan")
+
+    # (2) sign concordance with label-permutation null (bias-robust)
+    conc = np.sign(eb) == np.sign(eg)
+    c_obs = float(conc.mean())
+    c_perm = np.array([(np.sign(eb) == np.sign(rng.permutation(eg))).mean()
+                       for _ in range(n_perm)])
+    p_sign_perm = float((1 + np.sum(c_perm >= c_obs)) / (n_perm + 1))
+    n_conc = int(conc.sum())
+    p_binom = float(sum(comb(n, i) for i in range(n_conc, n + 1)) / 2 ** n)  # reference only
+
+    # (3) magnitude concordance: Spearman of discovery vs replication Age effect
+    rho = float(spearmanr(eb, eg).statistic)
+    rho_perm = np.array([spearmanr(eb, rng.permutation(eg)).statistic for _ in range(n_perm)])
+    p_rho = float((1 + np.sum(rho_perm >= rho)) / (n_perm + 1))
+
+    stats = {
+        "method": method, "n_pairs_reproducible": n, "min_jaccard": min_jaccard,
+        "n_perm": n_perm, "sig": sig,
+        "stouffer_K": K, "stouffer_Z": Zs,
+        "stouffer_p_normal": p_stouffer_norm, "stouffer_p_perm": p_stouffer_perm,
+        "sign_concordant": n_conc, "sign_frac": c_obs,
+        "sign_p_perm": p_sign_perm, "sign_p_binom_vs_0.5": p_binom,
+        "spearman_rho": rho, "spearman_p_perm": p_rho,
+    }
+    spath = _out_dir() / f"module_aging_replication_pooled__{method}__stats.json"
+    import json
+    spath.write_text(json.dumps(stats, indent=2))
+
+    print(f"\n=== Q3 POOLED cross-cohort aging replication ({method}) ===", flush=True)
+    print(f"region pairs pooled: {list(REGION_PAIRS)}", flush=True)
+    print(f"reproducible matched pairs (gene J>={min_jaccard}): {n}", flush=True)
+    print(f"\n(1) Stouffer directional meta-Z [HEADLINE] over K={K} discovery-significant "
+          f"(BrainSEQ p<{sig}) modules:", flush=True)
+    print(f"    Z={Zs:.3f} | analytic one-sided p={p_stouffer_norm:.3g} | "
+          f"permutation p={p_stouffer_perm:.3g}", flush=True)
+    print(f"(2) sign concordance: {n_conc}/{n} ({100*c_obs:.0f}%) | "
+          f"permutation p={p_sign_perm:.3g} | (binomial-vs-0.5 ref p={p_binom:.3g})", flush=True)
+    print(f"(3) magnitude (Spearman) discovery vs replication Age effect: rho={rho:.3f} | "
+          f"permutation p={p_rho:.3g}", flush=True)
+    print(f"\nwrote {path}\nwrote {spath}", flush=True)
 
 
 def _composition_unique_genes(cohort: str, region: str) -> set:
@@ -397,6 +531,7 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
           flush=True)
 
     out_rows = []
+    load_rows = []  # per-(seed,half,module,gene) switch-axis importance for the Q2 reframe
     for p in parts:
         # parse seed + half from <method>__<cohort>__<region>__seed<k>__<half>.parquet
         stem = p.stem[len(prefix):]
@@ -421,7 +556,8 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
         gene2mod = dict(zip(part["gene_id"], part["module_id"].astype(str)))
         load["module_id"] = load["gene_id"].map(gene2mod)
         for mid, grp in load.dropna(subset=["module_id"]).groupby("module_id"):
-            drivers = grp.sort_values("abs", ascending=False)["transcript_id"].head(k).tolist()
+            grp = grp.sort_values("abs", ascending=False)
+            drivers = grp["transcript_id"].head(k).tolist()
             a = age.loc[mid] if mid in age.index else None
             out_rows.append({
                 "cohort": cohort, "region": region, "method": method,
@@ -430,15 +566,24 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
                 "age_pvalue": float(a["pvalue"]) if a is not None else np.nan,
                 "drivers": ";".join(drivers),
             })
+            # per-gene switch-axis importance (max |loading| over the gene's transcripts).
+            # |loading| because the SVD axis sign is arbitrary per half-fit (not comparable).
+            gimp = grp.groupby("gene_id")["abs"].max()
+            load_rows.append(pd.DataFrame({
+                "seed": seed, "half": half, "module_id": str(mid),
+                "gene_id": gimp.index.astype(str), "importance": gimp.to_numpy(),
+            }))
         print(f"  {p.name}: {part['module_id'].nunique()} modules", flush=True)
 
     out = pd.DataFrame(out_rows)
     path = _meta_dir() / f"modules_meta__{cohort}__{region}__{method}.parquet"
     out.to_parquet(path, index=False)
+    lpath = _meta_dir() / f"modules_meta_loadings__{cohort}__{region}__{method}.parquet"
+    pd.concat(load_rows, ignore_index=True).to_parquet(lpath, index=False)
     n_sig = int((out["age_pvalue"] < 0.05).sum())
     print(f"\n=== Step-0 meta: {len(out)} (module,half) rows | "
           f"age p<0.05 in {n_sig} ({100*n_sig/max(len(out),1):.0f}%) ===", flush=True)
-    print(f"wrote {path}", flush=True)
+    print(f"wrote {path}\nwrote {lpath}", flush=True)
 
 
 def _halffit_module_genes(cohort: str, region: str, method: str) -> dict:
@@ -458,13 +603,27 @@ def _halffit_module_genes(cohort: str, region: str, method: str) -> dict:
     return out
 
 
+def _transcript_gene_map(cohort: str, region: str) -> dict[str, str]:
+    """transcript_id -> gene_id from the bundle's transcripts.parquet (cheap; no VAE load)."""
+    spec = COHORTS[cohort]
+    tt = pd.read_parquet(rel(*spec["bundle_root"], region, "transcripts.parquet"),
+                         columns=["transcript_id", "gene_id"])
+    return dict(zip(tt["transcript_id"].astype(str), tt["gene_id"].astype(str)))
+
+
 def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float) -> None:
     """Within-cohort Q3 (aging-sign concordance) + Q2 (driver reproducibility). For each
     seed the two independent halves are matched module-to-module by best gene-set Jaccard;
     a pair is *reproducible* when that Jaccard >= ``min_jaccard``. Q3: among reproducible
     pairs, do the two halves agree on the sign of the module-Age effect (overall, and among
-    pairs where both halves are age-nominal)? Q2: cross-half top-k driver-transcript Jaccard
-    on the same matched pairs. Pure post-hoc arithmetic over the meta parquet + partitions."""
+    pairs where both halves are age-nominal)? Q2 (driver reproducibility) is reported at TWO
+    levels: (i) the raw cross-half top-k driver-*transcript* Jaccard (descriptive; weak by
+    construction -- isoform identity is quantifier-sensitive), and (ii) the REFRAMED
+    driver-*gene* test, which is the level that actually reproduces. (ii) is made non-circular
+    by conditioning on the matched pair's *shared* genes: among genes present in both halves'
+    modules, are the same shared genes flagged as drivers more than chance (per-pair
+    hypergeometric), and pooled across reproducible pairs (Fisher)? Pure post-hoc arithmetic
+    over the meta parquet + partitions + the bundle transcript->gene map."""
     mpath = _meta_dir() / f"modules_meta__{cohort}__{region}__{method}.parquet"
     if not mpath.exists():
         raise SystemExit(f"run `meta` for {cohort}/{region}/{method} first ({mpath})")
@@ -477,6 +636,16 @@ def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float
         rec[(int(r.seed), r.half, str(r.module_id))] = (r.age_effect, r.age_pvalue, drv)
 
     genes = _halffit_module_genes(cohort, region, method)
+    t2g = _transcript_gene_map(cohort, region)
+    # per-(seed,half,module) gene->switch-importance vectors for the loading-correlation reframe
+    lpath = _meta_dir() / f"modules_meta_loadings__{cohort}__{region}__{method}.parquet"
+    imp: dict = {}
+    if lpath.exists():
+        ldf = pd.read_parquet(lpath)
+        ldf["module_id"] = ldf["module_id"].astype(str)
+        ldf["gene_id"] = ldf["gene_id"].astype(str)
+        for (s, h, m), grp in ldf.groupby(["seed", "half", "module_id"]):
+            imp[(int(s), h, m)] = grp.set_index("gene_id")["importance"]
     seeds = sorted({s for (s, _) in genes})
     print(f"[{cohort}/{region}/{method}] within-cohort A<->B matching over {len(seeds)} seeds "
           f"| reproducible = gene Jaccard >= {min_jaccard}", flush=True)
@@ -487,16 +656,37 @@ def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float
         if not ga or not gb:
             continue
         for ma, gset_a in ga.items():
-            best, bestj = None, 0.0
+            best, bestj, gset_best = None, 0.0, set()
             for mb, gset_b in gb.items():
                 j = len(gset_a & gset_b) / len(gset_a | gset_b) if (gset_a | gset_b) else 0.0
                 if j > bestj:
-                    best, bestj = mb, j
+                    best, bestj, gset_best = mb, j, gset_b
             if best is None:
                 continue
             ea, pa, da = rec.get((seed, "A", ma), (np.nan, np.nan, set()))
             eb, pb, db = rec.get((seed, "B", best), (np.nan, np.nan, set()))
             drv_j = len(da & db) / len(da | db) if (da | db) else np.nan
+            # REFRAMED Q2: driver *genes* (top-k transcripts mapped to genes), tested against
+            # the matched pair's SHARED-gene background so the matching itself can't inflate it.
+            dga = {t2g[t] for t in da if t in t2g}
+            dgb = {t2g[t] for t in db if t in t2g}
+            drv_gene_j = len(dga & dgb) / len(dga | dgb) if (dga | dgb) else np.nan
+            shared = gset_a & gset_best
+            DA, DB = dga & shared, dgb & shared  # driver genes drawn from the shared background
+            x, N, n1, n2 = len(DA & DB), len(shared), len(DA), len(DB)
+            # P(overlap >= x) for n2 draws from N with n1 successes; 1.0 if any margin empty
+            hyp_p = float(hypergeom.sf(x - 1, N, n1, n2)) if (N and n1 and n2) else np.nan
+            # PRIMARY reframe: do the SHARED genes rank as drivers consistently across halves?
+            # Spearman of per-gene switch-importance over the shared genes (continuous, no
+            # top-k cutoff, conditioned on shared genes so it is not inflated by the matching).
+            load_rho, load_p, n_shared_imp = np.nan, np.nan, 0
+            ia, ib = imp.get((seed, "A", ma)), imp.get((seed, "B", best))
+            if ia is not None and ib is not None:
+                common = sorted(shared & set(ia.index) & set(ib.index))
+                n_shared_imp = len(common)
+                if n_shared_imp >= 5:
+                    sr = spearmanr(ia.loc[common].to_numpy(), ib.loc[common].to_numpy())
+                    load_rho, load_p = float(sr.statistic), float(sr.pvalue)
             rows.append({
                 "cohort": cohort, "region": region, "method": method, "seed": seed,
                 "module_a": ma, "module_b": best, "gene_jaccard": bestj,
@@ -506,7 +696,11 @@ def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float
                 "sign_concordant": bool(np.sign(ea) == np.sign(eb))
                                    if (pd.notna(ea) and pd.notna(eb)) else False,
                 "both_age_sig": bool(pd.notna(pa) and pd.notna(pb) and pa < sig and pb < sig),
-                "driver_jaccard": drv_j,
+                "driver_jaccard": drv_j, "driver_gene_jaccard": drv_gene_j,
+                "n_shared_genes": N, "driver_gene_overlap": x,
+                "driver_gene_hyp_p": hyp_p,
+                "driver_load_rho": load_rho, "driver_load_p": load_p,
+                "n_shared_importance": n_shared_imp,
             })
     out = pd.DataFrame(rows).sort_values(["seed", "gene_jaccard"],
                                          ascending=[True, False]).reset_index(drop=True)
@@ -530,11 +724,48 @@ def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float
     print(f"sign-concordant among reproducible & both-halves-age-nominal: "
           f"{n_conc_both}/{nb} ({100*n_conc_both/max(nb,1):.0f}%) | sign-test p={sign_p:.3g}",
           flush=True)
-    print(f"\n=== Q2 driver-transcript reproducibility ({cohort}/{region}) ===", flush=True)
+    print(f"\n=== Q2 driver reproducibility ({cohort}/{region}) ===", flush=True)
     dj = repro["driver_jaccard"].dropna()
-    print(f"cross-half top-k driver Jaccard over reproducible pairs: "
+    print(f"(i) raw top-k driver-TRANSCRIPT Jaccard [descriptive, weak by construction]: "
           f"median={dj.median():.3f} mean={dj.mean():.3f} | pairs with any shared driver: "
           f"{int((dj > 0).sum())}/{len(dj)}", flush=True)
+    # (ii) reframed driver-GENE level, conditioned on the shared-gene background
+    dgj = repro["driver_gene_jaccard"].dropna()
+    hp = repro["driver_gene_hyp_p"].dropna()
+    n_pair_sig = int((hp < sig).sum())
+    # Fisher pooled across reproducible pairs (independent matched pairs): -2 sum ln p ~ chi2_2k
+    hp_pos = hp[hp > 0]
+    fisher_stat = float(-2.0 * np.log(hp_pos).sum()) if len(hp_pos) else float("nan")
+    fisher_p = float(chi2.sf(fisher_stat, 2 * len(hp_pos))) if len(hp_pos) else float("nan")
+    # (iii) PRIMARY reframe: shared-gene switch-importance rank correlation across halves
+    rr = repro.dropna(subset=["driver_load_rho"])
+    if len(rr):
+        rho_med = rr["driver_load_rho"].median()
+        n_rho_pos = int((rr["driver_load_rho"] > 0).sum())
+        rp_pos = rr.loc[rr["driver_load_p"] > 0, "driver_load_p"]
+        # one-sided (positive-concordance) p per pair, then Fisher-pool across pairs
+        rp_one = np.where(rr["driver_load_rho"] > 0, rr["driver_load_p"] / 2,
+                          1 - rr["driver_load_p"] / 2)
+        rp_one = rp_one[rp_one > 0]
+        f_stat = float(-2.0 * np.log(rp_one).sum()) if len(rp_one) else float("nan")
+        f_p = float(chi2.sf(f_stat, 2 * len(rp_one))) if len(rp_one) else float("nan")
+        f_p_str = "<1e-300 (underflow)" if f_p == 0 else f"{f_p:.3g}"
+        rho_lo, rho_hi = rr["driver_load_rho"].min(), rr["driver_load_rho"].max()
+        print(f"(iii) PRIMARY reframe -- shared-gene switch-importance rank concordance "
+              f"(Spearman over each matched pair's shared genes, >=5 genes):", flush=True)
+        print(f"      EFFECT SIZE (headline): median rho={rho_med:.3f} [{rho_lo:.3f}-{rho_hi:.3f}]"
+              f" | rho>0 in {n_rho_pos}/{len(rr)} pairs", flush=True)
+        print(f"      significance: pooled one-sided Fisher p={f_p_str} (note: per-pair p is "
+              f"driven by the 100s of shared genes, so rho is the meaningful quantity)", flush=True)
+        print(f"      caveat: reproducible switch-importance may be partly gene-intrinsic "
+              f"(stable isoform structure), not only module/aging-specific", flush=True)
+    else:
+        miss = "loadings parquet absent" if not lpath.exists() else "no pair has >=5 shared genes"
+        print(f"(iii) PRIMARY reframe -- shared-gene importance correlation: not computed "
+              f"({miss})", flush=True)
+    print(f"(ii) driver-GENE set test (k-limited): driver-gene Jaccard median={dgj.median():.3f} "
+          f"| shared-background hypergeometric POOLED Fisher p={fisher_p:.3g} "
+          f"({n_pair_sig}/{len(hp)} pairs p<{sig})", flush=True)
     print(f"\nwrote {path}", flush=True)
 
 
@@ -554,6 +785,16 @@ def main() -> None:
     rp.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     rp.add_argument("--k", type=int, default=5, help="top-k driver transcripts for matching")
     rp.add_argument("--sig", type=float, default=0.05, help="Age p-value cutoff for 'both_sig'")
+    pl = sub.add_parser("replication-pooled",
+                        help="Q3 pooled: cross-cohort aging replication pooled over all region "
+                             "pairs (Stouffer meta-Z + permutation tests; breaks the n=3 floor)")
+    pl.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
+    pl.add_argument("--k", type=int, default=5, help="top-k driver transcripts for driver Jaccard")
+    pl.add_argument("--sig", type=float, default=0.05, help="Age p cutoff for discovery-significant")
+    pl.add_argument("--min-jaccard", type=float, default=0.25,
+                    help="gene-set Jaccard for a reproducible cross-cohort match")
+    pl.add_argument("--n-perm", type=int, default=10000)
+    pl.add_argument("--seed", type=int, default=0)
     cm = sub.add_parser("complementarity", help="Q4: DTU-without-DGE / WGCNA-complementarity")
     cm.add_argument("--cohort", default="brainseq")
     cm.add_argument("--region", default="caudate")
@@ -576,6 +817,9 @@ def main() -> None:
         stability(args.cohort, args.region, args.method, args.n_perm, args.seed, args.fdr)
     elif args.cmd == "replication":
         replication(args.pair, args.method, args.k, args.sig)
+    elif args.cmd == "replication-pooled":
+        replication_pooled(args.method, args.k, args.sig, args.min_jaccard,
+                           args.n_perm, args.seed)
     elif args.cmd == "complementarity":
         complementarity(args.cohort, args.region, args.method, args.k, args.fdr)
     elif args.cmd == "meta":

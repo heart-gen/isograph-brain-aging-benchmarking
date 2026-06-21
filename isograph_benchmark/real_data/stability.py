@@ -94,7 +94,8 @@ def _split_indices(n: int, seed: int) -> tuple[np.ndarray, np.ndarray]:
 def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
                 min_minor_usage: float = 0.1, tin: bool = False,
                 reliability_floor: float = 0.0,
-                extra_covariates: list[str] | None = None) -> VaeModelConfig:
+                extra_covariates: list[str] | None = None,
+                max_module_frac: float | None = None) -> VaeModelConfig:
     covariates = list(spec["covariates"]) + list(extra_covariates or [])
     kw = dict(
         hidden_dim=256, latent_dim=32, n_epochs=500,
@@ -123,6 +124,10 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         # noisy/degraded gene keeps a minimum switch contribution instead of being
         # fully pruned -- guards n_common against over-aggressive edge removal.
         kw["switch_reliability_floor"] = reliability_floor
+    if max_module_frac is not None:
+        # Giant-module cap: any community over this fraction of assigned genes is
+        # recursively re-clustered at escalating resolution (IsoGraph core).
+        kw["max_module_frac"] = max_module_frac
     if spec["lr"] is not None:
         kw["lr"] = spec["lr"]
     return VaeModelConfig(**kw)
@@ -141,7 +146,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                  only_half: str | None = None, consensus_runs: int = 1,
                  reliability: bool = False, min_minor_usage: float = 0.1,
                  tin: bool = False, median_tin_covariate: bool = False,
-                 reliability_floor: float = 0.0) -> None:
+                 reliability_floor: float = 0.0,
+                 max_module_frac: float | None = None) -> None:
     """Fit IsoGraph on both split-halves for every seed in ``range(seeds)``, or for a
     single ``only_seed`` / ``only_half`` when given.
 
@@ -171,6 +177,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         method += "_mediantin"
     if reliability_floor > 0:
         method += f"_f{int(round(reliability_floor * 100)):02d}"
+    if max_module_frac is not None:
+        method += f"_cap{int(round(max_module_frac * 100)):02d}"
     bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
     sample_table = bundle.sample_table.reset_index(drop=True)
     tc = bundle.matrices["transcript_counts"]
@@ -202,7 +210,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
     cfg = _vae_config(spec, consensus_runs=consensus_runs,
                       reliability=reliability, min_minor_usage=min_minor_usage,
                       tin=tin, reliability_floor=reliability_floor,
-                      extra_covariates=extra_covariates)
+                      extra_covariates=extra_covariates,
+                      max_module_frac=max_module_frac)
     ks = [only_seed] if only_seed is not None else list(range(seeds))
     print(f"[{cohort}/{region}] {n} samples, {tc.shape[0]} transcripts | "
           f"method={method} | seeds {ks}", flush=True)
@@ -355,6 +364,9 @@ def main() -> None:
     fi.add_argument("--reliability-floor", type=float, default=0.0, metavar="F",
                     help="floor for the per-gene reliability weight (reliability in "
                          "[F,1]); caps downweighting. Tags partitions '_fNN'.")
+    fi.add_argument("--max-module-frac", type=float, default=None, metavar="C",
+                    help="giant-module cap: recursively re-cluster any module over this "
+                         "fraction of assigned genes (e.g. 0.15). Tags partitions '_capNN'.")
     sub.add_parser("aggregate", help="compute ARI/NMI over all partitions and summarize")
     args = ap.parse_args()
 
@@ -366,7 +378,8 @@ def main() -> None:
                      min_minor_usage=args.min_minor_usage,
                      tin=args.tin,
                      median_tin_covariate=args.median_tin_covariate,
-                     reliability_floor=args.reliability_floor)
+                     reliability_floor=args.reliability_floor,
+                     max_module_frac=args.max_module_frac)
     else:
         aggregate()
 
