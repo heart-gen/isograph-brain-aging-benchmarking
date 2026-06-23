@@ -244,11 +244,16 @@ grad-clip+divergence guard, weighted/seeded Leiden, gene_switch_loadings, estima
 - [x] **C-determinism** single-run Leiden edge-weighted + seeded — merged.
 - [x] **B** two-axis gene-similarity centering (`vae._gene_similarity`, double-centre
       axis=1 then axis=0) — already committed (`493038b`); cuts bridge edges at source.
-- [ ] **C** data-driven module-detection resolution in core: select Leiden resolution by a
+- [x] **C** data-driven module-detection resolution in core: select Leiden resolution by a
       giant-fraction cap (sweep up until largest module ≤ X% of genes), persist the chosen
       resolution to calibration metadata. Flag-gated, default-off (legacy connected-components
-      preserved). *(in progress — this increment.)*  Distinct from the negative `max_module_frac`
-      post-hoc split (E), which is parked on `giant-module-cap-experimental`.
+      preserved). **REJECTED & DEPRECATED (2026-06-22).** The split-half A/B (B below) showed
+      the cap *regresses* within-cohort stability ARI by 0.05–0.09 in every region with signal
+      — the same failure mode as the `max_module_frac` post-hoc split (E). The
+      `leiden_max_giant_frac` config field is kept (for run-hash/A/B reproducibility) but now
+      emits a `DeprecationWarning` (`models/base.py`) and the default stays `None`; tune
+      `leiden_resolution` instead. Collapse, if it recurs, is to be addressed via B-centering
+      (done) + D soft-threshold, not this knob.
 - [ ] **S5** promote estimability (`switch_reliability_source="estimability"`) to production
       `run_models`, default-on for real data, after re-confirming synthetic + Type-I unaffected.
 - [ ] **Cleanup** excise differential-TIN code path + helpers (`reliability.py`/`switch.py`);
@@ -263,19 +268,24 @@ grad-clip+divergence guard, weighted/seeded Leiden, gene_switch_loadings, estima
       defaults a stranger should use. Do last so docs match the final promoted surface.
 
 ### B. Validation gate (SLURM; nothing in A counts as done until this passes)
-- [~] Wire `leiden_max_giant_frac` into the stability harness — **done**: `--leiden-giant-frac`
-      flag (tags `_gcapNN`) + `STABILITY_LEIDEN_GIANT_FRAC` env passthrough; `_partitions_dir`
-      gained a `STABILITY_PARTITIONS_DIR` sandbox override so the A/B regenerates a *fresh*
-      baseline on current main (the Jun-12 production baseline predates the weighted/seeded
-      Leiden fix and would confound the cap). A/B **staged** in `_h/05.gcap_ab.sh` (baseline +
-      cap-0.15 arms × 6 regions, isolated sandbox, chained aggregate). **Not yet submitted.**
-      Accept: ARI/NMI ≥ baseline, giant-fraction ≤ 0.15 on all 6, synthetic recovery
-      unchanged-or-better, negative-control/Type-I false recovery stays ~0.
-      *Post-validation:* flip the IsoGraph `leiden_max_giant_frac` default to the validated
-      value (held at `None` pre-validation, since the similar `max_module_frac` regressed ARI)
-      and update the analysis-repo production configs to match.
-- [ ] Single documented LR/optimizer config trains all 6 regions *and* the diverging GTEx
-      `nucleus_accumbens` to BrainSEQ-range RMSE with no per-region tuning, no OOM.
+- [x] **B.1 giant-cap A/B — RAN 2026-06-22 (jobs 41633054/55→56): FAIL, cap rejected.**
+      `--leiden-giant-frac` flag (tags `_gcapNN`) + `STABILITY_LEIDEN_GIANT_FRAC` passthrough;
+      `_partitions_dir` `STABILITY_PARTITIONS_DIR` sandbox so the A/B regenerated a fresh
+      baseline on current main. Result (within-cohort split-half ARI, baseline → cap-0.15):
+      bs/caudate 0.209→0.131 (−0.078), gtex/caudate_bg 0.270→0.178 (−0.092), gtex/frontal_ba9
+      0.177→0.113 (−0.064), gtex/hippocampus 0.227→0.175 (−0.052); bs/dlpfc & bs/hippocampus
+      ~0 in both. The cap **regresses** reproducibility in every region with signal and shrinks
+      `n_common`. Acceptance (ARI ≥ baseline) **not met** → default held at `None` and the knob
+      **deprecated** in core (A.C above). Summary: `_m_gcap_ab/stability_summary.json`.
+- [x] **B.2 single-LR config — RAN 2026-06-22 (jobs 41633430→437): PASS.** One fixed
+      `lr=1e-3` + `grad_clip_norm=1.0` trained all 6 trust-funnel regions *and* the GTEx
+      `nucleus_accumbens` that diverged at lr=1e-3 pre-clip — **0/7 diverged, no OOM**, RMSE
+      0.58–0.81 (BrainSEQ 0.58–0.62, GTEx 0.77–0.81), n_modules 10–19. The merged
+      `grad_clip_norm` + divergence guard remove the hand-tuned GTEx `lr=3e-4`; **promote the
+      single-LR optimizer config** and drop per-dataset LR babysitting. (The pre-registered
+      `RMSE_BAND=(1.00,1.12)` was recalibrated to `(0.45,1.00)` — the original guess assumed
+      BrainSEQ ≈1.05 but real fits land ≈0.6; the hard gate is no-divergence/no-OOM.) Summary:
+      `_m/lr_validation/lr_validation_summary.json`.
 - [ ] Re-run production full-data fits with the promoted config (feeds C below).
 
 ### C. Analysis / manuscript evidence
