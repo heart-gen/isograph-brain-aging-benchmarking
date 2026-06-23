@@ -43,8 +43,36 @@ the switch transcript is degenerate):
 - `switch_transcript_top1_accuracy` — fraction of switching genes whose highest-|r|
   transcript (the interpretation's predicted switch driver) equals the ground-truth
   driver transcript T1. Chance ≈ 1/n_transcripts (0.25 at n_tx=4).
+- `switch_strength_auroc` — AUROC of the interpretation's per-gene `switch_strength`
+  for separating switching from non-switching genes within a module (chance 0.5).
+  Undefined (NaN) for modules that are all-switching or all-background, so it is scored
+  on the subset of modules that contain both classes.
 - `switch_magnitude_spearman` — Spearman correlation between the interpretation's
-  per-gene `switch_strength` and the true switch magnitude (`true_delta_psi`).
+  per-gene `switch_strength` and the true switch magnitude (`true_delta_psi`). **Computed
+  but not plotted** — see the construction caveat below.
+
+### Switch-event construction, and why magnitude is not a reported readout
+
+Each switching gene's PSI signal is `p1 = sigmoid(signal)`, where `signal` is driven by a
+**unit-variance** module latent (`synthetic_data.py`, `module_latent ~ N(0, 1)`), and the
+ground-truth magnitude is the across-sample range
+`true_delta_psi = p1.max() − p1.min()` (`synthetic_data.py:282`). Because the latent has
+the same unit scale for every gene, over ~160 samples its extremes reach roughly ±3, so
+**every** switching gene saturates to `Δψ ≈ 0.93` (empirically mean 0.93, **SD 0.046**,
+~11 % pinned at the 0.9998 clip). The generator has **no per-gene switch-magnitude
+parameter** — switches are near-complete by construction.
+
+Consequently the ground truth has **no magnitude gradient to recover**, and
+`switch_magnitude_spearman` is ≈ 0 by construction for *any* method and *any* reasonable
+predicted-strength proxy — it reflects sampling noise, not calibration (its per-module
+estimate's SD ≈ 0.29 is exactly the n≈12 sampling SE of a correlation, centred at ~0.05).
+We therefore keep the metric in the tables for completeness but report
+`switch_transcript_top1_accuracy` (the switch *driver-identity* claim) and
+`switch_strength_auroc` (does predicted strength rank switching genes above background) as
+the two interpretation-accuracy panels (figS11). Making magnitude calibration testable
+would require a per-gene amplitude parameter in the generator (e.g. scale `module_latent`
+per gene so `Δψ` spans a wide range); that is a scenario-scoped change and is not currently
+wired.
 
 The `multi_isoform_switch` scenario (`configs/synthetic_grid.yaml`,
 `n_transcripts_per_gene=4`) exists to exercise these; it is hashed on
