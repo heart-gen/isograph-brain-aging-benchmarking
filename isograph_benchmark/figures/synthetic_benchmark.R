@@ -379,11 +379,11 @@ scenario_count_labels <- function(long_df, methods = MAIN_METHOD_ORDER,
   labels <- vapply(scenarios, function(scen) {
     row <- counts[counts$scenario == scen, ]
     n_text <- if (nrow(row) == 0) {
-      "n=0 per method"
+      "n=0 seeds per method"
     } else if (row$n_min == row$n_max) {
-      paste0("n=", row$n_min, " per method")
+      paste0("n=", row$n_min, " seeds per method")
     } else {
-      paste0("n=", row$n_min, "-", row$n_max, " per method")
+      paste0("n=", row$n_min, "-", row$n_max, " seeds per method")
     }
     paste0(SCENARIO_LABELS[[scen]], "\n", n_text)
   }, character(1))
@@ -554,9 +554,9 @@ response_dot_fig <- function(long_df, scenario, x_col, facet_col,
   facet_labels <- vapply(facet_levels, function(v) {
     row <- facet_counts[facet_counts$facet_value == v, ]
     n_text <- if (row$n_min == row$n_max) {
-      paste0("n=", row$n_min, " per cell")
+      paste0("n=", row$n_min, " seeds")
     } else {
-      paste0("n=", row$n_min, "-", row$n_max, " per cell")
+      paste0("n=", row$n_min, "-", row$n_max, " seeds")
     }
     paste0(facet_label, " = ", format_param(v), "\n", n_text)
   }, character(1))
@@ -1212,12 +1212,18 @@ make_specificity_fig <- function(long_df) {
 # ---------------------------------------------------------------------------
 INTERPRET_METRICS <- c(
   switch_transcript_top1_accuracy = "Switch-transcript top-1 accuracy",
-  switch_magnitude_spearman       = "Switch-magnitude Spearman"
+  switch_strength_auroc           = "Switch-strength AUROC"
 )
-# Dashed reference line per metric: chance for top-1 (1/4 isoforms), 0 for Spearman.
+# Dashed reference line per metric: chance for top-1 (1/4 isoforms), 0.5 for AUROC.
+# NOTE: switch-magnitude Spearman is intentionally NOT shown. The synthetic generator
+# produces near-complete switches (Delta-PSI ~ 0.93 +/- 0.05, see synthetic_data.py and
+# the benchmark README), so the ground truth has no magnitude gradient to recover and the
+# Spearman is ~0 by construction for every method -- it tests sampling noise, not
+# calibration. Switch-strength AUROC (does the predicted switch strength rank switching
+# above non-switching genes) is the meaningful second interpretation readout instead.
 INTERPRET_CHANCE <- c(
   switch_transcript_top1_accuracy = 0.25,
-  switch_magnitude_spearman       = 0.0
+  switch_strength_auroc           = 0.5
 )
 
 make_interpretation_fig <- function(interp_df, methods = INTERPRET_METHOD_ORDER) {
