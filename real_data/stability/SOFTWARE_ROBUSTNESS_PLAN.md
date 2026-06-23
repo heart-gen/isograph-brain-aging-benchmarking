@@ -230,3 +230,70 @@ confound** — best-match Jaccard rewards WGCNA's handful of giant modules. Ther
   within-cohort diagnosis in `real_data/README.md`). IsoGraph's contribution is the
   DTU-without-DGE layer, not module-reproducibility parity with WGCNA — do not frame it as the
   latter.
+
+## 6. Remaining-to-NM tracked checklist (2026-06-21)
+
+Dependency-ordered. The collapse fix (§1) is the spine: it changes the production modules that
+the trust funnel and cross-cohort analyses are computed on, so software lands and is validated
+*before* the downstream analysis is (re)run. Keeper-trunk is merged to IsoGraph `main` (PR #15:
+grad-clip+divergence guard, weighted/seeded Leiden, gene_switch_loadings, estimability).
+
+### A. Software — IsoGraph core (the gating reproducibility work)
+- [x] **S1** gradient clipping (`grad_clip_norm`) — merged.
+- [x] **S2-lite** divergence guard (non-finite val-loss → restore best + stop) — merged.
+- [x] **C-determinism** single-run Leiden edge-weighted + seeded — merged.
+- [x] **B** two-axis gene-similarity centering (`vae._gene_similarity`, double-centre
+      axis=1 then axis=0) — already committed (`493038b`); cuts bridge edges at source.
+- [x] **C** data-driven module-detection resolution in core: select Leiden resolution by a
+      giant-fraction cap (sweep up until largest module ≤ X% of genes), persist the chosen
+      resolution to calibration metadata. Flag-gated, default-off (legacy connected-components
+      preserved). **REJECTED & DEPRECATED (2026-06-22).** The split-half A/B (B below) showed
+      the cap *regresses* within-cohort stability ARI by 0.05–0.09 in every region with signal
+      — the same failure mode as the `max_module_frac` post-hoc split (E). The
+      `leiden_max_giant_frac` config field is kept (for run-hash/A/B reproducibility) but now
+      emits a `DeprecationWarning` (`models/base.py`) and the default stays `None`; tune
+      `leiden_resolution` instead. Collapse, if it recurs, is to be addressed via B-centering
+      (done) + D soft-threshold, not this knob.
+- [ ] **S5** promote estimability (`switch_reliability_source="estimability"`) to production
+      `run_models`, default-on for real data, after re-confirming synthetic + Type-I unaffected.
+- [ ] **Cleanup** excise differential-TIN code path + helpers (`reliability.py`/`switch.py`);
+      keep estimability as the sole reliability source (negative lever in the A/B).
+- [ ] **S2/S3/S4** (as needed if validation shows residual fragility): full auto-LR-backoff+
+      restart, KL warmup/free-bits, graph-density cap (OOM safeguard at the 48 GB ceiling).
+- [ ] **D** adjacency soft-threshold — only if B+C leave the giant module above cap.
+- [ ] **Docs** full documentation update once the config surface settles: in-code docstrings,
+      `README.md`, the ReadTheDocs build, and the project wiki (separate repo). Cover the new
+      config flags (`grad_clip_norm`, `leiden_resolution`, `leiden_max_giant_frac`,
+      `leiden_resolution_grid`, `switch_reliability_source`) and the recommended single-config
+      defaults a stranger should use. Do last so docs match the final promoted surface.
+
+### B. Validation gate (SLURM; nothing in A counts as done until this passes)
+- [x] **B.1 giant-cap A/B — RAN 2026-06-22 (jobs 41633054/55→56): FAIL, cap rejected.**
+      `--leiden-giant-frac` flag (tags `_gcapNN`) + `STABILITY_LEIDEN_GIANT_FRAC` passthrough;
+      `_partitions_dir` `STABILITY_PARTITIONS_DIR` sandbox so the A/B regenerated a fresh
+      baseline on current main. Result (within-cohort split-half ARI, baseline → cap-0.15):
+      bs/caudate 0.209→0.131 (−0.078), gtex/caudate_bg 0.270→0.178 (−0.092), gtex/frontal_ba9
+      0.177→0.113 (−0.064), gtex/hippocampus 0.227→0.175 (−0.052); bs/dlpfc & bs/hippocampus
+      ~0 in both. The cap **regresses** reproducibility in every region with signal and shrinks
+      `n_common`. Acceptance (ARI ≥ baseline) **not met** → default held at `None` and the knob
+      **deprecated** in core (A.C above). Summary: `_m_gcap_ab/stability_summary.json`.
+- [x] **B.2 single-LR config — RAN 2026-06-22 (jobs 41633430→437): PASS.** One fixed
+      `lr=1e-3` + `grad_clip_norm=1.0` trained all 6 trust-funnel regions *and* the GTEx
+      `nucleus_accumbens` that diverged at lr=1e-3 pre-clip — **0/7 diverged, no OOM**, RMSE
+      0.58–0.81 (BrainSEQ 0.58–0.62, GTEx 0.77–0.81), n_modules 10–19. The merged
+      `grad_clip_norm` + divergence guard remove the hand-tuned GTEx `lr=3e-4`; **promote the
+      single-LR optimizer config** and drop per-dataset LR babysitting. (The pre-registered
+      `RMSE_BAND=(1.00,1.12)` was recalibrated to `(0.45,1.00)` — the original guess assumed
+      BrainSEQ ≈1.05 but real fits land ≈0.6; the hard gate is no-divergence/no-OOM.) Summary:
+      `_m/lr_validation/lr_validation_summary.json`.
+- [ ] Re-run production full-data fits with the promoted config (feeds C below).
+
+### C. Analysis / manuscript evidence
+- [ ] **Synthetic NM figure panels** (manuscript-figures): confound-robustness supp + main
+      (with/without-residualization ablation), Type-I/specificity null panel, interpretation-
+      accuracy panel. Blocked on regenerating stale `02_metrics/_m/synthetic_metric_long.parquet`.
+- [ ] **Real-data confounds** (NM gap #6) — last open Nature-Methods gap-list item.
+- [ ] **Trust funnel Q1–Q4** re-run on the post-collapse-fix production modules (Q2 reframe
+      landed, rho~0.77 9/9; Q1/Q3/Q4 outputs exist but must be recomputed if modules change).
+- [ ] **Cross-cohort metric correction**: retire best-match module Jaccard (granularity-
+      confounded), report granularity-invariant gene-level replication + gene-pair co-assignment.
