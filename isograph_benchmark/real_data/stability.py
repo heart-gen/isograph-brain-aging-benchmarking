@@ -41,7 +41,9 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import os
 import time
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -81,6 +83,13 @@ COHORTS = {
 
 
 def _partitions_dir():
+    # Optional sandbox override so an A/B can be run in isolation (fresh baseline +
+    # candidate arms) without overwriting the committed production partitions. The
+    # aggregate output dir is derived from this dir's parent, so a sandbox stays
+    # self-contained. Unset -> the default production location (behavior unchanged).
+    override = os.environ.get("STABILITY_PARTITIONS_DIR")
+    if override:
+        return ensure_dir(Path(override))
     return ensure_dir(rel("real_data", "stability", "_m", "partitions"))
 
 
@@ -95,7 +104,8 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
                 min_minor_usage: float = 0.1, tin: bool = False,
                 reliability_floor: float = 0.0,
                 extra_covariates: list[str] | None = None,
-                max_module_frac: float | None = None) -> VaeModelConfig:
+                max_module_frac: float | None = None,
+                leiden_giant_frac: float | None = None) -> VaeModelConfig:
     covariates = list(spec["covariates"]) + list(extra_covariates or [])
     kw = dict(
         hidden_dim=256, latent_dim=32, n_epochs=500,
@@ -125,9 +135,16 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         # fully pruned -- guards n_common against over-aggressive edge removal.
         kw["switch_reliability_floor"] = reliability_floor
     if max_module_frac is not None:
-        # Giant-module cap: any community over this fraction of assigned genes is
-        # recursively re-clustered at escalating resolution (IsoGraph core).
+        # Giant-module cap (post-hoc split, the *negative* lever): any community over
+        # this fraction of assigned genes is recursively re-clustered at escalating
+        # resolution. Kept for back-reference; superseded by leiden_giant_frac.
         kw["max_module_frac"] = max_module_frac
+    if leiden_giant_frac is not None:
+        # Collapse fix C (resolution-sweep cap): select the smallest Leiden resolution
+        # whose largest community is <= this fraction of genes, instead of splitting a
+        # giant post-hoc. Distinct mechanism from max_module_frac; the sweep grid is
+        # seeded at leiden_resolution (2.0 -> 2,4,8,16,32,64). Tags partitions _gcapNN.
+        kw["leiden_max_giant_frac"] = leiden_giant_frac
     if spec["lr"] is not None:
         kw["lr"] = spec["lr"]
     return VaeModelConfig(**kw)
@@ -147,7 +164,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                  reliability: bool = False, min_minor_usage: float = 0.1,
                  tin: bool = False, median_tin_covariate: bool = False,
                  reliability_floor: float = 0.0,
-                 max_module_frac: float | None = None) -> None:
+                 max_module_frac: float | None = None,
+                 leiden_giant_frac: float | None = None) -> None:
     """Fit IsoGraph on both split-halves for every seed in ``range(seeds)``, or for a
     single ``only_seed`` / ``only_half`` when given.
 
@@ -179,6 +197,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         method += f"_f{int(round(reliability_floor * 100)):02d}"
     if max_module_frac is not None:
         method += f"_cap{int(round(max_module_frac * 100)):02d}"
+    if leiden_giant_frac is not None:
+        method += f"_gcap{int(round(leiden_giant_frac * 100)):02d}"
     bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
     sample_table = bundle.sample_table.reset_index(drop=True)
     tc = bundle.matrices["transcript_counts"]
@@ -211,7 +231,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                       reliability=reliability, min_minor_usage=min_minor_usage,
                       tin=tin, reliability_floor=reliability_floor,
                       extra_covariates=extra_covariates,
-                      max_module_frac=max_module_frac)
+                      max_module_frac=max_module_frac,
+                      leiden_giant_frac=leiden_giant_frac)
     ks = [only_seed] if only_seed is not None else list(range(seeds))
     print(f"[{cohort}/{region}] {n} samples, {tc.shape[0]} transcripts | "
           f"method={method} | seeds {ks}", flush=True)
@@ -290,7 +311,7 @@ def _cross_cohort_rows() -> list[dict]:
 
 
 def aggregate() -> None:
-    out_dir = ensure_dir(rel("real_data", "stability", "_m"))
+    out_dir = ensure_dir(_partitions_dir().parent)
     files = _load_partitions()
     parts = {}  # (method, cohort, region, seed) -> {half: df}
     for f in files:
@@ -367,6 +388,10 @@ def main() -> None:
     fi.add_argument("--max-module-frac", type=float, default=None, metavar="C",
                     help="giant-module cap: recursively re-cluster any module over this "
                          "fraction of assigned genes (e.g. 0.15). Tags partitions '_capNN'.")
+    fi.add_argument("--leiden-giant-frac", type=float, default=None, metavar="G",
+                    help="collapse fix C: select the smallest Leiden resolution whose "
+                         "largest module is <= this fraction of genes (e.g. 0.15), instead "
+                         "of post-hoc splitting. Tags partitions '_gcapNN'.")
     sub.add_parser("aggregate", help="compute ARI/NMI over all partitions and summarize")
     args = ap.parse_args()
 
@@ -379,7 +404,8 @@ def main() -> None:
                      tin=args.tin,
                      median_tin_covariate=args.median_tin_covariate,
                      reliability_floor=args.reliability_floor,
-                     max_module_frac=args.max_module_frac)
+                     max_module_frac=args.max_module_frac,
+                     leiden_giant_frac=args.leiden_giant_frac)
     else:
         aggregate()
 

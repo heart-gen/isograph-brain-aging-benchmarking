@@ -60,11 +60,17 @@ if [[ "${STABILITY_MEDIAN_TIN:-0}" == "1" ]]; then MEDIAN_TIN_FLAG="--median-tin
 # Reliability-weight floor (reliability in [F,1]); caps downweighting / guards n_common.
 FLOOR_FLAG=""
 if [[ -n "${STABILITY_RELIABILITY_FLOOR:-}" ]]; then FLOOR_FLAG="--reliability-floor ${STABILITY_RELIABILITY_FLOOR}"; fi
-# Giant-module cap: recursively re-cluster any module over this fraction of assigned genes
-# (tags partitions 'isograph_capNN' for an A/B against the baseline). Set via:
+# Giant-module cap (post-hoc split, negative lever): recursively re-cluster any module over
+# this fraction of assigned genes (tags 'isograph_capNN'). Set via:
 #   sbatch --export=ALL,STABILITY_MAX_MODULE_FRAC=0.15 ...
 CAP_FLAG=""
 if [[ -n "${STABILITY_MAX_MODULE_FRAC:-}" ]]; then CAP_FLAG="--max-module-frac ${STABILITY_MAX_MODULE_FRAC}"; fi
+# Collapse fix C — resolution-sweep giant cap: pick the smallest Leiden resolution whose
+# largest module is <= this fraction of genes (tags 'isograph_gcapNN' for an A/B vs baseline).
+# Recommended candidate 0.15. Set via:
+#   sbatch --export=ALL,STABILITY_LEIDEN_GIANT_FRAC=0.15 ...
+GCAP_FLAG=""
+if [[ -n "${STABILITY_LEIDEN_GIANT_FRAC:-}" ]]; then GCAP_FLAG="--leiden-giant-frac ${STABILITY_LEIDEN_GIANT_FRAC}"; fi
 
 module purge
 module load anaconda3/2024.10-1
@@ -81,7 +87,7 @@ for ((k = 0; k < SEEDS; k++)); do
         log_message "  seed ${k} half ${half} ..."
         python -m isograph_benchmark.real_data.stability fit-isograph \
             --cohort "${COHORT}" --region "${REGION}" --seed "${k}" --half "${half}" \
-            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${TIN_FLAG} ${MEDIAN_TIN_FLAG} ${FLOOR_FLAG} ${CAP_FLAG}
+            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${TIN_FLAG} ${MEDIAN_TIN_FLAG} ${FLOOR_FLAG} ${CAP_FLAG} ${GCAP_FLAG}
     done
 done
 conda deactivate

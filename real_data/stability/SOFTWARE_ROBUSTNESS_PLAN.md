@@ -230,3 +230,60 @@ confound** — best-match Jaccard rewards WGCNA's handful of giant modules. Ther
   within-cohort diagnosis in `real_data/README.md`). IsoGraph's contribution is the
   DTU-without-DGE layer, not module-reproducibility parity with WGCNA — do not frame it as the
   latter.
+
+## 6. Remaining-to-NM tracked checklist (2026-06-21)
+
+Dependency-ordered. The collapse fix (§1) is the spine: it changes the production modules that
+the trust funnel and cross-cohort analyses are computed on, so software lands and is validated
+*before* the downstream analysis is (re)run. Keeper-trunk is merged to IsoGraph `main` (PR #15:
+grad-clip+divergence guard, weighted/seeded Leiden, gene_switch_loadings, estimability).
+
+### A. Software — IsoGraph core (the gating reproducibility work)
+- [x] **S1** gradient clipping (`grad_clip_norm`) — merged.
+- [x] **S2-lite** divergence guard (non-finite val-loss → restore best + stop) — merged.
+- [x] **C-determinism** single-run Leiden edge-weighted + seeded — merged.
+- [x] **B** two-axis gene-similarity centering (`vae._gene_similarity`, double-centre
+      axis=1 then axis=0) — already committed (`493038b`); cuts bridge edges at source.
+- [ ] **C** data-driven module-detection resolution in core: select Leiden resolution by a
+      giant-fraction cap (sweep up until largest module ≤ X% of genes), persist the chosen
+      resolution to calibration metadata. Flag-gated, default-off (legacy connected-components
+      preserved). *(in progress — this increment.)*  Distinct from the negative `max_module_frac`
+      post-hoc split (E), which is parked on `giant-module-cap-experimental`.
+- [ ] **S5** promote estimability (`switch_reliability_source="estimability"`) to production
+      `run_models`, default-on for real data, after re-confirming synthetic + Type-I unaffected.
+- [ ] **Cleanup** excise differential-TIN code path + helpers (`reliability.py`/`switch.py`);
+      keep estimability as the sole reliability source (negative lever in the A/B).
+- [ ] **S2/S3/S4** (as needed if validation shows residual fragility): full auto-LR-backoff+
+      restart, KL warmup/free-bits, graph-density cap (OOM safeguard at the 48 GB ceiling).
+- [ ] **D** adjacency soft-threshold — only if B+C leave the giant module above cap.
+- [ ] **Docs** full documentation update once the config surface settles: in-code docstrings,
+      `README.md`, the ReadTheDocs build, and the project wiki (separate repo). Cover the new
+      config flags (`grad_clip_norm`, `leiden_resolution`, `leiden_max_giant_frac`,
+      `leiden_resolution_grid`, `switch_reliability_source`) and the recommended single-config
+      defaults a stranger should use. Do last so docs match the final promoted surface.
+
+### B. Validation gate (SLURM; nothing in A counts as done until this passes)
+- [~] Wire `leiden_max_giant_frac` into the stability harness — **done**: `--leiden-giant-frac`
+      flag (tags `_gcapNN`) + `STABILITY_LEIDEN_GIANT_FRAC` env passthrough; `_partitions_dir`
+      gained a `STABILITY_PARTITIONS_DIR` sandbox override so the A/B regenerates a *fresh*
+      baseline on current main (the Jun-12 production baseline predates the weighted/seeded
+      Leiden fix and would confound the cap). A/B **staged** in `_h/05.gcap_ab.sh` (baseline +
+      cap-0.15 arms × 6 regions, isolated sandbox, chained aggregate). **Not yet submitted.**
+      Accept: ARI/NMI ≥ baseline, giant-fraction ≤ 0.15 on all 6, synthetic recovery
+      unchanged-or-better, negative-control/Type-I false recovery stays ~0.
+      *Post-validation:* flip the IsoGraph `leiden_max_giant_frac` default to the validated
+      value (held at `None` pre-validation, since the similar `max_module_frac` regressed ARI)
+      and update the analysis-repo production configs to match.
+- [ ] Single documented LR/optimizer config trains all 6 regions *and* the diverging GTEx
+      `nucleus_accumbens` to BrainSEQ-range RMSE with no per-region tuning, no OOM.
+- [ ] Re-run production full-data fits with the promoted config (feeds C below).
+
+### C. Analysis / manuscript evidence
+- [ ] **Synthetic NM figure panels** (manuscript-figures): confound-robustness supp + main
+      (with/without-residualization ablation), Type-I/specificity null panel, interpretation-
+      accuracy panel. Blocked on regenerating stale `02_metrics/_m/synthetic_metric_long.parquet`.
+- [ ] **Real-data confounds** (NM gap #6) — last open Nature-Methods gap-list item.
+- [ ] **Trust funnel Q1–Q4** re-run on the post-collapse-fix production modules (Q2 reframe
+      landed, rho~0.77 9/9; Q1/Q3/Q4 outputs exist but must be recomputed if modules change).
+- [ ] **Cross-cohort metric correction**: retire best-match module Jaccard (granularity-
+      confounded), report granularity-invariant gene-level replication + gene-pair co-assignment.
