@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import gc
 import json
+import math
 import os
 import time
 from pathlib import Path
@@ -105,7 +106,9 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
                 reliability_floor: float = 0.0,
                 extra_covariates: list[str] | None = None,
                 max_module_frac: float | None = None,
-                leiden_giant_frac: float | None = None) -> VaeModelConfig:
+                leiden_giant_frac: float | None = None,
+                lr_override: float | None = None,
+                grad_clip_norm: float | None = None) -> VaeModelConfig:
     covariates = list(spec["covariates"]) + list(extra_covariates or [])
     kw = dict(
         hidden_dim=256, latent_dim=32, n_epochs=500,
@@ -145,7 +148,14 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         # giant post-hoc. Distinct mechanism from max_module_frac; the sweep grid is
         # seeded at leiden_resolution (2.0 -> 2,4,8,16,32,64). Tags partitions _gcapNN.
         kw["leiden_max_giant_frac"] = leiden_giant_frac
-    if spec["lr"] is not None:
+    if grad_clip_norm is not None:
+        # B.2 single-LR validation: global grad-norm clip (the S1 lever) is what lets one
+        # fixed LR train every region without the per-cohort lr=3e-4 babysitting.
+        kw["grad_clip_norm"] = grad_clip_norm
+    if lr_override is not None:
+        # B.2: force ONE learning rate across all regions, ignoring the per-cohort spec.
+        kw["lr"] = lr_override
+    elif spec["lr"] is not None:
         kw["lr"] = spec["lr"]
     return VaeModelConfig(**kw)
 
@@ -355,6 +365,127 @@ def aggregate() -> None:
     print(f"\nWrote {out_dir}/stability_summary.parquet + .json and stability_pairs.parquet")
 
 
+# ---------------------------------------------------------------------------
+# B.2 single-LR validation: ONE full-data fit per region at a single fixed LR
+# ---------------------------------------------------------------------------
+# Acceptance band for reconstruction RMSE. The hand-tuned production fits land in the
+# BrainSEQ range ~1.04-1.08; we accept a slightly wider band and flag anything outside
+# it (or any divergence/OOM) so a single LR that quietly degrades a region is caught.
+RMSE_BAND = (1.00, 1.12)
+
+
+def _rmse_dir():
+    override = os.environ.get("STABILITY_RMSE_DIR")
+    if override:
+        return ensure_dir(Path(override))
+    return ensure_dir(rel("real_data", "stability", "_m", "lr_validation"))
+
+
+def fit_rmse(cohort: str, region: str, lr: float = 1e-3,
+             grad_clip_norm: float | None = 1.0) -> None:
+    """Validation gate B.2: ONE full-data IsoGraph fit at a single, fixed learning rate
+    (no per-region tuning) with gradient clipping, recording reconstruction RMSE and
+    whether training diverged.
+
+    The gate: a single documented LR/optimizer config must train all 6 trust-funnel
+    regions AND the GTEx region that diverged at the BrainSEQ default lr=1e-3
+    (``nucleus_accumbens``) to BrainSEQ-range RMSE with no OOM. This re-tests whether the
+    merged ``grad_clip_norm`` + divergence guard remove the need for per-dataset LR
+    babysitting (the production ``COHORTS`` spec still hard-codes GTEx ``lr=3e-4``). One
+    JSON row per region is written to ``_rmse_dir()`` for ``aggregate-rmse`` to tabulate.
+    """
+    if cohort not in COHORTS:
+        raise SystemExit(f"unknown cohort {cohort!r} (expected one of {list(COHORTS)})")
+    spec = COHORTS[cohort]
+    bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
+    sample_table = bundle.sample_table.reset_index(drop=True)
+    tc = bundle.matrices["transcript_counts"]
+    tt = bundle.feature_tables["transcript"]
+    if spec["filter_transcripts"]:
+        tc, tt = _filter_expressed_transcripts(tc, tt)
+    else:
+        tc = np.asarray(tc)
+    del bundle
+    n = sample_table.shape[0]
+
+    cfg = _vae_config(spec, lr_override=lr, grad_clip_norm=grad_clip_norm)
+    print(f"[{cohort}/{region}] {n} samples, {tc.shape[0]} transcripts | "
+          f"lr={lr} grad_clip_norm={grad_clip_norm}", flush=True)
+    rec = {"cohort": cohort, "region": region, "n_samples": int(n),
+           "n_transcripts": int(tc.shape[0]), "lr": float(lr),
+           "grad_clip_norm": (float(grad_clip_norm) if grad_clip_norm is not None else None)}
+    t0 = time.time()
+    try:
+        art = VaeNetworkModel(cfg).fit(
+            transcript_counts=tc, transcript_table=tt, sample_table=sample_table)
+        cal = art.calibration or {}
+        rmse = cal.get("reconstruction_rmse")
+        elbo = cal.get("vae_final_elbo")
+        rmse_ok = rmse is not None and math.isfinite(float(rmse))
+        rec.update({
+            "reconstruction_rmse": (float(rmse) if rmse_ok else None),
+            "vae_final_elbo": (float(elbo) if elbo is not None and math.isfinite(float(elbo)) else None),
+            "vae_best_epoch": cal.get("vae_best_epoch"),
+            "vae_early_stopped": cal.get("vae_early_stopped"),
+            "vae_n_epochs_trained": cal.get("vae_n_epochs_trained"),
+            "n_modules": int(art.module_table["module_id"].nunique()),
+            "diverged": not rmse_ok,
+            "seconds": round(time.time() - t0, 1),
+            "status": "ok",
+        })
+        print(f"  rmse={rec['reconstruction_rmse']} elbo={rec['vae_final_elbo']} "
+              f"early_stopped={rec['vae_early_stopped']} {rec['seconds']:.0f}s", flush=True)
+        del art
+        gc.collect()
+    except Exception as e:  # OOM / runtime error is itself a gate failure for this LR
+        rec.update({"status": f"FAILED:{type(e).__name__}", "error": str(e),
+                    "diverged": True, "reconstruction_rmse": None,
+                    "seconds": round(time.time() - t0, 1)})
+        print(f"  FAILED ({type(e).__name__}: {e})", flush=True)
+    out = _rmse_dir() / f"lrval__{cohort}__{region}.json"
+    out.write_text(json.dumps(rec, indent=2, default=str))
+    print(f"  wrote {out}", flush=True)
+
+
+def aggregate_rmse() -> None:
+    rdir = _rmse_dir()
+    files = sorted(p for p in rdir.iterdir()
+                   if p.suffix == ".json" and p.name.startswith("lrval__"))
+    if not files:
+        raise SystemExit(f"no lr-validation rows in {rdir} — run fit-rmse first")
+    rows = [json.loads(p.read_text()) for p in files]
+    df = pd.DataFrame(rows)
+    lo, hi = RMSE_BAND
+
+    def _verdict(r) -> str:
+        if r.get("status") != "ok" or r.get("diverged"):
+            return "DIVERGED/FAILED"
+        rm = r.get("reconstruction_rmse")
+        if rm is None or not (lo <= float(rm) <= hi):
+            return "OUT-OF-BAND"
+        return "PASS"
+
+    df["verdict"] = df.apply(_verdict, axis=1)
+    gate_pass = bool((df["verdict"] == "PASS").all())
+    lr_used = float(df["lr"].iloc[0]) if "lr" in df.columns and len(df) else None
+
+    out = _rmse_dir() / "lr_validation_summary"
+    df.to_parquet(out.with_suffix(".parquet"), index=False, compression="zstd")
+    summary = {"single_lr_gate_pass": gate_pass, "lr": lr_used,
+               "rmse_band": list(RMSE_BAND), "rows": df.to_dict(orient="records")}
+    out.with_suffix(".json").write_text(json.dumps(summary, indent=2, default=str))
+
+    show = [c for c in ["cohort", "region", "n_samples", "reconstruction_rmse",
+                        "vae_final_elbo", "vae_best_epoch", "vae_early_stopped",
+                        "n_modules", "diverged", "verdict", "seconds", "status"]
+            if c in df.columns]
+    print("\n=== single-LR full-data RMSE validation (gate B.2) ===")
+    print(df[show].sort_values(["cohort", "region"]).to_string(index=False))
+    print(f"\nSINGLE-LR GATE: {'PASS' if gate_pass else 'FAIL'}  "
+          f"(lr={lr_used}; all regions in RMSE band {RMSE_BAND}, no divergence/OOM)")
+    print(f"Wrote {out}.parquet + .json")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -393,6 +524,18 @@ def main() -> None:
                          "largest module is <= this fraction of genes (e.g. 0.15), instead "
                          "of post-hoc splitting. Tags partitions '_gcapNN'.")
     sub.add_parser("aggregate", help="compute ARI/NMI over all partitions and summarize")
+
+    fr = sub.add_parser("fit-rmse",
+                        help="B.2: one full-data fit at a single LR; record reconstruction RMSE")
+    fr.add_argument("--cohort", required=True, choices=list(COHORTS))
+    fr.add_argument("--region", required=True)
+    fr.add_argument("--lr", type=float, default=1e-3, metavar="LR",
+                    help="single learning rate applied to every region (default 1e-3 = "
+                         "the BrainSEQ default that diverges on some GTEx without clipping)")
+    fr.add_argument("--grad-clip-norm", type=float, default=1.0, metavar="C",
+                    help="global grad-norm clip (default 1.0; <=0 disables)")
+    sub.add_parser("aggregate-rmse",
+                   help="tabulate lr-validation rows -> single-LR gate (PASS/FAIL)")
     args = ap.parse_args()
 
     if args.cmd == "fit-isograph":
@@ -406,6 +549,11 @@ def main() -> None:
                      reliability_floor=args.reliability_floor,
                      max_module_frac=args.max_module_frac,
                      leiden_giant_frac=args.leiden_giant_frac)
+    elif args.cmd == "fit-rmse":
+        gc_norm = args.grad_clip_norm if args.grad_clip_norm and args.grad_clip_norm > 0 else None
+        fit_rmse(args.cohort, args.region, lr=args.lr, grad_clip_norm=gc_norm)
+    elif args.cmd == "aggregate-rmse":
+        aggregate_rmse()
     else:
         aggregate()
 
