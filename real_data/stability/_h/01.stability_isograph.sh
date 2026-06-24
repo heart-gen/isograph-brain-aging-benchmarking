@@ -50,13 +50,6 @@ CONSENSUS="${STABILITY_CONSENSUS:-1}"
 RELIABILITY="${STABILITY_RELIABILITY:-0}"
 RELIABILITY_FLAG=""
 if [[ "${RELIABILITY}" == "1" ]]; then RELIABILITY_FLAG="--reliability"; fi
-# Per-gene differential-TIN downweighting (needs cached TIN; tags 'isograph_tin') and/or
-# per-sample median-TIN covariate (tags 'isograph_mediantin'). brainseq caudate pilot.
-#   sbatch --export=ALL,STABILITY_TIN=1 ...   /   --export=ALL,STABILITY_MEDIAN_TIN=1 ...
-TIN_FLAG=""
-if [[ "${STABILITY_TIN:-0}" == "1" ]]; then TIN_FLAG="--tin"; fi
-MEDIAN_TIN_FLAG=""
-if [[ "${STABILITY_MEDIAN_TIN:-0}" == "1" ]]; then MEDIAN_TIN_FLAG="--median-tin-covariate"; fi
 # Reliability-weight floor (reliability in [F,1]); caps downweighting / guards n_common.
 FLOOR_FLAG=""
 if [[ -n "${STABILITY_RELIABILITY_FLOOR:-}" ]]; then FLOOR_FLAG="--reliability-floor ${STABILITY_RELIABILITY_FLOOR}"; fi
@@ -87,7 +80,7 @@ for ((k = 0; k < SEEDS; k++)); do
         log_message "  seed ${k} half ${half} ..."
         python -m isograph_benchmark.real_data.stability fit-isograph \
             --cohort "${COHORT}" --region "${REGION}" --seed "${k}" --half "${half}" \
-            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${TIN_FLAG} ${MEDIAN_TIN_FLAG} ${FLOOR_FLAG} ${CAP_FLAG} ${GCAP_FLAG}
+            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${FLOOR_FLAG} ${CAP_FLAG} ${GCAP_FLAG}
     done
 done
 conda deactivate

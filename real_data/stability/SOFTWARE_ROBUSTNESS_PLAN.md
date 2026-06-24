@@ -254,10 +254,25 @@ grad-clip+divergence guard, weighted/seeded Leiden, gene_switch_loadings, estima
       emits a `DeprecationWarning` (`models/base.py`) and the default stays `None`; tune
       `leiden_resolution` instead. Collapse, if it recurs, is to be addressed via B-centering
       (done) + D soft-threshold, not this knob.
-- [ ] **S5** promote estimability (`switch_reliability_source="estimability"`) to production
-      `run_models`, default-on for real data, after re-confirming synthetic + Type-I unaffected.
-- [ ] **Cleanup** excise differential-TIN code path + helpers (`reliability.py`/`switch.py`);
-      keep estimability as the sole reliability source (negative lever in the A/B).
+- [x] **S5** promote estimability (`switch_reliability_source="estimability"`) to production
+      **DONE (2026-06-24).** Every real-data fit in `run_models.py` now spreads `_PROMOTED_VAE`
+      (`switch_reliability_weighting=True` + `switch_reliability_source="estimability"` +
+      `switch_estimability_min_minor_usage=0.1`, plus `grad_clip_norm=1.0`; see B.2 below). Set
+      per-fit in the runner, NOT as a `config.py` default, so the synthetic benchmark grid is
+      untouched (config defaults verified still `degradation`/`weighting=False`/`grad_clip=None`)
+      — the "re-confirm synthetic + Type-I unaffected" precondition is met by construction.
+- [x] **Single-LR promotion** (B.2 PASS) **DONE (2026-06-24).** `run_models.run_gtex_region`
+      no longer hard-codes `lr=3e-4`; all real-data fits use the single default `lr=1e-3` +
+      `grad_clip_norm=1.0` (in `_PROMOTED_VAE`). Per-cohort LR babysitting retired.
+- [x] **Cleanup** excise differential-TIN code path + helpers **DONE (2026-06-24).** Removed
+      `gene_tin_reliability` (`features/reliability.py`), the `source=="tin_differential"` branch
+      and the `transcript_tin` `fit()` param (`models/vae.py`); and in the analysis repo the
+      `--tin`/`--median-tin-covariate` harness arms (`stability.py`), the `tin.py` extraction
+      module, and the `00.extract_tin.sh` SLURM wrapper. Per the 2026-06-24 scope decision the
+      parallel `median_tin_covariate` negative lever was excised too; `tin.py` retired entirely.
+      Estimability is now the sole switch-reliability lever used in production. (`inputs/tin/`
+      data cache left on disk, untracked.) Verified: no `tin_differential`/`gene_tin_reliability`/
+      `transcript_tin` refs remain in core; harness + runner byte-compile.
 - [ ] **S2/S3/S4** (as needed if validation shows residual fragility): full auto-LR-backoff+
       restart, KL warmup/free-bits, graph-density cap (OOM safeguard at the 48 GB ceiling).
 - [ ] **D** adjacency soft-threshold — only if B+C leave the giant module above cap.
