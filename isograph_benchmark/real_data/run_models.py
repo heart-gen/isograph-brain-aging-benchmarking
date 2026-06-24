@@ -30,6 +30,24 @@ BEST_LEIDEN_RESOLUTION = {
     "caudate_sczd": 2.0,   # brainseq SCZD+Control caudate
 }
 
+# Promoted single-config VAE defaults for every real-data fit (validation gate B,
+# 2026-06-22). Spread into each production VaeModelConfig so the shipped pipeline
+# matches the validated config and a stranger needs no per-dataset tuning:
+#   - grad_clip_norm=1.0 (B.2 PASS): one fixed lr=1e-3 + global grad-norm clipping
+#     trained all 6 trust-funnel regions AND the GTEx nucleus_accumbens that diverged
+#     at lr=1e-3 pre-clip (0/7 diverged, no OOM). Removes the hand-tuned GTEx lr=3e-4.
+#   - estimability switch reliability (S5): the sole *positive* split-half-stability
+#     lever in the A/B (covariate-free minor-isoform-usage downweighting). degradation/
+#     differential-TIN were negative and are not used here.
+# The synthetic benchmark grid is intentionally NOT changed (its config defaults stay
+# off until synthetic + Type-I are re-confirmed unaffected).
+_PROMOTED_VAE = dict(
+    grad_clip_norm=1.0,
+    switch_reliability_weighting=True,
+    switch_reliability_source="estimability",
+    switch_estimability_min_minor_usage=0.1,
+)
+
 
 def _filter_expressed_transcripts(
     transcript_counts: np.ndarray,
@@ -415,6 +433,7 @@ def run_brainseq_region(region: str) -> None:
         allow_abundance_abundance=False,
         alpha_switch=0.5,
         leiden_resolution=2.0,
+        **_PROMOTED_VAE,
     )
     print(f"[{region}] fitting model ...", flush=True)
     _t0 = time.time()
@@ -460,6 +479,7 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
         leiden_resolution=leiden_resolution,
+        **_PROMOTED_VAE,
     )
     print(f"[{region}+abundance] fitting model ...", flush=True)
     _t0 = time.time()
@@ -485,16 +505,17 @@ def run_gtex_region(region_dir_name: str) -> None:
 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        # GTEx brain regions have fewer samples (181-300) than BrainSEQ (238-390);
-        # the default lr=1e-3 destabilizes VAE training at this scale (val ELBO
-        # diverges to ~1e8, rmse 1.62). lr=3e-4 restores stable training
-        # (rmse 1.08, ELBO 4.8e4 — in BrainSEQ's range). See smoke-test diagnosis.
-        lr=3e-4,
+        # GTEx used to need a hand-tuned lr=3e-4: at the default lr=1e-3 the VAE
+        # diverged (val ELBO -> ~1e8) on some regions. Validation gate B.2 (2026-06-22)
+        # showed grad_clip_norm=1.0 (in _PROMOTED_VAE) lets the single default lr=1e-3
+        # train every GTEx region — including nucleus_accumbens, which diverged pre-clip
+        # — with no divergence/OOM. The per-cohort LR babysitting is therefore retired.
         residualize_covariates=covariate_cols,
         min_module_size=20, trait_columns=["AGE"], random_state=13,
         allow_abundance_abundance=False,
         alpha_switch=0.5,
         leiden_resolution=2.0,
+        **_PROMOTED_VAE,
     )
     print(f"[{region_dir_name}] fitting model ...", flush=True)
     _t0 = time.time()
@@ -558,6 +579,7 @@ def run_brainseq_caudate_sczd() -> None:
         allow_abundance_abundance=False,
         alpha_switch=0.5,
         leiden_resolution=10.0,
+        **_PROMOTED_VAE,
     )
     print("[caudate_sczd] fitting model ...", flush=True)
     _t0 = time.time()
@@ -601,6 +623,7 @@ def run_brainseq_caudate_sczd_with_abundance(leiden_resolution: float | None = N
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
         leiden_resolution=leiden_resolution,
+        **_PROMOTED_VAE,
     )
     print("[caudate_sczd+abundance] fitting model ...", flush=True)
     _t0 = time.time()

@@ -102,7 +102,7 @@ def _split_indices(n: int, seed: int) -> tuple[np.ndarray, np.ndarray]:
 
 
 def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
-                min_minor_usage: float = 0.1, tin: bool = False,
+                min_minor_usage: float = 0.1,
                 reliability_floor: float = 0.0,
                 extra_covariates: list[str] | None = None,
                 max_module_frac: float | None = None,
@@ -126,12 +126,6 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         kw["switch_reliability_weighting"] = True
         kw["switch_reliability_source"] = "estimability"
         kw["switch_estimability_min_minor_usage"] = min_minor_usage
-    if tin:
-        # Per-gene differential transcript-integrity (TIN) downweighting: genes whose
-        # isoform composition tracks within-gene differential degradation are switch
-        # artifacts -> downweight their switch-switch edges (needs transcript_tin).
-        kw["switch_reliability_weighting"] = True
-        kw["switch_reliability_source"] = "tin_differential"
     if reliability_floor > 0:
         # Cap the per-gene downweight at this floor (reliability in [floor, 1]) so a
         # noisy/degraded gene keeps a minimum switch contribution instead of being
@@ -172,7 +166,6 @@ def _write_partition(modules: pd.DataFrame, cohort, region, method, seed, half) 
 def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = None,
                  only_half: str | None = None, consensus_runs: int = 1,
                  reliability: bool = False, min_minor_usage: float = 0.1,
-                 tin: bool = False, median_tin_covariate: bool = False,
                  reliability_floor: float = 0.0,
                  max_module_frac: float | None = None,
                  leiden_giant_frac: float | None = None) -> None:
@@ -199,10 +192,6 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         method += "_consensus"
     if reliability:
         method += "_reliability"
-    if tin:
-        method += "_tin"
-    if median_tin_covariate:
-        method += "_mediantin"
     if reliability_floor > 0:
         method += f"_f{int(round(reliability_floor * 100)):02d}"
     if max_module_frac is not None:
@@ -221,26 +210,9 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
     del bundle
     n = sample_table.shape[0]
 
-    # Optional TIN inputs (brainseq caudate pilot). tin_mat is aligned row-for-row to
-    # the (filtered) transcript table and column-for-column to sample_table order, so
-    # it can be sliced by the same half index as tc.
-    tin_mat = None
-    extra_covariates: list[str] = []
-    if tin or median_tin_covariate:
-        from isograph_benchmark.real_data.tin import load_tin_aligned, load_sample_median_tin
-        sample_ids = sample_table["sample_id"].astype(str).tolist()
-        if tin:
-            tin_mat = load_tin_aligned(cohort, region,
-                                       tt["transcript_id"].astype(str).tolist(), sample_ids)
-        if median_tin_covariate:
-            sample_table = sample_table.copy()
-            sample_table["median_tin"] = load_sample_median_tin(cohort, region, sample_ids)
-            extra_covariates.append("median_tin")
-
     cfg = _vae_config(spec, consensus_runs=consensus_runs,
                       reliability=reliability, min_minor_usage=min_minor_usage,
-                      tin=tin, reliability_floor=reliability_floor,
-                      extra_covariates=extra_covariates,
+                      reliability_floor=reliability_floor,
                       max_module_frac=max_module_frac,
                       leiden_giant_frac=leiden_giant_frac)
     ks = [only_seed] if only_seed is not None else list(range(seeds))
@@ -260,10 +232,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
             t0 = time.time()
             try:
                 st = sample_table.iloc[idx].reset_index(drop=True)
-                tin_half = tin_mat[:, idx] if tin_mat is not None else None
                 art = VaeNetworkModel(cfg).fit(
                     transcript_counts=tc[:, idx], transcript_table=tt, sample_table=st,
-                    transcript_tin=tin_half,
                 )
                 mods = art.module_table[["gene_id", "module_id"]]
                 _write_partition(mods, cohort, region, method, k, half)
@@ -511,12 +481,6 @@ def main() -> None:
                          "switch-switch edges (tags partitions 'isograph_reliability')")
     fi.add_argument("--min-minor-usage", type=float, default=0.1, metavar="U",
                     help="minor-isoform usage floor for --reliability (default 0.1)")
-    fi.add_argument("--tin", action="store_true",
-                    help="per-gene differential-TIN switch-edge downweighting "
-                         "(needs cached TIN; tags partitions 'isograph_tin')")
-    fi.add_argument("--median-tin-covariate", action="store_true",
-                    help="add per-sample median TIN to residualization covariates "
-                         "(tags partitions 'isograph_mediantin')")
     fi.add_argument("--reliability-floor", type=float, default=0.0, metavar="F",
                     help="floor for the per-gene reliability weight (reliability in "
                          "[F,1]); caps downweighting. Tags partitions '_fNN'.")
@@ -548,8 +512,6 @@ def main() -> None:
                      consensus_runs=args.consensus,
                      reliability=args.reliability,
                      min_minor_usage=args.min_minor_usage,
-                     tin=args.tin,
-                     median_tin_covariate=args.median_tin_covariate,
                      reliability_floor=args.reliability_floor,
                      max_module_frac=args.max_module_frac,
                      leiden_giant_frac=args.leiden_giant_frac)
