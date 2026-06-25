@@ -353,9 +353,63 @@ def _save_core_artifacts(artifacts, out: Path) -> None:
     pd.DataFrame([artifacts.calibration or {}]).to_parquet(out / "calibration.parquet", index=False, compression="zstd")
     if artifacts.module_gene_roles is not None and not artifacts.module_gene_roles.empty:
         artifacts.module_gene_roles.to_parquet(out / "module_gene_roles.parquet", index=False, compression="zstd")
+    node_diag = getattr(artifacts, "node_diagnostics", None)
+    if node_diag is not None and not node_diag.empty:
+        node_diag.to_parquet(out / "node_diagnostics.parquet", index=False, compression="zstd")
+    recon = getattr(artifacts, "feature_reconstruction", None)
+    if recon is not None and not recon.empty:
+        # VAE reconstruction of the multiplex feature matrix; enables post-hoc
+        # re-projection of the gene graph under switch-only / switch-primary /
+        # full-multiplex channel rules without re-fitting (see project_tiers).
+        recon.to_parquet(out / "feature_reconstruction.parquet", index=False, compression="zstd")
 
 
-def _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col, label):
+# RNA-quality covariates aligned with the BrainSEQ DE/DTU aging model
+# (limma/satuRn design: RIN + mito_mapping_rate + percent_assigned + SVA). The IsoGraph
+# metrics parquet carries the both-ancestry analogs: exonic_rate (== featureCounts-style
+# percent_assigned) and x3_bias_75th_percentile (3' coverage bias / degradation). These
+# are the dominant confounds of the caudate aging modules (|corr|~0.73 with exonic_rate),
+# stronger and more principled than median TIN, and -- unlike TIN / the AA-only DE
+# phenotype.tsv -- available for every sample in all three BrainSEQ regions.
+RNASEQC_QC_COVARIATES = ["exonic_rate", "x3_bias_75th_percentile"]
+
+
+def _rnaseqc_covariate_table(region: str | None) -> pd.DataFrame | None:
+    """DE-aligned RNA-quality covariates (exonic_rate, x3_bias_75th_percentile) for this
+    BrainSEQ region keyed to sample_id, or None if the metrics parquet is absent."""
+    if region is None:
+        return None
+    p = rel("inputs", "processed", "brainseq", "metadata", f"{region}_rnaseq_metrics.parquet")
+    if not p.exists():
+        return None
+    df = pd.read_parquet(p, columns=["sample_rnum", *RNASEQC_QC_COVARIATES])
+    df = df.rename(columns={"sample_rnum": "sample_id"})
+    df["sample_id"] = df["sample_id"].astype(str)
+    return df
+
+
+# GTEx has no PEER factors in the bundle, but the GTEx RNAseQC suite (already in the
+# sample_table) carries the direct analogs of the brainseq DE-aligned QC covariates:
+# SMEXNCRT == exonic rate (percent_assigned analog), SM3PB75P == 3' bias 75th percentile
+# (x3_bias_75th analog). Used as RNA-quality proxies in the GTEx aging association,
+# matching the brainseq covariate philosophy cross-cohort.
+GTEX_QC_COVARIATES = ["SMEXNCRT", "SM3PB75P"]
+
+
+def _gtex_qc_covariate_table(sample_table: pd.DataFrame) -> pd.DataFrame | None:
+    """DE-aligned GTEx RNA-quality covariates pulled from the bundle sample_table
+    (numeric), keyed to sample_id; None if the columns are absent."""
+    cols = [c for c in GTEX_QC_COVARIATES if c in sample_table.columns]
+    if not cols:
+        return None
+    out = pd.DataFrame({"sample_id": sample_table["sample_id"].astype(str)})
+    for c in cols:
+        out[c] = pd.to_numeric(sample_table[c], errors="coerce").to_numpy()
+    return out
+
+
+def _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col, label,
+                        qc_table: pd.DataFrame | None = None):
     _save_core_artifacts(artifacts, out)
     eigengenes = _eigengenes_to_sample_table(artifacts)
     if eigengenes is not None:
@@ -365,8 +419,25 @@ def _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col, l
         spline = spline_age_association(eigengenes, sample_table, covariate_cols, age_col=age_col)
         spline.to_parquet(out / "age_spline.parquet", index=False, compression="zstd")
 
-        print(f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
-              f"linear n={len(linear)} | spline n={len(spline)}")
+        msg = (f"  {label}: {len(artifacts.module_table['module_id'].unique())} modules | "
+               f"linear n={len(linear)} | spline n={len(spline)}")
+
+        # DE-aligned QC-adjusted spline (the spline to report): keeps the baseline
+        # age_spline.parquet so the degradation attenuation is visible before/after.
+        if qc_table is not None:
+            qc_cols = [c for c in qc_table.columns if c != "sample_id"]
+            st_qc = sample_table.copy()
+            st_qc["sample_id"] = st_qc["sample_id"].astype(str)
+            # Drop any same-named columns first so native QC cols (GTEx SMxxx already in
+            # sample_table) are not duplicated by the merge.
+            st_qc = st_qc.drop(columns=[c for c in qc_cols if c in st_qc.columns])
+            st_qc = st_qc.merge(qc_table, on="sample_id", how="left")
+            spline_qc = spline_age_association(
+                eigengenes, st_qc, covariate_cols + qc_cols, age_col=age_col,
+            )
+            spline_qc.to_parquet(out / "age_spline_qc_adjusted.parquet", index=False, compression="zstd")
+            msg += f" | spline+QC({'+'.join(qc_cols)}) n={len(spline_qc)}"
+        print(msg)
 
 
 def _save_diagnosis_artifacts(
@@ -446,7 +517,8 @@ def run_brainseq_region(region: str) -> None:
     print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
-    _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region)
+    _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region,
+                        qc_table=_rnaseqc_covariate_table(region))
 
 
 def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | None = None) -> None:
@@ -494,7 +566,7 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
 
     out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae_with_abundance"))
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age",
-                        label=f"{region}+abundance")
+                        label=f"{region}+abundance", qc_table=_rnaseqc_covariate_table(region))
 
 
 def run_gtex_region(region_dir_name: str) -> None:
@@ -527,7 +599,8 @@ def run_gtex_region(region_dir_name: str) -> None:
     print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
-    _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE", label=region_dir_name)
+    _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE",
+                        label=region_dir_name, qc_table=_gtex_qc_covariate_table(bundle.sample_table))
 
 
 def _drd2_gene_id(transcript_table: pd.DataFrame) -> str | None:
