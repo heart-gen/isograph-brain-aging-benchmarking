@@ -70,7 +70,15 @@ def _build_output_frame(
     p_col = _find_column(columns, trait_cfg.get("p_col"), "p-value")
 
     out = pd.DataFrame()
-    out["SNP"] = chunk[snp_col].astype("string").str.strip()
+    raw_snp = chunk[snp_col].astype("string").str.strip()
+    if trait_cfg.get("snp_rsid_extract"):
+        # SNP ids carry the rsID embedded in a compound token (e.g.
+        # "rs11106131:78045649:G:T" or bare "chr:pos:a1:a2" with no rsID). The
+        # MAGMA reference panel is rsID-keyed, so pull the rsID; rows without one
+        # become NA and are dropped by the validity filter below.
+        out["SNP"] = raw_snp.str.extract(r"(rs\d+)", expand=False).astype("string")
+    else:
+        out["SNP"] = raw_snp
     out["P"] = pd.to_numeric(chunk[p_col], errors="coerce")
 
     if "fixed_n" in trait_cfg:

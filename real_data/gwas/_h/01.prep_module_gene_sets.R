@@ -18,7 +18,12 @@ out_dir <- file.path(project_root, "real_data", "gwas", "_m", "gene_sets")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
 MIN_GENES <- 10
-BACKENDS <- c("isograph_vae", "wgcna_gene")
+# The IsoGraph backend dir is selectable so a non-canonical resolution (e.g.
+# isograph_vae_res5) can be analysed without clobbering the canonical
+# isograph_vae gene sets -- the backend name is embedded in the output filename.
+# wgcna_gene is resolution-independent and always re-emitted (idempotent).
+ISOGRAPH_BACKEND <- Sys.getenv("MAGMA_ISOGRAPH_BACKEND", "isograph_vae")
+BACKENDS <- c(ISOGRAPH_BACKEND, "wgcna_gene")
 
 # Region collections: (dataset_label, region_dir, results_root)
 COLLECTIONS <- list(

@@ -12,7 +12,13 @@
 # Characterize the composition-unique gene sets (GO:BP enrichment + IsoGraph
 # module concentration) from the de-confounded gene-level test. Writes to
 # real_data/brainseq/<region>/_m/isograph_vae/composition_unique/.
-# Run AFTER 08.incremental_association.sh (needs gene_level.parquet).
+#
+# DEPENDENCY: this consumes incremental_association/gene_level.parquet, so it
+# MUST afterok on 08.incremental_association.sh -- NOT 04.interpret_modules.sh.
+# (Mis-wiring to interpret is what cancelled the S3 cascade on 2026-06-25: the
+# array launched before incremental finished writing. The consumer now also
+# bounded-waits for gene_level.parquet to absorb afterok skew, but wire the
+# correct parent regardless.)
 #
 #   task 1 -> brainseq-sczd
 #   task 2 -> brainseq-aging caudate

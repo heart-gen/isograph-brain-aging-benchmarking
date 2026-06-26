@@ -28,7 +28,12 @@ TRAIT_LABELS <- c(
     pd = "PD",
     stroke = "Stroke"
 )
-BACKENDS <- c("isograph_vae", "wgcna_gene")
+# IsoGraph backend dir is selectable (default canonical isograph_vae). With a
+# non-canonical backend (e.g. isograph_vae_res5) the combined parquet + figures
+# get a matching suffix so the canonical artifacts are never overwritten.
+ISOGRAPH_BACKEND <- Sys.getenv("MAGMA_ISOGRAPH_BACKEND", "isograph_vae")
+SUFFIX <- if (ISOGRAPH_BACKEND == "isograph_vae") "" else sub("^isograph_vae", "", ISOGRAPH_BACKEND)
+BACKENDS <- c(ISOGRAPH_BACKEND, "wgcna_gene")
 FDR_THRESHOLD <- 0.05
 TOP_N <- 20
 
@@ -60,7 +65,8 @@ gsa <- gsa %>%
     ungroup()
 
 # Save combined results
-write_parquet(gsa, file.path(file.path(project_root, "real_data", "gwas", "_m"), "magma_results_combined.parquet"))
+write_parquet(gsa, file.path(file.path(project_root, "real_data", "gwas", "_m"),
+                             sprintf("magma_results_combined%s.parquet", SUFFIX)))
 
 # ── Dot plot: top modules per backend × trait ─────────────────────────────────
 top_modules <- gsa %>%
@@ -96,12 +102,13 @@ plot_backend <- function(df, backend_label) {
               panel.grid.minor = element_blank())
 }
 
-p1 <- plot_backend(top_modules %>% filter(backend == "isograph_vae"),  "IsoGraph VAE modules")
+p1 <- plot_backend(top_modules %>% filter(backend == ISOGRAPH_BACKEND), "IsoGraph VAE modules")
 p2 <- plot_backend(top_modules %>% filter(backend == "wgcna_gene"),    "Gene-level WGCNA modules")
 
 fig <- p1 | p2
-ggsave(file.path(out_dir, "magma_enrichment_dotplot.pdf"), fig, width = 14, height = 10)
-cat("Saved:", file.path(out_dir, "magma_enrichment_dotplot.pdf"), "\n")
+dotplot_path <- file.path(out_dir, sprintf("magma_enrichment_dotplot%s.pdf", SUFFIX))
+ggsave(dotplot_path, fig, width = 14, height = 10)
+cat("Saved:", dotplot_path, "\n")
 
 # ── Top-20 ranked plot per trait ──────────────────────────────────────────────
 plot_top20 <- function(trait_name) {
@@ -109,16 +116,16 @@ plot_top20 <- function(trait_name) {
         group_by(backend) %>% slice_min(P, n = TOP_N) %>% ungroup()
     if (nrow(df) == 0) return(NULL)
 
-    df$label <- paste0(gsub("isograph_vae", "ISO", gsub("wgcna_gene", "WGCNA", df$backend)),
+    df$label <- paste0(gsub(ISOGRAPH_BACKEND, "ISO", gsub("wgcna_gene", "WGCNA", df$backend)),
                        ": ", gsub("__", " / ", df$VARIABLE))
     df$label <- factor(df$label, levels = df$label[order(df$P, decreasing = TRUE)])
 
+    fill_vals <- setNames(c("#2166AC", "#B2182B"), c(ISOGRAPH_BACKEND, "wgcna_gene"))
+    fill_labs <- setNames(c("IsoGraph VAE", "WGCNA gene"), c(ISOGRAPH_BACKEND, "wgcna_gene"))
     ggplot(df, aes(x = -log10(P), y = label, fill = backend)) +
         geom_col(alpha = 0.8) +
         geom_vline(xintercept = -log10(0.05), linetype = "dashed", color = "grey40") +
-        scale_fill_manual(values = c(isograph_vae = "#2166AC", wgcna_gene = "#B2182B"),
-                          labels = c(isograph_vae = "IsoGraph VAE", wgcna_gene = "WGCNA gene"),
-                          name = "Method") +
+        scale_fill_manual(values = fill_vals, labels = fill_labs, name = "Method") +
         labs(title = paste("Top modules:", trait_name),
              x = expression(-log[10](P)), y = NULL) +
         theme_bw(base_size = 9) +
@@ -129,7 +136,7 @@ trait_plots <- lapply(unique(gsa$trait), plot_top20)
 trait_plots <- Filter(Negate(is.null), trait_plots)
 if (length(trait_plots) > 0) {
     fig2 <- Reduce(`/`, trait_plots)
-    ggsave(file.path(out_dir, "magma_enrichment_top20.pdf"), fig2,
-           width = 10, height = 4 * length(trait_plots))
-    cat("Saved:", file.path(out_dir, "magma_enrichment_top20.pdf"), "\n")
+    top20_path <- file.path(out_dir, sprintf("magma_enrichment_top20%s.pdf", SUFFIX))
+    ggsave(top20_path, fig2, width = 10, height = 4 * length(trait_plots))
+    cat("Saved:", top20_path, "\n")
 }
