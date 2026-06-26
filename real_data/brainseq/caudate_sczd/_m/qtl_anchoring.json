@@ -1,0 +1,18 @@
+{
+  "analysis": "brainseq-sczd",
+  "region": null,
+  "tissue": "Brain_Caudate_basal_ganglia",
+  "variant": "standard",
+  "fdr": 0.05,
+  "n_isograph_genes": 20559,
+  "universe_sizes": {
+    "sQTL": 13690,
+    "eQTL": 19275
+  },
+  "module_set_sizes": {
+    "all_modules": 3511,
+    "pheno_sig_modules": 299,
+    "go_invisible_modules": 213,
+    "go_visible_modules": 86
+  }
+}

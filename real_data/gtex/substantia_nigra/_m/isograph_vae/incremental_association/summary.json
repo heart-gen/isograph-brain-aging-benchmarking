@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16368,
+    "composition_unique": 1,
+    "abundance_unique": 10,
+    "both": 0,
+    "neither": 16357
+  },
+  "module_level": {
+    "n_tested": 43,
+    "composition_unique": 11,
+    "abundance_unique": 0,
+    "both": 2,
+    "neither": 30
+  },
+  "analysis": "gtex-aging",
+  "region": "substantia_nigra",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

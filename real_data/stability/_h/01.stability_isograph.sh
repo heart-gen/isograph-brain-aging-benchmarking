@@ -4,8 +4,8 @@
 #SBATCH --job-name=stability-isograph
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=16  # 16 x 2000M = 32G; one VAE fit on ~18k genes peaks near 16G
-#SBATCH --time=03:00:00
+#SBATCH --cpus-per-task=24  # 24 x 2000M = 48G; dlpfc (idx 3) peaks ~46G, OOMs at 32G
+#SBATCH --time=04:00:00
 #SBATCH --array=1-6
 #SBATCH --output=real_data/stability/_m/logs/%x-%A_%a.log
 

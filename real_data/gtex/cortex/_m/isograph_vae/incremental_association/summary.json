@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16480,
+    "composition_unique": 438,
+    "abundance_unique": 2854,
+    "both": 72,
+    "neither": 13116
+  },
+  "module_level": {
+    "n_tested": 33,
+    "composition_unique": 22,
+    "abundance_unique": 0,
+    "both": 4,
+    "neither": 7
+  },
+  "analysis": "gtex-aging",
+  "region": "cortex",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

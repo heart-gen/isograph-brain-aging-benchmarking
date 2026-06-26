@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 35,
+      "n_go_enriched": 11,
+      "frac_go_enriched": 0.314,
+      "n_pheno_sig_fdr10": 24
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 2
+    },
+    "wgcna_switch": {
+      "n_modules": 15,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 0.467,
+      "n_pheno_sig_fdr10": 11
+    },
+    "wgcna_multiplex": {
+      "n_modules": 13,
+      "n_go_enriched": 11,
+      "frac_go_enriched": 0.846,
+      "n_pheno_sig_fdr10": 5
+    }
+  }
+}

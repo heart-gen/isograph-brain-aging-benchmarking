@@ -1,0 +1,17 @@
+{
+  "cohort": "gtex",
+  "region": "frontal_cortex_ba9",
+  "n_samples": 269,
+  "n_transcripts": 219379,
+  "lr": 0.001,
+  "grad_clip_norm": 1.0,
+  "reconstruction_rmse": 0.7861605882644653,
+  "vae_final_elbo": 55271.66015625,
+  "vae_best_epoch": 125,
+  "vae_early_stopped": true,
+  "vae_n_epochs_trained": 126,
+  "n_modules": 10,
+  "diverged": false,
+  "seconds": 140.4,
+  "status": "ok"
+}

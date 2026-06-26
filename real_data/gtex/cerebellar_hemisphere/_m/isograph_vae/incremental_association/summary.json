@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16140,
+    "composition_unique": 2,
+    "abundance_unique": 385,
+    "both": 0,
+    "neither": 15753
+  },
+  "module_level": {
+    "n_tested": 28,
+    "composition_unique": 0,
+    "abundance_unique": 0,
+    "both": 0,
+    "neither": 28
+  },
+  "analysis": "gtex-aging",
+  "region": "cerebellar_hemisphere",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

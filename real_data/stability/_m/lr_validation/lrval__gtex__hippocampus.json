@@ -1,0 +1,17 @@
+{
+  "cohort": "gtex",
+  "region": "hippocampus",
+  "n_samples": 255,
+  "n_transcripts": 220302,
+  "lr": 0.001,
+  "grad_clip_norm": 1.0,
+  "reconstruction_rmse": 0.8126223087310791,
+  "vae_final_elbo": 59463.08984375,
+  "vae_best_epoch": 125,
+  "vae_early_stopped": true,
+  "vae_n_epochs_trained": 126,
+  "n_modules": 38,
+  "diverged": false,
+  "seconds": 132.1,
+  "status": "ok"
+}

@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 38,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.158,
+      "n_pheno_sig_fdr10": 31
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_switch": {
+      "n_modules": 17,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 0.412,
+      "n_pheno_sig_fdr10": 14
+    },
+    "wgcna_multiplex": {
+      "n_modules": 17,
+      "n_go_enriched": 12,
+      "frac_go_enriched": 0.706,
+      "n_pheno_sig_fdr10": 9
+    }
+  }
+}
