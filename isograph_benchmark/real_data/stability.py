@@ -78,7 +78,8 @@ COHORTS = {
         "covariates": ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"],
         "age_col": "AGE",
         "filter_transcripts": False,
-        "lr": 3e-4,                   # GTEx needs lr=3e-4 (default diverges at this scale)
+        "lr": None,                   # promoted single LR: default 1e-3 + grad_clip_norm=1.0
+                                      # (gate B.2) replaces the old hand-tuned GTEx lr=3e-4.
     },
 }
 
@@ -114,15 +115,23 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariates,
         min_module_size=20, trait_columns=[spec["age_col"]], random_state=VAE_SEED,
-        allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=2.0,
+        allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=5.0,
+        # Promoted production defaults (mirror run_models._PROMOTED_VAE, 2026-06-24):
+        # the split-half baseline must equal the shipped config so the trust funnel
+        # validates the ACTUAL production modules. grad_clip_norm=1.0 (single-LR gate
+        # B.2) + estimability switch-reliability (the only positive stability lever).
+        grad_clip_norm=1.0,
+        switch_reliability_weighting=True,
+        switch_reliability_source="estimability",
+        switch_estimability_min_minor_usage=min_minor_usage,
     )
     if consensus_runs and consensus_runs >= 2:
         kw["consensus_runs"] = consensus_runs
     if reliability:
-        # Covariate-free isoform-estimability downweighting of switch-switch edges:
-        # genes whose minor isoform lacks read support carry a noise switch
-        # coordinate that flips between split-halves; downweighting their edges
-        # should stabilise the surviving module structure.
+        # NOTE (2026-06-24): estimability is now baked into the baseline kw above
+        # (it was promoted to production), so this flag is redundant for the source
+        # and only adds the '_reliability' method tag. Retained for back-reference;
+        # the production trust-funnel re-run uses the plain 'isograph' baseline.
         kw["switch_reliability_weighting"] = True
         kw["switch_reliability_source"] = "estimability"
         kw["switch_estimability_min_minor_usage"] = min_minor_usage

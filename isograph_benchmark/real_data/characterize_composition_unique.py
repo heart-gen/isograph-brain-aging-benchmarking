@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 
 import numpy as np
 import pandas as pd
@@ -39,6 +40,32 @@ _ANALYSES = [
 
 def _label(analysis: str, region: str | None) -> str:
     return f"{analysis}:{region}" if region else analysis
+
+
+def _wait_for_upstream(path, label: str, timeout_s: float = 600.0, poll_s: float = 10.0):
+    """Block until an upstream parquet materializes, absorbing afterok launch skew.
+
+    This stage consumes incremental_association/gene_level.parquet. If the SLURM
+    DAG is wired to depend on the wrong parent (afterok on 04.interpret rather than
+    08.incremental) or simply races a still-flushing writer, a bare existence check
+    crashes the whole array. Poll up to ``timeout_s`` so a small ordering skew is
+    tolerated; otherwise fail loudly with the correct dependency named.
+    """
+    deadline = time.monotonic() + timeout_s
+    waited = False
+    while not (path.exists() and path.stat().st_size > 0):
+        if time.monotonic() >= deadline:
+            raise FileNotFoundError(
+                f"[{label}] missing {path} after waiting {timeout_s:.0f}s; run "
+                "incremental_association first (wire afterok on 08.incremental, "
+                "not 04.interpret)."
+            )
+        if not waited:
+            print(f"[{label}] waiting for upstream {path.name} (afterok skew)...", flush=True)
+            waited = True
+        time.sleep(poll_s)
+    if waited:
+        print(f"[{label}] upstream {path.name} appeared; proceeding", flush=True)
 
 
 def _module_concentration(unique_genes: set[str], background: set[str], modules: pd.DataFrame) -> pd.DataFrame:
@@ -69,8 +96,7 @@ def characterize(analysis: str, region: str | None, variant: str,
     artifact_dir = _artifact_dir(analysis, region, variant)
     inc_dir = artifact_dir / "incremental_association"
     gl_path = inc_dir / "gene_level.parquet"
-    if not gl_path.exists():
-        raise FileNotFoundError(f"[{label}] missing {gl_path}; run incremental_association first.")
+    _wait_for_upstream(gl_path, label)
     gene_level = pd.read_parquet(gl_path)
     modules = pd.read_parquet(artifact_dir / "modules.parquet")
 

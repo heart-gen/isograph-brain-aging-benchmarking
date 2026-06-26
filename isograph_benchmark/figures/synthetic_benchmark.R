@@ -226,13 +226,33 @@ theme_pub <- function(base_size = 8.5) {
     )
 }
 
+# ggpubr's `palette=` already colours fill panels correctly, but the subsequent
+# scale_fill_manual (kept so the legend shows METHOD_LABELS) re-maps an already-resolved
+# fill scale and ggplot emits a benign "No shared levels ... manual scale" warning at
+# draw time. Colours and legend labels are verified correct; muffle only that specific
+# warning so the submission build log stays clean (everything else still surfaces).
+.muffle_no_shared_levels <- function(expr) {
+  withCallingHandlers(
+    expr,
+    warning = function(w) {
+      if (grepl("No shared levels", conditionMessage(w), fixed = TRUE)) {
+        invokeRestart("muffleWarning")
+      }
+    }
+  )
+}
+
 save_fig <- function(p, name, width, height) {
   pdf_path <- file.path(FIG_DIR, paste0(name, ".pdf"))
   png_path <- file.path(FIG_DIR, paste0(name, ".png"))
-  ggsave(pdf_path, plot = p, width = width, height = height, units = "in",
-         device = cairo_pdf)
-  ggsave(png_path, plot = p, width = width, height = height, units = "in",
-         dpi = 300)
+  .muffle_no_shared_levels(
+    ggsave(pdf_path, plot = p, width = width, height = height, units = "in",
+           device = cairo_pdf)
+  )
+  .muffle_no_shared_levels(
+    ggsave(png_path, plot = p, width = width, height = height, units = "in",
+           dpi = 300)
+  )
   cat("  ", name, " saved\n", sep = "")
 }
 
