@@ -49,18 +49,24 @@ _PROMOTED_VAE = dict(
 )
 
 
+# Canonical production Leiden resolution for the standard variant. See the wiki
+# (Tuning-and-Stability-Selection) for the rationale and the biology-driven sweep.
+CANONICAL_LEIDEN_RESOLUTION = 5.0
+
+
 def _isograph_out_subdir(leiden_resolution: float | None) -> str:
     """Output subdir name for a standard isograph_vae fit.
 
-    With no override (None) this is the canonical ``isograph_vae`` dir at each
-    region's production resolution. When an explicit ``leiden_resolution`` is
-    passed, the partition is written to a resolution-suffixed sibling (e.g.
-    ``isograph_vae_res5``) so a non-canonical resolution is a side-by-side
-    comparison set and never clobbers the canonical modules that the GWAS and
-    trust-funnel cascades consume. The suffix encodes the resolution with '.'
-    -> 'p' (e.g. 2.25 -> isograph_vae_res2p25).
+    With no override (None) or the canonical resolution (5.0) this is the
+    canonical ``isograph_vae`` dir that the GWAS and trust-funnel cascades
+    consume. Any *other* explicit ``leiden_resolution`` is written to a
+    resolution-suffixed sibling (e.g. ``isograph_vae_res5`` for 5.0 is the
+    canonical dir, ``isograph_vae_res2`` for 2.0) so a non-canonical resolution
+    is a side-by-side comparison set and never clobbers the canonical modules.
+    The suffix encodes the resolution with '.' -> 'p' (e.g. 2.25 ->
+    isograph_vae_res2p25).
     """
-    if leiden_resolution is None:
+    if leiden_resolution is None or leiden_resolution == CANONICAL_LEIDEN_RESOLUTION:
         return "isograph_vae"
     token = f"{leiden_resolution:g}".replace(".", "p")
     return f"isograph_vae_res{token}"
@@ -529,7 +535,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
         allow_abundance_abundance=True,
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
-        leiden_resolution=2.0 if leiden_resolution is None else leiden_resolution,
+        leiden_resolution=CANONICAL_LEIDEN_RESOLUTION if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
     print(f"[{region}] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
@@ -616,7 +622,7 @@ def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None
         allow_abundance_abundance=True,
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
-        leiden_resolution=2.0 if leiden_resolution is None else leiden_resolution,
+        leiden_resolution=CANONICAL_LEIDEN_RESOLUTION if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
     print(f"[{region_dir_name}] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
@@ -688,7 +694,7 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
         allow_abundance_abundance=True,
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
-        leiden_resolution=10.0 if leiden_resolution is None else leiden_resolution,
+        leiden_resolution=CANONICAL_LEIDEN_RESOLUTION if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
     print(f"[caudate_sczd] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
@@ -778,11 +784,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--leiden-resolution", type=float, default=None,
-        help="Override leiden_resolution. For the standard variant a non-None "
-             "value writes the partition to a resolution-suffixed sibling dir "
-             "(e.g. isograph_vae_res5) instead of the canonical isograph_vae, so "
-             "it never clobbers the canonical modules. Default (None): each "
-             "region's hard-coded production resolution (with-abundance uses "
+        help="Override leiden_resolution. Default (None) and the canonical value "
+             f"({CANONICAL_LEIDEN_RESOLUTION}) both write to the canonical "
+             "isograph_vae dir that the GWAS + trust-funnel cascades consume. "
+             "Any OTHER value writes to a resolution-suffixed sibling dir (e.g. "
+             "isograph_vae_res2 for 2.0, isograph_vae_res2p25 for 2.25) so a "
+             "biology-driven resolution sweep is a set of side-by-side comparison "
+             "dirs that never clobber the canonical modules (with-abundance uses "
              "BEST_LEIDEN_RESOLUTION from the Part 1 sweep).",
     )
     args = parser.parse_args()
