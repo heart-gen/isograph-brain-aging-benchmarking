@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 11114,
+    "composition_unique": 0,
+    "abundance_unique": 361,
+    "both": 0,
+    "neither": 10753
+  },
+  "module_level": {
+    "n_tested": 46,
+    "composition_unique": 1,
+    "abundance_unique": 0,
+    "both": 0,
+    "neither": 45
+  },
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

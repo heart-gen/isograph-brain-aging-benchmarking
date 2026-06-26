@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellar_hemisphere",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 28,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.214,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 12,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.75,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_switch": {
+      "n_modules": 16,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.312,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_multiplex": {
+      "n_modules": 21,
+      "n_go_enriched": 19,
+      "frac_go_enriched": 0.905,
+      "n_pheno_sig_fdr10": 1
+    }
+  }
+}

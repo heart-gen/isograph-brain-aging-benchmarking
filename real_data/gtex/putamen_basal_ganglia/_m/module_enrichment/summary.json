@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "putamen_basal_ganglia",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 36,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.25,
+      "n_pheno_sig_fdr10": 4
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.857,
+      "n_pheno_sig_fdr10": 2
+    },
+    "wgcna_switch": {
+      "n_modules": 18,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.222,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_multiplex": {
+      "n_modules": 13,
+      "n_go_enriched": 10,
+      "frac_go_enriched": 0.769,
+      "n_pheno_sig_fdr10": 3
+    }
+  }
+}

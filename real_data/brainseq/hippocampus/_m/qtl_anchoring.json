@@ -1,0 +1,15 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "fdr": 0.05,
+  "n_isograph_genes": 17515,
+  "universe_sizes": {
+    "sQTL": 12535,
+    "eQTL": 16756
+  },
+  "module_set_sizes": {
+    "all_modules": 3870
+  }
+}

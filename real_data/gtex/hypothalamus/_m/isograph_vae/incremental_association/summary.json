@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16898,
+    "composition_unique": 47,
+    "abundance_unique": 516,
+    "both": 1,
+    "neither": 16334
+  },
+  "module_level": {
+    "n_tested": 28,
+    "composition_unique": 10,
+    "abundance_unique": 0,
+    "both": 2,
+    "neither": 16
+  },
+  "analysis": "gtex-aging",
+  "region": "hypothalamus",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

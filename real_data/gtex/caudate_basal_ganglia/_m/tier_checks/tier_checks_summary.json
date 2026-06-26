@@ -1,0 +1,40 @@
+{
+  "analysis": "gtex-aging",
+  "region": "caudate_basal_ganglia",
+  "primary_tier": "full_multiplex",
+  "tiers": {
+    "switch_only": {
+      "n_modules": 16,
+      "median_switch_frac": 0.896,
+      "median_best_jaccard_vs_wgcna": 0.036,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 0,
+      "trait_abundance_unique": 0,
+      "trait_both": 0,
+      "trait_neither": 16
+    },
+    "switch_primary": {
+      "n_modules": 16,
+      "median_switch_frac": 0.861,
+      "median_best_jaccard_vs_wgcna": 0.035,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 0,
+      "trait_abundance_unique": 0,
+      "trait_both": 0,
+      "trait_neither": 16
+    },
+    "full_multiplex": {
+      "n_modules": 19,
+      "median_switch_frac": 0.837,
+      "median_best_jaccard_vs_wgcna": 0.027,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 0,
+      "trait_abundance_unique": 0,
+      "trait_both": 0,
+      "trait_neither": 19
+    }
+  }
+}
