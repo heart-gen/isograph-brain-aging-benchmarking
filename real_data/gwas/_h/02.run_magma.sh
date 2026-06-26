@@ -29,7 +29,11 @@ export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 
 MAGMA_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/magma
-GENE_LOC_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/NCBI38.gene.loc
+# The g1000_eur LD reference panel is build hg19/b37 (verified: bim chr1 max pos
+# 249,240,539 -> hg19, and the rsID-keyed positions match the b37 coords embedded
+# in the CLOZUK SCZ SNP ids, not the hg38 BP column). The gene location file MUST
+# match that build, so use NCBI37.3 -- pairing it with NCBI38 mis-maps SNPs to genes.
+GENE_LOC_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/NCBI37.3.gene.loc
 LD_REF_HPC=/ocean/projects/bio250020p/shared/opt/magma-v1.10/g1000_eur
 
 MAGMA="${MAGMA:-${MAGMA_HPC}}"
@@ -38,7 +42,13 @@ LD_REF="${LD_REF:-${LD_REF_HPC}}"
 CONFIG="${CONFIG:-configs/gwas_magma.yaml}"
 
 TRAITS=(scz mdd bp ad pd stroke)
-BACKENDS=(isograph_vae wgcna_gene)
+# IsoGraph backend dir is selectable (default canonical isograph_vae). Set
+# MAGMA_ISOGRAPH_BACKEND=isograph_vae_res5 to run the resolution-5.0 partition;
+# the gene analysis (.genes.out/.genes.raw) is module-independent and reused,
+# only the gene-set analysis (GSA) differs. Output files embed ${backend} so a
+# non-canonical backend never clobbers the canonical results.
+ISOGRAPH_BACKEND="${MAGMA_ISOGRAPH_BACKEND:-isograph_vae}"
+BACKENDS=("${ISOGRAPH_BACKEND}" wgcna_gene)
 
 SETS_DIR="${PROJECT_ROOT}/real_data/gwas/_m/gene_sets"
 PVAL_DIR="${PROJECT_ROOT}/real_data/gwas/_m/tmp/magma_pvals"
@@ -46,7 +56,7 @@ REF_TMP_DIR="${PROJECT_ROOT}/real_data/gwas/_m/tmp/magma_ref"
 GENE_RESULTS_DIR="${PROJECT_ROOT}/real_data/gwas/_m/gene_analysis"
 OUT_DIR="${PROJECT_ROOT}/real_data/gwas/_m/results"
 LOG_DIR="${PROJECT_ROOT}/real_data/gwas/_m/logs"
-ANNOT_PREFIX="${REF_TMP_DIR}/g1000_eur_NCBI38"
+ANNOT_PREFIX="${REF_TMP_DIR}/g1000_eur_NCBI37"
 SNP_LOC="${REF_TMP_DIR}/g1000_eur.snps.loc"
 
 mkdir -p "${PVAL_DIR}" "${REF_TMP_DIR}" "${GENE_RESULTS_DIR}" "${OUT_DIR}" "${LOG_DIR}"
@@ -106,11 +116,13 @@ for trait in "${TRAITS[@]}"; do
     fi
 
     log_message "  ${trait}: MAGMA gene analysis"
+    # NB: do NOT pass --genes-only here. It suppresses the .genes.raw file (the
+    # gene-gene correlation matrix), which the downstream gene-set analysis below
+    # consumes via --gene-results. We need both .genes.out and .genes.raw.
     "${MAGMA}" \
         --bfile "${LD_REF}" \
         --pval "${PVAL_FILE}" ncol=N \
         --gene-annot "${ANNOT_PREFIX}.genes.annot" \
-        --genes-only \
         --out "${GENE_PREFIX}" \
         2>&1 | tee "${LOG_DIR}/gene_${trait}.log"
 
