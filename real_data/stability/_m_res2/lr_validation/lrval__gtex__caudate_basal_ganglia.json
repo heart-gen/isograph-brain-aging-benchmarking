@@ -1,0 +1,17 @@
+{
+  "cohort": "gtex",
+  "region": "caudate_basal_ganglia",
+  "n_samples": 300,
+  "n_transcripts": 220069,
+  "lr": 0.001,
+  "grad_clip_norm": 1.0,
+  "reconstruction_rmse": 0.7857811450958252,
+  "vae_final_elbo": 55459.703125,
+  "vae_best_epoch": 125,
+  "vae_early_stopped": true,
+  "vae_n_epochs_trained": 126,
+  "n_modules": 19,
+  "diverged": false,
+  "seconds": 132.7,
+  "status": "ok"
+}

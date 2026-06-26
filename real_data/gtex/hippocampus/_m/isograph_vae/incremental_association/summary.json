@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16500,
+    "composition_unique": 61,
+    "abundance_unique": 2355,
+    "both": 14,
+    "neither": 14070
+  },
+  "module_level": {
+    "n_tested": 47,
+    "composition_unique": 7,
+    "abundance_unique": 1,
+    "both": 10,
+    "neither": 29
+  },
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

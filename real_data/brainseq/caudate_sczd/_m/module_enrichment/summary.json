@@ -1,0 +1,19 @@
+{
+  "analysis": "brainseq-sczd",
+  "region": null,
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 27,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 0.259,
+      "n_pheno_sig_fdr10": 8
+    },
+    "wgcna": {
+      "n_modules": 23,
+      "n_go_enriched": 17,
+      "frac_go_enriched": 0.739,
+      "n_pheno_sig_fdr10": 6
+    }
+  }
+}

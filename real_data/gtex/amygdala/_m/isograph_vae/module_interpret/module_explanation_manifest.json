@@ -1,0 +1,40 @@
+{
+  "annotation_columns": [
+    "first_exon_changed",
+    "last_exon_changed",
+    "internal_exon_difference",
+    "cds_changed",
+    "utr_changed",
+    "biotype_switch",
+    "coding_status_change",
+    "transcript_length_delta",
+    "cds_length_delta",
+    "shared_exon_fraction"
+  ],
+  "annotation_provided": true,
+  "ig_attribution_available": false,
+  "isograph_version": "0.1.0",
+  "module_ids": [
+    "M000",
+    "M001",
+    "M002",
+    "M004",
+    "M006",
+    "M011",
+    "M012",
+    "M014",
+    "M016",
+    "M018",
+    "M019",
+    "M020",
+    "M021"
+  ],
+  "n_modules": 13,
+  "plot_files": [],
+  "tables_per_module": [
+    "gene_driver_table.parquet",
+    "transcript_polarity_table.parquet",
+    "high_vs_low_table.parquet"
+  ],
+  "vae_attribution_available": false
+}

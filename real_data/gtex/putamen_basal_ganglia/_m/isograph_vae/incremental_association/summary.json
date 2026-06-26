@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16158,
+    "composition_unique": 4,
+    "abundance_unique": 1043,
+    "both": 1,
+    "neither": 15110
+  },
+  "module_level": {
+    "n_tested": 36,
+    "composition_unique": 3,
+    "abundance_unique": 1,
+    "both": 0,
+    "neither": 32
+  },
+  "analysis": "gtex-aging",
+  "region": "putamen_basal_ganglia",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

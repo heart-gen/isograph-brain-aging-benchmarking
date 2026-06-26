@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "amygdala",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 29,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.207,
+      "n_pheno_sig_fdr10": 12
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.857,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_switch": {
+      "n_modules": 13,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.462,
+      "n_pheno_sig_fdr10": 8
+    },
+    "wgcna_multiplex": {
+      "n_modules": 18,
+      "n_go_enriched": 15,
+      "frac_go_enriched": 0.833,
+      "n_pheno_sig_fdr10": 8
+    }
+  }
+}

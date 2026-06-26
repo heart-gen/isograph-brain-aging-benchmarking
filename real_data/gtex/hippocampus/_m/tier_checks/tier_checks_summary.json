@@ -1,0 +1,40 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "primary_tier": "full_multiplex",
+  "tiers": {
+    "switch_only": {
+      "n_modules": 18,
+      "median_switch_frac": 0.847,
+      "median_best_jaccard_vs_wgcna": 0.027,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 4,
+      "trait_abundance_unique": 0,
+      "trait_both": 2,
+      "trait_neither": 12
+    },
+    "switch_primary": {
+      "n_modules": 18,
+      "median_switch_frac": 0.828,
+      "median_best_jaccard_vs_wgcna": 0.027,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 4,
+      "trait_abundance_unique": 0,
+      "trait_both": 2,
+      "trait_neither": 12
+    },
+    "full_multiplex": {
+      "n_modules": 19,
+      "median_switch_frac": 0.802,
+      "median_best_jaccard_vs_wgcna": 0.019,
+      "n_degradation_flagged": 0,
+      "n_qc_tested": 0,
+      "trait_composition_unique": 4,
+      "trait_abundance_unique": 0,
+      "trait_both": 3,
+      "trait_neither": 12
+    }
+  }
+}

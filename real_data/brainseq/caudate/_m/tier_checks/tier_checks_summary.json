@@ -1,0 +1,40 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "caudate",
+  "primary_tier": "full_multiplex",
+  "tiers": {
+    "switch_only": {
+      "n_modules": 11,
+      "median_switch_frac": 0.962,
+      "median_best_jaccard_vs_wgcna": 0.027,
+      "n_degradation_flagged": 2,
+      "n_qc_tested": 11,
+      "trait_composition_unique": 3,
+      "trait_abundance_unique": 3,
+      "trait_both": 1,
+      "trait_neither": 4
+    },
+    "switch_primary": {
+      "n_modules": 9,
+      "median_switch_frac": 0.594,
+      "median_best_jaccard_vs_wgcna": 0.053,
+      "n_degradation_flagged": 3,
+      "n_qc_tested": 9,
+      "trait_composition_unique": 1,
+      "trait_abundance_unique": 1,
+      "trait_both": 4,
+      "trait_neither": 3
+    },
+    "full_multiplex": {
+      "n_modules": 10,
+      "median_switch_frac": 0.674,
+      "median_best_jaccard_vs_wgcna": 0.049,
+      "n_degradation_flagged": 3,
+      "n_qc_tested": 10,
+      "trait_composition_unique": 1,
+      "trait_abundance_unique": 2,
+      "trait_both": 4,
+      "trait_neither": 3
+    }
+  }
+}

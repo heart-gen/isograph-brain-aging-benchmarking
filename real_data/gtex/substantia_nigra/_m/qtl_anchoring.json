@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "substantia_nigra",
+  "tissue": "Brain_Substantia_nigra",
+  "variant": "standard",
+  "fdr": 0.05,
+  "n_isograph_genes": 18229,
+  "universe_sizes": {
+    "sQTL": 13536,
+    "eQTL": 18180
+  },
+  "module_set_sizes": {
+    "all_modules": 4905,
+    "pheno_sig_modules": 25,
+    "go_visible_modules": 25
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "cohort": "brainseq",
+  "region": "hippocampus",
+  "n_samples": 238,
+  "n_transcripts": 55633,
+  "lr": 0.001,
+  "grad_clip_norm": 1.0,
+  "reconstruction_rmse": 0.580284059047699,
+  "vae_final_elbo": 23341.755859375,
+  "vae_best_epoch": 125,
+  "vae_early_stopped": true,
+  "vae_n_epochs_trained": 126,
+  "n_modules": 47,
+  "diverged": false,
+  "seconds": 89.5,
+  "status": "ok"
+}
