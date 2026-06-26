@@ -1,0 +1,33 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/mdd_noMHC.genes.raw
+	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_gene_sets.txt
+	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/mdd_noMHC_isograph_vae
+
+Start time is 19:27:11, Thursday 25 Jun 2026
+
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/mdd_noMHC.genes.raw... 
+	17680 genes read from file
+Loading gene-set annotation...
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_gene_sets.txt... 
+	327 gene-set definitions read from file
+	found 327 gene sets containing genes defined in genotype data (containing a total of 12736 unique genes)
+Preparing variables for analysis...
+	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
+	truncating covariate values more than 5 standard deviations from the mean
+	total variables available for analysis: 327 gene sets
+
+Parsing model specifications...
+Inverting gene-gene correlation matrix...
+Performing regression analysis...
+	testing direction: one-sided, positive (sets), two-sided (covar)
+	conditioning on internal variables:
+		gene size, log(gene size)
+		gene density, log(gene density)
+		inverse mac, log(inverse mac)
+	analysing individual variables
+
+	analysing single-variable models (number of models: 327)
+	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/mdd_noMHC_isograph_vae.gsa.out
+
+End time is 19:27:26, Thursday 25 Jun 2026 (elapsed: 00:00:15)

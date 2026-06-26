@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16250,
+    "composition_unique": 545,
+    "abundance_unique": 4463,
+    "both": 107,
+    "neither": 11135
+  },
+  "module_level": {
+    "n_tested": 35,
+    "composition_unique": 5,
+    "abundance_unique": 1,
+    "both": 21,
+    "neither": 8
+  },
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

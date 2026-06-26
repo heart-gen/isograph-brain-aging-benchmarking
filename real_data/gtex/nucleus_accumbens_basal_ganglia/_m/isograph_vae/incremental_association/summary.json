@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16529,
+    "composition_unique": 1,
+    "abundance_unique": 185,
+    "both": 0,
+    "neither": 16343
+  },
+  "module_level": {
+    "n_tested": 26,
+    "composition_unique": 1,
+    "abundance_unique": 0,
+    "both": 1,
+    "neither": 24
+  },
+  "analysis": "gtex-aging",
+  "region": "nucleus_accumbens_basal_ganglia",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

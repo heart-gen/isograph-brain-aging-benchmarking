@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16543,
+    "composition_unique": 32,
+    "abundance_unique": 397,
+    "both": 7,
+    "neither": 16107
+  },
+  "module_level": {
+    "n_tested": 17,
+    "composition_unique": 0,
+    "abundance_unique": 0,
+    "both": 1,
+    "neither": 16
+  },
+  "analysis": "gtex-aging",
+  "region": "caudate_basal_ganglia",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

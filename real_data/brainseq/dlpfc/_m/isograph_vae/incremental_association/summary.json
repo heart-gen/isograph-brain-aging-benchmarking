@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 11554,
+    "composition_unique": 8,
+    "abundance_unique": 2181,
+    "both": 4,
+    "neither": 9361
+  },
+  "module_level": {
+    "n_tested": 38,
+    "composition_unique": 0,
+    "abundance_unique": 3,
+    "both": 0,
+    "neither": 35
+  },
+  "analysis": "brainseq-aging",
+  "region": "dlpfc",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

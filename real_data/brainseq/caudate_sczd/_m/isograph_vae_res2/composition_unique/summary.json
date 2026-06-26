@@ -1,0 +1,17 @@
+{
+  "analysis": "brainseq-sczd",
+  "region": null,
+  "variant": "standard",
+  "n_composition_unique": 34,
+  "n_tested": 17193,
+  "n_modules_enriched_fdr10": 3,
+  "n_go_terms": 0,
+  "top_go_terms": [],
+  "top_concentrated_modules": [
+    "M016",
+    "M007",
+    "M036",
+    "M019",
+    "M001"
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "within_cohort": [
+    {
+      "method": "isograph",
+      "cohort": "brainseq",
+      "region": "caudate",
+      "n_seeds": 5,
+      "mean_ari": 0.20871486086109434,
+      "sd_ari": 0.031134267491435212,
+      "mean_nmi": 0.1836982608874997,
+      "sd_nmi": 0.017564713639670732,
+      "mean_n_common": 9379.2,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "isograph",
+      "cohort": "brainseq",
+      "region": "dlpfc",
+      "n_seeds": 5,
+      "mean_ari": 0.07442197643138707,
+      "sd_ari": 0.043210090730845786,
+      "mean_nmi": 0.16058671804442334,
+      "sd_nmi": 0.08189982642139025,
+      "mean_n_common": 4116.4,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "isograph",
+      "cohort": "brainseq",
+      "region": "hippocampus",
+      "n_seeds": 5,
+      "mean_ari": 0.08145011041806058,
+      "sd_ari": 0.04403110777908241,
+      "mean_nmi": 0.11199538167230857,
+      "sd_nmi": 0.054524179145067214,
+      "mean_n_common": 4915.0,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "isograph",
+      "cohort": "gtex",
+      "region": "caudate_basal_ganglia",
+      "n_seeds": 5,
+      "mean_ari": 0.26564056166740746,
+      "sd_ari": 0.017335778216214424,
+      "mean_nmi": 0.1683410978862862,
+      "sd_nmi": 0.006260466375533059,
+      "mean_n_common": 16340.4,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "isograph",
+      "cohort": "gtex",
+      "region": "frontal_cortex_ba9",
+      "n_seeds": 5,
+      "mean_ari": 0.1774754335763195,
+      "sd_ari": 0.006694450864105336,
+      "mean_nmi": 0.16586255938353817,
+      "sd_nmi": 0.007184795494432569,
+      "mean_n_common": 16854.2,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "isograph",
+      "cohort": "gtex",
+      "region": "hippocampus",
+      "n_seeds": 5,
+      "mean_ari": 0.22722002068327746,
+      "sd_ari": 0.009978554852611494,
+      "mean_nmi": 0.15178221819206522,
+      "sd_nmi": 0.004588019582113825,
+      "mean_n_common": 16603.6,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "brainseq",
+      "region": "caudate",
+      "n_seeds": 5,
+      "mean_ari": 0.40261974220352065,
+      "sd_ari": 0.06557320364255358,
+      "mean_nmi": 0.53156539708989,
+      "sd_nmi": 0.017054271224056235,
+      "mean_n_common": 18338.8,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "brainseq",
+      "region": "dlpfc",
+      "n_seeds": 5,
+      "mean_ari": 0.30678155248879246,
+      "sd_ari": 0.04955080814173061,
+      "mean_nmi": 0.473149181583148,
+      "sd_nmi": 0.024897246349742795,
+      "mean_n_common": 18228.2,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "brainseq",
+      "region": "hippocampus",
+      "n_seeds": 5,
+      "mean_ari": 0.29090342693885995,
+      "sd_ari": 0.08842253040657791,
+      "mean_nmi": 0.3428176997176121,
+      "sd_nmi": 0.04106134032391019,
+      "mean_n_common": 19589.6,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "gtex",
+      "region": "caudate_basal_ganglia",
+      "n_seeds": 5,
+      "mean_ari": 0.710552555699933,
+      "sd_ari": 0.05387977095838693,
+      "mean_nmi": 0.5548586623732298,
+      "sd_nmi": 0.03908614102258529,
+      "mean_n_common": 18188.6,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "gtex",
+      "region": "frontal_cortex_ba9",
+      "n_seeds": 5,
+      "mean_ari": 0.6846556758344938,
+      "sd_ari": 0.08589993471749544,
+      "mean_nmi": 0.5356061640140763,
+      "sd_nmi": 0.04949475808131144,
+      "mean_n_common": 17870.0,
+      "comparison": "within_cohort_split_half"
+    },
+    {
+      "method": "wgcna",
+      "cohort": "gtex",
+      "region": "hippocampus",
+      "n_seeds": 5,
+      "mean_ari": 0.425676105869521,
+      "sd_ari": 0.09469995033187009,
+      "mean_nmi": 0.43983391927883664,
+      "sd_nmi": 0.056227631581681176,
+      "mean_n_common": 18068.8,
+      "comparison": "within_cohort_split_half"
+    }
+  ],
+  "cross_cohort": [
+    {
+      "method": "isograph",
+      "region": "caudate",
+      "comparison": "cross_cohort",
+      "ari": 0.06641832413053658,
+      "nmi": 0.20001890866628633,
+      "n_common": 2193
+    },
+    {
+      "method": "isograph",
+      "region": "hippocampus",
+      "comparison": "cross_cohort",
+      "ari": 0.05120155681475653,
+      "nmi": 0.17367423402663526,
+      "n_common": 1912
+    },
+    {
+      "method": "isograph",
+      "region": "dlpfc_ba9",
+      "comparison": "cross_cohort",
+      "ari": 0.07928971755287881,
+      "nmi": 0.1792983482237207,
+      "n_common": 1698
+    },
+    {
+      "method": "wgcna",
+      "region": "caudate",
+      "comparison": "cross_cohort",
+      "ari": 0.0571137744506964,
+      "nmi": 0.23536361829948782,
+      "n_common": 15585
+    },
+    {
+      "method": "wgcna",
+      "region": "hippocampus",
+      "comparison": "cross_cohort",
+      "ari": 0.3057630750910136,
+      "nmi": 0.23060792678563194,
+      "n_common": 16764
+    },
+    {
+      "method": "wgcna",
+      "region": "dlpfc_ba9",
+      "comparison": "cross_cohort",
+      "ari": 0.05574534545000432,
+      "nmi": 0.24502394096497057,
+      "n_common": 15840
+    }
+  ]
+}

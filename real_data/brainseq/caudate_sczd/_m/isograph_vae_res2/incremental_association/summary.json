@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 17193,
+    "composition_unique": 34,
+    "abundance_unique": 3821,
+    "both": 16,
+    "neither": 13322
+  },
+  "module_level": {
+    "n_tested": 40,
+    "composition_unique": 7,
+    "abundance_unique": 2,
+    "both": 1,
+    "neither": 30
+  },
+  "analysis": "brainseq-sczd",
+  "region": null,
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

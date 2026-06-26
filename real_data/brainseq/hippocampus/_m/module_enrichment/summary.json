@@ -1,0 +1,31 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 46,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.087,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 9,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_switch": {
+      "n_modules": 14,
+      "n_go_enriched": 1,
+      "frac_go_enriched": 0.071,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_multiplex": {
+      "n_modules": 30,
+      "n_go_enriched": 25,
+      "frac_go_enriched": 0.833,
+      "n_pheno_sig_fdr10": 0
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellum",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 28,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.214,
+      "n_pheno_sig_fdr10": 11
+    },
+    "wgcna": {
+      "n_modules": 16,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.812,
+      "n_pheno_sig_fdr10": 8
+    },
+    "wgcna_switch": {
+      "n_modules": 11,
+      "n_go_enriched": 3,
+      "frac_go_enriched": 0.273,
+      "n_pheno_sig_fdr10": 4
+    },
+    "wgcna_multiplex": {
+      "n_modules": 32,
+      "n_go_enriched": 20,
+      "frac_go_enriched": 0.625,
+      "n_pheno_sig_fdr10": 9
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "gene_level": {
+    "n_tested": 16351,
+    "composition_unique": 7,
+    "abundance_unique": 2279,
+    "both": 2,
+    "neither": 14063
+  },
+  "module_level": {
+    "n_tested": 29,
+    "composition_unique": 4,
+    "abundance_unique": 2,
+    "both": 9,
+    "neither": 14
+  },
+  "analysis": "gtex-aging",
+  "region": "amygdala",
+  "variant": "standard",
+  "fdr_alpha": 0.1
+}

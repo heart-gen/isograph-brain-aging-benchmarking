@@ -1,0 +1,31 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "methods": {
+    "isograph": {
+      "n_modules": 47,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.277,
+      "n_pheno_sig_fdr10": 11
+    },
+    "wgcna": {
+      "n_modules": 5,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.8,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_switch": {
+      "n_modules": 15,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.6,
+      "n_pheno_sig_fdr10": 9
+    },
+    "wgcna_multiplex": {
+      "n_modules": 17,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.765,
+      "n_pheno_sig_fdr10": 6
+    }
+  }
+}
