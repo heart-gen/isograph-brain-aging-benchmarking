@@ -1,14 +1,10 @@
 # Track intentional large reproducibility artifacts with Git LFS.
-inputs/processed/**/*.parquet filter=lfs diff=lfs merge=lfs -text
-inputs/bundles/**/*.npz filter=lfs diff=lfs merge=lfs -text
-inputs/bundles/**/*.parquet filter=lfs diff=lfs merge=lfs -text
-benchmark/**/_m/*.parquet filter=lfs diff=lfs merge=lfs -text
-real_data/**/_m/*.parquet filter=lfs diff=lfs merge=lfs -text
-reports/**/*.parquet filter=lfs diff=lfs merge=lfs -text
-figures/**/*.{pdf,png,svg} filter=lfs diff=lfs merge=lfs -text
-feature_scores.parquet filter=lfs diff=lfs merge=lfs -text
-gene_counts.parquet filter=lfs diff=lfs merge=lfs -text
-psi_events.parquet filter=lfs diff=lfs merge=lfs -text
-tx_counts.parquet filter=lfs diff=lfs merge=lfs -text
-gene_tpm.parquet filter=lfs diff=lfs merge=lfs -text
-transcript_tpm.parquet filter=lfs diff=lfs merge=lfs -text
+# Global parquet/npz rules so nested result tables are never committed as raw
+# blobs. The heavy regenerable artifacts (feature_scores, feature_reconstruction,
+# high_vs_low_table, edges) are git-ignored and distributed via Zenodo (see
+# zenodo/), so these LFS rules only ever apply to the lean committed results.
+*.parquet filter=lfs diff=lfs merge=lfs -text
+*.npz filter=lfs diff=lfs merge=lfs -text
+figures/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+figures/**/*.png filter=lfs diff=lfs merge=lfs -text
+figures/**/*.svg filter=lfs diff=lfs merge=lfs -text

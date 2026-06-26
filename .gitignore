@@ -22,6 +22,17 @@ real_data/**/_m/logs/*
 !real_data/**/_m/logs/.gitkeep
 real_data/**/_o/
 
+# Heavy regenerable artifacts -> distributed via Zenodo, not git/LFS (see zenodo/).
+real_data/**/feature_scores.parquet
+real_data/**/feature_reconstruction.parquet
+real_data/**/high_vs_low_table.parquet
+real_data/**/edges.parquet
+
+# Zenodo staging area (only the manifest + README are tracked).
+zenodo/*
+!zenodo/README.md
+!zenodo/MANIFEST.tsv
+
 # Local scratch / troubleshooting (not part of the published pipeline).
 develop/
 
