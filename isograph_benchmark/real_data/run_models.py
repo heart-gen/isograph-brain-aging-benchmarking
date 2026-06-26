@@ -49,6 +49,23 @@ _PROMOTED_VAE = dict(
 )
 
 
+def _isograph_out_subdir(leiden_resolution: float | None) -> str:
+    """Output subdir name for a standard isograph_vae fit.
+
+    With no override (None) this is the canonical ``isograph_vae`` dir at each
+    region's production resolution. When an explicit ``leiden_resolution`` is
+    passed, the partition is written to a resolution-suffixed sibling (e.g.
+    ``isograph_vae_res5``) so a non-canonical resolution is a side-by-side
+    comparison set and never clobbers the canonical modules that the GWAS and
+    trust-funnel cascades consume. The suffix encodes the resolution with '.'
+    -> 'p' (e.g. 2.25 -> isograph_vae_res2p25).
+    """
+    if leiden_resolution is None:
+        return "isograph_vae"
+    token = f"{leiden_resolution:g}".replace(".", "p")
+    return f"isograph_vae_res{token}"
+
+
 def _filter_expressed_transcripts(
     transcript_counts: np.ndarray,
     transcript_table: pd.DataFrame,
@@ -465,12 +482,14 @@ def _save_diagnosis_artifacts(
               f"diagnosis n={len(diagnosis)}")
 
 
-def run_brainseq_aging(regions: list[str] | None = None) -> None:
+def run_brainseq_aging(regions: list[str] | None = None,
+                       leiden_resolution: float | None = None) -> None:
     for region in regions or ["caudate", "hippocampus", "dlpfc"]:
-        run_brainseq_region(region)
+        run_brainseq_region(region, leiden_resolution=leiden_resolution)
 
 
-def run_gtex_aging(regions: list[str] | None = None) -> None:
+def run_gtex_aging(regions: list[str] | None = None,
+                   leiden_resolution: float | None = None) -> None:
     gtex_bundle_root = rel("inputs", "bundles", "gtex_v11_brain")
     if regions is None:
         if gtex_bundle_root.exists():
@@ -478,12 +497,12 @@ def run_gtex_aging(regions: list[str] | None = None) -> None:
         else:
             regions = GTEX_REGIONS
     for region in regions:
-        run_gtex_region(region)
+        run_gtex_region(region, leiden_resolution=leiden_resolution)
 
 
 
 
-def run_brainseq_region(region: str) -> None:
+def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
     sample_table = bundle.sample_table
     tc, tt = _filter_expressed_transcripts(
@@ -497,16 +516,23 @@ def run_brainseq_region(region: str) -> None:
         "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
     ]
 
+    # full-multiplex is the PRIMARY production model (task #27): abundance-abundance
+    # edges enabled with grid-calibrated alpha_abundance. The VAE fit is unchanged
+    # (these settings only affect post-fit graph construction), so the saved
+    # feature_reconstruction is identical and project_tiers still derives all three
+    # tiers from it. Abundance acts as a conservative safety net on clean real data
+    # (calibrated alpha ~0.90-0.95); see project_tiers / tier_checks.
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=20, trait_columns=["Age"], random_state=13,
-        allow_abundance_abundance=False,
+        allow_abundance_abundance=True,
         alpha_switch=0.5,
-        leiden_resolution=2.0,
+        alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
+        leiden_resolution=2.0 if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
-    print(f"[{region}] fitting model ...", flush=True)
+    print(f"[{region}] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=tc,
@@ -516,7 +542,8 @@ def run_brainseq_region(region: str) -> None:
     del tc, tt  # free filtered transcript data; no longer needed after fit
     print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae"))
+    out = ensure_dir(rel("real_data", "brainseq", region, "_m",
+                         _isograph_out_subdir(leiden_resolution)))
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region,
                         qc_table=_rnaseqc_covariate_table(region))
 
@@ -569,7 +596,7 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
                         label=f"{region}+abundance", qc_table=_rnaseqc_covariate_table(region))
 
 
-def run_gtex_region(region_dir_name: str) -> None:
+def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name))
 
     # GTEx QC covariates: RIN (SMRIN), ischemic time (SMTSISCH), mapping rate (SMMAPRT), sex (SEX)
@@ -584,12 +611,15 @@ def run_gtex_region(region_dir_name: str) -> None:
         # — with no divergence/OOM. The per-cohort LR babysitting is therefore retired.
         residualize_covariates=covariate_cols,
         min_module_size=20, trait_columns=["AGE"], random_state=13,
-        allow_abundance_abundance=False,
+        # full-multiplex primary (task #27): abundance-abundance edges with grid
+        # calibration; only affects post-fit graph, VAE reconstruction is unchanged.
+        allow_abundance_abundance=True,
         alpha_switch=0.5,
-        leiden_resolution=2.0,
+        alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
+        leiden_resolution=2.0 if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
-    print(f"[{region_dir_name}] fitting model ...", flush=True)
+    print(f"[{region_dir_name}] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -598,7 +628,8 @@ def run_gtex_region(region_dir_name: str) -> None:
     )
     print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m", "isograph_vae"))
+    out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m",
+                         _isograph_out_subdir(leiden_resolution)))
     _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE",
                         label=region_dir_name, qc_table=_gtex_qc_covariate_table(bundle.sample_table))
 
@@ -635,7 +666,7 @@ def check_drd2(artifacts, transcript_table: pd.DataFrame) -> bool:
     return True
 
 
-def run_brainseq_caudate_sczd() -> None:
+def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
     """Run IsoGraph VAE on the SCZD+Control caudate bundle (Dx as trait)."""
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
 
@@ -644,17 +675,23 @@ def run_brainseq_caudate_sczd() -> None:
         "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
     ]
 
+    # full-multiplex primary (task #27): unified with the aging canonical fits.
+    # Abundance-abundance edges with grid calibration; only affects post-fit graph,
+    # VAE reconstruction unchanged. Note: this can recover DRD2 (previously
+    # isolated_below_alpha at the fixed 0.95) if the calibrated alpha admits its
+    # 0.93 abundance edge — the DRD2 case study reflects the unified model.
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariate_cols,
         min_module_size=20, trait_columns=["Dx"],
         random_state=13,
-        allow_abundance_abundance=False,
+        allow_abundance_abundance=True,
         alpha_switch=0.5,
-        leiden_resolution=10.0,
+        alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
+        leiden_resolution=10.0 if leiden_resolution is None else leiden_resolution,
         **_PROMOTED_VAE,
     )
-    print("[caudate_sczd] fitting model ...", flush=True)
+    print(f"[caudate_sczd] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
         transcript_counts=bundle.matrices["transcript_counts"],
@@ -663,7 +700,8 @@ def run_brainseq_caudate_sczd() -> None:
     )
     print(f"[caudate_sczd] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae"))
+    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m",
+                         _isograph_out_subdir(leiden_resolution)))
     diagnosis_covariates = ["Age"] + covariate_cols
     _save_diagnosis_artifacts(
         artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd",
@@ -740,8 +778,12 @@ def main() -> None:
     )
     parser.add_argument(
         "--leiden-resolution", type=float, default=None,
-        help="Override leiden_resolution for the with-abundance variant. "
-             "Default: per-region BEST_LEIDEN_RESOLUTION from the Part 1 sweep.",
+        help="Override leiden_resolution. For the standard variant a non-None "
+             "value writes the partition to a resolution-suffixed sibling dir "
+             "(e.g. isograph_vae_res5) instead of the canonical isograph_vae, so "
+             "it never clobbers the canonical modules. Default (None): each "
+             "region's hard-coded production resolution (with-abundance uses "
+             "BEST_LEIDEN_RESOLUTION from the Part 1 sweep).",
     )
     args = parser.parse_args()
 
@@ -750,14 +792,14 @@ def main() -> None:
             for region in (args.region or ["caudate", "hippocampus", "dlpfc"]):
                 run_brainseq_region_with_abundance(region, leiden_resolution=args.leiden_resolution)
         else:
-            run_brainseq_aging(args.region)
+            run_brainseq_aging(args.region, leiden_resolution=args.leiden_resolution)
     elif args.analysis == "brainseq-sczd":
         if args.variant == "with-abundance":
             run_brainseq_caudate_sczd_with_abundance(leiden_resolution=args.leiden_resolution)
         else:
-            run_brainseq_caudate_sczd()
+            run_brainseq_caudate_sczd(leiden_resolution=args.leiden_resolution)
     elif args.analysis == "gtex-aging":
-        run_gtex_aging(args.region)
+        run_gtex_aging(args.region, leiden_resolution=args.leiden_resolution)
     else:
         print("BrainSEQ aging regions:")
         run_brainseq_aging()
