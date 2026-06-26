@@ -12,7 +12,9 @@ suppressPackageStartupMessages({
     library(dplyr)
 })
 
-script_dir <- dirname(normalizePath(if (interactive()) getwd() else commandArgs()[4], mustWork = FALSE))
+.args <- commandArgs(trailingOnly = FALSE)
+.script_path <- sub("^--file=", "", .args[grep("^--file=", .args)])
+script_dir <- dirname(normalizePath(if (interactive()) getwd() else .script_path, mustWork = FALSE))
 project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
 out_dir <- file.path(project_root, "real_data", "gwas", "_m", "gene_sets")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
