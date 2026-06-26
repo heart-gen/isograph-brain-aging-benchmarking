@@ -115,7 +115,7 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariates,
         min_module_size=20, trait_columns=[spec["age_col"]], random_state=VAE_SEED,
-        allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=2.0,
+        allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=5.0,
         # Promoted production defaults (mirror run_models._PROMOTED_VAE, 2026-06-24):
         # the split-half baseline must equal the shipped config so the trust funnel
         # validates the ACTUAL production modules. grad_clip_norm=1.0 (single-LR gate
