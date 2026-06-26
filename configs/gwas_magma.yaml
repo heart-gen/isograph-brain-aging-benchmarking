@@ -8,6 +8,11 @@ traits:
     fixed_n: 105318
     chr_col: CHR
     pos_col: BP
+    # CLOZUK SNP ids are "rsID:pos:a1:a2" (rsID embedded as the first field; the
+    # bare ":" prefix on ~1e3 SNPs lacks an rsID). The g1000_eur panel is keyed by
+    # rsID, so extract the rsID token to match. (The panel is hg19/b37; this file's
+    # BP column is hg38-lifted, but the embedded rsID is build-independent.)
+    snp_rsid_extract: true
   mdd:
     label: MDD
     path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/mdd2019edinburgh/hg38/PGC_UKB_depression_genome-wide_hg38
