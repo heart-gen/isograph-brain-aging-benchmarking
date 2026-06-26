@@ -74,6 +74,34 @@ genuine DTU-without-DGE layer invisible to pathway enrichment because the signal
 isoform regulation, not a shared GO term. Frame on mechanism; do NOT claim "pathways
 WGCNA misses". See `memory/project_go_invisible_gate.md`.
 
+### 1b. MECHANISM — GTEx sQTL/eQTL genetic anchoring of co-switch modules — IMPLEMENTED
+
+Reproducible CLI `python -m isograph_benchmark.real_data.qtl_anchoring
+--analysis brainseq-sczd` (SLURM array: `real_data/brainseq/_h/13.qtl_anchoring.sh`,
+17 analyses = SCZD + 3 brainseq aging + 13 gtex aging). Power-matched logistic
+enrichment (qtl status ~ module membership + log cis-variant count + log gene length
++ log isoform count [+ log intron group size]) within each xQTL tested universe ∩
+IsoGraph genes. Data: `inputs/raw/gtex_v11/xqtl/` (sGenes/eGenes per brain tissue).
+Outputs `<_m>/{qtl_anchoring.parquet, QTL_ANCHORING.md, qtl_anchoring.json}`.
+
+**Cross-tissue meta DONE** (`qtl_anchoring_meta.py`; 17 analyses; IVW fixed + DL
+random effects; outputs `real_data/_m/qtl_anchoring_meta/`). Pooling **reversed** the
+favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
+- Co-switch genes are cis-QTL **depleted for both** sQTL and eQTL (coordinated/network
+  genes are constrained → fewer common cis-QTL). This shared baseline is not the result.
+- **The result is the paired splicing-specificity contrast** (sQTL OR / eQTL OR within
+  analysis, removing the constraint baseline): all 1.07 (p=8e-6), pheno-sig 1.13
+  (p=1.5e-4), **GO-invisible 1.13 (p=3e-3, I²=0.15 — consistent across tissues)**,
+  GO-visible 1.04 (**ns**). Splicing-QTL is spared ~7–13% vs expression-QTL in
+  co-switch genes, significant exactly for the phenotype-associated + GO-invisible
+  modules and **null for the GO-visible (immune/abundance) modules** — a clean internal
+  control. Splicing-specific genetic anchoring concentrates where IsoGraph's unique
+  value is (DTU-without-DGE).
+- Manuscript line: frame on the **sQTL-vs-eQTL specificity contrast**, not raw sQTL
+  enrichment. Scope caveat (in report): cis-sQTL anchors member-gene splicing to
+  genetics, not the co-switching coordination itself. Optional secondary:
+  switch-transcript→LeafCutter-intron direction concordance.
+
 ### 2. Three-baseline comparison synthesis
 
 The enrichment + replication_go outputs now exist for all four methods but are
