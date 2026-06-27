@@ -1,6 +1,9 @@
 # Raw source copies are local-only and must never be tracked.
 inputs/raw/
 
+# Derived TIN caches (regenerable from the TIN extraction step; ~283 MB).
+inputs/tin/
+
 # Generated and scratch outputs.
 logs/
 scratch/
