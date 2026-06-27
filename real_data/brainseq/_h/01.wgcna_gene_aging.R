@@ -97,7 +97,7 @@ spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
         yf <- y[ok]
         fit <- lm.fit(Xf, yf)
         beta <- coef(fit)
-        df_res <- max(fit$rank - 1, 1)
+        df_res <- max(sum(ok) - fit$rank, 1)
         sigma2 <- sum(fit$residuals^2) / df_res
         V <- sigma2 * MASS::ginv(t(Xf) %*% Xf)
         beta_spline <- beta[spline_idx]
@@ -107,17 +107,29 @@ spline_age_assoc <- function(eigengenes, sample_tbl, covariate_cols, age_col) {
         se_proj <- sqrt(pmax(diag(V_proj), 0))
         z_proj <- ifelse(se_proj > 0, beta_proj / se_proj, 0)
         p_proj <- 2 * pnorm(-abs(z_proj))
+
+        Xred <- cbind(intercept[ok, , drop = FALSE], cov_df[ok, , drop = FALSE])
+        fit_red <- lm.fit(Xred, yf)
+        rss_full <- sum(fit$residuals^2)
+        rss_red <- sum(fit_red$residuals^2)
+        df_num <- max(fit$rank - fit_red$rank, 1)
+        f_stat <- ((rss_red - rss_full) / df_num) / (rss_full / df_res)
+        p_ftest <- if (is.finite(f_stat)) pf(f_stat, df_num, df_res, lower.tail = FALSE) else NA_real_
+
         data.frame(
             module_id = col, trait = "Age_spline",
             age_label = AGE_LABELS, age_prob = AGE_PROBS,
             effect = beta_proj, se = se_proj, z = z_proj, pvalue = p_proj,
-            n = sum(ok), stringsAsFactors = FALSE
+            pvalue_ftest = p_ftest, n = sum(ok), stringsAsFactors = FALSE
         )
     })
     result <- do.call(rbind, Filter(Negate(is.null), rows))
     if (!is.null(result) && nrow(result) > 0) {
         # BH within each age_label across modules (ave keeps row alignment).
         result$fdr <- ave(result$pvalue, result$age_label, FUN = fdr_bh)
+        ftest <- result[!duplicated(result$module_id), c("module_id", "pvalue_ftest")]
+        ftest$fdr_ftest <- fdr_bh(ftest$pvalue_ftest)
+        result <- merge(result, ftest[, c("module_id", "fdr_ftest")], by = "module_id", all.x = TRUE, sort = FALSE)
     }
     result
 }
