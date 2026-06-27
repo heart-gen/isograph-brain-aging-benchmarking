@@ -1,0 +1,19 @@
+{
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "tissue": "Brain_Frontal_Cortex_BA9",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "fdr": 0.05,
+  "n_universe_genes": 17604,
+  "universe_sizes": {
+    "sQTL": 13415,
+    "eQTL": 17569
+  },
+  "module_set_sizes": {
+    "all_modules": 17604,
+    "pheno_sig_modules": 10070,
+    "go_invisible_modules": 1898,
+    "go_visible_modules": 9258
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellar_hemisphere",
+  "tissue": "Brain_Cerebellar_Hemisphere",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "fdr": 0.05,
+  "n_universe_genes": 15802,
+  "universe_sizes": {
+    "sQTL": 11973,
+    "eQTL": 15776
+  },
+  "module_set_sizes": {
+    "all_modules": 15802,
+    "pheno_sig_modules": 214,
+    "go_visible_modules": 214
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "tissue": "Brain_Anterior_cingulate_cortex_BA24",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "fdr": 0.05,
+  "n_universe_genes": 7683,
+  "universe_sizes": {
+    "sQTL": 6489,
+    "eQTL": 7671
+  },
+  "module_set_sizes": {
+    "all_modules": 7683,
+    "pheno_sig_modules": 5198,
+    "go_invisible_modules": 112,
+    "go_visible_modules": 5086
+  }
+}

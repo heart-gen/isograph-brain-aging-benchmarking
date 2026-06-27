@@ -1,0 +1,19 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "fdr": 0.05,
+  "n_universe_genes": 17234,
+  "universe_sizes": {
+    "sQTL": 12905,
+    "eQTL": 17207
+  },
+  "module_set_sizes": {
+    "all_modules": 17234,
+    "pheno_sig_modules": 6023,
+    "go_invisible_modules": 287,
+    "go_visible_modules": 5807
+  }
+}
