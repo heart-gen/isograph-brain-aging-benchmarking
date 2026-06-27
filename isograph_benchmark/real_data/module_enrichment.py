@@ -35,13 +35,20 @@ _TOP_GO = 8
 _TOP_HUBS = 10
 
 
+METHOD_DIRS = {
+    "wgcna": "wgcna_gene",
+    "wgcna_switch": "wgcna_switch_only",
+    "wgcna_multiplex": "wgcna_multiplex",
+}
+
+
 def _method_dir(analysis: str, region: str | None, method: str, variant: str):
-    """Artifact dir for a method. IsoGraph honours --variant; WGCNA is its own dir."""
+    """Artifact dir for a method. IsoGraph honours --variant; WGCNA dirs are explicit."""
     iso_dir = _artifact_dir(analysis, region, variant)   # .../_m/isograph_vae[_with_abundance]
     if method == "isograph":
         return iso_dir
-    if method == "wgcna":
-        return iso_dir.parent / "wgcna_gene"
+    if method in METHOD_DIRS:
+        return iso_dir.parent / METHOD_DIRS[method]
     raise ValueError(f"unknown method {method!r}")
 
 
@@ -193,10 +200,19 @@ def main() -> None:
     parser.add_argument("analysis", choices=["brainseq-sczd", "brainseq-aging", "gtex-aging"])
     parser.add_argument("--region", action="append", dest="regions")
     parser.add_argument("--variant", choices=["standard", "with-abundance"], default="standard")
-    parser.add_argument("--method", choices=["isograph", "wgcna", "both"], default="both")
+    parser.add_argument(
+        "--method",
+        choices=["isograph", "wgcna", "wgcna_switch", "wgcna_multiplex", "both", "all"],
+        default="both",
+    )
     parser.add_argument("--no-go", action="store_true")
     args = parser.parse_args()
-    methods = ["isograph", "wgcna"] if args.method == "both" else [args.method]
+    if args.method == "both":
+        methods = ["isograph", "wgcna"]
+    elif args.method == "all":
+        methods = ["isograph", "wgcna", "wgcna_switch", "wgcna_multiplex"]
+    else:
+        methods = [args.method]
 
     if args.analysis == "brainseq-sczd":
         run_analysis("brainseq-sczd", None, args.variant, methods, args.no_go)

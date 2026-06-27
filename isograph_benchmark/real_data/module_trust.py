@@ -778,7 +778,7 @@ def main() -> None:
     st.add_argument("--region", default="caudate")
     st.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     st.add_argument("--n-perm", type=int, default=1000)
-    st.add_argument("--seed", type=int, default=0)
+    st.add_argument("--seed", type=int, default=13)
     st.add_argument("--fdr", type=float, default=0.05)
     rp = sub.add_parser("replication", help="Q3: cross-cohort aging replication of trusted modules")
     rp.add_argument("--pair", default="caudate", choices=list(REGION_PAIRS))
@@ -794,7 +794,7 @@ def main() -> None:
     pl.add_argument("--min-jaccard", type=float, default=0.25,
                     help="gene-set Jaccard for a reproducible cross-cohort match")
     pl.add_argument("--n-perm", type=int, default=10000)
-    pl.add_argument("--seed", type=int, default=0)
+    pl.add_argument("--seed", type=int, default=13)
     cm = sub.add_parser("complementarity", help="Q4: DTU-without-DGE / WGCNA-complementarity")
     cm.add_argument("--cohort", default="brainseq")
     cm.add_argument("--region", default="caudate")
