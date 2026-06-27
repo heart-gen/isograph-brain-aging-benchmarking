@@ -44,7 +44,12 @@ N_PERMUTATIONS = 1000
 SEED = 13
 
 # replication method name -> module_enrichment file prefix
-_PREFIX = {"isograph_vae": "isograph", "wgcna_gene": "wgcna"}
+_PREFIX = {
+    "isograph_vae": "isograph",
+    "wgcna_gene": "wgcna",
+    "wgcna_switch_only": "wgcna_switch",
+    "wgcna_multiplex": "wgcna_multiplex",
+}
 
 
 def _region_map() -> dict[str, tuple[str, str]]:
