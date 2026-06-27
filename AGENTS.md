@@ -102,21 +102,45 @@ favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
   genetics, not the co-switching coordination itself. Optional secondary:
   switch-transcript→LeafCutter-intron direction concordance.
 
-### 2. Three-baseline comparison synthesis
+**Matched-baseline control DONE** (`qtl_anchoring.py --method {wgcna_switch_only,
+wgcna_multiplex}`; SLURM `real_data/gtex/_h/08.qtl_anchoring_matched.sh`, 2 methods × 13
+GTEx tissues; `qtl_anchoring_meta.py` now multi-method). Anchors the matched WGCNA
+baselines (same switch features) and compares the splicing-specificity contrast on the
+**same 13 GTEx tissues**. Result is a clean **method effect**: only IsoGraph shows it —
+go_invisible **1.11 (p=0.011)**, pheno_sig 1.11 (p=2e-3), go_visible 1.02 (ns, internal
+control); `wgcna_switch_only` and `wgcna_multiplex` are **null everywhere** (go_invisible
+1.02 / 0.99, ns). Same features + classical inference loses the splicing-genetic signal
+that IsoGraph's VAE+Leiden concentrates in GO-invisible modules. (NB: a single tissue —
+frontal_cortex — looked specific for wgcna_switch_only at 1.29, but it does not survive
+pooling; trust the meta, not one tissue.) Complements item 2: WGCNA-switch matches
+IsoGraph on phenotype-sig RATE but NOT on genetic splicing-specificity.
 
-The enrichment + replication_go outputs now exist for all four methods but are
-**not yet synthesized**. Assemble the head-to-head.
+### 2. Three-baseline comparison synthesis — DONE
 
-- Pull per-method `module_enrichment` tables (GO-enriched %, pheno-sig count,
-  BOTH count, network metrics) for isograph vs the 3 WGCNA baselines, per region.
-- Pull `replication_go` cross-cohort GO consistency across the 4 methods.
-- **Key question the matched baselines answer:** does giving WGCNA the *same*
-  switch/multiplex feature matrix close IsoGraph's gap, or is the network
-  inference (VAE + Leiden) doing real work beyond the input representation? This
-  isolates method from input — the cleanest possible ablation for reviewers.
-- **Acceptance:** one comparison table + narrative stating exactly where IsoGraph
-  wins, where it ties, where WGCNA wins — with the matched baselines settling the
-  "is it the features or the method?" question.
+Reproducible CLI `python -m isograph_benchmark.real_data.baseline_comparison`
+(login-node aggregation; no SLURM). Outputs `real_data/_m/baseline_comparison/`:
+`baseline_comparison.parquet` (per region×method), `baseline_comparison_pooled.parquet`
+(per method), `BASELINE_COMPARISON.md`. 17 analyses, 16 with all four methods.
+
+**Result — read on per-module RATES, not totals** (totals scale with module count;
+IsoGraph runs finer: ~35 vs 8–18 modules). Pooled mean per-module rates:
+- pheno-sig rate: wgcna_switch_only **0.336** > isograph 0.268 > wgcna_multiplex
+  0.189 ≈ wgcna_gene 0.180. **Phenotype signal lives in the SWITCH features**, not the
+  method — both switch-fed methods beat both abundance-fed ones.
+- BOTH (pheno-sig AND GO) rate: isograph is **LOWEST** (0.074) — its GO-enrichment is
+  low by construction. GO rate: wgcna_gene 0.885 > wgcna_multiplex 0.758 >>
+  wgcna_switch_only 0.381 > isograph 0.217 (abundance/GO bias, expected).
+- **IsoGraph is NOT globally superior on module-level metrics**; classical
+  wgcna_switch_only matches/beats its phenotype rate. The **one clean method effect**:
+  on IDENTICAL switch+abundance features, isograph 0.268 > wgcna_multiplex 0.189 — VAE+
+  Leiden recovers phenotype-linked switch structure that classical multiplex WGCNA
+  dilutes back toward abundance.
+- Replication (isograph vs wgcna_gene only): classical WGCNA carries more cross-cohort
+  GO overlap; both beat their perm null.
+- **Manuscript line:** do NOT claim IsoGraph beats WGCNA on enrichment/phenotype rates.
+  Its defensible value is the DTU-without-DGE **content** (biology gate + incremental
+  association + sQTL/eQTL specificity), invisible to any abundance pipeline — complementary
+  layer, consistent with the de-confounded gene-level result.
 
 ### 3. Real-data confounds ablation (NM gap #6, still open)
 
