@@ -1,0 +1,19 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cortex",
+  "tissue": "Brain_Cortex",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "fdr": 0.05,
+  "n_universe_genes": 4309,
+  "universe_sizes": {
+    "sQTL": 3628,
+    "eQTL": 4298
+  },
+  "module_set_sizes": {
+    "all_modules": 4309,
+    "pheno_sig_modules": 3491,
+    "go_invisible_modules": 1298,
+    "go_visible_modules": 2193
+  }
+}

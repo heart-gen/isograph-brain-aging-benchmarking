@@ -18,11 +18,17 @@ independent GTEx donors, so there is no discovery/validation circularity. Genes 
 matched on unversioned Ensembl id. Reads only saved artifacts + the copied xQTL
 catalog; deterministic.
 
-Per analysis it writes, under <artifact-parent>/_m/:
-  qtl_anchoring.parquet — one row per (xqtl_kind, module_set): matched OR, CI,
-      p-value, foreground size, qtl rate in foreground vs background, method.
-  QTL_ANCHORING.md — the sQTL-vs-eQTL contrast writeup.
-  qtl_anchoring.json — run parameters (tissue, fdr, universe sizes).
+`--method` selects the graph whose modules are anchored: `isograph` (default) or the
+matched WGCNA baselines `wgcna_switch_only` / `wgcna_multiplex`. Because those baselines
+consume the same switch/multiplex features as IsoGraph, anchoring them tests whether the
+splicing-QTL specificity is a property of the switch features or of IsoGraph's inference.
+
+Per analysis it writes, under <artifact-parent>/_m/ (non-isograph methods get a
+`_<method>` filename suffix so IsoGraph's outputs are untouched):
+  qtl_anchoring[_<method>].parquet — one row per (xqtl_kind, module_set): graph_method,
+      matched OR, CI, p-value, foreground size, qtl rate in foreground vs background.
+  QTL_ANCHORING[_<method>].md — the sQTL-vs-eQTL contrast writeup.
+  qtl_anchoring[_<method>].json — run parameters (tissue, fdr, universe sizes).
 """
 from __future__ import annotations
 
@@ -40,6 +46,16 @@ from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
 DEFAULT_XQTL_DIR = rel("inputs", "raw", "gtex_v11", "xqtl")
 _QVAL = 0.05
+
+# graph method -> (artifact subdir under <_m>, module_enrichment table basename).
+# The matched WGCNA baselines consume the same switch/multiplex feature matrix as
+# IsoGraph, so anchoring them tests whether the splicing-QTL specificity is a property
+# of the switch features or of IsoGraph's VAE + Leiden inference.
+_METHODS = {
+    "isograph": ("isograph_vae", "isograph_modules.parquet"),
+    "wgcna_switch_only": ("wgcna_switch_only", "wgcna_switch_modules.parquet"),
+    "wgcna_multiplex": ("wgcna_multiplex", "wgcna_multiplex_modules.parquet"),
+}
 
 # IsoGraph region naming -> GTEx v11 brain tissue file prefix.
 _GTEX_TISSUE = {
@@ -101,13 +117,12 @@ def isoform_counts(gtf_cache: Path) -> pd.Series:
     return tx.groupby(_bare(tx["gene_id"]))["transcript_id"].nunique()
 
 
-def build_gene_sets(iso_dir: Path, fdr: float) -> dict[str, set[str]]:
-    modules = pd.read_parquet(iso_dir / "modules.parquet")
+def build_gene_sets(mod_dir: Path, enrich_path: Path, fdr: float) -> dict[str, set[str]]:
+    modules = pd.read_parquet(mod_dir / "modules.parquet")
     modules["gene"] = _bare(modules["gene_id"])
     modules["module_id"] = modules["module_id"].astype(str)
     sets = {"all_modules": set(modules["gene"])}
 
-    enrich_path = iso_dir.parent / "module_enrichment" / "isograph_modules.parquet"
     if enrich_path.exists():
         enrich = pd.read_parquet(enrich_path)
         enrich["module_id"] = enrich["module_id"].astype(str)
@@ -156,12 +171,20 @@ def matched_enrichment(universe: pd.DataFrame, in_set: set[str]) -> dict:
 
 
 def run_anchoring(analysis: str, region: str | None, variant: str, fdr: float,
-                  xqtl_dir: Path, tissue: str | None, gtf_cache: Path) -> pd.DataFrame:
+                  xqtl_dir: Path, tissue: str | None, gtf_cache: Path,
+                  method: str = "isograph") -> pd.DataFrame:
     iso_dir = _artifact_dir(analysis, region, variant)
+    subdir, enrich_name = _METHODS[method]
+    mod_dir = iso_dir.parent / subdir
     tissue = tissue or resolve_tissue(analysis, region)
-    iso_genes = set(_bare(pd.read_parquet(iso_dir / "node_diagnostics.parquet")["gene_id"]))
+    # universe = the method's own tested-gene set (node_diagnostics for IsoGraph; the
+    # clustered genes for WGCNA, which has no separate node table).
+    nd = mod_dir / "node_diagnostics.parquet"
+    universe_src = nd if nd.exists() else mod_dir / "modules.parquet"
+    iso_genes = set(_bare(pd.read_parquet(universe_src, columns=["gene_id"])["gene_id"]))
     iso_per_gene = isoform_counts(gtf_cache)
-    gene_sets = build_gene_sets(iso_dir, fdr)
+    enrich_path = iso_dir.parent / "module_enrichment" / enrich_name
+    gene_sets = build_gene_sets(mod_dir, enrich_path, fdr)
 
     rows = []
     universe_sizes = {}
@@ -177,17 +200,19 @@ def run_anchoring(analysis: str, region: str | None, variant: str, fdr: float,
         for set_name, genes in gene_sets.items():
             res = matched_enrichment(qtl, genes)
             rows.append({"analysis": analysis, "region": region or "", "tissue": tissue,
-                         "xqtl_kind": kind, "module_set": set_name, "fdr": fdr, **res})
+                         "graph_method": method, "xqtl_kind": kind,
+                         "module_set": set_name, "fdr": fdr, **res})
     gate = pd.DataFrame(rows)
 
     out_dir = ensure_dir(iso_dir.parent)
-    gate.to_parquet(out_dir / "qtl_anchoring.parquet", index=False, compression="zstd")
-    (out_dir / "qtl_anchoring.json").write_text(json.dumps(
+    suffix = "" if method == "isograph" else f"_{method}"
+    gate.to_parquet(out_dir / f"qtl_anchoring{suffix}.parquet", index=False, compression="zstd")
+    (out_dir / f"qtl_anchoring{suffix}.json").write_text(json.dumps(
         {"analysis": analysis, "region": region, "tissue": tissue, "variant": variant,
-         "fdr": fdr, "n_isograph_genes": len(iso_genes),
+         "method": method, "fdr": fdr, "n_universe_genes": len(iso_genes),
          "universe_sizes": universe_sizes,
          "module_set_sizes": {k: len(v) for k, v in gene_sets.items()}}, indent=2))
-    _write_report(out_dir, analysis, region, tissue, gate)
+    _write_report(out_dir, analysis, region, tissue, gate, suffix, method)
     return gate
 
 
@@ -199,24 +224,26 @@ def _markdown_table(df: pd.DataFrame) -> str:
 
 
 def _write_report(out_dir: Path, analysis: str, region: str | None, tissue: str,
-                  gate: pd.DataFrame) -> None:
+                  gate: pd.DataFrame, suffix: str = "", method: str = "isograph") -> None:
     show = gate.copy()
     for c in ("odds_ratio", "or_ci_low", "or_ci_high"):
         show[c] = show[c].round(2)
     show["pvalue"] = show["pvalue"].apply(lambda p: f"{p:.2e}" if pd.notna(p) else "NA")
+    show = show.rename(columns={"method": "fit_method"})
     table = show[["xqtl_kind", "module_set", "n_foreground", "rate_fg", "rate_bg",
-                  "odds_ratio", "or_ci_low", "or_ci_high", "pvalue", "method"]]
+                  "odds_ratio", "or_ci_low", "or_ci_high", "pvalue", "fit_method"]]
     lines = [
-        f"# Genetic anchoring — IsoGraph co-switch modules vs GTEx {tissue} xQTL "
+        f"# Genetic anchoring — {method} co-switch modules vs GTEx {tissue} xQTL "
         f"({analysis}" + (f"/{region}" if region else "") + ")",
         "",
         "Power-matched enrichment (logistic: qtl status ~ module membership + "
         "log cis-variant count + log gene length + log isoform count [+ log intron "
         "group size for sQTL]) within each xQTL's tested-gene universe intersected "
-        "with IsoGraph's tested genes.",
+        "with the method's tested genes.",
         "",
         "Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring "
-        f"--analysis {analysis}" + (f" --region {region}" if region else "") + "`",
+        f"--analysis {analysis}" + (f" --region {region}" if region else "")
+        + (f" --method {method}" if method != "isograph" else "") + "`",
         "",
         "## Matched odds ratios",
         "",
@@ -234,7 +261,7 @@ def _write_report(out_dir: Path, analysis: str, region: str | None, tissue: str,
         "regulated splicing; it does not by itself prove the *co-switching* is genetic "
         "(a shared trans regulator / cell composition could coordinate it).",
     ]
-    (out_dir / "QTL_ANCHORING.md").write_text("\n".join(lines) + "\n")
+    (out_dir / f"QTL_ANCHORING{suffix}.md").write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:
@@ -242,16 +269,19 @@ def main() -> None:
     p.add_argument("--analysis", required=True, help="brainseq-sczd, brainseq-aging, gtex-aging")
     p.add_argument("--region", default=None)
     p.add_argument("--variant", default="standard")
+    p.add_argument("--method", default="isograph", choices=list(_METHODS),
+                   help="graph method whose modules to anchor (default isograph)")
     p.add_argument("--fdr", type=float, default=_QVAL)
     p.add_argument("--xqtl-dir", default=str(DEFAULT_XQTL_DIR))
     p.add_argument("--tissue", default=None, help="override GTEx tissue prefix")
     p.add_argument("--gtf-cache", default=str(DEFAULT_GTF_CACHE))
     args = p.parse_args()
     gate = run_anchoring(args.analysis, args.region, args.variant, args.fdr,
-                         Path(args.xqtl_dir), args.tissue, Path(args.gtf_cache))
+                         Path(args.xqtl_dir), args.tissue, Path(args.gtf_cache),
+                         method=args.method)
     s = gate[gate.xqtl_kind == "sQTL"].set_index("module_set")["odds_ratio"]
     e = gate[gate.xqtl_kind == "eQTL"].set_index("module_set")["odds_ratio"]
-    print("module_set            sQTL_OR  eQTL_OR")
+    print(f"[{args.method}] module_set       sQTL_OR  eQTL_OR")
     for k in s.index:
         print(f"{k:22}{s[k]:7.2f}  {e.get(k, float('nan')):7.2f}")
 
