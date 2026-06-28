@@ -142,27 +142,58 @@ IsoGraph runs finer: ~35 vs 8–18 modules). Pooled mean per-module rates:
   association + sQTL/eQTL specificity), invisible to any abundance pipeline — complementary
   layer, consistent with the de-confounded gene-level result.
 
-### 3. Real-data confounds ablation (NM gap #6, still open)
+### 3. Real-data confounds ablation (NM gap #6) — DONE (synthetic); #30 QC landed
 
 Synthetic data is clean; real bulk brain RNA-seq is not. The headline this
 enables: **IsoGraph WITH vs WITHOUT `residualize_covariates` under confounded
 data**, proving residualization buys robustness vs WGCNA. Four canonical
-confounds, in priority order (zero-inflation is NOT one — bulk is NB
-overdispersion, already modeled):
+confounds (zero-inflation is NOT one — bulk is NB overdispersion, already modeled):
 
-1. RNA degradation (RIN-like 3′ coverage bias) — top priority; directly distorts
-   PSI / transcript ratios = IsoGraph's signal. (Partial infra exists: TIN
-   reliability + gene-body coverage covariate; tasks #10/#30 remain — module-level
-   QC flag + edge-type penalties, A/B QC metrics in feature residualization.)
+1. RNA degradation (RIN-like 3′ coverage bias) — directly distorts PSI / transcript
+   ratios = IsoGraph's signal.
 2. Cell-type composition variation (neuron/glia mixture; shifts with age).
 3. Batch effects (flowcell / processing batch).
 4. Library depth / mapping-rate variation.
 
-- **Do NOT start tasks #10/#30 without explicit confirmation** — they touch the
+**Acceptance MET (synthetic branch):** `figS8_confound_robustness` is the ablation
+figure — under composition / batch / depth confounds, `isograph_vae_residual` stays
+flat while raw VAE collapses and WGCNA degrades; RNA degradation is the honest limit
+(RIN regression can't recover a coordinate that isn't a single recorded axis), and
+`figS9_degradation_fallback` shows the abundance-channel variants (multiplex /
+reliability) recover it. Both rendered from completed runs in
+`benchmark/03_metrics/figures/`.
+
+**#30 DONE (2026-06-27):** A/B QC metrics in feature residualization. `residualize.py`
+gains `residualization_qc(before, after, design, feature_info)` — per-feature
+`var_retained_frac` + `confound_r2_before/after`; the working residualization drives
+`confound_r2_after`→0 while `var_retained_frac` reports the collateral signal cost.
+This is the diagnostic observable on REAL data (where module recovery is not). Wired
+through `FitArtifacts.residualization_qc` (vae.py captures it in both branches) and
+written as `residualization_qc.parquet` by `run_models.py`. Production fits already
+set `residualize_covariates`, so it populates on every real fit. Unit + e2e tested
+(`tests/test_residualization_qc.py`). Numerically non-invasive — does not change the
+residualized features. UNCOMMITTED.
+
+**Covariate policy DECIDED (2026-06-28): residualization is a DISCOVERY knob only.**
+Covariates do two jobs: protect module *discovery* (a confound axis fabricates artifact
+modules — no downstream test can un-merge them; synthetic ablation proves it), and
+adjust trait *inference* (best done jointly with the trait — spline for age, conditioning
+on the abundance channel). These are split, not stacked. Previously `feature_scores.parquet`
+held the *residualized* matrix (vae.py:660 used the in-place-residualized `switch_matrix`;
+the line-665 comment wrongly said "raw"), so `incremental_association` adjusted the SAME
+covariates a second time = double residualization. **Fix (uncommitted):** vae.py now keeps
+`switch_matrix_raw` and persists feature_scores from it — clustering/VAE still embed the
+residualized matrix, but feature_scores is RAW, so the downstream test is the single
+inference adjustment. Verified e2e: feature_scores retains the covariate axis (r²≈0.80)
+while the embedded matrix has confound_r²→0. `modules.parquet` is UNCHANGED (clustering
+input identical, deterministic seed); only feature_scores + downstream (incremental_association,
+trait_associations, module_gene_roles, characterize) change → production real-data re-fit
+needed. Task #31 (silent-skip guard on `build_design_matrix`) and #32 (finalize upstream
+list as technical-confounds-only, exclude trait + biological Sex/MoD; launch re-fit) follow.
+
+- **#10 remains the only open degradation task** (module-level QC flag + edge-type
+  penalties); **do NOT start it without explicit confirmation** — it touches the
   feature residualization path.
-- **Acceptance:** an ablation figure showing IsoGraph's metric degrades far less
-  than WGCNA when residualization is on under each confound; degradation-robust
-  behavior demonstrated on the real (or realistically-confounded synthetic) data.
 
 ### 4. Per-module trust funnel writeup
 

@@ -118,6 +118,18 @@ def _trait_spec(analysis: str) -> tuple[str, list[str]]:
     raise ValueError(f"Unknown analysis: {analysis!r}")
 
 
+def _discovery_covariates(analysis: str) -> list[str]:
+    """Upstream residualization (discovery knob), mirroring run_models.*_DISCOVERY_COVARIATES:
+    technical/topology confounds only. Biological covariates and the trait are adjusted
+    downstream in _associate, not regressed out before clustering."""
+    if analysis in ("brainseq-sczd", "brainseq-aging"):
+        return ["RIN", "mapping_rate", "mito_rate",
+                "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"]
+    if analysis == "gtex-aging":
+        return ["SMRIN", "SMTSISCH", "SMMAPRT"]
+    raise ValueError(f"Unknown analysis: {analysis!r}")
+
+
 def _pivot_eigengenes(eigengene_table: pd.DataFrame) -> pd.DataFrame:
     return (
         eigengene_table.set_index("module_id").T.reset_index()
@@ -125,12 +137,12 @@ def _pivot_eigengenes(eigengene_table: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def _base_cfg(analysis: str, covariate_cols: list[str], trait_col: str) -> VaeModelConfig:
+def _base_cfg(analysis: str, discovery_covariates: list[str], trait_col: str) -> VaeModelConfig:
     """Config carrying the production module-detection knobs (leiden_resolution,
     min_module_size, random_state, estimability) so tier modules match production."""
     return VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=covariate_cols,
+        residualize_covariates=discovery_covariates,
         min_module_size=20, trait_columns=[trait_col], random_state=13,
         allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=2.0,
         **_PROMOTED_VAE,
@@ -212,7 +224,7 @@ def project_region(analysis: str, region: str | None, source_subdir: str = "isog
     sim = reconstruction_to_similarity(x_recon)
     print(f"  similarity in {time.time()-t0:.0f}s", flush=True)
 
-    cfg = _base_cfg(analysis, covariate_cols, trait_col)
+    cfg = _base_cfg(analysis, _discovery_covariates(analysis), trait_col)
     model = VaeNetworkModel(cfg)
     # DE-aligned QC covariates for the QC-adjusted aging spline: brainseq pulls from the
     # metrics parquet; GTEx pulls the native RNAseQC analogs (SMEXNCRT, SM3PB75P) from the

@@ -61,12 +61,14 @@ SEED_BASE = 1000  # split seeds are SEED_BASE + k; VAE init seed is fixed (below
 VAE_SEED = 13     # fixed across halves: variation comes from the sample split, not init
 
 # Per-cohort fitting spec, mirroring run_models.run_brainseq_region / run_gtex_region.
-# Keep these in sync with run_models if the production configs change.
+# Keep these in sync with run_models if the production configs change. "covariates" is
+# the discovery-only residualization set (mirrors run_models.*_DISCOVERY_COVARIATES):
+# technical/topology confounds only, so the split-half modules match the shipped fit.
 COHORTS = {
     "brainseq": {
         "bundle_root": ("inputs", "bundles", "brainseq_v1"),
         "regions": ["caudate", "hippocampus", "dlpfc"],
-        "covariates": ["Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+        "covariates": ["RIN", "mapping_rate", "mito_rate",
                        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"],
         "age_col": "Age",
         "filter_transcripts": True,   # run_brainseq_region filters; GTEx bundles are pre-filtered
@@ -75,7 +77,7 @@ COHORTS = {
     "gtex": {
         "bundle_root": ("inputs", "bundles", "gtex_v11_brain"),
         "regions": ["caudate_basal_ganglia", "hippocampus", "frontal_cortex_ba9"],
-        "covariates": ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"],
+        "covariates": ["SMRIN", "SMTSISCH", "SMMAPRT"],
         "age_col": "AGE",
         "filter_transcripts": False,
         "lr": None,                   # promoted single LR: default 1e-3 + grad_clip_norm=1.0

@@ -379,6 +379,9 @@ def _save_core_artifacts(artifacts, out: Path) -> None:
     node_diag = getattr(artifacts, "node_diagnostics", None)
     if node_diag is not None and not node_diag.empty:
         node_diag.to_parquet(out / "node_diagnostics.parquet", index=False, compression="zstd")
+    resid_qc = getattr(artifacts, "residualization_qc", None)
+    if resid_qc is not None and not resid_qc.empty:
+        resid_qc.to_parquet(out / "residualization_qc.parquet", index=False, compression="zstd")
     recon = getattr(artifacts, "feature_reconstruction", None)
     if recon is not None and not recon.empty:
         # VAE reconstruction of the multiplex feature matrix; enables post-hoc
@@ -417,6 +420,22 @@ def _rnaseqc_covariate_table(region: str | None) -> pd.DataFrame | None:
 # (x3_bias_75th analog). Used as RNA-quality proxies in the GTEx aging association,
 # matching the brainseq covariate philosophy cross-cohort.
 GTEX_QC_COVARIATES = ["SMEXNCRT", "SM3PB75P"]
+
+# Covariate adjustment is split (2026-06-28): the *_COVARIATES sets adjust trait
+# inference downstream; the *_DISCOVERY_COVARIATES sets are the upstream residualization
+# (discovery knob). Discovery keeps technical/topology confounds only (RNA quality,
+# alignment, ancestry structure); biological Sex/MoD and the trait are NOT regressed out
+# before clustering -- they are adjusted jointly with the trait in the association test.
+BRAINSEQ_COVARIATES = [
+    "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
+    "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+]
+BRAINSEQ_DISCOVERY_COVARIATES = [
+    "RIN", "mapping_rate", "mito_rate",
+    "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
+]
+GTEX_COVARIATES = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
+GTEX_DISCOVERY_COVARIATES = ["SMRIN", "SMTSISCH", "SMMAPRT"]
 
 
 def _gtex_qc_covariate_table(sample_table: pd.DataFrame) -> pd.DataFrame | None:
@@ -517,10 +536,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
     )
     del bundle  # free ~415 MB transcript_counts before VAE feature computation
 
-    covariate_cols = [
-        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
-        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
-    ]
+    covariate_cols = BRAINSEQ_COVARIATES
 
     # full-multiplex is the PRIMARY production model (task #27): abundance-abundance
     # edges enabled with grid-calibrated alpha_abundance. The VAE fit is unchanged
@@ -530,7 +546,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
     # (calibrated alpha ~0.90-0.95); see project_tiers / tier_checks.
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=covariate_cols,
+        residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["Age"], random_state=13,
         allow_abundance_abundance=True,
         alpha_switch=0.5,
@@ -571,14 +587,11 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
     )
     del bundle
 
-    covariate_cols = [
-        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
-        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
-    ]
+    covariate_cols = BRAINSEQ_COVARIATES
 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=covariate_cols,
+        residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["Age"], random_state=13,
         allow_abundance_abundance=True,
         alpha_switch=0.5,
@@ -606,7 +619,7 @@ def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None
     bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name))
 
     # GTEx QC covariates: RIN (SMRIN), ischemic time (SMTSISCH), mapping rate (SMMAPRT), sex (SEX)
-    covariate_cols = ["SEX", "SMRIN", "SMTSISCH", "SMMAPRT"]
+    covariate_cols = GTEX_COVARIATES
 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
@@ -615,7 +628,7 @@ def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None
         # showed grad_clip_norm=1.0 (in _PROMOTED_VAE) lets the single default lr=1e-3
         # train every GTEx region — including nucleus_accumbens, which diverged pre-clip
         # — with no divergence/OOM. The per-cohort LR babysitting is therefore retired.
-        residualize_covariates=covariate_cols,
+        residualize_covariates=GTEX_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["AGE"], random_state=13,
         # full-multiplex primary (task #27): abundance-abundance edges with grid
         # calibration; only affects post-fit graph, VAE reconstruction is unchanged.
@@ -676,10 +689,7 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
     """Run IsoGraph VAE on the SCZD+Control caudate bundle (Dx as trait)."""
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
 
-    covariate_cols = [
-        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
-        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
-    ]
+    covariate_cols = BRAINSEQ_COVARIATES
 
     # full-multiplex primary (task #27): unified with the aging canonical fits.
     # Abundance-abundance edges with grid calibration; only affects post-fit graph,
@@ -688,7 +698,7 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
     # 0.93 abundance edge — the DRD2 case study reflects the unified model.
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=covariate_cols,
+        residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["Dx"],
         random_state=13,
         allow_abundance_abundance=True,
@@ -726,14 +736,11 @@ def run_brainseq_caudate_sczd_with_abundance(leiden_resolution: float | None = N
         leiden_resolution = BEST_LEIDEN_RESOLUTION.get("caudate_sczd", 2.0)
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
 
-    covariate_cols = [
-        "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
-        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5",
-    ]
+    covariate_cols = BRAINSEQ_COVARIATES
 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
-        residualize_covariates=covariate_cols,
+        residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["Dx"],
         random_state=13,
         allow_abundance_abundance=True,
