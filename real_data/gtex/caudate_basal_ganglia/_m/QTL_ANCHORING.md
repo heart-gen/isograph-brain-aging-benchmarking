@@ -1,15 +1,15 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Caudate_basal_ganglia xQTL (gtex-aging/caudate_basal_ganglia)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Caudate_basal_ganglia xQTL (gtex-aging/caudate_basal_ganglia)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex-aging --region caudate_basal_ganglia`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4879 | 0.2238 | 0.2226 | 0.85 | 0.78 | 0.93 | 5.72e-04 | logit_matched |
-| eQTL | all_modules | 6053 | 0.4999 | 0.5477 | 0.78 | 0.74 | 0.84 | 5.29e-14 | logit_matched |
+| sQTL | all_modules | 5185 | 0.2274 | 0.2204 | 0.88 | 0.8 | 0.96 | 3.17e-03 | logit_matched |
+| eQTL | all_modules | 6373 | 0.5009 | 0.5485 | 0.78 | 0.73 | 0.83 | 6.69e-15 | logit_matched |
 
 ## Reading
 

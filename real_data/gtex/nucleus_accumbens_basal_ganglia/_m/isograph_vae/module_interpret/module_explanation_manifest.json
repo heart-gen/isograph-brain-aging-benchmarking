@@ -13,13 +13,21 @@
   ],
   "annotation_provided": true,
   "ig_attribution_available": false,
-  "isograph_version": "0.1.0",
+  "isograph_version": "0.1.5",
   "module_ids": [
-    "M009",
+    "M000",
+    "M002",
+    "M003",
+    "M006",
+    "M012",
     "M013",
-    "M017"
+    "M014",
+    "M019",
+    "M026",
+    "M016",
+    "M031"
   ],
-  "n_modules": 3,
+  "n_modules": 11,
   "plot_files": [],
   "tables_per_module": [
     "gene_driver_table.parquet",

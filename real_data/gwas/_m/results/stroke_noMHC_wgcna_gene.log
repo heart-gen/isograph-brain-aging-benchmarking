@@ -4,7 +4,7 @@ Using flags:
 	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt
 	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/stroke_noMHC_wgcna_gene
 
-Start time is 21:27:09, Thursday 25 Jun 2026
+Start time is 09:20:26, Monday 29 Jun 2026
 
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/stroke_noMHC.genes.raw... 
 	17948 genes read from file
@@ -39,4 +39,4 @@ Performing regression analysis...
 	analysing single-variable models (number of models: 176)
 	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/stroke_noMHC_wgcna_gene.gsa.out
 
-End time is 21:27:23, Thursday 25 Jun 2026 (elapsed: 00:00:14)
+End time is 09:20:40, Monday 29 Jun 2026 (elapsed: 00:00:14)

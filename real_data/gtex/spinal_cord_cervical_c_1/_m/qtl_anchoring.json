@@ -3,13 +3,14 @@
   "region": "spinal_cord_cervical_c_1",
   "tissue": "Brain_Spinal_cord_cervical_c-1",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18299,
+  "n_universe_genes": 18299,
   "universe_sizes": {
     "sQTL": 13414,
     "eQTL": 18254
   },
   "module_set_sizes": {
-    "all_modules": 4892
+    "all_modules": 4803
   }
 }

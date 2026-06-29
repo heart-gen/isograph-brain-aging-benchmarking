@@ -7,11 +7,11 @@
     "neither": 11135
   },
   "module_level": {
-    "n_tested": 35,
+    "n_tested": 42,
     "composition_unique": 5,
-    "abundance_unique": 1,
-    "both": 21,
-    "neither": 8
+    "abundance_unique": 4,
+    "both": 20,
+    "neither": 13
   },
   "analysis": "gtex-aging",
   "region": "anterior_cingulate_cortex_ba24",

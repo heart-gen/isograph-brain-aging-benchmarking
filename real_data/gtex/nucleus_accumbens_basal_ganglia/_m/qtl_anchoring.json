@@ -3,15 +3,16 @@
   "region": "nucleus_accumbens_basal_ganglia",
   "tissue": "Brain_Nucleus_accumbens_basal_ganglia",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18539,
+  "n_universe_genes": 18539,
   "universe_sizes": {
     "sQTL": 13667,
     "eQTL": 18486
   },
   "module_set_sizes": {
-    "all_modules": 5294,
-    "pheno_sig_modules": 151,
-    "go_visible_modules": 151
+    "all_modules": 5735,
+    "pheno_sig_modules": 188,
+    "go_visible_modules": 188
   }
 }

@@ -7,11 +7,11 @@
     "neither": 14070
   },
   "module_level": {
-    "n_tested": 47,
-    "composition_unique": 7,
-    "abundance_unique": 1,
-    "both": 10,
-    "neither": 29
+    "n_tested": 41,
+    "composition_unique": 10,
+    "abundance_unique": 4,
+    "both": 11,
+    "neither": 16
   },
   "analysis": "gtex-aging",
   "region": "hippocampus",

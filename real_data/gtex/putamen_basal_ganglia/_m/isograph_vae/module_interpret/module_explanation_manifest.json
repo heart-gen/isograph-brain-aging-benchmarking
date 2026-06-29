@@ -13,13 +13,13 @@
   ],
   "annotation_provided": true,
   "ig_attribution_available": false,
-  "isograph_version": "0.1.0",
+  "isograph_version": "0.1.5",
   "module_ids": [
-    "M007",
-    "M004",
-    "M020",
-    "M032",
-    "M015"
+    "M001",
+    "M037",
+    "M012",
+    "M011",
+    "M030"
   ],
   "n_modules": 5,
   "plot_files": [],

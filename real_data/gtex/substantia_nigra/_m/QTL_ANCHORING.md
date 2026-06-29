@@ -1,19 +1,19 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Substantia_nigra xQTL (gtex-aging/substantia_nigra)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Substantia_nigra xQTL (gtex-aging/substantia_nigra)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex-aging --region substantia_nigra`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3992 | 0.127 | 0.1233 | 0.83 | 0.74 | 0.94 | 2.49e-03 | logit_matched |
-| sQTL | pheno_sig_modules | 14 | 0.0 | 0.1245 | 0.0 | 0.0 | inf | 9.99e-01 | logit_matched |
-| sQTL | go_visible_modules | 14 | 0.0 | 0.1245 | 0.0 | 0.0 | inf | 9.99e-01 | logit_matched |
-| eQTL | all_modules | 4875 | 0.2556 | 0.2905 | 0.8 | 0.74 | 0.87 | 1.43e-08 | logit_matched |
-| eQTL | pheno_sig_modules | 25 | 0.24 | 0.2812 | 0.79 | 0.32 | 1.99 | 6.22e-01 | logit_matched |
-| eQTL | go_visible_modules | 25 | 0.24 | 0.2812 | 0.79 | 0.32 | 1.99 | 6.22e-01 | logit_matched |
+| sQTL | all_modules | 3886 | 0.1225 | 0.1252 | 0.78 | 0.69 | 0.88 | 6.03e-05 | logit_matched |
+| sQTL | pheno_sig_modules | 24 | 0.0417 | 0.1246 | 0.23 | 0.03 | 1.77 | 1.60e-01 | logit_matched |
+| sQTL | go_visible_modules | 24 | 0.0417 | 0.1246 | 0.23 | 0.03 | 1.77 | 1.60e-01 | logit_matched |
+| eQTL | all_modules | 4751 | 0.2572 | 0.2896 | 0.81 | 0.75 | 0.88 | 1.27e-07 | logit_matched |
+| eQTL | pheno_sig_modules | 24 | 0.2083 | 0.2812 | 0.6 | 0.22 | 1.62 | 3.17e-01 | logit_matched |
+| eQTL | go_visible_modules | 24 | 0.2083 | 0.2812 | 0.6 | 0.22 | 1.62 | 3.17e-01 | logit_matched |
 
 ## Reading
 

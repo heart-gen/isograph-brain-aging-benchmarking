@@ -7,11 +7,11 @@
     "neither": 13322
   },
   "module_level": {
-    "n_tested": 27,
-    "composition_unique": 4,
-    "abundance_unique": 2,
+    "n_tested": 30,
+    "composition_unique": 7,
+    "abundance_unique": 1,
     "both": 1,
-    "neither": 20
+    "neither": 21
   },
   "analysis": "brainseq-sczd",
   "region": null,

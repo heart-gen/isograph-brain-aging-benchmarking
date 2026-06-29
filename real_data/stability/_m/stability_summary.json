@@ -150,25 +150,25 @@
       "method": "isograph",
       "region": "caudate",
       "comparison": "cross_cohort",
-      "ari": 0.06641832413053658,
-      "nmi": 0.20001890866628633,
-      "n_common": 2193
+      "ari": 0.0499913706704355,
+      "nmi": 0.1866770262656641,
+      "n_common": 2319
     },
     {
       "method": "isograph",
       "region": "hippocampus",
       "comparison": "cross_cohort",
-      "ari": 0.05120155681475653,
-      "nmi": 0.17367423402663526,
-      "n_common": 1912
+      "ari": 0.04822318874409767,
+      "nmi": 0.16736443430433173,
+      "n_common": 1863
     },
     {
       "method": "isograph",
       "region": "dlpfc_ba9",
       "comparison": "cross_cohort",
-      "ari": 0.07928971755287881,
-      "nmi": 0.1792983482237207,
-      "n_common": 1698
+      "ari": 0.03609997396821546,
+      "nmi": 0.15509147848184282,
+      "n_common": 2559
     },
     {
       "method": "wgcna",

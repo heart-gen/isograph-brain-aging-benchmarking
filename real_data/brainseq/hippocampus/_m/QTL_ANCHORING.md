@@ -1,15 +1,15 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Hippocampus xQTL (brainseq-aging/hippocampus)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Hippocampus xQTL (brainseq-aging/hippocampus)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brainseq-aging --region hippocampus`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3309 | 0.1496 | 0.1761 | 0.82 | 0.73 | 0.92 | 6.39e-04 | logit_matched |
-| eQTL | all_modules | 3845 | 0.3498 | 0.3879 | 0.82 | 0.76 | 0.89 | 6.15e-07 | logit_matched |
+| sQTL | all_modules | 3370 | 0.1487 | 0.1767 | 0.81 | 0.73 | 0.91 | 3.51e-04 | logit_matched |
+| eQTL | all_modules | 3916 | 0.3527 | 0.3872 | 0.84 | 0.77 | 0.9 | 3.50e-06 | logit_matched |
 
 ## Reading
 
