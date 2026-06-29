@@ -61,18 +61,23 @@ Reproducible gate: `python -m isograph_benchmark.real_data.go_invisible_gate
 Outputs under `real_data/brainseq/caudate_sczd/_m/`: `go_invisible_gate.parquet`,
 `GO_INVISIBLE_GATE.md`, `go_invisible_gate_background.json`.
 
-**Result (res 5.0).** 8 disease-sig SCZD switch modules; 2 GO-enriched (M013/M015 =
-clean immune pathways), **6 GO-invisible** (M010/M017/M020/M021/M023/M026). The
-GO-invisible modules carry **real isoform switches** (nearly all members have
-anticorrelated transcript pairs; switch strength 1.0–1.4) that are functionally
-consequential (CDS/coding-status/biotype/UTR changes) **at the same rate as the
-GO-visible disease modules and the pooled background** — structurally
-indistinguishable. Drivers are plausible + psychiatric-relevant (GNAL, PRKCB,
-FRMPD4, STXBP5, DDX3X, DGKH…) but heterogeneous within a module (shared switch
-axis, not a shared GO process). **Verdict: PASS in the complementary form** — a
-genuine DTU-without-DGE layer invisible to pathway enrichment because the signal is
-isoform regulation, not a shared GO term. Frame on mechanism; do NOT claim "pathways
-WGCNA misses". See `memory/project_go_invisible_gate.md`.
+**Result (res 5.0, post covariate-decouple re-fit, regen 2026-06-29).** 4 disease-sig
+SCZD switch modules (pheno_fdr ≤ 0.1), **all 4 GO-invisible** (M026/M020/M010/M023),
+0 GO-enriched. (The earlier pre-refit run reported 8 modules with 2 GO-visible
+M013/M015; the re-fit moved the phenotype-FDR landscape — cite the regenerated
+parquet, not the old prose. The GO-visible internal control now lives only in the
+cross-tissue QTL meta, not in this gate.) The GO-invisible modules carry **real
+isoform switches** (nearly all members have anticorrelated transcript pairs; max
+switch strength 1.10–1.39; 93–459 sig switch tx) that are functionally consequential
+(CDS/coding-status/biotype/UTR) **at or above the pooled background** (CDS 0.84 /
+coding-status 0.67 / biotype 0.74 / UTR 0.61) — structurally indistinguishable.
+Drivers are plausible + psychiatric-relevant (DDX3X, STXBP5, SPTBN1, ARNT2, PBX1,
+DGKH, SLC25A12…) but heterogeneous within a module (shared switch axis, not a shared
+GO process). **Verdict: PASS in the complementary form** — a genuine DTU-without-DGE
+layer invisible to pathway enrichment because the signal is isoform regulation, not a
+shared GO term. Frame on mechanism; do NOT claim "pathways WGCNA misses". Manubot
+summary: `real_data/brainseq/caudate_sczd/_m/GO_INVISIBLE_GATE_SUMMARY.md`. See
+`memory/project_go_invisible_gate.md`.
 
 ### 1b. MECHANISM — GTEx sQTL/eQTL genetic anchoring of co-switch modules — IMPLEMENTED
 
