@@ -3,13 +3,14 @@
   "region": "dlpfc",
   "tissue": "Brain_Frontal_Cortex_BA9",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18105,
+  "n_universe_genes": 18105,
   "universe_sizes": {
     "sQTL": 13028,
     "eQTL": 17249
   },
   "module_set_sizes": {
-    "all_modules": 4476
+    "all_modules": 4458
   }
 }

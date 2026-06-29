@@ -3,16 +3,17 @@
   "region": "frontal_cortex_ba9",
   "tissue": "Brain_Frontal_Cortex_BA9",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18291,
+  "n_universe_genes": 18291,
   "universe_sizes": {
     "sQTL": 13673,
     "eQTL": 18246
   },
   "module_set_sizes": {
-    "all_modules": 5246,
-    "pheno_sig_modules": 3757,
-    "go_invisible_modules": 2047,
-    "go_visible_modules": 1710
+    "all_modules": 8251,
+    "pheno_sig_modules": 5730,
+    "go_invisible_modules": 3571,
+    "go_visible_modules": 2159
   }
 }

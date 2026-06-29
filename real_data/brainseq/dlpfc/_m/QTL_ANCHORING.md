@@ -1,15 +1,15 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Frontal_Cortex_BA9 xQTL (brainseq-aging/dlpfc)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Frontal_Cortex_BA9 xQTL (brainseq-aging/dlpfc)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brainseq-aging --region dlpfc`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3869 | 0.2024 | 0.2244 | 0.86 | 0.78 | 0.95 | 2.66e-03 | logit_matched |
-| eQTL | all_modules | 4406 | 0.4855 | 0.5264 | 0.83 | 0.77 | 0.89 | 1.21e-07 | logit_matched |
+| sQTL | all_modules | 3849 | 0.2076 | 0.2221 | 0.89 | 0.81 | 0.98 | 2.03e-02 | logit_matched |
+| eQTL | all_modules | 4398 | 0.4973 | 0.5223 | 0.88 | 0.82 | 0.95 | 4.46e-04 | logit_matched |
 
 ## Reading
 

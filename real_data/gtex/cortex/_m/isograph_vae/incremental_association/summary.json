@@ -7,11 +7,11 @@
     "neither": 13116
   },
   "module_level": {
-    "n_tested": 33,
-    "composition_unique": 22,
+    "n_tested": 37,
+    "composition_unique": 19,
     "abundance_unique": 0,
     "both": 4,
-    "neither": 7
+    "neither": 14
   },
   "analysis": "gtex-aging",
   "region": "cortex",

@@ -7,11 +7,11 @@
     "neither": 10659
   },
   "module_level": {
-    "n_tested": 38,
-    "composition_unique": 5,
+    "n_tested": 47,
+    "composition_unique": 6,
     "abundance_unique": 3,
-    "both": 28,
-    "neither": 2
+    "both": 35,
+    "neither": 3
   },
   "analysis": "gtex-aging",
   "region": "frontal_cortex_ba9",

@@ -1,15 +1,15 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Spinal_cord_cervical_c-1 xQTL (gtex-aging/spinal_cord_cervical_c_1)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Spinal_cord_cervical_c-1 xQTL (gtex-aging/spinal_cord_cervical_c_1)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex-aging --region spinal_cord_cervical_c_1`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3765 | 0.1461 | 0.1574 | 0.76 | 0.68 | 0.85 | 2.34e-06 | logit_matched |
-| eQTL | all_modules | 4860 | 0.3302 | 0.3827 | 0.74 | 0.69 | 0.8 | 1.92e-16 | logit_matched |
+| sQTL | all_modules | 3698 | 0.146 | 0.1574 | 0.76 | 0.68 | 0.85 | 1.41e-06 | logit_matched |
+| eQTL | all_modules | 4761 | 0.3398 | 0.3789 | 0.79 | 0.74 | 0.85 | 8.66e-11 | logit_matched |
 
 ## Reading
 

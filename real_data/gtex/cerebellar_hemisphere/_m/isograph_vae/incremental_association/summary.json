@@ -7,11 +7,11 @@
     "neither": 15753
   },
   "module_level": {
-    "n_tested": 28,
+    "n_tested": 30,
     "composition_unique": 0,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 28
+    "neither": 30
   },
   "analysis": "gtex-aging",
   "region": "cerebellar_hemisphere",

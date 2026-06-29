@@ -3,16 +3,17 @@
   "region": "hippocampus",
   "tissue": "Brain_Hippocampus",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18424,
+  "n_universe_genes": 18424,
   "universe_sizes": {
     "sQTL": 13348,
     "eQTL": 18372
   },
   "module_set_sizes": {
-    "all_modules": 7152,
-    "pheno_sig_modules": 2571,
-    "go_invisible_modules": 780,
-    "go_visible_modules": 1791
+    "all_modules": 6771,
+    "pheno_sig_modules": 2513,
+    "go_invisible_modules": 802,
+    "go_visible_modules": 1711
   }
 }

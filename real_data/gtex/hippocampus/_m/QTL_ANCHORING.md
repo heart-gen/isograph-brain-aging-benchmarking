@@ -1,21 +1,21 @@
-# Genetic anchoring — IsoGraph co-switch modules vs GTEx Brain_Hippocampus xQTL (gtex-aging/hippocampus)
+# Genetic anchoring — isograph co-switch modules vs GTEx Brain_Hippocampus xQTL (gtex-aging/hippocampus)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with IsoGraph's tested genes.
+Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex-aging --region hippocampus`
 
 ## Matched odds ratios
 
-| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | method |
+| xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 5574 | 0.1679 | 0.1663 | 0.85 | 0.77 | 0.94 | 1.19e-03 | logit_matched |
-| sQTL | pheno_sig_modules | 1875 | 0.1563 | 0.1687 | 0.84 | 0.73 | 0.97 | 1.54e-02 | logit_matched |
-| sQTL | go_invisible_modules | 590 | 0.1814 | 0.1663 | 1.02 | 0.81 | 1.27 | 8.86e-01 | logit_matched |
-| sQTL | go_visible_modules | 1285 | 0.1447 | 0.1694 | 0.77 | 0.65 | 0.92 | 3.07e-03 | logit_matched |
-| eQTL | all_modules | 7118 | 0.3581 | 0.4093 | 0.77 | 0.72 | 0.82 | 2.19e-16 | logit_matched |
-| eQTL | pheno_sig_modules | 2563 | 0.3262 | 0.3997 | 0.72 | 0.66 | 0.78 | 2.50e-13 | logit_matched |
-| eQTL | go_invisible_modules | 778 | 0.3728 | 0.3902 | 0.91 | 0.78 | 1.06 | 2.14e-01 | logit_matched |
-| eQTL | go_visible_modules | 1785 | 0.3059 | 0.3984 | 0.66 | 0.59 | 0.73 | 1.51e-14 | logit_matched |
+| sQTL | all_modules | 5335 | 0.1693 | 0.1655 | 0.85 | 0.77 | 0.94 | 1.41e-03 | logit_matched |
+| sQTL | pheno_sig_modules | 1703 | 0.1797 | 0.1651 | 1.03 | 0.9 | 1.19 | 6.53e-01 | logit_matched |
+| sQTL | go_invisible_modules | 568 | 0.1725 | 0.1667 | 0.98 | 0.78 | 1.23 | 8.71e-01 | logit_matched |
+| sQTL | go_visible_modules | 1135 | 0.1833 | 0.1655 | 1.06 | 0.9 | 1.25 | 5.12e-01 | logit_matched |
+| eQTL | all_modules | 6742 | 0.3558 | 0.4089 | 0.76 | 0.71 | 0.81 | 1.21e-17 | logit_matched |
+| eQTL | pheno_sig_modules | 2486 | 0.3524 | 0.3953 | 0.82 | 0.75 | 0.9 | 1.18e-05 | logit_matched |
+| eQTL | go_invisible_modules | 800 | 0.36 | 0.3908 | 0.86 | 0.74 | 0.99 | 4.07e-02 | logit_matched |
+| eQTL | go_visible_modules | 1686 | 0.3488 | 0.3936 | 0.82 | 0.74 | 0.91 | 1.84e-04 | logit_matched |
 
 ## Reading
 

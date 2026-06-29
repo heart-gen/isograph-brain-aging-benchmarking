@@ -7,11 +7,11 @@
     "neither": 9032
   },
   "module_level": {
-    "n_tested": 49,
+    "n_tested": 46,
     "composition_unique": 6,
-    "abundance_unique": 14,
-    "both": 15,
-    "neither": 14
+    "abundance_unique": 11,
+    "both": 13,
+    "neither": 16
   },
   "analysis": "brainseq-aging",
   "region": "caudate",

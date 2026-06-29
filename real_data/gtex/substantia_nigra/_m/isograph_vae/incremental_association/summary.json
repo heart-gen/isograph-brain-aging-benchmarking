@@ -7,11 +7,11 @@
     "neither": 16357
   },
   "module_level": {
-    "n_tested": 43,
-    "composition_unique": 11,
+    "n_tested": 42,
+    "composition_unique": 16,
     "abundance_unique": 0,
-    "both": 2,
-    "neither": 30
+    "both": 1,
+    "neither": 25
   },
   "analysis": "gtex-aging",
   "region": "substantia_nigra",

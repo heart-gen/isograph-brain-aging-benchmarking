@@ -7,11 +7,11 @@
     "neither": 14063
   },
   "module_level": {
-    "n_tested": 29,
-    "composition_unique": 4,
-    "abundance_unique": 2,
-    "both": 9,
-    "neither": 14
+    "n_tested": 27,
+    "composition_unique": 2,
+    "abundance_unique": 5,
+    "both": 11,
+    "neither": 9
   },
   "analysis": "gtex-aging",
   "region": "amygdala",

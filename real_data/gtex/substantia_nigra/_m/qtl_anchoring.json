@@ -3,15 +3,16 @@
   "region": "substantia_nigra",
   "tissue": "Brain_Substantia_nigra",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18229,
+  "n_universe_genes": 18229,
   "universe_sizes": {
     "sQTL": 13536,
     "eQTL": 18180
   },
   "module_set_sizes": {
-    "all_modules": 4905,
-    "pheno_sig_modules": 25,
-    "go_visible_modules": 25
+    "all_modules": 4793,
+    "pheno_sig_modules": 24,
+    "go_visible_modules": 24
   }
 }

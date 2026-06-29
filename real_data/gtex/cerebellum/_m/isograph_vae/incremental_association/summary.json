@@ -7,10 +7,10 @@
     "neither": 12640
   },
   "module_level": {
-    "n_tested": 28,
+    "n_tested": 31,
     "composition_unique": 2,
-    "abundance_unique": 11,
-    "both": 8,
+    "abundance_unique": 12,
+    "both": 10,
     "neither": 7
   },
   "analysis": "gtex-aging",

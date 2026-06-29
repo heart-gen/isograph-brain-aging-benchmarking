@@ -7,11 +7,11 @@
     "neither": 16381
   },
   "module_level": {
-    "n_tested": 33,
-    "composition_unique": 2,
+    "n_tested": 32,
+    "composition_unique": 3,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 31
+    "neither": 29
   },
   "analysis": "gtex-aging",
   "region": "spinal_cord_cervical_c_1",

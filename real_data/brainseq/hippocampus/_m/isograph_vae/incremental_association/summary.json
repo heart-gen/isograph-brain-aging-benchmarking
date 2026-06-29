@@ -7,11 +7,11 @@
     "neither": 10753
   },
   "module_level": {
-    "n_tested": 46,
+    "n_tested": 50,
     "composition_unique": 1,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 45
+    "neither": 49
   },
   "analysis": "brainseq-aging",
   "region": "hippocampus",

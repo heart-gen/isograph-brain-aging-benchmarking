@@ -4,9 +4,9 @@
   "variant": "standard",
   "methods": {
     "isograph": {
-      "n_modules": 27,
-      "n_go_enriched": 7,
-      "frac_go_enriched": 0.259,
+      "n_modules": 30,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.167,
       "n_pheno_sig_fdr10": 8
     },
     "wgcna": {

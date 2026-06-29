@@ -1,0 +1,15 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "dlpfc",
+  "variant": "standard",
+  "n_composition_unique": 8,
+  "n_tested": 11554,
+  "n_modules_enriched_fdr10": 0,
+  "n_go_terms": 0,
+  "top_go_terms": [],
+  "top_concentrated_modules": [
+    "M001",
+    "M010",
+    "M008"
+  ]
+}

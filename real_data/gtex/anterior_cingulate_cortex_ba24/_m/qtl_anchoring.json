@@ -3,16 +3,17 @@
   "region": "anterior_cingulate_cortex_ba24",
   "tissue": "Brain_Anterior_cingulate_cortex_BA24",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 18100,
+  "n_universe_genes": 18100,
   "universe_sizes": {
     "sQTL": 13477,
     "eQTL": 18053
   },
   "module_set_sizes": {
-    "all_modules": 5513,
-    "pheno_sig_modules": 3643,
-    "go_invisible_modules": 1580,
-    "go_visible_modules": 2063
+    "all_modules": 5819,
+    "pheno_sig_modules": 3744,
+    "go_invisible_modules": 1566,
+    "go_visible_modules": 2178
   }
 }

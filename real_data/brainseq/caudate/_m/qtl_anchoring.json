@@ -3,15 +3,16 @@
   "region": "caudate",
   "tissue": "Brain_Caudate_basal_ganglia",
   "variant": "standard",
+  "method": "isograph",
   "fdr": 0.05,
-  "n_isograph_genes": 17976,
+  "n_universe_genes": 17976,
   "universe_sizes": {
     "sQTL": 13117,
     "eQTL": 17344
   },
   "module_set_sizes": {
-    "all_modules": 5600,
-    "pheno_sig_modules": 1320,
-    "go_invisible_modules": 1320
+    "all_modules": 5795,
+    "pheno_sig_modules": 1430,
+    "go_invisible_modules": 1430
   }
 }

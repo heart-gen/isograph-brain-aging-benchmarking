@@ -7,11 +7,11 @@
     "neither": 16343
   },
   "module_level": {
-    "n_tested": 26,
-    "composition_unique": 1,
+    "n_tested": 32,
+    "composition_unique": 0,
     "abundance_unique": 0,
-    "both": 1,
-    "neither": 24
+    "both": 2,
+    "neither": 30
   },
   "analysis": "gtex-aging",
   "region": "nucleus_accumbens_basal_ganglia",
