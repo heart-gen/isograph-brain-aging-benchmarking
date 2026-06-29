@@ -103,7 +103,8 @@ gene-abundance baseline — with driver switches that are genuine structural iso
 
 ## Figure and table notes
 
-- **Potential main figure — module trust funnel (to generate).** Single full-width figure,
+- **Main figure — module trust funnel (`real_data/stability/_m/figures/figTrustFunnel.{pdf,png}`,
+  built by `real_data/stability/_h/trust_funnel_figure.R`).** Single full-width figure,
   four panels left→right mirroring the funnel, no in-panel titles (interpretation in caption):
   - **(A) Q1 stability:** per-module co-assignment density vs the size-matched null, IsoGraph
     vs WGCNA, with the trusted count annotated (236/266 vs 64/73). Dot/strip over a null band;
@@ -121,9 +122,9 @@ gene-abundance baseline — with driver switches that are genuine structural iso
   full per-module trust ledger (module_id, n_genes, coassign_density, perm_p, fdr, trusted,
   driver ρ, cross-cohort age effects, replicates, structural-switch fractions).
 
-> No figure has been generated yet — these are build notes per the manuscript-figures
-> conventions. The single existing trust-funnel figure script is the data-driven R pipeline;
-> add a `figTrustFunnel` panel set there when the figure is commissioned.
+> The figure is rendered and committed; the script is data-driven (regenerate after any
+> re-fit of the module_trust tables). It reuses the project `theme_pub` / `save_fig` /
+> Okabe-Ito conventions from `isograph_benchmark/figures/synthetic_benchmark.R`.
 
 ## Reproducibility information
 
