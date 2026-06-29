@@ -10,7 +10,7 @@ in `isograph_benchmark/README.md`.
 > GTEx IsoGraph results are complete; the GTEx WGCNA baseline is being **re-run** after
 > two fixes to its R script (a soft-power selection bug and a spline-FDR bug — see
 > [WGCNA fixes](#wgcna-fixes)), and the GTEx downstream stages that consume WGCNA
-> (region-shared analysis, module enrichment) regenerate from it. The cross-cohort
+> (module enrichment) regenerate from it. The cross-cohort
 > replication IsoGraph arm is complete; the WGCNA arm now has a BrainSEQ aging WGCNA
 > baseline (new, running) and regenerates for both methods once it finishes — see
 > [Cross-cohort replication](#cross-cohort-replication-brainseq-vs-gtex).
@@ -21,7 +21,7 @@ in `isograph_benchmark/README.md`.
 | Cohort | Regions | Trait | Notes |
 |---|---|---|---|
 | **BrainSEQ** | `caudate` (Phase 3), `hippocampus`, `dlpfc` (Phase 2) | Age | Controls only, adults (Age ≥ 18) |
-| **BrainSEQ SCZD** | `caudate_sczd` | Dx | Control + schizophrenia; DRD2 isoform case study |
+| **BrainSEQ SCZD** | `caudate_sczd` | Dx | Control + schizophrenia |
 | **GTEx v11** | 13 brain regions (`amygdala` … `substantia_nigra`) | AGE | Exact age (v8-preferred) |
 
 Covariates (from `configs/real_data.yaml`): BrainSEQ adjusts for Sex, MoD, RIN, mapping
@@ -61,7 +61,6 @@ baselines are R scripts under each cohort's `_h/`.
 |---|---|---|
 | 01 | `01.run_isograph.sh` | IsoGraph fit per region: `modules`, `edges`, `traits`, `age_{linear,spline}`, `feature_scores`, `module_gene_roles`, `calibration` |
 | 02 | `02.wgcna_gene.{R,sh}` | WGCNA baseline: `modules`, `age_{linear,spline}` |
-| 03 | `03.region_shared_analysis.{R,sh}` | Cross-region module Jaccard (`_m/region_jaccard_*`) + age summaries (`_m/age_summary_*`) |
 | 04 | `04.interpret_modules.sh` | Per-module interpretation tables + structure annotations |
 | 05 | `05.incremental_association.sh` | Gene- vs module-level incremental association |
 | 06 | `06.module_enrichment.sh` | GO:BP + network metrics + phenotype FDR, both methods |
@@ -75,7 +74,6 @@ region (giant module 21–39%).
 |---|---|---|
 | 01 | `01.run_isograph_aging.sh`, `01.aging_models.R` | IsoGraph fit + aging models on the 3 control aging regions |
 | 02 | `02.run_isograph_sczd.sh`, `02.run_wgcna_sczd.{R,sh}` | Caudate SCZD IsoGraph (Dx trait) + WGCNA baseline |
-| 03 | `03.drd2_case_study.{R,sh}` | DRD2 isoform-switch case study |
 | 04 | `04.interpret_modules.sh` | Module interpretation |
 | 05 | `05.sweep_leiden.sh` | Leiden resolution sweep |
 | 06–07 | `06.run_isograph_with_abundance.sh`, `07.sweep_leiden_with_abundance.sh` | Abundance-channel variant + its Leiden sweep |
@@ -83,12 +81,8 @@ region (giant module 21–39%).
 | 09 | `09.characterize_composition_unique.sh` | Composition-unique module characterization (`_m/composition_unique_overlap.parquet`) |
 | 10 | `10.module_enrichment.sh` | GO:BP + phenotype enrichment, both methods |
 
-**No cross-region sharing analysis exists for BrainSEQ.** The GTEx-style region-Jaccard
-step (`03.region_shared_analysis`) has no BrainSEQ equivalent — with only three aging
-regions, module conservation is not analyzed as a dedicated stage. The BrainSEQ
-cross-region aggregations that do exist (`_m/composition_unique_overlap.parquet`,
-`_m/module_interpret_summary.parquet`) are overlap/interpretation summaries, not a
-region-conservation analysis.
+The BrainSEQ cross-region aggregations are `_m/composition_unique_overlap.parquet` and
+`_m/module_interpret_summary.parquet` (overlap/interpretation summaries).
 
 ### GWAS overlap (`real_data/gwas/_h/`)
 
