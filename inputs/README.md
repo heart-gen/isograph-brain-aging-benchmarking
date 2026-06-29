@@ -93,7 +93,7 @@ Example provenance (BrainSEQ caudate): 78,932 → **20,365 genes** and 384,354 �
 | Suite | Region(s) | Cohort / filters | Trait |
 |---|---|---|---|
 | `brainseq_v1/` | `caudate` (Phase 3), `hippocampus`, `dlpfc` (Phase 2) | Dx = Control, not dropped, Age ≥ 18 | Age |
-| `brainseq_sczd/` | `caudate` | Dx = Control + SCZD, not dropped, Age ≥ 18 (DRD2 isoform case study and disease associations) | Dx |
+| `brainseq_sczd/` | `caudate` | Dx = Control + SCZD, not dropped, Age ≥ 18 (disease associations) | Dx |
 | `gtex_v11_brain/` | 13 brain regions (`amygdala` … `substantia_nigra`) | GTEx v11 brain | AGE (exact; v8 preferred) |
 
 Covariates: BrainSEQ bundles carry Sex, MoD, RIN, mapping rate, mito rate, and

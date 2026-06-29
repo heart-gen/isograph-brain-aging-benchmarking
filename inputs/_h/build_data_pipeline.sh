@@ -195,8 +195,7 @@ fi
 #   brainseq_v1/dlpfc        BrainSEQ Phase 2 DLPFC (BSP2 RiboZeroGold only)
 #
 #   brainseq_sczd/caudate    BrainSEQ Phase 3 caudate — Control + SCZD
-#                            Used for DRD2 isoform case study and disease
-#                            trait associations (Dx as trait column).
+#                            Used for disease trait associations (Dx as trait column).
 #                            Dx=Control+SCZD, dropped=f, Age>=18
 #
 #   gtex_v11_brain/<region>  GTEx v11 brain regions (13 total)
@@ -230,6 +229,5 @@ echo "    BrainSEQ SCZD IsoGraph:     bash real_data/brainseq/_h/02.run_isograph
 echo "    GTEx aging:                 bash real_data/gtex/_h/01.run_isograph.sh"
 echo "    GTEx WGCNA comparison:      Rscript real_data/gtex/_h/02.wgcna_gene.R"
 echo "    BrainSEQ SCZD WGCNA:        Rscript real_data/brainseq/_h/02.run_wgcna_sczd.R"
-echo "    DRD2 case study:            Rscript real_data/brainseq/_h/03.drd2_case_study.R"
 echo "    MAGMA gene sets (HPC):      Rscript real_data/gwas/_h/01.prep_module_gene_sets.R"
 echo "    MAGMA enrichment (HPC):     sbatch real_data/gwas/_h/02.run_magma.sh"
