@@ -571,11 +571,12 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
 
 
 def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | None = None) -> None:
-    """Re-enable abundance-abundance edges (with grid calibration) for a BrainSEQ aging region.
+    """Legacy comparison arm: same full-multiplex channels as the standard primary fit,
+    but at the region's Part 1 BEST_LEIDEN_RESOLUTION instead of the canonical resolution.
 
     Writes artifacts to isograph_vae_with_abundance/ (separate from the standard run)
-    so results can be compared without overwriting the baseline. When
-    leiden_resolution is None, uses the region's BEST_LEIDEN_RESOLUTION (Part 1 sweep).
+    so the best-resolution arm can be compared without overwriting the canonical modules.
+    When leiden_resolution is None, uses the region's BEST_LEIDEN_RESOLUTION (Part 1 sweep).
     """
     if leiden_resolution is None:
         leiden_resolution = BEST_LEIDEN_RESOLUTION.get(region, 2.0)
@@ -785,8 +786,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--variant", default="standard", choices=["standard", "with-abundance"],
-        help="standard: default config (allow_abundance_abundance=False). "
-             "with-abundance: re-enable abundance edges with alpha_abundance_grid calibration. "
+        help="standard: full-multiplex primary config (allow_abundance_abundance=True, "
+             "alpha_abundance_grid calibration) at the canonical resolution, written to "
+             "isograph_vae. with-abundance: legacy comparison arm with the same channels "
+             "at the Part 1 BEST_LEIDEN_RESOLUTION, written to isograph_vae_with_abundance. "
              "Applies to brainseq-aging and brainseq-sczd.",
     )
     parser.add_argument(
