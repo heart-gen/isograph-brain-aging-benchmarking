@@ -64,9 +64,9 @@ TIERS: dict[str, dict] = {
     "full_multiplex": dict(switch_only=False, allow_abundance_abundance=True),
 }
 PRIMARY_TIER = "full_multiplex"
-# Output subdir per tier. Kept distinct from the legacy 'isograph_vae' (switch-primary
-# standard) so the pilot is non-destructive; the canonical-dir promotion is a separate
-# step once the tier comparison validates.
+# Output subdir per tier. The canonical 'isograph_vae' dir is the full_multiplex primary
+# (run_models); these per-tier dirs are the apples-to-apples ablation replicas projected
+# from the same fit, so writing them never clobbers the canonical cascade inputs.
 TIER_DIRS: dict[str, str] = {
     "switch_only": "isograph_vae_switch_only",
     "switch_primary": "isograph_vae_switch_primary",
