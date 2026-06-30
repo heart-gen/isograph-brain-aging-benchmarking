@@ -90,11 +90,15 @@ pipelines — the disease-axis instance of IsoGraph's defensible complementary v
   n_sig_switch_tx, frac_cds_changed/coding_status_change/biotype_switch/utr_changed,
   top_switch_genes) plus the pooled `_background` row from the JSON sidecar. This is the
   primary artifact; the gate is a small, table-centric result.
-- **Optional figure panel:** per-module functional-consequence fractions (CDS / coding-status
-  / biotype / UTR) for the four GO-invisible disease modules with the pooled-background line
-  overlaid, demonstrating "at or above background." Not built here; it folds naturally into
-  the complementarity supplement next to the QTL splicing-specificity figure (the same
-  modules carry the genetic anchoring). Build only if a standalone panel is wanted.
+- **Supplementary figure — GO-invisible switch modules
+  (`real_data/_m/figures/figGoInvisible.{pdf,png}`, built by
+  `real_data/_h/go_invisible_figure.R`).** (A) per-module functional-consequence fractions
+  (CDS / coding-status / biotype / UTR) for the four GO-invisible disease modules with the
+  pooled-background line overlaid, showing they sit comparable to background (some above, some
+  below — indistinguishable, not depleted); (B) switch coherence — nearly every member carries
+  a real anticorrelated transcript pair, with max switch strength annotated. Sits in the
+  complementarity supplement next to the QTL splicing-specificity figure (the same modules
+  carry the genetic anchoring).
 
 ## Reproducibility information
 
