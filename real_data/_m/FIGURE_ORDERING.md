@@ -48,6 +48,7 @@ Real-data supplements:
 | S-real-1 | `real_data/_m/figures/figBaselineRates.{pdf,png}` | **Bounds the claim:** per-module phenotype rate is driven by switch features (both switch-fed methods win) and GO enrichment by abundance — IsoGraph is not globally superior. |
 | S-real-2 | `real_data/_m/figures/figGwasResolution.{pdf,png}` | MAGMA module-GWAS enrichment is size-confounded; at canonical resolution 5.0 the giant-module artifact disappears (0/8 significant modules are giant vs 18/43 at res 2.0 and 79/99 for gene-level WGCNA) yet the schizophrenia signal survives across six regions. Built to manuscript conventions by `real_data/_h/gwas_resolution_figure.R`; summary `real_data/gwas/_m/GWAS_RESOLUTION_SUMMARY.md`. |
 | S-real-3 | `real_data/_m/figures/figGoInvisible.{pdf,png}` | The four GO-invisible SCZD switch modules carry functionally-consequential isoform switching comparable to the genome-wide background, and nearly every member carries a real anticorrelated transcript pair — GO-invisibility is GO's gene-level bias, not low module quality. Built by `real_data/_h/go_invisible_figure.R`; sits beside Fig 3. |
+| S-real-4 | `real_data/_m/figures/figSeparation.{pdf,png}` | **Abundance and isoform structure are separable and the separation adds information:** IsoGraph's per-gene abundance and switch axes are largely orthogonal (median \|r\|≈0.13, 41% of genes \|r\|<0.1, **A**); the de-confounded incremental test finds a specific set of composition-unique genes in every cohort/region whose switch channel carries phenotype signal total abundance misses (34 SCZD / 43 aging-caudate, up to 545 in GTEx cortex; **C**); e.g. NREP (`ENSG00000134986`) has flat total abundance across diagnosis (p=0.93) but a significant isoform switch (p=7e-5, **B**). Built by `real_data/_h/abundance_structure_figure.R` from `abundance_structure_separation.py` outputs; supports the complementary-layer framing (this is non-redundancy, not superiority). |
 
 ## Supplementary tables
 
@@ -69,5 +70,7 @@ Both previously-open gaps are now closed:
    beside Fig 3, showing the four disease modules' consequence fractions against background
    and their switch coherence.
 
-All main (Fig 1–3) and supplementary (S1–S11, S-real-1/2/3) figures now exist; the real-data
-figures were generated this session and are not yet committed.
+All main (Fig 1–3) and supplementary (S1–S11, S-real-1/2/3/4) figures now exist; the real-data
+figures were generated this session and are not yet committed. S-real-4 (`figSeparation`) states
+the foundational non-redundancy claim directly — abundance and isoform structure are
+computationally separable and the separation adds phenotype information.
