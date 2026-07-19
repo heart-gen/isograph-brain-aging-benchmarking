@@ -1,8 +1,9 @@
-# AGENTS.md — Real-Data Rigor & Biology for Nature Methods
+# AGENTS.md — Real-Data Rigor & Biology for Cell Genomics
 
 Working plan for finishing the **real-data** analysis so it is rigorous and
-biologically grounded for a Nature Methods submission. This file is the to-do
-spine; it is not a status report. Update it as items close.
+biologically grounded for a **Cell Genomics** submission (retargeted 2026-07-16
+from Nature Methods; rigor bar unchanged). This file is the to-do spine; it is
+not a status report. Update it as items close.
 
 ## North-star framing (do not drift from this)
 
@@ -177,7 +178,7 @@ through `FitArtifacts.residualization_qc` (vae.py captures it in both branches) 
 written as `residualization_qc.parquet` by `run_models.py`. Production fits already
 set `residualize_covariates`, so it populates on every real fit. Unit + e2e tested
 (`tests/test_residualization_qc.py`). Numerically non-invasive — does not change the
-residualized features. UNCOMMITTED.
+residualized features. **COMMITTED** (IsoGraph core `c958174`).
 
 **Covariate policy DECIDED (2026-06-28): residualization is a DISCOVERY knob only.**
 Covariates do two jobs: protect module *discovery* (a confound axis fabricates artifact
@@ -186,21 +187,35 @@ adjust trait *inference* (best done jointly with the trait — spline for age, c
 on the abundance channel). These are split, not stacked. Previously `feature_scores.parquet`
 held the *residualized* matrix (vae.py:660 used the in-place-residualized `switch_matrix`;
 the line-665 comment wrongly said "raw"), so `incremental_association` adjusted the SAME
-covariates a second time = double residualization. **Fix (uncommitted):** vae.py now keeps
-`switch_matrix_raw` and persists feature_scores from it — clustering/VAE still embed the
-residualized matrix, but feature_scores is RAW, so the downstream test is the single
-inference adjustment. Verified e2e: feature_scores retains the covariate axis (r²≈0.80)
+covariates a second time = double residualization. **Fix — DONE, COMMITTED** (IsoGraph core
+`c958174`, "Decouple residualization; persist raw feature_scores; add QC + missing-covariate
+guard"): vae.py keeps `switch_matrix_raw` and persists feature_scores from it — clustering/VAE
+still embed the residualized matrix, but feature_scores is RAW, so the downstream test is the
+single inference adjustment. Verified e2e: feature_scores retains the covariate axis (r²≈0.80)
 while the embedded matrix has confound_r²→0. `modules.parquet` is UNCHANGED (clustering
 input identical, deterministic seed); only feature_scores + downstream (incremental_association,
-trait_associations, module_gene_roles, characterize) change → production real-data re-fit
-needed. Task #31 (silent-skip guard on `build_design_matrix`) and #32 (finalize upstream
-list as technical-confounds-only, exclude trait + biological Sex/MoD; launch re-fit) follow.
+trait_associations, module_gene_roles, characterize) changed.
 
-- **#10 remains the only open degradation task** (module-level QC flag + edge-type
-  penalties); **do NOT start it without explicit confirmation** — it touches the
-  feature residualization path.
+- **#31 (silent-skip guard on `build_design_matrix`) — DONE**, same commit.
+- **#32 (upstream list technical-confounds-only; launch re-fit) — DONE.** Production re-fit
+  regenerated (`8376556` "Regenerate canonical real-data outputs from post-decouple fit";
+  res-2.0 comparison arm `fedec9c`). Verified 2026-07-16: all 13 GTEx + 4 BrainSEQ regions
+  carry canonical `_m/isograph_vae/modules.parquet`; both repos clean on `main`.
 
-### 4. Per-module trust funnel writeup
+- **#10 (module-level degradation QC flag + edge-type penalties) — WON'T DO for this
+  submission** (decided 2026-07-16). Degradation is instead **disclosed as a characterized
+  limitation** in the Discussion, citing figS8 (residualization holds for composition/batch/
+  depth; degradation is the exception) and figS9 (abundance-channel fallback restores
+  recovery). Do not start it without explicit confirmation — it touches the feature
+  residualization path.
+
+### 4. Per-module trust funnel writeup — DONE (delivered in manuscript)
+
+Delivered: Results §"IsoGraph modules are reproducible and replicate aging associations"
+(266 full-data modules, 236/89% trusted vs size-matched permutation null; driver ρ 0.77–0.82;
+25 cross-cohort aging replications vs 6 for the matched abundance baseline), figure
+`figTrustFunnel`, and supplementary `tableS7_module_trust_funnel.csv`. Original design notes
+below retained for rationale.
 
 The funnel goal is **per-module trust**, not global ARI (global ARI is
 deprioritized — finer res-5.0 isograph partitions are inherently less
@@ -214,15 +229,26 @@ stability → drivers (`module_meta` loadings, done) → aging replication
 - **Acceptance:** a short list of high-trust modules that survive all four gates,
   carried forward as the modules the biological claims rest on.
 
-### 5. Manuscript summary tables + figures
+### 5. Manuscript summary tables + figures — DONE (assembled 2026-07-16)
 
-After 1–4 land, produce publication artifacts.
+- Supplementary tables S1–S7 built by `real_data/_h/assemble_supp_tables.py`, with legends
+  in `real_data/_m/supp_tables/SUPPLEMENTARY_TABLES.md`; mirrored into the manuscript at
+  `content/supplementary_tables/`.
+- Supplement wired in the manuscript repo as `content/06.supplement.md`: 14 supplementary
+  figures — S1–S11 synthetic (`benchmark/03_metrics/figures/figS1..figS11`) and S12–S14
+  real-data (`figBaselineRates`, `figGoInvisible`, `figGwasResolution`) — numbered in
+  citation order via `pandoc-fignos` `tag=`, plus S1–S7 table legends. All 17 figure
+  cross-refs resolve; no orphaned assets.
+- **Remaining:** Cell Genomics re-target (abstract re-lead, STAR Methods + Key Resources
+  Table), DOI placeholders (Zenodo ×2, benchmark repo, protocols.io, GTEx access date).
 
-- Use the `per-analsis-summarization` skill for analysis→Manubot summary tables.
-- Use the `manuscript-figures` skill for the real-data figures (three-baseline
-  comparison, trust funnel, GWAS res5 specificity, confound ablation).
-- **Acceptance:** main + supplemental real-data figures and Table(s) drafted,
-  each tied to a specific honest claim above.
+### 6. sQTL intron-direction concordance — OPEN (the one new analysis)
+
+Approved 2026-07-16 as the single added orthogonal validation. Extend the anchoring layer
+with LeafCutter intron-usage direction concordance for switch transcripts (AGENTS.md §1b
+listed it as the optional secondary). Ship as a committed, parametrized CLI beside
+`isograph_benchmark/real_data/qtl_anchoring.py` + SLURM wrapper, deterministic seed,
+parquet + Manubot markdown summary. Hardens the genetic-anchoring headline; feeds Table S3–S5.
 
 ---
 

@@ -5,7 +5,7 @@ Using flags:
 	--gene-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/tmp/magma_ref/g1000_eur_NCBI37.genes.annot
 	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/scz_noMHC
 
-Start time is 18:14:27, Thursday 25 Jun 2026
+Start time is 09:13:51, Friday 17 Jul 2026
 
 Loading PLINK-format data...
 Reading file /ocean/projects/bio250020p/shared/opt/magma-v1.10/g1000_eur.fam... 503 individuals read
@@ -22,13 +22,10 @@ Reading SNP p-values from file /ocean/projects/bio260021p/kbenjamin/projects/iso
 	using variable: SNP (SNP id)
 	using variable: P (p-value)
 	using variable: N (sample size; discarding SNPs with N < 50)
-	read 7532140 lines from file, containing valid SNP p-values for 7470367 SNPs in data (99.18% of lines, 32.96% of SNPs in data)
-	WARNING: file contained 20 SNPs (same IDs or synonyms) with duplications
-	         dropped all occurrences of each from analysis
-	         writing list of duplicated IDs to supplementary log file
+	read 7613603 lines from file, containing valid SNP p-values for 7504549 SNPs in data (98.57% of lines, 33.11% of SNPs in data)
 Loading gene annotation from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/tmp/magma_ref/g1000_eur_NCBI37.genes.annot... 
 	19248 gene definitions read from file
-	found 17497 genes containing valid SNPs in genotype data
+	found 17866 genes containing valid SNPs in genotype data
 
 
 Starting gene analysis... 
@@ -37,4 +34,4 @@ Starting gene analysis...
 	writing intermediate output to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/scz_noMHC.genes.raw
 
 
-End time is 18:23:46, Thursday 25 Jun 2026 (elapsed: 00:09:19)
+End time is 09:25:31, Friday 17 Jul 2026 (elapsed: 00:11:40)

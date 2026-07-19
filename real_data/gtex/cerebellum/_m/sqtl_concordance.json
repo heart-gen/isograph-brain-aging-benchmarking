@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellum",
+  "tissue": "Brain_Cerebellum",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 13335,
+  "module_set_sizes": {
+    "all_modules": 2804,
+    "pheno_sig_modules": 939,
+    "go_invisible_modules": 570,
+    "go_visible_modules": 369
+  }
+}

@@ -4,10 +4,10 @@ Using flags:
 	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_res2_gene_sets.txt
 	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae_res2
 
-Start time is 09:17:46, Monday 29 Jun 2026
+Start time is 09:29:36, Friday 17 Jul 2026
 
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/scz_noMHC.genes.raw... 
-	17497 genes read from file
+	17866 genes read from file
 Loading gene-set annotation...
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_res2_gene_sets.txt... 
 	WARNING: gene set gtex__amygdala__M020 contains no genes defined in genotype data
@@ -23,7 +23,7 @@ Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-
 	WARNING: gene set gtex__substantia_nigra__M010 contains no genes defined in genotype data
 	WARNING: gene set brainseq__caudate_sczd__M017 contains no genes defined in genotype data
 	301 gene-set definitions read from file
-	found 289 gene sets containing genes defined in genotype data (containing a total of 12898 unique genes)
+	found 289 gene sets containing genes defined in genotype data (containing a total of 13142 unique genes)
 Preparing variables for analysis...
 	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
 	truncating covariate values more than 5 standard deviations from the mean
@@ -36,6 +36,7 @@ Performing regression analysis...
 	conditioning on internal variables:
 		gene size, log(gene size)
 		gene density, log(gene density)
+		sample size, log(sample size)
 		inverse mac, log(inverse mac)
 	analysing individual variables
 
@@ -44,4 +45,4 @@ Performing regression analysis...
 	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae_res2.gsa.genes.out
 	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae_res2.gsa.sets.genes.out
 
-End time is 09:17:59, Monday 29 Jun 2026 (elapsed: 00:00:13)
+End time is 09:29:50, Friday 17 Jul 2026 (elapsed: 00:00:14)

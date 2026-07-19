@@ -48,19 +48,19 @@ FDR-significant IsoGraph modules at resolution 2.0, **18 (42%) are giant** (≥ 
 extending up to 2,600+ genes — the significant hits pile up at large module sizes, the
 signature of the MAGMA size bias rather than focused biology.
 
-**Canonical resolution 5.0 eliminates the artifact.** At resolution 5.0 IsoGraph yields **8
-FDR-significant modules, 0 of them giant** (largest significant module 802 genes; no
+**Canonical resolution 5.0 eliminates the artifact.** At resolution 5.0 IsoGraph yields **6
+FDR-significant modules, 0 of them giant** (largest significant module 691 genes; no
 module in the entire partition reaches 900 genes among the hits). The size-vs-significance
 dependence is gone — significant modules are confined to the small-module regime.
 
-**The schizophrenia signal survives the size control.** Schizophrenia drops from 28
-significant modules at resolution 2.0 to **6 at resolution 5.0**, but those 6 are real,
-modest-sized modules (137–802 genes) spread across independent regions — GTEx amygdala
-M000 (547 genes, FDR 0.0022), cerebellar hemisphere M001 (657, 0.012), spinal cord
-cervical M002 (501, 0.013), BrainSEQ caudate M009 (137, 0.015), GTEx hippocampus M000
-(802, 0.016), and hypothalamus M000 (679, 0.044). SCZ accounts for 6 of the 8 surviving
-hits; the other two are a small PD module (caudate basal ganglia M029, 37 genes) and a BP
-module (putamen M007, 271 genes). The disease signal is genuine, not size-driven.
+**The schizophrenia signal survives the size control.** Schizophrenia drops from 22
+significant modules at resolution 2.0 to **5 at resolution 5.0**, but those 5 are real,
+modest-sized modules (139–691 genes) spread across independent regions — GTEx amygdala
+M000 (554 genes, FDR 0.0007), GTEx hypothalamus M000 (691, 0.033), GTEx hippocampus M002
+(421, 0.036), BrainSEQ caudate M009 (139, 0.036), and BrainSEQ hippocampus M000
+(373, 0.036). SCZ accounts for 5 of the 6 surviving hits; the sixth is a small PD module
+(GTEx caudate basal ganglia M029, 37 genes). The disease signal is genuine, not
+size-driven.
 
 **The gene-level WGCNA baseline is itself an unguarded giant-module pipeline.** Classical
 `wgcna_gene` returns **99 FDR-significant modules, 79 (80%) of them giant**, the largest
@@ -69,9 +69,9 @@ size-bias phenomenon — exactly the artifact resolution control removes from Is
 reinforcing the project-wide read that gene-abundance/size dominates the bulk signal.
 
 **Headline:** *MAGMA module-GWAS enrichment is confounded by module size; at IsoGraph's
-canonical Leiden resolution 5.0 the giant-module artifact disappears (0/8 significant
-modules are giant, vs 18/43 at resolution 2.0 and 79/99 for gene-level WGCNA), yet a
-size-controlled schizophrenia signal survives across six independent brain regions.*
+canonical Leiden resolution 5.0 the giant-module artifact disappears (0/6 significant
+modules are giant, vs 18/35 at resolution 2.0 and 77/99 for gene-level WGCNA), yet a
+size-controlled schizophrenia signal survives across five independent brain regions.*
 
 ## Figure and table notes
 
@@ -81,7 +81,7 @@ size-controlled schizophrenia signal survives across six independent brain regio
   IsoGraph res 2.0 / res 5.0 / WGCNA, significant hits highlighted, with the 900-gene giant
   cutoff marked — the artifact and its fix read directly off where the coloured points sit
   relative to the cutoff. (B) significant-module counts split by giant vs non-giant per
-  method — the giant fraction collapses to zero at res 5.0. (C) the eight surviving res-5.0
+  method — the giant fraction collapses to zero at res 5.0. (C) the six surviving res-5.0
   IsoGraph hits as a dot plot (−log10 FDR, sized by module genes, coloured by trait),
   showing modest sizes and SCZ dominance. No in-panel titles; the read lives in the caption.
 - **Tables:** `magma_results_combined.parquet` (res 5.0, canonical) and
@@ -114,7 +114,7 @@ size-controlled schizophrenia signal survives across six independent brain regio
   that the headline module-GWAS enrichment is size-confounded and that controlling module
   size (via canonical resolution) is what makes the surviving signal trustworthy. It is the
   GWAS-axis companion to the giant-module-cap stability work.
-- The six surviving SCZ modules are reported as size-controlled hits, not as a fine-mapped
+- The five surviving SCZ modules are reported as size-controlled hits, not as a fine-mapped
   causal account; integrate them with the QTL splicing-specificity contrast (the genetic
   anchoring of the same co-switch modules) and the GO-invisible gate (the disease switch
   content), and read the WGCNA giant-module result alongside the three-baseline comparison
