@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for ARVCF in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+ARVCF lies in the 22q11.2 schizophrenia deletion region (haplotypic SCZ association with COMT) and is itself a modulator of pre-mRNA splicing -- it interacts with SRSF1, DDX5 and hnRNP H2 and alters alternative-splicing activity -- so a splicing-led ARVCF event is consistent with both its locus and its molecular role.
+
+_References:_ @doi:10.1038/sj.mp.4001586

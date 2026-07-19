@@ -19,3 +19,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CTSH in AD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+CTSH (cathepsin H) is a protective Alzheimer's-disease GWAS locus; the gene is annotated with multiple transcript variants encoding distinct isoforms, and the AD-associated coding change (Gly->Arg) affects only a subset of isoforms, so isoform choice modulates the functional consequence of the locus. This is the highest-CLPP splicing-led case in the panel (CLPP 0.39, AD hippocampus).
+
+_References:_ @doi:10.1038/s41386-023-01542-2

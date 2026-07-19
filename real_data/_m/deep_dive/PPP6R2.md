@@ -25,3 +25,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PPP6R2 in ALS,SCZ — the same switch is genetically anchored across more than one trait. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both ALS and SCZ (three resolved events, the most in the panel), but disease-specific isoform biology is not established -- a novel cross-trait splicing-led candidate for follow-up.

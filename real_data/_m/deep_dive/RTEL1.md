@@ -22,3 +22,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for RTEL1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative C-terminal isoforms in other tissues, but a brain disease-specific splice role is not established -- a splicing-led candidate whose isoform choice warrants transcript-level follow-up.

@@ -17,3 +17,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PGS1 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+PGS1 (phosphatidylglycerophosphate synthase 1; mitochondrial phospholipid biosynthesis) colocalizes as a splicing-led switch in ALS with no established disease isoform biology -- a novel candidate.

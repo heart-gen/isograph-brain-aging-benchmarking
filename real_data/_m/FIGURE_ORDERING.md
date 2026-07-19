@@ -56,14 +56,20 @@ Real-data supplements:
 
 ## Supplementary tables
 
-See `real_data/_m/supp_tables/SUPPLEMENTARY_TABLES.md` (Tables S1–S11) — three-baseline pooled
+See `real_data/_m/supp_tables/SUPPLEMENTARY_TABLES.md` (Tables S1–S12) — three-baseline pooled
 (S1) and per-region (S2); QTL specificity contrast (S3), matched-baseline contrast (S4) and
 raw cis-QTL ORs (S5); GO-invisible disease modules (S6); per-region trust funnel (S7); and the
 per-gene deep-dive set backing Fig 4 — verdict panel (S8), per-event anchor→switch→consequence
-(S9), per-gene RBP regulators (S10), and per-gene/exon clinical annotation (S11), which let a
-reader reconstruct any colocalized gene's mechanistic vignette. The synthetic Table 1
+(S9), per-gene RBP regulators (S10), per-gene/exon clinical annotation (S11), and per-gene
+known-isoform-biology literature (S12) — which let a reader reconstruct any colocalized gene's
+mechanistic vignette. The synthetic Table 1
 (`benchmark/03_metrics/_m/table1_benchmark_summary.csv`) and scale-compute table
 (`tableS_scale_compute_summary.csv`) accompany Figs 1/S6.
+
+The integrated **genetic-anchoring Results section** (Fig 3 + Fig 4 + S-real-5/6/7, folding the
+coloc / S-LDSC / switch-consequence / RBP-regulon / clinical-consequence / deep-dive-plus-literature
+layers into manuscript prose with Manubot citekeys) is drafted at
+`real_data/_m/GENETIC_ANCHORING_RESULTS.md`.
 
 ## Status
 

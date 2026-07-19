@@ -19,13 +19,15 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S9 | `deep_dive/deep_dive_events.tsv` | `coloc/_m/coloc_isoform_events_combined.parquet` (+direction) | per-event anchor→switch→consequence for every colocalized gene |
 | S10 | `deep_dive/deep_dive_rbp.tsv` | `_m/rbp/{rbp_switch_calls,rbp_regulon}.parquet` | per-gene switched + module-enriched RBP regulators |
 | S11 | `deep_dive/deep_dive_exon_clinical.tsv` | per-region `clinical_consequence/exon_clinvar.parquet` | per-gene/exon switched-vs-constitutive ClinVar & CDS annotation |
+| S12 | `deep_dive/deep_dive_literature.tsv` | `deep_dive/deep_dive_literature.parquet` | curated known-isoform-biology literature per resolved splicing-led gene (with Manubot citekeys) |
 
-Tables S8–S11 (the per-gene deep-dive) live under `real_data/_m/deep_dive/` and are regenerated
+Tables S8–S12 (the per-gene deep-dive) live under `real_data/_m/deep_dive/` and are regenerated
 by `real_data/_h/build_deep_dive.sh` (not the `assemble_supp_tables.py` assembler). Together they
 let a reader reconstruct the SNCA-style mechanistic vignette for any colocalized gene without a
 hand-written narrative: S9 gives the variant→junction→switch-pair→structural-consequence chain,
-S10 the candidate RBP regulators, S11 the clinical (coding-vs-non-coding, ClinVar) read, and S8
-the one-line verdict.
+S10 the candidate RBP regulators, S11 the clinical (coding-vs-non-coding, ClinVar) read, S8
+the one-line verdict, and S12 the known-isoform-biology literature (four genes with documented
+disease isoform biology, eight flagged `novel_candidate`).
 
 ---
 
@@ -147,6 +149,19 @@ variant counts. Lets a reader do the SNCA-style clinical read for any gene — e
 switched exon is non-coding and pathogenic-variant-free while the gene's P/LP burden sits in
 shared constitutive coding exons. Supports: the clinical-consequence layer of each vignette.
 
+## Table S12 — Per-gene literature (known isoform biology)
+
+One row per resolved splicing-led gene (n = 12): a curated synthesis of known isoform biology in
+the relevant disease (`literature`), Manubot citekeys (`references`), and a `curation` flag —
+`documented` for the four genes with established disease isoform biology matching their resolved
+switch (SNCA [@doi:10.3389/fgene.2019.00584; @doi:10.3390/genes9020063], DLG1/SAP97
+[@doi:10.1038/tp.2015.154], CTSH [@doi:10.1038/s41386-023-01542-2], ARVCF
+[@doi:10.1038/sj.mp.4001586]) and `novel_candidate` for the eight without established
+disease-specific isoform literature (PPP6R2, GGNBP2, PGS1, CDIP1, PRRC2B, RTEL1, TBC1D15, TPCN1).
+Curation is data (a dict in `gene_deep_dive.py`) so the table and vignette Section 6 regenerate
+deterministically; no DOI/PMID is fabricated. Supports: the literature layer (layer 6) of each
+resolved vignette and the deep-dive Results paragraph.
+
 ---
 
 ## Reproducibility
@@ -160,9 +175,10 @@ shared constitutive coding exons. Supports: the clinical-consequence layer of ea
 - The assembler only re-shapes and rounds; it computes no new statistics. Regenerate after any
   re-run of the upstream analyses (baseline_comparison, qtl_anchoring, go_invisible_gate,
   module_trust).
-- Tables S8–S11 have a separate generator: `real_data/_h/build_deep_dive.sh`, which runs
+- Tables S8–S12 have a separate generator: `real_data/_h/build_deep_dive.sh`, which runs
   `python -m isograph_benchmark.real_data.gene_deep_dive` (deterministic joins over the coloc,
-  RBP, and clinical-consequence ledgers) and writes `deep_dive_*.{tsv,parquet}` under
+  RBP, and clinical-consequence ledgers, plus the curated `_LITERATURE` dict) and writes
+  `deep_dive_*.{tsv,parquet}` under
   `real_data/_m/deep_dive/`. The same script extracts the SNCA transcript exons from GENCODE v47
   and renders the four genetic-anchoring figures. Regenerate after any re-run of the coloc,
   RBP-regulon, or clinical-consequence analyses.

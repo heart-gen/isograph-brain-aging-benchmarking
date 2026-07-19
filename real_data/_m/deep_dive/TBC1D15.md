@@ -16,3 +16,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for TBC1D15 in PD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome interface, a pathway central to Parkinson's-disease mitophagy; its PD-associated splicing-led switch has no established isoform literature -- a mechanistically suggestive novel candidate.
