@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 6125,
+  "module_set_sizes": {
+    "all_modules": 6771,
+    "pheno_sig_modules": 3033,
+    "go_invisible_modules": 1094,
+    "go_visible_modules": 1939
+  }
+}

@@ -52,6 +52,7 @@ def _chunk_reader(path: Path, trait_cfg: dict[str, Any], chunksize: int):
     return pd.read_csv(
         path,
         sep=_sep_arg(trait_cfg.get("sep")),
+        comment=trait_cfg.get("comment"),
         compression="infer",
         chunksize=chunksize,
         dtype="string",

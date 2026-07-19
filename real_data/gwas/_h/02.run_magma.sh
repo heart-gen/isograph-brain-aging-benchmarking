@@ -41,7 +41,7 @@ GENE_LOC="${GENE_LOC:-${GENE_LOC_HPC}}"
 LD_REF="${LD_REF:-${LD_REF_HPC}}"
 CONFIG="${CONFIG:-configs/gwas_magma.yaml}"
 
-TRAITS=(scz mdd bp ad pd stroke)
+TRAITS=(scz mdd bp ad pd stroke lbd als)
 # IsoGraph backend dir is selectable (default canonical isograph_vae). Set
 # MAGMA_ISOGRAPH_BACKEND=isograph_vae_res5 to run the resolution-5.0 partition;
 # the gene analysis (.genes.out/.genes.raw) is module-independent and reused,
