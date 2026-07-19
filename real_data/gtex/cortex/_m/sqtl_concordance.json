@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cortex",
+  "tissue": "Brain_Cortex",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 9265,
+  "module_set_sizes": {
+    "all_modules": 3205,
+    "pheno_sig_modules": 1676,
+    "go_invisible_modules": 879,
+    "go_visible_modules": 797
+  }
+}

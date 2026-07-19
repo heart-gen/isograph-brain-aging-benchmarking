@@ -1,18 +1,23 @@
 traits:
   scz:
     label: SCZ
-    path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/SCZ/CLOZUK_PGC2/primary.qc1_filt_hg38
-    sep: whitespace
-    snp_col: SNP
-    p_col: P
-    fixed_n: 105318
-    chr_col: CHR
-    pos_col: BP
-    # CLOZUK SNP ids are "rsID:pos:a1:a2" (rsID embedded as the first field; the
-    # bare ":" prefix on ~1e3 SNPs lacks an rsID). The g1000_eur panel is keyed by
-    # rsID, so extract the rsID token to match. (The panel is hg19/b37; this file's
-    # BP column is hg38-lifted, but the embedded rsID is build-independent.)
-    snp_rsid_extract: true
+    # PGC3 wave 3 (Trubetskoy et al. 2022). The EUROPEAN-ancestry subset is used,
+    # not the multi-ancestry "primary" release: MAGMA is run against the g1000_eur
+    # LD reference panel, so the summary statistics must be European to be
+    # LD-matched. (This is also the like-for-like replacement for the previously
+    # used European CLOZUK+PGC2 release.)
+    path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/SCZ/PGC3/PGC3_SCZ_wave3.european.autosome.public.v3.vcf.tsv.gz
+    sep: tab
+    # PGC sumstats-VCF v1.0: 73 leading "##" metadata lines precede the header.
+    comment: "#"
+    snp_col: ID
+    p_col: PVAL
+    # NCAS/NCON vary per SNP (per-variant cohort coverage), so sum them per row
+    # rather than fixing N. Matches the bp/ad/pd convention.
+    n_sum_cols: [NCAS, NCON]
+    chr_col: CHROM
+    pos_col: POS
+    # POS is GRCh37, matching the MHC window below and the hg19 g1000_eur panel.
   mdd:
     label: MDD
     path: /ocean/projects/bio250020p/shared/resources/gwas/PGC/mdd2019edinburgh/hg38/PGC_UKB_depression_genome-wide_hg38
@@ -58,6 +63,32 @@ traits:
     n_col: sample_size
     chr_col: chromosome
     pos_col: position
+  # --- neurodegenerative aging traits (S-LDSC + coloc counterparts) ---
+  lbd:
+    label: LBD
+    # Chia et al. 2021 (GCST90001390), GWAS-catalog harmonised (rsID = hm_rsid).
+    # 2,591 cases / 4,027 controls; no per-SNP N.
+    path: /ocean/projects/bio250020p/shared/resources/gwas/LBD/data/harmonised/33589841-GCST90001390-EFO_0006792.h.tsv.gz
+    sep: tab
+    snp_col: hm_rsid
+    p_col: p_value
+    fixed_n: 6618
+    chr_col: hm_chrom
+    pos_col: hm_pos
+  als:
+    label: ALS
+    # van Rheenen et al. 2021 EUR (GCST90027164), harmonised. Effective N per meta;
+    # total European sample 138,086 (no per-SNP N in the harmonised file).
+    path: /ocean/projects/bio260021p/shared/resources/gwas/als/34873335-GCST90027164-MONDO_0004976.h.tsv.gz
+    sep: tab
+    snp_col: hm_rsid
+    p_col: p_value
+    fixed_n: 138086
+    chr_col: hm_chrom
+    pos_col: hm_pos
+  # NB: FTD intentionally omitted. The only available sumstats are IFGC (Ferrari
+  # et al. 2014); the intended cohort is a 2024 FTD GWAS that has not been
+  # provided, so FTD is dropped rather than mixing 2014 effects with a 2024 N.
 
 output_dir: real_data/gwas/_m/tmp/magma_pvals
 mhc:

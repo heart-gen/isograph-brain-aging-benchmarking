@@ -1,0 +1,14 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 6125,
+  "module_set_sizes": {
+    "all_modules": 3941
+  }
+}

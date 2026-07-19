@@ -31,6 +31,15 @@ real_data/**/feature_reconstruction.parquet
 real_data/**/high_vs_low_table.parquet
 real_data/**/edges.parquet
 
+# Coloc/S-LDSC per-locus LD, SuSiE, and munge intermediates (235 GB / 1.5 GB;
+# regenerable from real_data/{coloc,ldsc}/_h). Only the lean top-level summaries
+# and result tables are tracked; the per-trait subdirs are Zenodo-bound.
+real_data/coloc/_m/*/
+real_data/ldsc/_m/*/
+
+# Downloaded motif archive (extracted ATtRACT_db.txt/pwm.txt are tracked).
+inputs/rbp_motifs/*.zip
+
 # Zenodo staging area (only the manifest + README are tracked).
 zenodo/*
 !zenodo/README.md

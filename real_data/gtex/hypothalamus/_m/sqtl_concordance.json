@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hypothalamus",
+  "tissue": "Brain_Hypothalamus",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 7229,
+  "module_set_sizes": {
+    "all_modules": 5228,
+    "pheno_sig_modules": 610,
+    "go_invisible_modules": 234,
+    "go_visible_modules": 376
+  }
+}

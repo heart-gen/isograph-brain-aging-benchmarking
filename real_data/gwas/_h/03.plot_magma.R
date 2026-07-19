@@ -21,14 +21,16 @@ res_dir <- file.path(project_root, "real_data", "gwas", "_m", "results")
 out_dir <- file.path(project_root, "real_data", "gwas", "_m", "figures")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-TRAITS   <- c("scz", "mdd", "bp", "ad", "pd", "stroke")
+TRAITS   <- c("scz", "mdd", "bp", "ad", "pd", "stroke", "lbd", "als")
 TRAIT_LABELS <- c(
     scz = "SCZ",
     mdd = "MDD",
     bp = "BP",
     ad = "AD",
     pd = "PD",
-    stroke = "Stroke"
+    stroke = "Stroke",
+    lbd = "LBD",
+    als = "ALS"
 )
 # IsoGraph backend dir is selectable (default canonical isograph_vae). With a
 # non-canonical backend (e.g. isograph_vae_res5) the combined parquet + figures
