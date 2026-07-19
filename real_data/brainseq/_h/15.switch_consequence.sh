@@ -49,8 +49,12 @@ SPECS=(
 read -r TREE REGION <<< "${SPECS[${SLURM_ARRAY_TASK_ID:-0}]}"
 ARTIFACT="real_data/${TREE}/${REGION}/_m/isograph_vae"
 
+if ! command -v module >/dev/null 2>&1; then
+    source /etc/profile.d/modules.sh 2>/dev/null || source /usr/share/lmod/lmod/init/bash 2>/dev/null || true
+fi
 module purge
 module load anaconda3/2024.10-1
+source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
 log_message "**** switch consequence: ${TREE}/${REGION} ****"
