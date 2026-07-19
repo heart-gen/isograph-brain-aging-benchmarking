@@ -97,8 +97,18 @@ P/LP-dense than constitutive exons; ratio < 1).
 Colocalization posteriors are modest and bulk-tissue-derived, so per-gene claims are suggestive;
 the set-level pattern (splicing-led ≡ GO-invisible; cross-disease concordance) is the defensible
 claim. RBP motif calls are motif presence, not measured binding, and do not yet test whether the
-lead QTL variant sits within a switched-exon motif. Per-gene literature synthesis and the three
-supporting supplementary figures (switch-consequence, RBP-regulon, clinical-consequence) are
-pending. Integrate this summary with `SWITCH_CONSEQUENCE_SUMMARY.md`, `RBP_REGULON_SUMMARY.md`,
-`CLINICAL_CONSEQUENCE_META.md`, and the coloc `SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md` when
-drafting the genetic-anchoring Results section.
+lead QTL variant sits within a switched-exon motif.
+
+A curated **literature layer** (deep-dive layer 6) is now attached to each resolved
+splicing-led gene as vignette Section 6 and as `deep_dive_literature.{parquet,tsv}` (Table S12):
+four genes have established disease isoform biology matching their resolved switch — SNCA
+[@doi:10.3389/fgene.2019.00584; @doi:10.3390/genes9020063], DLG1/SAP97 [@doi:10.1038/tp.2015.154],
+CTSH [@doi:10.1038/s41386-023-01542-2], and ARVCF [@doi:10.1038/sj.mp.4001586] — and the other
+eight (PPP6R2, GGNBP2, PGS1, CDIP1, PRRC2B, RTEL1, TBC1D15, TPCN1) are flagged `novel_candidate`
+(no established disease-specific isoform literature), the under-characterized GO-invisible
+switching the method is designed to nominate.
+
+The integrated genetic-anchoring Results section is now drafted at
+`real_data/_m/GENETIC_ANCHORING_RESULTS.md`, folding this summary together with
+`SWITCH_CONSEQUENCE_SUMMARY.md`, `RBP_REGULON_SUMMARY.md`, `CLINICAL_CONSEQUENCE_META.md`,
+`LDSC_SUMMARY.md`, and the coloc `SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md`.

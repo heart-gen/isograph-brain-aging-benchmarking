@@ -20,3 +20,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PRRC2B in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+PRRC2B is LoF-constrained (LOEUF 0.34) and colocalizes as a splicing-led switch in schizophrenia with no established disease isoform literature -- a novel candidate.

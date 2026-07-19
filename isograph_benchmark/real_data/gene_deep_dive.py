@@ -42,6 +42,130 @@ PANEL = [
 ]
 _Q_ENRICH = 0.05
 
+# Layer 6 -- known isoform biology per resolved splicing-led gene (curated, with Manubot
+# citekeys where a specific source is confirmed and clearly-marked placeholders otherwise).
+# Kept as data so the vignettes and the literature supp table regenerate deterministically.
+# `refs` are Manubot citekeys; `[citation needed: ...]` marks a real finding whose exact
+# citekey still needs to be pinned before submission (never fabricate a DOI/PMID).
+_LITERATURE: dict[str, dict] = {
+    "SNCA": {
+        "text": (
+            "SNCA carries an extensively documented alternative-splicing program that is "
+            "disease-relevant in synucleinopathy: at least four alternative 5'UTR first "
+            "exons plus internal exon-3/exon-5 skipping generate transcripts that are "
+            "differentially expressed across PD and dementia-with-Lewy-bodies brain regions, "
+            "and the coding splice variants (SNCA-126/112/98) modulate alpha-synuclein "
+            "aggregation kinetics. The IsoGraph-resolved event here is a 5'-end (alternative "
+            "first exon) choice, matching the well-established 5'UTR/regulatory arm of this "
+            "program rather than a coding change -- consistent with a dosage mechanism at a "
+            "LoF-constrained gene (LOEUF 0.40)."),
+        "refs": ["@doi:10.3389/fgene.2019.00584", "@doi:10.3390/genes9020063"],
+    },
+    "DLG1": {
+        "text": (
+            "DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal "
+            "alpha vs beta isoforms, an internal I3 insert and additional cassette exons "
+            "tune its PDZ/GK synaptic function. A DLG1 splice variant is reported to be "
+            "expressed at reduced cortical levels in early-onset schizophrenia, and DLG1 "
+            "sits in the 3q29 schizophrenia locus, so an sQTL that shifts DLG1 isoform "
+            "choice is a mechanistically plausible splicing-led route to SCZ risk."),
+        "refs": ["@doi:10.1038/tp.2015.154"],
+    },
+    "CTSH": {
+        "text": (
+            "CTSH (cathepsin H) is a protective Alzheimer's-disease GWAS locus; the gene is "
+            "annotated with multiple transcript variants encoding distinct isoforms, and the "
+            "AD-associated coding change (Gly->Arg) affects only a subset of isoforms, so "
+            "isoform choice modulates the functional consequence of the locus. This is the "
+            "highest-CLPP splicing-led case in the panel (CLPP 0.39, AD hippocampus)."),
+        "refs": ["@doi:10.1038/s41386-023-01542-2"],
+    },
+    "ARVCF": {
+        "text": (
+            "ARVCF lies in the 22q11.2 schizophrenia deletion region (haplotypic SCZ "
+            "association with COMT) and is itself a modulator of pre-mRNA splicing -- it "
+            "interacts with SRSF1, DDX5 and hnRNP H2 and alters alternative-splicing activity "
+            "-- so a splicing-led ARVCF event is consistent with both its locus and its "
+            "molecular role."),
+        "refs": ["@doi:10.1038/sj.mp.4001586"],
+    },
+    # Resolved splicing-led genes without established disease-specific isoform literature:
+    # honest "novel candidate" entries (the north-star is that IsoGraph surfaces
+    # GO-invisible, under-characterized switching -- these are exactly that).
+    "PPP6R2": {
+        "text": (
+            "PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both "
+            "ALS and SCZ (three resolved events, the most in the panel), but disease-specific "
+            "isoform biology is not established -- a novel cross-trait splicing-led candidate "
+            "for follow-up."),
+        "refs": [],
+    },
+    "GGNBP2": {
+        "text": (
+            "GGNBP2/ZNF403 (17q12) is LoF-constrained (LOEUF 0.20) and colocalizes as a "
+            "splicing-led switch in ALS; its isoform biology in neurodegeneration is "
+            "uncharacterized -- a novel splicing-led candidate."),
+        "refs": [],
+    },
+    "RTEL1": {
+        "text": (
+            "RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative "
+            "C-terminal isoforms in other tissues, but a brain disease-specific splice role "
+            "is not established -- a splicing-led candidate whose isoform choice warrants "
+            "transcript-level follow-up."),
+        "refs": [],
+    },
+    "TBC1D15": {
+        "text": (
+            "TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome "
+            "interface, a pathway central to Parkinson's-disease mitophagy; its PD-associated "
+            "splicing-led switch has no established isoform literature -- a mechanistically "
+            "suggestive novel candidate."),
+        "refs": [],
+    },
+    "PGS1": {
+        "text": (
+            "PGS1 (phosphatidylglycerophosphate synthase 1; mitochondrial phospholipid "
+            "biosynthesis) colocalizes as a splicing-led switch in ALS with no established "
+            "disease isoform biology -- a novel candidate."),
+        "refs": [],
+    },
+    "CDIP1": {
+        "text": (
+            "CDIP1 (cell-death-inducing p53 target) colocalizes as a two-event splicing-led "
+            "switch in schizophrenia; its isoform biology in SCZ is uncharacterized -- a "
+            "novel candidate."),
+        "refs": [],
+    },
+    "PRRC2B": {
+        "text": (
+            "PRRC2B is LoF-constrained (LOEUF 0.34) and colocalizes as a splicing-led switch "
+            "in schizophrenia with no established disease isoform literature -- a novel "
+            "candidate."),
+        "refs": [],
+    },
+    "TPCN1": {
+        "text": (
+            "TPCN1 (endolysosomal two-pore Ca2+ channel; AD locus) colocalizes as a "
+            "splicing-led switch with no established disease isoform biology -- a novel "
+            "candidate."),
+        "refs": [],
+    },
+}
+
+
+def _literature_lines(gene: str) -> list[str]:
+    """Section 6 (literature) for a vignette; empty if the gene is not curated."""
+    lit = _LITERATURE.get(gene)
+    if lit is None:
+        return []
+    out = ["## 6. Literature (known isoform biology)", lit["text"]]
+    if lit["refs"]:
+        out.append("")
+        out.append("_References:_ " + "; ".join(lit["refs"]))
+    out.append("")
+    return out
+
 
 def _all_coloc_genes() -> list[str]:
     ev = pd.read_parquet(rel("real_data", "coloc", "_m", "coloc_isoform_events_combined.parquet"))
@@ -184,6 +308,7 @@ def _vignette(row: dict) -> str:
     L.append("## 5. Interpretation")
     L.append(_interpretation(row))
     L.append("")
+    L.extend(_literature_lines(row["gene"]))
     return "\n".join(L)
 
 
@@ -291,6 +416,19 @@ def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
         exons = exons[[c for c in keep if c in exons.columns]].sort_values(
             ["gene_name", "region", "start"])
         _emit(exons, out_dir, "deep_dive_exon_clinical")
+
+    # (4) curated literature layer (known isoform biology) for the resolved splicing-led genes
+    sym_set = set(ens2sym.values())
+    lit_rows = [
+        {"gene_name": g,
+         "literature": v["text"],
+         "references": "; ".join(v["refs"]) if v["refs"] else "",
+         "curation": "documented" if v["refs"] else "novel_candidate"}
+        for g, v in _LITERATURE.items() if g in sym_set
+    ]
+    if lit_rows:
+        lit = pd.DataFrame(lit_rows).sort_values("gene_name").reset_index(drop=True)
+        _emit(lit, out_dir, "deep_dive_literature")
 
 
 def _write_panel_md(panel: pd.DataFrame, out_dir) -> None:

@@ -23,3 +23,6 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CDIP1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+CDIP1 (cell-death-inducing p53 target) colocalizes as a two-event splicing-led switch in schizophrenia; its isoform biology in SCZ is uncharacterized -- a novel candidate.

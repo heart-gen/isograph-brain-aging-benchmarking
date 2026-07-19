@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for DLG1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal alpha vs beta isoforms, an internal I3 insert and additional cassette exons tune its PDZ/GK synaptic function. A DLG1 splice variant is reported to be expressed at reduced cortical levels in early-onset schizophrenia, and DLG1 sits in the 3q29 schizophrenia locus, so an sQTL that shifts DLG1 isoform choice is a mechanistically plausible splicing-led route to SCZ risk.
+
+_References:_ @doi:10.1038/tp.2015.154
