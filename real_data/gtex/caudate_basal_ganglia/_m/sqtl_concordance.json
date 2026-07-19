@@ -1,0 +1,14 @@
+{
+  "analysis": "gtex-aging",
+  "region": "caudate_basal_ganglia",
+  "tissue": "Brain_Caudate_basal_ganglia",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 8963,
+  "module_set_sizes": {
+    "all_modules": 6419
+  }
+}

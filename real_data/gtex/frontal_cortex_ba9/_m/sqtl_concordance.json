@@ -1,0 +1,17 @@
+{
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "tissue": "Brain_Frontal_Cortex_BA9",
+  "variant": "standard",
+  "fdr": 0.05,
+  "min_tx": 3,
+  "n_perm": 2000,
+  "seed": 13,
+  "n_lead_sqtl_introns": 8747,
+  "module_set_sizes": {
+    "all_modules": 8251,
+    "pheno_sig_modules": 7004,
+    "go_invisible_modules": 3159,
+    "go_visible_modules": 3845
+  }
+}
