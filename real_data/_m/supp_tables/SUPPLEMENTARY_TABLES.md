@@ -15,6 +15,17 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S5 | `tableS5_qtl_raw_enrichment_or.csv` | `qtl_anchoring_meta/qtl_anchoring_meta.parquet` | shared cis-QTL depletion baseline the ratio removes |
 | S6 | `tableS6_go_invisible_gate.csv` | `brainseq/caudate_sczd/_m/go_invisible_gate.parquet` | disease switch modules are real DTU-without-DGE biology |
 | S7 | `tableS7_module_trust_funnel.csv` | `stability/_m/module_trust/*` | per-module trust scaffold (stability→drivers→replication→complementarity) |
+| S8 | `deep_dive/deep_dive_panel.tsv` | `deep_dive/deep_dive_panel.parquet` | per-gene verdict for every colocalized gene (splicing-led vs expression-led) |
+| S9 | `deep_dive/deep_dive_events.tsv` | `coloc/_m/coloc_isoform_events_combined.parquet` (+direction) | per-event anchor→switch→consequence for every colocalized gene |
+| S10 | `deep_dive/deep_dive_rbp.tsv` | `_m/rbp/{rbp_switch_calls,rbp_regulon}.parquet` | per-gene switched + module-enriched RBP regulators |
+| S11 | `deep_dive/deep_dive_exon_clinical.tsv` | per-region `clinical_consequence/exon_clinvar.parquet` | per-gene/exon switched-vs-constitutive ClinVar & CDS annotation |
+
+Tables S8–S11 (the per-gene deep-dive) live under `real_data/_m/deep_dive/` and are regenerated
+by `real_data/_h/build_deep_dive.sh` (not the `assemble_supp_tables.py` assembler). Together they
+let a reader reconstruct the SNCA-style mechanistic vignette for any colocalized gene without a
+hand-written narrative: S9 gives the variant→junction→switch-pair→structural-consequence chain,
+S10 the candidate RBP regulators, S11 the clinical (coding-vs-non-coding, ClinVar) read, and S8
+the one-line verdict.
 
 ---
 
@@ -98,6 +109,44 @@ regions: 236/266 modules trusted; driver ρ medians 0.77–0.82 with 96–100% p
 BrainSEQ modules replicate cross-cohort (caudate 3/45, DLPFC 9/35, hippocampus 13/50).
 Supports: the per-module trust scaffold the biological claims rest on.
 
+## Table S8 — Per-gene deep-dive panel (all colocalized genes)
+
+One row per colocalized disease gene (n = 68), ranked splicing-led first. Columns: anchoring
+trait(s), QTL kinds (sQTL/eQTL), max eCAVIAR CLPP and its tissue, gnomAD LOEUF, number of
+resolved switch-pair events and a multi-locus flag, concordant trait(s), BrainSeq replication and
+GO-invisible flags, and the verdict (splicing-led = an sQTL resolving onto a concordant IsoGraph
+switch pair; expression-led = eQTL gene-level only; splicing-unresolved = sQTL not mapping onto
+the switch pair). Of 68 genes, 12 are splicing-led — **all 12 GO-invisible** — 23
+splicing-unresolved, and 33 expression-led; four splicing-led genes are multi-locus (PPP6R2,
+SNCA, CDIP1, DLG1). Supports: the genetically-anchored isoform-switch set and its
+verdict-by-gene provenance.
+
+## Table S9 — Per-event genetic anchor → switch → consequence
+
+One row per colocalized isoform event (n = 141 over 68 genes): gene, trait, case, QTL kind,
+tissue, lead variant (rsID, ref/alt) and risk allele, signed risk-QTL effect and direction, the
+LeafCutter junction, CLPP, GO-invisibility, the IsoGraph switch pair and whether the junction
+maps into it (`junction_in_switch_pair`), the structural consequence, GTEx concordance, BrainSeq
+region and replication, and a resolved-event sentence. This is the reader's reconstruction table:
+filtering to a gene reproduces the variant→junction→switch chain used for the SNCA vignette.
+
+## Table S10 — Per-gene RBP regulators
+
+One row per gene × region × module × RBP (n = 973 over 54 genes) where an RBP motif is both
+called switched in the gene and enriched in the gene's IsoGraph module at BH q < 0.05; columns
+include the module, GO-invisibility, motif enrichment and q. Identifies candidate trans splice
+regulators of each gene's switch (e.g. ADAR/CPEB2/PTBP2 for SNCA). Exploratory (motif presence,
+not measured binding). Supports: the regulatory-logic layer of each vignette.
+
+## Table S11 — Per-gene/exon clinical annotation
+
+One row per gene × region × exon (n = 6,041 over 64 genes): coordinates and length, whether the
+exon is differentially used (`switched`) or constitutive, whether it overlaps CDS
+(`cds_overlap`), and its ClinVar pathogenic/likely-pathogenic (`n_plp`) and total (`n_clinvar`)
+variant counts. Lets a reader do the SNCA-style clinical read for any gene — e.g. confirm that a
+switched exon is non-coding and pathogenic-variant-free while the gene's P/LP burden sits in
+shared constitutive coding exons. Supports: the clinical-consequence layer of each vignette.
+
 ---
 
 ## Reproducibility
@@ -111,3 +160,9 @@ Supports: the per-module trust scaffold the biological claims rest on.
 - The assembler only re-shapes and rounds; it computes no new statistics. Regenerate after any
   re-run of the upstream analyses (baseline_comparison, qtl_anchoring, go_invisible_gate,
   module_trust).
+- Tables S8–S11 have a separate generator: `real_data/_h/build_deep_dive.sh`, which runs
+  `python -m isograph_benchmark.real_data.gene_deep_dive` (deterministic joins over the coloc,
+  RBP, and clinical-consequence ledgers) and writes `deep_dive_*.{tsv,parquet}` under
+  `real_data/_m/deep_dive/`. The same script extracts the SNCA transcript exons from GENCODE v47
+  and renders the four genetic-anchoring figures. Regenerate after any re-run of the coloc,
+  RBP-regulon, or clinical-consequence analyses.
