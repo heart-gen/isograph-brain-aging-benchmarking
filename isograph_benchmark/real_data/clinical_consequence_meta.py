@@ -31,8 +31,12 @@ def _collect(name: str) -> pd.DataFrame:
 def run() -> pd.DataFrame:
     cc = _collect("clinical_consequence")
     con = _collect("constraint_summary")
+    scope_col = "scope" if "scope" in cc.columns else None
+    keys = ["stratum", "scope"] if scope_col else ["stratum"]
     rows = []
-    for stratum, sub in cc.groupby("stratum"):
+    for key, sub in cc.groupby(keys):
+        stratum = key[0] if isinstance(key, tuple) else key
+        scope = key[1] if isinstance(key, tuple) else "all_exons"
         sub = sub.dropna(subset=["ratio", "p_emp"])
         if sub.empty:
             continue
@@ -43,6 +47,7 @@ def run() -> pd.DataFrame:
                                       method="fisher") if not cs.empty else (np.nan, np.nan))
         rows.append({
             "stratum": stratum,
+            "scope": scope,
             "n_regions": int(sub["region"].nunique()),
             "n_ratio_gt1_p05": int(((sub["ratio"] > 1) & (sub["p_emp"] < 0.05)).sum()),
             "n_ratio_lt1_p05": int(((sub["ratio"] < 1) & (sub["p_emp"] < 0.05)).sum()),
@@ -53,7 +58,8 @@ def run() -> pd.DataFrame:
             "median_loeuf_switch": float(cs["median_loeuf_switch"].median()) if not cs.empty else np.nan,
             "loeuf_fisher_p": float(loeuf_p) if cs is not None and not cs.empty else np.nan,
         })
-    meta = pd.DataFrame(rows).sort_values("stratum")
+    meta = pd.DataFrame(rows).sort_values(["scope", "stratum"] if "scope" in
+                                          pd.DataFrame(rows).columns else ["stratum"])
     out = rel("real_data", "_m", "clinical_consequence_meta.parquet")
     out.parent.mkdir(parents=True, exist_ok=True)
     meta.to_parquet(out, index=False)
@@ -69,15 +75,18 @@ def _write_report(meta: pd.DataFrame) -> None:
         "than genome-wide (lower median LOEUF; Fisher-combined MWU p). The exon-level ClinVar "
         "columns are a direction-neutral secondary readout: how many regions have switched exons "
         "with higher (ratio>1) vs lower (ratio<1) P/LP density than constitutive exons at "
-        "two-sided within-gene permutation p < 0.05, and the median ratio. Alt-spliced exons are "
-        "usually less constrained, so ratio < 1 is the expected baseline.", "",
-        "| stratum | regions | median LOEUF (switch) | LOEUF p | ratio>1 (p<.05) | ratio<1 (p<.05) | median ratio | Fisher p |",
-        "|---------|---------|-----------------------|---------|-----------------|-----------------|--------------|----------|",
+        "two-sided within-gene permutation p < 0.05, and the median ratio. `scope` = all "
+        "switch-pair exons vs coding (CDS-overlapping) exons only. Alt-spliced exons are usually "
+        "less constrained, so ratio < 1 is the expected baseline; the CDS scope is the fairer "
+        "coding-vs-coding contrast.", "",
+        "| scope | stratum | regions | median LOEUF (switch) | LOEUF p | ratio>1 (p<.05) | ratio<1 (p<.05) | median ratio | Fisher p |",
+        "|-------|---------|---------|-----------------------|---------|-----------------|-----------------|--------------|----------|",
     ]
     for r in meta.itertuples():
         lines.append(
-            f"| {r.stratum} | {r.n_regions} | {r.median_loeuf_switch:.3f} | {r.loeuf_fisher_p:.2e} | "
-            f"{r.n_ratio_gt1_p05} | {r.n_ratio_lt1_p05} | {r.median_ratio:.2f} | {r.fisher_p:.2e} |")
+            f"| {getattr(r, 'scope', 'all_exons')} | {r.stratum} | {r.n_regions} | "
+            f"{r.median_loeuf_switch:.3f} | {r.loeuf_fisher_p:.2e} | {r.n_ratio_gt1_p05} | "
+            f"{r.n_ratio_lt1_p05} | {r.median_ratio:.2f} | {r.fisher_p:.2e} |")
     (rel("real_data", "_m", "CLINICAL_CONSEQUENCE_META.md")).write_text("\n".join(lines) + "\n")
 
 

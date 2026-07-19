@@ -101,17 +101,42 @@ def _count_in(arr: np.ndarray | None, start: int, end: int) -> int:
     return int(hi - lo)
 
 
-def _switch_exon_sets(tx_db: dict, pairs: pd.DataFrame) -> tuple[set, set, str | None]:
+def _merge_intervals(ivs: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Sort + merge overlapping/adjacent (start, end) intervals."""
+    out: list[tuple[int, int]] = []
+    for s, e in sorted(ivs):
+        if out and s <= out[-1][1] + 1:
+            out[-1] = (out[-1][0], max(out[-1][1], e))
+        else:
+            out.append((s, e))
+    return out
+
+
+def _overlaps(exon: tuple[int, int], merged: list[tuple[int, int]]) -> bool:
+    """Does an exon interval intersect a merged (sorted) CDS footprint?"""
+    s, e = exon
+    for cs, ce in merged:
+        if cs > e:
+            break
+        if s <= ce:
+            return True
+    return False
+
+
+def _switch_exon_sets(tx_db: dict, pairs: pd.DataFrame):
     """For one gene's switch pairs: SWITCHED exons (in exactly one isoform of some pair) and
     BACKGROUND exons (all other exons of the switching isoforms). Returns (switched, background,
-    chrom) as sets of (start, end)."""
+    chrom, cds_footprint) — exon sets of (start, end) and the merged CDS interval list across the
+    switching isoforms (for the coding-exon restriction)."""
     ex_by_tx: dict[str, set] = {}
+    cds: list[tuple[int, int]] = []
     chrom = None
     for tx in set(pairs["transcript_id_1"]) | set(pairs["transcript_id_2"]):
         rec = tx_db.get(tx)
         if rec is None:
             continue
         ex_by_tx[tx] = {tuple(e) for e in rec.exons}
+        cds.extend(tuple(c) for c in rec.cds)
         chrom = rec.chrom
     switched: set = set()
     for r in pairs.itertuples():
@@ -120,25 +145,27 @@ def _switch_exon_sets(tx_db: dict, pairs: pd.DataFrame) -> tuple[set, set, str |
             switched |= (e1 ^ e2)          # differentially used exons
     allex: set = set().union(*ex_by_tx.values()) if ex_by_tx else set()
     background = allex - switched
-    return switched, background, chrom
+    return switched, background, chrom, _merge_intervals(cds)
 
 
 def _exon_table(tx_db: dict, obs: pd.DataFrame, plp: dict, allcv: dict) -> pd.DataFrame:
-    """Per-exon rows (gene, chrom, start, end, length, switched, n_plp, n_clinvar, go_invisible)."""
+    """Per-exon rows (gene, chrom, start, end, length, switched, cds_overlap, n_plp, n_clinvar,
+    go_invisible). `cds_overlap` = exon intersects the gene's CDS footprint (coding exon)."""
     rows = []
     for gene, sub in obs.groupby("gene"):
         go_inv = bool(sub["go_invisible"].iloc[0])
-        switched, background, chrom = _switch_exon_sets(tx_db, sub)
+        switched, background, chrom, cds = _switch_exon_sets(tx_db, sub)
         if chrom is None:
             continue
         c = _norm_chrom(chrom)
         for is_sw, exons in ((True, switched), (False, background)):
             for (s, e) in exons:
                 rows.append((gene, chrom, int(s), int(e), int(e - s + 1), is_sw,
+                             _overlaps((s, e), cds),
                              _count_in(plp.get(c), s, e), _count_in(allcv.get(c), s, e),
                              go_inv))
-    return pd.DataFrame(rows, columns=["gene", "chrom", "start", "end", "length",
-                                       "switched", "n_plp", "n_clinvar", "go_invisible"])
+    return pd.DataFrame(rows, columns=["gene", "chrom", "start", "end", "length", "switched",
+                                       "cds_overlap", "n_plp", "n_clinvar", "go_invisible"])
 
 
 def _density(sub: pd.DataFrame, mask: np.ndarray) -> float:
@@ -238,16 +265,21 @@ def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int) -> 
 
     rng = np.random.default_rng(seed)
     rows = []
-    for stratum, sub in _strata(exons):
-        if sub.empty:
-            continue
-        r = _within_gene_perm(sub, n_perm, rng)
-        r.update(region=region, stratum=stratum, n_genes=int(sub["gene"].nunique()),
-                 n_switched_exons=int(sub["switched"].sum()),
-                 n_bg_exons=int((~sub["switched"]).sum()),
-                 n_plp_switched=int(sub.loc[sub["switched"], "n_plp"].sum()),
-                 n_plp_bg=int(sub.loc[~sub["switched"], "n_plp"].sum()))
-        rows.append(r)
+    # `all_exons` = every switch-pair exon; `cds` = coding exons only (both switched and
+    # background restricted to exons overlapping the gene's CDS footprint), which removes the
+    # UTR/alt-exon length bias so the contrast is coding-vs-coding.
+    for scope, escope in (("all_exons", exons), ("cds", exons[exons["cds_overlap"]])):
+        for stratum, sub in _strata(escope):
+            if sub.empty:
+                continue
+            r = _within_gene_perm(sub, n_perm, rng)
+            r.update(region=region, scope=scope, stratum=stratum,
+                     n_genes=int(sub["gene"].nunique()),
+                     n_switched_exons=int(sub["switched"].sum()),
+                     n_bg_exons=int((~sub["switched"]).sum()),
+                     n_plp_switched=int(sub.loc[sub["switched"], "n_plp"].sum()),
+                     n_plp_bg=int(sub.loc[~sub["switched"], "n_plp"].sum()))
+            rows.append(r)
     summary = pd.DataFrame(rows)
 
     # gnomAD LOEUF anchor
@@ -275,11 +307,12 @@ def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int) -> 
     constraint_summary.to_parquet(out_dir / "constraint_summary.parquet", index=False)
     _write_report(out_dir, region, summary, constraint_summary, exons)
 
-    a = summary[summary["stratum"] == "all"]
-    if not a.empty:
-        r = a.iloc[0]
-        print(f"{region}: P/LP switched {r['switched_plp_per_kb']:.3f} vs bg "
-              f"{r['bg_plp_per_kb']:.3f} /kb, ratio {r['ratio']:.2f}, p={r['p_emp']:.3g}")
+    for scope in ("all_exons", "cds"):
+        a = summary[(summary["stratum"] == "all") & (summary["scope"] == scope)]
+        if not a.empty:
+            r = a.iloc[0]
+            print(f"{region} [{scope}]: P/LP switched {r['switched_plp_per_kb']:.3f} vs bg "
+                  f"{r['bg_plp_per_kb']:.3f} /kb, ratio {r['ratio']:.2f}, p={r['p_emp']:.3g}")
     return summary
 
 
@@ -295,13 +328,15 @@ def _write_report(out_dir: Path, region: str, summary: pd.DataFrame,
         "baseline; the gnomAD LOEUF panel below is the primary gene-level anchor. Stratified by "
         "GO-invisible module membership.", "",
         f"- exons scored: **{len(exons)}** "
-        f"(switched {int(exons['switched'].sum())}, background {int((~exons['switched']).sum())})",
+        f"(switched {int(exons['switched'].sum())}, background {int((~exons['switched']).sum())}; "
+        f"CDS-overlapping {int(exons['cds_overlap'].sum())}). `scope` = all switch-pair exons vs "
+        f"coding (CDS-overlapping) exons only.",
         "",
-        "| stratum | genes | switched/kb | bg/kb | ratio | p | perm genes |",
-        "|---------|-------|-------------|-------|-------|---|------------|",
+        "| scope | stratum | genes | switched/kb | bg/kb | ratio | p | perm genes |",
+        "|-------|---------|-------|-------------|-------|-------|---|------------|",
     ]
     for r in summary.itertuples():
-        lines.append(f"| {r.stratum} | {r.n_genes} | {r.switched_plp_per_kb:.3f} | "
+        lines.append(f"| {r.scope} | {r.stratum} | {r.n_genes} | {r.switched_plp_per_kb:.3f} | "
                      f"{r.bg_plp_per_kb:.3f} | {r.ratio:.2f} | {r.p_emp:.3g} | {r.n_perm_genes} |")
     lines += ["", "**gnomAD LOEUF** of the switch genes vs all genes in the constraint table "
               "(Mann-Whitney, 'more constrained' = lower LOEUF). Gene-level anchor.", "",
