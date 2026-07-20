@@ -242,13 +242,21 @@ stability → drivers (`module_meta` loadings, done) → aging replication
 - **Remaining:** Cell Genomics re-target (abstract re-lead, STAR Methods + Key Resources
   Table), DOI placeholders (Zenodo ×2, benchmark repo, protocols.io, GTEx access date).
 
-### 6. sQTL intron-direction concordance — OPEN (the one new analysis)
+### 6. sQTL intron-direction concordance — DONE (informative null; coloc carries direction)
 
-Approved 2026-07-16 as the single added orthogonal validation. Extend the anchoring layer
-with LeafCutter intron-usage direction concordance for switch transcripts (AGENTS.md §1b
-listed it as the optional secondary). Ship as a committed, parametrized CLI beside
-`isograph_benchmark/real_data/qtl_anchoring.py` + SLURM wrapper, deterministic seed,
-parquet + Manubot markdown summary. Hardens the genetic-anchoring headline; feeds Table S3–S5.
+Approved 2026-07-16 as the single added orthogonal validation; shipped as committed CLIs
+`isograph_benchmark/real_data/sqtl_concordance.py` + `sqtl_concordance_meta.py` (commit
+01f3c47) with SLURM wrapper `real_data/brainseq/_h/14.sqtl_concordance.sh` (seed 13, 2000
+permutation draws), parquet + `real_data/_m/sqtl_concordance_meta/SQTL_CONCORDANCE_META.md`.
+**Outcome — a diagnosed null:** the within-gene rank-concordance between the switch axis and
+the lead sQTL's per-transcript intron direction is at or below a full-variance permutation null
+in every module set (pooled mean |rho| 0.29–0.34, p≈0.76–1.0). Cause is construction, not
+biology: a single lead sQTL tags introns with a near-constant net per-transcript sign in ~2/3
+of genes, so the within-gene correlation collapses to tie-breaking noise. Directionality is
+therefore carried by colocalization (`sqtl_coloc`, GWAS-anchored allele direction), not this
+allele-reference-free relative test; the positive anchoring evidence remains the sQTL/eQTL
+specificity enrichment (`qtl_anchoring`) + coloc. Reported transparently as an underpowered
+negative; does not feed a headline table but is documented for completeness.
 
 ---
 
