@@ -28,10 +28,17 @@ from statsmodels.stats.multitest import multipletests
 
 from isograph_benchmark.paths import rel
 from isograph_benchmark.real_data.coloc_prep import load_switch_genes
-from isograph_benchmark.real_data.qtl_anchoring import _bare
+from isograph_benchmark.real_data.qtl_anchoring import _bare, build_gene_sets
 
 _RBP_DIR = rel("real_data", "_m", "rbp")
 _COUNTS = _RBP_DIR / "rbp_counts.parquet"
+_FLANK_NOTE = 100        # intronic flank window (nt); mirrors rbp_scan_intronic._FLANK
+# per-scope Stage-1 count tables; "combined" unions the mature + intronic presence
+_SCOPE_COUNTS = {
+    "mature": [_RBP_DIR / "rbp_counts.parquet"],
+    "intronic": [_RBP_DIR / "rbp_counts_intronic.parquet"],
+    "combined": [_RBP_DIR / "rbp_counts.parquet", _RBP_DIR / "rbp_counts_intronic.parquet"],
+}
 _TREE_OF = {**{r: "brainseq" for r in ("caudate_sczd", "caudate", "hippocampus", "dlpfc")}}
 _REGIONS = [
     ("brainseq", "caudate_sczd"), ("brainseq", "caudate"), ("brainseq", "hippocampus"),
@@ -50,6 +57,27 @@ def _presence(counts: pd.DataFrame) -> dict[tuple[str, str], int]:
             counts[["transcript_id", "rbp", "count"]].itertuples(index=False)}
 
 
+def _gene_tags(art, fdr: float) -> tuple[pd.DataFrame, str]:
+    """(gene, module_id, go_invisible) tags + provenance.
+
+    Primary pool = phenotype-associated switch genes (`load_switch_genes`). When that is empty
+    (regions with no FDR-significant phenotype/age association, e.g. several GTEx tissues), fall
+    back to the region's FULL module-gene pool so the RBP-regulon question — "is this co-switch
+    module coordinated by an RBP?" — is still asked; the GO-invisible tag is preserved from
+    `build_gene_sets`, and a `pool_source` flag records which universe was used.
+    """
+    sg = load_switch_genes(art, fdr)
+    if not sg.empty:
+        return sg[["gene", "module_id", "go_invisible"]].drop_duplicates(), "switch_genes"
+    enrich_path = art.parent / "module_enrichment" / "isograph_modules.parquet"
+    inv = build_gene_sets(art, enrich_path, fdr).get("go_invisible_modules", set())
+    mods = pd.read_parquet(art / "modules.parquet")
+    mods["gene"] = _bare(mods["gene_id"])
+    mods["module_id"] = mods["module_id"].astype(str)
+    mods["go_invisible"] = mods["gene"].isin(inv)
+    return mods[["gene", "module_id", "go_invisible"]].drop_duplicates(), "module_genes"
+
+
 def _switch_calls(region_tree: str, region: str, pres: dict, rbps: list[str],
                   fdr: float) -> pd.DataFrame:
     """Per (gene, RBP): does the switch gain/lose the motif (present in one isoform only)?"""
@@ -57,13 +85,13 @@ def _switch_calls(region_tree: str, region: str, pres: dict, rbps: list[str],
     sp_path = art / "module_interpret" / "structure_switch_pairs.parquet"
     if not sp_path.exists():
         return pd.DataFrame()
-    sg = load_switch_genes(art, fdr)
-    if sg.empty:
+    tag, pool_source = _gene_tags(art, fdr)
+    if tag.empty:
         return pd.DataFrame()
     sp = pd.read_parquet(sp_path)
     sp["gene"] = _bare(sp["gene_id"])
-    tag = sg.groupby("gene").agg(go_invisible=("go_invisible", "max"),
-                                 module_id=("module_id", "first")).reset_index()
+    tag = tag.groupby("gene").agg(go_invisible=("go_invisible", "max"),
+                                  module_id=("module_id", "first")).reset_index()
     sp = sp.merge(tag, on="gene", how="inner")
     if sp.empty:
         return pd.DataFrame()
@@ -81,9 +109,9 @@ def _switch_calls(region_tree: str, region: str, pres: dict, rbps: list[str],
                 if (c1 > 0) != (c2 > 0):
                     switched = True
                     break
-            rows.append((region, gene, mod, go_inv, rbp, switched))
+            rows.append((region, gene, mod, go_inv, rbp, switched, pool_source))
     return pd.DataFrame(rows, columns=["region", "gene", "module_id", "go_invisible",
-                                       "rbp", "switched"])
+                                       "rbp", "switched", "pool_source"])
 
 
 def _regulon_enrich(calls: pd.DataFrame) -> pd.DataFrame:
@@ -93,9 +121,9 @@ def _regulon_enrich(calls: pd.DataFrame) -> pd.DataFrame:
     for region, rc in calls.groupby("region"):
         genes = rc["gene"].unique()
         N = len(genes)
+        pool_source = rc["pool_source"].iloc[0] if "pool_source" in rc.columns else "switch_genes"
         # pool: number of genes with this RBP switched (region-wide)
         pool = rc.groupby("rbp")["switched"].sum().to_dict()
-        gene_mod = rc.drop_duplicates("gene").set_index("gene")["module_id"]
         gene_inv = rc.drop_duplicates("gene").set_index("gene")["go_invisible"]
         for module, mg in rc.groupby("module_id"):
             module_genes = mg["gene"].unique()
@@ -116,20 +144,27 @@ def _regulon_enrich(calls: pd.DataFrame) -> pd.DataFrame:
                     "rbp": rbp, "module_size": n, "n_switched": int(k),
                     "pool_switched": K, "pool_size": N,
                     "expected": exp, "enrichment": (k / exp if exp > 0 else np.nan),
-                    "p": p})
+                    "p": p, "pool_source": pool_source})
     res = pd.DataFrame(out)
     if not res.empty:
         res["q"] = multipletests(res["p"], method="fdr_bh")[1]
     return res
 
 
-def run(fdr: float) -> None:
-    if not _COUNTS.exists():
-        raise SystemExit(f"{_COUNTS} missing; run rbp_scan.py (motif env) first.")
-    counts = pd.read_parquet(_COUNTS)
+def run(fdr: float, scope: str = "mature") -> None:
+    paths = _SCOPE_COUNTS[scope]
+    missing = [p for p in paths if not p.exists()]
+    if missing:
+        hint = "rbp_scan.py" if scope == "mature" else "rbp_scan_intronic.py"
+        raise SystemExit(f"{missing[0]} missing; run {hint} (motif env) first "
+                         f"(scope={scope} needs {[p.name for p in paths]}).")
+    counts = pd.concat([pd.read_parquet(p) for p in paths], ignore_index=True)
+    if len(paths) > 1:                     # combined: union presence across scopes
+        counts = counts.groupby(["transcript_id", "rbp"], as_index=False)["count"].sum()
     pres = _presence(counts)
     rbps = sorted(counts["rbp"].unique())
-    print(f"loaded motif counts: {len(rbps)} RBPs, {counts['transcript_id'].nunique():,} transcripts")
+    print(f"[{scope}] loaded motif counts: {len(rbps)} RBPs, "
+          f"{counts['transcript_id'].nunique():,} transcripts")
 
     calls = []
     for tree, region in _REGIONS:
@@ -139,20 +174,32 @@ def run(fdr: float) -> None:
             print(f"  {region}: {c['gene'].nunique()} switch genes")
     calls = pd.concat(calls, ignore_index=True)
     _RBP_DIR.mkdir(parents=True, exist_ok=True)
-    calls.to_parquet(_RBP_DIR / "rbp_switch_calls.parquet", index=False)
+    suffix = "" if scope == "mature" else f"_{scope}"
+    calls.to_parquet(_RBP_DIR / f"rbp_switch_calls{suffix}.parquet", index=False)
 
     reg = _regulon_enrich(calls)
-    reg.to_parquet(_RBP_DIR / "rbp_regulon.parquet", index=False)
-    _write_report(reg, calls)
+    reg.to_parquet(_RBP_DIR / f"rbp_regulon{suffix}.parquet", index=False)
+    _write_report(reg, calls, _RBP_DIR / f"RBP_REGULON{suffix}.md", scope)
     n_sig = int((reg["q"] < 0.05).sum()) if not reg.empty else 0
-    print(f"candidate RBP regulons (q<0.05): {n_sig} module-RBP pairs across "
+    print(f"[{scope}] candidate RBP regulons (q<0.05): {n_sig} module-RBP pairs across "
           f"{reg['region'].nunique() if not reg.empty else 0} regions")
 
 
-def _write_report(reg: pd.DataFrame, calls: pd.DataFrame) -> None:
+def _write_report(reg: pd.DataFrame, calls: pd.DataFrame,
+                  out_path: Path | None = None, scope: str = "mature") -> None:
+    out_path = out_path or (_RBP_DIR / "RBP_REGULON.md")
+    scope_note = {
+        "mature": "Motifs are scanned on the **mature transcript** (exonic + UTR) sequence.",
+        "intronic": "Motifs are scanned on **intronic splice-site flanks** "
+                    f"(pre-mRNA sense; up to {_FLANK_NOTE} nt into each intron), the binding "
+                    "niche for splicing-regulatory RBPs invisible to the mature-transcript scan.",
+        "combined": "Motif presence unions the **mature-transcript** and **intronic "
+                    "splice-site flank** scans.",
+    }[scope]
     sig = reg[reg["q"] < 0.05].sort_values("q") if not reg.empty else reg
     lines = [
-        "# Candidate RBP regulons among IsoGraph co-switch modules", "",
+        f"# Candidate RBP regulons among IsoGraph co-switch modules ({scope} scope)", "",
+        scope_note, "",
         "For each module and RBP, whether RBP binding-site switching (motif gained/lost "
         "between the switch-pair isoforms) is over-represented among the module's genes vs "
         "the region's switch-gene pool (hypergeometric, BH across module x RBP tests). A "
@@ -170,14 +217,16 @@ def _write_report(reg: pd.DataFrame, calls: pd.DataFrame) -> None:
         lines.append(f"| {r.region} | {r.module_id} | {r.rbp} | {r.module_size} | "
                      f"{r.n_switched} | {r.enrichment:.2f} | {r.q:.2e} | "
                      f"{'yes' if r.go_invisible else 'no'} |")
-    (_RBP_DIR / "RBP_REGULON.md").write_text("\n".join(lines) + "\n")
+    out_path.write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Per-module RBP-regulon enrichment (stage 2).")
     p.add_argument("--fdr", type=float, default=0.05)
+    p.add_argument("--scope", choices=("mature", "intronic", "combined"), default="mature",
+                   help="which Stage-1 count table(s) to consume (default: mature, canonical)")
     args = p.parse_args()
-    run(args.fdr)
+    run(args.fdr, args.scope)
 
 
 if __name__ == "__main__":
