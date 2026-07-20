@@ -389,8 +389,9 @@ Result tables: `benchmark/03_metrics/_m/synthetic_metric_summary.parquet` (per-a
 + bootstrap CIs), `synthetic_metric_long.parquet` (per-run tidy table),
 `synthetic_pairwise_tests.parquet` (paired tests + rank-biserial + Cliff's δ + full-family
 FDR), and `benchmark/02_interpret/_m/synthetic_interpret_summary.parquet` (interpretation
-accuracy). Table 1 (`table1_benchmark_summary.csv`) and the scale/compute supplement
-(`tableS_scale_compute_summary.csv`) are written under `benchmark/03_metrics/_m/`; the
+accuracy). The supplementary benchmark summary (`tableS_benchmark_summary.csv`) and the
+scale/compute supplement (`tableS_scale_compute_summary.csv`) are written under
+`benchmark/03_metrics/_m/`; the
 rendered figures (`fig1_benchmark_overview` and `figS1`–`figS11`, PDF + PNG) are written
 under `benchmark/03_metrics/figures/`.
 

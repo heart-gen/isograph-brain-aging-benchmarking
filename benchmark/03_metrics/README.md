@@ -124,7 +124,7 @@ collect → summarize → figures pipeline over whatever runs are complete.
 
 ## Results
 
-See generated figures in `figures/`, the main summary table `_m/table1_benchmark_summary.csv`, and the scale compute table `_m/tableS_scale_compute_summary.csv`.
+See generated figures in `figures/`, the supplementary benchmark summary table `_m/tableS_benchmark_summary.csv` (six core accuracy scenarios × six main methods), and the scale compute table `_m/tableS_scale_compute_summary.csv`.
 All figures were regenerated with R, ggpubr, ggplot2, and patchwork.
 
 **Primary metrics:**
@@ -200,7 +200,8 @@ bash benchmark/03_metrics/_h/step_1_collect.sh
 bash benchmark/03_metrics/_h/step_2_summarize.sh
 # or: sbatch benchmark/03_metrics/_h/step_2_summarize.sh
 
-# Step 3 - Generate figures and Table 1 (R/ggplot2)
+# Step 3 - Generate figures and summary tables (R/ggplot2)
+#   (ISOGRAPH_TABLES_ONLY=1 regenerates only the CSV summary tables, no figures)
 bash benchmark/03_metrics/_h/step_3_figures.sh
 # or: sbatch benchmark/03_metrics/_h/step_3_figures.sh
 ```
@@ -227,7 +228,7 @@ When run through SLURM, the scripts write logs as `collect-<jobid>.log`, `summar
 | `_m/synthetic_metric_summary.parquet` | Bootstrap summary by scenario, method, and metric; 282 rows |
 | `_m/synthetic_metric_long.parquet` | Per-run long-format metrics; 57,702 rows |
 | `_m/synthetic_pairwise_tests.parquet` | Paired Wilcoxon signed-rank tests vs. WGCNA with BH FDR; 240 tests |
-| `_m/table1_benchmark_summary.csv` | Manuscript-ready CPU benchmark summary table with significance markers |
+| `_m/tableS_benchmark_summary.csv` | Supplementary CPU benchmark summary table (six core accuracy scenarios × six main methods) |
 | `_m/tableS_scale_compute_summary.csv` | Scale compute table for IsoGraph VAE and WGCNA across gene-count grid |
 | `_m/logs/` | Reproducibility logs for collection, summary, and figure/table generation |
 | `figures/fig1_benchmark_overview.pdf` | Main CPU accuracy and specificity benchmark overview |

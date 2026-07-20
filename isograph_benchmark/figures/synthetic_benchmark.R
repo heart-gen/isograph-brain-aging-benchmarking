@@ -1290,8 +1290,12 @@ make_interpretation_fig <- function(interp_df, methods = INTERPRET_METHOD_ORDER)
 # ---------------------------------------------------------------------------
 # Tables
 # ---------------------------------------------------------------------------
+# Supplementary benchmark summary (moved from main Table 1). Restricted to the six
+# core accuracy scenarios (MAIN_SCENARIO_ORDER) so the main-method set is fully
+# populated; the multiplex (abundance_switch_mixed) and scale scenarios use a
+# different method set and are covered by figS7 and tableS_scale_compute respectively.
 make_table1 <- function(summary) {
-  scenarios <- SCENARIO_ORDER[SCENARIO_ORDER %in% unique(summary$scenario)]
+  scenarios <- MAIN_SCENARIO_ORDER[MAIN_SCENARIO_ORDER %in% unique(summary$scenario)]
   methods   <- MAIN_METHOD_ORDER[MAIN_METHOD_ORDER %in% unique(summary$method)]
 
   metric_map <- c(
@@ -1338,9 +1342,9 @@ make_table1 <- function(summary) {
   }
 
   tbl <- do.call(rbind, rows)
-  out_path <- file.path(TABLE_DIR, "table1_benchmark_summary.csv")
+  out_path <- file.path(TABLE_DIR, "tableS_benchmark_summary.csv")
   write.csv(tbl, out_path, row.names = FALSE)
-  cat("  table1_benchmark_summary.csv:", nrow(tbl), "rows\n")
+  cat("  tableS_benchmark_summary.csv:", nrow(tbl), "rows\n")
 }
 
 make_compute_table <- function(raw_df, long_df) {
@@ -1433,6 +1437,11 @@ cat("  Completed runs:", nrow(raw),
     " | Long metric rows:", nrow(long),
     " | Summary rows:", nrow(summary), "\n")
 
+# ISOGRAPH_TABLES_ONLY=1 regenerates just the summary tables (fast, no figure
+# rendering) so table edits do not churn every figure PDF's embedded timestamp.
+TABLES_ONLY <- nzchar(Sys.getenv("ISOGRAPH_TABLES_ONLY"))
+
+if (!TABLES_ONLY) {
 cat("Generating figures...\n")
 
 tryCatch({
@@ -1538,6 +1547,10 @@ tryCatch({
   if (!is.null(p)) save_fig(p, "figS11_interpretation_accuracy", width = 7.5, height = 3.6)
   else cat("  figS11: no interpretation summary yet, skipping\n")
 }, error = function(e) warning("figS11 error: ", conditionMessage(e)))
+
+} else {
+  cat("ISOGRAPH_TABLES_ONLY set - skipping figures, regenerating summary tables only\n")
+}
 
 tryCatch(make_table1(summary), error = function(e) warning("table1 error: ", conditionMessage(e)))
 tryCatch(make_compute_table(raw, long), error = function(e) warning("compute table error: ", conditionMessage(e)))
