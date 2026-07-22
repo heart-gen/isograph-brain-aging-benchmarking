@@ -1456,7 +1456,7 @@ tryCatch({
     "run_switching_fraction", "run_noise_sd",
     "Switching gene fraction", "Noise SD"
   )
-  if (!is.null(p)) save_fig(p, "figS1_idealized_switching", width = 10.5, height = 4.6)
+  if (!is.null(p)) save_fig(p, "figS1_idealized_switching", width = 10.5, height = 3.6)
   else cat("  figS1: no data, skipping\n")
 }, error = function(e) warning("figS1 error: ", conditionMessage(e)))
 
@@ -1466,7 +1466,7 @@ tryCatch({
     "run_count_dispersion", "run_noise_sd",
     "Count dispersion", "Noise SD"
   )
-  if (!is.null(p)) save_fig(p, "figS2_noise_stress", width = 12, height = 4.6)
+  if (!is.null(p)) save_fig(p, "figS2_noise_stress", width = 10.5, height = 3.6)
   else cat("  figS2: no data, skipping\n")
 }, error = function(e) warning("figS2 error: ", conditionMessage(e)))
 
@@ -1476,7 +1476,7 @@ tryCatch({
     "run_interaction_strength", "run_interaction_fraction",
     "Interaction strength", "Interaction fraction"
   )
-  if (!is.null(p)) save_fig(p, "figS3_feature_interactions", width = 10.5, height = 4.6)
+  if (!is.null(p)) save_fig(p, "figS3_feature_interactions", width = 10.5, height = 3.6)
   else cat("  figS3: no data, skipping\n")
 }, error = function(e) warning("figS3 error: ", conditionMessage(e)))
 
