@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "spinal_cord_cervical_c_1",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15586,
+    "n_switch_pos": 51,
+    "n_psi_pos": 1,
+    "contingency": {
+      "switch_psi": 0,
+      "switch_only": 51,
+      "psi_only": 1,
+      "neither": 15534
+    },
+    "psi_pos_rate_in_switch_genes": 0.0,
+    "psi_pos_rate_in_background": 6.43707756678468e-05,
+    "fisher_or": 0.0,
+    "fisher_p": 1.0,
+    "adjusted_or": 7.786673933090401e-06,
+    "adjusted_p": 0.9989597390287863,
+    "alpha": 0.05
+  }
+}

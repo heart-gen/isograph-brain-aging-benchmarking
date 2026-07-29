@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "anterior_cingulate_cortex_ba24",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15556,
+    "n_switch_pos": 3516,
+    "n_psi_pos": 1071,
+    "contingency": {
+      "switch_psi": 332,
+      "switch_only": 3184,
+      "psi_only": 739,
+      "neither": 11301
+    },
+    "psi_pos_rate_in_switch_genes": 0.09442548350398179,
+    "psi_pos_rate_in_background": 0.06137873754152824,
+    "fisher_or": 1.5945475006969896,
+    "fisher_p": 2.955928033113493e-11,
+    "adjusted_or": 1.4337865228272142,
+    "adjusted_p": 2.680136126268101e-07,
+    "alpha": 0.05
+  }
+}

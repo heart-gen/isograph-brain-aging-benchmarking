@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "caudate_basal_ganglia",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15835,
+    "n_switch_pos": 0,
+    "n_psi_pos": 128,
+    "contingency": {
+      "switch_psi": 0,
+      "switch_only": 0,
+      "psi_only": 128,
+      "neither": 15707
+    },
+    "psi_pos_rate_in_switch_genes": 0.0,
+    "psi_pos_rate_in_background": 0.008083359646353016,
+    "fisher_or": NaN,
+    "fisher_p": 1.0,
+    "adjusted_or": NaN,
+    "adjusted_p": NaN,
+    "alpha": 0.05
+  }
+}

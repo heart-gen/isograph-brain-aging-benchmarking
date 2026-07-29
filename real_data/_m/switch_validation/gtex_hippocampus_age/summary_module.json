@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "hippocampus",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15783,
+    "n_switch_pos": 2632,
+    "n_psi_pos": 82,
+    "contingency": {
+      "switch_psi": 25,
+      "switch_only": 2607,
+      "psi_only": 57,
+      "neither": 13094
+    },
+    "psi_pos_rate_in_switch_genes": 0.009498480243161094,
+    "psi_pos_rate_in_background": 0.004334271158086838,
+    "fisher_or": 2.202908498711297,
+    "fisher_p": 0.0013841426045507696,
+    "adjusted_or": 1.8627985401570493,
+    "adjusted_p": 0.01159837978812246,
+    "alpha": 0.05
+  }
+}

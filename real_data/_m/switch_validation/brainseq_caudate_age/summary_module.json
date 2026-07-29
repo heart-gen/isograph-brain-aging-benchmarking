@@ -1,0 +1,33 @@
+{
+  "cohort": "brainseq",
+  "region": "caudate",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 11144,
+    "n_switch_pos": 822,
+    "n_psi_pos": 59,
+    "contingency": {
+      "switch_psi": 9,
+      "switch_only": 813,
+      "psi_only": 50,
+      "neither": 10272
+    },
+    "psi_pos_rate_in_switch_genes": 0.010948905109489052,
+    "psi_pos_rate_in_background": 0.00484402247626429,
+    "fisher_or": 2.2742435424354244,
+    "fisher_p": 0.027851416694062235,
+    "adjusted_or": 2.058944329787917,
+    "adjusted_p": 0.04843423964227623,
+    "alpha": 0.05
+  },
+  "event_resolved": {
+    "n_resolved_junctions": 17,
+    "n_matched_to_psi": 9,
+    "n_both_significant": 0,
+    "n_concordant": 0,
+    "alpha": 0.05
+  }
+}
