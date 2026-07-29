@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "cerebellum",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15245,
+    "n_switch_pos": 831,
+    "n_psi_pos": 36,
+    "contingency": {
+      "switch_psi": 1,
+      "switch_only": 830,
+      "psi_only": 35,
+      "neither": 14379
+    },
+    "psi_pos_rate_in_switch_genes": 0.0012033694344163659,
+    "psi_pos_rate_in_background": 0.0024281948106008046,
+    "fisher_or": 0.49497418244406194,
+    "fisher_p": 0.8673769991470742,
+    "adjusted_or": 0.3552188299073722,
+    "adjusted_p": 0.31092484317611135,
+    "alpha": 0.05
+  }
+}

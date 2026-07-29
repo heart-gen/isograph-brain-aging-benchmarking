@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "amygdala",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15548,
+    "n_switch_pos": 1314,
+    "n_psi_pos": 6,
+    "contingency": {
+      "switch_psi": 0,
+      "switch_only": 1314,
+      "psi_only": 6,
+      "neither": 14228
+    },
+    "psi_pos_rate_in_switch_genes": 0.0,
+    "psi_pos_rate_in_background": 0.00042152592384431644,
+    "fisher_or": 0.0,
+    "fisher_p": 1.0,
+    "adjusted_or": NaN,
+    "adjusted_p": NaN,
+    "alpha": 0.05
+  }
+}

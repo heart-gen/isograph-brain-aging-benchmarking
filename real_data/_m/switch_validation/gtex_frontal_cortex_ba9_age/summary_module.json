@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "frontal_cortex_ba9",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15646,
+    "n_switch_pos": 6349,
+    "n_psi_pos": 1025,
+    "contingency": {
+      "switch_psi": 515,
+      "switch_only": 5834,
+      "psi_only": 510,
+      "neither": 8787
+    },
+    "psi_pos_rate_in_switch_genes": 0.08111513624192786,
+    "psi_pos_rate_in_background": 0.05485640529202969,
+    "fisher_or": 1.5209371029865495,
+    "fisher_p": 6.299983874850692e-11,
+    "adjusted_or": 1.4458514017263293,
+    "adjusted_p": 1.586853972019818e-08,
+    "alpha": 0.05
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "hypothalamus",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 16141,
+    "n_switch_pos": 560,
+    "n_psi_pos": 31,
+    "contingency": {
+      "switch_psi": 1,
+      "switch_only": 559,
+      "psi_only": 30,
+      "neither": 15551
+    },
+    "psi_pos_rate_in_switch_genes": 0.0017857142857142857,
+    "psi_pos_rate_in_background": 0.0019254219883191065,
+    "fisher_or": 0.9273106738223017,
+    "fisher_p": 0.6656807849539892,
+    "adjusted_or": 0.7872480716779814,
+    "adjusted_p": 0.8143338822192401,
+    "alpha": 0.05
+  }
+}

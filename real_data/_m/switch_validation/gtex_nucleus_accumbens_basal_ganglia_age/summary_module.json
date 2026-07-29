@@ -1,0 +1,26 @@
+{
+  "cohort": "gtex",
+  "region": "nucleus_accumbens_basal_ganglia",
+  "variant": "standard",
+  "trait": "age",
+  "switch_set": "module",
+  "gene_corroboration": {
+    "switch_set": "module",
+    "n_genes": 15786,
+    "n_switch_pos": 168,
+    "n_psi_pos": 22,
+    "contingency": {
+      "switch_psi": 0,
+      "switch_only": 168,
+      "psi_only": 22,
+      "neither": 15596
+    },
+    "psi_pos_rate_in_switch_genes": 0.0,
+    "psi_pos_rate_in_background": 0.0014086310667178897,
+    "fisher_or": 0.0,
+    "fisher_p": 1.0,
+    "adjusted_or": 4.1222694834636625e-07,
+    "adjusted_p": 0.996205279168576,
+    "alpha": 0.05
+  }
+}
