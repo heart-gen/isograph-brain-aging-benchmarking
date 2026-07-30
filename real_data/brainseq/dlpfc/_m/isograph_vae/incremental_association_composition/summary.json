@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 11554,
+    "composition_unique": 15,
+    "abundance_unique": 3763,
+    "both": 18,
+    "neither": 7758
+  },
+  "module_level": {
+    "n_tested": 39,
+    "composition_unique": 0,
+    "abundance_unique": 6,
+    "both": 1,
+    "neither": 32
+  },
+  "analysis": "brainseq-aging",
+  "region": "dlpfc",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Astro",
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC"
+  ]
+}

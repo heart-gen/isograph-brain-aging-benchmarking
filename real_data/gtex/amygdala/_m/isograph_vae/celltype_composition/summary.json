@@ -1,0 +1,29 @@
+{
+  "analysis": "gtex-aging",
+  "region": "amygdala",
+  "variant": "standard",
+  "cell_types": [
+    "Astro",
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC",
+    "Oligo"
+  ],
+  "composition_covariates": [
+    "Astro",
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC"
+  ],
+  "n_samples": 181,
+  "n_samples_covered": 181,
+  "marker_top_n": 25,
+  "n_module_celltype_marker_depleted_fdr05": 0,
+  "n_module_celltype_marker_enriched_fdr05": 4
+}

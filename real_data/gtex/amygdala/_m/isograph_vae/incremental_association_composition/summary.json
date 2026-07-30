@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 16351,
+    "composition_unique": 6,
+    "abundance_unique": 4,
+    "both": 0,
+    "neither": 16341
+  },
+  "module_level": {
+    "n_tested": 27,
+    "composition_unique": 0,
+    "abundance_unique": 0,
+    "both": 0,
+    "neither": 27
+  },
+  "analysis": "gtex-aging",
+  "region": "amygdala",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Astro",
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC"
+  ]
+}
