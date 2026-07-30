@@ -130,12 +130,13 @@ def gene_level_deconfounded(
     bundle,
     fdr_alpha: float = 0.10,
     min_samples: int = 30,
+    comp_cols: tuple[str, ...] = (),
 ) -> pd.DataFrame:
     st = bundle.sample_table
     sample_ids = set(st["sample_id"].astype(str))
     samp = _sample_cols(fs, sample_ids)
     st = st.set_index(st["sample_id"].astype(str)).loc[samp]
-    covs = _covariate_cols(analysis)
+    covs = _covariate_cols(analysis) + list(comp_cols)
 
     SW = _channel_matrix(fs, "switch", samp)
     AB = _channel_matrix(fs, "abundance", samp)
@@ -201,11 +202,12 @@ def module_level_incremental(
     modules: pd.DataFrame,
     bundle,
     fdr_alpha: float = 0.10,
+    comp_cols: tuple[str, ...] = (),
 ) -> pd.DataFrame:
     st = bundle.sample_table
     sample_ids = set(st["sample_id"].astype(str))
     samp = _sample_cols(fs, sample_ids)
-    covs = _covariate_cols(analysis)
+    covs = _covariate_cols(analysis) + list(comp_cols)
 
     eg_switch = _pivot_eigengenes(_eigengene_table(_channel_matrix(fs, "switch", samp), modules, samp))
     eg_abund = _pivot_eigengenes(_eigengene_table(_channel_matrix(fs, "abundance", samp), modules, samp))
@@ -238,19 +240,42 @@ def _summary(gene_level: pd.DataFrame, module_level: pd.DataFrame) -> dict:
     }
 
 
-def run_analysis(analysis: str, region: str | None, variant: str, fdr_alpha: float) -> dict:
+def _attach_composition(artifact_dir, bundle) -> list[str]:
+    """Merge written cell-type fractions into bundle.sample_table by sample_id and
+    return the composition covariate columns. Requires celltype_composition to have run."""
+    from isograph_benchmark.real_data.celltype_composition import load_composition_covariates
+    frac, comp_cols = load_composition_covariates(artifact_dir)
+    fr = frac[comp_cols].reset_index()
+    fr.columns = ["sample_id", *comp_cols]
+    fr["sample_id"] = fr["sample_id"].astype(str)
+    st = bundle.sample_table.copy()
+    st["sample_id"] = st["sample_id"].astype(str)
+    bundle.sample_table = st.merge(fr, on="sample_id", how="left")
+    return comp_cols
+
+
+def run_analysis(analysis: str, region: str | None, variant: str, fdr_alpha: float,
+                 composition: bool = False) -> dict:
     label = f"{analysis}/{region}" if region else analysis
     artifact_dir, fs, modules, bundle = _load(analysis, region, variant)
+    comp_cols = tuple(_attach_composition(artifact_dir, bundle)) if composition else ()
+    if composition:
+        print(f"[{label}] composition-adjusted; covariates += {list(comp_cols)}", flush=True)
     print(f"[{label}] gene-level de-confounded test ...", flush=True)
-    gene_level = gene_level_deconfounded(analysis, fs, bundle, fdr_alpha=fdr_alpha)
+    gene_level = gene_level_deconfounded(analysis, fs, bundle, fdr_alpha=fdr_alpha,
+                                         comp_cols=comp_cols)
     print(f"[{label}] module-level incremental ...", flush=True)
-    module_level = module_level_incremental(analysis, fs, modules, bundle, fdr_alpha=fdr_alpha)
+    module_level = module_level_incremental(analysis, fs, modules, bundle, fdr_alpha=fdr_alpha,
+                                            comp_cols=comp_cols)
 
-    out = ensure_dir(artifact_dir / "incremental_association")
+    subdir = "incremental_association_composition" if composition else "incremental_association"
+    out = ensure_dir(artifact_dir / subdir)
     gene_level.to_parquet(out / "gene_level.parquet", index=False, compression="zstd")
     module_level.to_parquet(out / "module_level.parquet", index=False, compression="zstd")
     summary = _summary(gene_level, module_level)
-    summary.update({"analysis": analysis, "region": region, "variant": variant, "fdr_alpha": fdr_alpha})
+    summary.update({"analysis": analysis, "region": region, "variant": variant,
+                    "fdr_alpha": fdr_alpha, "composition_adjusted": composition,
+                    "composition_covariates": list(comp_cols)})
     (out / "summary.json").write_text(json.dumps(summary, indent=2))
 
     g = summary["gene_level"]
@@ -271,16 +296,20 @@ def main() -> None:
                              "Default: all brainseq (3) or all gtex (13) regions.")
     parser.add_argument("--variant", choices=["standard", "with-abundance"], default="standard")
     parser.add_argument("--fdr", type=float, default=0.10)
+    parser.add_argument("--composition", action="store_true",
+                        help="add estimated cell-type fractions as inference covariates "
+                             "(requires celltype_composition to have run; brainseq only). "
+                             "Writes to incremental_association_composition/.")
     args = parser.parse_args()
 
     if args.analysis == "brainseq-sczd":
-        run_analysis("brainseq-sczd", None, args.variant, args.fdr)
+        run_analysis("brainseq-sczd", None, args.variant, args.fdr, args.composition)
     elif args.analysis == "gtex-aging":
         for region in (args.regions or GTEX_REGIONS):
-            run_analysis("gtex-aging", region, args.variant, args.fdr)
+            run_analysis("gtex-aging", region, args.variant, args.fdr, args.composition)
     else:
         for region in (args.regions or ["caudate", "hippocampus", "dlpfc"]):
-            run_analysis("brainseq-aging", region, args.variant, args.fdr)
+            run_analysis("brainseq-aging", region, args.variant, args.fdr, args.composition)
 
 
 if __name__ == "__main__":

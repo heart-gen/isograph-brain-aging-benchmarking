@@ -1,0 +1,28 @@
+{
+  "gene_level": {
+    "n_tested": 16250,
+    "composition_unique": 88,
+    "abundance_unique": 565,
+    "both": 2,
+    "neither": 15595
+  },
+  "module_level": {
+    "n_tested": 42,
+    "composition_unique": 16,
+    "abundance_unique": 0,
+    "both": 0,
+    "neither": 26
+  },
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Excit",
+    "Inhib",
+    "Micro",
+    "OPC",
+    "Oligo"
+  ]
+}

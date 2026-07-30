@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 17193,
+    "composition_unique": 2,
+    "abundance_unique": 3949,
+    "both": 1,
+    "neither": 13241
+  },
+  "module_level": {
+    "n_tested": 30,
+    "composition_unique": 0,
+    "abundance_unique": 0,
+    "both": 1,
+    "neither": 29
+  },
+  "analysis": "brainseq-sczd",
+  "region": null,
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC"
+  ]
+}
