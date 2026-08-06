@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 16500,
+    "composition_unique": 21,
+    "abundance_unique": 1291,
+    "both": 3,
+    "neither": 15185
+  },
+  "module_level": {
+    "n_tested": 41,
+    "composition_unique": 14,
+    "abundance_unique": 1,
+    "both": 9,
+    "neither": 17
+  },
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC",
+    "Oligo"
+  ]
+}

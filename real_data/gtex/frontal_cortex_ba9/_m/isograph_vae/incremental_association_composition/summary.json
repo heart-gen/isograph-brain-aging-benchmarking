@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 16362,
+    "composition_unique": 0,
+    "abundance_unique": 726,
+    "both": 0,
+    "neither": 15636
+  },
+  "module_level": {
+    "n_tested": 47,
+    "composition_unique": 0,
+    "abundance_unique": 1,
+    "both": 0,
+    "neither": 46
+  },
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC",
+    "Oligo"
+  ]
+}

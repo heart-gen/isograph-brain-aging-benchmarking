@@ -258,6 +258,59 @@ allele-reference-free relative test; the positive anchoring evidence remains the
 specificity enrichment (`qtl_anchoring`) + coloc. Reported transparently as an underpowered
 negative; does not feed a headline table but is documented for completeness.
 
+### 7. Neuronal CLIP orthogonal validation — DONE (informative sparse null)
+
+Stages 22–24 build switch-localized windows, quarantine the structurally confounded
+NOVA1 nomination, and formally classify PTBP2/TDP-43 human contexts as descriptive or
+not estimable when discordant support is sparse. Stage 25 is the independent NOVA-family
+rescue: `nova_family_renomination.py` plus
+`real_data/brainseq/_h/25.nova_family_renomination.sh` scans the full 17-analysis
+universe with two-sided intronic opportunity control and gene-level adjusted enrichment.
+The frozen result is 79,763 transcripts, 374,296 eligible pairs, and two GO-visible
+BrainSEQ hippocampus regulons (M001/M002; 339 genes, 1,993 unique transcript pairs).
+Label these candidates `NOVA_FAMILY`, not NOVA1/2. Stage 26 is implemented as
+`nova2_ctag_clip.py` plus `real_data/brainseq/_h/26.nova2_ctag_clip.sh`: it acquires
+GSE103315 and reciprocal hg38/mm10 chain resources with pinned hashes, reconstructs
+strict within-gene matched windows for the frozen candidates, requires full single-block
+forward mapping plus >=95% reciprocal overlap, and tests exact NOVA2 coverage separately
+in Emx1 cortical, Gad2 cortical, and Pcp2 Purkinje contexts. GEO exposes one pooled
+unique-tag bedGraph per context (three biological replicates pooled), not replicate-level
+processed peaks or input. Therefore stage-26 effects are explicitly descriptive Tier-2
+pooled-signal evidence; absence of coverage is not proof of no binding. Final result QC is
+complete (SLURM 42902680, exit 0): only 1,272/42,718 matched window rows (3.0%)
+passed strict reciprocal mapping. At the prespecified 100-nt width, only 9 genes had
+jointly callable case/control windows and none carried pooled NOVA2 coverage in any
+context; the Emx1-vs-Gad2 interaction likewise had 0 informative differences. The
+50-nt Emx1 sensitivity was sparse and null (76 genes, 4 case-bound vs 2 control-bound,
+OR 1.8, exact p=0.6875; matched-window OR 1.0, p=1.0). **Verdict: informative null /
+not testable at adequate power**, not a NOVA2 rescue. Raw replicate reprocessing is
+low priority: the nine selected SRA-lite runs total only ~474 MB, but reprocessing
+cannot repair the dominant cross-species mapping bottleneck and would require a newly
+pinned SRA/alignment environment. GSE103314 acquisition is complete: the six Nova2-cKO
+Quantas/BED12 supplements are checksum-pinned at sample/contrast level, and the Emx1,
+Gad2, and Pcp2 catalogs pass unique-event-to-coordinate QC.
+
+Stage 27 is implemented as `nova2_perturbation.py` plus
+`real_data/brainseq/_h/27.nova2_perturbation.sh`, following the frozen
+`real_data/NOVA2_PERTURBATION_ANALYSIS_SPEC.md`. It deterministically reconciles
+duplicate Quantas rows, retains one-to-many BED12 event coordinates, derives
+strand-aware 50/100/250-nt intronic flanks, requires strict reciprocal mm10/hg38
+mapping, and tests event localization in the frozen matched case/control windows with
+genes as the primary unit. Counts are pinned by context and width in config. Final QC
+is complete (SLURM 42928722, exit 0). At 100 nt, reciprocal mapping retained 586/11,353
+Emx1 flanks (5.2%), 435/8,199 Gad2 (5.3%), and 181/2,611 Pcp2 (6.9%), yielding only
+2, 3, and 0 localized human windows. Emx1 had 1 case-only versus 1 control-only gene
+(327 callable genes; OR 1.0, exact p=1.0); Gad2 had 0 versus 1 (OR 0.33, p=1.0); Pcp2
+had no discordance. The 50-nt sensitivity was directionally favorable but below the
+prespecified 10-discordant-gene threshold (Emx1 7 vs 2, OR 3.0, p=0.180; Gad2 4 vs 2,
+OR 1.8, p=0.688). No gene replicated case-specific localization across both cortical
+contexts. One primary-width Emx1 case window at **SPPL2A** had both Nova2-cKO event
+localization and independent pooled NOVA2 cTag coverage; this is an exact descriptive
+example, not enrichment evidence. **Verdict: informative sparse null / not formally
+estimable**, so this does not rescue NOVA2 and candidates remain `NOVA_FAMILY`. Close
+the neuronal CLIP analysis here for this submission; integrate the null transparently
+in Methods/Results or supplement, and keep controlled-access EGA reanalysis optional.
+
 ---
 
 ## Pointers

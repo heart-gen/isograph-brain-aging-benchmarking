@@ -47,6 +47,12 @@ _COUPLED_DEGRADATION_SCENARIO = "rna_degradation_coupled"
 # non-degenerate. n_transcripts_per_gene is part of its dataset hash (fresh IDs).
 _INTERPRET_SCENARIO = "multi_isoform_switch"
 
+# A1: genetic-anchoring scenario. Plants a cis-variant per co-switching module; its
+# genetic knobs join the dataset hash so sweep points get fresh IDs without touching
+# any existing scenario's hash.
+_GENETIC_SCENARIO = "genetic_anchoring"
+_GENETIC_PARAM_KEYS = ["genetic_effect", "genetic_module_fraction", "genetic_maf"]
+
 
 def resource_class(method: str, scenario: str) -> str:
     if method == "isograph_vae_gpu":
@@ -104,6 +110,9 @@ _COUPLED_DEGRADATION_DATASET_KEYS = _CONFOUND_SCENARIO_DATASET_KEYS + [
 # multi-isoform datasets are distinct; other scenarios keep their existing hashes.
 _INTERPRET_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + ["n_transcripts_per_gene"]
 
+# Genetic-anchoring scenario hashes on its genetic knobs so sweep points are distinct.
+_GENETIC_SCENARIO_DATASET_KEYS = _SCENARIO_DATASET_KEYS + _GENETIC_PARAM_KEYS
+
 
 def _dataset_hash_keys(scenario: str) -> list[str]:
     if scenario == "abundance_switch_mixed":
@@ -112,6 +121,8 @@ def _dataset_hash_keys(scenario: str) -> list[str]:
         return _COUPLED_DEGRADATION_DATASET_KEYS
     if scenario == _INTERPRET_SCENARIO:
         return _INTERPRET_SCENARIO_DATASET_KEYS
+    if scenario == _GENETIC_SCENARIO:
+        return _GENETIC_SCENARIO_DATASET_KEYS
     if scenario in _CONFOUND_SCENARIOS:
         return _CONFOUND_SCENARIO_DATASET_KEYS
     return _SCENARIO_DATASET_KEYS
@@ -126,6 +137,8 @@ def _scenario_methods(cfg: dict, scenario: str) -> list[str]:
         return cfg.get("degradation_methods", cfg["methods"])
     if scenario == _INTERPRET_SCENARIO:
         return cfg.get("interpret_methods", cfg["methods"])
+    if scenario == _GENETIC_SCENARIO:
+        return cfg.get("genetic_methods", cfg["methods"])
     if scenario in _CONFOUND_SCENARIOS:
         return cfg.get("confound_methods", cfg["methods"])
     return cfg["methods"]
@@ -140,6 +153,7 @@ def expand_grid() -> pd.DataFrame:
             + cfg.get("confound_methods", [])
             + cfg.get("degradation_methods", [])
             + cfg.get("interpret_methods", [])
+            + cfg.get("genetic_methods", [])
         )
     )
     rows: list[dict[str, object]] = []

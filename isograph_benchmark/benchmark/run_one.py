@@ -6,7 +6,9 @@ import os
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
+from scipy import stats
 
 from isograph.evaluation.metrics import module_recovery_score
 from isograph.io.artifacts import load_dataset_bundle
@@ -200,6 +202,106 @@ def write_artifacts(out_dir: Path, artifacts) -> None:
         write_json(out_dir / "calibration.json", artifacts.calibration)
 
 
+_FEATURE_META_COLS = ("feature_id", "gene_id", "feature_type", "n_transcripts")
+
+
+def _uniform_module_eigengenes(module_table, feature_scores, sample_ids):
+    """Module eigengenes computed identically for every method.
+
+    eigengene(module) = mean, over that module's gene feature-scores, of the per-sample
+    score (the same formula IsoGraph's own base model uses). Crucially we compute it
+    from each method's RAW ``feature_scores`` + its module partition rather than reading
+    the model's emitted ``eigengene_table`` -- some baselines (e.g. Spearman+Leiden) do
+    not emit one, and persisted feature_scores are raw for every method (VAE denoising
+    lives in the embedding it clusters, not the scores). So this isolates the one thing
+    the A1 comparison is about: did the method recover the co-switching module?
+    """
+    if module_table is None or module_table.empty or feature_scores is None or feature_scores.empty:
+        return [], np.empty((0, 0))
+    ids = [s for s in sample_ids if s in feature_scores.columns]
+    rows: list[np.ndarray] = []
+    mods: list[str] = []
+    for module_id, genes in module_table.groupby("module_id")["gene_id"]:
+        sub = feature_scores.loc[feature_scores["gene_id"].isin(set(genes)), ids]
+        if sub.empty:
+            continue
+        mods.append(module_id)
+        rows.append(sub.to_numpy(dtype=float).mean(axis=0))
+    return mods, (np.vstack(rows) if rows else np.empty((0, len(ids))))
+
+
+def genetic_recovery_metrics(artifacts, bundle) -> dict[str, Any]:
+    """A1: does the method recover the planted cis-genetic anchoring of modules?
+
+    Ground truth (``truth_genetics.parquet`` + ``genotypes`` matrix) plants, per anchored
+    module, one bi-allelic variant whose dosage shifts that module's switch latent, plus
+    an equal number of unlinked null variants. The per-allele effect is modest, so the
+    genotype->PSI signal is only detectable by pooling the module's genes into an
+    eigengene -- i.e. only after the co-switching module is recovered. For each planted
+    variant we take the method's best (most-associated) recovered-module eigengene and
+    test it against the genotype (Bonferroni over the predicted modules). Reported:
+
+    * ``genetic_anchor_recall``      -- fraction of ANCHORED variants recovered;
+    * ``genetic_anchor_fpr``         -- fraction of NULL variants spuriously recovered;
+    * ``genetic_anchor_best_r2_mean``-- mean best eigengene-genotype R^2 over anchored
+                                        variants (graded recovery, robust to threshold).
+    Returns ``{}`` when the dataset carries no planted genetics (all other scenarios).
+    """
+    truth_gen = bundle.truth_tables.get("truth_genetics.parquet", pd.DataFrame())
+    if truth_gen.empty or "genotypes" not in bundle.matrices:
+        return {}
+    genotypes = np.asarray(bundle.matrices["genotypes"], dtype=float)  # (n_snps, n_samples)
+    n_anchored = int(truth_gen["anchored"].sum())
+    n_null = int((~truth_gen["anchored"]).sum())
+    base = {
+        "n_planted_mqtl": n_anchored,
+        "n_null_variants": n_null,
+        "genetic_anchor_recall": 0.0,
+        "genetic_anchor_fpr": 0.0,
+        "genetic_anchor_best_r2_mean": 0.0,
+    }
+
+    sample_ids = list(bundle.sample_table["sample_id"])
+    mods, E = _uniform_module_eigengenes(artifacts.module_table, artifacts.feature_scores, sample_ids)
+    if E.shape[0] == 0:
+        return base  # no modules recovered -> zero anchoring by construction
+    # Restrict/reorder genotype columns to the eigengene sample order.
+    pos = {s: i for i, s in enumerate(sample_ids)}
+    used_ids = [s for s in sample_ids if s in set(artifacts.feature_scores.columns)]
+    g_cols = [pos[s] for s in used_ids]
+    G = genotypes[:, g_cols]
+    n_pred = E.shape[0]
+
+    recalls: list[float] = []
+    fprs: list[float] = []
+    best_r2s: list[float] = []
+    for i, anchored in enumerate(truth_gen["anchored"].tolist()):
+        g = G[i]
+        if np.std(g) == 0:
+            continue
+        best_r2 = 0.0
+        best_p = 1.0
+        for j in range(n_pred):
+            e = E[j]
+            if not np.all(np.isfinite(e)) or np.std(e) == 0:
+                continue
+            r, p = stats.pearsonr(e, g)
+            if r * r > best_r2:
+                best_r2 = float(r * r)
+                best_p = float(p)
+        detected = 1.0 if min(1.0, best_p * max(n_pred, 1)) < 0.05 else 0.0
+        if anchored:
+            recalls.append(detected)
+            best_r2s.append(best_r2)
+        else:
+            fprs.append(detected)
+
+    base["genetic_anchor_recall"] = float(np.mean(recalls)) if recalls else 0.0
+    base["genetic_anchor_fpr"] = float(np.mean(fprs)) if fprs else 0.0
+    base["genetic_anchor_best_r2_mean"] = float(np.mean(best_r2s)) if best_r2s else 0.0
+    return base
+
+
 def compute_metrics(artifacts, bundle) -> dict[str, Any]:
     truth_modules = bundle.truth_tables.get("truth_modules.parquet", pd.DataFrame())
     truth_switch = bundle.truth_tables.get("truth_switch.parquet", pd.DataFrame())
@@ -242,6 +344,9 @@ def compute_metrics(artifacts, bundle) -> dict[str, Any]:
         if abundance_genes:
             abund_role = set(roles.loc[roles["module_role"].isin(("abundance_only", "coupled")), "gene_id"])
             metrics["role_abundance_recall"] = len(abund_role & abundance_genes) / len(abundance_genes)
+
+    # A1: genetic-anchoring recovery (no-op dict for non-genetic scenarios).
+    metrics.update(genetic_recovery_metrics(artifacts, bundle))
 
     return metrics
 

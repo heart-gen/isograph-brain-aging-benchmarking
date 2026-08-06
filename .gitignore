@@ -1,5 +1,7 @@
 # Raw source copies are local-only and must never be tracked.
 inputs/raw/
+inputs/_m/*.log
+real_data/_m/neuronal_clip/
 
 # Derived TIN caches (regenerable from the TIN extraction step; ~283 MB).
 inputs/tin/
@@ -60,3 +62,8 @@ real_data/_m/scz_age_projection/*.log
 # GTEx within-gene junction usage: large, regenerable from the raw STAR junctions GCT via
 # `inputs/_h/build_gtex_junction_usage.sh`. Other gtex_v11 processed parquets stay tracked.
 inputs/processed/gtex_v11/*/junction_usage.parquet
+
+# GTEx composition: intermediate genes×samples bulk-count parquets exported for the R MuSiC
+# deconvolution (regenerable via `celltype_composition export-gtex`; ~85MB). The MuSiC
+# outputs (proportions tsv, marker stats, fractions) are kept.
+real_data/gtex/_m/composition/inputs/
