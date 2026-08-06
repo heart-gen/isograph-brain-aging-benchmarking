@@ -58,6 +58,14 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     cell_composition_cv = max(_as_float(row, "cell_composition_cv", 0.0), 0.0)
     batch_effect_sd = max(_as_float(row, "batch_effect_sd", 0.0), 0.0)
     library_depth_cv = max(_as_float(row, "library_depth_cv", 0.0), 0.0)
+    # A1: cis-genetic anchoring of co-switching modules. All default to 0.0/inactive,
+    # so any scenario that does not set them draws no extra RNG and produces
+    # byte-identical data to before. genetic_effect = per-allele shift of an anchored
+    # module's switch latent; genetic_module_fraction = fraction of modules anchored;
+    # genetic_maf = minor-allele frequency of the planted variants.
+    genetic_effect = max(_as_float(row, "genetic_effect", 0.0), 0.0)
+    genetic_module_fraction = np.clip(_as_float(row, "genetic_module_fraction", 0.0), 0.0, 1.0)
+    genetic_maf = float(np.clip(_as_float(row, "genetic_maf", 0.25), 0.01, 0.5))
 
     n_modules = max(2, min(8, n_genes // 50))
     n_module_genes = max(1, int(round(n_genes * switching_fraction)))
@@ -106,6 +114,37 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
     module_latent = rng.normal(size=(n_modules, n_samples))
     module_latent += ((age - age.mean()) / age.std())[None, :] * rng.normal(0.15, 0.05, (n_modules, 1))
     module_latent += (dx == "SCZD")[None, :] * rng.normal(0.15, 0.05, (n_modules, 1))
+
+    # ---- A1: cis-genetic anchoring of a subset of co-switching modules ----
+    # For each anchored module, plant one bi-allelic cis-variant whose per-sample
+    # dosage (0/1/2 under Hardy-Weinberg at genetic_maf) shifts that module's SWITCH
+    # latent by genetic_effect per allele. The genotype therefore enters only through
+    # the module's switch genes' PSI -- the same channel IsoGraph's switch coordinate
+    # denoises -- and a method recovers the planted variant->module link only if it
+    # first recovers the co-switching module (an eigengene mQTL). We also draw an equal
+    # number of UNLINKED "null" variants (added to no module) so a method's spurious
+    # anchoring rate is measurable. All RNG is gated on genetic_effect>0, so inactive
+    # scenarios draw nothing extra and stay byte-identical.
+    genotypes: np.ndarray | None = None
+    genetics_meta: list[dict[str, object]] = []
+    if genetic_effect > 0 and genetic_module_fraction > 0:
+        n_anchor = max(1, int(round(n_modules * genetic_module_fraction)))
+        anchored = list(range(n_anchor))  # deterministic first-k modules
+        anchor_geno = rng.binomial(2, genetic_maf, size=(n_anchor, n_samples)).astype(float)
+        for a, m in enumerate(anchored):
+            g = anchor_geno[a]
+            gz = (g - g.mean()) / (g.std() + 1e-8)
+            module_latent[m] = module_latent[m] + genetic_effect * gz
+            genetics_meta.append(
+                {"snp_id": f"rsSYN{m:03d}", "module_id": f"M{m:03d}", "anchored": True}
+            )
+        # Unlinked null variants: same MAF, added to no module (false-positive control).
+        null_geno = rng.binomial(2, genetic_maf, size=(n_anchor, n_samples)).astype(float)
+        for k in range(n_anchor):
+            genetics_meta.append(
+                {"snp_id": f"rsNULL{k:03d}", "module_id": "", "anchored": False}
+            )
+        genotypes = np.vstack([anchor_geno, null_geno])
 
     # PSI signal: only switch genes get latent signal in PSI proportions
     signal = rng.normal(0, noise_sd, size=(n_genes, n_samples))
@@ -288,6 +327,82 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
         build_feature_spec("truth_abundance", "truth_abundance.parquet", truth_abundance),
         build_feature_spec("truth_switch_event", "truth_switch_event.parquet", truth_switch_event),
     ]
+    matrix_specs = [
+        build_matrix_spec("gene_counts", "gene_counts.npz", gene_counts),
+        build_matrix_spec("transcript_counts", "transcript_counts.npz", transcript_counts),
+        build_matrix_spec("psi", "psi.npz", psi),
+    ]
+    provenance = {
+        "generator": "isograph_brain_aging_benchmark_v2",
+        "scenario": str(row["scenario"]),
+        "seed": str(row["seed"]),
+        "abundance_fraction": str(_as_float(row, "abundance_fraction", 0.0)),
+        "degradation_3p_bias": str(degradation_3p_bias),
+        "cell_composition_cv": str(cell_composition_cv),
+        "batch_effect_sd": str(batch_effect_sd),
+        "library_depth_cv": str(library_depth_cv),
+    }
+    truth_table_names = [
+        "truth_modules.parquet", "truth_switch.parquet", "truth_abundance.parquet",
+        "truth_switch_event.parquet",
+    ]
+    feature_tables = {
+        "gene": gene_table,
+        "transcript": transcript_table,
+        "psi": psi_table,
+        "truth_module": truth_modules,
+        "truth_switch": truth_switch,
+        "truth_abundance": truth_abundance,
+        "truth_switch_event": truth_switch_event,
+    }
+    matrices = {"gene_counts": gene_counts, "transcript_counts": transcript_counts, "psi": psi}
+    truth_tables = {
+        "truth_modules.parquet": truth_modules,
+        "truth_switch.parquet": truth_switch,
+        "truth_abundance.parquet": truth_abundance,
+        "truth_switch_event.parquet": truth_switch_event,
+    }
+
+    # A1: genetics artifacts are attached only when active, so all pre-existing
+    # scenarios keep an unchanged manifest/file set (byte-identical datasets). Row i
+    # of the genotypes matrix corresponds to row i of truth_genetics (anchored SNPs
+    # first, then the unlinked null SNPs).
+    if genotypes is not None:
+        truth_genetics = pd.DataFrame(
+            [
+                {
+                    **meta,
+                    "maf": genetic_maf,
+                    "per_allele_effect": genetic_effect,
+                    "n_module_genes": (
+                        int((module_index == int(str(meta["module_id"])[1:])).sum())
+                        if meta["anchored"] else 0
+                    ),
+                    "n_module_switch_genes": (
+                        int(((module_index == int(str(meta["module_id"])[1:])) & switching_mask).sum())
+                        if meta["anchored"] else 0
+                    ),
+                }
+                for meta in genetics_meta
+            ]
+        )
+        # truth_genetics is persisted purely via the truth_tables mechanism
+        # (save_dataset_bundle writes bundle.truth_tables by filename; load reads them
+        # from manifest.truth_tables). It needs no FeatureTableSpec -- whose `kind` is a
+        # closed Literal in the isograph package -- so A1 stays decoupled from the
+        # package schema. The genotypes matrix uses a free-form MatrixSpec assay name.
+        matrix_specs.append(build_matrix_spec("genotypes", "genotypes.npz", genotypes))
+        provenance.update(
+            {
+                "genetic_effect": str(genetic_effect),
+                "genetic_module_fraction": str(genetic_module_fraction),
+                "genetic_maf": str(genetic_maf),
+            }
+        )
+        truth_table_names.append("truth_genetics.parquet")
+        matrices["genotypes"] = genotypes
+        truth_tables["truth_genetics.parquet"] = truth_genetics
+
     manifest = DatasetManifest(
         dataset_name=str(row["dataset_id"]),
         suite_name="isograph_brain_aging_synthetic",
@@ -300,45 +415,16 @@ def build_synthetic_bundle(row: pd.Series) -> DatasetBundle:
             build_feature_spec("truth_module", "truth_modules.parquet", truth_modules),
             build_feature_spec("truth_switch", "truth_switch.parquet", truth_switch),
         ] + extra_feature_specs,
-        matrices=[
-            build_matrix_spec("gene_counts", "gene_counts.npz", gene_counts),
-            build_matrix_spec("transcript_counts", "transcript_counts.npz", transcript_counts),
-            build_matrix_spec("psi", "psi.npz", psi),
-        ],
-        provenance={
-            "generator": "isograph_brain_aging_benchmark_v2",
-            "scenario": str(row["scenario"]),
-            "seed": str(row["seed"]),
-            "abundance_fraction": str(_as_float(row, "abundance_fraction", 0.0)),
-            "degradation_3p_bias": str(degradation_3p_bias),
-            "cell_composition_cv": str(cell_composition_cv),
-            "batch_effect_sd": str(batch_effect_sd),
-            "library_depth_cv": str(library_depth_cv),
-        },
-        truth_tables=[
-            "truth_modules.parquet", "truth_switch.parquet", "truth_abundance.parquet",
-            "truth_switch_event.parquet",
-        ],
+        matrices=matrix_specs,
+        provenance=provenance,
+        truth_tables=truth_table_names,
     )
     return DatasetBundle(
         manifest=manifest,
         sample_table=sample_table,
-        feature_tables={
-            "gene": gene_table,
-            "transcript": transcript_table,
-            "psi": psi_table,
-            "truth_module": truth_modules,
-            "truth_switch": truth_switch,
-            "truth_abundance": truth_abundance,
-            "truth_switch_event": truth_switch_event,
-        },
-        matrices={"gene_counts": gene_counts, "transcript_counts": transcript_counts, "psi": psi},
-        truth_tables={
-            "truth_modules.parquet": truth_modules,
-            "truth_switch.parquet": truth_switch,
-            "truth_abundance.parquet": truth_abundance,
-            "truth_switch_event.parquet": truth_switch_event,
-        },
+        feature_tables=feature_tables,
+        matrices=matrices,
+        truth_tables=truth_tables,
     )
 
 
