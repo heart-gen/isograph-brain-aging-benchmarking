@@ -1,0 +1,56 @@
+{
+  "analysis": "A2 long-read (Bambu, ONT DLPFC BA9/46) confirmation of IsoGraph aging switch transcript pairs",
+  "tier": "Tier-1 (processed matrix): isoform-level existence + switch-like anti-correlated usage; signed usage-vs-age is Tier-1.5/Tier-2",
+  "dataset": "Aguzzoli-Heberle 2024 NBT; Zenodo 8180677; n=12 (6 AD/6 control)",
+  "cohort": "gtex",
+  "trait": "age",
+  "variant": "standard",
+  "thresholds": {
+    "alpha": 0.05,
+    "min_count": 5.0,
+    "min_samples": 3,
+    "min_if": 0.05,
+    "coding_pairs_only": true
+  },
+  "per_region": [
+    {
+      "region": "frontal_cortex_ba9",
+      "n_switch_genes": 7004,
+      "n_genes_expressed_longread": 6869,
+      "n_genes_multi_isoform": 4391,
+      "n_genes_confirmed": 4103,
+      "confirmed_rate_of_expressed": 0.5973212985878585,
+      "n_switch_pairs": 61302,
+      "n_pairs_detected": 16394,
+      "pair_detection_rate": 0.2674301001598643,
+      "n_pairs_switch_like": 5173,
+      "pair_switch_like_rate": 0.08438550128870184,
+      "coding_pairs_only": true
+    },
+    {
+      "region": "cortex",
+      "n_switch_genes": 1676,
+      "n_genes_expressed_longread": 1654,
+      "n_genes_multi_isoform": 1126,
+      "n_genes_confirmed": 1051,
+      "confirmed_rate_of_expressed": 0.6354292623941958,
+      "n_switch_pairs": 15878,
+      "n_pairs_detected": 4512,
+      "pair_detection_rate": 0.284166771633707,
+      "n_pairs_switch_like": 1341,
+      "pair_switch_like_rate": 0.08445648066507117,
+      "coding_pairs_only": true
+    }
+  ],
+  "pooled": {
+    "regions": [
+      "frontal_cortex_ba9",
+      "cortex"
+    ],
+    "n_genes_confirmed": 5154,
+    "n_genes_expressed_longread": 8523,
+    "confirmed_rate_of_expressed": 0.6047166490672299,
+    "pair_detection_rate": 0.27087328323399845,
+    "pair_switch_like_rate": 0.08440010365379633
+  }
+}

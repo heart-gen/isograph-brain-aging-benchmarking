@@ -42,6 +42,17 @@ degradation_methods:
 interpret_methods:
   - isograph_vae
   - isograph_vae_multiplex
+# A1 genetic-anchoring scenario: contrast the promoted VAE method + its multiplex
+# (switch+abundance) variant against the two matched network baselines on the IDENTICAL
+# features -- Spearman+Leiden (same clustering, no VAE denoising) and classical WGCNA
+# (correlation network). The claim under test: only the VAE recovers the planted
+# cis-variant->module anchoring, because it recovers the co-switching module the
+# eigengene mQTL rides on.
+genetic_methods:
+  - isograph_vae
+  - isograph_vae_multiplex
+  - isograph_spearman_leiden
+  - wgcna_gene
 scenarios:
   idealized_switching:
     n_genes: [400]
@@ -152,6 +163,24 @@ scenarios:
     switching_fraction: [0.25]
     noise_sd: [0.25]
     library_depth_cv: [0.25, 0.5, 0.75, 1.0]
+    seed_count: 20
+  genetic_anchoring:
+    # A1: ground-truth genetics. Each co-switching module carries one planted cis-variant
+    # whose dosage shifts the module's SWITCH latent (per-allele = genetic_effect), plus an
+    # equal number of unlinked NULL variants. The effect is modest, so the genotype->PSI
+    # signal is only recoverable by pooling the module's genes into an eigengene mQTL --
+    # i.e. only AFTER the co-switching module is recovered. Metrics: genetic_anchor_recall
+    # (anchored variants recovered), genetic_anchor_fpr (null variants spuriously recovered),
+    # genetic_anchor_best_r2_mean (graded), alongside module_recovery. Switch-driven modules
+    # (abundance_fraction unset=0); noise sweep spans the regime where VAE denoising separates
+    # from correlation networks. genetic_effect sweep gives a dose-response.
+    n_genes: [400]
+    n_samples: [200]
+    switching_fraction: [0.25]
+    noise_sd: [0.25, 0.40]
+    genetic_effect: [0.5, 1.0, 2.0]
+    genetic_module_fraction: [1.0]
+    genetic_maf: [0.30]
     seed_count: 20
   scale:
     n_genes: [1000, 3000, 6000, 12000]

@@ -1,0 +1,25 @@
+{
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "variant": "standard",
+  "cell_types": [
+    "Astro",
+    "Excit",
+    "Inhib",
+    "Micro",
+    "OPC",
+    "Oligo"
+  ],
+  "composition_covariates": [
+    "Excit",
+    "Inhib",
+    "Micro",
+    "OPC",
+    "Oligo"
+  ],
+  "n_samples": 233,
+  "n_samples_covered": 233,
+  "marker_top_n": 25,
+  "n_module_celltype_marker_depleted_fdr05": 0,
+  "n_module_celltype_marker_enriched_fdr05": 6
+}

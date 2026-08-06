@@ -1,0 +1,30 @@
+{
+  "gene_level": {
+    "n_tested": 11648,
+    "composition_unique": 17,
+    "abundance_unique": 3085,
+    "both": 22,
+    "neither": 8524
+  },
+  "module_level": {
+    "n_tested": 46,
+    "composition_unique": 0,
+    "abundance_unique": 24,
+    "both": 0,
+    "neither": 22
+  },
+  "analysis": "brainseq-aging",
+  "region": "caudate",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": true,
+  "composition_covariates": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC"
+  ]
+}

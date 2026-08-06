@@ -1,0 +1,29 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "cell_types": [
+    "Astro",
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC",
+    "Oligo"
+  ],
+  "composition_covariates": [
+    "Excit",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "Mural",
+    "OPC",
+    "Oligo"
+  ],
+  "n_samples": 255,
+  "n_samples_covered": 255,
+  "marker_top_n": 25,
+  "n_module_celltype_marker_depleted_fdr05": 0,
+  "n_module_celltype_marker_enriched_fdr05": 3
+}
