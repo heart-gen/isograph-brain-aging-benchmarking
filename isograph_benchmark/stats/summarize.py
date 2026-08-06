@@ -34,6 +34,11 @@ METRICS = [
     "metrics_role_abundance_only_n",
     "metrics_role_coupled_n",
     "metrics_role_discordant_n",
+    # A1 genetic-anchoring metrics (populated only for the genetic_anchoring scenario;
+    # missing columns are skipped automatically for all other scenarios).
+    "metrics_genetic_anchor_recall",
+    "metrics_genetic_anchor_fpr",
+    "metrics_genetic_anchor_best_r2_mean",
 ]
 
 
