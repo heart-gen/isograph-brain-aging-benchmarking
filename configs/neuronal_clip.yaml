@@ -1,0 +1,963 @@
+version: 5
+frozen_date: "2026-08-01"
+accessed_date: "2026-08-01"
+seed: 13
+
+output_root: inputs/raw/neuronal_clip
+dataset_manifest: reports/neuronal_clip/dataset_manifest.tsv
+candidate_manifest: reports/neuronal_clip/candidate_manifest.parquet
+context_qc_manifest: reports/neuronal_clip/context_qc.tsv
+
+candidate_source:
+  regulon: real_data/_m/rbp/rbp_regulon_intronic.parquet
+  switch_calls: real_data/_m/rbp/rbp_switch_calls_intronic.parquet
+  motif_counts: real_data/_m/rbp/rbp_counts_intronic.parquet
+  q_max: 0.05
+  expected_module_rbp_nominations: 17
+  rbps: [TARDBP, NOVA1, NOVA2, RBFOX2, PTBP2]
+
+window_stage:
+  gtf_cache: real_data/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
+  genome_build: GRCh38.primary_assembly
+  gencode_release: 47
+  output_dir: real_data/_m/neuronal_clip/windows
+  primary_width: 100
+  sensitivity_widths: [50, 250]
+  expected_candidate_rows: 12779
+  expected_unique_candidates: 12038
+  control_source: motif_negative_transcript_intronic_flanks
+  match_without_replacement: true
+  length_ratio_min: 0.80
+  length_ratio_max: 1.25
+  gc_tolerance: 0.05
+  max_ambiguous_fraction: 0.00
+  mappability_policy: deferred_to_callable_filter
+  input_coverage_policy: deferred_to_context_peak_stage
+
+motif_opportunity_stage:
+  output_dir: real_data/_m/neuronal_clip/motif_opportunity
+  window_dir: real_data/_m/neuronal_clip/windows
+  primary_width: 100
+  quarantined_rbps:
+    NOVA1:
+      status: not_testable_current_candidate_definition
+      reason: transcript-wide motif presence is confounded by intronic sequence opportunity
+      replacement_label: NOVA_FAMILY
+  nova_family:
+    evidence_scope: exploratory_qc_only
+    motifs_dna_sense: [CCAC, CCAT, TCAC, TCAT]
+    min_instances_per_cluster: 3
+    max_cluster_span_nt: 30
+    require_both_transcripts_scannable: true
+    min_intronic_opportunity_nt: 100
+
+nova_family_renomination:
+  output_dir: real_data/_m/neuronal_clip/nova_family_renomination
+  candidate_manifest: reports/neuronal_clip/nova_family_candidate_manifest.parquet
+  gtf_cache: real_data/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
+  primary_width: 100
+  motifs_dna_sense: [CCAC, CCAT, TCAC, TCAT]
+  min_instances_per_cluster: 3
+  max_cluster_span_nt: 30
+  min_intronic_opportunity_nt_per_transcript: 100
+  discovery_fdr: 0.05
+  regulon_q_max: 0.05
+  min_module_genes: 3
+  model_covariates:
+    - log_total_intronic_opportunity
+    - log_eligible_pair_count
+    - log_transcript_count
+  expected_transcripts: 79763
+  expected_eligible_pairs: 374296
+  expected_regulon_nominations: 2
+  expected_candidate_rows: 1993
+  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+nova2_ctag_stage:
+  output_dir: real_data/_m/neuronal_clip/nova2_ctag
+  candidate_manifest: reports/neuronal_clip/nova_family_candidate_manifest.parquet
+  dataset_id: GSE103315_NOVA2_CTAG
+  evidence_tier: 2
+  human_assembly: hg38
+  mouse_assembly: mm10
+  forward_chain: inputs/raw/neuronal_clip/UCSC/hg38ToMm10.over.chain.gz
+  reverse_chain: inputs/raw/neuronal_clip/UCSC/mm10ToHg38.over.chain.gz
+  reciprocal_overlap_min: 0.95
+  min_mapped_fraction: 1.0
+  min_biological_replicates_pooled: 3
+  minimum_coverage: 1
+  processed_signal_resolution: pooled_only
+  callability_basis: reciprocal_liftover_only
+  peak_status: study_processed_unique_tag_coverage_not_called_peaks
+  primary_contexts: [nova2_emx1_cortex, nova2_gad2_cortex]
+  secondary_contexts: [nova2_pcp2_purkinje]
+  expected_candidate_rows: 1993
+  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+
+nova2_perturbation_stage:
+  output_dir: real_data/_m/neuronal_clip/nova2_perturbation
+  candidate_manifest: reports/neuronal_clip/nova_family_candidate_manifest.parquet
+  human_window_manifest: real_data/_m/neuronal_clip/nova2_ctag/human_windows/window_manifest.parquet
+  human_window_membership: real_data/_m/neuronal_clip/nova2_ctag/human_windows/candidate_window_membership.parquet
+  ctag_overlap_calls: real_data/_m/neuronal_clip/nova2_ctag/overlap_calls.parquet
+  dataset_id: GSE103314_NOVA2_CKO
+  evidence_class: perturbation
+  human_assembly: hg38
+  mouse_assembly: mm10
+  forward_chain: inputs/raw/neuronal_clip/UCSC/mm10ToHg38.over.chain.gz
+  reverse_chain: inputs/raw/neuronal_clip/UCSC/hg38ToMm10.over.chain.gz
+  reciprocal_overlap_min: 0.95
+  primary_width: 100
+  sensitivity_widths: [50, 250]
+  event_fdr_max: 0.05
+  absolute_delta_inclusion_min: 0.10
+  min_informative_discordant_genes: 10
+  primary_contexts: [nova2_emx1_cko, nova2_gad2_cko]
+  secondary_contexts: [nova2_pcp2_cko]
+  ctag_context_map:
+    nova2_emx1_cko: nova2_emx1_cortex
+    nova2_gad2_cko: nova2_gad2_cortex
+    nova2_pcp2_cko: nova2_pcp2_purkinje
+  expected_candidate_rows: 1993
+  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+  expected_context_counts:
+    nova2_emx1_cko:
+      unique_events: 2677
+      event_flanks: {50: 11708, 100: 11353, 250: 10715}
+      reciprocal_flanks: {50: 2245, 100: 586, 250: 59}
+      localized_windows: {50: 31, 100: 2, 250: 1}
+    nova2_gad2_cko:
+      unique_events: 1964
+      event_flanks: {50: 8433, 100: 8199, 250: 7730}
+      reciprocal_flanks: {50: 1609, 100: 435, 250: 53}
+      localized_windows: {50: 18, 100: 3, 250: 2}
+    nova2_pcp2_cko:
+      unique_events: 603
+      event_flanks: {50: 2699, 100: 2611, 250: 2424}
+      reciprocal_flanks: {50: 626, 100: 181, 250: 14}
+      localized_windows: {50: 0, 100: 0, 250: 0}
+
+overlap_stage:
+  output_dir: real_data/_m/neuronal_clip/overlap
+  window_dir: real_data/_m/neuronal_clip/windows
+  eligibility_manifest: real_data/_m/neuronal_clip/motif_opportunity/candidate_eligibility.parquet
+  context_qc_manifest: reports/neuronal_clip/context_qc.tsv
+  primary_width: 100
+  min_informative_discordant_sets: 10
+  human_contexts:
+    - ptbp2_ba4
+    - ptbp2_ipscn
+    - tdp43_ngn2_baseline
+    - tdp43_ngn2_stress
+    - tdp43_nk_baseline
+  enriched_windows:
+    q_max: 0.05
+    require_same_strand: true
+    min_callable_replicates: 2
+    min_bound_replicates: 2
+    callability_basis: study_processed_gene_universe
+    mappability_status: inherited_from_study_processed_window_universe
+  paired_strand_bigwig:
+    rscript: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript
+    helper: isograph_benchmark/real_data/neuronal_clip_bigwig.R
+    normalization_scale: 1000000.0
+    pseudocount_cpm: 0.01
+    min_input_cpm: 0.0
+    require_positive_input: true
+    min_log2_ip_input: 1.0
+    min_callable_replicates: 2
+    min_bound_replicates: 2
+    callability_basis: strand_matched_input_signal
+    mappability_status: not_separately_available_unique_read_signal_only
+
+contexts:
+  - context_id: ptbp2_ba4
+    dataset_id: GSE206650_replicate_signal
+    accession: GSE206650
+    rbp: PTBP2
+    species: Homo sapiens
+    context: Postmortem human motor cortex, Brodmann area 4
+    condition: baseline
+    analysis_scope: primary
+    evidence_tier: 1
+    qc_type: paired_strand_bigwig
+    required_strands: [pos, neg]
+    min_ip_replicates: 3
+    min_input_replicates: 3
+    consensus_sha256: 3cb99b962d10872bfb38eed7547fbc01597201faf0df5e494c1ef24cb6fe015a
+    consensus_handling: shared_sensitivity_only
+    context_specific_peak_source: replicate_strand_specific_ip_and_input_bigwig
+    resolution: Reconstruct an input-aware BA4 peak or signal map separately; never count the duplicated GEO consensus bigBed as an independent BA4 map.
+
+  - context_id: ptbp2_ipscn
+    dataset_id: GSE206650_replicate_signal
+    accession: GSE206650
+    rbp: PTBP2
+    species: Homo sapiens
+    context: Mature human iPSC-derived neurons
+    condition: baseline
+    analysis_scope: primary
+    evidence_tier: 1
+    qc_type: paired_strand_bigwig
+    required_strands: [pos, neg]
+    min_ip_replicates: 3
+    min_input_replicates: 3
+    consensus_sha256: 3cb99b962d10872bfb38eed7547fbc01597201faf0df5e494c1ef24cb6fe015a
+    consensus_handling: shared_sensitivity_only
+    context_specific_peak_source: replicate_strand_specific_ip_and_input_bigwig
+    resolution: Reconstruct an input-aware iPSC-neuron peak or signal map separately; never count the duplicated GEO consensus bigBed as an independent iPSC-neuron map.
+
+  - context_id: tdp43_ngn2_baseline
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Homo sapiens
+    context: NGN2-induced neurons
+    condition: baseline
+    analysis_scope: primary
+    evidence_tier: 1
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: tdp43_ngn2_stress
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Homo sapiens
+    context: NGN2-induced neurons
+    condition: stressed
+    analysis_scope: sensitivity
+    evidence_tier: 1
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: tdp43_nk_baseline
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Homo sapiens
+    context: Directly converted age-retaining neurons (NK)
+    condition: baseline
+    analysis_scope: primary
+    evidence_tier: 1
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: tdp43_mouse_young
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Mus musculus
+    context: Whole brain, young
+    condition: aging
+    analysis_scope: secondary
+    evidence_tier: 3
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: tdp43_mouse_mid
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Mus musculus
+    context: Whole brain, middle age
+    condition: aging
+    analysis_scope: secondary
+    evidence_tier: 3
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: tdp43_mouse_old
+    dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Mus musculus
+    context: Whole brain, old
+    condition: aging
+    analysis_scope: secondary
+    evidence_tier: 3
+    qc_type: enriched_windows
+    min_replicates: 2
+    min_significant_windows_per_replicate: 10
+
+  - context_id: nova2_emx1_cortex
+    dataset_id: GSE103315_NOVA2_CTAG
+    accession: GSE103315
+    rbp: NOVA2
+    species: Mus musculus
+    context: Emx1-positive cortical excitatory neurons
+    condition: baseline
+    analysis_scope: orthogonal_primary
+    evidence_tier: 2
+    qc_type: ctag_pooled_bedgraph
+    min_biological_replicates_pooled: 3
+
+  - context_id: nova2_gad2_cortex
+    dataset_id: GSE103315_NOVA2_CTAG
+    accession: GSE103315
+    rbp: NOVA2
+    species: Mus musculus
+    context: Gad2-positive cortical inhibitory neurons
+    condition: baseline
+    analysis_scope: orthogonal_primary
+    evidence_tier: 2
+    qc_type: ctag_pooled_bedgraph
+    min_biological_replicates_pooled: 3
+
+  - context_id: nova2_pcp2_purkinje
+    dataset_id: GSE103315_NOVA2_CTAG
+    accession: GSE103315
+    rbp: NOVA2
+    species: Mus musculus
+    context: Pcp2-positive cerebellar Purkinje cells
+    condition: baseline
+    analysis_scope: orthogonal_secondary
+    evidence_tier: 2
+    qc_type: ctag_pooled_bedgraph
+    min_biological_replicates_pooled: 3
+
+  - context_id: nova2_emx1_cko
+    dataset_id: GSE103314_NOVA2_CKO
+    accession: GSE103314
+    rbp: NOVA2
+    species: Mus musculus
+    context: Emx1-positive cortical excitatory neurons
+    condition: Nova2 conditional knockout versus control
+    analysis_scope: orthogonal_primary
+    evidence_class: perturbation
+    qc_type: perturbation_tables
+    min_events: 1
+
+  - context_id: nova2_gad2_cko
+    dataset_id: GSE103314_NOVA2_CKO
+    accession: GSE103314
+    rbp: NOVA2
+    species: Mus musculus
+    context: Gad2-positive cortical inhibitory neurons
+    condition: Nova2 conditional knockout versus control
+    analysis_scope: orthogonal_primary
+    evidence_class: perturbation
+    qc_type: perturbation_tables
+    min_events: 1
+
+  - context_id: nova2_pcp2_cko
+    dataset_id: GSE103314_NOVA2_CKO
+    accession: GSE103314
+    rbp: NOVA2
+    species: Mus musculus
+    context: Pcp2-positive cerebellar Purkinje cells
+    condition: Nova2 conditional knockout versus control
+    analysis_scope: orthogonal_secondary
+    evidence_class: perturbation
+    qc_type: perturbation_tables
+    min_events: 1
+
+  - context_id: tdp43_motor_neuron_ega
+    dataset_id: EGAD00001008426_TDP43
+    accession: EGAD00001008426
+    rbp: TARDBP
+    species: Homo sapiens
+    context: iPSC-derived motor neurons from two control lines
+    condition: baseline
+    analysis_scope: optional
+    evidence_tier: 1
+    qc_type: controlled_access
+
+  - context_id: nova_rbfox2_motor_neuron_ega
+    dataset_id: EGAD00001008428_NOVA_RBFOX2
+    accession: EGAD00001008428
+    rbp: NOVA1; NOVA2; RBFOX2
+    species: Homo sapiens
+    context: iPSC-derived motor neurons from two control lines
+    condition: baseline
+    analysis_scope: optional
+    evidence_tier: 1
+    qc_type: controlled_access
+
+datasets:
+  - dataset_id: GSE103314_NOVA2_CKO
+    accession: GSE103314
+    rbp: NOVA2
+    species: Mus musculus
+    context: Genetically defined cortical and cerebellar neuronal populations
+    condition: Nova2 conditional knockout versus control
+    assay: RNA-seq alternative-splicing perturbation
+    evidence_class: perturbation
+    assembly: mm10
+    access: public
+    analysis_scope: orthogonal
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103314
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing statistics
+        context_id: nova2_emx1_cko
+        format: quantas_as_tsv_gz
+        expected_bytes: 163456
+        sha256: ef5936c968ef1be25ae1c342e471ea2fbe015ebee4d4f15c182d429cd313d187
+        extract: false
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing BED12 coordinates
+        context_id: nova2_emx1_cko
+        format: quantas_bed12_gz
+        expected_bytes: 94482
+        sha256: 39f527fefd909d9583cc4250b9c4f5c191245049b07f26a3eb554a6b6e1533e4
+        extract: false
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing statistics
+        context_id: nova2_gad2_cko
+        format: quantas_as_tsv_gz
+        expected_bytes: 122034
+        sha256: 4aab3a6fa38e43a07728d52fa51b67000a9d915d09598026dffae3392f1b50d6
+        extract: false
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing BED12 coordinates
+        context_id: nova2_gad2_cko
+        format: quantas_bed12_gz
+        expected_bytes: 72651
+        sha256: 02a17e737a2b9770ef39070ada315553e8307ead40308041d99f1eb3a5fcb06d
+        extract: false
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing statistics
+        context_id: nova2_pcp2_cko
+        format: quantas_as_tsv_gz
+        expected_bytes: 35328
+        sha256: 0664498123f6ff7439b36bae6c804db4c9eca222fd6b6f2571710b54fe004c75
+        extract: false
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103314/suppl/GSE103314_mm10.BED12.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz
+        path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz
+        role: study-processed significant alternative-splicing BED12 coordinates
+        context_id: nova2_pcp2_cko
+        format: quantas_bed12_gz
+        expected_bytes: 21194
+        sha256: 3272b13018005b51b796643485360cb0fb5da4fb5af98634ec1816192c6e8a62
+        extract: false
+    samples:
+      - sample_id: GSE103314_Emx1_significant_events
+        context_id: nova2_emx1_cko
+        context: Emx1-positive cortical excitatory neurons
+        condition: Nova2 conditional knockout versus control
+        assay_role: processed_contrast
+        biological_replicates_control: 3
+        biological_replicates_knockout: 3
+        analysis_scope: orthogonal_primary
+        files:
+          - {path: GSE103314/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz, role: significant_event_statistics, format: quantas_as_tsv_gz}
+          - {path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Emx1-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz, role: significant_event_coordinates, format: quantas_bed12_gz}
+      - sample_id: GSE103314_Gad2_significant_events
+        context_id: nova2_gad2_cko
+        context: Gad2-positive cortical inhibitory neurons
+        condition: Nova2 conditional knockout versus control
+        assay_role: processed_contrast
+        biological_replicates_control: 3
+        biological_replicates_knockout: 3
+        analysis_scope: orthogonal_primary
+        files:
+          - {path: GSE103314/GSE103314_mm10.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz, role: significant_event_statistics, format: quantas_as_tsv_gz}
+          - {path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.FACS.RNAseq.e18.5.Gad2-Cre.Ctl_vs_Nova2cko.FDR005_dI01.txt.gz, role: significant_event_coordinates, format: quantas_bed12_gz}
+      - sample_id: GSE103314_Pcp2_significant_events
+        context_id: nova2_pcp2_cko
+        context: Pcp2-positive cerebellar Purkinje cells
+        condition: Nova2 conditional knockout versus control
+        assay_role: processed_contrast
+        biological_replicates_control: 3
+        biological_replicates_knockout: 3
+        analysis_scope: orthogonal_secondary
+        files:
+          - {path: GSE103314/GSE103314_mm10.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz, role: significant_event_statistics, format: quantas_as_tsv_gz}
+          - {path: GSE103314/GSE103314_mm10.BED12.AS.Quantas.Dissection.RNAseq.P28.Purkinje.Nova2cKO.FDR005_dI01.txt.gz, role: significant_event_coordinates, format: quantas_bed12_gz}
+
+  - dataset_id: GSE103315_NOVA2_CTAG
+    accession: GSE103315
+    rbp: NOVA2
+    species: Mus musculus
+    context: Genetically defined cortical and cerebellar neuronal populations
+    condition: baseline
+    assay: cTag-CLIP
+    evidence_tier: 2
+    assembly: mm10
+    access: public
+    analysis_scope: orthogonal
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE103315
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE103nnn/GSE103315/suppl/GSE103315_CLIP_processed_data_bedgraph_files.tar.gz
+        path: GSE103315/GSE103315_CLIP_processed_data_bedgraph_files.tar.gz
+        role: study-processed replicate and pooled unique-tag bedGraph archive
+        expected_bytes: 145349980
+        sha256: 2ef4f2f2b040a5e15667517163edc37003e5bee902dec8e7dd8e856de739e722
+        extract: true
+    samples:
+      - sample_id: GSE103315_Emx1_pooled
+        context_id: nova2_emx1_cortex
+        context: Emx1-positive cortical excitatory neurons
+        condition: baseline
+        assay_role: pooled_IP
+        replicate: 0
+        biological_replicates_pooled: 3
+        replicate_resolution: pooled_only
+        analysis_scope: orthogonal_primary
+        files:
+          - path: GSE103315/GSE103315_CLIP_processed_data_bedgraph_files.tar_files/mm10.e18.5.Cortex.NOVA2-cTagCLIP.Emx1-Cre.bedgraph.gz
+            role: pooled_unique_tag_coverage
+            format: bedgraph_gz
+            strand: unstranded
+      - sample_id: GSE103315_Gad2_pooled
+        context_id: nova2_gad2_cortex
+        context: Gad2-positive cortical inhibitory neurons
+        condition: baseline
+        assay_role: pooled_IP
+        replicate: 0
+        biological_replicates_pooled: 3
+        replicate_resolution: pooled_only
+        analysis_scope: orthogonal_primary
+        files:
+          - path: GSE103315/GSE103315_CLIP_processed_data_bedgraph_files.tar_files/mm10.e18.5.Cortex.NOVA2-cTagCLIP.Gad2-Cre.bedgraph.gz
+            role: pooled_unique_tag_coverage
+            format: bedgraph_gz
+            strand: unstranded
+      - sample_id: GSE103315_Pcp2_pooled
+        context_id: nova2_pcp2_purkinje
+        context: Pcp2-positive cerebellar Purkinje cells
+        condition: baseline
+        assay_role: pooled_IP
+        replicate: 0
+        biological_replicates_pooled: 3
+        replicate_resolution: pooled_only
+        analysis_scope: orthogonal_secondary
+        files:
+          - path: GSE103315/GSE103315_CLIP_processed_data_bedgraph_files.tar_files/mm10.P28.Cerebellum.NOVA2-cTagCLIP.Pcp2-Cre.bedgraph.gz
+            role: pooled_unique_tag_coverage
+            format: bedgraph_gz
+            strand: unstranded
+
+  - dataset_id: UCSC_HG38_MM10_CHAINS
+    accession: UCSC_hg38_mm10_liftOver
+    rbp: not_applicable
+    species: Homo sapiens; Mus musculus
+    context: Reciprocal cross-species coordinate mapping resource
+    condition: not_applicable
+    assay: coordinate_mapping_resource
+    evidence_tier: not_applicable
+    assembly: hg38; mm10
+    access: public
+    analysis_scope: orthology_resource
+    source_page: https://hgdownload.soe.ucsc.edu/downloads.html
+    files:
+      - url: https://hgdownload.soe.ucsc.edu/goldenPath/hg38/liftOver/hg38ToMm10.over.chain.gz
+        path: UCSC/hg38ToMm10.over.chain.gz
+        role: forward reciprocal-liftOver chain
+        expected_bytes: 72877108
+        sha256: 5493fa0c90d5bf56ea64a2787ebafbc49f7fc33b682b6db17b6d3a4bcb939339
+        extract: false
+      - url: https://hgdownload.soe.ucsc.edu/goldenPath/mm10/liftOver/mm10ToHg38.over.chain.gz
+        path: UCSC/mm10ToHg38.over.chain.gz
+        role: reverse reciprocal-liftOver chain
+        expected_bytes: 70749762
+        sha256: 78368ce28c5ccb0006b34889d652f4148b3900ac6805cd515d23b00c9773940e
+        extract: false
+
+  - dataset_id: GSE206650_BA4_PTBP2
+    accession: GSE206650
+    rbp: PTBP2
+    species: Homo sapiens
+    context: Postmortem human motor cortex, Brodmann area 4
+    condition: baseline
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: hg38
+    access: public
+    upstream_qc: The BA4 and iPSC-neuron GEO consensus bigBed supplements are byte-identical; do not treat them as independent contexts without replicate-level confirmation.
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE206650
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE206nnn/GSE206650/suppl/GSE206650_GRChg38.BA4_realigned_10.narrow_peak.combined.bb
+        path: GSE206650/GSE206650_GRChg38.BA4_realigned_10.narrow_peak.combined.bb
+        role: study-provided CLAM multi-replicate consensus peaks
+        context_id: ptbp2_ba4
+        peak_use: shared_sensitivity_only
+        peak_qc_status: byte_identical_across_context_labels
+        expected_bytes: 722285
+        sha256: 3cb99b962d10872bfb38eed7547fbc01597201faf0df5e494c1ef24cb6fe015a
+
+  - dataset_id: GSE206650_iPSCN_PTBP2
+    accession: GSE206650
+    rbp: PTBP2
+    species: Homo sapiens
+    context: Mature human iPSC-derived neurons
+    condition: baseline
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: hg38
+    access: public
+    upstream_qc: The BA4 and iPSC-neuron GEO consensus bigBed supplements are byte-identical; do not treat them as independent contexts without replicate-level confirmation.
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE206650
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE206nnn/GSE206650/suppl/GSE206650_GRChg38.IPS_realigned_10.narrow_peak.combined.bb
+        path: GSE206650/GSE206650_GRChg38.IPS_realigned_10.narrow_peak.combined.bb
+        role: study-provided CLAM multi-replicate consensus peaks
+        context_id: ptbp2_ipscn
+        peak_use: shared_sensitivity_only
+        peak_qc_status: byte_identical_across_context_labels
+        expected_bytes: 722285
+        sha256: 3cb99b962d10872bfb38eed7547fbc01597201faf0df5e494c1ef24cb6fe015a
+
+  - dataset_id: GSE206650_replicate_signal
+    accession: GSE206650
+    rbp: PTBP2
+    species: Homo sapiens
+    context: Postmortem human BA4 cortex and mature iPSC-derived neurons
+    condition: baseline
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: hg38
+    access: public
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE206650
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE206nnn/GSE206650/suppl/GSE206650_RAW.tar
+        path: GSE206650/GSE206650_RAW.tar
+        role: replicate-level strand-specific IP and size-matched-input bigWig archive
+        peak_use: context_specific_reconstruction_source
+        expected_bytes: 513955840
+        sha256: d5f8efcf4b3cebc2ff1b640a14a70bae5503467a2e1781c9bbdb11239a67f1bc
+        extract: true
+    samples:
+      - sample_id: GSM6260040
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: input
+        replicate: 1
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260040_BA4_Input_1_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260040_BA4_Input_1_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260041
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: input
+        replicate: 2
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260041_BA4_Input_2_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260041_BA4_Input_2_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260042
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: input
+        replicate: 3
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260042_BA4_Input_3_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260042_BA4_Input_3_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260043
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: IP
+        replicate: 1
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260043_BA4_PTBP2_1_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260043_BA4_PTBP2_1_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260044
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: IP
+        replicate: 2
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260044_BA4_PTBP2_2_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260044_BA4_PTBP2_2_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260045
+        context_id: ptbp2_ba4
+        context: Postmortem human motor cortex, Brodmann area 4
+        condition: baseline
+        assay_role: IP
+        replicate: 3
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260045_BA4_PTBP2_3_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260045_BA4_PTBP2_3_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260046
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: input
+        replicate: 1
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260046_iPSCNs_Input_1_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260046_iPSCNs_Input_1_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260047
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: input
+        replicate: 2
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260047_iPSCNs_Input_2_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260047_iPSCNs_Input_2_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260048
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: input
+        replicate: 3
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260048_iPSCNs_Input_3_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260048_iPSCNs_Input_3_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260049
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: IP
+        replicate: 1
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260049_iPSCNs_PTBP2_1_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260049_iPSCNs_PTBP2_1_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260050
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: IP
+        replicate: 2
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260050_iPSCNs_PTBP2_2_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260050_iPSCNs_PTBP2_2_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+      - sample_id: GSM6260051
+        context_id: ptbp2_ipscn
+        context: Mature human iPSC-derived neurons
+        condition: baseline
+        assay_role: IP
+        replicate: 3
+        files:
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260051_iPSCNs_PTBP2_3_unique.sorted.pos.bw, role: strand_signal, strand: pos, format: bigwig}
+          - {path: GSE206650/GSE206650_RAW_files/GSM6260051_iPSCNs_PTBP2_3_unique.sorted.neg.bw, role: strand_signal, strand: neg, format: bigwig}
+
+  - dataset_id: GSE276985_processed
+    accession: GSE276985
+    rbp: TARDBP
+    species: Homo sapiens; Mus musculus
+    context: Human NGN2 and directly converted neurons; age-stratified mouse brain
+    condition: baseline, stress, and aging contexts kept separate downstream
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: hg38; mm10
+    access: public
+    enriched_window_q_max: 0.05
+    source_page: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE276985
+    files:
+      - url: https://ftp.ncbi.nlm.nih.gov/geo/series/GSE276nnn/GSE276985/suppl/GSE276985_RAW.tar
+        path: GSE276985/GSE276985_RAW.tar
+        role: study-provided processed enriched-window TSV archive
+        expected_bytes: 130918400
+        sha256: aee4720d9c19614b9bebafdf871418d1c0205a95d62ab72ff993f7722a96b45d
+        extract: true
+    samples:
+      - sample_id: GSM8510692
+        context_id: tdp43_ngn2_baseline
+        context: NGN2-induced neurons
+        condition: baseline
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 2
+        analysis_scope: primary
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510692_TDP-43_Ngn2_Unstress-20-08-2024-13-59-01.TDP-43_Ngn2_Unstressed_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510693
+        context_id: tdp43_ngn2_baseline
+        context: NGN2-induced neurons
+        condition: baseline
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 1
+        analysis_scope: primary
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510693_TDP-43_Ngn2_Unstress-20-08-2024-13-59-01.TDP-43_Ngn2_Unstressed_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510694
+        context_id: tdp43_ngn2_stress
+        context: NGN2-induced neurons
+        condition: stressed
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 2
+        analysis_scope: sensitivity
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510694_TDP-43_Ngn2_Stress-20-08-2024-13-59-01.TDP-43_Ngn2_Stressed_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510695
+        context_id: tdp43_ngn2_stress
+        context: NGN2-induced neurons
+        condition: stressed
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 1
+        analysis_scope: sensitivity
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510695_TDP-43_Ngn2_Stress-20-08-2024-13-59-01.TDP-43_Ngn2_Stressed_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510696
+        context_id: tdp43_nk_baseline
+        context: Directly converted age-retaining neurons (NK)
+        condition: baseline
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 2
+        analysis_scope: primary
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510696_TDP-43_NK-20-08-2024-13-59-01.TDP-43_NK_Unstressed_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510697
+        context_id: tdp43_nk_baseline
+        context: Directly converted age-retaining neurons (NK)
+        condition: baseline
+        species: Homo sapiens
+        assembly: hg38
+        assay_role: IP
+        replicate: 1
+        analysis_scope: primary
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510697_TDP-43_NK-20-08-2024-13-59-01.TDP-43_NK_Unstressed_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510698
+        context_id: tdp43_mouse_young
+        context: Whole brain, young
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 4
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510698_TDP-43_Young-Age_MouseBrain-20-08-2024-14-05-32.young_TDP-43_IP_4.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510699
+        context_id: tdp43_mouse_young
+        context: Whole brain, young
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 3
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510699_TDP-43_Young-Age_MouseBrain-20-08-2024-14-05-32.young_TDP-43_IP_3.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510700
+        context_id: tdp43_mouse_young
+        context: Whole brain, young
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 2
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510700_TDP-43_Young-Age_MouseBrain-20-08-2024-14-05-32.young_TDP-43_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510701
+        context_id: tdp43_mouse_young
+        context: Whole brain, young
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 1
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510701_TDP-43_Young-Age_MouseBrain-20-08-2024-14-05-32.young_TDP-43_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510702
+        context_id: tdp43_mouse_mid
+        context: Whole brain, middle age
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 2
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510702_TDP-43_Mid-Age_MouseBrain-20-08-2024-14-05-32.mid_TDP-43_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510703
+        context_id: tdp43_mouse_mid
+        context: Whole brain, middle age
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 1
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510703_TDP-43_Mid-Age_MouseBrain-20-08-2024-14-05-32.mid_TDP-43_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510704
+        context_id: tdp43_mouse_old
+        context: Whole brain, old
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 2
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510704_TDP-43_Old-Age_MouseBrain-20-08-2024-14-05-32.old_TDP-43_IP_2.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+      - sample_id: GSM8510705
+        context_id: tdp43_mouse_old
+        context: Whole brain, old
+        condition: aging
+        species: Mus musculus
+        assembly: mm10
+        assay_role: IP
+        replicate: 1
+        analysis_scope: secondary
+        evidence_tier: 3
+        files:
+          - {path: GSE276985/GSE276985_RAW_files/GSM8510705_TDP-43_Old-Age_MouseBrain-20-08-2024-14-05-32.old_TDP-43_IP_1.enriched_windows.tsv.gz, role: enriched_windows, format: enriched_windows_tsv_gz}
+
+  - dataset_id: EGAD00001008426_TDP43
+    accession: EGAD00001008426
+    study: EGAS00001005880
+    dac: EGAC00001002455
+    dac_contact: martin.regensburger@uk-erlangen.de
+    request_url: https://ega-archive.org/datasets/EGAD00001008426/request
+    expected_samples: 4
+    sample_manifest_status: optional_pending_controlled_access
+    analysis_scope: optional
+    rbp: TARDBP
+    species: Homo sapiens
+    context: iPSC-derived motor neurons from two control lines
+    condition: baseline
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: GRCh38
+    access: controlled
+    source_page: https://ega-archive.org/datasets/EGAD00001008426
+    files: []
+
+  - dataset_id: EGAD00001008428_NOVA_RBFOX2
+    accession: EGAD00001008428
+    study: EGAS00001005880
+    dac: EGAC00001002455
+    dac_contact: martin.regensburger@uk-erlangen.de
+    request_url: https://ega-archive.org/datasets/EGAD00001008428/request
+    expected_samples: 12
+    sample_manifest_status: optional_pending_controlled_access
+    analysis_scope: optional
+    rbp: NOVA1; NOVA2; RBFOX2
+    species: Homo sapiens
+    context: iPSC-derived motor neurons from two control lines
+    condition: baseline
+    assay: eCLIP
+    evidence_tier: 1
+    assembly: GRCh38
+    access: controlled
+    source_page: https://ega-archive.org/datasets/EGAD00001008428
+    files: []
