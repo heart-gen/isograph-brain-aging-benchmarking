@@ -1,0 +1,10 @@
+{
+  "source": "Aguzzoli-Heberle et al., Nat Biotechnol 2024 (DOI 10.1038/s41587-024-02245-9)",
+  "zenodo_record": "8180677",
+  "url": "https://zenodo.org/records/8180677/files/counts_transcript.txt?download=1",
+  "file": "counts_transcript.txt",
+  "bytes": 91699489,
+  "md5": "f2d3b25bd8434f8022ab574c1f3e5c39",
+  "quantifier": "Bambu (transcript-level counts, intronic reads excluded)",
+  "assay": "ONT PromethION cDNA (SQK-PCS111), DLPFC BA9/46, n=12 (6 AD / 6 control)"
+}
