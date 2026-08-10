@@ -27,6 +27,29 @@ scripts/stage_zenodo_bundle.sh --checksums   # writes MANIFEST.tsv (path, bytes,
 scripts/stage_zenodo_bundle.sh --tar         # also build the upload tarball
 ```
 
-After upload, record the DOI here and in the manuscript Data Availability section.
+## Deposition metadata
 
-**Zenodo DOI:** _TODO — add after first deposition._
+`.zenodo.json` (this directory) holds the pre-filled deposition metadata — title,
+creators + ORCIDs, `cc-by-4.0` data license, keywords, and related-identifier links to
+the IsoGraph software archive (`10.5281/zenodo.20007826`) and the long-read source
+dataset (`10.5281/zenodo.8180677`). Upload the staged tarball through the Zenodo web
+uploader (or the REST API) and paste `.zenodo.json` into the metadata form / request
+body so the record is consistent with the manuscript.
+
+## Two DOIs to mint (both feed the manuscript Data Availability section)
+
+1. **Dataset-bundle DOI** — this deposition (the heavy artifacts above). Fills the
+   `TODO: Zenodo DOI` placeholders in `content/05.methods.md` (Key resources table +
+   Data-and-code-availability list).
+2. **Benchmark-repository DOI** — archive of this analysis repo. Easiest path: enable the
+   GitHub↔Zenodo integration for `heart-gen/isograph-brain-aging-benchmarking`, cut a
+   tagged GitHub release, and Zenodo mints a versioned DOI automatically. Fills the
+   `TODO: benchmark repository DOI` placeholder.
+
+A third identifier, the **protocols.io DOI**, is minted when the step-by-step protocol is
+published there (it mirrors the IsoGraph wiki); it fills the `TODO: protocols.io DOI`
+placeholder. These three are the only account-gated items left in Data Availability — the
+GTEx access date (January 15, 2026) and the long-read Zenodo DOI are already filled.
+
+**Zenodo DOI (dataset bundle):** _TODO — add after first deposition._
+**Zenodo DOI (benchmark repo):** _TODO — add after tagged GitHub release._
