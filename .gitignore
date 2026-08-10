@@ -33,6 +33,10 @@ real_data/**/feature_reconstruction.parquet
 real_data/**/high_vs_low_table.parquet
 real_data/**/edges.parquet
 
+# satuRn raw input matrices (counts/coldata/txinfo, ~300 MB; regenerable from the
+# quant pipeline). Only the isa_concordance result tables are tracked.
+real_data/_m/isa_concordance/**/_saturn_inputs/
+
 # Coloc/S-LDSC per-locus LD, SuSiE, and munge intermediates (235 GB / 1.5 GB;
 # regenerable from real_data/{coloc,ldsc}/_h). Only the lean top-level summaries
 # and result tables are tracked; the per-trait subdirs are Zenodo-bound.
@@ -46,6 +50,7 @@ inputs/rbp_motifs/*.zip
 zenodo/*
 !zenodo/README.md
 !zenodo/MANIFEST.tsv
+!zenodo/.zenodo.json
 
 # Local scratch / troubleshooting (not part of the published pipeline).
 develop/
