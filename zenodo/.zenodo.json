@@ -1,0 +1,54 @@
+{
+  "upload_type": "dataset",
+  "title": "IsoGraph brain-aging benchmark: heavy deterministic output artifacts (feature scores, VAE reconstructions, network edges, module interpretation tables)",
+  "description": "<p>Heavy, regenerable output artifacts from the IsoGraph brain aging and disease study (see companion manuscript and analysis repository). The GitHub analysis repository (with Git LFS) carries the lean result artifacts needed to reproduce every figure and statistic; the large deterministic intermediates that exceed practical Git/LFS limits are deposited here instead.</p><p>Contents (listed with byte sizes and SHA-256 checksums in <code>MANIFEST.tsv</code>): per-sample switch/abundance <code>feature_scores.parquet</code>, VAE <code>feature_reconstruction.parquet</code>, IsoGraph network <code>edges.parquet</code>, and per-module <code>high_vs_low_table.parquet</code> interpretation tables, across all BrainSEQ and GTEx v11 brain-region analyses at the canonical Leiden resolution 5.0. Every file is a deterministic output of the committed, config-driven pipeline and can be regenerated from the source bundles with the pinned analysis environment (<code>env/environment.lock.txt</code>) and IsoGraph v0.1.5.</p><p>No controlled-access source data are redistributed. BrainSEQ source data remain under the original controlled-access terms; GTEx v11 data are publicly available at the GTEx Portal.</p>",
+  "creators": [
+    {
+      "name": "Bennett, Alexis",
+      "orcid": "0000-0002-5384-7657",
+      "affiliation": "Department of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern University"
+    },
+    {
+      "name": "Benjamin, Kynon J. M.",
+      "orcid": "0000-0003-2016-4646",
+      "affiliation": "Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School of Medicine, Northwestern University"
+    }
+  ],
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "language": "eng",
+  "version": "1.0.0",
+  "keywords": [
+    "IsoGraph",
+    "isoform switching",
+    "alternative splicing",
+    "brain aging",
+    "splicing QTL",
+    "transcript isoforms",
+    "co-switching modules",
+    "variational autoencoder",
+    "BrainSEQ",
+    "GTEx"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/heart-gen/isograph-brain-aging-benchmarking",
+      "resource_type": "software",
+      "scheme": "url"
+    },
+    {
+      "relation": "isDerivedFrom",
+      "identifier": "10.5281/zenodo.20007826",
+      "resource_type": "software",
+      "scheme": "doi"
+    },
+    {
+      "relation": "references",
+      "identifier": "10.5281/zenodo.8180677",
+      "resource_type": "dataset",
+      "scheme": "doi"
+    }
+  ],
+  "notes": "Companion deposition to the IsoGraph brain-aging manuscript. Software (IsoGraph) is archived separately at doi:10.5281/zenodo.20007826. Populate the manuscript Data Availability 'Zenodo DOI' placeholders with the DOI minted for this deposition."
+}
