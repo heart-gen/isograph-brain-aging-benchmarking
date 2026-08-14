@@ -1,0 +1,25 @@
+tier	tier_label	gene_name	ensembl_gene_id	n_regions	n_regions_binding	selection_reason
+0	regulator	KHDRBS1	ENSG00000121774			KHDRBS1 itself -- the perturbation target
+1	core recurrent	SOCS3	ENSG00000184557	5	5	switched + enriched module in 5 region(s); 5 eCLIP-supported
+1	core recurrent	IRF1	ENSG00000125347	5	5	switched + enriched module in 5 region(s); 5 eCLIP-supported
+1	core recurrent	OSMR-DT	ENSG00000249740	5	5	switched + enriched module in 5 region(s); 5 eCLIP-supported
+1	core recurrent	CSF3	ENSG00000108342	4	4	switched + enriched module in 4 region(s); 4 eCLIP-supported
+1	core recurrent	P2RY6	ENSG00000171631	4	4	switched + enriched module in 4 region(s); 4 eCLIP-supported
+1	core recurrent	GNB2	ENSG00000172354	4	3	switched + enriched module in 4 region(s); 3 eCLIP-supported
+1	core recurrent	PUS1	ENSG00000177192	4	3	switched + enriched module in 4 region(s); 3 eCLIP-supported
+1	core recurrent	MAPRE3	ENSG00000084764	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	MDH2	ENSG00000146701	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	JPT1	ENSG00000189159	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	FSTL3	ENSG00000070404	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	ZFP36	ENSG00000128016	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	GDI1	ENSG00000203879	3	2	switched + enriched module in 3 region(s); 2 eCLIP-supported
+1	core recurrent	CEP170B	ENSG00000099814	3	2	switched + enriched module in 3 region(s); 2 eCLIP-supported
+2	disease anchor	CDIP1	ENSG00000089486	3	2	colocalized SCZ (sQTL); splicing-led (IsoGraph-resolved switch)
+2	disease anchor	GABBR2	ENSG00000136928	2	2	colocalized SCZ (sQTL); splicing (sQTL not resolved to switch pair)
+2	disease anchor	PTPRN	ENSG00000054356	2	2	colocalized ALS (sQTL); splicing (sQTL not resolved to switch pair)
+2	disease anchor	TPCN1	ENSG00000186815	1	1	colocalized AD (sQTL); splicing-led (IsoGraph-resolved switch)
+3	GO-invisible program	PLCD3	ENSG00000161714	3	1	GO-invisible module in 1 region(s), no coloc anchor
+3	GO-invisible program	INF2	ENSG00000203485	3	1	GO-invisible module in 2 region(s), no coloc anchor
+3	GO-invisible program	ZDHHC3	ENSG00000163812	3	1	GO-invisible module in 2 region(s), no coloc anchor
+3	GO-invisible program	UBE2O	ENSG00000175931	2	2	GO-invisible module in 1 region(s), no coloc anchor
+3	GO-invisible program	TECPR1	ENSG00000205356	2	2	GO-invisible module in 1 region(s), no coloc anchor
