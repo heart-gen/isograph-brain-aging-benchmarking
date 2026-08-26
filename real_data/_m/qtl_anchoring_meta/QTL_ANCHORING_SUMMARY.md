@@ -61,29 +61,45 @@ the estimand; it is reported only to motivate the contrast.
 
 **Splicing-specificity contrast — the result.** The paired sQTL-OR / eQTL-OR ratio exceeds
 1 and concentrates exactly where IsoGraph's DTU-without-DGE value lives
-(`qtl_anchoring_meta_contrast.parquet`): `all_modules` **1.07** (95% CI 1.04–1.10,
-p=7.8e-6), `pheno_sig_modules` **1.13** (1.06–1.20, p=1.5e-4, I²=0.22),
-`go_invisible_modules` **1.13** (1.04–1.22, p=2.6e-3, I²=0.15 — consistent across tissues),
-and `go_visible_modules` **1.04** (0.94–1.14, p=0.46, **ns**). Splicing-QTL are spared
-~13% relative to expression-QTL in the phenotype-associated and GO-invisible co-switch
-modules, and the immune/abundance GO-visible modules are a clean internal null.
+(`qtl_anchoring_meta_contrast.parquet`): `all_modules` **1.068** (95% CI 1.04–1.10,
+p=1.3e-5, I²=0.29), `pheno_sig_modules` **1.163** (1.10–1.23, p=3.6e-7, I²=0.47),
+`go_invisible_modules` **1.172** (1.09–1.26, p=2.3e-5, **I²=0.00, Q=8.5** — homogeneous
+across all 10 tissues, FE and RE identical), and `go_visible_modules` **1.104**
+(1.01–1.20, p=0.022, I²=0.68, Q=31.4). Splicing-QTL are spared ~7–17% relative to
+expression-QTL, concentrating in the phenotype-associated and GO-invisible co-switch
+modules.
+
+**On the GO-visible arm — read this carefully.** It is *not* a clean internal null. At
+1.104 (p=0.022) it is positive and nominally significant. What separates it from the
+GO-invisible arm is **consistency, not presence/absence**: GO-invisible is homogeneous
+across every tissue (I²=0.00), whereas the GO-visible ratio rides on strong between-tissue
+heterogeneity (I²=0.68, Q=31.4), so its nominal significance is carried by a few tissues
+rather than a reproducible effect. Report GO-visible as the low end of a gradient, never as
+an on/off control. (An earlier version of this file reported 1.04, p=0.46, ns — those values
+came from meta outputs written 2026-06-27, two days *before* the 2026-06-29
+covariate-decouple re-fit regenerated their inputs. The values above regenerate
+bit-identically from the current inputs, max|diff| = 0.)
 
 **Matched-baseline method effect — only IsoGraph shows it.** On the 13 GTEx tissues all
 methods share (8-tissue common-subset contrast, `qtl_anchoring_meta_contrast_common.parquet`),
-IsoGraph reproduces the specificity (`all_modules` **1.11**, p=6.5e-6; `pheno_sig` **1.11**,
-p=2.1e-3; `go_invisible` **1.11**, p=0.011) while the matched WGCNA baselines on identical
-switch features are **null everywhere**: `wgcna_switch_only` go_invisible 1.02 (p=0.71),
-pheno_sig 0.97 (p=0.46); `wgcna_multiplex` go_invisible 0.99 (p=0.86), pheno_sig 0.98
-(p=0.41). Same features + classical inference loses the splicing-genetic signal that
+IsoGraph reproduces the specificity (`all_modules` **1.105**, p=5.8e-6; `pheno_sig`
+**1.146**, p=1.9e-5; `go_invisible` **1.164**, p=2.0e-4; `go_visible` 1.087, p=0.060) while
+the matched WGCNA baselines on identical switch features are **null everywhere**:
+`wgcna_switch_only` go_invisible 1.021 (p=0.71), pheno_sig 0.968 (p=0.46), go_visible 0.959
+(p=0.30); `wgcna_multiplex` go_invisible 0.993 (p=0.86), pheno_sig 0.980 (p=0.41),
+go_visible 0.993 (p=0.77). **This is the primary internal control** — it holds the switch
+features fixed and varies only the inference, which localises the effect far more
+sharply than a module-content contrast can. Same features + classical inference loses the splicing-genetic signal that
 IsoGraph's VAE + Leiden concentrates in the GO-invisible modules — the genetic-anchoring
 analog of the three-baseline result. (One tissue, frontal_cortex, looked specific for
 `wgcna_switch_only` at 1.29 but does not survive pooling; trust the meta, not one tissue.)
 
-**Headline:** *Splicing-QTL are spared ~13% over expression-QTL in IsoGraph's
-phenotype-associated, GO-invisible co-switch modules — significant exactly where the
-DTU-without-DGE value concentrates, null for the GO-visible immune/abundance modules, and
-absent in matched WGCNA baselines built on identical switch features. Genetic anchoring of
-the complementary isoform-regulation layer is a clean IsoGraph method effect.*
+**Headline:** *Splicing-QTL are spared ~16–17% over expression-QTL in IsoGraph's
+phenotype-associated and GO-invisible co-switch modules — and in the GO-invisible modules
+the effect is perfectly homogeneous across all 10 brain tissues (I²=0.00). It is absent in
+matched WGCNA baselines built on identical switch features, so genetic anchoring of the
+complementary isoform-regulation layer is an IsoGraph method effect, not a property of the
+switch features.*
 
 ## Figure and table notes
 
@@ -94,7 +110,7 @@ the complementary isoform-regulation layer is a clean IsoGraph method effect.*
     line at OR = 1 — both depleted, sQTL above eQTL (motivates the contrast).
   - **(B)** splicing-specificity contrast (sQTL-OR / eQTL-OR) per module set for IsoGraph,
     forest-style point + 95% CI, reference line at ratio = 1 — concentrates in pheno-sig +
-    GO-invisible, GO-visible null.
+    GO-invisible; GO-visible is the weakest arm (and the most heterogeneous), not a null.
   - **(C)** matched-baseline method effect on the shared tissues: the contrast per module
     set coloured by method (IsoGraph / wgcna_switch_only / wgcna_multiplex) — only IsoGraph
     is positive; baselines straddle 1.

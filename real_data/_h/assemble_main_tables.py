@@ -56,7 +56,7 @@ _MODSET = {
     "all_modules": "All modules",
     "pheno_sig_modules": "Phenotype-associated",
     "go_invisible_modules": "GO-invisible (DTU-without-DGE)",
-    "go_visible_modules": "GO-visible (immune/abundance control)",
+    "go_visible_modules": "GO-visible (immune/abundance)",
 }
 
 
@@ -182,9 +182,13 @@ def main() -> None:
         "genetics), inverse-variance fixed-effect meta-analysis across brain xQTL "
         "analyses (k), with 95% CI, p, and I2 heterogeneity. The contrast removes the "
         "shared cis-QTL depletion baseline of constrained network genes. The effect "
-        "concentrates in the phenotype-associated and GO-invisible module sets and is "
-        "null in the GO-visible immune/abundance control; matched WGCNA baselines on "
-        "identical switch features show no effect. This is the statistical anchor of "
+        "concentrates in the phenotype-associated and GO-invisible module sets, where "
+        "it is also homogeneous across tissues (I2 = 0.00 for GO-invisible); the "
+        "GO-visible immune/abundance set is the weakest arm and its nominal "
+        "significance rests on between-tissue heterogeneity (I2 = 0.68) rather than a "
+        "consistent effect. The primary internal control is the matched WGCNA "
+        "baselines, which consume identical switch features and show no effect in any "
+        "module set. This is the statistical anchor of "
         "the genetic-anchoring result (cf. per-gene resolution in Table 3, whose "
         "colocalization posteriors are individually modest). Verbatim from "
         "real_data/_m/qtl_anchoring_meta/qtl_anchoring_meta_contrast.parquet."

@@ -96,13 +96,24 @@ favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
 - Co-switch genes are cis-QTL **depleted for both** sQTL and eQTL (coordinated/network
   genes are constrained → fewer common cis-QTL). This shared baseline is not the result.
 - **The result is the paired splicing-specificity contrast** (sQTL OR / eQTL OR within
-  analysis, removing the constraint baseline): all 1.07 (p=8e-6), pheno-sig 1.13
-  (p=1.5e-4), **GO-invisible 1.13 (p=3e-3, I²=0.15 — consistent across tissues)**,
-  GO-visible 1.04 (**ns**). Splicing-QTL is spared ~7–13% vs expression-QTL in
-  co-switch genes, significant exactly for the phenotype-associated + GO-invisible
-  modules and **null for the GO-visible (immune/abundance) modules** — a clean internal
-  control. Splicing-specific genetic anchoring concentrates where IsoGraph's unique
-  value is (DTU-without-DGE).
+  analysis, removing the constraint baseline). Numbers below are the 2026-06-29
+  post-covariate-decouple re-fit inputs (`qtl_anchoring_meta_contrast.parquet`;
+  regenerates bit-identically, max|diff| = 0): all 1.068 (p=1.3e-5, I²=0.29),
+  pheno-sig 1.163 (p=3.6e-7, I²=0.47), **GO-invisible 1.172 (p=2.3e-5, I²=0.00,
+  Q=8.5 — FE and RE identical)**, GO-visible 1.104 (p=0.022, I²=0.68, Q=31.4).
+  Splicing-QTL is spared ~7–17% vs expression-QTL in co-switch genes, concentrating in
+  the phenotype-associated + GO-invisible modules — where IsoGraph's unique value is
+  (DTU-without-DGE).
+- **GO-visible is NO LONGER a clean internal null** — do not describe it as one. On the
+  re-fit inputs it is 1.104 at p=0.022. What separates it from GO-invisible is now
+  *consistency*, not presence/absence: GO-invisible is homogeneous across all 10 tissues
+  (I²=0.00) while GO-visible rides on heterogeneity (I²=0.68), so its nominal
+  significance is carried by a few tissues rather than a consistent effect. Report it as
+  the low end of a gradient.
+- **The primary internal control is the matched WGCNA baselines, not GO-visible.** They
+  hold the switch features fixed and vary only the inference, and they are null across
+  every module set (0.970–1.017, p=0.44–0.86) — a stronger and more interpretable
+  control than a module-content contrast.
 - Manuscript line: frame on the **sQTL-vs-eQTL specificity contrast**, not raw sQTL
   enrichment. Scope caveat (in report): cis-sQTL anchors member-gene splicing to
   genetics, not the co-switching coordination itself. Optional secondary:
@@ -113,9 +124,11 @@ wgcna_multiplex}`; SLURM `real_data/gtex/_h/08.qtl_anchoring_matched.sh`, 2 meth
 GTEx tissues; `qtl_anchoring_meta.py` now multi-method). Anchors the matched WGCNA
 baselines (same switch features) and compares the splicing-specificity contrast on the
 **same 13 GTEx tissues**. Result is a clean **method effect**: only IsoGraph shows it —
-go_invisible **1.11 (p=0.011)**, pheno_sig 1.11 (p=2e-3), go_visible 1.02 (ns, internal
-control); `wgcna_switch_only` and `wgcna_multiplex` are **null everywhere** (go_invisible
-1.02 / 0.99, ns). Same features + classical inference loses the splicing-genetic signal
+go_invisible **1.164 (p=2.0e-4)**, pheno_sig 1.146 (p=1.9e-5), go_visible 1.087 (p=0.060);
+`wgcna_switch_only` and `wgcna_multiplex` are **null everywhere** (go_invisible 1.021
+p=0.71 / 0.993 p=0.86; go_visible 0.959 p=0.30 / 0.993 p=0.77). This null — not
+go_visible — is the primary internal control. Same features + classical inference loses
+the splicing-genetic signal
 that IsoGraph's VAE+Leiden concentrates in GO-invisible modules. (NB: a single tissue —
 frontal_cortex — looked specific for wgcna_switch_only at 1.29, but it does not survive
 pooling; trust the meta, not one tissue.) Complements item 2: WGCNA-switch matches
@@ -310,6 +323,39 @@ example, not enrichment evidence. **Verdict: informative sparse null / not forma
 estimable**, so this does not rescue NOVA2 and candidates remain `NOVA_FAMILY`. Close
 the neuronal CLIP analysis here for this submission; integrate the null transparently
 in Methods/Results or supplement, and keep controlled-access EGA reanalysis optional.
+
+### 8. OPEN — neuronal-CLIP frozen inputs invalidated by the intronic re-scan (2026-08-26)
+
+`configs/neuronal_clip.yaml` (version 5, frozen 2026-08-01) declares its
+`candidate_source` as `rbp_regulon_intronic.parquet`, `rbp_switch_calls_intronic.parquet`
+and `rbp_counts_intronic.parquet`. Those three files were regenerated on 2026-08-26
+(SLURM 44484240) when the intronic scan was moved off the legacy flat 0.25 background onto
+the GC-binned composition background, which the mature scope had already used since
+2026-08-12. The pre-re-scan files are preserved as `*_intronic_flatbg.parquet`.
+
+The config pins `expected_module_rbp_nominations: 17` and the new tables still yield
+exactly 17 — **but they are not the same 17**. Over TARDBP/NOVA1/NOVA2/RBFOX2/PTBP2:
+8 nominations shared, 9 dropped, 9 added (TARDBP 5 -> 3, NOVA2 3 -> 5); e.g.
+`frontal_cortex_ba9/M008/TARDBP` is gone and `frontal_cortex_ba9/M010/NOVA2` is new.
+The count guard therefore PASSES while 53% of the candidate set has silently changed —
+the failure mode a pinned expectation is supposed to prevent.
+
+**Severity: provenance, not conclusion.** Section 7's verdict is an informative sparse
+null driven by the cross-species mm10/hg38 reciprocal-mapping bottleneck (~3-5% of windows
+retained), not by which candidates were nominated, so the scientific finding does not move.
+What is broken is the claim that the frozen suite is reproducible from its declared inputs.
+
+Options (needs a decision):
+1. Re-freeze to `version: 6` against the composition background, re-run stages 22-27, and
+   update the pinned counts. Preferred on correctness — the composition background is the
+   corrected scan — but re-dates a frozen artifact and costs a re-run.
+2. Pin `candidate_source` explicitly at the `*_intronic_flatbg.parquet` files, keeping the
+   frozen suite internally reproducible and documenting why it uses the superseded scan.
+3. Revert the intronic tables. Not recommended: it would re-break the mature/intronic
+   background inconsistency that the re-scan fixed.
+
+Whichever is chosen, replace the bare count guard with a candidate-identity hash so a
+changed set cannot pass as unchanged.
 
 ---
 
