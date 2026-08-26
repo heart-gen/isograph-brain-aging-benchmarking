@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import hashlib
+import json
 import os
 import shutil
 import tarfile
@@ -22,6 +23,14 @@ from isograph_benchmark.real_data.rbp_regulon import _REGIONS
 
 DEFAULT_CONFIG = "configs/neuronal_clip.yaml"
 CHUNK_SIZE = 1024 * 1024
+CANDIDATE_IDENTITY_COLUMNS = [
+    "region",
+    "module_id",
+    "rbp",
+    "gene",
+    "transcript_id_1",
+    "transcript_id_2",
+]
 RETRIEVAL_FIELDS = (
     "retrieved_at_utc",
     "last_modified",
@@ -44,6 +53,35 @@ def _source_hashes(cfg: dict[str, Any]) -> dict[str, str]:
         "switch_calls_sha256": sha256(rel(source["switch_calls"])),
         "motif_counts_sha256": sha256(rel(source["motif_counts"])),
     }
+
+
+def _candidate_identity_sha256(frame: pd.DataFrame) -> str:
+    view = frame[CANDIDATE_IDENTITY_COLUMNS].astype("string").fillna("")
+    view = view.sort_values(CANDIDATE_IDENTITY_COLUMNS, kind="mergesort")
+    digest = hashlib.sha256()
+    for row in view.itertuples(index=False, name=None):
+        digest.update(
+            (
+                json.dumps(list(row), ensure_ascii=True, separators=(",", ":")) + "\n"
+            ).encode()
+        )
+    return digest.hexdigest()
+
+
+def _guard_candidate_identity(source: dict[str, Any], observed: str) -> None:
+    configured = source.get("expected_candidate_identity_sha256")
+    if configured is None:
+        print(
+            "candidate identity unpinned; observed sha256 "
+            f"{observed} -- pin it as "
+            "candidate_source.expected_candidate_identity_sha256"
+        )
+        return
+    if str(configured) != observed:
+        raise RuntimeError(
+            "Neuronal-CLIP candidate identity changed: "
+            f"{observed} observed, {configured} expected"
+        )
 
 
 def freeze_candidates(cfg: dict[str, Any]) -> Path:
@@ -161,6 +199,7 @@ def freeze_candidates(cfg: dict[str, Any]) -> Path:
             f"{observed_nominations} module-RBP nominations observed, "
             f"{expected_nominations} expected"
         )
+    _guard_candidate_identity(source, _candidate_identity_sha256(candidate))
 
     out = rel(cfg["candidate_manifest"])
     ensure_dir(out.parent)
