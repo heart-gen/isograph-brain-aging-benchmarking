@@ -19,8 +19,8 @@ must be honest about this. Interpret against **three WGCNA baselines**:
 
 - **Heavy compute on SLURM only.** Login node = light work (reads, small
   aggregation, plotting). Account `bio260021p`, memory fixed at 2000M/cpu.
-- **Never `git add -A`.** Stage selectively. Commit only when explicitly asked;
-  commit messages end with `Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>`.
+- **Never `git add -A`.** Stage selectively. Commit only when explicitly asked.
+  Do **not** add a `Co-Authored-By:` trailer to commit messages.
 - **Do not push** without explicit confirmation (currently on hold across all
   repos). PR bodies end with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
 - **Do not commit large data caches:** `modules_meta/`, `module_trust/`,
