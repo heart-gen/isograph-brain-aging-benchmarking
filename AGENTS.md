@@ -374,12 +374,24 @@ nominations, **8 shared / 9 dropped / 9 added**; TARDBP 5 -> 3, NOVA2 3 -> 5;
 12,779 -> 11,261 (9,287 shared). This confirms the count guard was passing on a set that had
 changed by 53%.
 
-Stages 21b/22/23 re-run and COMPLETED 2026-08-26 (jobs 44534466/44534467/44534573); the
-re-run freeze passed the newly pinned identity hash silently, which is the guard working.
-Stages 24-27 chained (44534675-8). Downstream pins in the NOVA-family / ctag / perturbation
-stages (`expected_candidate_rows: 1993`, `expected_candidate_identity_sha256: 8970b1cf...`,
-`expected_context_counts`, `consensus_sha256`) are derived from the OLD candidate set and
-are expected to need re-deriving as those stages run.
+Stages 21b/22/23/24/25 re-run and COMPLETED 2026-08-26 (jobs 44534466/44534467/44534573/
+44534675/44534676); the re-run freeze passed the newly pinned identity hash silently, which
+is the guard working. Stages 26/27 chained (44534677-8).
+
+**The NOVA-family pins did NOT need re-deriving.** They were bootstrapped (temporarily
+unpinned) for job 44534676 and every observed value came back IDENTICAL to the v5 pins:
+`transcripts` 79763, `eligible_pairs` 374296, `regulon_nominations` 2, `candidate_rows`
+1993, `candidate_identity_sha256` 8970b1cf... . The NOVA-family renomination builds its own
+candidate set from the CCAC/CCAT/TCAC/TCAT intronic scan over switch pairs, so it is
+invariant to the RBP-regulon nominations the intronic re-scan moved; stage 26 passed the
+unchanged identity guard on the same manifest. The pins are restored verbatim and the
+config is byte-identical to its committed state. A verification re-run of stage 25 under
+the restored pins is deferred until 26/27 finish, because it rewrites the manifest they read.
+
+**Conclusion confirmed unchanged on the v6 candidates.** Stage 24 re-run gives
+`descriptive_underpowered` in all four contexts (ptbp2_ba4 3, ptbp2_ipscn 8, tdp43 baseline
+0, tdp43 stress 0 informative discordant sets out of 147/145/188/97 callable matched sets)
+— the same informative sparse null section 7 records. Provenance moved; the finding did not.
 
 ---
 
