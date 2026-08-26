@@ -25,7 +25,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `benchmark/03_metrics/figures/` |
 | Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `real_data/stability/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
-| QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio 1.13 in pheno-sig + GO-invisible (p=1.5e-4 / 2.6e-3), null in GO-visible; IsoGraph-only vs matched WGCNA baselines | Strong (2 internal nulls) | GO-visible null + matched-baseline null; IVW+DL meta | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
+| QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00); GO-visible weakest at 1.104 (p=0.022, I²=0.68); IsoGraph-only vs matched WGCNA baselines | Strong (matched-baseline null) | Matched-baseline null (primary control); GO-visible = low end of a gradient, NOT a null; IVW+DL meta | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
 | Colocalization / deep-dive | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
 | Partitioned heritability (S-LDSC) | Does switch layer carry disease heritability? | baselineLD v2.2 × 5 traits | Aging sQTL annotation enriched all neurodeg traits (LBD 7.17×, PD 3.80×, AD 3.37×, ALS 2.96×, SCZ 1.74×); disease-SCZ is eQTL-led | Moderate–strong | Single- + joint-annotation models | `real_data/ldsc/_m/` | `LDSC_SUMMARY.md` |
 | GWAS/MAGMA resolution | Is module-GWAS enrichment a size artifact? | MAGMA per module | At res 5.0 giant-module artifact disappears (0/8 sig giant vs 18/43 res2.0, 79/99 gene-level WGCNA); SCZ signal survives 6 regions | Strong (artifact control) | Resolution sweep + WGCNA comparison | CLI + SLURM | `GWAS_RESOLUTION_SUMMARY.md`, `figGwasResolution` |
@@ -55,8 +55,8 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 #### Finding 3: The GO-invisible switch layer is genetically anchored to splicing, method-specifically
 **Evidence status:** Established (strongest orthogonal result).
-**Key quantitative evidence:** sQTL/eQTL specificity contrast 1.13 in pheno-sig + GO-invisible (p=1.5e-4 / 2.6e-3, I²=0.15), 1.04 ns in GO-visible; IsoGraph-only (go_invisible 1.11 p=0.011) vs matched WGCNA baselines null (1.02/0.99).
-**Validation:** two internal nulls (GO-visible control + matched-baseline control); IVW-FE + DL-RE meta over 17 analyses.
+**Key quantitative evidence:** sQTL/eQTL specificity contrast 1.163 pheno-sig (p=3.6e-7) and 1.172 GO-invisible (p=2.3e-5, **I²=0.00** — homogeneous across all 10 tissues); GO-visible is the weakest arm at 1.104 (p=0.022) and carries I²=0.68, so it is a gradient low end, **not a null**. IsoGraph-only (go_invisible 1.164, p=2.0e-4 on the common tissues) vs matched WGCNA baselines null (1.021 / 0.993).
+**Validation:** the matched-baseline null is the primary internal control (identical switch features, inference varied); IVW-FE + DL-RE meta over 17 analyses.
 **Limitations:** estimand is the *contrast* not raw OR (co-switch genes cis-QTL depleted for both); cis-sQTL anchors member-gene splicing, not the coordination itself; bulk GTEx under-samples cell-type-specific splicing.
 **Repository sources:** `QTL_ANCHORING_SUMMARY.md`.
 
@@ -98,7 +98,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | GO-invisible gate module count: 8 modules (2 GO-visible) vs 4 modules (all GO-invisible) | Pre-refit prose vs post-refit `go_invisible_gate.parquet` (2026-06-29) | Wrong number in older narrative | **Resolved in-repo:** cite the regenerated parquet (4, all GO-invisible). Ensure no drafted prose still says 8/2. |
 | Coloc gene count phrasing: "68 genes" vs "141 events in 68 genes" vs "12+23+33" split | `GENETIC_ANCHORING_RESULTS.md` internal | 12+23+33 = 68 ✓ but "141 colocalized isoform events" vs Fig4D "68 colocalized genes" needs one canonical count in caption | Reconcile event-count vs gene-count wording in Fig 4 caption before submission |
 | Target journal: AGENTS.md header + §5 say Cell Genomics; `FIGURE_ORDERING.md` header still says "Nature Methods" | AGENTS.md vs FIGURE_ORDERING.md | Stale label | Update FIGURE_ORDERING.md header to Cell Genomics |
-| Fig 3 headline "≈1.13" vs common-subset "1.11" | `QTL_ANCHORING_SUMMARY.md` (full 17-analysis 1.13 vs 8-tissue common 1.11) | Both correct for different subsets | State which subset each number is from in the caption |
+| Fig 3 headline "≈1.17" vs common-subset "1.16" | `QTL_ANCHORING_SUMMARY.md` (full 17-analysis 1.172 vs 8-tissue common 1.164) | Both correct for different subsets | State which subset each number is from in the caption |
 
 ### 5. Reproducibility Status
 
@@ -188,7 +188,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 **Central claim:** IsoGraph surfaces a reproducible, genetically-anchored **isoform-switch regulatory layer** — invisible to abundance/GO pipelines — whose disease-relevant modules are spared at splicing-QTL specifically and onto which disease variants (e.g. SNCA across LBD+PD) colocalize.
 
 **Evidence supporting the recommendation:**
-- The strongest, most-controlled result is Finding 3 (splicing-specificity contrast with two internal nulls + matched-baseline method effect).
+- The strongest, most-controlled result is Finding 3 (splicing-specificity contrast, homogeneous across tissues at I²=0.00, with the matched-baseline null as its internal control + matched-baseline method effect).
 - Findings 2+4 give the mechanism (real GO-invisible DTU that disease variants resolve onto).
 - Finding 1 keeps it honest (complementary, not superior).
 
@@ -253,7 +253,7 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Confidence: High (one cohort — say so).
 
 ### Results 4: Splicing-QTL specifically anchor the GO-invisible layer — an IsoGraph method effect (Fig 3) [HEADLINE]
-- Evidence: contrast 1.13 pheno-sig/GO-invisible, null GO-visible; IsoGraph-only vs matched WGCNA; S-LDSC heritability.
+- Evidence: contrast 1.163 pheno-sig / 1.172 GO-invisible (I²=0.00); GO-visible weakest (1.104, I²=0.68), not a null; IsoGraph-only vs matched WGCNA; S-LDSC heritability.
 - Role: headline orthogonal validation. Transition: "which variants, on which switches?"
 - Confidence: High.
 
@@ -312,7 +312,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | --- | --- | --- | --- | --- | --- | --- |
 | Fig 1–4 as ordered | benchmark + trust + QTL + anchoring | Findings 6/5/3/4 | **Keep as-is** | Dependency-correct, biology-led | High | Main |
 | ~~Synthetic benchmark summary~~ (`tableS_benchmark_summary.csv`) | benchmark/03_metrics | Finding 6 | **MOVED TO SUPPLEMENT — DONE** | Demoted from main; regenerated clean (6 core scenarios × 6 methods, no NA rows) and renamed via `synthetic_benchmark.R` (`ISOGRAPH_TABLES_ONLY=1`). References updated in `FIGURE_ORDERING.md` + `benchmark/03_metrics/README.md`. | High | **Supp ✓** |
-| **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast 1.13 in pheno-sig/GO-invisible (p=1.5e-4 / 2.6e-3), null in GO-visible, IsoGraph-only vs matched WGCNA (all ns). **Reproducible:** `real_data/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
+| **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00), GO-visible weakest (1.104, p=0.022, I²=0.68 — not a null), IsoGraph-only vs matched WGCNA (all ns). **Reproducible:** `real_data/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
 | **Main Table 2 — Splicing-led colocalized genes (NEW, built; reframed)** | deep-dive panel + literature | Finding 4 | **Main companion OR keep in Supp (S8/S9)** | Per-gene resolution; **CLPP posteriors are individually modest** — coloc threshold is eCAVIAR CLPP≥0.01 ("strong" ≥0.05), only **4/12 clear 0.05** and only CTSH (0.39) is substantial. Caption states the claim is *set-level coherence*, NOT per-locus significance (which lives in the contrast table + S-LDSC). Max CLPP carries confidence stars (`*` >0.01, `**` >0.05, `***` >0.10 → 1×`***`, 3×`**`, 8×`*`). Reproducible: same builder → `table3_splicing_led_genes.{csv,md}`. | Moderate | **Main or Supp** |
 | S-real-1 (baseline rates) | baseline_comparison | Finding 1 | **Keep in Supp** | Bounds, not advances | High | Supp |
 | **New: SCZ convergence panel** | SCZ projection (significant, P=0.0058) | Results 6 | **Add as Fig 4E or new S-real-8** | Convergence is significant → extends anchoring to disease convergence; per-locus genotype layer stays supp | Moderate | **Main (Fig 4E) or Supp** |
@@ -399,7 +399,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 
 ### 20. Final Strategic Recommendation
 
-**[EVIDENCE] Current repository state:** A near-complete, self-controlled body of work establishes IsoGraph as a reproducible, complementary DTU-without-DGE layer whose GO-invisible disease modules are specifically anchored to splicing genetics (contrast 1.13, two internal nulls, IsoGraph-only) and onto which disease variants colocalize (SNCA cross-disease). Figures are ordered, a Results section is drafted, and the supplement is wired. The one honest bound (not globally superior to WGCNA) is settled and belongs in the supplement.
+**[EVIDENCE] Current repository state:** A near-complete, self-controlled body of work establishes IsoGraph as a reproducible, complementary DTU-without-DGE layer whose GO-invisible disease modules are specifically anchored to splicing genetics (contrast 1.172 at I²=0.00, matched-baseline null, IsoGraph-only) and onto which disease variants colocalize (SNCA cross-disease). Figures are ordered, a Results section is drafted, and the supplement is wired. The one honest bound (not globally superior to WGCNA) is settled and belongs in the supplement.
 
 **[REQUIREMENT] Submission constraints (verified 2026-07-20):** Cell Genomics research Article — **<8,000 words** (excl. refs/STAR Methods/supp), **≤7 display items counting figures AND tables** (current plan = Fig 1–4 + QTL-contrast table = 5, with room for a 6th SCZ panel; synthetic benchmark table demoted to supp), structured summary. **STAR Methods** required with a **Key Resources Table** + a **Resource Availability** block (Lead contact / Materials availability / Data and code availability). **Mandatory before acceptance:** all original code in a DOI-minting repo (Zenodo) with the DOI reported, and a data-and-code-availability statement listing every accession + DOI. Still to verify on the live pages: reference style, supplemental caps, Highlights/graphical-abstract, and inclusion/ethics wording.
 

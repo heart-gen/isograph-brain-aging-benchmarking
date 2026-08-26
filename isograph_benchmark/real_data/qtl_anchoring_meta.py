@@ -27,6 +27,7 @@ from scipy.stats import norm
 
 from isograph_benchmark.paths import ensure_dir, rel
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
+from isograph_benchmark.stats.meta_analysis import meta, meta_keys
 
 # (analysis, region) for the 17 anchoring runs; mirrors 13.qtl_anchoring.sh.
 ANALYSES: list[tuple[str, str | None]] = [
@@ -76,37 +77,12 @@ def collect(variant: str, methods: tuple[str, ...]) -> pd.DataFrame:
     return df
 
 
-_META_KEYS = ("k", "n_fg_total", "or_fe", "or_fe_low", "or_fe_high", "p_fe",
-              "or_re", "or_re_low", "or_re_high", "p_re", "Q", "I2")
+_META_KEYS = meta_keys("or")
 
 
 def _meta(group: pd.DataFrame) -> pd.Series:
-    g = group[np.isfinite(group["beta"]) & np.isfinite(group["se"]) & (group["se"] > 0)]
-    k = len(g)
-    if k == 0:
-        return pd.Series({key: (0 if key in ("k", "n_fg_total") else np.nan)
-                          for key in _META_KEYS})
-    beta, se = g["beta"].to_numpy(), g["se"].to_numpy()
-    w = 1.0 / se**2
-    beta_fe = float(np.sum(w * beta) / np.sum(w))
-    se_fe = float(np.sqrt(1.0 / np.sum(w)))
-    q = float(np.sum(w * (beta - beta_fe) ** 2))
-    i2 = float(max(0.0, (q - (k - 1)) / q)) if k > 1 and q > 0 else 0.0
-    # DerSimonian-Laird random effects
-    tau2 = max(0.0, (q - (k - 1)) / (np.sum(w) - np.sum(w**2) / np.sum(w))) if k > 1 else 0.0
-    wr = 1.0 / (se**2 + tau2)
-    beta_re = float(np.sum(wr * beta) / np.sum(wr))
-    se_re = float(np.sqrt(1.0 / np.sum(wr)))
-    p_fe = float(2 * norm.sf(abs(beta_fe / se_fe)))
-    p_re = float(2 * norm.sf(abs(beta_re / se_re)))
-    return pd.Series({
-        "k": k, "n_fg_total": int(g["n_foreground"].sum()) if "n_foreground" in g else 0,
-        "or_fe": np.exp(beta_fe), "or_fe_low": np.exp(beta_fe - _Z * se_fe),
-        "or_fe_high": np.exp(beta_fe + _Z * se_fe), "p_fe": p_fe,
-        "or_re": np.exp(beta_re), "or_re_low": np.exp(beta_re - _Z * se_re),
-        "or_re_high": np.exp(beta_re + _Z * se_re), "p_re": p_re,
-        "Q": q, "I2": i2,
-    })
+    """Thin wrapper over the shared engine; kept so call sites read unchanged."""
+    return meta(group, effect_name="or", count_col="n_foreground")
 
 
 def _diff_rows(per: pd.DataFrame) -> pd.DataFrame:
@@ -267,7 +243,15 @@ def _write_report(out_dir: Path, per: pd.DataFrame, meta: pd.DataFrame,
         "IsoGraph's inference — the genetic-anchoring analog of the three-baseline result. "
         "IsoGraph's value is the switch-feature *representation* and its finer modules, not "
         "a unique network-inference effect.",
-        "- High I2 flags between-tissue heterogeneity; prefer RE there. The contrast se "
+        "- **Primary internal control = the matched WGCNA baselines**, not "
+        "`go_visible_modules`. The baselines hold the switch features fixed and vary only "
+        "the inference, so a null there localises the effect to IsoGraph's inference. "
+        "`go_visible_modules` is a secondary control on module CONTENT and is only ever a "
+        "relative contrast — read it as the low end of a gradient, not as an on/off null.",
+        "- High I2 flags between-tissue heterogeneity; prefer RE there. A nominally "
+        "significant ratio carrying high I2 is driven by a few tissues, not by a "
+        "consistent effect, and is weaker evidence than a smaller ratio at I2 near 0 — "
+        "compare module sets on consistency as well as magnitude. The contrast se "
         "is conservative (treats sQTL/eQTL estimates as independent though they share "
         "the foreground genes).",
         "- Scope unchanged: cis-sQTL anchors member-gene splicing to genetics, not the "
