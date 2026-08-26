@@ -385,8 +385,22 @@ unpinned) for job 44534676 and every observed value came back IDENTICAL to the v
 candidate set from the CCAC/CCAT/TCAC/TCAT intronic scan over switch pairs, so it is
 invariant to the RBP-regulon nominations the intronic re-scan moved; stage 26 passed the
 unchanged identity guard on the same manifest. The pins are restored verbatim and the
-config is byte-identical to its committed state. A verification re-run of stage 25 under
-the restored pins is deferred until 26/27 finish, because it rewrites the manifest they read.
+config is byte-identical to its committed state. Stage 25 was re-run under the restored
+pins once 26/27 were clear (44536008, exit 0, no guard error).
+
+**Provenance race, found and fixed.** The v6 pins were bootstrapped by editing the config
+while stages 26/27 were still running, and those stages re-hash the config more than once
+per run, so run 1 left `nova2_ctag/human_windows/window_qc.json` recording the transient
+bootstrap sha while its own `nova2_ctag_validation.json` recorded the final one. Editing a
+config is only safe when nothing is in flight, not merely when the current stage has
+already read it. Stages 26/27 were re-run end-to-end under the committed config
+(44536564/44536565, both exit 0). Every artifact under `real_data/_m/neuronal_clip/` now
+records `config_sha256 d56e90f9`, and stages 26/27 record the on-disk manifest hash
+`cb17af7e`. `reports/neuronal_clip/nova_family_candidate_manifest.parquet` differs from its
+v5 copy only in the embedded `frozen_date` / `config_sha256` columns; candidate content is
+invariant, and every section 7 number reproduces exactly (ctag 1,272/42,718 reciprocal;
+perturbation 586/11,353, 435/8,199, 181/2,611 with 2/3/0 localized; 50-nt Emx1 OR 3.0
+p=0.180, Gad2 OR 1.8 p=0.688; 100-nt Emx1 OR 1.0 p=1.0).
 
 **Conclusion confirmed unchanged on the v6 candidates.** Stage 24 re-run gives
 `descriptive_underpowered` in all four contexts (ptbp2_ba4 3, ptbp2_ipscn 8, tdp43 baseline
