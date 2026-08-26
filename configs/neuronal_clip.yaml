@@ -1,5 +1,5 @@
-version: 5
-frozen_date: "2026-08-01"
+version: 6
+frozen_date: "2026-08-26"
 accessed_date: "2026-08-01"
 seed: 13
 
@@ -14,6 +14,7 @@ candidate_source:
   motif_counts: real_data/_m/rbp/rbp_counts_intronic.parquet
   q_max: 0.05
   expected_module_rbp_nominations: 17
+  expected_candidate_identity_sha256: 210f28fbc47eb3a17a301dc4e54985583e52b26bd49cb7f75e094520fe17e782
   rbps: [TARDBP, NOVA1, NOVA2, RBFOX2, PTBP2]
 
 window_stage:
@@ -24,8 +25,8 @@ window_stage:
   output_dir: real_data/_m/neuronal_clip/windows
   primary_width: 100
   sensitivity_widths: [50, 250]
-  expected_candidate_rows: 12779
-  expected_unique_candidates: 12038
+  expected_candidate_rows: 11261
+  expected_unique_candidates: 10410
   control_source: motif_negative_transcript_intronic_flanks
   match_without_replacement: true
   length_ratio_min: 0.80

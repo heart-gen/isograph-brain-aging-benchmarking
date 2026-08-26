@@ -324,7 +324,7 @@ estimable**, so this does not rescue NOVA2 and candidates remain `NOVA_FAMILY`. 
 the neuronal CLIP analysis here for this submission; integrate the null transparently
 in Methods/Results or supplement, and keep controlled-access EGA reanalysis optional.
 
-### 8. OPEN — neuronal-CLIP frozen inputs invalidated by the intronic re-scan (2026-08-26)
+### 8. RESOLVED 2026-08-26 (option 1: re-freeze to v6) — neuronal-CLIP frozen inputs invalidated by the intronic re-scan
 
 `configs/neuronal_clip.yaml` (version 5, frozen 2026-08-01) declares its
 `candidate_source` as `rbp_regulon_intronic.parquet`, `rbp_switch_calls_intronic.parquet`
@@ -345,17 +345,41 @@ null driven by the cross-species mm10/hg38 reciprocal-mapping bottleneck (~3-5% 
 retained), not by which candidates were nominated, so the scientific finding does not move.
 What is broken is the claim that the frozen suite is reproducible from its declared inputs.
 
-Options (needs a decision):
-1. Re-freeze to `version: 6` against the composition background, re-run stages 22-27, and
-   update the pinned counts. Preferred on correctness — the composition background is the
-   corrected scan — but re-dates a frozen artifact and costs a re-run.
-2. Pin `candidate_source` explicitly at the `*_intronic_flatbg.parquet` files, keeping the
-   frozen suite internally reproducible and documenting why it uses the superseded scan.
-3. Revert the intronic tables. Not recommended: it would re-break the mature/intronic
-   background inconsistency that the re-scan fixed.
+**Decision taken with the user 2026-08-26: option 1, re-freeze to `version: 6`.** The
+composition background is the corrected scan, and pinning the suite to the superseded
+flat-background tables would have enshrined the uncorrected background inside a validation
+suite with no good answer to "why does your CLIP validation use a different background than
+your motif scan?". The re-run is compute-only — `inputs/raw/neuronal_clip` (1.7 GB) and
+`reports/neuronal_clip/dataset_manifest.tsv` were already frozen on disk — so
+`accessed_date` stays 2026-08-01 and only the candidate-derivation provenance moves.
 
-Whichever is chosen, replace the bare count guard with a candidate-identity hash so a
-changed set cannot pass as unchanged.
+What landed:
+- `configs/neuronal_clip.yaml` -> `version: 6`, `frozen_date: 2026-08-26`, `accessed_date`
+  unchanged. Re-pinned `window_stage.expected_candidate_rows` 12779 -> **11261** and
+  `expected_unique_candidates` 12038 -> **10410**.
+- **The count guard is replaced by a candidate-identity hash.**
+  `candidate_source.expected_candidate_identity_sha256` pins the sorted
+  (region, module_id, rbp, gene, transcript_id_1, transcript_id_2) digest, reusing the
+  `_candidate_identity_sha256` / `_guard_candidate_identity` convention already used by the
+  NOVA-family stages. Unpinned -> prints the observed hash and continues (bootstrap);
+  pinned and mismatched -> raises. The count guard is kept as a cheap first check.
+- 5 tests in `tests/test_neuronal_clip_fetch.py`, including the exact failure mode the count
+  guard could not see: same number of nominations, different nominations.
+- New committed wrapper `real_data/brainseq/_h/21b.neuronal_clip_freeze.sh` — the freeze had
+  been run by hand, which was its own reproducibility gap.
+
+Grounded diff of the re-freeze (old vs new `candidate_manifest.parquet`): 17 -> 17
+nominations, **8 shared / 9 dropped / 9 added**; TARDBP 5 -> 3, NOVA2 3 -> 5;
+`frontal_cortex_ba9/M008/TARDBP` gone, `frontal_cortex_ba9/M010/NOVA2` new. Candidate rows
+12,779 -> 11,261 (9,287 shared). This confirms the count guard was passing on a set that had
+changed by 53%.
+
+Stages 21b/22/23 re-run and COMPLETED 2026-08-26 (jobs 44534466/44534467/44534573); the
+re-run freeze passed the newly pinned identity hash silently, which is the guard working.
+Stages 24-27 chained (44534675-8). Downstream pins in the NOVA-family / ctag / perturbation
+stages (`expected_candidate_rows: 1993`, `expected_candidate_identity_sha256: 8970b1cf...`,
+`expected_context_counts`, `consensus_sha256`) are derived from the OLD candidate set and
+are expected to need re-deriving as those stages run.
 
 ---
 
