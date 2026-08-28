@@ -1,0 +1,23 @@
+# RBP motif-family clustering (reviewer item 6b) and the composition background used by the
+# motif scan (item 6a). Pinned here so both stages are reproducible from a single config.
+
+families:
+  # Average-linkage cut on distance = 1 - (max-over-offsets mean column correlation).
+  # ATtRACT's motifs are short and degenerate, so similarity is continuous rather than
+  # clustered and no cut is uniquely correct: see the cut-sensitivity table in
+  # real_data/_m/rbp/RBP_MOTIF_FAMILIES.md. 0.25 keeps the known hnRNP / ELAVL / SRSF /
+  # PTBP groups together without collapsing everything into one family.
+  cut: 0.25
+  # Minimum overlapping columns for an offset to be scored.
+  min_overlap: 4
+  # RBP motifs act on single-stranded RNA, so only the sense orientation is compared.
+  reverse_complement: false
+
+background:
+  # Per-transcript MOODS backgrounds would need ~1e8 threshold solves (1,300 matrices x
+  # 80,000 transcripts), which is not affordable. Transcripts are binned by nucleotide
+  # composition instead and one threshold set is solved per bin.
+  gc_bins: 20
+  purine_bins: 2
+  pseudocount: 0.1
+  p_threshold: 1.0e-4
