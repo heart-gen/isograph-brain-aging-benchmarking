@@ -92,8 +92,16 @@ a main figure.
   RNA-seq.** Tier-1 done (`longread_switch_confirm.py` +
   `real_data/brainseq/_h/29.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
   8180677 Bambu quants, confirms 60.5% of GTEx cortical switch genes.
-  **GAP: the 8.4% "switch-like" rate has no matched null, so it is not yet
-  interpretable.** Build the null before the number goes in the paper.
+  A matched null now exists (`switch_orthogonal_confirm.py --mode global-null`, 2026-08-28)
+  and it is sobering: switch pairs are switch-like 0.6466 of the time against an
+  abundance-matched null of 0.6391 from the *same genes* (p=0.022, difference +0.0075 —
+  significant only because n≈18,000). Non-switch pairs sit at a mean usage correlation of
+  -0.172 before any biology, because within-gene fractions sum to one. **A bare negative
+  usage correlation is therefore close to vacuous as switch evidence**; read the rate
+  against this null, never against zero, and prefer within-switch-universe contrasts.
+  **GAP: this uses the detected-pair denominator while the published 8.4% uses all
+  prespecified pairs, so the 8.4% figure itself still needs its own null before it goes
+  in the paper.**
 * [~] **Frozen-module projection between cohorts.** `replication.py` does bidirectional
   module preservation (best-Jaccard + size-preserving label-permutation null) and
   `scz_age_projection.py` freezes out-of-cohort aging modules and projects them onto
@@ -127,7 +135,7 @@ a main figure.
   untestable). Baseline verified against `diagnosis_assoc.parquet` (max |diff| 5.7e-15).
   **The result is not a clean bill of health:** rRNA rate alone takes the FDR<0.05 modules
   from 7 to 4 and the fully adjusted model to 2. This belongs in the manuscript.
-* [~] **Remaining sensitivity analyses** — harness built 2026-08-28,
+* [x] **Remaining sensitivity analyses** — harness built and RUN 2026-08-28,
   `switch_feature_sensitivity.py` + `real_data/_h/37.switch_feature_sensitivity.sh`,
   covering all five axes (pseudocount, transcript-expression filter, minor-isoform
   threshold, identifiability by transcript number, quantification pipeline). Gated on an
@@ -136,6 +144,18 @@ a main figure.
   trait signal, not of an independently refit network; a full refit per setting is the
   expensive follow-on. The quantification axis is a cross-cohort concordance and therefore
   confounds quantifier with cohort — an upper bound, not an isolated estimate.
+
+  **Results (brainseq/caudate, gate passed at max |diff| = 0):** pseudocount is a
+  non-issue (median per-gene |r| >= 0.992 over 0.1-2.0, 20/20 published-significant
+  module-age associations retained). The expression filter and minor-isoform threshold
+  matter more — loosening to count>5/frac>=0.5 gives median |r| 0.842 and 18/20;
+  min_usage=0.10 drops 2,727 genes and retains 15/20. **No sign flips among
+  published-significant modules under any setting.** Identifiability is a mild monotone
+  trend (median |age r| 0.066 -> 0.102 across transcript-number strata, module membership
+  0.28 -> 0.62) but the |r|>0.2 tail is flat, so it reads as a membership effect, and the
+  top stratum has 69 genes. **Quantification is the striking one:** per-gene switch-age
+  effects are essentially uncorrelated between Salmon and RSEM on matched regions
+  (Pearson 0.007 caudate, -0.002 hippocampus, sign concordance 0.499).
 
 ## Mechanistic validation (was "Additional analysis for Nature Communications")
 
