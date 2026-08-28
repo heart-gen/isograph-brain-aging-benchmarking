@@ -72,3 +72,13 @@ inputs/processed/gtex_v11/*/junction_usage.parquet
 # deconvolution (regenerable via `celltype_composition export-gtex`; ~85MB). The MuSiC
 # outputs (proportions tsv, marker stats, fractions) are kept.
 real_data/gtex/_m/composition/inputs/
+
+# Synthetic datasets generated for the residualization-cost ablation (100 hashed dataset
+# dirs, ~82 MB). Same class as benchmark/01_synthetic/_m/datasets/ above: regenerable from
+# configs/residual_cost_ablation.yaml, and subject to the archived-not-regenerable rule --
+# never regenerate these to "fix" a result.
+benchmark/01_synthetic/_m/datasets_residual_cost/
+
+# Sharded backfill intermediates from benchmark/backfill_metrics.py (same class as the
+# already-ignored benchmark/**/_m/_shards/; the merged metrics land in synthetic_results).
+benchmark/01_synthetic/_m/partition_backfill/
