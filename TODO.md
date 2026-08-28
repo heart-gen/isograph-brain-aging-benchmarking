@@ -39,6 +39,53 @@ of its items are now covered under Mechanistic validation below.
   TPM is archived as a data product (`build_parquet.convert_gtex_transcript_tpm`) and
   never fed to a model (`build_bundles.py:230,249`). Manuscript methods corrected.
 
+## Verification audit 2026-08-28 — are the open analysis tasks still needed?
+
+Checked each of the 7 remaining analysis items against the code and the data on disk, on
+the suspicion that TODO.md had gone stale. **Six are accurate as written. One is not.**
+
+| # | task | verdict |
+|---|---|---|
+| 1 | long-read matched null | still open — `longread_switch_confirm.py` has no null of any kind |
+| 2 | BrainSEQ<->GTEx eigengene projection | still open — `replication.py` is overlap-based, `scz_age_projection.py` projects *within* BrainSEQ (aging modules -> SCZD cohort), neither is cross-cohort eigengene projection |
+| 3 | junction/PSI network + transcript-level WGCNA | still open — no match anywhere in the tree |
+| 4 | phenotype-blind resolution/edge selection | still open, but **smaller than stated** — see below |
+| 5 | SCZ medication/toxicology/smoking confounders | **premise is wrong — the data does not exist** — see below |
+| 6 | five-part sensitivity block | still open — the knobs exist as hard-coded defaults, no harness varies them |
+| 7 | SNCA orthogonal confirmation | still open, and **the machinery to do it already holds the answer** — see below |
+
+**#4 is smaller than TODO.md implies.** `stability.py` already implements exactly the
+phenotype-blind criterion the reviewer asked for — split-half refit, ARI/NMI over genes
+assigned in both halves, seeds 0..k-1. It simply has no `--leiden-resolution` argument, so
+it has only ever run at the canonical resolution. What is missing is a sweep, not a method.
+Separately, `leiden_sweep_results.parquet` does carry two phenotype-blind columns
+(`giant_fraction`, `nmi_to_prev`) alongside the phenotype-aware `n_sig_linear_fdr10` /
+`n_sig_spline_fdr10` — but `nmi_to_prev` compares adjacent resolutions within one fit, which
+is a smoothness diagnostic, not a resampling stability.
+
+**#5's premise is wrong: BrainSEQ does not release these variables.** The BrainSEQ colData
+carries 130 columns and every one beyond `Dx / Age / Sex / Race / PMI / MoD / RIN / Protocol
+/ SNP_PC1-10` is sequencing QC (`rse-gene.bsp3.caudate-n487.gencode-v47.RData`, checked
+2026-08-28). There is no medication, antipsychotic, toxicology, nicotine or smoking field —
+not in the bundles (`inputs/bundles/brainseq_*/*/samples.parquet`, 28 columns), not in the
+source RSEs, and not anywhere under `shared/resources/libd-data`. `clinical_consequence.py`
+is unrelated despite the name: it is ClinVar/gnomAD variant constraint. The reviewer's
+request was explicitly "**where available**", and the honest answer is that they are not.
+The task is therefore rescoped, not dropped: audit availability as a first-class output,
+run the sensitivity over every confounder that *is* available, and use molecular proxies
+where a defensible one exists — flagged as proxies.
+
+**#7's answer is already computable from existing outputs, and it is a negative.** The
+SNCA sQTL that colocalizes in LBD and PD tags junction `chr4:89835692-89836127(-)` carried
+by `ENST00000508895.5`. That transcript *is* detected in the ONT DLPFC long-read data
+(`longread_switch_confirm/pair_confirmation.parquet`), but at a mean isoform fraction of
+0.0029, its switch partner `ENST00000394989` at 0.0011, and their usage correlation is
+**+0.635** — positively correlated, `switch_like = False`. The gene passes gene-level
+confirmation in both regions while the specific anchored pair does not behave as a switch
+in an orthogonal technology. This needs to be a committed CLI over all 12 splicing-led
+genes, not an observation about one gene, and it bears directly on whether SNCA can carry
+a main figure.
+
 ## Partially done — the gap is the work
 
 * [~] **Confirm top transcript pairs and disease-linked events using long-read brain
@@ -97,8 +144,15 @@ carried furthest.
   `real_data/_m/rbp_target_panel/WETLAB_PERTURBATION_DESIGN.md` with the assayable
   pair list from `rbp_pair_assayability.py` + `real_data/_h/34.rbp_pair_assayability.sh`
   (NONO 11 / ELAVL1 6 / KHDRBS1 8 measurable-and-responsive pairs).
-  **GAP: a wet-lab result, which is out of scope for this submission — say so
-  explicitly in the limitations rather than leaving it implied.**
+  **Wet-lab CLOSED 2026-08-28 (out of scope, prioritized and handed off).**
+  `real_data/_m/rbp_target_panel/WETLAB_HANDOFF.md` states the priority order the design
+  doc did not: P1 = NONO + KHDRBS1 together (the adjudicating contrast; NONO alone can
+  only confirm and cannot separate a regulon from a generic abundant-RBP effect), P2 =
+  add ELAVL1 (broadest nomination but the thinnest assayable panel, 2/14 tier-1 genes
+  responsive), P3 = secondary endpoints + same-model CLIP before any direct-regulation
+  claim. The limitation is now written into the manuscript discussion
+  (manuscript repo `content/04.discussion.md`, commit ba19cdd) together with the
+  HepG2/K562-not-brain eCLIP caveat, rather than left implied.
   The HepG2/K562-not-brain caveat on the ENCODE eCLIP panels is written into
   `real_data/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
   `rbp_binding.py`, so it survives regeneration.
@@ -108,9 +162,10 @@ carried furthest.
   `real_data/_m/GENETIC_ANCHORING_RESULTS.md` and `PER_GENE_DEEP_DIVE_PLAN.md`).
   **GAP: single data type — no orthogonal confirmation of the first-exon switch.**
 
-## Manuscript mechanics (Cell Genomics re-target)
+## Manuscript mechanics — MOVED OUT 2026-08-28
 
-* [ ] Abstract re-lead for a hybrid resource+discovery framing.
-* [ ] STAR Methods conversion.
-* [ ] Key Resources Table.
-* [ ] Fill 5 DOI placeholders.
+Abstract re-lead, STAR Methods conversion, the Key Resources Table and the 5 identifier
+placeholders now live in the manuscript repository
+(`/ocean/projects/bio260021p/kbenjamin/manuscript/isograph-brain-manuscript`, `TODO.md`,
+section "Cell Genomics re-target", commit 069c8e6). They are manuscript mechanics, not
+analysis. Closed here.
