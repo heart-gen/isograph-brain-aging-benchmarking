@@ -117,15 +117,25 @@ a main figure.
 
 ## Open
 
-* [ ] **Test schizophrenia findings for medication, toxicology, smoking and related
-  confounding where available.** Nothing implemented. `qc_covariate_test.py` is
-  RNA-quality covariates (RIN / 3' bias / exonic rate), not clinical confounders.
-* [ ] **Remaining sensitivity analyses** — no harness exists for any of these:
-  * pseudocount choice
-  * transcript-expression filtering
-  * minor-isoform thresholds
-  * transcript number and identifiability
-  * quantification pipeline
+* [x] **Test schizophrenia findings for medication, toxicology, smoking and related
+  confounding where available.** DONE 2026-08-28 — `scz_confound_sensitivity.py` +
+  `real_data/_h/36.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
+  operative clause: BrainSEQ releases **none** of medication, toxicology or smoking, so
+  the CLI emits the availability audit as a re-runnable output and then tests the three
+  tiers it can (measured covariates the published model omits; molecular proxies for
+  smoking and antipsychotic exposure built from raw bundle counts; and what stays
+  untestable). Baseline verified against `diagnosis_assoc.parquet` (max |diff| 5.7e-15).
+  **The result is not a clean bill of health:** rRNA rate alone takes the FDR<0.05 modules
+  from 7 to 4 and the fully adjusted model to 2. This belongs in the manuscript.
+* [~] **Remaining sensitivity analyses** — harness built 2026-08-28,
+  `switch_feature_sensitivity.py` + `real_data/_h/37.switch_feature_sensitivity.sh`,
+  covering all five axes (pseudocount, transcript-expression filter, minor-isoform
+  threshold, identifiability by transcript number, quantification pipeline). Gated on an
+  exact rebuild of the published switch channel (max |diff| 0.0). **GAP: the module
+  partition is held fixed**, so this measures the stability of the representation and its
+  trait signal, not of an independently refit network; a full refit per setting is the
+  expensive follow-on. The quantification axis is a cross-cohort concordance and therefore
+  confounds quantifier with cohort — an upper bound, not an isolated estimate.
 
 ## Mechanistic validation (was "Additional analysis for Nature Communications")
 
@@ -156,11 +166,19 @@ carried furthest.
   The HepG2/K562-not-brain caveat on the ENCODE eCLIP panels is written into
   `real_data/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
   `rbp_binding.py`, so it survives regeneration.
-* [~] **Validate the shared SNCA alternative-first-exon mechanism across independent
-  data types or cohorts.** SNCA carries an LBD splicing colocalization
-  (`coloc_isoform_events.py`, `coloc_direction.py`; written up in
-  `real_data/_m/GENETIC_ANCHORING_RESULTS.md` and `PER_GENE_DEEP_DIVE_PLAN.md`).
-  **GAP: single data type — no orthogonal confirmation of the first-exon switch.**
+* [x] **Validate the shared SNCA alternative-first-exon mechanism across independent
+  data types or cohorts.** DONE 2026-08-28 (computational arm) —
+  `switch_orthogonal_confirm.py` + `real_data/_h/35.switch_orthogonal_confirm.sh` scores
+  the sQTL-anchored transcript pair itself, for all 12 splicing-led genes, in ONT
+  long-read DLPFC against switch pairs matched on abundance decile.
+  **Set-level: confirmed.** 0.453 switch-like vs a matched null of 0.252 (p=5e-4);
+  0.600 vs 0.304 restricted to pairs whose anchored isoform is usably expressed.
+  **SNCA specifically: not confirmed.** Its sQTL-carrying transcript `ENST00000508895`
+  sits at 0.29% of SNCA's long-read output, 4 of its 5 anchored pairs are *positively*
+  correlated, and it fails the abundance qualification entirely — as does CTSH, the only
+  high-confidence coloc. Report the splicing-led set, and do not promote SNCA or CTSH to
+  a main figure on orthogonal grounds. This reinforces Table 3's existing set-level
+  caption rather than contradicting it.
 
 ## Manuscript mechanics — MOVED OUT 2026-08-28
 
