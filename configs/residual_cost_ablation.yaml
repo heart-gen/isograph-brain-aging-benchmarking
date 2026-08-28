@@ -1,0 +1,58 @@
+# Residual-cost ablation (benchmark gap: "is residualization free when there is no
+# confound to remove?").
+#
+# This is a SEPARATE grid from configs/synthetic_grid.yaml, with its own dataset root, so
+# it cannot touch the archived benchmark datasets. It exists because 1,204 of the cached
+# datasets -- including every core switch scenario -- no longer regenerate from the current
+# generator (see benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md), so their sample tables
+# could not be given the covariates isograph_vae_residual needs. The ablation is a
+# WITHIN-dataset paired comparison, so it does not need to be commensurable with the
+# archived grid: it only needs both arms run on identical fresh data.
+#
+# Scope note: in unconfounded scenarios RIN, neuron_frac and batch are constants and
+# build_design_matrix drops them, so this measures the cost of residualizing LIBRARY DEPTH
+# ONLY (library_size, a lognormal sigma=0.25 draw). It is not a test of residualization in
+# general, and must not be reported as one.
+#
+# One representative parameter point per scenario rather than the full sweep: the question
+# is whether residualization costs anything on clean data, which is a paired contrast at a
+# typical operating point, not a sweep.
+
+base_seed: 13
+seed_count: 20
+ablation: residual_cost
+
+methods:
+  - isograph_vae
+  - isograph_vae_residual
+
+scenarios:
+  idealized_switching:
+    n_genes: 400
+    n_samples: 160
+    switching_fraction: 0.25
+    noise_sd: 0.25
+  noise_stress:
+    n_genes: 400
+    n_samples: 160
+    switching_fraction: 0.25
+    count_dispersion: 15
+    noise_sd: 0.25
+  non_switching_background:
+    n_genes: 400
+    n_samples: 160
+    switching_fraction: 0.1
+    noise_sd: 0.25
+  unequal_isoform_abundance:
+    n_genes: 400
+    n_samples: 160
+    switching_fraction: 0.25
+    abundance_imbalance: 10
+    noise_sd: 0.2
+  feature_space_interactions:
+    n_genes: 400
+    n_samples: 160
+    switching_fraction: 0.25
+    interaction_strength: 1.0
+    interaction_fraction: 0.5
+    noise_sd: 0.25
