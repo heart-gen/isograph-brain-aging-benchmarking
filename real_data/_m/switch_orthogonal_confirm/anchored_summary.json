@@ -1,0 +1,71 @@
+{
+  "mode": "anchored",
+  "question": "Do the genetically anchored (sQTL-colocalizing) IsoGraph switch pairs behave like switches in orthogonal ONT long-read DLPFC data?",
+  "longread_dataset": "Aguzzoli-Heberle 2024 NBT; Bambu; Zenodo 8180677; n=12 DLPFC BA9/46",
+  "n_longread_samples": 12,
+  "n_splicing_led_genes": 12,
+  "n_coloc_events": 17,
+  "n_anchored_pairs": 235,
+  "n_anchored_pairs_detected": 53,
+  "n_anchored_pairs_switch_like": 24,
+  "n_anchored_pairs_usable": 75,
+  "n_anchored_pairs_switch_like_usable": 18,
+  "n_genes_orthogonally_confirmed": 10,
+  "n_genes_confirmed_at_usable_abundance": 9,
+  "n_genes_tested": 12,
+  "background": {
+    "universe": "IsoGraph switch pairs scored in long-read, splicing-led genes excluded",
+    "n_pairs": 67649,
+    "switch_like_rate_unmatched": 0.17440021286345697
+  },
+  "matched_null": {
+    "switch_like_rate": {
+      "statistic": "switch_like_rate",
+      "n_focal": 53,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 67167,
+      "observed": 0.4528301886792453,
+      "null_mean": 0.25174528301886795,
+      "null_sd": 0.05700235063511055,
+      "null_q025": 0.1320754716981132,
+      "null_q975": 0.37735849056603776,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000
+    },
+    "mean_usage_spearman": {
+      "statistic": "mean_usage_spearman",
+      "n_focal": 53,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 67167,
+      "observed": -0.10795220924028028,
+      "null_mean": -0.14470832543225573,
+      "null_sd": 0.06143921602727239,
+      "null_q025": -0.26305131169359036,
+      "null_q975": -0.020939244620334082,
+      "p_empirical_two_sided": 0.5367316341829086,
+      "n_draws": 2000
+    },
+    "switch_like_rate_usable_only": {
+      "statistic": "switch_like_rate",
+      "n_focal": 30,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 67167,
+      "observed": 0.6,
+      "null_mean": 0.30404999999999993,
+      "null_sd": 0.0841542086489638,
+      "null_q025": 0.13333333333333333,
+      "null_q975": 0.4666666666666667,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000
+    }
+  },
+  "thresholds": {
+    "min_count": 5.0,
+    "min_samples": 3,
+    "min_samples_corr": 4,
+    "min_anchored_if": 0.05,
+    "n_strata": 10,
+    "n_draws": 2000,
+    "seed": 13
+  }
+}
