@@ -1,0 +1,47 @@
+{
+  "mode": "global-null",
+  "question": "Is the long-read switch-like rate of IsoGraph switch pairs above that of abundance-matched non-switch transcript pairs from the same genes?",
+  "n_switch_pairs": 67794,
+  "n_switch_pairs_detected": 18268,
+  "switch_like_rate": 0.6466498795708342,
+  "n_nonswitch_pairs": 79871,
+  "n_nonswitch_pairs_detected": 6275,
+  "nonswitch_switch_like_rate_unmatched": 0.5775298804780876,
+  "matched_null": {
+    "switch_like_rate": {
+      "statistic": "switch_like_rate",
+      "n_focal": 18268,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 6275,
+      "observed": 0.6466498795708342,
+      "null_mean": 0.6391246989270856,
+      "null_sd": 0.003273078646419817,
+      "null_q025": 0.6328552660389752,
+      "null_q975": 0.6455550689730677,
+      "p_empirical_two_sided": 0.022488755622188907,
+      "n_draws": 2000
+    },
+    "mean_usage_spearman": {
+      "statistic": "mean_usage_spearman",
+      "n_focal": 18268,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 6275,
+      "observed": -0.19530083936057321,
+      "null_mean": -0.17154676570469127,
+      "null_sd": 0.002977857262555466,
+      "null_q025": -0.17731246268501497,
+      "null_q975": -0.16559476207744706,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000
+    }
+  },
+  "thresholds": {
+    "min_count": 5.0,
+    "min_samples": 3,
+    "min_samples_corr": 4,
+    "max_pairs_per_gene": 20,
+    "n_strata": 10,
+    "n_draws": 2000,
+    "seed": 13
+  }
+}
