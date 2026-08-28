@@ -99,8 +99,9 @@ carried furthest.
   (NONO 11 / ELAVL1 6 / KHDRBS1 8 measurable-and-responsive pairs).
   **GAP: a wet-lab result, which is out of scope for this submission — say so
   explicitly in the limitations rather than leaving it implied.**
-  Caveat still to be written into `real_data/_m/rbp/RBP_REGULON_SUMMARY.md`: the
-  ENCODE eCLIP panels are HepG2/K562, **not brain**.
+  The HepG2/K562-not-brain caveat on the ENCODE eCLIP panels is written into
+  `real_data/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
+  `rbp_binding.py`, so it survives regeneration.
 * [~] **Validate the shared SNCA alternative-first-exon mechanism across independent
   data types or cohorts.** SNCA carries an LBD splicing colocalization
   (`coloc_isoform_events.py`, `coloc_direction.py`; written up in
