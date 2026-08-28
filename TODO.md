@@ -125,6 +125,43 @@ a main figure.
 
 ## Open
 
+* [ ] **Known-junction orthogonal validation of the SNCA and CTSH coloc events
+  (BrainSEQ short-read, in-house).** The long-read arm failed on these two genes for two
+  *different* reasons, and neither is "the switch is not real":
+  **CTSH is a region mismatch** — its coloc tissue is hippocampus (CLPP 0.386) but the ONT
+  data is DLPFC BA9/46, so CTSH was never tested in its own region.
+  **SNCA is a platform mismatch** — its coloc tissues (cortex, frontal_cortex_BA9) DO match
+  the long-read tissue, so region is not the explanation; the assay is ONT **cDNA**
+  (SQK-PCS111), which truncates at the 5' end, and SNCA's event is an alternative **first
+  exon** — exactly the event class that protocol under-detects. Its 0.29% usage is
+  therefore not interpretable as absence.
+  **The decisive test is already on disk and is far better powered.** Both colocalizing
+  junctions are present as *known* junctions in the BrainSEQ junction annotation —
+  SNCA `chr4:89835692-89836127(-)` and CTSH `chr15:78937423-78937686(-)` /
+  `chr15:78937423-78939140(-)` — and BrainSEQ has hippocampus n=452, DLPFC n=500,
+  caudate n=487, i.e. ~40x the ONT n=12, measuring the junction the sQTL actually tags
+  rather than a whole-transcript proxy.
+  **Work:** extend `validate_switch_splicing.py` (already built for junction/PSI
+  validation) with a targeted per-junction mode — take the 12 splicing-led coloc events,
+  resolve each to its annotated junction, compute per-sample PSI against the gene's
+  competing junctions, and test (i) that the junction is measurably used in the coloc
+  tissue and (ii) that its PSI anti-correlates with the partner junction beyond the
+  compositional-closure baseline established by `switch_orthogonal_confirm --mode
+  global-null` (never against zero). Run CTSH in **hippocampus** and SNCA in
+  **DLPFC + caudate**. Wrapper `real_data/brainseq/_h/38.junction_coloc_confirm.sh`.
+  **Decision rule, pre-registered:** if the junctions validate here, report the
+  short-read junction result as the orthogonal confirmation and cite the long-read
+  failure as an assay limitation (5' bias / region), not as a negative. If they do not
+  validate, SNCA and CTSH stay off any main figure and the set-level result in
+  `switch_orthogonal_confirm --mode anchored` (0.453 vs 0.252, p=5e-4) stands alone.
+  This supersedes commissioning new long-read data as the next step; see the
+  platform/region note there if long-read is revisited (hippocampus for CTSH;
+  5'-complete chemistry — direct-RNA, 5'-capture, or PacBio Iso-Seq — for SNCA, since
+  more ONT cDNA would reproduce the same bias; disease-specific tissue is NOT required,
+  because the question is whether the anchored isoform reaches measurable usage and
+  anti-correlates with its partner, which is a normal-variation question — the coloc
+  already supplies the disease link).
+
 * [x] **Test schizophrenia findings for medication, toxicology, smoking and related
   confounding where available.** DONE 2026-08-28 — `scz_confound_sensitivity.py` +
   `real_data/_h/36.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
@@ -133,8 +170,24 @@ a main figure.
   tiers it can (measured covariates the published model omits; molecular proxies for
   smoking and antipsychotic exposure built from raw bundle counts; and what stays
   untestable). Baseline verified against `diagnosis_assoc.parquet` (max |diff| 5.7e-15).
-  **The result is not a clean bill of health:** rRNA rate alone takes the FDR<0.05 modules
-  from 7 to 4 and the fully adjusted model to 2. This belongs in the manuscript.
+  **The rRNA-rate result needs care, and an earlier reading of it here was wrong.**
+  rRNA rate alone takes the FDR<0.05 modules from 7 to 4 and the fully adjusted model to 2,
+  but that is *not* a confounding result and must not be reported as one. `r_rna_rate` has
+  **no marginal association with diagnosis** (Cohen's d = -0.009, p = 0.93), so it cannot
+  confound the diagnosis-outcome relationship; its association appears only after
+  conditioning on the published covariates (partial r = +0.108), which is the collider-bias
+  signature, not the confounder signature. Ruled out as alternative explanations: it is not
+  double-correction against the VAE (`residualize_composition=False`, so `feature_scores`
+  are RAW -- verified by the exact rebuild in `switch_feature_sensitivity.py`, max |diff| 0),
+  it is not double-counting the mito axis (partial r with `mito_rate` given the published
+  model = -0.0000), and it is not power loss (SE ratios 0.963-1.006; the effects genuinely
+  shrink 4-23%). There is also no dose-response: the modules *most* correlated with rRNA
+  rate survive (M010 -0.344, M020 -0.333) while the ones that fall are the *least*
+  correlated (M022 -0.121, M023 -0.112) -- the opposite of what technical-artifact removal
+  would produce. **Do not add `r_rna_rate` to the inference model on confounding grounds.**
+  The policy-consistent action, if any, is at *discovery*: `r_rna_rate` is the one major
+  technical axis absent from `BRAINSEQ_DISCOVERY_COVARIATES` (which carries RIN,
+  mapping_rate, mito_rate, SNP_PC1-5). Report the sensitivity as a sensitivity.
 * [x] **Remaining sensitivity analyses** — harness built and RUN 2026-08-28,
   `switch_feature_sensitivity.py` + `real_data/_h/37.switch_feature_sensitivity.sh`,
   covering all five axes (pseudocount, transcript-expression filter, minor-isoform
@@ -199,6 +252,9 @@ carried furthest.
   high-confidence coloc. Report the splicing-led set, and do not promote SNCA or CTSH to
   a main figure on orthogonal grounds. This reinforces Table 3's existing set-level
   caption rather than contradicting it.
+  **Follow-on:** the two failures are region- and platform-explained, and the better-powered
+  test is in-house short-read junctions -- see the open "Known-junction orthogonal
+  validation of the SNCA and CTSH coloc events" item under **Open**.
 
 ## Manuscript mechanics — MOVED OUT 2026-08-28
 
