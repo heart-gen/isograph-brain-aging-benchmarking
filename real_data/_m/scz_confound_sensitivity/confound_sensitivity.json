@@ -1,0 +1,65 @@
+{
+  "analysis": "SCZD module diagnosis association under clinical/technical confounders",
+  "cohort": "BrainSEQ caudate (Dx = SCZD vs Control)",
+  "artifacts": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/brainseq/caudate_sczd/_m/isograph_vae",
+  "published_covariates": [
+    "Age",
+    "Sex",
+    "MoD",
+    "RIN",
+    "mapping_rate",
+    "mito_rate",
+    "SNP_PC1",
+    "SNP_PC2",
+    "SNP_PC3",
+    "SNP_PC4",
+    "SNP_PC5"
+  ],
+  "measured_tested": [
+    "PMI",
+    "Race",
+    "r_rna_rate",
+    "SNP_PC6",
+    "SNP_PC7",
+    "SNP_PC8",
+    "SNP_PC9",
+    "SNP_PC10"
+  ],
+  "measured_not_testable": {
+    "Protocol": "released but invariant in this cohort (single level: RiboZeroGold)"
+  },
+  "proxies_built": {
+    "smoking_ahr_battery": {
+      "n_genes_found": 3,
+      "genes_found": [
+        "CYP1B1",
+        "NQO1",
+        "TIPARP"
+      ],
+      "genes_missing": [
+        "AHRR",
+        "CYP1A1"
+      ],
+      "rationale": "aryl-hydrocarbon-receptor xenobiotic battery; the canonical transcriptional response to tobacco smoke exposure"
+    },
+    "antipsychotic_drd2": {
+      "n_genes_found": 1,
+      "genes_found": [
+        "DRD2"
+      ],
+      "genes_missing": [],
+      "rationale": "striatal DRD2 is upregulated by chronic D2-receptor blockade; caudate is the relevant tissue, and DRD2 is the drug target itself"
+    }
+  },
+  "unavailable": {
+    "medication": "no antipsychotic, mood-stabiliser or any other medication field",
+    "toxicology": "no post-mortem toxicology panel",
+    "smoking": "no smoking status, pack-years, nicotine or cotinine measurement",
+    "substance_use": "no alcohol or illicit substance field",
+    "duration_of_illness": "no age at onset or illness duration"
+  },
+  "fdr": 0.05,
+  "baseline_tolerance": 1e-06,
+  "n_samples": 390,
+  "n_modules": 30
+}
