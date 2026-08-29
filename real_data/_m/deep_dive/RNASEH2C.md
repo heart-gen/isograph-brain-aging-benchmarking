@@ -18,7 +18,7 @@
 | scz | Brain_Anterior_cingulate_cortex_BA24 | rs4930156 | T | 0.5024814605712891 | risk allele T increases intron usage of chr11:65715317-65719681(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** CPEB1(3), CPEB4(3), DHX58(3), ENOX1(3), ESRP2(3), FXR2(3), HNRNPAB(3), HNRNPA3(3), SUPV3L1(3), PUM2(3), U2AF2(3), RBM24(3), SNRPB2(3), DDX58(2), G3BP1(2), KHDRBS1(2), PHAX(1), HNRNPLL(1)
+- **All switched-motif RBPs (recurrence across regions):** ACO1(3), AGO2(3), CELF4(3), CELF5(3), CPEB1(3), CPEB4(3), DHX58(3), SYNCRIP(3), EIF4B(3), ESRP2(3), G3BP1(3), HNRNPCL1(3), HNRNPAB(3), HNRNPU(3), HNRNPM(3), NELFE(3), LIN28A(3), IGHMBP2(3), KHDRBS2(3), PUM1(3)
 
 ## 5. Interpretation
 RNASEH2C has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

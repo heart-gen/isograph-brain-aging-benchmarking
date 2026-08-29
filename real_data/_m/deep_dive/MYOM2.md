@@ -18,8 +18,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs12681998 | G | 0.6909205913543701 | risk allele G increases intron usage of chr8:2127881-2129127(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** IGF2BP2, PPRC1, SUPV3L1, SNRPB2, HNRNPAB, AGO1, ZFP36L2, RBM28, CELF4, A1CF
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), ADAR(3), AGO1(3), CELF4(3), CPEB1(3), CPEB4(3), CSTF2(3), DHX9(3), DHX58(3), ESRP2(3), HNRNPA1L2(3), HNRNPA3(3), HNRNPA2B1(3), TRA2A(3), SRSF11(3), HNRNPAB(3), HNRNPLL(3), IGF2BP1(3), IGF2BP2(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PABPC1
+- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), ADAR(3), AGO1(3), CPEB1(3), CPEB4(3), CSTF2(3), DAZAP1(3), DDX19B(3), DHX58(3), DHX9(3), ESRP2(3), HNRNPK(3), FMR1(3), G3BP2(3), GRSF1(3), HNRNPA1L2(3), HNRNPA2B1(3), HNRNPCL1(3), HNRNPDL(3)
 
 ## 5. Interpretation
 MYOM2 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

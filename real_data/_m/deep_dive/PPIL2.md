@@ -20,8 +20,8 @@
 | scz | Brain_Hypothalamus | rs5999098 | T | -0.8351643681526184 | risk allele T decreases intron usage of chr22:21695496-21696747(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** MATR3, PABPC5, YBX2, ESRP1, ZFP36L2, IGF2BP2, SNRNP70, PABPC3, RBM46, PABPC4, RBMS1, SART3, CELF5, CNOT4
-- **All switched-motif RBPs (recurrence across regions):** AKAP1(4), CELF5(4), CNOT4(4), DHX58(4), ESRP1(4), IGF2BP2(4), FXR2(4), MATR3(4), PABPC3(4), YBX2(4), PABPC5(4), PHAX(4), PTBP2(4), RBM46(4), RBM25(4), RBMS1(4), SAMD4A(4), ZC3H10(4), SART3(4), SNRNP70(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** RBM41, RBMS1, G3BP1, ZC3H10, FXR2, ESRP1, YTHDC1, HNRNPA3, CNOT4, CPEB2, ENOX1, PABPC3, PABPN1, PABPC5, RBM24
+- **All switched-motif RBPs (recurrence across regions):** ESRP1(6), ENOX1(6), CPEB2(6), CNOT4(6), HNRNPA3(6), FXR2(6), PHAX(6), PABPN1(6), PTBP2(6), PUM2(6), IGF2BP2(6), HNRNPCL1(6), ZC3H10(6), YTHDC1(6), SAMD4A(6), RBMS1(6), RBM41(6), RBM46(6), PABPC5(6), PABPC3(6)
 
 ## 5. Interpretation
 PPIL2 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

@@ -16,7 +16,7 @@
 | scz | Brain_Frontal_Cortex_BA9 | rs74410877 | T | -0.33154040575027466 | risk allele T decreases expression of WBP2 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** AGO1(3), CPEB4(3), AGO2(3), DDX19B(3), CSTF2(3), ELAVL3(3), ESRP1(3), DHX58(3), EIF4A3(3), HNRNPLL(3), HNRNPCL1(3), HNRNPAB(3), HNRNPA3(3), SRSF10(3), SYNCRIP(3), YTHDC1(3), U2AF2(3), IGF2BP2(3), IGF2BP1(3), IGHMBP2(3)
+- **All switched-motif RBPs (recurrence across regions):** AGO1(5), AGO2(5), CELF5(5), CELF4(5), CSTF2(5), CPEB4(5), U2AF2(5), ZFP36L2(5), DDX19B(5), DHX58(5), EIF4A3(5), ELAVL3(5), ESRP1(5), HNRNPAB(5), HNRNPA3(5), HNRNPCL1(5), KHDRBS3(5), LIN28A(5), HNRNPM(5), HNRNPU(5)
 
 ## 5. Interpretation
 WBP2 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

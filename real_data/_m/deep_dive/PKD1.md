@@ -15,8 +15,8 @@
 | pd | sQTL | Brain_Cerebellum | 0.02 | no | — | yes | — | risk allele G decreases usage of junction chr16:2112399-2112788(-) (unmapped transcript; n |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** YBX2, CELF6, ZFP36L2, IGF2BP1, RBM24, FXR1, ENOX1, PABPN1, HNRNPA1L2, ESRP1, AKAP1, ESRP2, CNOT4, DHX58, CELF5
-- **All switched-motif RBPs (recurrence across regions):** ACO1(4), AGO1(4), AKAP1(4), CELF4(4), CELF5(4), CELF6(4), CMTR1(4), CNOT4(4), CPEB4(4), DDX19B(4), DHX58(4), ELAVL2(4), ELAVL3(4), ENOX1(4), ESRP1(4), ESRP2(4), FXR1(4), G3BP1(4), HNRNPA0(4), HNRNPA1L2(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** G3BP1, RBM14, RBM41, PPRC1, ZC3H10, ENOX1, RBMS3, CELF6, RALY, CNOT4, ZCRB1, MATR3, PABPC3, A1CF, YTHDC1
+- **All switched-motif RBPs (recurrence across regions):** A1CF(6), ACO1(6), AGO1(6), AGO2(6), AKAP1(6), CELF4(6), CELF5(6), CELF6(6), CNOT4(6), CPEB2(6), DAZAP1(6), CPEB4(6), DHX58(6), DDX19B(6), ELAVL3(6), ELAVL4(6), EIF4A3(6), ELAVL2(6), ENOX1(6), ESRP1(6)
 
 ## 5. Interpretation
 PKD1 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

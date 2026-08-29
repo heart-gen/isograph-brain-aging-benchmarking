@@ -12,8 +12,8 @@
 | als | sQTL | Brain_Cerebellum | 0.48 | no | no | yes | — | risk allele G increases usage of junction chr11:6614686-6614866(-) (ENST00000299427.12,ENS |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ESRP1, HNRNPA1L2, RBM6
-- **All switched-motif RBPs (recurrence across regions):** CELF4(3), ESRP1(3), HNRNPAB(3), HNRNPA1L2(3), ZC3H10(3), RBM6(2), G3BP1(1), CPEB1(1)
+- **Switched *and* module-enriched (q<0.05) RBPs:** G3BP1, SNRPB2, RBMS3, AKAP1, RBM6, ZC3H10, ESRP1, YTHDC1, G3BP2, PABPC5, SART3, HNRNPLL, ZCRB1, KHDRBS2
+- **All switched-motif RBPs (recurrence across regions):** AKAP1(4), CELF6(4), HNRNPAB(4), ESRP1(4), G3BP2(4), FXR2(4), NELFE(4), LIN28A(4), KHDRBS2(4), HNRNPLL(4), TARDBP(4), YTHDC1(4), SNRPB2(4), SRSF4(4), RBM6(4), RBM25(4), SART3(4), RBMS3(4), ZC3H10(4), ZCRB1(4)
 
 ## 5. Interpretation
 TPP1 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

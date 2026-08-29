@@ -11,8 +11,8 @@
 | pd | eQTL | Brain_Frontal_Cortex_BA9 | 0.05 | no | — | no | — | risk allele T increases SH3GL2 expression (gene-level; no intron) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ELAVL3, KHDRBS3, RC3H1, KHDRBS1, HNRNPA2B1, KHDRBS2, DDX19B, U2AF2, AKAP1, AGO2, CPEB4, CELF4, HNRNPA0, SFPQ, PUM2
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), AGO1(3), AGO2(3), AKAP1(3), CELF4(3), CELF5(3), CMTR1(3), CPEB1(3), CPEB4(3), CSTF2(3), DDX19B(3), EIF4A3(3), ELAVL2(3), ELAVL3(3), FXR1(3), HNRNPA0(3), HNRNPA1L2(3), HNRNPA2B1(3), HNRNPAB(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** TIAL1, ELAVL1, ELAVL4, RC3H1, ZC3H10, CPEB4, RBM14, RBMS1, IGF2BP2, CELF4, SF1
+- **All switched-motif RBPs (recurrence across regions):** ACO1(5), AGO1(5), AGO2(5), CELF4(5), CELF5(5), CMTR1(5), CNOT4(5), CPEB1(5), CPEB4(5), CSTF2(5), DAZAP1(5), DDX19B(5), EIF4A3(5), ELAVL1(5), ELAVL2(5), ELAVL3(5), ELAVL4(5), FMR1(5), FXR1(5), GRSF1(5)
 
 ## 5. Interpretation
 SH3GL2 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

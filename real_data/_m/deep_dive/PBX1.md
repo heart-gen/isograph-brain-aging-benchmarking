@@ -11,8 +11,8 @@
 | scz | eQTL | Brain_Cortex | 0.02 | no | — | yes | — | risk allele T decreases PBX1 expression (gene-level; no intron) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** A1CF, ZCRB1
-- **All switched-motif RBPs (recurrence across regions):** A1CF(1), CELF4(1), CELF5(1), CELF6(1), DHX58(1), EIF4B(1), ESRP1(1), G3BP1(1), G3BP2(1), HNRNPA1L2(1), IGF2BP1(1), IGF2BP2(1), MATR3(1), RBFOX2(1), RBM24(1), RBM28(1), RBM41(1), RBM42(1), RBM6(1), RBMS3(1)
+- **Switched *and* module-enriched (q<0.05) RBPs:** A1CF
+- **All switched-motif RBPs (recurrence across regions):** A1CF(2), AGO2(2), CELF4(2), CELF5(2), CELF6(2), FXR1(2), CNOT4(2), DHX58(2), EIF4B(2), ESRP1(2), GRSF1(2), G3BP2(2), FXR2(2), ZFP36L2(2), SNRNP70(2), ZCRB1(2), HNRNPM(2), IGF2BP2(2), IGF2BP1(2), PABPC3(2)
 
 ## 5. Interpretation
 PBX1 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

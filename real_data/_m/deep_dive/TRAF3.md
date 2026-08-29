@@ -16,8 +16,7 @@
 | scz | Brain_Spinal_cord_cervical_c-1 | rs12588339 | A | 0.3340833783149719 | risk allele A increases expression of TRAF3 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** SUPV3L1
-- **All switched-motif RBPs (recurrence across regions):** PABPC3(4), SNRNP70(4), SUPV3L1(4), ZNF638(4)
+- **All switched-motif RBPs (recurrence across regions):** CNOT4(5), PUM2(5), SNRNP70(5), SUPV3L1(5), ZNF638(5)
 
 ## 5. Interpretation
 TRAF3 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

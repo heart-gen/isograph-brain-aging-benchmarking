@@ -18,8 +18,8 @@
 | scz | Brain_Cerebellum | rs12412038 | G | 1.4276000261306763 | risk allele G increases intron usage of chr10:103174982-103181185(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** A1CF
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ESRP1(3), SRSF11(3), PABPN1(3), PPRC1(3), RBM6(3), RBM8A(3), CELF4(1), DHX58(1), RBM41(1)
+- **Switched *and* module-enriched (q<0.05) RBPs:** DHX9, PABPN1
+- **All switched-motif RBPs (recurrence across regions):** PPRC1(5), HNRNPA1L2(5), ESRP1(5), RBM8A(5), RBM14(5), PABPN1(5), SRSF11(5), AGO2(4), TARDBP(4), DHX58(2), LIN28A(2), ANKHD1(1), ADAR(1), CSTF2(1), DHX9(1), IGHMBP2(1), IGF2BP2(1), PABPC4(1), RBM6(1)
 
 ## 5. Interpretation
 NT5C2 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

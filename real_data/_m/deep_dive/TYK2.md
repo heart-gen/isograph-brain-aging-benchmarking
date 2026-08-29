@@ -11,8 +11,8 @@
 | lbd | eQTL | Brain_Spinal_cord_cervical_c-1 | 0.03 | no | — | yes | — | risk allele A decreases TYK2 expression (gene-level; no intron) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** RALY, HNRNPCL1, A1CF, MATR3, CELF6, IGF2BP1, ENOX1, PABPN1, ESRP2, EIF4A3, CELF5, CELF4, PTBP2
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), EIF4A3(3), CPEB1(3), CELF6(3), SUPV3L1(3), HNRNPA0(3), RBM14(3), ESRP2(3), HNRNPCL1(3), RALY(3), AGO2(2), CELF4(2), CELF5(2), G3BP1(2), HNRNPA3(2), HNRNPAB(2), HNRNPD(2), FXR2(2), CPEB4(2)
+- **Switched *and* module-enriched (q<0.05) RBPs:** RBM14, RBMS3, CELF6, RALY, CNOT4, ZCRB1, MATR3, A1CF, YTHDC1, AKAP1, ESRP2, HNRNPA3, HNRNPCL1, IGF2BP1, CPEB2
+- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), AKAP1(3), GRSF1(3), CELF6(3), CPEB1(3), CNOT4(3), ESRP2(3), HNRNPA0(3), EIF4A3(3), PPIE(3), ZCRB1(3), RBM25(3), RBM14(3), SUPV3L1(3), RBMS3(3), CPEB2(2), CPEB4(2), AGO2(2), HNRNPAB(2)
 
 ## 5. Interpretation
 TYK2 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

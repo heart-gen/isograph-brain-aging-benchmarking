@@ -14,8 +14,8 @@
 | ad | sQTL | Brain_Hippocampus | 0.39 | no | no | yes | — | risk allele T decreases usage of junction chr15:78937823-78939140(-) (ENST00000533777.5,EN |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ZCRB1, CPEB1, KHDRBS2, EIF4A3, DDX19B, U2AF2
-- **All switched-motif RBPs (recurrence across regions):** CPEB1(4), CPEB4(4), DDX19B(4), EIF4A3(4), ZRANB2(4), ESRP2(4), HNRNPA3(4), IGF2BP1(4), PABPN1(4), KHDRBS2(4), RBFOX2(4), RBM28(4), ZCRB1(4), SNRPB2(4), U2AF2(4), ACO1(2), HNRNPLL(2), RBMY1A1(2), SAMD4A(2), YTHDC1(2)
+- **Switched *and* module-enriched (q<0.05) RBPs:** SAMD4A, CPEB1, KHDRBS2, EIF4A3, RALY, RBMS3
+- **All switched-motif RBPs (recurrence across regions):** AGO2(4), CPEB2(4), CPEB1(4), CPEB4(4), DDX19B(4), ZRANB2(4), EIF4A3(4), FXR1(4), HNRNPA3(4), HNRNPCL1(4), HNRNPM(4), IGF2BP2(4), IGF2BP1(4), PABPN1(4), PUM2(4), KHDRBS2(4), PABPC5(4), RALY(4), RBM28(4), RBFOX2(4)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CTSH in AD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

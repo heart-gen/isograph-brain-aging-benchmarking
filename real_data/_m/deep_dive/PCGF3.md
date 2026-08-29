@@ -17,8 +17,8 @@
 | pd | sQTL | Brain_Cerebellum | 0.01 | no | no | yes | — | risk allele G increases usage of junction chr4:761416-764984(+) (ENST00000362003.10,ENST00 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** SART3, YTHDC1, SUPV3L1, SNRPB2, AGO1, ZFP36L2, AKAP1, FXR1, AGO2, RBMS3, HNRNPLL, CELF4, A1CF, ENOX1, CELF5
-- **All switched-motif RBPs (recurrence across regions):** A1CF(5), ACO1(5), AGO1(5), AGO2(5), AKAP1(5), CELF4(5), CELF5(5), CPEB2(5), CSTF2(5), DHX58(5), ENOX1(5), ESRP1(5), FXR1(5), FXR2(5), G3BP2(5), HNRNPA0(5), HNRNPA1L2(5), HNRNPA3(5), HNRNPCL1(5), HNRNPLL(5)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PUM1
+- **All switched-motif RBPs (recurrence across regions):** ACO1(6), AGO1(6), AGO2(6), AKAP1(6), CELF4(6), CELF5(6), CELF6(6), CNOT4(6), CPEB2(6), CSTF2(6), DHX58(6), ENOX1(6), ESRP1(6), FXR1(6), FXR2(6), G3BP2(6), HNRNPA0(6), HNRNPA1L2(6), HNRNPA3(6), HNRNPLL(6)
 
 ## 5. Interpretation
 PCGF3 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

@@ -20,8 +20,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs78640136 | G | 0.7075767517089844 | risk allele G increases intron usage of chr4:175701767-176002309(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ZCRB1, CPEB2, DHX9, RBMS3, ZFP36L2, DDX58, AKAP1, IFIH1, RBM42, RALY, ADAR, DHX58, PABPC5, PABPC4, ZNF346
-- **All switched-motif RBPs (recurrence across regions):** ADAR(5), AGO1(5), AKAP1(5), CELF4(5), CELF5(5), CMTR1(5), CPEB1(5), CPEB2(5), CSTF2(5), DDX19B(5), DDX58(5), DHX58(5), DHX9(5), EIF4A3(5), ERI1(5), ESRP1(5), ESRP2(5), G3BP1(5), HNRNPA0(5), HNRNPAB(5)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PPRC1, RBM14, DHX9, SNRPB2, G3BP1, DDX58, ADAR, RALY, RBMS3, DHX58, CPEB2, IFIH1, ZNF346
+- **All switched-motif RBPs (recurrence across regions):** ADAR(6), AGO1(6), CELF4(6), CELF5(6), CSTF2(6), CMTR1(6), CPEB1(6), CPEB2(6), DDX58(6), DDX19B(6), DHX58(6), DHX9(6), YTHDC1(6), EIF4A3(6), ELAVL3(6), ERI1(6), ESRP1(6), ESRP2(6), FMR1(6), G3BP1(6)
 
 ## 5. Interpretation
 GPM6A has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

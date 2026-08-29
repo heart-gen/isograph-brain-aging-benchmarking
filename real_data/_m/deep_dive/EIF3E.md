@@ -22,7 +22,7 @@
 | scz | Brain_Cerebellar_Hemisphere | rs13257548 | A | -0.41363778710365295 | risk allele A decreases intron usage of chr8:108241913-108248613(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** ADAR(4), AKAP1(4), CPEB1(4), EIF4A3(4), ESRP1(4), HNRNPA0(4), HNRNPCL1(4), IFIH1(4), LIN28A(4), PABPC4(4), PHAX(4), PTBP2(4), RBM25(4), RBMS3(4), YBX2(4), ZFP36L2(4)
+- **All switched-motif RBPs (recurrence across regions):** ADAR(4), AGO2(4), CPEB1(4), DDX19B(4), EIF4A3(4), ELAVL3(4), ESRP1(4), HNRNPA0(4), HNRNPCL1(4), HNRNPM(4), IFIH1(4), IGHMBP2(4), KHDRBS2(4), LIN28A(4), NELFE(4), PABPC4(4), PHAX(4), PTBP2(4), RBFOX1(4), RBM25(4)
 
 ## 5. Interpretation
 EIF3E has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

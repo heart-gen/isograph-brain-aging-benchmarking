@@ -12,8 +12,7 @@
 | als | sQTL | Brain_Hypothalamus | 0.01 | no | no | yes | — | risk allele G decreases usage of junction chr16:1334756-1338540(+) (ENST00000324385.9,ENST |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** RBM8A
-- **All switched-motif RBPs (recurrence across regions):** CPEB4(3), ENOX1(3), G3BP1(3), RBM14(3), RBM8A(3), SNRPA(3), YTHDC1(3), ZC3H10(3)
+- **All switched-motif RBPs (recurrence across regions):** HNRNPA3(3), HNRNPLL(3), HNRNPU(3), HNRNPM(3), KHDRBS2(3), KHDRBS3(3), SNRPA(3), PABPC3(3), PABPC5(3), PPRC1(3), PUM1(3), PUM2(3), RBM14(3), RBM8A(3), ZC3H10(3), SRSF10(3), SRSF4(3), SYNCRIP(3), ZNF638(3), YTHDC1(3)
 
 ## 5. Interpretation
 BAIAP3 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

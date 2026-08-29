@@ -11,8 +11,8 @@
 | pd | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | no annotated structural change | risk allele T decreases usage of junction chr12:71918548-71920731(+) (ENST00000319106.12,E |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** CPEB2, A1CF, DHX9, RBMS3, ZFP36L2, RBM41, RALY, ADAR, DHX58, PABPC5, PABPC4, MATR3, DDX58, SART3, RBM46
-- **All switched-motif RBPs (recurrence across regions):** A1CF(4), ACO1(4), ADAR(4), AGO1(4), AGO2(4), CELF4(4), CELF5(4), CNOT4(4), CPEB2(4), CPEB4(4), CSTF2(4), DDX58(4), DHX58(4), DHX9(4), EIF4A3(4), EIF4B(4), G3BP2(4), HNRNPA1L2(4), HNRNPAB(4), HNRNPCL1(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PPRC1, RBM14, DHX9, RBM41, SNRPB2, DDX58, ZC3H10, ADAR, RALY, RBM6, RBMS3, DHX58, CPEB2, IFIH1
+- **All switched-motif RBPs (recurrence across regions):** A1CF(6), ACO1(6), ADAR(6), AGO1(6), AGO2(6), CELF4(6), CELF5(6), CNOT4(6), CPEB2(6), CPEB4(6), CSTF2(6), DDX19B(6), DDX58(6), DHX58(6), DHX9(6), EIF4A3(6), FMR1(6), G3BP2(6), GRSF1(6), HNRNPA1L2(6)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for TBC1D15 in PD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
