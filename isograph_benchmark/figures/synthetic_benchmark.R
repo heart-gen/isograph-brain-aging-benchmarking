@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Publication-quality figures for the IsoGraph synthetic benchmark.
-# Requires: ggpubr, ggplot2, patchwork, dplyr, tidyr, arrow, scales
+# Requires: ggpubr, ggplot2, patchwork, dplyr, tidyr, arrow, scales, ggrepel
 
 suppressPackageStartupMessages({
   library(arrow)
@@ -93,9 +93,22 @@ INTERPRET_METHOD_ORDER <- c(
   "isograph_vae_multiplex"
 )
 
+# Partition-metric diagnostics (figS12). Includes the two abundance-channel variants and
+# the residualization ablation, because the coverage-vs-merging split they expose is the
+# whole point of the panel: residualization repairs merging, multiplex repairs coverage.
+PARTITION_METHOD_ORDER <- c(
+  "isograph_vae",
+  "isograph_vae_residual",
+  "isograph_vae_multiplex",
+  "isograph_vae_reliability",
+  "isograph_spearman_leiden",
+  "wgcna_gene"
+)
+
 METHOD_ORDER <- unique(c(MAIN_METHOD_ORDER, MULTIPLEX_METHOD_ORDER,
                          COMPUTE_METHOD_ORDER, CONFOUND_METHOD_ORDER,
-                         DEGRADATION_METHOD_ORDER, INTERPRET_METHOD_ORDER))
+                         DEGRADATION_METHOD_ORDER, INTERPRET_METHOD_ORDER,
+                         PARTITION_METHOD_ORDER))
 
 METHOD_LABELS <- c(
   isograph_baseline        = "IsoGraph Baseline",
@@ -169,6 +182,19 @@ SCENARIO_ORDER <- c(
   "scale_realistic"
 )
 
+# Scenarios carrying partition metrics (figS12). Ordered switch-first, then the confound
+# scenarios where the coverage-vs-merging distinction does the work.
+PARTITION_SCENARIO_ORDER <- c(
+  "idealized_switching",
+  "feature_space_interactions",
+  "abundance_switch_mixed",
+  "cell_composition",
+  "library_depth",
+  "batch_effects",
+  "rna_degradation",
+  "rna_degradation_coupled"
+)
+
 SCENARIO_LABELS <- c(
   idealized_switching        = "Idealized switching",
   noise_stress               = "Noise stress",
@@ -187,10 +213,24 @@ SCENARIO_LABELS <- c(
   scale_realistic            = "Scale (BrainSEQ 16k)"
 )
 
+# Main-figure metric panels, in plotting order (names = metric column, values = y label).
+# `metrics_ari_planted` is the reviewer-requested fragmentation-sensitive primary: unlike
+# best-match Jaccard it charges a method for splitting one planted module across many
+# predicted ones, so a method cannot buy recovery with over-partitioning.
 MAIN_METRICS <- c(
-  "metrics_module_recovery",
-  "metrics_switch_gene_detection_rate",
-  "metrics_nonswitch_gene_module_rate"
+  metrics_module_recovery            = "Module recovery\n(AUC; 1 = perfect)",
+  metrics_ari_planted                = "Adjusted Rand index\n(planted genes)",
+  metrics_switch_gene_detection_rate = "Switching gene detection\n(recall; 1 = all recovered)",
+  metrics_nonswitch_gene_module_rate = "Non-switching gene exclusion\n(1 - false-positive rate)"
+)
+
+# Scenarios where a partition metric is undefined rather than merely absent, with the
+# reason rendered into the empty facet. `negative_control_noise` plants a single gene in a
+# single module, so every method scores a vacuous ARI/homogeneity/completeness of 1.0
+# there; partition_metrics.py suppresses them and the size-preserving permutation null
+# (figS12C) carries that scenario instead.
+PARTITION_NA_NOTES <- c(
+  negative_control_noise = "undefined\n(1 planted module)"
 )
 
 # Star tiers for the geom_pwc SUPPLEMENTS (dose-response, compute). Threshold is
@@ -436,7 +476,10 @@ metric_box_data <- function(long_df, metric_name, methods = MAIN_METHOD_ORDER,
 box_metric_panel <- function(long_df, metric_name, y_label, tag,
                              show_x_labels = FALSE,
                              methods = MAIN_METHOD_ORDER,
-                             scenarios = MAIN_SCENARIO_ORDER) {
+                             scenarios = MAIN_SCENARIO_ORDER,
+                             ylim = c(0, 1.08),
+                             na_notes = NULL,
+                             show_strip = TRUE) {
   sub <- metric_box_data(long_df, metric_name, methods = methods,
                          scenarios = scenarios)
   # Full-family FDR < 0.05 brackets (isograph_vae vs WGCNA), one per scenario facet,
@@ -470,7 +513,7 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
       breaks = c(0, 0.25, 0.5, 0.75, 1),
       expand = expansion(mult = c(0.02, 0.08))
     ) +
-    coord_cartesian(ylim = c(0, 1.08), clip = "off") +
+    coord_cartesian(ylim = ylim, clip = "off") +
     labs(x = NULL, y = y_label, fill = NULL, tag = tag) +
     theme(
       legend.position = "right",
@@ -495,6 +538,36 @@ box_metric_panel <- function(long_df, metric_name, y_label, tag,
     )
   }
 
+  # Label facets where the metric is undefined by construction, so an empty panel reads
+  # as "not applicable" rather than "method scored zero" or "data still running".
+  if (!is.null(na_notes)) {
+    missing <- intersect(names(na_notes),
+                         setdiff(scenarios, unique(as.character(sub$scenario))))
+    if (length(missing) > 0) {
+      note_df <- data.frame(
+        scenario_label = factor(unname(scenario_labels[missing]),
+                                levels = unname(scenario_labels[scenarios])),
+        label = unname(na_notes[missing]),
+        x = (length(methods) + 1) / 2,
+        y = mean(ylim)
+      )
+      p <- p + geom_text(
+        data = note_df,
+        aes(x = .data$x, y = .data$y, label = .data$label),
+        inherit.aes = FALSE, hjust = 0.5, vjust = 0.5,
+        size = 2.4, colour = "grey40", lineheight = 0.95
+      )
+    }
+  }
+
+  # The scenario strips (and their per-method n) are identical in every stacked panel;
+  # drawing them once at the top buys the vertical room the extra ARI panel needs and
+  # keeps the long y-axis titles from colliding with the panel tags.
+  if (!show_strip) {
+    p <- p + theme(strip.text = element_blank(),
+                   strip.background = element_blank())
+  }
+
   if (!show_x_labels) {
     p <- p + theme(axis.text.x = element_blank(),
                    axis.ticks.x = element_blank())
@@ -507,30 +580,28 @@ make_fig1 <- function(long_df) {
   scenarios <- present_scenarios(long_df, MAIN_SCENARIO_ORDER)
   if (length(methods) == 0 || length(scenarios) == 0) return(NULL)
 
-  pA <- box_metric_panel(
-    long_df,
-    "metrics_module_recovery",
-    "Module recovery (AUC; 1 = perfect)",
-    "A",
-    methods = methods, scenarios = scenarios
-  )
-  pB <- box_metric_panel(
-    long_df,
-    "metrics_switch_gene_detection_rate",
-    "Switching gene detection (recall; 1 = all recovered)",
-    "B",
-    methods = methods, scenarios = scenarios
-  )
-  pC <- box_metric_panel(
-    long_df,
-    "metrics_nonswitch_gene_module_rate",
-    "Non-switching gene exclusion (1 - false-positive rate)",
-    "C",
-    show_x_labels = TRUE,
-    methods = methods, scenarios = scenarios
-  )
+  metrics <- names(MAIN_METRICS)
+  tags <- LETTERS[seq_along(metrics)]
+  panels <- vector("list", length(metrics))
+  for (i in seq_along(metrics)) {
+    metric <- metrics[[i]]
+    # ARI is unbounded below; give it a little headroom so the near-zero confound
+    # distributions are not clipped flat against the axis.
+    ylim <- if (metric == "metrics_ari_planted") c(-0.06, 1.08) else c(0, 1.08)
+    panels[[i]] <- box_metric_panel(
+      long_df,
+      metric,
+      unname(MAIN_METRICS[[metric]]),
+      tags[[i]],
+      show_x_labels = (i == length(metrics)),
+      methods = methods, scenarios = scenarios,
+      ylim = ylim,
+      na_notes = PARTITION_NA_NOTES,
+      show_strip = (i == 1)
+    )
+  }
 
-  (pA / pB / pC) +
+  Reduce(`/`, panels) +
     plot_layout(guides = "collect") &
     theme(legend.position = "right")
 }
@@ -1288,6 +1359,211 @@ make_interpretation_fig <- function(interp_df, methods = INTERPRET_METHOD_ORDER)
 }
 
 # ---------------------------------------------------------------------------
+# Partition-metric diagnostics (reviewer items 1 + 4)
+# ---------------------------------------------------------------------------
+# Panel A separates the two ways a method can lose ARI. `ari_planted` charges a method
+# both for genes it grouped wrongly and for planted genes it never assigned;
+# `ari_assigned` conditions on the assigned subset, so the segment length between them is
+# exactly the coverage penalty. A long segment means conservatism (genes dropped, but what
+# was kept is right); a short segment at low ARI means genuine merging.
+coverage_gap_panel <- function(long_df, methods = PARTITION_METHOD_ORDER,
+                               scenarios = PARTITION_SCENARIO_ORDER, tag = "A") {
+  sub <- long_df |>
+    filter(
+      .data$scenario %in% scenarios,
+      .data$method %in% methods,
+      .data$metric %in% c("metrics_ari_planted", "metrics_ari_assigned"),
+      is.finite(.data$value)
+    )
+  if (nrow(sub) == 0) return(NULL)
+
+  methods   <- methods[methods %in% unique(as.character(sub$method))]
+  scenarios <- scenarios[scenarios %in% unique(as.character(sub$scenario))]
+
+  plot_df <- sub |>
+    group_by(.data$scenario, .data$method, .data$metric) |>
+    summarise(value = median(.data$value), .groups = "drop") |>
+    tidyr::pivot_wider(names_from = "metric", values_from = "value") |>
+    filter(is.finite(.data$metrics_ari_planted),
+           is.finite(.data$metrics_ari_assigned)) |>
+    mutate(
+      method = factor(as.character(.data$method), levels = methods),
+      scenario_label = factor(unname(SCENARIO_LABELS[as.character(.data$scenario)]),
+                              levels = unname(SCENARIO_LABELS[scenarios]))
+    )
+  if (nrow(plot_df) == 0) return(NULL)
+
+  ggplot(plot_df, aes(y = .data$method)) +
+    geom_segment(aes(x = .data$metrics_ari_planted, xend = .data$metrics_ari_assigned,
+                     yend = .data$method, colour = .data$method),
+                 linewidth = 1.1, alpha = 0.55,
+                 arrow = arrow(length = unit(0.055, "in"), type = "closed")) +
+    geom_point(aes(x = .data$metrics_ari_planted, colour = .data$method),
+               size = 1.5, shape = 16) +
+    geom_point(aes(x = .data$metrics_ari_assigned, colour = .data$method),
+               size = 1.5, shape = 21, fill = "white", stroke = 0.55) +
+    facet_wrap(~ scenario_label, nrow = 2) +
+    scale_y_discrete(limits = rev(methods), labels = METHOD_LABELS_SHORT) +
+    scale_colour_manual(values = METHOD_COLORS[methods],
+                        labels = METHOD_LABELS[methods], breaks = methods) +
+    scale_x_continuous(limits = c(-0.05, 1.02),
+                       breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+    labs(x = "ARI: filled = all planted genes, open = assigned genes only",
+         y = NULL, colour = NULL, tag = tag) +
+    theme_pub() +
+    theme(legend.position = "none",
+          axis.text.y = element_text(size = 6.5),
+          plot.tag = element_text(size = 10, face = "bold"))
+}
+
+# Panel B is the fragmentation/merging plane. Homogeneity ~ 1 with completeness < 1 means
+# every predicted module is pure but planted modules were split across several of them
+# (fragmentation, WGCNA's signature). The converse, low homogeneity, means distinct
+# planted modules were merged into one predicted module.
+fragmentation_plane_panel <- function(long_df, methods = PARTITION_METHOD_ORDER,
+                                      scenarios = PARTITION_SCENARIO_ORDER, tag = "B") {
+  sub <- long_df |>
+    filter(
+      .data$scenario %in% scenarios,
+      .data$method %in% methods,
+      .data$metric %in% c("metrics_homogeneity_planted",
+                          "metrics_completeness_planted"),
+      is.finite(.data$value)
+    )
+  if (nrow(sub) == 0) return(NULL)
+  methods <- methods[methods %in% unique(as.character(sub$method))]
+
+  plot_df <- sub |>
+    group_by(.data$scenario, .data$method, .data$metric) |>
+    summarise(value = median(.data$value), .groups = "drop") |>
+    tidyr::pivot_wider(names_from = "metric", values_from = "value") |>
+    filter(is.finite(.data$metrics_homogeneity_planted),
+           is.finite(.data$metrics_completeness_planted)) |>
+    mutate(
+      method = factor(as.character(.data$method), levels = methods),
+      scenario_label = factor(
+        unname(SCENARIO_LABELS[as.character(.data$scenario)]),
+        levels = unname(SCENARIO_LABELS[scenarios[scenarios %in%
+                                                  unique(as.character(sub$scenario))]])
+      )
+    )
+  if (nrow(plot_df) == 0) return(NULL)
+
+  # Faceted by scenario rather than labelled in a single plane: 48 method x scenario
+  # points in one panel cannot be labelled legibly, and the comparison the panel exists
+  # to support is between methods within a scenario.
+  ggplot(plot_df, aes(x = .data$metrics_completeness_planted,
+                      y = .data$metrics_homogeneity_planted)) +
+    geom_abline(slope = 1, intercept = 0, linetype = "dotted",
+                colour = "grey70", linewidth = 0.3) +
+    geom_point(aes(colour = .data$method, shape = .data$method), size = 2.1,
+               alpha = 0.9) +
+    facet_wrap(~ scenario_label, nrow = 2) +
+    scale_colour_manual(values = METHOD_COLORS[methods],
+                        labels = METHOD_LABELS[methods], breaks = methods) +
+    scale_shape_manual(values = seq_along(methods) + 14,
+                       labels = METHOD_LABELS[methods], breaks = methods) +
+    scale_x_continuous(breaks = c(0.4, 0.6, 0.8, 1.0)) +
+    scale_y_continuous(breaks = c(0.4, 0.6, 0.8, 1.0)) +
+    coord_cartesian(xlim = c(0.3, 1.04), ylim = c(0.3, 1.04)) +
+    labs(x = "Completeness (planted genes) - low = fragmentation",
+         y = "Homogeneity (planted genes)\nlow = merging",
+         colour = NULL, shape = NULL, tag = tag) +
+    theme_pub() +
+    theme(legend.position = "right",
+          plot.tag = element_text(size = 10, face = "bold"))
+}
+
+# Panel C is the item-4 calibration: best-match Jaccard against a module-count-preserving
+# permutation null. A raw recovery score is not interpretable on its own because a method
+# that emits many small modules earns matches by chance; z = (observed - null mean) / null
+# SD is. `negative_control_noise` is the acceptance test -- nothing is planted there, so
+# every method must land near z = 0.
+null_calibration_panel <- function(long_df, raw_df, methods = PARTITION_METHOD_ORDER,
+                                   tag = "C") {
+  scenarios <- c(PARTITION_SCENARIO_ORDER, "negative_control_noise")
+  sub <- long_df |>
+    filter(
+      .data$scenario %in% scenarios,
+      .data$method %in% methods,
+      .data$metric == "metrics_module_recovery_z",
+      is.finite(.data$value)
+    )
+  if (nrow(sub) == 0) return(NULL)
+  methods   <- methods[methods %in% unique(as.character(sub$method))]
+  scenarios <- scenarios[scenarios %in% unique(as.character(sub$scenario))]
+
+  plot_df <- sub |>
+    group_by(.data$scenario, .data$method) |>
+    summarise(z = median(.data$value), .groups = "drop")
+
+  # Median permutation P comes from the raw table: summarize.py deliberately omits
+  # perm_p (averaging p-values is not meaningful), so it is read per-run here and
+  # reduced with a median only for annotation.
+  if (!is.null(raw_df) && "metrics_module_recovery_perm_p" %in% names(raw_df)) {
+    pp <- raw_df |>
+      filter(.data$run_scenario %in% scenarios,
+             .data$run_method %in% methods,
+             is.finite(.data$metrics_module_recovery_perm_p)) |>
+      group_by(scenario = as.character(.data$run_scenario),
+               method = as.character(.data$run_method)) |>
+      summarise(perm_p = median(.data$metrics_module_recovery_perm_p),
+                .groups = "drop")
+    plot_df <- plot_df |>
+      mutate(scenario = as.character(.data$scenario),
+             method = as.character(.data$method)) |>
+      left_join(pp, by = c("scenario", "method"))
+  } else {
+    plot_df$perm_p <- NA_real_
+  }
+
+  plot_df <- plot_df |>
+    mutate(
+      method = factor(as.character(.data$method), levels = methods),
+      scenario_label = factor(unname(SCENARIO_LABELS[as.character(.data$scenario)]),
+                              levels = unname(SCENARIO_LABELS[scenarios])),
+      # z is unbounded and genuine recoveries reach the hundreds; log1p keeps the
+      # near-null bars legible in the same panel.
+      z_plot = log1p(pmax(0, .data$z)),
+      calibrated = !is.na(.data$perm_p) & .data$perm_p > 0.05
+    )
+
+  ggplot(plot_df, aes(x = .data$scenario_label, y = .data$z_plot,
+                      fill = .data$method)) +
+    geom_col(position = position_dodge(width = 0.8), width = 0.72,
+             colour = "grey25", linewidth = 0.15) +
+    geom_point(data = dplyr::filter(plot_df, .data$calibrated),
+               aes(x = .data$scenario_label, y = .data$z_plot + 0.22),
+               position = position_dodge(width = 0.8), shape = 8, size = 1.1,
+               colour = "grey20", inherit.aes = TRUE, show.legend = FALSE) +
+    geom_hline(yintercept = log1p(2), linetype = "dashed", colour = "grey45",
+               linewidth = 0.35) +
+    scale_fill_manual(values = METHOD_COLORS[methods],
+                      labels = METHOD_LABELS[methods], breaks = methods) +
+    labs(x = NULL,
+         y = "log(1 + z) vs. count-preserving null",
+         fill = NULL, tag = tag,
+         caption = paste("Dashed line z = 2.",
+                         "Asterisk marks median permutation P > 0.05,",
+                         "i.e. recovery fully explained by module-count structure.")) +
+    theme_pub() +
+    theme(legend.position = "right",
+          axis.text.x = element_text(angle = 30, hjust = 1, size = 6.5),
+          plot.caption = element_text(size = 6, colour = "grey35", hjust = 0),
+          plot.tag = element_text(size = 10, face = "bold"))
+}
+
+make_partition_diagnostics_fig <- function(long_df, raw_df) {
+  if (!"metrics_ari_assigned" %in% unique(as.character(long_df$metric))) return(NULL)
+  pA <- coverage_gap_panel(long_df)
+  pB <- fragmentation_plane_panel(long_df)
+  pC <- null_calibration_panel(long_df, raw_df)
+  panels <- Filter(Negate(is.null), list(pA, pB, pC))
+  if (length(panels) == 0) return(NULL)
+  Reduce(`/`, panels) + plot_layout(heights = c(1.25, 1, 1))
+}
+
+# ---------------------------------------------------------------------------
 # Tables
 # ---------------------------------------------------------------------------
 # Supplementary benchmark summary (moved from main Table 1). Restricted to the six
@@ -1300,6 +1576,10 @@ make_table1 <- function(summary) {
 
   metric_map <- c(
     metrics_module_recovery            = "Module recovery",
+    metrics_ari_planted                = "ARI (planted)",
+    metrics_ari_assigned               = "ARI (assigned genes only)",
+    metrics_homogeneity_planted        = "Homogeneity",
+    metrics_completeness_planted       = "Completeness",
     metrics_switch_gene_detection_rate = "Switch detection",
     metrics_nonswitch_gene_module_rate =
       "Non-switching gene module rate (lower is better)"
@@ -1446,7 +1726,7 @@ cat("Generating figures...\n")
 
 tryCatch({
   fig1 <- make_fig1(long)
-  if (!is.null(fig1)) save_fig(fig1, "fig1_benchmark_overview", width = 12, height = 8.2)
+  if (!is.null(fig1)) save_fig(fig1, "fig1_benchmark_overview", width = 12, height = 10.8)
   else cat("  fig1: no data, skipping\n")
 }, error = function(e) warning("fig1 error: ", conditionMessage(e)))
 
@@ -1547,6 +1827,12 @@ tryCatch({
   if (!is.null(p)) save_fig(p, "figS11_interpretation_accuracy", width = 7.5, height = 3.6)
   else cat("  figS11: no interpretation summary yet, skipping\n")
 }, error = function(e) warning("figS11 error: ", conditionMessage(e)))
+
+tryCatch({
+  p <- make_partition_diagnostics_fig(long, raw)
+  if (!is.null(p)) save_fig(p, "figS12_partition_diagnostics", width = 10, height = 11)
+  else cat("  figS12: no partition metrics yet, skipping\n")
+}, error = function(e) warning("figS12 error: ", conditionMessage(e)))
 
 } else {
   cat("ISOGRAPH_TABLES_ONLY set - skipping figures, regenerating summary tables only\n")
