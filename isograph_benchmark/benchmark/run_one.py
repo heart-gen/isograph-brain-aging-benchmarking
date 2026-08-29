@@ -25,6 +25,7 @@ from isograph.workflow.config import (
     WgcnaModelConfig,
 )
 
+from isograph_benchmark.benchmark.partition_metrics import partition_metrics
 from isograph_benchmark.benchmark.spearman_leiden import SpearmanLeidenConfig, SpearmanLeidenModel
 from isograph_benchmark.benchmark.synthetic_data import ensure_dataset
 from isograph_benchmark.benchmark.telemetry import (
@@ -347,6 +348,15 @@ def compute_metrics(artifacts, bundle) -> dict[str, Any]:
 
     # A1: genetic-anchoring recovery (no-op dict for non-genetic scenarios).
     metrics.update(genetic_recovery_metrics(artifacts, bundle))
+
+    # Fragmentation-sensitive partition metrics + the module-count-preserving null for
+    # module_recovery.  truth_switch covers every gene, so it supplies the universe for the
+    # variant that treats background genes as an extra planted class.  Backfilled onto
+    # already-completed runs by benchmark.backfill_metrics using this same function.
+    universe = truth_switch["gene_id"].astype(str).tolist() if not truth_switch.empty else None
+    metrics.update(
+        partition_metrics(artifacts.module_table, truth_modules, universe=universe)
+    )
 
     return metrics
 
