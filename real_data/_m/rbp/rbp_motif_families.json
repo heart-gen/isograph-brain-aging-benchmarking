@@ -1,0 +1,94 @@
+{
+  "cut": 0.25,
+  "min_overlap": 4,
+  "n_matrices": 1194,
+  "n_rbps": 160,
+  "n_families": 136,
+  "n_multi_rbp_families": 107,
+  "largest_family": 112,
+  "calibration": {
+    "by_rbp": {
+      "n_within_pairs": 16010,
+      "n_between_pairs": 696211,
+      "within_quantiles": {
+        "0.25": 0.3815496085638588,
+        "0.5": 0.6610916948303819,
+        "0.75": 0.7333333333333334,
+        "0.9": 1.0
+      },
+      "between_quantiles": {
+        "0.25": 2.4804242289772215e-17,
+        "0.5": 0.3318460185882299,
+        "0.75": 0.4666666666666666,
+        "0.9": 0.6666666666666666
+      }
+    },
+    "by_attract_family": {
+      "n_within_pairs": 220560,
+      "n_between_pairs": 491661,
+      "within_quantiles": {
+        "0.25": 0.1111111111111111,
+        "0.5": 0.3333333333333333,
+        "0.75": 0.5156364056665561,
+        "0.9": 0.7213551820196851
+      },
+      "between_quantiles": {
+        "0.25": 2.4804242289772215e-17,
+        "0.5": 0.30708735482125865,
+        "0.75": 0.4666666666666666,
+        "0.9": 0.6666666666666666
+      }
+    }
+  },
+  "cut_sweep": [
+    {
+      "cut": 0.1,
+      "n_families": 262,
+      "largest_family": 92,
+      "n_singletons": 78,
+      "rbp_purity": 0.4137353433835846
+    },
+    {
+      "cut": 0.15,
+      "n_families": 213,
+      "largest_family": 98,
+      "n_singletons": 48,
+      "rbp_purity": 0.3852596314907873
+    },
+    {
+      "cut": 0.2,
+      "n_families": 172,
+      "largest_family": 112,
+      "n_singletons": 32,
+      "rbp_purity": 0.3601340033500838
+    },
+    {
+      "cut": 0.25,
+      "n_families": 136,
+      "largest_family": 112,
+      "n_singletons": 21,
+      "rbp_purity": 0.34003350083752093
+    },
+    {
+      "cut": 0.3,
+      "n_families": 100,
+      "largest_family": 140,
+      "n_singletons": 9,
+      "rbp_purity": 0.31909547738693467
+    },
+    {
+      "cut": 0.35,
+      "n_families": 72,
+      "largest_family": 185,
+      "n_singletons": 4,
+      "rbp_purity": 0.29731993299832493
+    },
+    {
+      "cut": 0.4,
+      "n_families": 57,
+      "largest_family": 202,
+      "n_singletons": 4,
+      "rbp_purity": 0.28559463986599665
+    }
+  ]
+}

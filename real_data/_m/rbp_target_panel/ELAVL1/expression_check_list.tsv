@@ -1,0 +1,22 @@
+tier	tier_label	gene_name	ensembl_gene_id	n_regions	n_regions_binding	selection_reason
+0	regulator	ELAVL1	ENSG00000066044			ELAVL1 itself -- the perturbation target
+1	core recurrent	STX1B	ENSG00000099365	4	5	switched + enriched module in 4 region(s); 5 eCLIP-supported
+1	core recurrent	CHRNB2	ENSG00000160716	3	4	switched + enriched module in 3 region(s); 4 eCLIP-supported
+1	core recurrent	ABCG4	ENSG00000172350	3	4	switched + enriched module in 3 region(s); 4 eCLIP-supported
+1	core recurrent	TMEM130	ENSG00000166448	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	SYP	ENSG00000102003	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	CACNB1	ENSG00000067191	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	SBK1	ENSG00000188322	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	MT3	ENSG00000087250	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	C1orf216	ENSG00000142686	2	3	switched + enriched module in 2 region(s); 3 eCLIP-supported
+1	core recurrent	PPP2R1A	ENSG00000105568	3	1	switched + enriched module in 3 region(s); 1 eCLIP-supported
+1	core recurrent	MLF2	ENSG00000089693	2	1	switched + enriched module in 2 region(s); 1 eCLIP-supported
+1	core recurrent	AP1M1	ENSG00000072958	2	1	switched + enriched module in 2 region(s); 1 eCLIP-supported
+1	core recurrent	CPLX2	ENSG00000145920	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	NACC1	ENSG00000160877	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+2	disease anchor	TMED4	ENSG00000158604	1	1	colocalized SCZ (eQTL,sQTL); splicing (sQTL not resolved to switch pair)
+3	GO-invisible program	RINL	ENSG00000187994	2	2	GO-invisible module in 2 region(s), no coloc anchor
+3	GO-invisible program	B4GALNT4	ENSG00000182272	1	1	GO-invisible module in 1 region(s), no coloc anchor
+3	GO-invisible program	ADCY6	ENSG00000174233	1	1	GO-invisible module in 1 region(s), no coloc anchor
+3	GO-invisible program	TMEM63B	ENSG00000137216	2	2	GO-invisible module in 1 region(s), no coloc anchor
+3	GO-invisible program	CDC37	ENSG00000105401	1	1	GO-invisible module in 1 region(s), no coloc anchor
