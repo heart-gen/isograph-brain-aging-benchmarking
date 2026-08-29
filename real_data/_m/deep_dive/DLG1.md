@@ -20,8 +20,8 @@
 | scz | Brain_Cerebellar_Hemisphere | rs9843908 | T | 0.31144991517066956 | risk allele T increases intron usage of chr3:197282845-197296346(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ACO1
-- **All switched-motif RBPs (recurrence across regions):** ACO1(4), DDX58(4), RBM42(4), DHX58(4), FXR1(4), HNRNPA3(4), MATR3(4), PABPC4(3), ESRP2(3), EIF4B(3), CNOT4(3), ZNF638(3), YBX2(3), SUPV3L1(3), CELF6(3), RBFOX2(3), ADAR(1), CPEB2(1), HNRNPA1L2(1), DHX9(1)
+- **Switched *and* module-enriched (q<0.05) RBPs:** ACO1, HNRNPLL, DHX9, PABPN1
+- **All switched-motif RBPs (recurrence across regions):** ACO1(7), DDX58(7), CELF6(7), CNOT4(7), FXR1(7), DHX58(7), HNRNPU(7), RBM42(7), PPRC1(7), NELFE(7), HNRNPA3(7), RBM8A(6), G3BP2(6), RBM41(6), YTHDC1(6), ZC3H10(6), SNRPB2(5), RBFOX2(5), AGO2(5), LIN28A(5)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for DLG1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

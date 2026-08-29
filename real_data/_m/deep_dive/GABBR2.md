@@ -18,8 +18,8 @@
 | scz | Brain_Cerebellum | rs7869257 | G | 0.5653102993965149 | risk allele G increases intron usage of chr9:98302896-98303241(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PPIE, ELAVL4, KHDRBS1, HNRNPD, SYNCRIP, RNASEL, ELAVL3, OAS1, IGF2BP3, TIAL1, U2AF2, ELAVL2, PABPC1, KHDRBS3, RBMX
-- **All switched-motif RBPs (recurrence across regions):** A1CF(4), ACO1(4), ADAR(4), AGO1(4), AGO2(4), CPEB1(4), CPEB4(4), DHX58(4), DDX58(4), DDX19B(4), CSTF2(4), HNRNPLL(4), HNRNPD(4), HNRNPCL1(4), HNRNPA3(4), EIF4A3(4), DHX9(4), ELAVL4(4), ELAVL3(4), ESRP2(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** ELAVL4, KHDRBS1, TIAL1, RNASEL, PPIE, ZFP36, OAS1, HNRNPC, TIA1, IGF2BP3, HNRNPD, ELAVL2, PABPC1, RBMX, ELAVL3
+- **All switched-motif RBPs (recurrence across regions):** A1CF(6), ACO1(6), ADAR(6), AGO1(6), AGO2(6), ANKHD1(6), CPEB2(6), CPEB1(6), CNOT4(6), CPEB4(6), DDX58(6), DDX19B(6), CSTF2(6), EIF4A3(6), DHX9(6), DHX58(6), FUS(6), ESRP1(6), ESRP2(6), ENOX1(6)
 
 ## 5. Interpretation
 GABBR2 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

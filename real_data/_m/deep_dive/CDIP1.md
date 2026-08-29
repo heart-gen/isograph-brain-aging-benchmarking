@@ -18,8 +18,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs4786493 | C | 0.43002358078956604 | risk allele C increases intron usage of chr16:4514664-4538702(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** CPEB1, PPRC1, SUPV3L1, CPEB4, IGHMBP2
-- **All switched-motif RBPs (recurrence across regions):** AGO2(6), AKAP1(6), CPEB1(6), CPEB2(6), CPEB4(6), DHX58(6), EIF4A3(6), FXR2(6), G3BP1(6), HNRNPLL(6), IGF2BP2(6), IGF2BP3(6), IGHMBP2(6), NUDT21(6), PABPN1(6), PPRC1(6), PTBP2(6), RALY(6), RBFOX2(6), RBM14(6)
+- **Switched *and* module-enriched (q<0.05) RBPs:** KHDRBS1, CPEB1, CPEB4, SNRPA, NUDT21, U2AF2, HNRNPK
+- **All switched-motif RBPs (recurrence across regions):** AGO2(8), CNOT4(8), CPEB1(8), CPEB2(8), CPEB4(8), DDX19B(8), DHX58(8), EIF4A3(8), FXR2(8), HNRNPAB(8), HNRNPK(8), HNRNPLL(8), HNRNPM(8), HNRNPU(8), IGF2BP2(8), IGF2BP3(8), IGHMBP2(8), KHDRBS1(8), KHDRBS2(8), KHDRBS3(8)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CDIP1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

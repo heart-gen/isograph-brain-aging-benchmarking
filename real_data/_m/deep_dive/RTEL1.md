@@ -17,8 +17,8 @@
 | scz | Brain_Cerebellar_Hemisphere | rs190464636 | C | -1.9781608581542969 | risk allele C decreases intron usage of chr20:63690947-63691742(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PABPC1, ESRP1, RNASEL, ELAVL4, HNRNPD, SYNCRIP, IGHMBP2, ELAVL3, SRSF10, DHX58, FXR2, SART3, KHDRBS3, U2AF2
-- **All switched-motif RBPs (recurrence across regions):** DDX19B(3), DHX58(3), EIF4A3(3), ELAVL3(3), ELAVL4(3), ESRP1(3), FXR2(3), HNRNPA0(3), HNRNPD(3), IGHMBP2(3), KHDRBS2(3), KHDRBS3(3), PABPC1(3), PUM2(3), RNASEL(3), SART3(3), SNRPB2(3), SRSF10(3), SYNCRIP(3), U2AF2(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** IGF2BP1, RBM6, ESRP1, RNASEL, YTHDC1, PABPC1, RBM24, ELAVL4, DHX58, HNRNPC, HNRNPCL1, RALY
+- **All switched-motif RBPs (recurrence across regions):** CPEB4(4), EIF4A3(4), DHX58(4), DDX19B(4), CSTF2(4), ELAVL3(4), ELAVL4(4), ESRP1(4), FXR2(4), HNRNPD(4), HNRNPCL1(4), HNRNPC(4), HNRNPA0(4), YTHDC1(4), ZFP36L2(4), U2AF2(4), TRA2A(4), HNRNPU(4), KHDRBS3(4), KHDRBS2(4)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for RTEL1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

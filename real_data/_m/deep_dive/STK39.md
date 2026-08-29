@@ -11,8 +11,8 @@
 | pd | eQTL | Brain_Nucleus_accumbens_basal_ganglia | 0.04 | no | — | yes | — | risk allele T decreases STK39 expression (gene-level; no intron) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** RBM41, HNRNPCL1, PABPC5, A1CF, MATR3, RBMS3, ZFP36L2, G3BP2, PABPC4, RBMS1, HNRNPA1L2, RBM6, ESRP1, AKAP1, ADAR
-- **All switched-motif RBPs (recurrence across regions):** A1CF(4), ACO1(4), ADAR(4), AGO2(4), AKAP1(4), CPEB1(4), DDX58(4), DHX58(4), DHX9(4), EIF4A3(4), ESRP1(4), G3BP1(4), G3BP2(4), HNRNPA1L2(4), HNRNPA3(4), HNRNPAB(4), HNRNPCL1(4), HNRNPM(4), IFIH1(4), MATR3(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** G3BP1, RBM14, RBM6, ZC3H10, RBMS1, A1CF, AKAP1, ESRP1, HNRNPA3, HNRNPCL1, ADAR, DHX9, PABPC4, PABPC5, ZFP36L2
+- **All switched-motif RBPs (recurrence across regions):** A1CF(5), ACO1(5), ADAR(5), AGO2(5), AKAP1(5), CELF2(5), CPEB1(5), CSTF2(5), DDX19B(5), DDX58(5), DHX58(5), DHX9(5), EIF4A3(5), ESRP1(5), G3BP1(5), GRSF1(5), HNRNPA1L2(5), HNRNPA3(5), HNRNPAB(5), HNRNPCL1(5)
 
 ## 5. Interpretation
 STK39 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

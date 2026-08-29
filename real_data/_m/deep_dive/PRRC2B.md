@@ -16,7 +16,7 @@
 | scz | Brain_Anterior_cingulate_cortex_BA24 | rs113866326 | C | 2.670367956161499 | risk allele C increases intron usage of chr9:131483445-131484686(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), CELF6(3), DHX58(3), ENOX1(3), FXR2(3), G3BP2(3), IGF2BP2(3), PABPC3(3), PABPN1(3), PPRC1(3), SAMD4A(3), SRSF4(3), YBX2(3), ZC3H10(3)
+- **All switched-motif RBPs (recurrence across regions):** A1CF(3), DHX58(3), ENOX1(3), CPEB2(3), CELF6(3), RBM24(3), SAMD4A(3), RBM46(3), RBM41(3), YBX2(3), YTHDC1(3), ZC3H10(3), ZNF638(3), NELFE(3), IGF2BP1(3), PABPN1(3), LIN28A(3), HNRNPCL1(3), G3BP2(3), CELF4(1)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PRRC2B in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

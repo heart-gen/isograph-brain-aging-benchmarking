@@ -18,8 +18,8 @@
 | scz | Brain_Hippocampus | rs11263770 | G | 0.21380910277366638 | risk allele G increases expression of GGNBP2 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** SUPV3L1, NONO
-- **All switched-motif RBPs (recurrence across regions):** A1CF(3), AGO2(3), AKAP1(3), CELF5(3), CELF4(3), CELF6(3), CPEB2(3), FXR2(3), CSTF2(3), DDX58(3), DHX58(3), EIF4A3(3), EIF4B(3), ESRP1(3), FXR1(3), HNRNPAB(3), G3BP1(3), G3BP2(3), HNRNPA1L2(3), HNRNPLL(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** HNRNPC, PUM1, NONO, TARDBP, U2AF2
+- **All switched-motif RBPs (recurrence across regions):** A1CF(4), AGO2(4), AKAP1(4), CELF4(4), CELF5(4), DDX19B(4), CELF6(4), CPEB2(4), CSTF2(4), DHX58(4), DDX58(4), EIF4A3(4), ENOX1(4), U2AF2(4), ESRP1(4), FXR1(4), FXR2(4), G3BP2(4), G3BP1(4), GRSF1(4)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for GGNBP2 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

@@ -19,8 +19,8 @@
 | scz | Brain_Frontal_Cortex_BA9 | rs3814883 | C | 0.46809905767440796 | risk allele C increases intron usage of chr16:30007090-30007179(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** YTHDC1, SUPV3L1, SNRPB2, DHX58, HNRNPAB, AGO2, CELF4, PABPC4, SYNCRIP, PUM2, CELF5
-- **All switched-motif RBPs (recurrence across regions):** ANKHD1(3), CELF4(3), CELF6(3), CELF5(3), CPEB4(3), DDX19B(3), SRSF10(3), DHX58(3), FXR2(3), G3BP1(3), HNRNPAB(3), HNRNPA1L2(3), KHDRBS2(3), HNRNPLL(3), PABPN1(3), PIWIL1(3), SUPV3L1(3), ZRANB2(3), YTHDC1(3), SNRNP70(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** HNRNPD, ELAVL3, PPIE, CPEB4, HNRNPDL, HNRNPAB, LIN28A, HNRNPLL, DHX58, RBFOX2, TIA1, RBM4, SNRPA, ELAVL2, U2AF2
+- **All switched-motif RBPs (recurrence across regions):** ANKHD1(5), RALY(5), CELF4(5), CELF5(5), CSTF2(5), CPEB4(5), DDX19B(5), ESRP2(5), HNRNPLL(5), IGF2BP2(5), KHDRBS2(5), HNRNPCL1(5), NELFE(5), PTBP2(5), PIWIL1(5), PABPC5(5), PABPC3(5), RBM4(5), RBM46(5), RBM6(5)
 
 ## 5. Interpretation
 DOC2A has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

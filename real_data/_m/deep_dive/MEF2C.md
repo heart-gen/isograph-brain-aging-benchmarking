@@ -11,7 +11,8 @@
 | als | eQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | — | yes | — | risk allele G increases MEF2C expression (gene-level; no intron) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** CPEB2(4), G3BP1(4), ENOX1(4), DHX58(4), ZCRB1(4), ZC3H10(4), RBM42(4), PABPC5(4), RBFOX2(4), SNRNP70(3), CELF6(3), HNRNPA1L2(3), CPEB1(1), AKAP1(1), ESRP1(1), MATR3(1), RALY(1), RBM41(1), RBMS1(1), RBMS3(1)
+- **Switched *and* module-enriched (q<0.05) RBPs:** RBM41, RBMS1, FXR2, RBMS3, G3BP1, SNRPB2, HNRNPA3, RBM42, RBM28, ENOX1, PABPN1, CELF6, AKAP1, MATR3
+- **All switched-motif RBPs (recurrence across regions):** ENOX1(6), HNRNPA3(6), DHX58(6), G3BP2(6), ESRP2(6), RBFOX2(6), SUPV3L1(6), RBM28(6), ZFP36L2(5), G3BP1(5), RBM42(5), SNRPB2(5), RBMS3(5), PABPC5(5), CPEB2(5), ANKHD1(5), CNOT4(5), SRSF4(5), SNRNP70(4), PABPN1(4)
 
 ## 5. Interpretation
 MEF2C colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

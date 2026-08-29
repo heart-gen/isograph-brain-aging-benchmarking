@@ -20,8 +20,8 @@
 | scz | Brain_Hypothalamus | rs217384 | G | -0.6302598118782043 | risk allele G decreases intron usage of chr7:44579628-44581449(-) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PPIE, KHDRBS1
-- **All switched-motif RBPs (recurrence across regions):** AGO1(4), AGO2(4), AKAP1(4), CPEB1(4), CPEB2(4), CPEB4(4), CSTF2(4), DDX19B(4), DHX58(4), EIF4A3(4), ELAVL1(4), ELAVL3(4), ELAVL4(4), HNRNPA0(4), HNRNPA1L2(4), HNRNPA3(4), HNRNPAB(4), HNRNPCL1(4), HNRNPLL(4), IGF2BP3(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** ELAVL4, ELAVL1
+- **All switched-motif RBPs (recurrence across regions):** AGO1(5), AGO2(5), AKAP1(5), CPEB1(5), CPEB2(5), CPEB4(5), CSTF2(5), DAZAP1(5), DDX19B(5), DHX58(5), EIF4A3(5), ELAVL1(5), ELAVL3(5), ELAVL4(5), ERI1(5), FXR2(5), G3BP1(5), G3BP2(5), GRSF1(5), HNRNPA0(5)
 
 ## 5. Interpretation
 TMED4 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

@@ -16,8 +16,8 @@
 | scz | Brain_Cortex | rs11264227 | C | -0.12016735970973969 | risk allele C decreases expression of CHRNB2 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PPIE, ELAVL4, KHDRBS1, HNRNPD, SYNCRIP, RNASEL, ELAVL3, OAS1, IGF2BP3, U2AF2, ELAVL2, PABPC1, KHDRBS3, RBMX, CELF2
-- **All switched-motif RBPs (recurrence across regions):** ACO1(4), ADAR(4), AGO1(4), AGO2(4), CELF2(4), CELF6(4), CPEB1(4), CPEB4(4), CSTF2(4), DAZAP1(4), DDX19B(4), DDX58(4), DHX58(4), DHX9(4), EIF4A3(4), ELAVL1(4), ELAVL2(4), ELAVL3(4), ELAVL4(4), ESRP1(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** ELAVL1, ELAVL4, KHDRBS1, RNASEL, PPIE, ZFP36, OAS1, HNRNPC, TIA1, IGF2BP3, HNRNPD, ELAVL2, PABPC1, RBMX, RC3H1
+- **All switched-motif RBPs (recurrence across regions):** ADAR(5), AGO1(5), AGO2(5), CELF1(5), CELF2(5), CPEB1(5), CPEB4(5), CSTF2(5), DAZAP1(5), DDX19B(5), DDX58(5), DHX58(5), DHX9(5), EIF4A3(5), ELAVL1(5), ELAVL2(5), ELAVL3(5), ELAVL4(5), ENOX1(5), ESRP1(5)
 
 ## 5. Interpretation
 CHRNB2 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

@@ -20,8 +20,8 @@
 | scz | Brain_Anterior_cingulate_cortex_BA24 | rs149165 | T | -0.3566074073314667 | risk allele T decreases intron usage of chr16:58510683-58511422(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PPRC1
-- **All switched-motif RBPs (recurrence across regions):** ESRP2(3), SNRPB2(3), DHX58(3), HNRNPA1L2(3), IGF2BP1(3), IGF2BP2(3), HNRNPA3(3), G3BP1(3), PPRC1(3), RBM25(3), SRSF11(3), YBX2(3), AGO2(2), EIF4A3(2), CPEB2(2), CELF5(2), AKAP1(2), RBM46(2), HNRNPAB(2), HNRNPA0(2)
+- **Switched *and* module-enriched (q<0.05) RBPs:** CPEB1
+- **All switched-motif RBPs (recurrence across regions):** CELF6(4), DHX58(4), IGF2BP2(4), HNRNPA1L2(4), FXR2(4), ESRP2(4), ENOX1(4), LIN28A(4), SRSF11(4), YBX2(4), YTHDC1(4), RBMY1A1(4), IGF2BP1(4), HNRNPM(4), HNRNPCL1(4), RBM25(4), RBM4(4), PABPC5(4), CPEB1(2), ACO1(2)
 
 ## 5. Interpretation
 NDRG4 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

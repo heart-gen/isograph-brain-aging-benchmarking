@@ -16,8 +16,8 @@
 | scz | Brain_Cerebellum | rs56282503 | C | 0.35913631319999695 | risk allele C increases expression of PAK6 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** RBM14, G3BP1, SAMD4A, RC3H1, RBM8A, OAS1, HNRNPA0, PPRC1, SUPV3L1, IGF2BP3, QKI
-- **All switched-motif RBPs (recurrence across regions):** AGO1(3), AGO2(3), CELF4(3), CELF5(3), CPEB2(3), CPEB4(3), EIF4A3(3), ENOX1(3), ESRP1(3), G3BP1(3), G3BP2(3), HNRNPA0(3), HNRNPA1L2(3), HNRNPAB(3), HNRNPLL(3), IGF2BP3(3), NELFE(3), OAS1(3), PHAX(3), PPRC1(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** RC3H1, PPIE, OAS1, HNRNPA0, RBM14, AKAP1, FXR1, ZFP36L2, SUPV3L1, CELF4, RBM24, IGF2BP3
+- **All switched-motif RBPs (recurrence across regions):** ACO1(4), AGO1(4), AGO2(4), AKAP1(4), CELF4(4), CELF5(4), CNOT4(4), CPEB2(4), EIF4A3(4), ENOX1(4), ESRP1(4), FXR1(4), G3BP1(4), G3BP2(4), HNRNPA0(4), HNRNPA1L2(4), HNRNPA3(4), HNRNPAB(4), HNRNPDL(4), HNRNPLL(4)
 
 ## 5. Interpretation
 PAK6 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

@@ -20,8 +20,8 @@
 | scz | Brain_Frontal_Cortex_BA9 | rs76300267 | G | 1.7728859186172485 | risk allele G increases intron usage of chr22:50419462-50422259(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ACO1
-- **All switched-motif RBPs (recurrence across regions):** A1CF(5), ACO1(5), AGO1(5), AGO2(5), CELF4(5), CELF5(5), DHX58(5), EIF4B(5), ESRP1(5), FXR2(5), G3BP1(5), G3BP2(5), HNRNPA3(5), IGF2BP2(5), MSI1(5), NUDT21(5), PABPC4(5), PTBP2(5), PUM2(5), QKI(5)
+- **Switched *and* module-enriched (q<0.05) RBPs:** AGO1, MATR3, NUDT21
+- **All switched-motif RBPs (recurrence across regions):** A1CF(7), AGO1(7), CELF4(7), CELF5(7), CSTF2(7), DHX58(7), EIF4B(7), ENOX1(7), ESRP1(7), FXR2(7), G3BP2(7), HNRNPA3(7), HNRNPM(7), IGF2BP2(7), LIN28A(7), MATR3(7), MSI1(7), NELFE(7), NUDT21(7), PABPC4(7)
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PPP6R2 in ALS,SCZ — the same switch is genetically anchored across more than one trait. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.

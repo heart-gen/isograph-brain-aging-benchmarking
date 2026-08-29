@@ -28,8 +28,8 @@
 | scz | Brain_Cerebellum | rs12919215 | G | 1.5796688795089722 | risk allele G increases intron usage of chr16:89556085-89556887(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** SNRPB2, HNRNPCL1, SART3, CPEB2, RALY, G3BP2, YBX2, PTBP2, ENOX1, ZFP36L2
-- **All switched-motif RBPs (recurrence across regions):** CELF5(3), CELF4(3), CSTF2(3), CPEB2(3), DDX19B(3), ELAVL3(3), EIF4B(3), EIF4A3(3), ZFP36L2(3), ZC3H10(3), RBM6(3), ESRP1(3), HNRNPAB(3), HNRNPCL1(3), HNRNPA0(3), G3BP2(3), KHDRBS2(3), SNRPB2(3), SRSF11(3), YBX2(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PUM2, SART3, NELFE, KHDRBS2, RBM14, G3BP2, PTBP2, PABPN1
+- **All switched-motif RBPs (recurrence across regions):** CSTF2(4), AGO2(4), CPEB2(4), G3BP2(4), HNRNPA0(4), ESRP1(4), ELAVL3(4), EIF4B(4), EIF4A3(4), DDX19B(4), HNRNPAB(4), GRSF1(4), FXR2(4), SNRPA(4), PTBP2(4), PABPN1(4), RBM25(4), PUM2(4), NUDT21(4), PABPC4(4)
 
 ## 5. Interpretation
 SPG7 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

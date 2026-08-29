@@ -16,8 +16,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs12103469 | C | 0.20539891719818115 | risk allele C increases expression of PITPNC1 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** ZFP36L2, SART3, PABPC4, PUM2, RBMS3, EIF4A3, PABPC3, IFIH1, SRSF11, HNRNPCL1, CPEB2, DHX58, RALY, PHAX
-- **All switched-motif RBPs (recurrence across regions):** A1CF(4), ACO1(4), ADAR(4), AGO1(4), AGO2(4), AKAP1(4), ANKHD1(4), CELF4(4), CELF5(4), CELF6(4), CMTR1(4), CPEB2(4), CSTF2(4), DDX58(4), DHX58(4), DHX9(4), EIF4A3(4), EIF4B(4), FXR2(4), G3BP1(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PUM1, SAMD4A, IFIH1, KHDRBS2, EIF4A3, PABPC4, G3BP1, RALY, RBMS3, HNRNPU, SF1, DHX58, SRSF11, SYNCRIP
+- **All switched-motif RBPs (recurrence across regions):** A1CF(5), ACO1(5), ADAR(5), AGO1(5), AGO2(5), AKAP1(5), ANKHD1(5), CELF4(5), CELF5(5), CMTR1(5), CNOT4(5), CPEB2(5), CSTF2(5), DAZAP1(5), DDX19B(5), DDX58(5), DHX58(5), DHX9(5), EIF4A3(5), EIF4B(5)
 
 ## 5. Interpretation
 PITPNC1 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

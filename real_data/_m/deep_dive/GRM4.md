@@ -17,7 +17,7 @@
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
 - **Switched *and* module-enriched (q<0.05) RBPs:** DHX58
-- **All switched-motif RBPs (recurrence across regions):** AGO2(3), CNOT4(3), CPEB4(3), CPEB1(3), HNRNPA1L2(3), DHX58(3), SART3(3), SNRNP70(3), G3BP1(3), FXR2(3), PABPC4(3), SAMD4A(3), RBFOX2(3), PABPC5(3), SUPV3L1(3), AGO1(1), AKAP1(1), HNRNPA3(1), HNRNPA0(1), ESRP2(1)
+- **All switched-motif RBPs (recurrence across regions):** A1CF(3), AGO2(3), AKAP1(3), CPEB1(3), CNOT4(3), CPEB2(3), CPEB4(3), HNRNPA1L2(3), DDX19B(3), DHX58(3), ELAVL3(3), ESRP2(3), FXR1(3), FXR2(3), G3BP1(3), HNRNPM(3), HNRNPDL(3), RBFOX2(3), PPIE(3), LIN28A(3)
 
 ## 5. Interpretation
 GRM4 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

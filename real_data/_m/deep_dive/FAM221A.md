@@ -24,8 +24,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs5029444 | C | -0.5256322026252747 | risk allele C decreases intron usage of chr7:23698299-23700789(+) |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** CPEB2, A1CF, RBMS3, ZFP36L2, RBMS1, AKAP1, RBM41, RBM42, RALY, DHX58, PABPC5, PABPC4, SART3, IGF2BP2
-- **All switched-motif RBPs (recurrence across regions):** AGO2(4), AGO1(4), CELF4(4), AKAP1(4), CSTF2(4), EIF4A3(4), CELF5(4), CPEB2(4), ESRP1(4), HNRNPA2B1(4), HNRNPA0(4), G3BP1(4), ZFP36L2(4), YTHDC1(4), SRSF10(4), HNRNPAB(4), HNRNPD(4), HNRNPCL1(4), HNRNPLL(4), IFIH1(4)
+- **Switched *and* module-enriched (q<0.05) RBPs:** PPRC1, RBM14, RBM41, SNRPB2, G3BP1, RALY, RBMS3, DHX58, CPEB2, IFIH1
+- **All switched-motif RBPs (recurrence across regions):** AGO2(5), AGO1(5), CELF5(5), CPEB2(5), AKAP1(5), CELF4(5), CSTF2(5), EIF4A3(5), DDX19B(5), DAZAP1(5), ZNF638(5), ZFP36L2(5), YTHDC1(5), ELAVL3(5), ESRP2(5), ESRP1(5), FXR2(5), G3BP1(5), HNRNPAB(5), GRSF1(5)
 
 ## 5. Interpretation
 FAM221A has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.

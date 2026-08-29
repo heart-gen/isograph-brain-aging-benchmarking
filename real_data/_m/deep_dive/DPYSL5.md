@@ -16,8 +16,8 @@
 | scz | Brain_Substantia_nigra | rs2082610 | G | 0.21863797307014465 | risk allele G increases expression of DPYSL5 |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** PPIE, KHDRBS1
-- **All switched-motif RBPs (recurrence across regions):** ACO1(3), ADAR(3), AGO2(3), AKAP1(3), CELF4(3), CELF5(3), CELF6(3), CNOT4(3), CPEB1(3), CPEB2(3), CPEB4(3), CSTF2(3), DDX19B(3), DHX58(3), EIF4A3(3), EIF4B(3), ELAVL1(3), ELAVL3(3), ELAVL4(3), ENOX1(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** ELAVL4, ELAVL1
+- **All switched-motif RBPs (recurrence across regions):** ACO1(4), ADAR(4), AGO1(4), AGO2(4), AKAP1(4), CELF4(4), CELF5(4), CELF6(4), CNOT4(4), CPEB1(4), CPEB2(4), CPEB4(4), CSTF2(4), DAZAP1(4), DDX19B(4), DHX58(4), EIF4A3(4), EIF4B(4), ELAVL1(4), ELAVL3(4)
 
 ## 5. Interpretation
 DPYSL5 colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.

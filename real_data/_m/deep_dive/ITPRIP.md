@@ -16,7 +16,8 @@
 | scz | Brain_Cortex | rs17883150 | G | -0.2046354115009308 | risk allele G decreases expression of ITPRIP |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **All switched-motif RBPs (recurrence across regions):** ACO1(3), AGO2(3), AKAP1(3), CELF4(3), CELF5(3), CNOT4(3), CPEB1(3), CPEB2(3), CPEB4(3), DHX58(3), EIF4A3(3), ERI1(3), FXR2(3), G3BP2(3), HNRNPA0(3), HNRNPA1L2(3), HNRNPA3(3), HNRNPAB(3), HNRNPD(3), HNRNPLL(3)
+- **Switched *and* module-enriched (q<0.05) RBPs:** KHDRBS1, HNRNPC, PPIE, HNRNPD
+- **All switched-motif RBPs (recurrence across regions):** ACO1(3), AGO2(3), AKAP1(3), CELF4(3), CELF5(3), CNOT4(3), CPEB1(3), CPEB2(3), CPEB4(3), DDX19B(3), DHX58(3), EIF4A3(3), ELAVL3(3), ENOX1(3), ERI1(3), ESRP2(3), G3BP2(3), GRSF1(3), HNRNPA0(3), HNRNPA1L2(3)
 
 ## 5. Interpretation
 ITPRIP colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.
