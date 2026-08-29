@@ -1,0 +1,45 @@
+{
+  "method": "isograph",
+  "model": "linear",
+  "n_pairs": 130,
+  "n_concordant": 25,
+  "n_permutations": 100,
+  "n_boot": 500,
+  "seed": 13,
+  "median_gene_jaccard": 0.016666666666666666,
+  "measures": {
+    "go_jaccard": {
+      "mean_matched": 0.025613511033636918,
+      "mean_concordant": 0.125,
+      "mean_discordant": 0.016368256246068257,
+      "null_mean": 0.005936983070481654,
+      "null_sd": 0.00580339297826169,
+      "p_emp": 0.009900990099009901,
+      "mwu_p_concordant_vs_not": 0.14266219994342993,
+      "diff_ci_low": -0.030301808299819315,
+      "diff_ci_high": 0.36363470700608774
+    },
+    "celltype_r": {
+      "mean_matched": 0.26037968186020144,
+      "mean_concordant": 0.38835392958122755,
+      "mean_discordant": 0.22990962287900465,
+      "null_mean": 0.20442194437030026,
+      "null_sd": 0.03137511447516303,
+      "p_emp": 0.039603960396039604,
+      "mwu_p_concordant_vs_not": 0.08075152777263994,
+      "diff_ci_low": 0.05277857923901734,
+      "diff_ci_high": 0.274953270611553
+    },
+    "structure_r": {
+      "mean_matched": null,
+      "mean_concordant": null,
+      "mean_discordant": null,
+      "null_mean": null,
+      "null_sd": null,
+      "p_emp": null,
+      "mwu_p_concordant_vs_not": null,
+      "diff_ci_low": null,
+      "diff_ci_high": null
+    }
+  }
+}

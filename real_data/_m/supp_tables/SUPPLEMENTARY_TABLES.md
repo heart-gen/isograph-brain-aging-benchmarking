@@ -104,8 +104,10 @@ pathway enrichment (biology gate PASS, complementary form).
 One row per region × method (IsoGraph) summarising the four-question funnel: Q1 stability
 (`n_modules`, `n_trusted`, `frac_trusted` above a size-matched permutation null at FDR<0.05),
 Q2 drivers (`median_driver_rho`, `frac_positive_rho` of shared-gene switch-loading Spearman ρ
-across split halves), Q3 cross-cohort aging replication (`n_replicates`/`n_replication_pairs`,
-BrainSEQ↔GTEx, sign-concordant and jointly significant; BrainSEQ rows only), and Q4
+across split halves), Q3 cross-cohort aging concordance (`n_concordant`/`n_replication_pairs`,
+BrainSEQ↔GTEx, sign-concordant and jointly significant in both cohorts; BrainSEQ rows
+only; counted on the linear covariate-free arm — see REPLICATION_PERMUTATION.md for the
+permutation null and the linear-vs-spline asymmetry), and Q4
 complementarity (`median_frac_dtu_without_dge`, `median_frac_in_wgcna_age`). Across six
 regions: 236/266 modules trusted; driver ρ medians 0.77–0.82 with 96–100% positive; 25/130
 BrainSEQ modules replicate cross-cohort (caudate 3/45, DLPFC 9/35, hippocampus 13/50).
