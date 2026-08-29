@@ -86,3 +86,11 @@ benchmark/01_synthetic/_m/partition_backfill/
 # Per-shard intermediates of the sample-table refresh. sample_table_refresh.parquet is
 # their exact union (2,290 rows, identical schema) and is the tracked artifact.
 benchmark/01_synthetic/_m/sample_table_refresh__shard*.parquet
+
+# Superseded raw flat-background motif count table (15 MB). The GC-binned background
+# replaced it; what the flat-vs-GC comparison is actually made on are the derived
+# *_flatbg call/regulon/binding tables, which ARE tracked. Its mature counterpart was not
+# preserved at all (the previous rbp_counts.parquet in history is that table), so tracking
+# only the intronic one would be an inconsistent half-measure. Regenerable by re-running
+# rbp_scan_intronic.py with the flat background.
+real_data/_m/rbp/rbp_counts_intronic_flatbg.parquet
