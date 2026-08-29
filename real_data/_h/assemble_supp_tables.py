@@ -151,7 +151,7 @@ def trust_table() -> None:
             frac_trusted=round(n_trust / n_mod, 3) if n_mod else None,
             median_driver_rho=round(rho_med, 3) if rho_med is not None else None,
             frac_positive_rho=round(pos_frac, 3) if pos_frac is not None else None,
-            n_replication_pairs=n_pairs, n_replicates=n_rep,
+            n_replication_pairs=n_pairs, n_concordant=n_rep,
             median_frac_dtu_without_dge=round(dtu_med, 4) if dtu_med is not None else None,
             median_frac_in_wgcna_age=round(wgage_med, 3) if wgage_med is not None else None,
         ))
