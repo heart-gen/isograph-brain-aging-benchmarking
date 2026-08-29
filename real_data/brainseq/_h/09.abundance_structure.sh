@@ -29,8 +29,12 @@ export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p real_data/brainseq/_m/logs
 log_message "**** Abundance-structure separation ****"
 
+if ! command -v module >/dev/null 2>&1; then
+    source /etc/profile.d/modules.sh 2>/dev/null || source /usr/share/lmod/lmod/init/bash 2>/dev/null || true
+fi
 module purge
 module load anaconda3/2024.10-1
+source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
 export OMP_NUM_THREADS=8
