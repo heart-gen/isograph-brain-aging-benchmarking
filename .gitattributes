@@ -5,9 +5,13 @@
 # zenodo/), so these LFS rules only ever apply to the lean committed results.
 *.parquet filter=lfs diff=lfs merge=lfs -text
 *.npz filter=lfs diff=lfs merge=lfs -text
-figures/**/*.pdf filter=lfs diff=lfs merge=lfs -text
-figures/**/*.png filter=lfs diff=lfs merge=lfs -text
-figures/**/*.svg filter=lfs diff=lfs merge=lfs -text
+# Figures. The previous rules were written as `figures/**/*.pdf`, which anchors to the
+# directory holding this file — and there is no top-level figures/, so they matched nothing
+# and all 50 tracked figures went in as raw blobs. Same class of gap as the nested-parquet
+# one already fixed above, so take the same fix: match by extension anywhere.
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.svg filter=lfs diff=lfs merge=lfs -text
 # GO reference databases (pinned release for reproducible enrichment).
 inputs/go_annotations/** filter=lfs diff=lfs merge=lfs -text
 # GTEx MuSiC marker-stats tables (mean-ratio per cell type) — sizable, keep out of text history.
