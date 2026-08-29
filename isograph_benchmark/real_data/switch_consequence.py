@@ -124,7 +124,8 @@ def _observed_pairs(artifact_dir: Path, switch_genes: pd.DataFrame) -> pd.DataFr
     return sp[["gene", "transcript_id_1", "transcript_id_2", "go_invisible"]]
 
 
-def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int) -> pd.DataFrame:
+def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int,
+        n_boot: int = 2000) -> pd.DataFrame:
     iso_dir = artifact_dir
     switch_genes = load_switch_genes(iso_dir, fdr)
     if switch_genes.empty:
@@ -191,19 +192,34 @@ def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int) -> 
             s = pd.DataFrame(sampled)
             for c in _CLASSES:
                 null_rates[c][i] = float(s[c].mean())
+        # Gene-level block bootstrap for a CI on the log enrichment.  Genes are the
+        # exchangeable unit — the null is drawn *within* gene, so pairs from one gene are
+        # not independent and a pair-level bootstrap would understate the uncertainty.
+        # Supplies the (beta, se) that the random-effects meta consumes downstream; a
+        # combined p-value alone cannot distinguish a large effect from a small one
+        # measured in many analyses.
+        boot_log = _block_bootstrap(sub, pool, n_obs_per_gene, n_boot, rng)
+
         for c in _CLASSES:
             nn = null_rates[c][~np.isnan(null_rates[c])]
             null_mean = float(nn.mean()) if nn.size else np.nan
             # one-sided empirical p: P(null >= observed)
             p_emp = (float((nn >= obs_rate[c]).sum() + 1) / (nn.size + 1)
                      if nn.size else np.nan)
+            bl = boot_log.get(c, np.empty(0))
+            bl = bl[np.isfinite(bl)]
+            enrichment = (obs_rate[c] / null_mean if null_mean and null_mean > 0 else np.nan)
             enrich.append({
                 "region": region, "stratum": stratum, "consequence": c,
                 "n_obs_pairs": n_pairs, "n_genes": len(genes),
                 "obs_rate": obs_rate[c], "null_mean": null_mean,
-                "enrichment": (obs_rate[c] / null_mean
-                               if null_mean and null_mean > 0 else np.nan),
+                "enrichment": enrichment,
                 "p_emp": p_emp,
+                "log_enrichment": float(np.log(enrichment)) if enrichment and enrichment > 0 else np.nan,
+                "log_enrichment_se": float(bl.std(ddof=1)) if bl.size > 1 else np.nan,
+                "enrichment_ci_low": float(np.exp(np.quantile(bl, 0.025))) if bl.size > 1 else np.nan,
+                "enrichment_ci_high": float(np.exp(np.quantile(bl, 0.975))) if bl.size > 1 else np.nan,
+                "n_boot": int(bl.size),
             })
 
     enrich_df = pd.DataFrame(enrich)
@@ -216,6 +232,47 @@ def run(region: str, artifact_dir: Path, fdr: float, n_perm: int, seed: int) -> 
                     for r in sig.itertuples())
     print(f"{region}: {len(pair_df)} switch pairs; coding_consequence {msg}")
     return enrich_df
+
+
+def _block_bootstrap(sub: pd.DataFrame, pool: dict[str, list[dict]],
+                     n_obs_per_gene: dict[str, int], n_boot: int,
+                     rng: np.random.Generator) -> dict[str, np.ndarray]:
+    """Bootstrap distribution of log(obs_rate / null_mean), resampling GENES.
+
+    Each draw resamples the stratum's genes with replacement, then recomputes both the
+    observed rate over those genes' switch pairs and the within-gene null rate over a
+    matched redraw from the same genes' annotated-pair pools — so the numerator and the
+    denominator move together and the ratio's uncertainty is not understated.
+    """
+    out = {c: np.full(n_boot, np.nan) for c in _CLASSES}
+    genes = sub["gene"].unique()
+    if len(genes) == 0 or n_boot <= 0:
+        return out
+    by_gene = {g: grp[list(_CLASSES)].to_numpy(bool) for g, grp in sub.groupby("gene")}
+    # Materialise each gene's annotated-pair pool as an array once; the inner loop runs
+    # n_boot x n_genes times, so rebuilding these per draw dominates the runtime.
+    pool_arr = {g: np.array([[d[c] for c in _CLASSES] for d in pool[g]], dtype=bool)
+                for g in genes if pool.get(g) and n_obs_per_gene.get(g, 0)}
+
+    for i in range(n_boot):
+        drawn = genes[rng.integers(0, len(genes), size=len(genes))]
+        obs_stack, null_stack = [], []
+        for g in drawn:
+            if g in by_gene:
+                obs_stack.append(by_gene[g])
+            pa = pool_arr.get(g)
+            if pa is not None:
+                idx = rng.integers(0, len(pa), size=n_obs_per_gene[g])
+                null_stack.append(pa[idx])
+        if not obs_stack or not null_stack:
+            continue
+        obs_rate = np.vstack(obs_stack).mean(axis=0)
+        null_rate = np.vstack(null_stack).mean(axis=0)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            logratio = np.log(np.where(null_rate > 0, obs_rate / null_rate, np.nan))
+        for j, c in enumerate(_CLASSES):
+            out[c][i] = logratio[j]
+    return out
 
 
 def _strata(pair_df: pd.DataFrame):
@@ -262,6 +319,8 @@ def main() -> None:
                    help="override the artifact dir; else derived from region+resolution.")
     p.add_argument("--fdr", type=float, default=0.05)
     p.add_argument("--n-perm", type=int, default=1000)
+    p.add_argument("--n-boot", type=int, default=2000,
+                   help="gene-level block-bootstrap draws for the log-enrichment CI")
     p.add_argument("--seed", type=int, default=13)
     args = p.parse_args()
     artifact_dir = (Path(args.artifact_dir) if args.artifact_dir
@@ -269,7 +328,7 @@ def main() -> None:
     if not (artifact_dir / "module_interpret" / "structure_switch_pairs.parquet").exists():
         raise SystemExit(f"no structure_switch_pairs under {artifact_dir}; "
                          f"run interpret_modules first.")
-    run(args.region, artifact_dir, args.fdr, args.n_perm, args.seed)
+    run(args.region, artifact_dir, args.fdr, args.n_perm, args.seed, args.n_boot)
 
 
 if __name__ == "__main__":

@@ -5,14 +5,16 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=2
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #SBATCH --array=0-16
 #SBATCH --output=real_data/brainseq/_m/logs/switch-consequence-%A_%a.log
 
 ## Switch coding-consequence enrichment (switch_consequence.py) across all 17 switch-layer
 ## regions: does the IsoGraph switch axis preferentially select coding/UTR-consequential
 ## isoform pairs vs a within-gene random-pair null? Deterministic (--seed 13). One region per
-## array task. Usage: sbatch real_data/brainseq/_h/15.switch_consequence.sh [--n-perm N]
+## array task. Also emits a gene-level block-bootstrap SE / CI on the log enrichment
+## (--n-boot, default 2000), which the cross-region random-effects meta pools.
+## Usage: sbatch real_data/brainseq/_h/15.switch_consequence.sh [--n-perm N] [--n-boot N]
 set -euo pipefail
 log_message() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
