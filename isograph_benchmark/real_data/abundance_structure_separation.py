@@ -29,7 +29,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir
+from isograph_benchmark.paths import ensure_dir, rel
 from isograph_benchmark.real_data.incremental_association import (
     _channel_matrix,
     _covariate_cols,  # noqa: F401  (kept for parity; not required here)
@@ -110,6 +110,45 @@ def incremental_summary(variant: str) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def incremental_effect_sizes(variant: str) -> pd.DataFrame:
+    """Conditional effect-size distributions pooled across every incremental analysis.
+
+    An FDR count ("34 SCZD genes", "43 caudate genes") is strongly sample-size dependent,
+    so it cannot say how much unique information the switch channel carries.  This pools
+    the per-analysis ``gene_level_effect_sizes`` blocks into one long table: the overall
+    quantiles of each conditional partial R², and the same per FDR category, so the
+    significant genes can be read against the ``neither`` noise floor of their own analysis.
+
+    One row per (analysis, region, effect, category); ``category == "__all__"`` is the
+    unstratified distribution.
+    """
+    rows = []
+    for analysis, region in _INCREMENTAL_TARGETS:
+        sj = _artifact_dir(analysis, region, variant) / "incremental_association" / "summary.json"
+        if not sj.exists():
+            continue
+        payload = json.loads(sj.read_text())
+        blocks = payload.get("gene_level_effect_sizes") or {}
+        base = {
+            "analysis": analysis,
+            "cohort": _LABELS.get(analysis, analysis),
+            "region": region or "caudate",
+            "variant": variant,
+            "composition_adjusted": bool(payload.get("composition_adjusted", False)),
+        }
+        for effect, entry in blocks.items():
+            q = entry.get("quantiles") or {}
+            rows.append({**base, "effect": effect, "category": "__all__",
+                         "n": entry.get("n"),
+                         "q10": q.get("0.1"), "q25": q.get("0.25"), "median": q.get("0.5"),
+                         "q75": q.get("0.75"), "q90": q.get("0.9")})
+            for cat, sub in (entry.get("by_category") or {}).items():
+                rows.append({**base, "effect": effect, "category": cat,
+                             "n": sub.get("n"), "q10": None, "q25": None,
+                             "median": sub.get("median"), "q75": None, "q90": sub.get("q90")})
+    return pd.DataFrame(rows)
+
+
 # --------------------------------------------------------------------------- #
 # 3. Example gene: stable total abundance, real isoform switch (Panel C)
 # --------------------------------------------------------------------------- #
@@ -161,6 +200,47 @@ def example_gene(analysis: str, fs: pd.DataFrame, bundle, artifact_dir,
     return df, stats_out
 
 
+def _write_effect_report(eff: pd.DataFrame) -> None:
+    """EFFECT_SIZES.md — the conditional effect sizes behind the FDR counts."""
+    lines = [
+        "# Conditional effect sizes for the unique-switch-information test", "",
+        "The de-confounded gene-level test asks whether the switch channel carries "
+        "phenotype signal the abundance channel does not, and vice versa. Reporting only "
+        "the FDR-significant count makes the answer a function of sample size. These are "
+        "the effect-size distributions behind those counts: `partial_r2_switch_given_abund` "
+        "is the proportion of residual variance the switch block explains after the "
+        "covariates and abundance are already in the model (`partial_r2_abund_given_switch` "
+        "is the mirror image).", "",
+        "Read the FDR-significant categories against `neither`, which is the same "
+        "analysis's own noise floor. `composition_unique` = switch-significant only; "
+        "`abundance_unique` = abundance-significant only; `both` = both.", "",
+    ]
+    for effect, block in eff.groupby("effect"):
+        lines += [f"## `{effect}`", "",
+                  "| analysis | region | adj | n | median (all) | q90 (all) | "
+                  "median: composition_unique | median: neither | ratio vs neither |",
+                  "|---|---|---|---|---|---|---|---|---|"]
+        for keys, g in block.groupby(["analysis", "region", "composition_adjusted"]):
+            analysis, region, adjusted = keys
+            allrow = g[g["category"] == "__all__"]
+            cu = g[g["category"] == "composition_unique"]["median"]
+            ne = g[g["category"] == "neither"]["median"]
+            cu_v = float(cu.iloc[0]) if len(cu) and pd.notna(cu.iloc[0]) else np.nan
+            ne_v = float(ne.iloc[0]) if len(ne) and pd.notna(ne.iloc[0]) else np.nan
+            med = float(allrow["median"].iloc[0]) if len(allrow) else np.nan
+            q90 = float(allrow["q90"].iloc[0]) if len(allrow) else np.nan
+            n = int(allrow["n"].iloc[0]) if len(allrow) and pd.notna(allrow["n"].iloc[0]) else 0
+            ratio = cu_v / ne_v if np.isfinite(cu_v) and np.isfinite(ne_v) and ne_v > 0 else np.nan
+            fmt = lambda v, s="{:.4f}": s.format(v) if np.isfinite(v) else "n/a"  # noqa: E731
+            lines.append(
+                f"| {analysis} | {region} | {'yes' if adjusted else 'no'} | {n:,} | "
+                f"{fmt(med)} | {fmt(q90)} | {fmt(cu_v)} | {fmt(ne_v)} | "
+                f"{fmt(ratio, '{:.1f}x')} |")
+        lines.append("")
+    out = rel("real_data", "_m", "EFFECT_SIZES.md")
+    out.write_text("\n".join(lines) + "\n")
+
+
 def run(analysis: str, region: str | None, variant: str, gene: str | None) -> None:
     artifact_dir, fs, _modules, bundle = _load(analysis, region, variant)
     out = ensure_dir(artifact_dir / "abundance_structure")
@@ -170,6 +250,14 @@ def run(analysis: str, region: str | None, variant: str, gene: str | None) -> No
 
     incr = incremental_summary(variant)
     incr.to_parquet(out / "incremental_summary.parquet", index=False, compression="zstd")
+
+    # Cross-analysis product, so it lands at the repo _m level rather than under one
+    # region's artifact dir.
+    eff = incremental_effect_sizes(variant)
+    if not eff.empty:
+        eff_out = ensure_dir(rel("real_data", "_m")) / "incremental_effect_sizes.parquet"
+        eff.to_parquet(eff_out, index=False, compression="zstd")
+        _write_effect_report(eff)
 
     eg, eg_stats = example_gene(analysis, fs, bundle, artifact_dir, gene)
     eg.to_parquet(out / "example_gene.parquet", index=False, compression="zstd")
