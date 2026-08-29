@@ -11,6 +11,13 @@ MOODS settings as the mature scan. Per-(transcript, RBP) hit counts are aggregat
 transcript's intronic flanks so the output schema is identical to `rbp_counts.parquet`, letting
 Stage 2 (`rbp_regulon.py --scope intronic`) consume it unchanged.
 
+It inherits the mature scan's composition-matched background (reviewer item 6a) rather than a
+flat 0.25 one, which matters more here than for mature transcripts: intronic sequence is
+markedly AT-rich, so a flat background inflates exactly the AU-binding regulators this scope
+exists to find. Backgrounds are binned over each transcript's pooled flank composition, and
+the flat-background counts are emitted alongside under `bg_mode='flat'`. Hits are also tallied
+per motif family. The `region` column is constant (`intron_flank`), so the schema matches.
+
 Runs in the dedicated `motif` env (MOODS + pyfaidx + pandas).
 """
 from __future__ import annotations
@@ -24,7 +31,12 @@ import MOODS.scan
 import MOODS.tools
 
 from isograph_benchmark.real_data.rbp_scan import (
-    _load_pwms, _needed_transcripts, _P_THRESH,
+    _PSEUDOCOUNT,
+    _P_THRESH,
+    _bin_background,
+    _load_pwms,
+    _needed_transcripts,
+    composition_bin,
 )
 
 _REPO = Path(__file__).resolve().parents[2]
@@ -34,7 +46,10 @@ _GENOME_FA = Path(
 _GTF = Path(
     "/ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/"
     "gtf/gencode.v47.annotation.gtf")
-_OUT = _REPO / "real_data" / "_m" / "rbp" / "rbp_counts_intronic.parquet"
+_RBP_DIR = _REPO / "real_data" / "_m" / "rbp"
+_OUT = _RBP_DIR / "rbp_counts_intronic.parquet"
+_FAM_OUT = _RBP_DIR / "rbp_family_counts_intronic.parquet"
+_FAMILIES = _RBP_DIR / "rbp_motif_families.parquet"
 _FLANK = 100              # nt reaching into the intron from each splice site
 
 _COMP = str.maketrans("ACGTNacgtn", "TGCANtgcan")
@@ -102,7 +117,7 @@ def _intron_flanks(rec: dict) -> list[tuple[str, int, int]]:
     return out
 
 
-def run() -> None:
+def run(flat_too: bool = True) -> None:
     needed = _needed_transcripts()
     print(f"switch transcripts to scan (intronic): {len(needed):,}")
 
@@ -115,46 +130,85 @@ def run() -> None:
     print(f"ATtRACT human PWMs: {len(matrices)} matrices, "
           f"{len({r for _, r in labels})} RBPs")
 
-    bg = MOODS.tools.flat_bg(4)
-    thresholds = [MOODS.tools.threshold_from_p(m, bg, _P_THRESH) for m in matrices]
-    scanner = MOODS.scan.Scanner(7)
-    scanner.set_motifs(matrices, bg, thresholds)
+    if not _FAMILIES.exists():
+        raise SystemExit(f"{_FAMILIES} not found; run rbp_motif_families.py first.")
+    fam = pd.read_parquet(_FAMILIES, columns=["matrix_id", "family_id"])
+    family_of = dict(zip(fam["matrix_id"], fam["family_id"]))
 
     genome = pyfaidx.Fasta(str(_GENOME_FA), sequence_always_upper=True)
 
-    rows = []
-    n = 0
+    # Pass 1: gather each transcript's flank sequences and bin by their pooled composition.
+    by_bin: dict[tuple[int, int], dict[str, list[str]]] = {}
     for tid, rec in multi.items():
         strand = rec["strand"]
-        per_rbp: dict[str, int] = {}
+        seqs = []
         for chrom, gstart, gend in _intron_flanks(rec):
             if chrom not in genome:
                 continue
             seq = str(genome[chrom][gstart - 1:gend])  # 1-based inclusive -> 0-based half-open
             if strand == "-":
                 seq = _revcomp(seq)
-            seq = seq.replace("U", "T")               # PWM U column already mapped to T
-            for (_, rbp), matches in zip(labels, scanner.scan(seq)):
-                c = len(matches)
-                if c:
-                    per_rbp[rbp] = per_rbp.get(rbp, 0) + c
-        for rbp, c in per_rbp.items():
-            rows.append((tid, rbp, c))
-        n += 1
-        if n % 5000 == 0:
-            print(f"  scanned {n:,} transcripts")
+            seqs.append(seq.replace("U", "T"))         # PWM U column already mapped to T
+        if not seqs:
+            continue
+        gb, pb, _, _ = composition_bin("".join(seqs))
+        by_bin.setdefault((gb, pb), {})[tid] = seqs
+    n = sum(len(v) for v in by_bin.values())
+    print(f"  flank sequences for {n:,} transcripts in {len(by_bin)} composition bins",
+          flush=True)
 
-    out = pd.DataFrame(rows, columns=["transcript_id", "rbp", "count"])
+    rbp_rows: list = []
+    fam_rows: list = []
+
+    def scan_bins(bg_of, bg_mode: str) -> None:
+        for k, (key, group) in enumerate(sorted(by_bin.items()), start=1):
+            bg = bg_of(group)
+            log_odds = [MOODS.tools.log_odds(m, bg, _PSEUDOCOUNT) for m in matrices]
+            thresholds = [MOODS.tools.threshold_from_p(m, bg, _P_THRESH) for m in log_odds]
+            scanner = MOODS.scan.Scanner(7)
+            scanner.set_motifs(log_odds, bg, thresholds)
+            for tid, seqs in group.items():
+                per_rbp: dict[str, int] = {}
+                per_fam: dict[str, int] = {}
+                for seq in seqs:
+                    for (mid, rbp), matches in zip(labels, scanner.scan(seq)):
+                        c = len(matches)
+                        if not c:
+                            continue
+                        per_rbp[rbp] = per_rbp.get(rbp, 0) + c
+                        f = family_of.get(mid)
+                        if f is not None:
+                            per_fam[f] = per_fam.get(f, 0) + c
+                for rbp, c in per_rbp.items():
+                    rbp_rows.append((tid, rbp, "intron_flank", c, bg_mode))
+                for f, c in per_fam.items():
+                    fam_rows.append((tid, f, "intron_flank", c, bg_mode))
+            print(f"  [{bg_mode}] bin {key} ({len(group):,} tx) [{k}/{len(by_bin)}]",
+                  flush=True)
+
+    scan_bins(lambda g: _bin_background([s for v in g.values() for s in v]), "composition")
+    if flat_too:
+        flat = MOODS.tools.flat_bg(4)
+        scan_bins(lambda g: flat, "flat")
+
+    out = pd.DataFrame(rbp_rows, columns=["transcript_id", "rbp", "region",
+                                          "count", "bg_mode"])
+    fam_out = pd.DataFrame(fam_rows, columns=["transcript_id", "family_id", "region",
+                                              "count", "bg_mode"])
     _OUT.parent.mkdir(parents=True, exist_ok=True)
-    out.to_parquet(_OUT, index=False)
-    print(f"scanned {n:,} transcripts -> {_OUT} ({len(out):,} (tx,RBP) hit rows)")
+    out.to_parquet(_OUT, index=False, compression="zstd")
+    fam_out.to_parquet(_FAM_OUT, index=False, compression="zstd")
+    print(f"scanned {n:,} transcripts -> {_OUT} ({len(out):,} rbp rows, "
+          f"{len(fam_out):,} family rows)")
 
 
 def main() -> None:
-    argparse.ArgumentParser(
-        description="Scan switch-isoform intronic splice-site flanks for ATtRACT RBP motifs."
-    ).parse_args()
-    run()
+    p = argparse.ArgumentParser(
+        description="Scan switch-isoform intronic splice-site flanks for ATtRACT RBP motifs.")
+    p.add_argument("--no-flat", action="store_true",
+                   help="skip the parallel flat-background scan (halves runtime)")
+    args = p.parse_args()
+    run(not args.no_flat)
 
 
 if __name__ == "__main__":

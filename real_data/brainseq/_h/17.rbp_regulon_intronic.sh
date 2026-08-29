@@ -4,8 +4,8 @@
 #SBATCH --job-name=rbp-regulon-intronic
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=8
-#SBATCH --time=04:00:00
+#SBATCH --cpus-per-task=8   # 8 x 2000M = 16G; flank sequences are held in memory
+#SBATCH --time=08:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/rbp-regulon-intronic-%j.log
 
 ## RBP-regulon analysis (intronic splice-site-flank scope), extends 16.rbp_regulon.sh from the
@@ -41,7 +41,7 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 
 log "**** stage 1: MOODS intronic-flank motif scan (motif env) ****"
 conda activate "${MOTIF_ENV}"
-python -m isograph_benchmark.real_data.rbp_scan_intronic
+python -u -m isograph_benchmark.real_data.rbp_scan_intronic "$@"
 conda deactivate
 
 log "**** stage 2: per-module RBP regulon enrichment, intronic scope (isograph env) ****"
