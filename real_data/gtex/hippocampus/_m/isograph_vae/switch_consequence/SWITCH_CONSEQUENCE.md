@@ -19,7 +19,7 @@ Per consequence class: fraction of IsoGraph switch pairs with the change (`obs_r
 | go_invisible | cds_changed | 0.736 | 0.711 | 1.04 | 0.000999 |
 | go_invisible | coding_consequence | 0.736 | 0.711 | 1.04 | 0.000999 |
 | go_invisible | coding_status_change | 0.310 | 0.368 | 0.84 | 1 |
-| go_invisible | first_exon_changed | 0.969 | 0.973 | 1.00 | 1 |
+| go_invisible | first_exon_changed | 0.969 | 0.973 | 1.00 | 0.996 |
 | go_invisible | internal_exon_difference | 0.898 | 0.922 | 0.97 | 1 |
 | go_invisible | last_exon_changed | 0.911 | 0.953 | 0.96 | 1 |
 | go_invisible | nmd_switch | 0.159 | 0.173 | 0.92 | 1 |
@@ -28,7 +28,7 @@ Per consequence class: fraction of IsoGraph switch pairs with the change (`obs_r
 | go_visible | cds_changed | 0.690 | 0.662 | 1.04 | 0.000999 |
 | go_visible | coding_consequence | 0.690 | 0.662 | 1.04 | 0.000999 |
 | go_visible | coding_status_change | 0.296 | 0.339 | 0.87 | 1 |
-| go_visible | first_exon_changed | 0.967 | 0.970 | 1.00 | 1 |
+| go_visible | first_exon_changed | 0.967 | 0.970 | 1.00 | 0.999 |
 | go_visible | internal_exon_difference | 0.906 | 0.925 | 0.98 | 1 |
 | go_visible | last_exon_changed | 0.914 | 0.955 | 0.96 | 1 |
 | go_visible | nmd_switch | 0.125 | 0.137 | 0.91 | 1 |
