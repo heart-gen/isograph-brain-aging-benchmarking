@@ -28,7 +28,7 @@ Per consequence class: fraction of IsoGraph switch pairs with the change (`obs_r
 | go_visible | cds_changed | 0.765 | 0.733 | 1.04 | 0.000999 |
 | go_visible | coding_consequence | 0.765 | 0.733 | 1.04 | 0.000999 |
 | go_visible | coding_status_change | 0.329 | 0.379 | 0.87 | 1 |
-| go_visible | first_exon_changed | 0.968 | 0.972 | 1.00 | 0.999 |
+| go_visible | first_exon_changed | 0.968 | 0.972 | 1.00 | 1 |
 | go_visible | internal_exon_difference | 0.911 | 0.923 | 0.99 | 1 |
 | go_visible | last_exon_changed | 0.919 | 0.956 | 0.96 | 1 |
 | go_visible | nmd_switch | 0.144 | 0.151 | 0.96 | 1 |
