@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
   library(tidyr)
   library(ggplot2)
   library(patchwork)
+  library(jsonlite)
 })
 
 find_root <- function() {
@@ -117,14 +118,33 @@ pB <- ggplot(wc, aes(region_lab, driver_load_rho)) +
   theme_pub() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # ---------------------------------------------------------------------------
-# Panel C - Q3 cross-cohort aging replication (paired BrainSEQ vs GTEx age effect)
+# Panel C - Q3 cross-cohort aging concordance (paired BrainSEQ vs GTEx age effect).
+# Plots the linear/covariate-free arm; the linear-vs-spline asymmetry is reported in
+# REPLICATION_PERMUTATION.md rather than by switching the panel's model.
 # ---------------------------------------------------------------------------
 rep <- load_stage("module_aging_replication__") |>
   filter(is.finite(age_effect_bs), is.finite(age_effect_gtex))
 rep$method_lab <- METHOD_LABELS[rep$method]
+# Permutation P for the arm this panel actually plots: the linear/Pearson statistic
+# against the `matching` null (the stricter of the two nulls -- it holds every age
+# statistic fixed and permutes only which GTEx module each BrainSEQ module is matched to).
+# Read from the stats JSON rather than transcribed, so the annotation cannot drift from
+# replication_permutation.py's output.
+perm_p <- function(method) {
+  f <- file.path(MT_DIR, sprintf(
+    "replication_permutation__%s__pearson__matching__stats.json", method))
+  if (!file.exists(f)) return(NA_real_)
+  jsonlite::fromJSON(f)$p_emp
+}
+# "concordant", not "replicate": the pre-registered decision rule in
+# REPLICATION_PERMUTATION.md forbids the word "replication" for this count, which does not
+# separate from the matching null under the covariate-adjusted model.
 rep_counts <- rep |> group_by(method) |>
   summarise(rep = sum(replicates), M = n(), .groups = "drop") |>
-  mutate(lab = sprintf("%s: %d / %d replicate", METHOD_LABELS[method], rep, M))
+  mutate(p_emp = vapply(method, perm_p, numeric(1)),
+         lab = sprintf("%s: %d / %d concordant%s", METHOD_LABELS[method], rep, M,
+                       ifelse(is.finite(p_emp),
+                              sprintf("  (perm P = %.3f)", p_emp), "")))
 lim <- max(abs(c(rep$age_effect_bs, rep$age_effect_gtex)), na.rm = TRUE)
 
 pC <- ggplot(rep, aes(age_effect_bs, age_effect_gtex)) +

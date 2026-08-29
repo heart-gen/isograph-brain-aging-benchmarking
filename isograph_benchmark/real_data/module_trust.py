@@ -175,11 +175,16 @@ def stability(cohort: str, region: str, method: str, n_perm: int, seed: int,
     print(f"\nwrote {path}", flush=True)
 
 
-def _module_drivers(cohort: str, region: str, k: int) -> dict[str, set]:
+def _module_drivers(cohort: str, region: str, k: int, method: str = "isograph") -> dict[str, set]:
     """Top-k driver transcripts per production module (top |r| in the explain-module
-    transcript_polarity_table, i.e. isoforms whose usage tracks the module)."""
+    transcript_polarity_table, i.e. isoforms whose usage tracks the module).
+
+    Only the IsoGraph backends produce a ``module_interpret`` tree; the classical WGCNA
+    baseline has no transcript-level driver notion, so it yields an empty mapping and the
+    driver-Jaccard column reads 0 rather than silently borrowing IsoGraph's drivers.
+    """
     root = PROD_ROOTS[(cohort, region)]
-    interp = rel(*root, "isograph_vae", "module_interpret")
+    interp = rel(*root, METHOD_DIRS[method], "module_interpret")
     out: dict[str, set] = {}
     if not interp.exists():
         return out
@@ -195,16 +200,44 @@ def _module_drivers(cohort: str, region: str, k: int) -> dict[str, set]:
     return out
 
 
-def _module_genes(cohort: str, region: str) -> dict[str, set]:
+def _module_genes(cohort: str, region: str, method: str = "isograph") -> dict[str, set]:
     """gene set per production module (quantifier-robust matching key)."""
-    return _load_production_modules(cohort, region, "isograph")
+    return _load_production_modules(cohort, region, method)
 
 
-def _age_effects(cohort: str, region: str) -> pd.DataFrame:
+AGE_MODELS = ("linear", "spline")
+
+
+def _age_effects(cohort: str, region: str, method: str = "isograph",
+                 model: str = "linear") -> pd.DataFrame:
+    """Per-module Age effect and p-value, under one of the two fitted age models.
+
+    ``linear`` is the published covariate-free Pearson r (``age_linear.parquet``).
+    ``spline`` is the covariate-adjusted df=3 natural cubic spline the rest of the
+    manuscript uses: the omnibus F-test p, with the direction taken from the projected
+    late-vs-early contrast (effect at the 90th age percentile minus the 10th), so a
+    non-monotone trajectory still gets a defined sign.
+    """
     root = PROD_ROOTS[(cohort, region)]
-    df = pd.read_parquet(rel(*root, "isograph_vae", "age_linear.parquet"))
+    if model == "linear":
+        df = pd.read_parquet(rel(*root, METHOD_DIRS[method], "age_linear.parquet"))
+        df["module_id"] = df["module_id"].astype(str)
+        return df.set_index("module_id")[["effect", "pvalue", "fdr"]]
+    if model != "spline":
+        raise SystemExit(f"unknown age model {model!r}; choose from {AGE_MODELS}")
+
+    df = pd.read_parquet(rel(*root, METHOD_DIRS[method], "age_spline.parquet"))
     df["module_id"] = df["module_id"].astype(str)
-    return df.set_index("module_id")[["effect", "pvalue", "fdr"]]
+    rows = []
+    for mid, g in df.groupby("module_id"):
+        g = g.sort_values("age_prob")
+        rows.append({
+            "module_id": mid,
+            "effect": float(g["effect"].iloc[-1] - g["effect"].iloc[0]),
+            "pvalue": float(g["pvalue_ftest"].iloc[0]),
+            "fdr": float(g["fdr_ftest"].iloc[0]),
+        })
+    return pd.DataFrame(rows).set_index("module_id")[["effect", "pvalue", "fdr"]]
 
 
 def _trusted_set(cohort: str, region: str, method: str) -> set:
@@ -215,16 +248,22 @@ def _trusted_set(cohort: str, region: str, method: str) -> set:
     return set(df.loc[df["trusted"], "module_id"].astype(str))
 
 
-def _crosscohort_rows(pair: str, method: str, k: int, sig: float) -> list[dict]:
+def _crosscohort_rows(pair: str, method: str, k: int, sig: float,
+                      model: str = "linear") -> list[dict]:
     """One row per trusted discovery (BrainSEQ) module: its best gene-Jaccard match in the
     replication (GTEx) cohort, with both cohorts' module-Age effect/p and driver overlap.
     Shared by per-pair ``replication`` and pooled ``replication_pooled``."""
     (bc, br), (gc, gr) = REGION_PAIRS[pair]
     bs_trust = _trusted_set(bc, br, method)
     gt_trust = _trusted_set(gc, gr, method)
-    bs_genes, gt_genes = _module_genes(bc, br), _module_genes(gc, gr)
-    bs_drv, gt_drv = _module_drivers(bc, br, k), _module_drivers(gc, gr, k)
-    bs_age, gt_age = _age_effects(bc, br), _age_effects(gc, gr)
+    # Every artifact below must come from `method`'s own fit.  Reading IsoGraph's modules
+    # and Age effects while selecting module ids from WGCNA's trusted list looks plausible —
+    # both backends label modules M000, M001, ... — but silently produces IsoGraph rows under
+    # a WGCNA heading rather than raising.
+    bs_genes, gt_genes = _module_genes(bc, br, method), _module_genes(gc, gr, method)
+    bs_drv, gt_drv = _module_drivers(bc, br, k, method), _module_drivers(gc, gr, k, method)
+    bs_age = _age_effects(bc, br, method, model)
+    gt_age = _age_effects(gc, gr, method, model)
     print(f"[{pair}] {bc}/{br} ({len(bs_trust)} trusted) <-> {gc}/{gr} "
           f"({len(gt_trust)} trusted) | gene-set matching (driver Jaccard reported "
           f"separately; isoform drivers are quantifier-sensitive)", flush=True)
@@ -260,12 +299,16 @@ def _crosscohort_rows(pair: str, method: str, k: int, sig: float) -> list[dict]:
     return rows
 
 
-def replication(pair: str, method: str, k: int, sig: float) -> None:
+def replication(pair: str, method: str, k: int, sig: float, model: str = "linear") -> None:
     """Q3 cross-cohort aging replication: match trusted modules across cohorts by driver-
     transcript overlap, then test Age-effect sign/significance concordance."""
-    rows = _crosscohort_rows(pair, method, k, sig)
+    rows = _crosscohort_rows(pair, method, k, sig, model)
     out = pd.DataFrame(rows).sort_values("gene_jaccard", ascending=False).reset_index(drop=True)
-    path = _out_dir() / f"module_aging_replication__{pair}__{method}.parquet"
+    # The spline arm writes to its own prefix: trust_funnel_figure.R prefix-globs
+    # "module_aging_replication__" and assemble_supp_tables.py reads those names exactly, so
+    # reusing the prefix would silently mix the two age models in the figures and tables.
+    stem = "module_aging_replication" if model == "linear" else f"module_aging_replication_{model}"
+    path = _out_dir() / f"{stem}__{pair}__{method}.parquet"
     out.to_parquet(path, index=False)
 
     n_match = int((out["gene_jaccard"] > 0).sum())
@@ -442,11 +485,11 @@ def complementarity(cohort: str, region: str, method: str, k: int, fdr: float) -
     stab = pd.read_parquet(
         _out_dir() / f"module_stability__{cohort}__{region}__{method}.parquet")
     trusted = stab.loc[stab["trusted"], "module_id"].astype(str).tolist()
-    genes = _module_genes(cohort, region)
-    drivers = _module_drivers(cohort, region, k)
+    genes = _module_genes(cohort, region, method)
+    drivers = _module_drivers(cohort, region, k, method)
     dtu = _composition_unique_genes(cohort, region)
     wgcna_age = _wgcna_age_genes(cohort, region, fdr)
-    age = _age_effects(cohort, region)
+    age = _age_effects(cohort, region, method)
     struct = _structure_flags(cohort, region)
     sflags = ["cds_changed", "utr_changed", "biotype_switch", "coding_status_change"]
     print(f"[{cohort}/{region}/{method}] {len(trusted)} trusted modules | "
@@ -769,6 +812,70 @@ def within(cohort: str, region: str, method: str, sig: float, min_jaccard: float
     print(f"\nwrote {path}", flush=True)
 
 
+def replication_model_contrast(method: str = "isograph") -> None:
+    """Decompose the linear-vs-spline gap in the Q3 concordance count.
+
+    Panel C of the trust funnel reports the covariate-free linear (Pearson) arm, while the
+    covariate-adjusted spline is the age model used elsewhere in the manuscript.  The two
+    give very different counts, and a reader is entitled to know *which component* moves.
+    Splitting the count into its two conjuncts answers that: `sign_match` is whether the two
+    cohorts agree on direction, `both_sig` is whether both clear the p cutoff.  Reporting
+    only the final count would leave it ambiguous whether the models disagree about the
+    direction of aging or merely about how much of it survives covariate adjustment.
+
+    Reads the per-pair tables both `replication --model {linear,spline}` runs already wrote;
+    it re-fits nothing, so it cannot drift from the numbers those tables carry.
+    """
+    out_dir = _out_dir()
+    rows = []
+    for model in AGE_MODELS:
+        tag = "" if model == "linear" else "_spline"
+        frames = []
+        for path in sorted(out_dir.iterdir()):
+            name = path.name
+            if not name.startswith(f"module_aging_replication{tag}__"):
+                continue
+            if "_pooled__" in name or not name.endswith(f"__{method}.parquet"):
+                continue
+            # linear's prefix is a strict prefix of nothing else, but spell the guard out:
+            # "module_aging_replication__" must not swallow "..._spline__".
+            if model == "linear" and "_spline__" in name:
+                continue
+            frames.append(pd.read_parquet(path))
+        if not frames:
+            continue
+        t = pd.concat(frames, ignore_index=True)
+        rows.append({
+            "method": method,
+            "model": model,
+            "n_pairs": int(len(t)),
+            "sign_match": int(t["sign_match"].sum()),
+            "both_sig": int(t["both_sig"].sum()),
+            "concordant": int(t["replicates"].sum()),
+            "discovery_sig": int((t["age_p_bs"] < 0.05).sum()),
+            "replication_sig": int((t["age_p_gtex"] < 0.05).sum()),
+        })
+    if not rows:
+        raise SystemExit(f"no replication tables found for method={method!r}; run "
+                         "`replication --model linear` and `--model spline` first")
+    out = pd.DataFrame(rows)
+    path = out_dir / f"replication_model_contrast__{method}.parquet"
+    out.to_parquet(path, index=False, compression="zstd")
+    print(out.to_string(index=False), flush=True)
+    if len(out) == 2:
+        lin = out[out["model"] == "linear"].iloc[0]
+        spl = out[out["model"] == "spline"].iloc[0]
+        print(f"\nsign_match: {lin.sign_match} -> {spl.sign_match} "
+              f"(delta {spl.sign_match - lin.sign_match:+d})", flush=True)
+        print(f"both_sig:   {lin.both_sig} -> {spl.both_sig} "
+              f"(delta {spl.both_sig - lin.both_sig:+d})", flush=True)
+        print(f"discovery-cohort modules at p<0.05:   {lin.discovery_sig} -> "
+              f"{spl.discovery_sig}", flush=True)
+        print(f"replication-cohort modules at p<0.05: {lin.replication_sig} -> "
+              f"{spl.replication_sig}", flush=True)
+    print(f"\nwrote {path}", flush=True)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -785,6 +892,10 @@ def main() -> None:
     rp.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     rp.add_argument("--k", type=int, default=5, help="top-k driver transcripts for matching")
     rp.add_argument("--sig", type=float, default=0.05, help="Age p-value cutoff for 'both_sig'")
+    rp.add_argument("--model", default="linear", choices=list(AGE_MODELS),
+                    help="age model: linear = published covariate-free Pearson; "
+                         "spline = covariate-adjusted df=3 spline F-test (written to "
+                         "module_aging_replication_spline__*)")
     pl = sub.add_parser("replication-pooled",
                         help="Q3 pooled: cross-cohort aging replication pooled over all region "
                              "pairs (Stouffer meta-Z + permutation tests; breaks the n=3 floor)")
@@ -812,11 +923,15 @@ def main() -> None:
     wn.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     wn.add_argument("--sig", type=float, default=0.05)
     wn.add_argument("--min-jaccard", type=float, default=0.25)
+    mc = sub.add_parser("replication-model-contrast",
+                        help="decompose the linear-vs-spline Q3 count into sign agreement "
+                             "vs both-cohort significance")
+    mc.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     args = ap.parse_args()
     if args.cmd == "stability":
         stability(args.cohort, args.region, args.method, args.n_perm, args.seed, args.fdr)
     elif args.cmd == "replication":
-        replication(args.pair, args.method, args.k, args.sig)
+        replication(args.pair, args.method, args.k, args.sig, args.model)
     elif args.cmd == "replication-pooled":
         replication_pooled(args.method, args.k, args.sig, args.min_jaccard,
                            args.n_perm, args.seed)
@@ -826,6 +941,8 @@ def main() -> None:
         meta(args.cohort, args.region, args.method, args.k)
     elif args.cmd == "within":
         within(args.cohort, args.region, args.method, args.sig, args.min_jaccard)
+    elif args.cmd == "replication-model-contrast":
+        replication_model_contrast(args.method)
 
 
 if __name__ == "__main__":

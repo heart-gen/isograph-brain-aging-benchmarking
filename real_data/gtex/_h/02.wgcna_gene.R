@@ -230,6 +230,12 @@ run_gtex_wgcna <- function(region) {
     colnames(me) <- label_map[sub("^ME", "", colnames(me))]
     me_df <- cbind(data.frame(sample_id = rownames(me), stringsAsFactors = FALSE), me)
 
+    # Persist the eigengenes themselves. WGCNA's eigengene is a first principal component,
+    # so unlike the IsoGraph backends it cannot be reconstructed from the artifacts on disk;
+    # the cross-cohort replication permutation test needs the actual matrix that produced
+    # age_linear/age_spline below.
+    write_parquet(me_df, file.path(out_dir, "eigengenes.parquet"))
+
     # Sample table (subset to samples used)
     sample_tbl <- bundle_samples[bundle_samples$sample_id %in% rownames(me), ]
 
