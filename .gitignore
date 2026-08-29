@@ -82,3 +82,7 @@ benchmark/01_synthetic/_m/datasets_residual_cost/
 # Sharded backfill intermediates from benchmark/backfill_metrics.py (same class as the
 # already-ignored benchmark/**/_m/_shards/; the merged metrics land in synthetic_results).
 benchmark/01_synthetic/_m/partition_backfill/
+
+# Per-shard intermediates of the sample-table refresh. sample_table_refresh.parquet is
+# their exact union (2,290 rows, identical schema) and is the tracked artifact.
+benchmark/01_synthetic/_m/sample_table_refresh__shard*.parquet
