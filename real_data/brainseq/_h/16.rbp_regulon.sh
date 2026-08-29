@@ -4,17 +4,30 @@
 #SBATCH --job-name=rbp-regulon
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=4
-#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=8   # 8 x 2000M = 16G; sequences for ~80k transcripts are
+                            # held in memory so each composition bin scans with one
+                            # threshold set
+#SBATCH --time=08:00:00
 #SBATCH --output=real_data/brainseq/_m/logs/rbp-regulon-%j.log
 
 ## RBP-regulon analysis (light 3'UTR/mature-transcript scope), two stages:
 ##   stage 1 (motif env): rbp_scan.py — scan switch-isoform sequences (GENCODE v47 transcript
-##            FASTA) against ATtRACT human RBP PWMs (MOODS) -> per-(transcript,RBP) hit counts.
+##            FASTA) against ATtRACT human RBP PWMs (MOODS), with GC-binned composition
+##            backgrounds and a 5'UTR/CDS/3'UTR partition -> per-(transcript,RBP,region)
+##            and per-(transcript,family,region) hit counts.
 ##   stage 2 (isograph env): rbp_regulon.py — call RBP site gain/loss between switch-pair
 ##            isoforms, per-module hypergeometric regulon enrichment vs the switch-gene pool.
 ## Resources staged under inputs/rbp_motifs (ATtRACT) + inputs/raw/gencode_v47 (transcript FASTA).
-## Usage: sbatch real_data/brainseq/_h/16.rbp_regulon.sh
+## Requires real_data/brainseq/_h/31.rbp_motif_families.sh to have run first (stage 1
+## tallies hits per motif family as well as per RBP).
+## Usage: sbatch real_data/brainseq/_h/16.rbp_regulon.sh [--stage all|scan|regulon] [--no-flat]
+##   --stage scan     stage 1 only (the ~8 h MOODS scan)
+##   --stage regulon  stage 2 only -- re-tests the frozen Stage-1 count tables without
+##                    rescanning.  Use this when only the enrichment/GLM code changed; the
+##                    scan output is an expensive frozen input and must not be rewritten
+##                    to pick up a stage-2 fix.
+## Remaining arguments go to stage 1 when it runs, and to stage 2 otherwise (so
+## `--stage regulon --scope intronic --unit family_id` works).
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
@@ -33,13 +46,34 @@ fi
 module purge
 module load anaconda3/2024.10-1
 
-log "**** stage 1: MOODS motif scan (motif env) ****"
-conda activate "${MOTIF_ENV}"
-python -m isograph_benchmark.real_data.rbp_scan
-conda deactivate
+STAGE=all
+if [[ "${1:-}" == "--stage" ]]; then
+    STAGE="${2:?--stage needs a value: all|scan|regulon}"
+    shift 2
+fi
+case "${STAGE}" in
+    all|scan|regulon) ;;
+    *) echo "ERROR: --stage must be all, scan or regulon (got '${STAGE}')."; exit 1 ;;
+esac
 
-log "**** stage 2: per-module RBP regulon enrichment (isograph env) ****"
-conda activate "${ISO_ENV}"
-python -m isograph_benchmark.real_data.rbp_regulon
-conda deactivate
-log "**** RBP regulon done ****"
+if [[ "${STAGE}" == "all" || "${STAGE}" == "scan" ]]; then
+    log "**** stage 1: MOODS motif scan (motif env) ****"
+    conda activate "${MOTIF_ENV}"
+    python -u -m isograph_benchmark.real_data.rbp_scan "$@"
+    conda deactivate
+else
+    log "**** stage 1 skipped (--stage ${STAGE}); consuming the frozen count tables ****"
+fi
+
+if [[ "${STAGE}" == "all" || "${STAGE}" == "regulon" ]]; then
+    log "**** stage 2: per-module RBP regulon enrichment (isograph env) ****"
+    conda activate "${ISO_ENV}"
+    # Only stage 1 takes the scan flags; on a stage-2-only run they belong to the regulon.
+    if [[ "${STAGE}" == "regulon" ]]; then
+        python -u -m isograph_benchmark.real_data.rbp_regulon "$@"
+    else
+        python -u -m isograph_benchmark.real_data.rbp_regulon
+    fi
+    conda deactivate
+fi
+log "**** RBP regulon done (stage ${STAGE}) ****"

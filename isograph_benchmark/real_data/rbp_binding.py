@@ -231,6 +231,44 @@ def _overlap_flags(intervals: pd.DataFrame, peaks_by_chrom: dict) -> np.ndarray:
     return flags
 
 
+def _overlap_bp(intervals: pd.DataFrame, peaks_by_chrom: dict) -> np.ndarray:
+    """Peak-covered bp per interval row.
+
+    The binary any-overlap flag makes a long switched interval beat a short constitutive one
+    by construction: the longer the sequence, the likelier *some* peak touches it. Covered bp
+    divided by interval kb gives a binding density that is comparable across intervals of
+    different length, which is what the switched-vs-constitutive contrast needs.
+    """
+    covered = np.zeros(len(intervals), dtype=np.int64)
+    for i, (chrom, s, e) in enumerate(zip(intervals["chrom"], intervals["start"],
+                                          intervals["end"])):
+        arr = peaks_by_chrom.get(chrom)
+        if arr is None:
+            continue
+        starts, ends = arr
+        lo = np.searchsorted(starts, e, side="right")
+        if lo == 0:
+            continue
+        ps, pe = starts[:lo], ends[:lo]
+        hit = pe >= s
+        if not hit.any():
+            continue
+        # Peaks may overlap each other; union them so shared bases are not double-counted.
+        a = np.maximum(ps[hit], s)
+        b = np.minimum(pe[hit], e)
+        order = np.argsort(a)
+        a, b = a[order], b[order]
+        total, cur_s, cur_e = 0, a[0], b[0]
+        for x, y in zip(a[1:], b[1:]):
+            if x > cur_e + 1:
+                total += cur_e - cur_s + 1
+                cur_s, cur_e = x, y
+            else:
+                cur_e = max(cur_e, y)
+        covered[i] = total + (cur_e - cur_s + 1)
+    return covered
+
+
 def _load_peaks(rbp: str, bind_dir: Path) -> dict | None:
     p = bind_dir / f"{rbp}.bed.gz"
     if not p.exists():
@@ -269,7 +307,9 @@ def _binding_calls_region(region_tree: str, region: str, gtf: pd.DataFrame,
         peaks = _load_peaks(rbp, bind_dir)
         if peaks is None:
             continue
-        sw = sw.assign(_hit=_overlap_flags(sw, peaks))
+        sw = sw.assign(_hit=_overlap_flags(sw, peaks),
+                       _bp=_overlap_bp(sw, peaks),
+                       _len=sw["end"] - sw["start"] + 1)
         # per gene: is the RBP bound at the SWITCHED interval and/or the CONSTITUTIVE interval?
         wide = (sw.pivot_table(index=["gene", "module_id", "go_invisible"],
                                columns="interval_type", values="_hit", aggfunc="max")
@@ -277,12 +317,106 @@ def _binding_calls_region(region_tree: str, region: str, gtf: pd.DataFrame,
                   .reset_index())
         wide["bound_switched"] = wide["switched"] == True   # noqa: E712 (NaN-safe cast)
         wide["bound_constitutive"] = wide["constitutive"] == True  # noqa: E712
+        # Length-normalised binding density alongside the binary flag.
+        span = (sw.pivot_table(index="gene", columns="interval_type",
+                               values=["_bp", "_len"], aggfunc="sum", fill_value=0))
+        for kind in ("switched", "constitutive"):
+            bp = (span[("_bp", kind)] if ("_bp", kind) in span.columns
+                  else pd.Series(0, index=span.index))
+            ln = (span[("_len", kind)] if ("_len", kind) in span.columns
+                  else pd.Series(0, index=span.index))
+            wide[f"bp_{kind}"] = wide["gene"].map(bp).fillna(0).astype(int)
+            wide[f"len_{kind}"] = wide["gene"].map(ln).fillna(0).astype(int)
+            wide[f"density_{kind}"] = np.where(
+                wide[f"len_{kind}"] > 0,
+                wide[f"bp_{kind}"] / (wide[f"len_{kind}"] / 1000.0), np.nan)
         wide["rbp"] = rbp
         wide["region"] = region
         wide["pool_source"] = pool_source
         rows.append(wide[["region", "gene", "module_id", "go_invisible", "rbp",
-                          "bound_switched", "bound_constitutive", "pool_source"]])
+                          "bound_switched", "bound_constitutive",
+                          "bp_switched", "bp_constitutive",
+                          "len_switched", "len_constitutive",
+                          "density_switched", "density_constitutive", "pool_source"]])
     return pd.concat(rows, ignore_index=True) if rows else pd.DataFrame()
+
+
+N_BOOT = 2000
+SEED = 13
+_Z95 = 1.959963984540054
+
+
+def _family_note(rbp_support: pd.DataFrame) -> str:
+    """How many independent motif families the supported RBPs represent.
+
+    "17 of 39 RBPs" overstates the evidence when several of those RBPs share a
+    near-identical motif, so the family-collapsed count is reported next to it.
+    """
+    fam_path = rel("real_data", "_m", "rbp", "rbp_motif_families.parquet")
+    if not fam_path.exists() or rbp_support.empty:
+        return ""
+    fam = pd.read_parquet(fam_path, columns=["rbp", "family_id"]).drop_duplicates()
+    by_rbp = fam.groupby("rbp")["family_id"].apply(set)
+    sup = rbp_support.loc[rbp_support["binding_supported"], "rbp"]
+    tested = rbp_support["rbp"]
+    n_sup_fam = len(set().union(*[by_rbp.get(r, set()) for r in sup])) if len(sup) else 0
+    n_test_fam = len(set().union(*[by_rbp.get(r, set()) for r in tested])) if len(tested) else 0
+    if not n_test_fam:
+        return ""
+    return (f", which represent **{n_sup_fam}** of **{n_test_fam}** independent motif "
+            f"families (see `rbp_motif_families.py`)")
+
+
+def _matched_or(b: int, c: int) -> dict[str, float]:
+    """Haldane-corrected matched odds ratio (b/c) with a Wald CI on the log scale.
+
+    The 0.5 correction keeps the estimate and its interval finite when one discordant cell
+    is empty, which happens for the RBPs with few nominated genes.
+    """
+    if b + c == 0:
+        return {"matched_or": np.nan, "matched_or_ci_low": np.nan,
+                "matched_or_ci_high": np.nan}
+    bh, ch = b + 0.5, c + 0.5
+    log_or = float(np.log(bh / ch))
+    se = float(np.sqrt(1.0 / bh + 1.0 / ch))
+    return {"matched_or": float(np.exp(log_or)),
+            "matched_or_ci_low": float(np.exp(log_or - _Z95 * se)),
+            "matched_or_ci_high": float(np.exp(log_or + _Z95 * se))}
+
+
+def _density_ratio(g: pd.DataFrame, n_boot: int, seed: int) -> dict[str, float]:
+    """Peak-bp-per-kb in switched vs constitutive intervals, with a gene-level bootstrap CI.
+
+    Pooled over the RBP's nominated genes (total covered bp over total interval kb) rather
+    than averaged over per-gene ratios, so genes with tiny intervals cannot dominate. Genes
+    are the resampling unit because a gene's switched and constitutive intervals are not
+    independent of each other.
+    """
+    bp_s = g["bp_switched"].to_numpy(float)
+    bp_c = g["bp_constitutive"].to_numpy(float)
+    ln_s = g["len_switched"].to_numpy(float) / 1000.0
+    ln_c = g["len_constitutive"].to_numpy(float) / 1000.0
+
+    def ratio(idx):
+        s = bp_s[idx].sum() / ln_s[idx].sum() if ln_s[idx].sum() > 0 else np.nan
+        c = bp_c[idx].sum() / ln_c[idx].sum() if ln_c[idx].sum() > 0 else np.nan
+        return s, c, (s / c if c and np.isfinite(c) and c > 0 else np.nan)
+
+    all_idx = np.arange(len(g))
+    d_s, d_c, obs = ratio(all_idx)
+    lo = hi = np.nan
+    if len(g) >= 3 and np.isfinite(obs):
+        rng = np.random.default_rng(seed)
+        draws = np.empty(n_boot)
+        for i in range(n_boot):
+            draws[i] = ratio(rng.integers(0, len(g), len(g)))[2]
+        draws = draws[np.isfinite(draws)]
+        if draws.size > 1:
+            lo, hi = (float(v) for v in np.quantile(draws, [0.025, 0.975]))
+    return {"density_switched": float(d_s) if np.isfinite(d_s) else np.nan,
+            "density_constitutive": float(d_c) if np.isfinite(d_c) else np.nan,
+            "density_ratio": float(obs) if np.isfinite(obs) else np.nan,
+            "density_ci_low": lo, "density_ci_high": hi}
 
 
 def _rbp_binding_test(calls: pd.DataFrame, regulon_path: Path, fdr: float) -> pd.DataFrame:
@@ -305,10 +439,13 @@ def _rbp_binding_test(calls: pd.DataFrame, regulon_path: Path, fdr: float) -> pd
     nominated = calls.merge(sig, on=["region", "module_id", "rbp"], how="inner")
     if nominated.empty:
         return pd.DataFrame()
-    per_gene = (nominated.groupby(["rbp", "gene"])
-                .agg(bound_switched=("bound_switched", "max"),
-                     bound_constitutive=("bound_constitutive", "max"))
-                .reset_index())
+    agg = {"bound_switched": ("bound_switched", "max"),
+           "bound_constitutive": ("bound_constitutive", "max")}
+    for c in ("bp_switched", "bp_constitutive", "len_switched", "len_constitutive"):
+        if c in nominated.columns:
+            agg[c] = (c, "max")
+    per_gene = nominated.groupby(["rbp", "gene"]).agg(**agg).reset_index()
+    has_bp = "bp_switched" in per_gene.columns
     out = []
     for rbp, g in per_gene.groupby("rbp"):
         n = len(g)
@@ -317,10 +454,16 @@ def _rbp_binding_test(calls: pd.DataFrame, regulon_path: Path, fdr: float) -> pd
         b = int((g["bound_switched"] & ~g["bound_constitutive"]).sum())   # switched-only
         c = int((~g["bound_switched"] & g["bound_constitutive"]).sum())   # constitutive-only
         p = binomtest(b, b + c, 0.5, alternative="two-sided").pvalue if (b + c) > 0 else np.nan
-        out.append({"rbp": rbp, "n_genes": n,
-                    "rate_switched": round(n_sw / n, 3), "rate_constitutive": round(n_co / n, 3),
-                    "rate_diff": round(n_sw / n - n_co / n, 3),
-                    "n_switched_only": b, "n_constitutive_only": c, "mcnemar_p": p})
+        row = {"rbp": rbp, "n_genes": n,
+               "rate_switched": round(n_sw / n, 3), "rate_constitutive": round(n_co / n, 3),
+               "rate_diff": round(n_sw / n - n_co / n, 3),
+               "n_switched_only": b, "n_constitutive_only": c, "mcnemar_p": p}
+        # Haldane-corrected matched odds ratio with a Wald CI, so the McNemar p is
+        # accompanied by an effect size rather than a bare significance call.
+        row.update(_matched_or(b, c))
+        if has_bp:
+            row.update(_density_ratio(g, n_boot=N_BOOT, seed=SEED))
+        out.append(row)
     res = pd.DataFrame(out)
     ok = res["mcnemar_p"].notna()
     res.loc[ok, "mcnemar_fdr"] = multipletests(res.loc[ok, "mcnemar_p"], method="fdr_bh")[1]
@@ -412,16 +555,25 @@ def _write_summary(calls, joined, rbp_support, testable, bind_dir, out) -> None:
             "same gene×RBP binding recurs across regions — so they are reported descriptively "
             "below, not as the significance count.", "",
             f"- RBPs with preferential switched-interval binding: **{npref}/{nt}**; "
-            f"**binding-supported** (preferential AND BH q≤0.05): **{nsup}/{nt}**.",
+            f"**binding-supported** (preferential AND BH q≤0.05): **{nsup}/{nt}**"
+            f"{_family_note(rbp_support)}.",
             f"- Median switched−constitutive bound-rate gap across RBPs: **{med:.3f}** — small "
             "and near-universal. This is binding *capacity* at alternative vs constitutive "
             "exons, **not** factor-specific occupancy; it does not establish that the predicted "
             "regulon factors selectively bind the switched sequence beyond a generic "
             "alternative-exon skew.", "",
             "### Binding-supported RBPs (switched > constitutive)", "",
+            "`matched_or` is the Haldane-corrected discordant-pair odds ratio behind the "
+            "McNemar p; `density_ratio` is peak-covered bp per kb in switched vs constitutive "
+            "intervals, with a gene-level bootstrap CI. The binary rates alone cannot "
+            "distinguish a real preference from a longer switched interval having more chance "
+            "to be touched by some peak.", "",
             _md_table(rbp_support[rbp_support["binding_supported"]]
-                      [["rbp", "n_genes", "rate_switched", "rate_constitutive",
-                        "rate_diff", "mcnemar_fdr"]].round(4)),
+                      [[c for c in ("rbp", "n_genes", "rate_switched", "rate_constitutive",
+                                    "rate_diff", "matched_or", "matched_or_ci_low",
+                                    "matched_or_ci_high", "density_ratio", "density_ci_low",
+                                    "density_ci_high", "mcnemar_fdr")
+                        if c in rbp_support.columns]].round(4)),
             "",
         ]
     else:
