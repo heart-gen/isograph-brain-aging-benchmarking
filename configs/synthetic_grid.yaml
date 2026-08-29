@@ -2,10 +2,46 @@ seed_count_core: 20
 seed_count_main_figure: 30
 seed_count_scale: 15
 base_seed: 13
+# isograph_vae_residual is listed for the UNCONFOUNDED scenarios as the intended cost
+# control for the gap #6 ablation. Residualization repairs the merging failure mode on
+# confounded data (cell_composition ARI 0.185 -> 0.643, library_depth 0.116 -> 0.647), but
+# regressing out covariates removes real signal whenever signal and covariate are
+# correlated, so "residualization fixes the confound losses" is only supportable alongside
+# evidence that it costs nothing when there is no confound to remove.
+#
+# THAT ABLATION IS NOT RUN FROM THIS GRID. Of the 1,980 isograph_vae_residual rows here,
+# 488 have completed (the four confound scenarios, rna_degradation_coupled, and 88 of the
+# 400 abundance_switch_mixed rows) and 1,492 are pending. Those 1,492 split into two groups
+# that must NOT be treated the same way:
+#
+#   1,180 rows on the UNCONFOUNDED switch scenarios (idealized_switching 360, noise_stress
+#   320, feature_space_interactions 300, unequal_isoform_abundance 80,
+#   non_switching_background 80, negative_control_noise 40). DO NOT RUN THESE. Two reasons:
+#     a. Residualization would be a SILENT NO-OP. Their cached samples.parquet predates the
+#        RIN/neuron_frac/batch/library_size columns, so build_design_matrix receives nothing
+#        and isograph_vae_residual reduces to isograph_vae -- the ablation would report
+#        "costs exactly nothing" as an artifact of never having run.
+#     b. The sample tables cannot be repaired. 1,204 cached datasets -- every core switch
+#        scenario -- no longer regenerate from the current generator, so their covariates
+#        cannot be backfilled without replacing the expression data every published number
+#        was computed on. See benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md.
+#
+#   312 rows on abundance_switch_mixed. These ARE runnable and are simply unfinished: all
+#   400 of those datasets reproduced exactly and had their sample tables refreshed, so
+#   residualization is a real operation on them. They are a genuine coverage gap in the
+#   multiplex feature space, not a deliberate omission.
+#
+# The cost question is answered instead by a self-contained paired ablation on FRESH,
+# generator-pinned datasets: configs/residual_cost_ablation.yaml ->
+# isograph_benchmark/benchmark/residual_cost.py -> benchmark/03_metrics/_m/RESIDUAL_COST.md.
+# Note its scope: in unconfounded scenarios RIN, neuron_frac and batch are constants that
+# build_design_matrix drops, so what is measured is the cost of residualizing LIBRARY DEPTH
+# ONLY -- not residualization in general.
 methods:
   - isograph_vae
   - isograph_vae_gpu
   - isograph_vae_multiplex
+  - isograph_vae_residual
   - isograph_latent
   - isograph_graph
   - isograph_baseline
@@ -14,6 +50,7 @@ methods:
 multiplex_methods:
   - isograph_vae
   - isograph_vae_multiplex
+  - isograph_vae_residual
   - wgcna_gene
 scale_methods:
   - isograph_vae

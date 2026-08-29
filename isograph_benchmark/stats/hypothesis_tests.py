@@ -46,7 +46,12 @@ import numpy as np
 import pandas as pd
 from scipy.stats import rankdata, wilcoxon
 
-from isograph_benchmark.stats.summarize import METRICS, benjamini_hochberg
+from isograph_benchmark.stats.summarize import (
+    METRIC_FAMILY,
+    METRICS,
+    benjamini_hochberg,
+    bootstrap_ci,
+)
 
 # Primary reference method for pairwise comparisons.
 REFERENCE_METHOD = "wgcna_gene"
@@ -112,6 +117,21 @@ def _cliffs_magnitude(delta: float) -> str:
     return "large"
 
 
+def _paired_diff_ci(
+    a: np.ndarray, b: np.ndarray, n_iter: int, alpha: float, seed: int
+) -> tuple[float, float]:
+    """Percentile bootstrap CI for the mean paired difference (method − reference).
+
+    Resamples the per-simulation *differences*, which is the paired quantity — resampling
+    the two arms independently would discard the pairing that makes the comparison sensitive.
+    """
+    diff = a - b
+    diff = diff[np.isfinite(diff)]
+    if len(diff) < 2:
+        return np.nan, np.nan
+    return bootstrap_ci(diff, n_iter=n_iter, alpha=alpha, seed=seed)
+
+
 def _paired_wilcoxon(
     a: np.ndarray,
     b: np.ndarray,
@@ -134,6 +154,9 @@ def paired_tests(
     df: pd.DataFrame,
     metrics: list[str] | None = None,
     reference: str = REFERENCE_METHOD,
+    n_boot: int = 10_000,
+    alpha: float = 0.05,
+    seed: int = 13,
 ) -> pd.DataFrame:
     """Run paired Wilcoxon tests: each method vs. reference, per scenario × metric.
 
@@ -147,12 +170,17 @@ def paired_tests(
     reference:
         Method used as the baseline for all pairwise comparisons.
 
+    n_boot, alpha, seed:
+        Percentile-bootstrap settings for the paired-difference confidence interval.
+
     Returns
     -------
     DataFrame with columns:
-        scenario, metric, method, method_ref, n_pairs, mean_diff (method − ref),
+        scenario, metric, metric_family, method, method_ref, n_pairs,
+        mean_diff (method − ref), diff_ci_low, diff_ci_high, median_diff,
         statistic, p_value, rank_biserial, cliffs_delta, cliffs_magnitude,
-        family, family_size, p_adj (BH over the full family),
+        family, family_size, p_adj (BH within metric_family),
+        p_adj_all_metrics (BH over every test reported here),
         p_adj_within_metric (BH within each metric), significant_05,
         significant_10, direction
     """
@@ -190,6 +218,8 @@ def paired_tests(
 
                 stat, pval = _paired_wilcoxon(a, b)
                 mean_diff = float(np.mean(a - b)) if len(a) > 0 else np.nan
+                median_diff = float(np.median(a - b)) if len(a) > 0 else np.nan
+                ci_low, ci_high = _paired_diff_ci(a, b, n_iter=n_boot, alpha=alpha, seed=seed)
                 rank_biserial = _signed_rank_biserial(a, b)
                 cliffs = _cliffs_delta(a, b)
 
@@ -197,10 +227,14 @@ def paired_tests(
                     {
                         "scenario":         scenario,
                         "metric":           metric,
+                        "metric_family":    METRIC_FAMILY.get(metric, "core"),
                         "method":           method,
                         "method_ref":       reference,
                         "n_pairs":          int(len(a)),
                         "mean_diff":        mean_diff,
+                        "median_diff":      median_diff,
+                        "diff_ci_low":      ci_low,
+                        "diff_ci_high":     ci_high,
                         "statistic":        stat,
                         "p_value":          pval,
                         "rank_biserial":    rank_biserial,
@@ -214,12 +248,22 @@ def paired_tests(
         return result
 
     # ---- Multiplicity scope (#7) -------------------------------------------
-    # Canonical correction: BH-FDR over the ENTIRE family of comparisons
-    # (every scenario × metric × method test reported here).  This is the
-    # conservative, pre-registered choice; family + family_size record it.
-    result["family"] = "all_scenario_metric_method"
-    result["family_size"] = int(result["p_value"].notna().sum())
-    result["p_adj"] = benjamini_hochberg(result["p_value"]).values
+    # Canonical correction: BH-FDR over every scenario × metric × method test within a
+    # metric family.  The fragmentation-sensitive partition metrics are a separately
+    # pre-registered addition, so they form their own family; without that split, adding 810
+    # partition tests would shift every already-published `p_adj` for the original metrics by
+    # enlarging a shared family.  The split bounds that specific contamination — it does not
+    # freeze the core `p_adj`, which still moves as core metrics and runs accumulate.
+    # `p_adj_all_metrics` keeps the pooled correction on record.
+    result["family"] = "scenario_metric_method_within_metric_family"
+    result["family_size"] = (
+        result.groupby("metric_family")["p_value"].transform(lambda s: int(s.notna().sum()))
+    )
+    result["p_adj"] = (
+        result.groupby("metric_family")["p_value"]
+        .transform(lambda s: benjamini_hochberg(s).values)
+    )
+    result["p_adj_all_metrics"] = benjamini_hochberg(result["p_value"]).values
 
     # Sensitivity column: BH applied within each metric (a narrower family),
     # so reviewers can gauge how robust the calls are to the family definition.
