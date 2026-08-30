@@ -32,7 +32,7 @@ from sklearn.metrics import normalized_mutual_info_score
 
 from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.base import compute_module_gene_roles, compute_trait_associations
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import region_artifact_dir, rel
 from isograph_benchmark.real_data.go_enrichment import GoAnnotations, HAS_GOATOOLS
 from isograph_benchmark.real_data.run_models import (
     diagnosis_association,
@@ -125,18 +125,7 @@ def _select_best_resolution(results: pd.DataFrame) -> float:
 
 
 def _artifact_dir(analysis: str, region: str | None, variant: str = "standard") -> Path:
-    # variant "with-abundance" sweeps the abundance-channel refit (separate dir),
-    # so both IsoGraph variants can be resolution-selected by the same GO criterion.
-    subdir = "isograph_vae_with_abundance" if variant == "with-abundance" else "isograph_vae"
-    if analysis == "brainseq-sczd":
-        return rel("real_data", "brainseq", "caudate_sczd", "_m", subdir)
-    if analysis == "brainseq-aging":
-        assert region is not None
-        return rel("real_data", "brainseq", region, "_m", subdir)
-    if analysis == "gtex-aging":
-        assert region is not None
-        return rel("real_data", "gtex", region, "_m", subdir)
-    raise ValueError(f"Unknown analysis: {analysis!r}")
+    return region_artifact_dir(analysis, region, variant)
 
 
 def _bundle_path(analysis: str, region: str | None) -> Path:

@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 from isograph_benchmark.stats.meta_analysis import meta, meta_keys
 
@@ -135,7 +135,7 @@ def run_meta(variant: str = "standard",
              methods: tuple[str, ...] = ("isograph", "wgcna_switch_only",
                                          "wgcna_multiplex")) -> pd.DataFrame:
     per = collect(variant, methods)
-    out_dir = ensure_dir(rel("real_data", "_m", "qtl_anchoring_meta"))
+    out_dir = ensure_dir(stage_out("anchoring", "qtl_anchoring_meta"))
     if per.empty:
         print("no qtl_anchoring*.parquet outputs found")
         return per

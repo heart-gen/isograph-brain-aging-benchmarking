@@ -27,7 +27,7 @@ import argparse
 import pandas as pd
 from scipy.stats import norm
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.gwas_traits import TRAITS
 
 # custom annotations appended (in order) per model
@@ -64,7 +64,7 @@ def _parse(path, trait, case, annotation, model, annots) -> list[dict]:
 
 
 def collect() -> pd.DataFrame:
-    base = rel("real_data", "ldsc", "_m")
+    base = stage_out("anchoring.ldsc")
     rows = []
     for annotation, case in _CASE.items():
         rdir = base / annotation / "results"
@@ -149,7 +149,7 @@ def _write_report(tidy: pd.DataFrame, out_dir) -> None:
 
 def main() -> None:
     argparse.ArgumentParser(description="Summarize S-LDSC partitioned heritability.").parse_args()
-    out_dir = ensure_dir(rel("real_data", "ldsc", "_m"))
+    out_dir = ensure_dir(stage_out("anchoring.ldsc"))
     tidy = collect()
     tidy.to_parquet(out_dir / "ldsc_partitioned.parquet", index=False, compression="zstd")
     _write_report(tidy, out_dir)

@@ -33,7 +33,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_CACHE
 from isograph_benchmark.real_data.qtl_anchoring import (
     DEFAULT_XQTL_DIR,
@@ -201,7 +201,7 @@ def meta(variant: str) -> None:
         print("[meta] no per-analysis parquets found", flush=True)
         return
     allm = pd.concat(frames, ignore_index=True)
-    out = ensure_dir(rel("real_data", "_m", "module_genetic_anchoring_meta"))
+    out = ensure_dir(stage_out("anchoring", "module_genetic_anchoring_meta"))
     allm.to_parquet(out / "module_genetic_anchoring_all.parquet", index=False, compression="zstd")
 
     est = allm[np.isfinite(allm["contrast_log"]) & allm["perm_p"].notna()].copy()

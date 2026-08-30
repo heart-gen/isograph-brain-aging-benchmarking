@@ -16,7 +16,7 @@ import argparse
 
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.gwas_traits import TRAITS
 
 CLPP_STRONG = 0.05
@@ -33,7 +33,7 @@ def _source_of(dirname: str) -> str:
 
 
 def collect() -> tuple[pd.DataFrame, pd.DataFrame]:
-    base = rel("real_data", "coloc", "_m")
+    base = stage_out("anchoring.coloc")
     counts, genes = [], []
     for d in sorted(base.glob("*__*")):
         cdir = d / "coloc"
@@ -118,7 +118,7 @@ def _write_report(cnt: pd.DataFrame, gdf: pd.DataFrame, out_dir) -> None:
 
 def main() -> None:
     argparse.ArgumentParser(description="Cross-trait coloc rollup.").parse_args()
-    out_dir = ensure_dir(rel("real_data", "coloc", "_m"))
+    out_dir = ensure_dir(stage_out("anchoring.coloc"))
     cnt, gdf = collect()
     if cnt.empty:
         raise SystemExit("No coloc contrasts found.")

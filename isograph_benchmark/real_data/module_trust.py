@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2, hypergeom, norm, spearmanr
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.stability import (
     COHORTS, SEED_BASE, _filter_expressed_transcripts, _split_indices,
 )
@@ -53,7 +53,7 @@ REGION_PAIRS = {
 
 
 def _out_dir():
-    return ensure_dir(rel("real_data", "stability", "_m", "module_trust"))
+    return ensure_dir(stage_out("trust.stability", "module_trust"))
 
 
 def _load_production_modules(cohort: str, region: str, method: str) -> dict[str, set]:
@@ -68,7 +68,7 @@ def _load_production_modules(cohort: str, region: str, method: str) -> dict[str,
 
 def _load_halffit_maps(cohort: str, region: str, method: str) -> list[dict[str, str]]:
     """gene_id -> module label for each split-half partition of this method."""
-    pdir = rel("real_data", "stability", "_m", "partitions")
+    pdir = stage_out("trust.stability", "partitions")
     prefix = f"{method}__{cohort}__{region}__"
     maps = []
     for p in sorted(pdir.iterdir()):
@@ -537,7 +537,7 @@ def complementarity(cohort: str, region: str, method: str, k: int, fdr: float) -
 
 
 def _meta_dir():
-    return ensure_dir(rel("real_data", "stability", "_m", "modules_meta"))
+    return ensure_dir(stage_out("trust.stability", "modules_meta"))
 
 
 def meta(cohort: str, region: str, method: str, k: int) -> None:
@@ -566,7 +566,7 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
     del bundle
     n = sample_table.shape[0]
 
-    pdir = rel("real_data", "stability", "_m", "partitions")
+    pdir = stage_out("trust.stability", "partitions")
     prefix = f"{method}__{cohort}__{region}__"
     parts = sorted(p for p in pdir.iterdir()
                    if p.name.startswith(prefix) and p.suffix == ".parquet")
@@ -632,7 +632,7 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
 def _halffit_module_genes(cohort: str, region: str, method: str) -> dict:
     """(seed, half) -> {module_id: set(gene_id)} for each split-half partition. Module
     labels match the meta parquet (both read module_id straight from the partition)."""
-    pdir = rel("real_data", "stability", "_m", "partitions")
+    pdir = stage_out("trust.stability", "partitions")
     prefix = f"{method}__{cohort}__{region}__"
     out: dict = {}
     for p in sorted(pdir.iterdir()):

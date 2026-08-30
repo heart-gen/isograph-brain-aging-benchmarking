@@ -5,7 +5,7 @@ import re
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_dir
 
 
 def _load_stats_config(yaml_path: str) -> dict:
@@ -169,7 +169,7 @@ def summarize_metrics(
 
 
 def main() -> None:
-    results_path = rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
+    results_path = stage_dir("synthetic", "01_synthetic", "_m", "synthetic_results.parquet")
     if not results_path.exists():
         raise SystemExit(f"Missing results file: {results_path}\nRun collect_results first.")
 
@@ -192,13 +192,13 @@ def main() -> None:
 
     summary = pd.concat(parts, ignore_index=True)
 
-    out = rel("benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
+    out = stage_dir("synthetic", "03_metrics", "_m", "synthetic_metric_summary.parquet")
     ensure_dir(out.parent)
     summary.to_parquet(out, index=False, compression="zstd")
     print(f"Wrote {len(summary):,} rows to {out.name}")
 
     long = make_long_metrics(df)
-    out_long = rel("benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
+    out_long = stage_dir("synthetic", "03_metrics", "_m", "synthetic_metric_long.parquet")
     long.to_parquet(out_long, index=False, compression="zstd")
     print(f"Wrote {len(long):,} rows to {out_long.name}")
 
@@ -207,7 +207,7 @@ def main() -> None:
     print("Running paired Wilcoxon tests + paired-difference bootstrap CIs (vs. wgcna_gene) ...")
     tests = paired_tests(df, n_boot=n_iter, alpha=alpha, seed=13)
     if not tests.empty:
-        out_tests = rel("benchmark", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
+        out_tests = stage_dir("synthetic", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
         tests.to_parquet(out_tests, index=False, compression="zstd")
         n_sig05 = tests["significant_05"].sum()
         n_sig10 = tests["significant_10"].sum()

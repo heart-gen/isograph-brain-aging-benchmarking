@@ -31,7 +31,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, stage_out
 
 # Originally hand-prioritized panel (genetic_anchoring_v2), kept for reference. The CLI
 # defaults to EVERY colocalized gene so multi-locus / multi-trait cases are not dropped;
@@ -168,7 +168,7 @@ def _literature_lines(gene: str) -> list[str]:
 
 
 def _all_coloc_genes() -> list[str]:
-    ev = pd.read_parquet(rel("real_data", "coloc", "_m", "coloc_isoform_events_combined.parquet"))
+    ev = pd.read_parquet(stage_out("anchoring.coloc", "coloc_isoform_events_combined.parquet"))
     return sorted(ev["gene_name"].dropna().unique())
 
 
@@ -177,13 +177,13 @@ def _ens(series: pd.Series) -> pd.Series:
 
 
 def _load() -> dict:
-    ev = pd.read_parquet(rel("real_data", "coloc", "_m", "coloc_isoform_events_combined.parquet"))
-    di = pd.read_parquet(rel("real_data", "coloc", "_m", "coloc_direction_combined.parquet"))
-    calls = pd.read_parquet(rel("real_data", "_m", "rbp", "rbp_switch_calls.parquet"))
-    regulon = pd.read_parquet(rel("real_data", "_m", "rbp", "rbp_regulon.parquet"))
+    ev = pd.read_parquet(stage_out("anchoring.coloc", "coloc_isoform_events_combined.parquet"))
+    di = pd.read_parquet(stage_out("anchoring.coloc", "coloc_direction_combined.parquet"))
+    calls = pd.read_parquet(stage_out("regulation", "rbp", "rbp_switch_calls.parquet"))
+    regulon = pd.read_parquet(stage_out("regulation", "rbp", "rbp_regulon.parquet"))
     con = []
     for tree in ("brainseq", "gtex"):
-        for f in rel("real_data", tree).glob(
+        for f in cohort_dir(tree).glob(
                 "*/_m/isograph_vae/clinical_consequence/gene_constraint.parquet"):
             con.append(pd.read_parquet(f))
     constraint = pd.concat(con, ignore_index=True) if con else pd.DataFrame(
@@ -336,7 +336,7 @@ def _interpretation(row: dict) -> str:
 
 def run(genes: list[str]) -> pd.DataFrame:
     d = _load()
-    out_dir = ensure_dir(rel("real_data", "_m", "deep_dive"))
+    out_dir = ensure_dir(stage_out("anchoring", "deep_dive"))
     rows = []
     for g in genes:
         row = _gene_row(g, d)
@@ -400,7 +400,7 @@ def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
     # (3) per-gene/exon clinical annotation (SNCA-style read for every gene)
     frames = []
     for tree in ("brainseq", "gtex"):
-        for f in rel("real_data", tree).glob(
+        for f in cohort_dir(tree).glob(
                 "*/_m/isograph_vae/clinical_consequence/exon_clinvar.parquet"):
             x = pd.read_parquet(f)
             x["ens"] = _ens(x["gene"])

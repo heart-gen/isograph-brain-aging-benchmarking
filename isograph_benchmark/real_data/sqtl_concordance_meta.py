@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.sqtl_concordance import _N_PERM, _SEED, _perm_null
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
@@ -88,7 +88,7 @@ def meta(variant: str) -> pd.DataFrame:
                   .agg(n_genes=("rho", "size"), mean_abs_rho=("rho", lambda s: round(s.abs().mean(), 4)))
                   .reset_index())
 
-    out_dir = ensure_dir(rel("real_data", "_m", "sqtl_concordance_meta"))
+    out_dir = ensure_dir(stage_out("anchoring", "sqtl_concordance_meta"))
     summary.to_parquet(out_dir / "sqtl_concordance_meta.parquet", index=False, compression="zstd")
     per_cohort.to_parquet(out_dir / "per_cohort.parquet", index=False, compression="zstd")
     (out_dir / "sqtl_concordance_meta.json").write_text(json.dumps(

@@ -40,7 +40,7 @@ import pandas as pd
 from patsy import dmatrix
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import rel
 from isograph_benchmark.real_data.module_trust import (
     METHOD_DIRS,
     PROD_ROOTS,

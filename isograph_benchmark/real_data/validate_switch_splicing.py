@@ -72,7 +72,7 @@ from scipy import stats
 
 from isograph.io.artifacts import load_dataset_bundle
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.run_models import (
     diagnosis_association,
     spline_age_association,
@@ -116,9 +116,9 @@ def _age_col(cohort: str) -> str:
 def _artifact_dir(cohort: str, region: str, variant: str, trait: str) -> "object":
     subdir = "isograph_vae_with_abundance" if variant == "with-abundance" else "isograph_vae"
     if cohort == "gtex":
-        return rel("real_data", "gtex", region, "_m", subdir)
+        return region_store("gtex", region, subdir)
     tree = "caudate_sczd" if trait == "dx" else region
-    return rel("real_data", "brainseq", tree, "_m", subdir)
+    return region_store("brainseq", tree, subdir)
 
 
 def _bundle_path(cohort: str, region: str, trait: str) -> "object":
@@ -136,7 +136,7 @@ def _splice_path(cohort: str, region: str) -> "object":
 
 
 def _out_dir(cohort: str, region: str, trait: str) -> "object":
-    return ensure_dir(rel("real_data", "_m", "switch_validation", f"{cohort}_{region}_{trait}"))
+    return ensure_dir(stage_out("mechanism", "switch_validation", f"{cohort}_{region}_{trait}"))
 
 
 def _strip_ver(s: pd.Series) -> pd.Series:
@@ -413,7 +413,7 @@ def _match_event(chrom: str, s: int, e: int, gene_events: pd.DataFrame) -> tuple
 def event_resolved(
     region: str, variant: str, trait: str, sample_table: pd.DataFrame, alpha: float
 ) -> tuple[pd.DataFrame, dict]:
-    ev = pd.read_parquet(rel("real_data", "_m", "deep_dive", "deep_dive_events.parquet"))
+    ev = pd.read_parquet(stage_out("anchoring", "deep_dive", "deep_dive_events.parquet"))
     ev = ev[ev["junction_in_switch_pair"] == True].copy()  # noqa: E712
     ev["gene"] = _strip_ver(ev["ens"])
 

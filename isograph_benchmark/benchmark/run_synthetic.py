@@ -6,7 +6,7 @@ from itertools import product
 import pandas as pd
 
 from isograph_benchmark.config import load_yaml
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_dir
 
 
 RESOURCE_DEFAULTS = {
@@ -214,7 +214,7 @@ def expand_grid() -> pd.DataFrame:
 
 
 def main() -> None:
-    out = rel("benchmark", "00_design", "_m", "synthetic_run_grid.parquet")
+    out = stage_dir("synthetic", "00_design", "_m", "synthetic_run_grid.parquet")
     ensure_dir(out.parent)
     grid = expand_grid()
     grid.to_parquet(out, index=False, compression="zstd")

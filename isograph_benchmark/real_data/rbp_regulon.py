@@ -26,11 +26,11 @@ import pandas as pd
 from scipy.stats import hypergeom
 from statsmodels.stats.multitest import multipletests
 
-from isograph_benchmark.paths import rel
+from isograph_benchmark.paths import region_store, stage_out
 from isograph_benchmark.real_data.coloc_prep import load_switch_genes
 from isograph_benchmark.real_data.qtl_anchoring import _bare, build_gene_sets
 
-_RBP_DIR = rel("real_data", "_m", "rbp")
+_RBP_DIR = stage_out("regulation", "rbp")
 _COUNTS = _RBP_DIR / "rbp_counts.parquet"
 _FLANK_NOTE = 100        # intronic flank window (nt); mirrors rbp_scan_intronic._FLANK
 # per-scope Stage-1 count tables; "combined" unions the mature + intronic presence
@@ -164,7 +164,7 @@ def _gene_tags(art, fdr: float) -> tuple[pd.DataFrame, str]:
 def _switch_calls(region_tree: str, region: str, pres: dict, rbps: list[str],
                   fdr: float) -> pd.DataFrame:
     """Per (gene, RBP): does the switch gain/lose the motif (present in one isoform only)?"""
-    art = rel("real_data", region_tree, region, "_m", "isograph_vae")
+    art = region_store(region_tree, region, "isograph_vae")
     sp_path = art / "module_interpret" / "structure_switch_pairs.parquet"
     if not sp_path.exists():
         return pd.DataFrame()
@@ -417,7 +417,7 @@ def run(fdr: float, scope: str = "mature", unit: str = "rbp", bg_mode: str = "co
     # property of its transcripts, not of the region it was called in).
     sp_frames = []
     for tree, region in _REGIONS:
-        f = rel("real_data", tree, region, "_m", "isograph_vae", "module_interpret",
+        f = region_store(tree, region, "isograph_vae", "module_interpret",
                 "structure_switch_pairs.parquet")
         if f.exists():
             d = pd.read_parquet(f, columns=["gene_id", "transcript_id_1", "transcript_id_2"])
