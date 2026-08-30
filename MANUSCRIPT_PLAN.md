@@ -21,8 +21,8 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 | Analysis | Question | Data | Main finding | Evidence strength | Validation | Reproducibility | Sources |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | 219/240 paired Wilcoxon favour IsoGraph over WGCNA; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
-| Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `benchmark/03_metrics/figures/` |
+| Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | 219/240 paired Wilcoxon favour IsoGraph over WGCNA; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
+| Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `01_synthetic_benchmark/03_metrics/figures/` |
 | Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `real_data/stability/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
 | QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00); GO-visible weakest at 1.104 (p=0.022, I²=0.68); IsoGraph-only vs matched WGCNA baselines | Strong (matched-baseline null) | Matched-baseline null (primary control); GO-visible = low end of a gradient, NOT a null; IVW+DL meta | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
@@ -311,7 +311,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | Proposed item | Evidence | Claim supported | Recommendation | Reasoning | Confidence | Placement |
 | --- | --- | --- | --- | --- | --- | --- |
 | Fig 1–4 as ordered | benchmark + trust + QTL + anchoring | Findings 6/5/3/4 | **Keep as-is** | Dependency-correct, biology-led | High | Main |
-| ~~Synthetic benchmark summary~~ (`tableS_benchmark_summary.csv`) | benchmark/03_metrics | Finding 6 | **MOVED TO SUPPLEMENT — DONE** | Demoted from main; regenerated clean (6 core scenarios × 6 methods, no NA rows) and renamed via `synthetic_benchmark.R` (`ISOGRAPH_TABLES_ONLY=1`). References updated in `FIGURE_ORDERING.md` + `benchmark/03_metrics/README.md`. | High | **Supp ✓** |
+| ~~Synthetic benchmark summary~~ (`tableS_benchmark_summary.csv`) | 01_synthetic_benchmark/03_metrics | Finding 6 | **MOVED TO SUPPLEMENT — DONE** | Demoted from main; regenerated clean (6 core scenarios × 6 methods, no NA rows) and renamed via `synthetic_benchmark.R` (`ISOGRAPH_TABLES_ONLY=1`). References updated in `FIGURE_ORDERING.md` + `01_synthetic_benchmark/03_metrics/README.md`. | High | **Supp ✓** |
 | **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00), GO-visible weakest (1.104, p=0.022, I²=0.68 — not a null), IsoGraph-only vs matched WGCNA (all ns). **Reproducible:** `real_data/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
 | **Main Table 2 — Splicing-led colocalized genes (NEW, built; reframed)** | deep-dive panel + literature | Finding 4 | **Main companion OR keep in Supp (S8/S9)** | Per-gene resolution; **CLPP posteriors are individually modest** — coloc threshold is eCAVIAR CLPP≥0.01 ("strong" ≥0.05), only **4/12 clear 0.05** and only CTSH (0.39) is substantial. Caption states the claim is *set-level coherence*, NOT per-locus significance (which lives in the contrast table + S-LDSC). Max CLPP carries confidence stars (`*` >0.01, `**` >0.05, `***` >0.10 → 1×`***`, 3×`**`, 8×`*`). Reproducible: same builder → `table3_splicing_led_genes.{csv,md}`. | Moderate | **Main or Supp** |
 | S-real-1 (baseline rates) | baseline_comparison | Finding 1 | **Keep in Supp** | Bounds, not advances | High | Supp |
@@ -320,10 +320,10 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 
 > **Note — synthetic Table 1 → Supplement: DONE.** Regenerated clean (six core accuracy scenarios ×
 > six main methods, no NA rows — the multiplex/scale scenarios that produced NA are correctly
-> excluded) and renamed to `benchmark/03_metrics/_m/tableS_benchmark_summary.csv` via a new
+> excluded) and renamed to `01_synthetic_benchmark/03_metrics/_m/tableS_benchmark_summary.csv` via a new
 > `ISOGRAPH_TABLES_ONLY=1` fast path in `synthetic_benchmark.R` (no figure churn). Old
 > `table1_benchmark_summary.csv` `git rm`'d; references updated in `FIGURE_ORDERING.md` +
-> `benchmark/03_metrics/README.md`.
+> `01_synthetic_benchmark/03_metrics/README.md`.
 >
 > **Display-item math (≤7 cap, figures + tables).** Recommended main set = Fig 1–4 + **main Table 1
 > (QTL contrast)** = **5**; add **main Table 2 (splicing-led genes)** → 6; conditional SCZ panel → 7.

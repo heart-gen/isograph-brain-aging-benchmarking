@@ -26,7 +26,7 @@ METRICS = [
     "measurement_elapsed_sec",
     # Abundance / isoform-role metrics (populated for the abundance scenarios;
     # missing columns are skipped automatically until a benchmark re-run emits
-    # them — see compute_metrics() in benchmark/run_one.py).
+    # them — see compute_metrics() in 01_synthetic_benchmark/run_one.py).
     "metrics_abundance_gene_detection_rate",
     "metrics_role_switch_recall",
     "metrics_role_abundance_recall",

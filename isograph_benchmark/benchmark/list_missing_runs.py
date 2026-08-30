@@ -6,7 +6,7 @@ predates the covariate columns, so ``build_design_matrix`` receives nothing and
 residualization silently reduces to plain ``isograph_vae``.  Running them would produce a
 "residualization costs nothing" result manufactured by the method not running, and the
 sample tables cannot be repaired because 1,204 cached datasets no longer regenerate from the
-current generator (``benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md``).  That question is
+current generator (``01_synthetic_benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md``).  That question is
 answered instead by ``residual_cost.py`` on fresh, generator-pinned datasets.
 
 Everything else missing is a genuine coverage gap and is emitted here.  The skip list is

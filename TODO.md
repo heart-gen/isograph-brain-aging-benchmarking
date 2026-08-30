@@ -17,8 +17,8 @@ of its items are now covered under Mechanistic validation below.
   `celltype_composition.py` — joins the committed MuSiC BrainSEQ deconvolution and
   supplies a marker-depletion cut; consumed by `incremental_association`.
 * [x] **Reconcile and validate the benchmark recovery-metric definition.**
-  `benchmark/partition_metrics.py` + `backfill_metrics.py`, 15 unit tests,
-  `benchmark/03_metrics/_m/PARTITION_METRICS.md`. Best-match Jaccard reproduces the
+  `01_synthetic_benchmark/partition_metrics.py` + `backfill_metrics.py`, 15 unit tests,
+  `01_synthetic_benchmark/03_metrics/_m/PARTITION_METRICS.md`. Best-match Jaccard reproduces the
   published `module_recovery_score` to 2.22e-16 over all 13,060 runs, and the
   count-preserving Jaccard null shows WGCNA's negative-control recovery (0.500) is
   fully explained by its module-count structure (z=0.47, perm p=0.746).
@@ -33,7 +33,7 @@ of its items are now covered under Mechanistic validation below.
   `isograph_vae`, `isograph_vae_reliability` (estimability), `isograph_vae_multiplex`,
   `isograph_vae_residual` — plus `project_tiers.py`, which derives the switch_only /
   switch_primary / multiplex edge tiers from ONE fit so the latent is held constant.
-  Residualization cost on unconfounded data: `benchmark/03_metrics/_m/RESIDUAL_COST.md`.
+  Residualization cost on unconfounded data: `01_synthetic_benchmark/03_metrics/_m/RESIDUAL_COST.md`.
 * [x] **Sensitivity to counts versus TPM.** N/A — no method ever consumes TPM.
   BrainSEQ uses Salmon counts, GTEx RSEM expected counts, synthetic simulated counts;
   TPM is archived as a data product (`build_parquet.convert_gtex_transcript_tpm`) and

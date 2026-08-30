@@ -60,7 +60,7 @@ merits — the giant M000, within-cohort split-half stability, and stranger-repr
 **not** as cross-cohort-correspondence improvers.
 
 **Objective functions (do not regress):**
-- **Synthetic** module recovery / switch-gene detection (`benchmark/.../synthetic_*`).
+- **Synthetic** module recovery / switch-gene detection (`01_synthetic_benchmark/.../synthetic_*`).
 - **Within-cohort split-half** ARI/NMI + `n_common` (`stability.py`, the committed A/B dial).
   Estimability is the *only* lever that has improved this so far (mean ΔARI +0.008, ΔNMI
   +0.012, 6/6 regions); consensus-Leiden, differential-TIN, and median-TIN all regressed it.

@@ -1,7 +1,7 @@
 # Manuscript figure & table ordering (IsoGraph, Nature Methods)
 
 The final figure/table sequence for the IsoGraph manuscript, with the one honest claim each
-artifact carries. Synthetic-benchmark figures live under `benchmark/03_metrics/figures/`;
+artifact carries. Synthetic-benchmark figures live under `01_synthetic_benchmark/03_metrics/figures/`;
 real-data figures under `real_data/{_m,stability/_m,gwas/_m}/figures/`. North-star: IsoGraph is
 a **complementary DTU-without-DGE layer**, not a globally superior method — the ordering moves
 from "the method recovers switch modules" (synthetic) → "its modules are trustworthy"
@@ -12,7 +12,7 @@ abundance pipelines" (real-data complementarity).
 
 | Fig | File | Claim |
 | --- | --- | --- |
-| **1** | `benchmark/03_metrics/figures/fig1_benchmark_overview.{pdf,png}` | On synthetic ground truth IsoGraph VAE recovers switch modules with complete switch-gene detection; 219/240 paired Wilcoxon tests favour it over WGCNA. |
+| **1** | `01_synthetic_benchmark/03_metrics/figures/fig1_benchmark_overview.{pdf,png}` | On synthetic ground truth IsoGraph VAE recovers switch modules with complete switch-gene detection; 219/240 paired Wilcoxon tests favour it over WGCNA. |
 | **2** | `real_data/stability/_m/figures/figTrustFunnel.{pdf,png}` | On real brain data IsoGraph's modules are per-module trustworthy: 236/266 chance-trusted across six regions, switch drivers reproduce (ρ≈0.77–0.82), 25 modules replicate aging cross-cohort (~4× the abundance baseline). |
 | **3** | `real_data/_m/figures/figQtlSpecificity.{pdf,png}` | The disease/GO-invisible switch modules are genetically anchored — splicing QTL are spared relative to eQTL (ratio≈1.17, I²=0.00 — homogeneous across all 10 tissues) exactly there, weakest and most heterogeneous in the GO-visible set, and the effect is IsoGraph-only on matched WGCNA baselines. |
 | **4** | `real_data/_m/figures/figGeneticAnchoring.{pdf,png}` | Disease variants resolve to isoform switches: (A) SNCA risk alleles for LBD and PD both raise usage of the same alternative-first-exon junction, mapping onto one GO-invisible IsoGraph switch pair; (B) the aging switch layer carries partitioned heritability across five traits (splicing- vs expression-lean by trait); (C) 12 splicing-led colocalized genes, all GO-invisible; (D) of 68 colocalized genes, 12 are splicing-led, 23 splicing-unresolved, 33 expression-led. Built by `real_data/_h/genetic_anchoring_figure.R` (via `build_deep_dive.sh`); summary `real_data/_m/deep_dive/DEEP_DIVE_SUMMARY.md`. |
@@ -26,7 +26,7 @@ three-baseline rates (Fig S-real-1) deliberately sit in the supplement because t
 
 ## Supplementary figures
 
-Synthetic parameter-resolved and stress panels (existing, `benchmark/03_metrics/figures/`):
+Synthetic parameter-resolved and stress panels (existing, `01_synthetic_benchmark/03_metrics/figures/`):
 
 | Fig | File | Claim |
 | --- | --- | --- |
@@ -63,7 +63,7 @@ per-gene deep-dive set backing Fig 4 — verdict panel (S8), per-event anchor→
 (S9), per-gene RBP regulators (S10), per-gene/exon clinical annotation (S11), and per-gene
 known-isoform-biology literature (S12) — which let a reader reconstruct any colocalized gene's
 mechanistic vignette. The synthetic benchmark summary — **supplementary**, moved out of the
-main text (`benchmark/03_metrics/_m/tableS_benchmark_summary.csv`; six core accuracy scenarios ×
+main text (`01_synthetic_benchmark/03_metrics/_m/tableS_benchmark_summary.csv`; six core accuracy scenarios ×
 six main methods) — and the scale-compute table (`tableS_scale_compute_summary.csv`) accompany
 Figs 1/S6.
 

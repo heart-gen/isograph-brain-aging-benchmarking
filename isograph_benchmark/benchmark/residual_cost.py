@@ -16,7 +16,7 @@ The obvious route -- run ``isograph_vae_residual`` over the existing unconfounde
    ran).
 2. Of those, 1,204 -- every core switch scenario -- no longer regenerate from the current
    generator, so their sample tables cannot be repaired.  See
-   ``benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md``.
+   ``01_synthetic_benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md``.
 
 The ablation is a **paired within-dataset contrast**: both arms see byte-identical input,
 and only the residualization flag differs.  That makes commensurability with the archived
@@ -37,7 +37,7 @@ Usage
 -----
     python -m isograph_benchmark.benchmark.residual_cost grid
     python -m isograph_benchmark.benchmark.residual_cost materialize
-    sbatch benchmark/01_synthetic/_h/run_residual_cost.sh
+    sbatch 01_synthetic_benchmark/01_synthetic/_h/run_residual_cost.sh
     python -m isograph_benchmark.benchmark.residual_cost summarize
 """
 from __future__ import annotations
@@ -279,7 +279,7 @@ def _write_report(runs: pd.DataFrame, res: pd.DataFrame, outdir) -> None:
         "residualization in general and must not be reported as one.", "",
         "**Why fresh datasets.** The archived unconfounded datasets predate the covariate "
         "columns, and 1,204 of them no longer regenerate from the current generator "
-        "(`benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md`), so their sample tables "
+        "(`01_synthetic_benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md`), so their sample tables "
         "could not be repaired. A paired within-dataset contrast does not need to be "
         "commensurable with the archive, so these were generated fresh and pinned.", "",
         f"Generator pin: commit `{pin.get('git_commit')}`, "

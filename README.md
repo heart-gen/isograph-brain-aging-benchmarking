@@ -13,7 +13,7 @@ Real-data spline aging analyses refer to spline models of age against module eig
 - `inputs/raw/` - ignored local copies of BrainSEQ and GTEx source files.
 - `inputs/processed/` - compressed parquet inputs used by analyses.
 - `inputs/bundles/` - IsoGraph dataset bundles.
-- `benchmark/` - synthetic benchmark runs and metrics.
+- `01_synthetic_benchmark/` - synthetic benchmark runs and metrics.
 - `real_data/` - BrainSEQ and GTEx aging analyses.
 - `figures/` - manuscript-ready figure panels.
 - `reports/` - statistical summaries and manifests.
@@ -26,7 +26,7 @@ over paired synthetic datasets.
 
 ## Module Interpretation
 
-Synthetic module interpretation accuracy is evaluated in `benchmark/02_interpret/`
+Synthetic module interpretation accuracy is evaluated in `01_synthetic_benchmark/02_interpret/`
 against ground-truth synthetic modules and switching genes.
 
 Real-data module interpretation is run with:

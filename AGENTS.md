@@ -180,7 +180,7 @@ flat while raw VAE collapses and WGCNA degrades; RNA degradation is the honest l
 (RIN regression can't recover a coordinate that isn't a single recorded axis), and
 `figS9_degradation_fallback` shows the abundance-channel variants (multiplex /
 reliability) recover it. Both rendered from completed runs in
-`benchmark/03_metrics/figures/`.
+`01_synthetic_benchmark/03_metrics/figures/`.
 
 **#30 DONE (2026-06-27):** A/B QC metrics in feature residualization. `residualize.py`
 gains `residualization_qc(before, after, design, feature_info)` — per-feature
@@ -248,7 +248,7 @@ stability → drivers (`module_meta` loadings, done) → aging replication
   in `real_data/_m/supp_tables/SUPPLEMENTARY_TABLES.md`; mirrored into the manuscript at
   `content/supplementary_tables/`.
 - Supplement wired in the manuscript repo as `content/06.supplement.md`: 14 supplementary
-  figures — S1–S11 synthetic (`benchmark/03_metrics/figures/figS1..figS11`) and S12–S14
+  figures — S1–S11 synthetic (`01_synthetic_benchmark/03_metrics/figures/figS1..figS11`) and S12–S14
   real-data (`figBaselineRates`, `figGoInvisible`, `figGwasResolution`) — numbered in
   citation order via `pandoc-fignos` `tag=`, plus S1–S7 table legends. All 17 figure
   cross-refs resolve; no orphaned assets.
