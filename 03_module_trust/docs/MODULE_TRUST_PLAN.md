@@ -8,7 +8,7 @@ The deliverable is **not** "make IsoGraph's global split-half ARI match WGCNA." 
 ARI/NMI on hard partitions is only a *relative dial* for A/B-ing method changes against
 IsoGraph's own baseline (estimability helped; consensus did not). It is the wrong altitude
 for the science and structurally unfair to a method that fragments/relabels modules over a
-low-SNR, multi-isoform-only signal (see the caveat in `real_data/README.md`).
+low-SNR, multi-isoform-only signal (see the caveat in `02_module_discovery/README.md`).
 
 The real questions are per-module:
 

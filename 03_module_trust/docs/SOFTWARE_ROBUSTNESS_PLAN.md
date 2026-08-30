@@ -227,7 +227,7 @@ confound** — best-match Jaccard rewards WGCNA's handful of giant modules. Ther
   Rand/ARI-style, over gene pairs present in both cohorts, optionally at matched resolution.
 - **Honest limitation to keep in the manuscript:** switch covariation is intrinsically less
   cross-cohort-reproducible than abundance co-expression (consistent with the committed
-  within-cohort diagnosis in `real_data/README.md`). IsoGraph's contribution is the
+  within-cohort diagnosis in `02_module_discovery/README.md`). IsoGraph's contribution is the
   DTU-without-DGE layer, not module-reproducibility parity with WGCNA — do not frame it as the
   latter.
 

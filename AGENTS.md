@@ -26,6 +26,10 @@ must be honest about this. Interpret against **three WGCNA baselines**:
 - **Do not commit large data caches:** `modules_meta/`, `module_trust/`,
   `partitions/`, `inputs/tin/`, `inputs/go_annotations/`, `_m/` outputs, region
   output dirs.
+- **Never hardcode a repository path.** `isograph_benchmark/paths.py` holds
+  `OUTPUT_DIRS`, the single definition of where each stage writes; address stages
+  with `stage_out` / `region_store` / `region_artifact_dir`. New analyses add a
+  bucket there rather than a literal path.
 - Config is the single source of truth. Canonical Leiden resolution = **5.0**,
   giant-cap **OFF**. Keep code clean — rationale lives in the wiki, not comments.
 - **Every official test / analysis / interpretation must be reproducible.** No
@@ -416,7 +420,12 @@ p=0.180, Gad2 OR 1.8 p=0.688; 100-nt Emx1 OR 1.0 p=1.0).
 - Real-data analysis modules: `isograph_benchmark/real_data/` (`interpret_modules.py`,
   `module_enrichment.py`, `replication_go.py`, `incremental_association.py`,
   `characterize_composition_unique.py`, `run_matched_wgcna.py`, `run_models.py`).
-- SLURM launchers live under each cohort's `_h/` (brainseq) and per-region trees.
+- SLURM launchers live in each stage's `_h/`, numbered `01..N` in dependency order:
+  `02_module_discovery` (fits + baselines), `03_module_trust`,
+  `04_module_characterization`, `05_genetic_anchoring`, `06_switch_mechanism`,
+  `07_rbp_regulation`, `manuscript` (display items).
+- Repo map: `README.md` (stages in argument order) and `ANALYSIS_MAP.md`
+  (analysis -> CLI -> wrapper -> outputs -> display item). Each stage has a README.
 - Memory index: `~/.claude/.../memory/MEMORY.md` — the project_* files carry the
   detailed state (resolution5_comparison, wgcna_rigor_fixes, strengths_limitations,
   module_trust_funnel, nature_methods_gaps).

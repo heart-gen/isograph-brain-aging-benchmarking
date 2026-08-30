@@ -1,4 +1,10 @@
-# Synthetic Benchmark of IsoGraph
+# 01 — Synthetic benchmark
+
+**Question:** does IsoGraph recover isoform-switch modules where the truth is known?
+Sub-stages run in order: `00_design` → `01_synthetic` → `02_interpret` → `03_metrics`.
+**Display items:** Fig 1 `fig1_benchmark_overview` and supplementary S1–S11, built in
+place under `03_metrics/figures/` by `isograph_benchmark/figures/synthetic_benchmark.R`;
+supplementary tables `tableS_benchmark_summary.csv`, `tableS_scale_compute_summary.csv`.
 
 This document summarizes the synthetic benchmark that evaluates IsoGraph against a
 WGCNA baseline for recovering **gene-level modules of coordinated isoform switching**
