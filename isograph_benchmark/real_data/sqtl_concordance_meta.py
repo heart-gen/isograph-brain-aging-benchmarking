@@ -116,7 +116,7 @@ def _write_report(out_dir: Path, summary: pd.DataFrame, pooled: pd.DataFrame) ->
         "the sQTL allele reference and the switch-axis orientation are arbitrary.",
         "",
         "Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` "
-        "(after the per-cohort array in `real_data/brainseq/_h/14.sqtl_concordance.sh`).",
+        "(after the per-cohort array in `02_module_discovery/brainseq/_h/14.sqtl_concordance.sh`).",
         "",
         "## Pooled concordance by module set",
         "",

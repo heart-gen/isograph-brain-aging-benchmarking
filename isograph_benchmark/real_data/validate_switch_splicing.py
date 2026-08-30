@@ -555,7 +555,7 @@ def main() -> None:
             raise SystemExit(
                 "Missing GTEx junction_usage.parquet for: " + ", ".join(missing) + ". Run "
                 "`python -m isograph_benchmark.inputs.build_gtex_junction_usage --region <r>` "
-                "(SLURM: real_data/gtex/_h/... ) first.")
+                "(SLURM: 02_module_discovery/gtex/_h/... ) first.")
     elif args.trait == "dx":
         regions = args.regions or ["caudate"]
         if regions != ["caudate"]:

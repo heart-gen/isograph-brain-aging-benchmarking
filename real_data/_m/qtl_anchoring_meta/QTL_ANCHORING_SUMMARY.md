@@ -129,8 +129,8 @@ switch features.*
   `--method {isograph,wgcna_switch_only,wgcna_multiplex}`) and
   `isograph_benchmark/real_data/qtl_anchoring_meta.py` (IVW FE + DL RE pooling and
   contrasts).
-- SLURM drivers: `real_data/brainseq/_h/13.qtl_anchoring.sh` (17-analysis array) and
-  `real_data/gtex/_h/08.qtl_anchoring_matched.sh` (2 methods × 13 GTEx tissues).
+- SLURM drivers: `02_module_discovery/brainseq/_h/13.qtl_anchoring.sh` (17-analysis array) and
+  `02_module_discovery/gtex/_h/08.qtl_anchoring_matched.sh` (2 methods × 13 GTEx tissues).
 - Key parameters: power-matched logistic enrichment with cis-variant count / gene length /
   isoform count / intron-group size covariates; FDR 0.05; FE + DL-RE pooling; deterministic
   seeds.

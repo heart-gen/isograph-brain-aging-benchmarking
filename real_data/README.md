@@ -55,7 +55,7 @@ baselines are R scripts under each cohort's `_h/`.
 
 ## Pipelines
 
-### GTEx (`real_data/gtex/_h/`)
+### GTEx (`02_module_discovery/gtex/_h/`)
 
 | Step | Script | Output |
 |---|---|---|
@@ -68,7 +68,7 @@ baselines are R scripts under each cohort's `_h/`.
 All 13 regions have run through stages 01–06. Current IsoGraph module counts: 14–29 per
 region (giant module 21–39%).
 
-### BrainSEQ (`real_data/brainseq/_h/`)
+### BrainSEQ (`02_module_discovery/brainseq/_h/`)
 
 | Step | Script | Purpose |
 |---|---|---|
@@ -142,7 +142,7 @@ across these two independent cohorts for either method.
 
 The BrainSEQ aging WGCNA baseline used here did not previously exist (the BrainSEQ aging
 regions had only `isograph_vae`); it was added as
-`real_data/brainseq/_h/01.wgcna_gene_aging.{R,sh}`, adapted from the fixed GTEx
+`02_module_discovery/brainseq/_h/01.wgcna_gene_aging.{R,sh}`, adapted from the fixed GTEx
 `02.wgcna_gene` to BrainSEQ counts (log2-CPM), categorical covariates (Sex, MoD;
 complete-case spline handling for NA SNP PCs), and the Age trait (caudate 21 / hippocampus
 9 / dlpfc 25 modules).
@@ -277,7 +277,7 @@ a cross-method ranking.
 
 ## WGCNA fixes
 
-Two bugs were fixed in `real_data/gtex/_h/02.wgcna_gene.R`:
+Two bugs were fixed in `02_module_discovery/gtex/_h/02.wgcna_gene.R`:
 
 1. **Soft-power selection.** The baseline initially collapsed into a single giant module
    in every region (76–100% of genes in one module; one module in four regions).
@@ -310,8 +310,8 @@ pattern but produced a healthy baseline (23 modules, 24% giant) and has not been
 Per region: `real_data/<cohort>/<region>/_m/isograph_vae/` (and
 `isograph_vae_with_abundance/` for BrainSEQ), `…/wgcna_gene/`, `…/module_enrichment/`,
 and the IsoGraph `module_interpret/` and `incremental_association/` subdirectories.
-Cohort-level summaries: `real_data/gtex/_m/` (region Jaccard, age summaries, interpret
-summary) and `real_data/brainseq/_m/` (composition-unique overlap, interpret summary).
+Cohort-level summaries: `02_module_discovery/gtex/_m/` (region Jaccard, age summaries, interpret
+summary) and `02_module_discovery/brainseq/_m/` (composition-unique overlap, interpret summary).
 Model outputs under `_m/` are regenerable from the bundles in `inputs/bundles/`; bulky
 intermediates (`_o/`, `_m/tmp/`, logs) are git-ignored.
 

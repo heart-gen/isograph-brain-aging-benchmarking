@@ -13,7 +13,7 @@ Re-running the de-confounded gene-level switch-vs-abundance test with MuSiC cell
 
 ## GTEx (aging replication arm)
 
-In-repo MuSiC re-run; 6/8 deconvolved regions retain a composition-robust switch signal and 2/8 collapse to zero — a **region-dependent, partial** replication: limbic/striatal aging DTU reproduces as composition-robust, while the two cortical regions collapse (composition-entangled and/or over-adjusted). Full breakdown + caveats in `real_data/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md`.
+In-repo MuSiC re-run; 6/8 deconvolved regions retain a composition-robust switch signal and 2/8 collapse to zero — a **region-dependent, partial** replication: limbic/striatal aging DTU reproduces as composition-robust, while the two cortical regions collapse (composition-entangled and/or over-adjusted). Full breakdown + caveats in `02_module_discovery/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md`.
 
 | region | n_tested | comp_unique_base | comp_unique_adj | retained_frac | both_base | both_adj | n_cell_types | samples_covered | marker_depleted | marker_enriched |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

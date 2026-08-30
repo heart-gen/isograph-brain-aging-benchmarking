@@ -44,9 +44,9 @@ The defensible claim is therefore narrower than the unadjusted counts suggest: c
 - Analysis directory: `real_data/_m/rbp/`.
 - Primary scripts: `isograph_benchmark/real_data/rbp_scan.py` and `rbp_scan_intronic.py` (stage 1, motif env), `isograph_benchmark/real_data/rbp_regulon.py` (stage 2, isograph env), `rbp_motif_families.py` (family definitions).
 - Execution commands:
-  - `sbatch real_data/brainseq/_h/16.rbp_regulon.sh --stage regulon` (mature, per-RBP; job 44484238)
-  - `sbatch real_data/brainseq/_h/16.rbp_regulon.sh --stage regulon --unit family_id` (job 44484239)
-  - `sbatch real_data/brainseq/_h/17.rbp_regulon_intronic.sh` (intronic scan + intronic and combined scopes; job 44484240)
+  - `sbatch 02_module_discovery/brainseq/_h/16.rbp_regulon.sh --stage regulon` (mature, per-RBP; job 44484238)
+  - `sbatch 02_module_discovery/brainseq/_h/16.rbp_regulon.sh --stage regulon --unit family_id` (job 44484239)
+  - `sbatch 02_module_discovery/brainseq/_h/17.rbp_regulon_intronic.sh` (intronic scan + intronic and combined scopes; job 44484240)
   - `--stage regulon` re-tests the frozen stage-1 count tables without repeating the MOODS scan, which is the expensive frozen input.
 - Parameters: motif hit p-threshold 1×10⁻⁴, pseudocount 0.1, **composition-matched background over 20 GC × 2 purine bins** (flat background retained in parallel), sense-strand only, U→T; hypergeometric over-representation with BH across module × RBP cells; adjusted binomial GLM with covariates `log_length`, `gc`, `frac_5utr`, `frac_cds`, `frac_3utr`, `log_n_transcripts`, BH across estimable cells only; estimability guards `_SEP_TOL` 1×10⁻⁸, `_MAX_SE` 100, `_MAX_ABS_COEF` 30; minimum module size 3 switch genes; switch-gene FDR default 0.05.
 - Output files (2026-08-26): `rbp_counts_intronic.parquet` (stage 1, 00:40); `rbp_switch_calls*.parquet`, `rbp_regulon*.parquet`, `RBP_REGULON*.md` (stage 2/3, 00:54–01:38).

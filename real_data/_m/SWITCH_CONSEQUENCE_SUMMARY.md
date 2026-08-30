@@ -23,9 +23,9 @@ Across all 10 regions the switch axis was consistently a **productive UTR/CDS-re
 ### Reproducibility Information
 - Analysis directory: `real_data/_m/` (rollup); per-region outputs under `real_data/{brainseq,gtex}/<region>/_m/isograph_vae/switch_consequence/`.
 - Primary scripts: `isograph_benchmark/real_data/switch_consequence.py` (per-region permutation test), `isograph_benchmark/real_data/switch_consequence_meta.py` (cross-region Fisher rollup).
-- Execution command: `sbatch real_data/brainseq/_h/15.switch_consequence.sh` (SLURM array 0–16, one region per task, tree-qualified region names), then `python -m isograph_benchmark.real_data.switch_consequence_meta`.
+- Execution command: `sbatch 02_module_discovery/brainseq/_h/15.switch_consequence.sh` (SLURM array 0–16, one region per task, tree-qualified region names), then `python -m isograph_benchmark.real_data.switch_consequence_meta`.
 - Parameters: `--n-perm 1000`, `--seed 13`, switch-gene FDR default 0.05; NMD 50-nt rule, ±2 bp tolerance in structural matching.
-- Execution date: 2026-07-18 (array logs `real_data/brainseq/_m/logs/switch-consequence-42399857_*.log`, all 17 tasks reached "Complete"; meta refreshed 12:48).
+- Execution date: 2026-07-18 (array logs `02_module_discovery/brainseq/_m/logs/switch-consequence-42399857_*.log`, all 17 tasks reached "Complete"; meta refreshed 12:48).
 - Git commit: baseline `86a3ef4`; analysis code committed in the same session (uncommitted at run time).
 - Compute environment: PSC Bridges-2 RM-shared, account bio260021p; conda env `/ocean/projects/bio260021p/shared/opt/envs/isograph`.
 - Key package versions (from env at analysis time): Python 3.12.13, numpy 2.4.4, pandas 2.3.3, scipy 1.17.1, statsmodels 0.14.6.

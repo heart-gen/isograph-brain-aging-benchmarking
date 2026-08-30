@@ -13,7 +13,7 @@ otherwise-invisible contribution (DTU-without-DGE):
   - genes.parquet              : the composition-unique genes + their stats.
 
 --combine reads the per-analysis gene lists and writes the cross-analysis
-overlap (e.g. SCZD ∩ caudate-aging) to real_data/brainseq/_m/.
+overlap (e.g. SCZD ∩ caudate-aging) to 02_module_discovery/brainseq/_m/.
 """
 from __future__ import annotations
 

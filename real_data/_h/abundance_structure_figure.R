@@ -6,7 +6,7 @@
 # whose switch channel carries phenotype signal that total abundance cannot -> separation
 # adds information. (C) one such gene: total abundance flat across diagnosis while the
 # isoform-switch score shifts. Reads
-# real_data/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/*, writes
+# 02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/*, writes
 # figSeparation.{pdf,png} to real_data/_m/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        real_data/_h/abundance_structure_figure.R

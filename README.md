@@ -32,8 +32,8 @@ against ground-truth synthetic modules and switching genes.
 Real-data module interpretation is run with:
 
 ```bash
-sbatch real_data/brainseq/_h/04.interpret_modules.sh
-sbatch real_data/gtex/_h/04.interpret_modules.sh
+sbatch 02_module_discovery/brainseq/_h/04.interpret_modules.sh
+sbatch 02_module_discovery/gtex/_h/04.interpret_modules.sh
 ```
 
 By default, real-data interpretation uses the GENCODE v47 primary-assembly GTF

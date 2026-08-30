@@ -2,7 +2,7 @@
 
 Per-gene Spearman rho between IsoGraph's switch-axis usage change and the lead sQTL's per-transcript intron direction, pooled across the 17 brain cohorts. `pvalue` compares the pooled mean |rho| to a within-gene rank-permutation null (seed 13, 2000 draws); |rho| is used because both the sQTL allele reference and the switch-axis orientation are arbitrary.
 
-Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` (after the per-cohort array in `real_data/brainseq/_h/14.sqtl_concordance.sh`).
+Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` (after the per-cohort array in `02_module_discovery/brainseq/_h/14.sqtl_concordance.sh`).
 
 ## Pooled concordance by module set
 

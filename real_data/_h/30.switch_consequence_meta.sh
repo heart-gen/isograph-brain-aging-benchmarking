@@ -11,7 +11,7 @@
 ## Cross-region rollup of the switch coding-consequence enrichment. Pools the per-analysis
 ## log enrichments by DerSimonian-Laird random effects (with Cochran's Q / I2), separately
 ## for the aging and disease analyses, and demotes the Fisher-combined p to a secondary
-## column. Requires real_data/brainseq/_h/15.switch_consequence.sh to have run first so the
+## column. Requires 02_module_discovery/brainseq/_h/15.switch_consequence.sh to have run first so the
 ## gene-level block-bootstrap SEs exist. Light enough for the login node, but committed as a
 ## wrapper so the published rollup is reproducible from a single command.
 ## Usage: sbatch real_data/_h/30.switch_consequence_meta.sh

@@ -37,7 +37,7 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     # 01 — synthetic benchmark (stage root; sub-stages 00_design .. 03_metrics)
     "synthetic": ("01_synthetic_benchmark",),
     # 02 — module discovery; the cohort x region artifact store lives beneath it
-    "modules": ("real_data",),
+    "modules": ("02_module_discovery",),
     # 03 — module trust
     "trust.stability": ("real_data", "stability", "_m"),
     "trust.replication": ("real_data", "replication", "_m"),
