@@ -26,8 +26,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-AS_DIR  <- rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae", "abundance_structure")
-FIG_DIR <- rel("real_data", "_m", "figures")
+AS_DIR  <- rel("02_module_discovery", "brainseq", "caudate_sczd", "_m", "isograph_vae", "abundance_structure")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito. IsoGraph vermillion is reused for the switch channel throughout the manuscript.

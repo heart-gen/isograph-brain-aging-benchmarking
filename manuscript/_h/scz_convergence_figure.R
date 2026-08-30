@@ -23,7 +23,7 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-FIG_DIR <- rel("real_data", "_m", "figures")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Shared house style (matches genetic_anchoring_figure.R).
@@ -63,7 +63,7 @@ compact_reg <- function(s) {
   else paste(nm, collapse = ", ")
 }
 
-conv <- read_parquet(rel("real_data", "_m", "scz_age_projection", "convergence.parquet")) |>
+conv <- read_parquet(rel("05_genetic_anchoring", "_m", "scz_age_projection", "convergence.parquet")) |>
   mutate(
     cohort = unname(COHORT_LAB[source]),
     reg    = vapply(candidate_rbp_regulators, compact_reg, character(1)),

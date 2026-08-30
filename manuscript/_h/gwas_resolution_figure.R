@@ -22,8 +22,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-GWAS_DIR <- rel("real_data", "gwas", "_m")
-FIG_DIR  <- rel("real_data", "_m", "figures")
+GWAS_DIR <- rel("05_genetic_anchoring", "_m", "gwas")
+FIG_DIR  <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 GIANT     <- 900          # giant-module gene-count cutoff

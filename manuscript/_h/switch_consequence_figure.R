@@ -14,7 +14,7 @@ find_root <- function() {
   while (!file.exists(file.path(d, ".here")) && d != dirname(d)) d <- dirname(d); d
 }
 ROOT <- find_root(); rel <- function(...) file.path(ROOT, ...)
-FIG_DIR <- rel("real_data", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
+FIG_DIR <- rel("manuscript", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 theme_pub <- function(base_size = 8.5) {
   theme_classic(base_size = base_size) +
     theme(axis.text = element_text(size = 7.5), axis.title = element_text(size = 8.5),
@@ -31,7 +31,7 @@ save_fig <- function(p, name, width, height) {
 }
 sig_star <- function(p) ifelse(p < 1e-3, "***", ifelse(p < 1e-2, "**", ifelse(p < 0.05, "*", "")))
 
-sc <- as.data.frame(read_parquet(rel("real_data", "_m", "switch_consequence_meta.parquet")))
+sc <- as.data.frame(read_parquet(rel("06_switch_mechanism", "_m", "switch_consequence_meta.parquet")))
 LAB <- c(utr_changed = "UTR remodeled", coding_consequence = "CDS remodeled",
          cds_changed = "CDS length change", first_exon_changed = "First exon change",
          internal_exon_difference = "Internal exon diff.", last_exon_changed = "Last exon change",

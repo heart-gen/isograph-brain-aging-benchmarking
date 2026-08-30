@@ -25,8 +25,8 @@ find_root <- function() {
 }
 ROOT     <- find_root()
 rel      <- function(...) file.path(ROOT, ...)
-GATE_DIR <- rel("real_data", "brainseq", "caudate_sczd", "_m")
-FIG_DIR  <- rel("real_data", "_m", "figures")
+GATE_DIR <- rel("02_module_discovery", "brainseq", "caudate_sczd", "_m")
+FIG_DIR  <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 MOD_COL <- "#D55E00"   # module switch evidence (vermillion, shared with the QTL figure)

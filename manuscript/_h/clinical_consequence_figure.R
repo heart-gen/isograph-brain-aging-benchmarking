@@ -15,7 +15,7 @@ find_root <- function() {
   while (!file.exists(file.path(d, ".here")) && d != dirname(d)) d <- dirname(d); d
 }
 ROOT <- find_root(); rel <- function(...) file.path(ROOT, ...)
-FIG_DIR <- rel("real_data", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
+FIG_DIR <- rel("manuscript", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 theme_pub <- function(base_size = 8.5) {
   theme_classic(base_size = base_size) +
     theme(axis.text = element_text(size = 7.5), axis.title = element_text(size = 8.5),
@@ -33,7 +33,7 @@ save_fig <- function(p, name, width, height) {
 
 # ---- Panel A: per-region switch-gene vs genome-wide median LOEUF ----
 cs <- bind_rows(lapply(
-  Sys.glob(rel("real_data", "*", "*", "_m", "isograph_vae", "clinical_consequence",
+  Sys.glob(rel("02_module_discovery", "*", "*", "_m", "isograph_vae", "clinical_consequence",
                "constraint_summary.parquet")),
   function(f) as.data.frame(read_parquet(f)))) |>
   filter(stratum == "all", !is.na(median_loeuf_switch))
@@ -50,7 +50,7 @@ pA <- ggplot(csl, aes(set, loeuf)) +
   theme_pub() + theme(axis.text.x = element_text(size = 8))
 
 # ---- Panel B: switched vs constitutive-exon ClinVar P/LP density ----
-cc <- as.data.frame(read_parquet(rel("real_data", "_m", "clinical_consequence_meta.parquet")))
+cc <- as.data.frame(read_parquet(rel("06_switch_mechanism", "_m", "clinical_consequence_meta.parquet")))
 b <- cc |> filter(stratum == "all") |>
   select(scope, switched = median_switched_per_kb, constitutive = median_bg_per_kb, median_ratio) |>
   pivot_longer(c(switched, constitutive), names_to = "exon_set", values_to = "per_kb") |>
@@ -70,7 +70,7 @@ pB <- ggplot(b, aes(exon_set, per_kb, fill = exon_set)) +
                       axis.text.x = element_text(angle = 15, hjust = 1))
 
 # ---- Panel C: LOEUF of colocalized genes by verdict ----
-panel <- as.data.frame(read_parquet(rel("real_data", "_m", "deep_dive", "deep_dive_panel.parquet")))
+panel <- as.data.frame(read_parquet(rel("05_genetic_anchoring", "_m", "deep_dive", "deep_dive_panel.parquet")))
 pc <- panel |> filter(!is.na(loeuf)) |>
   mutate(v = case_when(grepl("splicing-led", verdict) ~ "splicing-led",
                        grepl("not resolved", verdict) ~ "splicing\n(unresolved)",

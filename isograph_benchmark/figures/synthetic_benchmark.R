@@ -26,19 +26,19 @@ find_root <- function() {
 ROOT <- find_root()
 rel <- function(...) file.path(ROOT, ...)
 
-RAW_PATH     <- rel("benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
-LONG_PATH    <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
-SUMMARY_PATH <- rel("benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
+RAW_PATH     <- rel("01_synthetic_benchmark", "01_synthetic", "_m", "synthetic_results.parquet")
+LONG_PATH    <- rel("01_synthetic_benchmark", "03_metrics", "_m", "synthetic_metric_long.parquet")
+SUMMARY_PATH <- rel("01_synthetic_benchmark", "03_metrics", "_m", "synthetic_metric_summary.parquet")
 # Precomputed paired tests with FULL-FAMILY (scenario x metric x method) BH adjustment.
 # The main figure's significance brackets are driven by this table's p_adj so the
 # stars match the reported full-family FDR exactly (rather than ggpubr recomputing a
 # per-panel correction). See full_family_brackets() and box_metric_panel().
-PAIRWISE_PATH <- rel("benchmark", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
+PAIRWISE_PATH <- rel("01_synthetic_benchmark", "03_metrics", "_m", "synthetic_pairwise_tests.parquet")
 # Stage-03 interpretation accuracy (multi_isoform_switch); optional - figures that
 # read it skip cleanly when the file is absent (its array job may still be running).
-INTERPRET_SUMMARY_PATH <- rel("benchmark", "02_interpret", "_m", "synthetic_interpret_summary.parquet")
-FIG_DIR      <- rel("benchmark", "03_metrics", "figures")
-TABLE_DIR    <- rel("benchmark", "03_metrics", "_m")
+INTERPRET_SUMMARY_PATH <- rel("01_synthetic_benchmark", "02_interpret", "_m", "synthetic_interpret_summary.parquet")
+FIG_DIR      <- rel("01_synthetic_benchmark", "03_metrics", "figures")
+TABLE_DIR    <- rel("01_synthetic_benchmark", "03_metrics", "_m")
 dir.create(FIG_DIR,   showWarnings = FALSE, recursive = TRUE)
 dir.create(TABLE_DIR, showWarnings = FALSE, recursive = TRUE)
 

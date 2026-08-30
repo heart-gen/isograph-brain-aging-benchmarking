@@ -12,7 +12,7 @@ find_root <- function() {
   while (!file.exists(file.path(d, ".here")) && d != dirname(d)) d <- dirname(d); d
 }
 ROOT <- find_root(); rel <- function(...) file.path(ROOT, ...)
-FIG_DIR <- rel("real_data", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
+FIG_DIR <- rel("manuscript", "_m", "figures"); dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 theme_pub <- function(base_size = 8.5) {
   theme_classic(base_size = base_size) +
     theme(axis.text = element_text(size = 7.5), axis.title = element_text(size = 8.5),
@@ -28,7 +28,7 @@ save_fig <- function(p, name, width, height) {
          units = "in", dpi = 300); cat("  ", name, " saved\n", sep = "")
 }
 
-rb <- as.data.frame(read_parquet(rel("real_data", "_m", "rbp", "rbp_regulon.parquet")))
+rb <- as.data.frame(read_parquet(rel("07_rbp_regulation", "_m", "rbp", "rbp_regulon.parquet")))
 sig <- rb |> filter(q < 0.05)
 
 # ---- Panel A: recurrent regulators (regions with a significant enrichment) ----
