@@ -39,7 +39,7 @@ headline biology (the complementary DTU layer)
 - **Split-half fits** (`03_module_trust/_m/stability/partitions/`, 5 seeds × 2 halves × 6 regions,
   per method incl. `isograph`, `isograph_reliability`, `isograph_tin`): the resample
   ensemble for Q1 (stability) and Q2 (driver reproducibility, within-cohort).
-- **Production full-data fits** (`real_data/{brainseq,gtex}/<region>/_m/isograph_vae/modules.parquet`
+- **Production full-data fits** (`02_module_discovery/{brainseq,gtex}/<region>/_m/isograph_vae/modules.parquet`
   and `wgcna_gene/modules.parquet`): the reference modules whose trust we report, and the
   basis for Q3 cross-cohort replication (`REGION_PAIRS`) and Q4 WGCNA comparison.
 - **DGE / GO**: existing de-confounded gene-level age test (the DTU-without-DGE gene sets)

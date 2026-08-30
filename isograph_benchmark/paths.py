@@ -42,20 +42,20 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     "trust.stability": ("03_module_trust", "_m", "stability"),
     "trust.replication": ("03_module_trust", "_m", "replication"),
     # 04 — module characterization
-    "characterize": ("real_data", "_m"),
+    "characterize": ("04_module_characterization", "_m"),
     # 05 — genetic anchoring
-    "anchoring": ("real_data", "_m"),
-    "anchoring.coloc": ("real_data", "coloc", "_m"),
-    "anchoring.ldsc": ("real_data", "ldsc", "_m"),
-    "anchoring.gwas": ("real_data", "gwas", "_m"),
+    "anchoring": ("05_genetic_anchoring", "_m"),
+    "anchoring.coloc": ("05_genetic_anchoring", "_m", "coloc"),
+    "anchoring.ldsc": ("05_genetic_anchoring", "_m", "ldsc"),
+    "anchoring.gwas": ("05_genetic_anchoring", "_m", "gwas"),
     # 06 — switch mechanism
-    "mechanism": ("real_data", "_m"),
+    "mechanism": ("06_switch_mechanism", "_m"),
     # 07 — RBP regulation
-    "regulation": ("real_data", "_m"),
+    "regulation": ("07_rbp_regulation", "_m"),
     # manuscript display items
-    "manuscript": ("real_data", "_m"),
+    "manuscript": ("manuscript", "_m"),
     # shared gitignored scratch (GTF parse cache, id maps)
-    "tmp": ("real_data", "_m", "tmp"),
+    "tmp": ("04_module_characterization", "_m", "tmp"),
 }
 
 COHORTS: tuple[str, ...] = ("brainseq", "gtex")

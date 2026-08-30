@@ -82,7 +82,7 @@ schizophrenia**
    `inputs/raw/neuronal_clip/EGA/`; do not commit them.
 5. Extend `configs/neuronal_clip.yaml` with the authorized EGAF file inventory,
    sizes and checksums before analysis.
-6. Regenerate `reports/neuronal_clip/dataset_manifest.tsv` so the controlled-access
+6. Regenerate `07_rbp_regulation/_m/neuronal_clip_manifests/dataset_manifest.tsv` so the controlled-access
    state is replaced with sample- and file-level provenance.
 
 The reproducible public-data acquisition wrapper is

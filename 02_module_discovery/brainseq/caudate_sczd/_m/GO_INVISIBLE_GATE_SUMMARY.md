@@ -91,8 +91,8 @@ pipelines — the disease-axis instance of IsoGraph's defensible complementary v
   top_switch_genes) plus the pooled `_background` row from the JSON sidecar. This is the
   primary artifact; the gate is a small, table-centric result.
 - **Supplementary figure — GO-invisible switch modules
-  (`real_data/_m/figures/figGoInvisible.{pdf,png}`, built by
-  `real_data/_h/go_invisible_figure.R`).** (A) per-module functional-consequence fractions
+  (`manuscript/_m/figures/figGoInvisible.{pdf,png}`, built by
+  `manuscript/_h/go_invisible_figure.R`).** (A) per-module functional-consequence fractions
   (CDS / coding-status / biotype / UTR) for the four GO-invisible disease modules with the
   pooled-background line overlaid, showing they sit comparable to background (some above, some
   below — indistinguishable, not depleted); (B) switch coherence — nearly every member carries
@@ -105,7 +105,7 @@ pipelines — the disease-axis instance of IsoGraph's defensible complementary v
 - Analysis directory: `02_module_discovery/brainseq/caudate_sczd/_m/`.
 - Primary script: `isograph_benchmark/real_data/go_invisible_gate.py`
   (`python -m isograph_benchmark.real_data.go_invisible_gate --analysis brainseq-sczd`).
-- SLURM driver: `02_module_discovery/brainseq/_h/12.go_invisible_gate.sh`.
+- SLURM driver: `04_module_characterization/_h/05.go_invisible_gate.sh`.
 - Inputs: production `isograph_vae/` SCZD modules + module phenotype associations, switch
   evidence, structural switch annotation, module GO enrichment.
 - Outputs: `go_invisible_gate.parquet`, `GO_INVISIBLE_GATE.md`,

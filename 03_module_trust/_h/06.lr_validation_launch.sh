@@ -20,7 +20,7 @@ PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${PWD}}"
 cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: run from the repo root."; exit 1; }
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
-mkdir -p 03_module_trust/_m/stability/logs 03_module_trust/_m/stability/lr_validation
+mkdir -p 03_module_trust/_m/logs 03_module_trust/_m/stability/lr_validation
 
 # Forward an optional single-LR / grad-clip override to the array driver.
 EXPORTS="ALL"

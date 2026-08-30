@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=2
 #SBATCH --time=00:20:00
-#SBATCH --output=03_module_trust/_m/stability/logs/%x-%j.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%j.log
 
 # Compute ARI/NMI for every split-half pair (both methods) and summarize within- vs
 # cross-cohort partition agreement. Gate on the two fitting arrays:
@@ -23,7 +23,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 module purge
 module load anaconda3/2024.10-1

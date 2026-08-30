@@ -13,7 +13,7 @@ over-represented among the module's genes relative to the pooled switch-gene bac
 within-pair "gained/lost" call compares two isoforms of the SAME gene, controlling transcript
 length/composition. Results are stratified GO-invisible vs GO-visible.
 
-Output (real_data/_m/rbp/): rbp_switch_calls.parquet (per gene x RBP), rbp_regulon.parquet
+Output (07_rbp_regulation/_m/rbp/): rbp_switch_calls.parquet (per gene x RBP), rbp_regulon.parquet
 (per module x RBP enrichment), RBP_REGULON.md, and a cross-region meta.
 """
 from __future__ import annotations

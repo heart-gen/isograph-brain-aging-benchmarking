@@ -35,7 +35,7 @@ Axes
                      region; the pipelines cannot be swapped within a cohort, so this is a
                      cross-cohort concordance, and it is reported as such
 
-Outputs land in ``real_data/_m/switch_feature_sensitivity/``.
+Outputs land in ``06_switch_mechanism/_m/switch_feature_sensitivity/``.
 """
 from __future__ import annotations
 

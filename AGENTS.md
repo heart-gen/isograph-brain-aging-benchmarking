@@ -58,7 +58,7 @@ must be honest about this. Interpret against **three WGCNA baselines**:
 ### 1. BIOLOGY GATE — GO-invisible disease switch modules — DONE (PASS, complementary)
 
 Reproducible gate: `python -m isograph_benchmark.real_data.go_invisible_gate
---analysis brainseq-sczd` (SLURM: `02_module_discovery/brainseq/_h/12.go_invisible_gate.sh`).
+--analysis brainseq-sczd` (SLURM: `04_module_characterization/_h/05.go_invisible_gate.sh`).
 Outputs under `02_module_discovery/brainseq/caudate_sczd/_m/`: `go_invisible_gate.parquet`,
 `GO_INVISIBLE_GATE.md`, `go_invisible_gate_background.json`.
 
@@ -83,7 +83,7 @@ summary: `02_module_discovery/brainseq/caudate_sczd/_m/GO_INVISIBLE_GATE_SUMMARY
 ### 1b. MECHANISM — GTEx sQTL/eQTL genetic anchoring of co-switch modules — IMPLEMENTED
 
 Reproducible CLI `python -m isograph_benchmark.real_data.qtl_anchoring
---analysis brainseq-sczd` (SLURM array: `02_module_discovery/brainseq/_h/13.qtl_anchoring.sh`,
+--analysis brainseq-sczd` (SLURM array: `05_genetic_anchoring/_h/01.qtl_anchoring.sh`,
 17 analyses = SCZD + 3 brainseq aging + 13 gtex aging). Power-matched logistic
 enrichment (qtl status ~ module membership + log cis-variant count + log gene length
 + log isoform count [+ log intron group size]) within each xQTL tested universe ∩
@@ -91,7 +91,7 @@ IsoGraph genes. Data: `inputs/raw/gtex_v11/xqtl/` (sGenes/eGenes per brain tissu
 Outputs `<_m>/{qtl_anchoring.parquet, QTL_ANCHORING.md, qtl_anchoring.json}`.
 
 **Cross-tissue meta DONE** (`qtl_anchoring_meta.py`; 17 analyses; IVW fixed + DL
-random effects; outputs `real_data/_m/qtl_anchoring_meta/`). Pooling **reversed** the
+random effects; outputs `05_genetic_anchoring/_m/qtl_anchoring_meta/`). Pooling **reversed** the
 favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
 - Co-switch genes are cis-QTL **depleted for both** sQTL and eQTL (coordinated/network
   genes are constrained → fewer common cis-QTL). This shared baseline is not the result.
@@ -120,7 +120,7 @@ favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
   switch-transcript→LeafCutter-intron direction concordance.
 
 **Matched-baseline control DONE** (`qtl_anchoring.py --method {wgcna_switch_only,
-wgcna_multiplex}`; SLURM `02_module_discovery/gtex/_h/08.qtl_anchoring_matched.sh`, 2 methods × 13
+wgcna_multiplex}`; SLURM `05_genetic_anchoring/_h/02.qtl_anchoring_matched.sh`, 2 methods × 13
 GTEx tissues; `qtl_anchoring_meta.py` now multi-method). Anchors the matched WGCNA
 baselines (same switch features) and compares the splicing-specificity contrast on the
 **same 13 GTEx tissues**. Result is a clean **method effect**: only IsoGraph shows it —
@@ -137,7 +137,7 @@ IsoGraph on phenotype-sig RATE but NOT on genetic splicing-specificity.
 ### 2. Three-baseline comparison synthesis — DONE
 
 Reproducible CLI `python -m isograph_benchmark.real_data.baseline_comparison`
-(login-node aggregation; no SLURM). Outputs `real_data/_m/baseline_comparison/`:
+(login-node aggregation; no SLURM). Outputs `04_module_characterization/_m/baseline_comparison/`:
 `baseline_comparison.parquet` (per region×method), `baseline_comparison_pooled.parquet`
 (per method), `BASELINE_COMPARISON.md`. 17 analyses, 16 with all four methods.
 
@@ -244,8 +244,8 @@ stability → drivers (`module_meta` loadings, done) → aging replication
 
 ### 5. Manuscript summary tables + figures — DONE (assembled 2026-07-16)
 
-- Supplementary tables S1–S7 built by `real_data/_h/assemble_supp_tables.py`, with legends
-  in `real_data/_m/supp_tables/SUPPLEMENTARY_TABLES.md`; mirrored into the manuscript at
+- Supplementary tables S1–S7 built by `manuscript/_h/assemble_supp_tables.py`, with legends
+  in `manuscript/_m/supp_tables/SUPPLEMENTARY_TABLES.md`; mirrored into the manuscript at
   `content/supplementary_tables/`.
 - Supplement wired in the manuscript repo as `content/06.supplement.md`: 14 supplementary
   figures — S1–S11 synthetic (`01_synthetic_benchmark/03_metrics/figures/figS1..figS11`) and S12–S14
@@ -259,8 +259,8 @@ stability → drivers (`module_meta` loadings, done) → aging replication
 
 Approved 2026-07-16 as the single added orthogonal validation; shipped as committed CLIs
 `isograph_benchmark/real_data/sqtl_concordance.py` + `sqtl_concordance_meta.py` (commit
-01f3c47) with SLURM wrapper `02_module_discovery/brainseq/_h/14.sqtl_concordance.sh` (seed 13, 2000
-permutation draws), parquet + `real_data/_m/sqtl_concordance_meta/SQTL_CONCORDANCE_META.md`.
+01f3c47) with SLURM wrapper `05_genetic_anchoring/_h/03.sqtl_concordance.sh` (seed 13, 2000
+permutation draws), parquet + `05_genetic_anchoring/_m/sqtl_concordance_meta/SQTL_CONCORDANCE_META.md`.
 **Outcome — a diagnosed null:** the within-gene rank-concordance between the switch axis and
 the lead sQTL's per-transcript intron direction is at or below a full-variance permutation null
 in every module set (pooled mean |rho| 0.29–0.34, p≈0.76–1.0). Cause is construction, not
@@ -277,12 +277,12 @@ Stages 22–24 build switch-localized windows, quarantine the structurally confo
 NOVA1 nomination, and formally classify PTBP2/TDP-43 human contexts as descriptive or
 not estimable when discordant support is sparse. Stage 25 is the independent NOVA-family
 rescue: `nova_family_renomination.py` plus
-`02_module_discovery/brainseq/_h/25.nova_family_renomination.sh` scans the full 17-analysis
+`07_rbp_regulation/_h/12.nova_family_renomination.sh` scans the full 17-analysis
 universe with two-sided intronic opportunity control and gene-level adjusted enrichment.
 The frozen result is 79,763 transcripts, 374,296 eligible pairs, and two GO-visible
 BrainSEQ hippocampus regulons (M001/M002; 339 genes, 1,993 unique transcript pairs).
 Label these candidates `NOVA_FAMILY`, not NOVA1/2. Stage 26 is implemented as
-`nova2_ctag_clip.py` plus `02_module_discovery/brainseq/_h/26.nova2_ctag_clip.sh`: it acquires
+`nova2_ctag_clip.py` plus `07_rbp_regulation/_h/13.nova2_ctag_clip.sh`: it acquires
 GSE103315 and reciprocal hg38/mm10 chain resources with pinned hashes, reconstructs
 strict within-gene matched windows for the frozen candidates, requires full single-block
 forward mapping plus >=95% reciprocal overlap, and tests exact NOVA2 coverage separately
@@ -304,8 +304,8 @@ Quantas/BED12 supplements are checksum-pinned at sample/contrast level, and the 
 Gad2, and Pcp2 catalogs pass unique-event-to-coordinate QC.
 
 Stage 27 is implemented as `nova2_perturbation.py` plus
-`02_module_discovery/brainseq/_h/27.nova2_perturbation.sh`, following the frozen
-`real_data/NOVA2_PERTURBATION_ANALYSIS_SPEC.md`. It deterministically reconciles
+`07_rbp_regulation/_h/14.nova2_perturbation.sh`, following the frozen
+`07_rbp_regulation/docs/NOVA2_PERTURBATION_ANALYSIS_SPEC.md`. It deterministically reconciles
 duplicate Quantas rows, retains one-to-many BED12 event coordinates, derives
 strand-aware 50/100/250-nt intronic flanks, requires strict reciprocal mm10/hg38
 mapping, and tests event localization in the frozen matched case/control windows with
@@ -350,7 +350,7 @@ composition background is the corrected scan, and pinning the suite to the super
 flat-background tables would have enshrined the uncorrected background inside a validation
 suite with no good answer to "why does your CLIP validation use a different background than
 your motif scan?". The re-run is compute-only — `inputs/raw/neuronal_clip` (1.7 GB) and
-`reports/neuronal_clip/dataset_manifest.tsv` were already frozen on disk — so
+`07_rbp_regulation/_m/neuronal_clip_manifests/dataset_manifest.tsv` were already frozen on disk — so
 `accessed_date` stays 2026-08-01 and only the candidate-derivation provenance moves.
 
 What landed:
@@ -365,7 +365,7 @@ What landed:
   pinned and mismatched -> raises. The count guard is kept as a cheap first check.
 - 5 tests in `tests/test_neuronal_clip_fetch.py`, including the exact failure mode the count
   guard could not see: same number of nominations, different nominations.
-- New committed wrapper `02_module_discovery/brainseq/_h/21b.neuronal_clip_freeze.sh` — the freeze had
+- New committed wrapper `07_rbp_regulation/_h/08.neuronal_clip_freeze.sh` — the freeze had
   been run by hand, which was its own reproducibility gap.
 
 Grounded diff of the re-freeze (old vs new `candidate_manifest.parquet`): 17 -> 17
@@ -394,9 +394,9 @@ per run, so run 1 left `nova2_ctag/human_windows/window_qc.json` recording the t
 bootstrap sha while its own `nova2_ctag_validation.json` recorded the final one. Editing a
 config is only safe when nothing is in flight, not merely when the current stage has
 already read it. Stages 26/27 were re-run end-to-end under the committed config
-(44536564/44536565, both exit 0). Every artifact under `real_data/_m/neuronal_clip/` now
+(44536564/44536565, both exit 0). Every artifact under `07_rbp_regulation/_m/neuronal_clip/` now
 records `config_sha256 d56e90f9`, and stages 26/27 record the on-disk manifest hash
-`cb17af7e`. `reports/neuronal_clip/nova_family_candidate_manifest.parquet` differs from its
+`cb17af7e`. `07_rbp_regulation/_m/neuronal_clip_manifests/nova_family_candidate_manifest.parquet` differs from its
 v5 copy only in the embedded `frozen_date` / `config_sha256` columns; candidate content is
 invariant, and every section 7 number reproduces exactly (ctag 1,272/42,718 reciprocal;
 perturbation 586/11,353, 435/8,199, 181/2,611 with 2/3/0 localized; 50-nt Emx1 OR 3.0

@@ -32,7 +32,7 @@ records this as a first-class, re-runnable output rather than a claim in prose.
 The baseline model is verified against the published ``diagnosis_assoc.parquet`` before any
 sensitivity is fitted, so the ladder perturbs the published statistic and not a lookalike.
 
-Outputs land in ``real_data/_m/scz_confound_sensitivity/``.
+Outputs land in ``06_switch_mechanism/_m/scz_confound_sensitivity/``.
 """
 from __future__ import annotations
 

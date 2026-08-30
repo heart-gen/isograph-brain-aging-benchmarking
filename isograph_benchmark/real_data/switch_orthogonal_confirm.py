@@ -37,7 +37,7 @@ Modes
 Both modes share one scoring primitive, so the anchored pairs and their background are
 scored by identical code.
 
-Outputs land in ``real_data/_m/switch_orthogonal_confirm/``.
+Outputs land in ``06_switch_mechanism/_m/switch_orthogonal_confirm/``.
 """
 from __future__ import annotations
 

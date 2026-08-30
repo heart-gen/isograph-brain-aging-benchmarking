@@ -157,7 +157,7 @@ def load_eigengenes(cohort: str, region: str, method: str) -> pd.DataFrame:
         raise SystemExit(
             f"{art} carries neither eigengenes.parquet nor feature_scores.parquet, so its "
             f"eigengenes cannot be recovered. For the classical WGCNA baseline, re-run "
-            f"02_module_discovery/gtex/_h/02.wgcna_gene.sh (or brainseq 01.wgcna_gene_aging.sh), "
+            f"02_module_discovery/_h/09.wgcna_gene_gtex.sh (or brainseq 01.wgcna_gene_aging.sh), "
             f"which now persists eigengenes.parquet."
         )
     fs = pd.read_parquet(fs_path)

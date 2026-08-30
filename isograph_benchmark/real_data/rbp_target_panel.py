@@ -57,7 +57,7 @@ The panel is tiered:
                                  anchor: the program-level control, so the experiment is not
                                  reduced to validating GWAS loci.
 
-Outputs (real_data/_m/rbp_target_panel/<RBP>/):
+Outputs (07_rbp_regulation/_m/rbp_target_panel/<RBP>/):
   rbp_target_evidence.parquet/tsv     one row per eligible (gene, region)
   rbp_target_candidates.parquet/tsv   one row per eligible gene, ranked (the full universe)
   rbp_target_panel.parquet/tsv        the tiered panel

@@ -18,7 +18,7 @@ not run through replication).
 Reads, per region, <_m>/module_enrichment/{<method>_modules.parquet, summary.json}
 and 03_module_trust/_m/replication/replication_go_summary.parquet.
 
-Writes under real_data/_m/baseline_comparison/:
+Writes under 04_module_characterization/_m/baseline_comparison/:
   baseline_comparison.parquet        — one row per (cohort, region, method).
   baseline_comparison_pooled.parquet — one row per method, pooled across regions.
   BASELINE_COMPARISON.md             — comparison table + honest win/tie/loss read.

@@ -24,7 +24,7 @@ funnel asks four sequential questions and only passes survivors downstream:
 - **Split-half ensemble** — `03_module_trust/_m/stability/partitions/` (5 seeds × 2 halves ×
   region × method) and the per-fit sidecars `modules_meta/` (eigengene, Age effect, driver
   loadings/kME). Supplies the resampling evidence for Q1 and Q2.
-- **Production full-data fits** — `real_data/{brainseq,gtex}/<region>/_m/isograph_vae/`
+- **Production full-data fits** — `02_module_discovery/{brainseq,gtex}/<region>/_m/isograph_vae/`
   (full-multiplex primary) and `wgcna_gene/` modules. These are the reference modules whose
   trust is reported and the basis for Q3/Q4.
 - **De-confounded gene-level age test** — the DTU-without-DGE gene sets feeding Q4.

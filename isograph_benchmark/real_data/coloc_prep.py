@@ -22,7 +22,7 @@ Matching: IsoGraph modules and GTEx SuSiE both carry Ensembl gene_id, matched ba
 (unversioned). hg19 gene coordinates (for the PGC3 window + LD panel, both b37) come
 from MAGMA's NCBI37.3.gene.loc keyed by the GTEx symbol. PGC3 EUR is b37, matching.
 
-Writes under real_data/coloc/_m/<analysis>[/<region>]/:
+Writes under 05_genetic_anchoring/_m/coloc/<analysis>[/<region>]/:
   candidate_genes.tsv   — switch gene, module, go_invisible, symbol, hg19 coords, lead SNP/P, retained
   candidate_loci.tsv    — merged retained ±1Mb windows (LOCUS_ID, chr, start, stop, genes)
   qtl_credible_sets.tsv — gene x tissue x kind(sQTL/eQTL) x CS variant, PIP (b38 ids)

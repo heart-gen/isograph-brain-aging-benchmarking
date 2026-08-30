@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 #SBATCH --array=0-3
-#SBATCH --output=03_module_trust/_m/stability/logs/%x-%A_%a.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%A_%a.log
 
 ## Reviewer item 7: are the cross-cohort matched modules functionally preserved despite
 ## their low gene overlap (median gene Jaccard ~0.02)? Compares each matched pair's GO-term
@@ -37,7 +37,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 SPECS=(
     "isograph linear"

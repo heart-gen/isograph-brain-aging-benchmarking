@@ -84,7 +84,7 @@ region (giant module 21–39%).
 The BrainSEQ cross-region aggregations are `_m/composition_unique_overlap.parquet` and
 `_m/module_interpret_summary.parquet` (overlap/interpretation summaries).
 
-### GWAS overlap (`real_data/gwas/_h/`)
+### GWAS overlap (`05_genetic_anchoring/_h/`)
 
 Module gene sets from either cohort are tested for heritability enrichment with MAGMA:
 `01.prep_module_gene_sets` → `02.run_magma` → `03.plot_magma` (config `configs/gwas_magma.yaml`).
@@ -277,7 +277,7 @@ a cross-method ranking.
 
 ## WGCNA fixes
 
-Two bugs were fixed in `02_module_discovery/gtex/_h/02.wgcna_gene.R`:
+Two bugs were fixed in `02_module_discovery/_h/09.wgcna_gene_gtex.R`:
 
 1. **Soft-power selection.** The baseline initially collapsed into a single giant module
    in every region (76–100% of genes in one module; one module in four regions).
@@ -307,7 +307,7 @@ pattern but produced a healthy baseline (23 modules, 24% giant) and has not been
 
 ## Outputs
 
-Per region: `real_data/<cohort>/<region>/_m/isograph_vae/` (and
+Per region: `02_module_discovery/<cohort>/<region>/_m/isograph_vae/` (and
 `isograph_vae_with_abundance/` for BrainSEQ), `…/wgcna_gene/`, `…/module_enrichment/`,
 and the IsoGraph `module_interpret/` and `incremental_association/` subdirectories.
 Cohort-level summaries: `02_module_discovery/gtex/_m/` (region Jaccard, age summaries, interpret

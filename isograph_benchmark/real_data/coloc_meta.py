@@ -1,6 +1,6 @@
 """Cross-trait rollup of the coloc capstone: one table over disease + aging traits.
 
-Each `real_data/coloc/_m/<gene_source>__<trait>/coloc/` holds a per-trait CLPP contrast
+Each `05_genetic_anchoring/_m/coloc/<gene_source>__<trait>/coloc/` holds a per-trait CLPP contrast
 (coloc_summary.py). This aggregates them into the manuscript-facing cross-trait view:
 
   * per-trait colocalization counts (sQTL / eQTL, total / strong, GO-invisible share);
@@ -8,7 +8,7 @@ Each `real_data/coloc/_m/<gene_source>__<trait>/coloc/` holds a per-trait CLPP c
     named-candidate evidence — canonical neurodegeneration genes (e.g. SNCA for LBD,
     TPP1/SCFD1 for ALS) anchored to switch modules through splicing.
 
-Writes real_data/coloc/_m/COLOC_META.md and coloc_meta.parquet (+ colocalized_genes.tsv).
+Writes 05_genetic_anchoring/_m/coloc/COLOC_META.md and coloc_meta.parquet (+ colocalized_genes.tsv).
 """
 from __future__ import annotations
 
