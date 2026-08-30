@@ -34,7 +34,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, stage_out
 from isograph_benchmark.real_data.qtl_anchoring import _bare
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir, _bundle_path
 
@@ -45,7 +45,7 @@ DEFAULT_MUSIC_DIR = Path(
 )
 # GTEx MuSiC run lives in THIS repo (sample_id-keyed; produced by the R deconvolution in
 # real_data/gtex/_h/09.gtex_music_deconv.R, seeded from the same Tran/LIBD snRNA references).
-GTEX_MUSIC_DIR = rel("real_data", "gtex", "_m", "composition")
+GTEX_MUSIC_DIR = cohort_dir("gtex", "_m", "composition")
 
 # GTEx brain region -> Tran/LIBD snRNA reference key. Only regions with a defensibly matched
 # reference are deconvolved; the mapping follows the precedent already committed in
@@ -313,7 +313,7 @@ def meta(variant: str) -> None:
     BrainSEQ cohort is the headline (disease + primary aging); GTEx is the aging replication
     arm — appended when its in-repo MuSiC deconvolution has been run."""
     bq = _contrast_rows([(a, r, l) for a, r, _, l in _META_REGIONS], variant)
-    out = ensure_dir(rel("real_data", "_m"))
+    out = ensure_dir(stage_out("characterize"))
     bq.to_parquet(out / "composition_adjustment.parquet", index=False, compression="zstd")
 
     gt_specs = [("gtex-aging", r, f"GTEx {r}") for r in GTEX_REF]

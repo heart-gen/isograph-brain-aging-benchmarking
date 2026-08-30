@@ -43,14 +43,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.run_models import (
     BRAINSEQ_COVARIATES,
     diagnosis_association,
 )
 
 _BUNDLE = rel("inputs", "bundles", "brainseq_sczd", "caudate")
-_ARTIFACTS = rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae")
+_ARTIFACTS = region_store("brainseq", "caudate_sczd", "isograph_vae")
 
 # The published SCZD diagnosis model (run_models.run_brainseq_caudate_sczd).
 PUBLISHED_COVARIATES = ["Age"] + BRAINSEQ_COVARIATES
@@ -100,7 +100,7 @@ PROXY_SETS = {
 
 
 def _out_dir() -> Path:
-    return ensure_dir(rel("real_data", "_m", "scz_confound_sensitivity"))
+    return ensure_dir(stage_out("mechanism", "scz_confound_sensitivity"))
 
 
 # --------------------------------------------------------------------------- #

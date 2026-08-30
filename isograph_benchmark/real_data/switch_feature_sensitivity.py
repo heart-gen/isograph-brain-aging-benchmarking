@@ -49,7 +49,7 @@ from scipy import stats
 
 from isograph.features.channels import gene_feature_channels
 from isograph.io.artifacts import load_dataset_bundle
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.run_models import (
     _filter_expressed_transcripts,
     linear_age_association,
@@ -77,11 +77,11 @@ _META = {"feature_id", "gene_id", "feature_type", "n_transcripts"}
 
 
 def _out_dir() -> Path:
-    return ensure_dir(rel("real_data", "_m", "switch_feature_sensitivity"))
+    return ensure_dir(stage_out("mechanism", "switch_feature_sensitivity"))
 
 
 def _artifact_dir(cohort: str, region: str) -> Path:
-    return rel(*COHORTS[cohort]["artifacts"], region, "_m", "isograph_vae")
+    return region_store(cohort, region, "isograph_vae")
 
 
 # --------------------------------------------------------------------------- #

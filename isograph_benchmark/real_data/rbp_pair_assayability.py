@@ -63,7 +63,7 @@ import statsmodels.api as sm
 from statsmodels.stats.multitest import multipletests
 
 from isograph.explain.structure import parse_gtf
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.interpret_modules import (DEFAULT_GTF_CACHE,
                                                             DEFAULT_GTF_PATH)
 
@@ -77,7 +77,7 @@ _GTEX_REGIONS = ("amygdala", "anterior_cingulate_cortex_ba24", "caudate_basal_ga
 # GTEx technical covariates carried alongside age, matching configs/real_data.yaml.
 _COVARIATES = ("SEX", "SMRIN", "SMTSISCH")
 
-_PANEL_DIR = rel("real_data", "_m", "rbp_target_panel")
+_PANEL_DIR = stage_out("regulation", "rbp_target_panel")
 
 
 # --------------------------------------------------------------------------- structure

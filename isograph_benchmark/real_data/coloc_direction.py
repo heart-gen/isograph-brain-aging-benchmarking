@@ -34,11 +34,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
 from isograph_benchmark.real_data.qtl_anchoring import _bare
 
-_COLOC_ROOT = rel("real_data", "coloc", "_m")
+_COLOC_ROOT = stage_out("anchoring.coloc")
 _XQTL_DIR = rel("inputs", "raw", "gtex_v11", "xqtl")
 _KIND_SUFFIX = {"sQTL": "sQTLs", "eQTL": "eQTLs"}
 

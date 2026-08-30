@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, rel
 from isograph_benchmark.real_data.go_enrichment import GoAnnotations, HAS_GOATOOLS
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
@@ -152,7 +152,7 @@ def combine(variant: str) -> None:
             rows.append({"set_a": a, "set_b": b, "n_a": len(sets[a]), "n_b": len(sets[b]),
                          "n_overlap": len(inter),
                          "jaccard": round(len(inter) / len(sets[a] | sets[b]), 4) if (sets[a] | sets[b]) else 0.0})
-    out = ensure_dir(rel("real_data", "brainseq", "_m"))
+    out = ensure_dir(cohort_dir("brainseq", "_m"))
     df = pd.DataFrame(rows)
     df.to_parquet(out / "composition_unique_overlap.parquet", index=False, compression="zstd")
     print("Cross-analysis composition-unique overlap:")

@@ -31,7 +31,7 @@ from isograph.models.base import FitArtifacts, compute_module_gene_roles
 from isograph.models.wgcna import _RUNNER_R
 from isograph.workflow.config import WgcnaModelConfig
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel
 from isograph_benchmark.real_data.run_models import (
     GTEX_REGIONS,
     _filter_expressed_transcripts,
@@ -177,7 +177,7 @@ def run_brainseq_aging(regions: list[str], variants: list[str], seed: int, timeo
         for variant in variants:
             print(f"[brainseq-aging/{region}/{variant}] matched-feature WGCNA", flush=True)
             art = _fit_artifacts(bundle, tc, tt, BRAINSEQ_COVARIATES, variant, _cfg(seed, timeout_seconds))
-            out = ensure_dir(rel("real_data", "brainseq", region, "_m", VARIANT_DIRS[variant]))
+            out = ensure_dir(region_store("brainseq", region, VARIANT_DIRS[variant]))
             _save_age_artifacts(
                 art, out, bundle.sample_table, BRAINSEQ_COVARIATES, age_col="Age",
                 label=f"brainseq/{region}/{variant}", qc_table=_rnaseqc_covariate_table(region),
@@ -193,7 +193,7 @@ def run_gtex_aging(regions: list[str], variants: list[str], seed: int, timeout_s
                 bundle, bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
                 GTEX_COVARIATES, variant, _cfg(seed, timeout_seconds),
             )
-            out = ensure_dir(rel("real_data", "gtex", region, "_m", VARIANT_DIRS[variant]))
+            out = ensure_dir(region_store("gtex", region, VARIANT_DIRS[variant]))
             _save_age_artifacts(
                 art, out, bundle.sample_table, GTEX_COVARIATES, age_col="AGE",
                 label=f"gtex/{region}/{variant}", qc_table=_gtex_qc_covariate_table(bundle.sample_table),
@@ -208,7 +208,7 @@ def run_brainseq_sczd(variants: list[str], seed: int, timeout_seconds: int) -> N
             bundle, bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
             BRAINSEQ_COVARIATES, variant, _cfg(seed, timeout_seconds),
         )
-        out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", VARIANT_DIRS[variant]))
+        out = ensure_dir(region_store("brainseq", "caudate_sczd", VARIANT_DIRS[variant]))
         _save_diagnosis_artifacts(
             art, out, bundle, covariate_cols=SCZD_COVARIATES, label=f"brainseq_sczd/{variant}",
         )

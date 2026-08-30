@@ -32,10 +32,10 @@ import pandas as pd
 from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial.distance import squareform
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 
 MOTIF_DIR = rel("inputs", "rbp_motifs")
-OUT_DIR = rel("real_data", "_m", "rbp")
+OUT_DIR = stage_out("regulation", "rbp")
 CONFIG = rel("configs", "rbp_families.yaml")
 
 DEFAULT_CUT = 0.25          # distance = 1 - mean column correlation

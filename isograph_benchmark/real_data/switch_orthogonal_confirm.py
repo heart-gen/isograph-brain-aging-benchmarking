@@ -49,7 +49,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.longread_switch_confirm import (
     _COUNTS_FILE,
     _default_data_dir,
@@ -59,9 +59,8 @@ from isograph_benchmark.real_data.longread_switch_confirm import (
 )
 from isograph_benchmark.real_data.validate_switch_splicing import _strip_ver
 
-_COLOC_EVENTS = rel("real_data", "coloc", "_m", "coloc_isoform_events_combined.parquet")
-_PAIR_CONFIRMATION = rel(
-    "real_data", "_m", "longread_switch_confirm", "pair_confirmation.parquet"
+_COLOC_EVENTS = stage_out("anchoring.coloc", "coloc_isoform_events_combined.parquet")
+_PAIR_CONFIRMATION = stage_out("mechanism", "longread_switch_confirm", "pair_confirmation.parquet"
 )
 
 # Abundance strata for matching. Pairs are binned on the mean isoform fraction of their
@@ -71,7 +70,7 @@ _N_STRATA = 10
 
 
 def _out_dir() -> Path:
-    return ensure_dir(rel("real_data", "_m", "switch_orthogonal_confirm"))
+    return ensure_dir(stage_out("mechanism", "switch_orthogonal_confirm"))
 
 
 def _md_table(frame: pd.DataFrame, floats: int = 4) -> str:

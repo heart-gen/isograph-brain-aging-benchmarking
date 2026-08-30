@@ -63,7 +63,7 @@ from scipy import stats
 
 from isograph.io.artifacts import load_dataset_bundle
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
 from isograph_benchmark.real_data.validate_switch_splicing import (
     BRAINSEQ_AGING_REGIONS,
@@ -106,7 +106,7 @@ def _exposure_spec(trait: str) -> dict:
 
 
 def _out_dir(cohort: str, region: str, trait: str):
-    return ensure_dir(rel("real_data", "_m", "isa_concordance", f"{cohort}_{region}_{trait}"))
+    return ensure_dir(stage_out("mechanism", "isa_concordance", f"{cohort}_{region}_{trait}"))
 
 
 # --------------------------------------------------------------------------- #

@@ -13,7 +13,7 @@ from scipy import stats
 from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.vae import VaeNetworkModel
 from isograph.workflow.config import VaeModelConfig
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel
 
 # Age evaluation probabilities for spline projection (p10, p25, p50, p75, p90)
 AGE_PROBS = np.array([0.25, 0.50, 0.75])
@@ -564,8 +564,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
     del tc, tt  # free filtered transcript data; no longer needed after fit
     print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", region, "_m",
-                         _isograph_out_subdir(leiden_resolution)))
+    out = ensure_dir(region_store("brainseq", region, _isograph_out_subdir(leiden_resolution)))
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region,
                         qc_table=_rnaseqc_covariate_table(region))
 
@@ -611,7 +610,7 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
     print(f"[{region}+abundance] fit done in {time.time() - _t0:.0f}s | "
           f"alpha_abundance={artifacts.calibration.get('alpha_abundance') if artifacts.calibration else 'n/a'}", flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", region, "_m", "isograph_vae_with_abundance"))
+    out = ensure_dir(region_store("brainseq", region, "isograph_vae_with_abundance"))
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age",
                         label=f"{region}+abundance", qc_table=_rnaseqc_covariate_table(region))
 
@@ -648,8 +647,7 @@ def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None
     )
     print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "gtex", region_dir_name, "_m",
-                         _isograph_out_subdir(leiden_resolution)))
+    out = ensure_dir(region_store("gtex", region_dir_name, _isograph_out_subdir(leiden_resolution)))
     _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE",
                         label=region_dir_name, qc_table=_gtex_qc_covariate_table(bundle.sample_table))
 
@@ -717,8 +715,7 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
     )
     print(f"[caudate_sczd] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m",
-                         _isograph_out_subdir(leiden_resolution)))
+    out = ensure_dir(region_store("brainseq", "caudate_sczd", _isograph_out_subdir(leiden_resolution)))
     diagnosis_covariates = ["Age"] + covariate_cols
     _save_diagnosis_artifacts(
         artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd",
@@ -761,7 +758,7 @@ def run_brainseq_caudate_sczd_with_abundance(leiden_resolution: float | None = N
           f"alpha_abundance={artifacts.calibration.get('alpha_abundance') if artifacts.calibration else 'n/a'}",
           flush=True)
 
-    out = ensure_dir(rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae_with_abundance"))
+    out = ensure_dir(region_store("brainseq", "caudate_sczd", "isograph_vae_with_abundance"))
     diagnosis_covariates = ["Age"] + covariate_cols
     _save_diagnosis_artifacts(
         artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd+abundance",

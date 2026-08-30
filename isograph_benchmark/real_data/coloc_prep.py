@@ -36,7 +36,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
 from isograph_benchmark.real_data.qtl_anchoring import (
     _GTEX_TISSUE,
@@ -274,8 +274,8 @@ def run(gene_source: str, trait: str, region: str | None, variant: str, fdr: flo
         xqtl_dir: Path, tissues: list[str], min_recurrence: int) -> None:
     spec = gt.get(trait)
     tag = gene_source + (f"_{region}" if region else "") + f"__{trait}"
-    out_dir = ensure_dir(rel("real_data", "coloc", "_m", tag))
-    tmp_dir = ensure_dir(rel("real_data", "coloc", "_m", "_tmp"))
+    out_dir = ensure_dir(stage_out("anchoring.coloc", tag))
+    tmp_dir = ensure_dir(stage_out("anchoring.coloc", "_tmp"))
 
     switch = _resolve_switch_genes(gene_source, region, variant, fdr, min_recurrence)
     genes = set(switch["gene"])

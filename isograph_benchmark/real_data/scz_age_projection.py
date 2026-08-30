@@ -40,7 +40,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import rel
+from isograph_benchmark.paths import region_store, rel, stage_out
 from isograph.io.artifacts import load_dataset_bundle
 from isograph_benchmark.real_data.run_models import BRAINSEQ_COVARIATES
 from isograph_benchmark.real_data.qtl_anchoring import _bare
@@ -52,27 +52,27 @@ DX_COVS = ["Age", "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
 AGE_COVS = ["Sex", "RIN", "mapping_rate", "mito_rate",
             "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"]
 _MIN_MODULE = 3
-_OUT = rel("real_data", "_m", "scz_age_projection")
+_OUT = stage_out("anchoring", "scz_age_projection")
 
 # aging module sources (independent of the disease cohort's discovery), caudate-matched
 _AGING_SOURCES = {
     "gtex_caudate_bg": {
-        "modules": rel("real_data", "gtex", "caudate_basal_ganglia", "_m", "isograph_vae", "modules.parquet"),
+        "modules": region_store("gtex", "caudate_basal_ganglia", "isograph_vae", "modules.parquet"),
         "magma_prefix": "gtex__caudate_basal_ganglia__",
         "rbp_region": "caudate_basal_ganglia",
     },
     "brainseq_caudate": {
-        "modules": rel("real_data", "brainseq", "caudate", "_m", "isograph_vae", "modules.parquet"),
+        "modules": region_store("brainseq", "caudate", "isograph_vae", "modules.parquet"),
         "magma_prefix": "brainseq__caudate__",
         "rbp_region": "caudate",
     },
 }
 # candidate trans-regulators: per-module RBP regulons (rbp_regulon.py --scope combined)
-_RBP_REGULON = rel("real_data", "_m", "rbp", "rbp_regulon_combined.parquet")
-_DISEASE_FS = rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae", "feature_scores.parquet")
+_RBP_REGULON = stage_out("regulation", "rbp", "rbp_regulon_combined.parquet")
+_DISEASE_FS = region_store("brainseq", "caudate_sczd", "isograph_vae", "feature_scores.parquet")
 _DISEASE_BUNDLE = rel("inputs", "bundles", "brainseq_sczd", "caudate")
-_MAGMA = rel("real_data", "gwas", "_m", "magma_results_combined.parquet")
-_COLOC = rel("real_data", "coloc", "_m", "coloc_isoform_events_combined.parquet")
+_MAGMA = stage_out("anchoring.gwas", "magma_results_combined.parquet")
+_COLOC = stage_out("anchoring.coloc", "coloc_isoform_events_combined.parquet")
 
 
 # --------------------------------------------------------------------------- #

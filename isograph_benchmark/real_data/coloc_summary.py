@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.gwas_traits import TRAITS
 
 CLPP_MIN = 0.01
@@ -51,7 +51,7 @@ def _rate(df: pd.DataFrame) -> dict:
 
 
 def run(analysis: str, region: str | None) -> pd.DataFrame:
-    m_dir = rel("real_data", "coloc", "_m", analysis + (f"_{region}" if region else ""))
+    m_dir = stage_out("anchoring.coloc", analysis + (f"_{region}" if region else ""))
     clpp_path = m_dir / "coloc" / "clpp_results.tsv"
     if not clpp_path.exists():
         raise SystemExit(f"{clpp_path} not found; run 03.coloc_clpp.R first.")

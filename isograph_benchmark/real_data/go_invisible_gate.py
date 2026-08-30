@@ -27,14 +27,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_PATH
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
 FUNCTIONAL_COLS = ("cds_changed", "coding_status_change", "biotype_switch", "utr_changed")
 _ABS_R = 0.3
 _Q = 0.05
-_SYMBOL_CACHE = rel("real_data", "_m", "tmp", "gene_id_symbol.parquet")
+_SYMBOL_CACHE = stage_out("tmp", "gene_id_symbol.parquet")
 
 
 def gene_symbol_map(gtf_path: Path, cache: Path = _SYMBOL_CACHE) -> dict[str, str]:

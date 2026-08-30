@@ -41,7 +41,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import binomtest, spearmanr
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 
 # (brainseq_region, gtex_region, label) for the three matched brain regions.
 REGION_PAIRS = [
@@ -58,11 +58,11 @@ SEED = 13
 
 
 def _modules_path(cohort: str, region: str, method: str):
-    return rel("real_data", cohort, region, "_m", method, "modules.parquet")
+    return region_store(cohort, region, method, "modules.parquet")
 
 
 def _age_linear_path(cohort: str, region: str, method: str):
-    return rel("real_data", cohort, region, "_m", method, "age_linear.parquet")
+    return region_store(cohort, region, method, "age_linear.parquet")
 
 
 def _load_modules(cohort: str, region: str, method: str) -> pd.DataFrame | None:
@@ -226,7 +226,7 @@ def main() -> None:
                     help=f"Methods to run (default: {DEFAULT_METHODS}).")
     args = ap.parse_args()
 
-    out_dir = rel("real_data", "replication", "_m")
+    out_dir = stage_out("trust.replication")
     ensure_dir(out_dir)
 
     all_match = []
