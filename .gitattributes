@@ -15,5 +15,5 @@
 # GO reference databases (pinned release for reproducible enrichment).
 inputs/go_annotations/** filter=lfs diff=lfs merge=lfs -text
 # GTEx MuSiC marker-stats tables (mean-ratio per cell type) — sizable, keep out of text history.
-real_data/gtex/_m/composition/marker_stats_genes.*.csv filter=lfs diff=lfs merge=lfs -text
+02_module_discovery/gtex/_m/composition/marker_stats_genes.*.csv filter=lfs diff=lfs merge=lfs -text
 counts_transcript.txt filter=lfs diff=lfs merge=lfs -text

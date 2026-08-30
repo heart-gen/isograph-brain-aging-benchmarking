@@ -25,7 +25,7 @@ Across the 10 regions, 9,430 switch genes were scored against 157–160 ATtRACT 
 ### Reproducibility Information
 - Analysis directory: `real_data/_m/rbp/`.
 - Primary scripts: `isograph_benchmark/real_data/rbp_scan.py` (stage 1, motif env), `isograph_benchmark/real_data/rbp_regulon.py` (stage 2, isograph env).
-- Execution command: `sbatch real_data/brainseq/_h/16.rbp_regulon.sh` (stage 1 in `motif` env, stage 2 in `isograph` env).
+- Execution command: `sbatch 02_module_discovery/brainseq/_h/16.rbp_regulon.sh` (stage 1 in `motif` env, stage 2 in `isograph` env).
 - Parameters: motif hit p-threshold 1×10⁻⁴, pseudocount 0.1, flat background, sense-strand only, U→T; hypergeometric over-representation, BH across module × RBP tests, minimum module size 3, switch-gene FDR default 0.05.
 - Output files: `rbp_counts.parquet` (stage 1, 13:09), `rbp_switch_calls.parquet` + `rbp_regulon.parquet` + `RBP_REGULON.md` (stage 2, 13:27).
 - Execution date: 2026-07-18.

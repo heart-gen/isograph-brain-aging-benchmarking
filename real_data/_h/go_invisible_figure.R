@@ -4,7 +4,7 @@
 # (A) per-module driver functional-consequence fractions (CDS / coding-status / biotype /
 #     UTR change) against the pooled background line. (B) switch coherence: nearly every
 #     member gene carries a real anticorrelated transcript pair, with max switch strength
-#     annotated. Reads real_data/brainseq/caudate_sczd/_m/go_invisible_gate.parquet +
+#     annotated. Reads 02_module_discovery/brainseq/caudate_sczd/_m/go_invisible_gate.parquet +
 #     go_invisible_gate_background.json, writes figGoInvisible.{pdf,png} to
 #     real_data/_m/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \

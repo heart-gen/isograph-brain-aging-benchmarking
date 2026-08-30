@@ -32,7 +32,7 @@ then submit if clear:**
 ```bash
 squeue -u kbenjamin -n clinical-consequence -o '%i %t %r'   # expect empty
 # if empty:
-sbatch --array=0,3,4,5 real_data/brainseq/_h/18.clinical_consequence.sh
+sbatch --array=0,3,4,5 02_module_discovery/brainseq/_h/18.clinical_consequence.sh
 ```
 Confirm success = each of the 4 either writes `.../clinical_consequence/clinical_consequence.parquet`
 OR logs a legitimate "skipping" reason (caudate_sczd should NOT skip — it's the SCZD region).
@@ -40,8 +40,8 @@ OR logs a legitimate "skipping" reason (caudate_sczd should NOT skip — it's th
 ### A2. Commit the wrapper fixes (USER ALREADY APPROVED, gated on A1 success)
 Once the re-run completes cleanly, commit the module-init guard added to both wrappers:
 ```bash
-git add real_data/brainseq/_h/15.switch_consequence.sh \
-        real_data/brainseq/_h/18.clinical_consequence.sh
+git add 02_module_discovery/brainseq/_h/15.switch_consequence.sh \
+        02_module_discovery/brainseq/_h/18.clinical_consequence.sh
 git commit   # message below
 ```
 Commit message:

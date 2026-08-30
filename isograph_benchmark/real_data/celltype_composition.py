@@ -44,7 +44,7 @@ DEFAULT_MUSIC_DIR = Path(
     "/cell_proportion_estimate/_m"
 )
 # GTEx MuSiC run lives in THIS repo (sample_id-keyed; produced by the R deconvolution in
-# real_data/gtex/_h/09.gtex_music_deconv.R, seeded from the same Tran/LIBD snRNA references).
+# 02_module_discovery/gtex/_h/09.gtex_music_deconv.R, seeded from the same Tran/LIBD snRNA references).
 GTEX_MUSIC_DIR = cohort_dir("gtex", "_m", "composition")
 
 # GTEx brain region -> Tran/LIBD snRNA reference key. Only regions with a defensibly matched
@@ -369,7 +369,7 @@ def meta(variant: str) -> None:
                   "zero — a **region-dependent, partial** replication: limbic/striatal aging "
                   "DTU reproduces as composition-robust, while the two cortical regions "
                   "collapse (composition-entangled and/or over-adjusted). Full breakdown + "
-                  "caveats in `real_data/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md`.", "",
+                  "caveats in `02_module_discovery/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md`.", "",
                   _md_table(gt)]
 
     lines += ["", "## Interpretation", "",

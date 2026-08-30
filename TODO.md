@@ -11,7 +11,7 @@ of its items are now covered under Mechanistic validation below.
 ## Done — do not redo
 
 * [x] **Validate major IsoGraph switches using junction counts or PSI.**
-  `validate_switch_splicing.py` + `real_data/brainseq/_h/16.validate_switch_splicing.sh`.
+  `validate_switch_splicing.py` + `02_module_discovery/brainseq/_h/16.validate_switch_splicing.sh`.
   Caudate marginal OR ~105 vs module OR ~2.3.
 * [x] **Adjust human-cohort analyses for estimated cell-type composition.**
   `celltype_composition.py` — joins the committed MuSiC BrainSEQ deconvolution and
@@ -23,7 +23,7 @@ of its items are now covered under Mechanistic validation below.
   count-preserving Jaccard null shows WGCNA's negative-control recovery (0.500) is
   fully explained by its module-count structure (z=0.47, perm p=0.746).
 * [x] **Direct genetic analysis of module eigengenes.**
-  `module_genetic_anchoring.py` + `real_data/brainseq/_h/21.module_anchoring.sh` —
+  `module_genetic_anchoring.py` + `02_module_discovery/brainseq/_h/21.module_anchoring.sh` —
   per-module splicing-specificity contrast against a permutation null of random
   gene sets, closing the "pooling does not show any individual module is anchored"
   objection. Plus S-LDSC + coloc (`ldsc_annot_prep.py`, `coloc_*.py`).
@@ -90,7 +90,7 @@ a main figure.
 
 * [~] **Confirm top transcript pairs and disease-linked events using long-read brain
   RNA-seq.** Tier-1 done (`longread_switch_confirm.py` +
-  `real_data/brainseq/_h/29.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
+  `02_module_discovery/brainseq/_h/29.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
   8180677 Bambu quants, confirms 60.5% of GTEx cortical switch genes.
   A matched null now exists (`switch_orthogonal_confirm.py --mode global-null`, 2026-08-28)
   and it is sobering: switch pairs are switch-like 0.6466 of the time against an
@@ -148,7 +148,7 @@ a main figure.
   tissue and (ii) that its PSI anti-correlates with the partner junction beyond the
   compositional-closure baseline established by `switch_orthogonal_confirm --mode
   global-null` (never against zero). Run CTSH in **hippocampus** and SNCA in
-  **DLPFC + caudate**. Wrapper `real_data/brainseq/_h/38.junction_coloc_confirm.sh`.
+  **DLPFC + caudate**. Wrapper `02_module_discovery/brainseq/_h/38.junction_coloc_confirm.sh`.
   **Decision rule, pre-registered:** if the junctions validate here, report the
   short-read junction result as the orthogonal confirmation and cite the long-read
   failure as an assay limitation (5' bias / region), not as a negative. If they do not

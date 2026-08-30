@@ -58,8 +58,8 @@ must be honest about this. Interpret against **three WGCNA baselines**:
 ### 1. BIOLOGY GATE — GO-invisible disease switch modules — DONE (PASS, complementary)
 
 Reproducible gate: `python -m isograph_benchmark.real_data.go_invisible_gate
---analysis brainseq-sczd` (SLURM: `real_data/brainseq/_h/12.go_invisible_gate.sh`).
-Outputs under `real_data/brainseq/caudate_sczd/_m/`: `go_invisible_gate.parquet`,
+--analysis brainseq-sczd` (SLURM: `02_module_discovery/brainseq/_h/12.go_invisible_gate.sh`).
+Outputs under `02_module_discovery/brainseq/caudate_sczd/_m/`: `go_invisible_gate.parquet`,
 `GO_INVISIBLE_GATE.md`, `go_invisible_gate_background.json`.
 
 **Result (res 5.0, post covariate-decouple re-fit, regen 2026-06-29).** 4 disease-sig
@@ -77,13 +77,13 @@ DGKH, SLC25A12…) but heterogeneous within a module (shared switch axis, not a 
 GO process). **Verdict: PASS in the complementary form** — a genuine DTU-without-DGE
 layer invisible to pathway enrichment because the signal is isoform regulation, not a
 shared GO term. Frame on mechanism; do NOT claim "pathways WGCNA misses". Manubot
-summary: `real_data/brainseq/caudate_sczd/_m/GO_INVISIBLE_GATE_SUMMARY.md`. See
+summary: `02_module_discovery/brainseq/caudate_sczd/_m/GO_INVISIBLE_GATE_SUMMARY.md`. See
 `memory/project_go_invisible_gate.md`.
 
 ### 1b. MECHANISM — GTEx sQTL/eQTL genetic anchoring of co-switch modules — IMPLEMENTED
 
 Reproducible CLI `python -m isograph_benchmark.real_data.qtl_anchoring
---analysis brainseq-sczd` (SLURM array: `real_data/brainseq/_h/13.qtl_anchoring.sh`,
+--analysis brainseq-sczd` (SLURM array: `02_module_discovery/brainseq/_h/13.qtl_anchoring.sh`,
 17 analyses = SCZD + 3 brainseq aging + 13 gtex aging). Power-matched logistic
 enrichment (qtl status ~ module membership + log cis-variant count + log gene length
 + log isoform count [+ log intron group size]) within each xQTL tested universe ∩
@@ -120,7 +120,7 @@ favorable single-tissue SCZD tail (sQTL OR 1.37) — read it honestly:
   switch-transcript→LeafCutter-intron direction concordance.
 
 **Matched-baseline control DONE** (`qtl_anchoring.py --method {wgcna_switch_only,
-wgcna_multiplex}`; SLURM `real_data/gtex/_h/08.qtl_anchoring_matched.sh`, 2 methods × 13
+wgcna_multiplex}`; SLURM `02_module_discovery/gtex/_h/08.qtl_anchoring_matched.sh`, 2 methods × 13
 GTEx tissues; `qtl_anchoring_meta.py` now multi-method). Anchors the matched WGCNA
 baselines (same switch features) and compares the splicing-specificity contrast on the
 **same 13 GTEx tissues**. Result is a clean **method effect**: only IsoGraph shows it —
@@ -259,7 +259,7 @@ stability → drivers (`module_meta` loadings, done) → aging replication
 
 Approved 2026-07-16 as the single added orthogonal validation; shipped as committed CLIs
 `isograph_benchmark/real_data/sqtl_concordance.py` + `sqtl_concordance_meta.py` (commit
-01f3c47) with SLURM wrapper `real_data/brainseq/_h/14.sqtl_concordance.sh` (seed 13, 2000
+01f3c47) with SLURM wrapper `02_module_discovery/brainseq/_h/14.sqtl_concordance.sh` (seed 13, 2000
 permutation draws), parquet + `real_data/_m/sqtl_concordance_meta/SQTL_CONCORDANCE_META.md`.
 **Outcome — a diagnosed null:** the within-gene rank-concordance between the switch axis and
 the lead sQTL's per-transcript intron direction is at or below a full-variance permutation null
@@ -277,12 +277,12 @@ Stages 22–24 build switch-localized windows, quarantine the structurally confo
 NOVA1 nomination, and formally classify PTBP2/TDP-43 human contexts as descriptive or
 not estimable when discordant support is sparse. Stage 25 is the independent NOVA-family
 rescue: `nova_family_renomination.py` plus
-`real_data/brainseq/_h/25.nova_family_renomination.sh` scans the full 17-analysis
+`02_module_discovery/brainseq/_h/25.nova_family_renomination.sh` scans the full 17-analysis
 universe with two-sided intronic opportunity control and gene-level adjusted enrichment.
 The frozen result is 79,763 transcripts, 374,296 eligible pairs, and two GO-visible
 BrainSEQ hippocampus regulons (M001/M002; 339 genes, 1,993 unique transcript pairs).
 Label these candidates `NOVA_FAMILY`, not NOVA1/2. Stage 26 is implemented as
-`nova2_ctag_clip.py` plus `real_data/brainseq/_h/26.nova2_ctag_clip.sh`: it acquires
+`nova2_ctag_clip.py` plus `02_module_discovery/brainseq/_h/26.nova2_ctag_clip.sh`: it acquires
 GSE103315 and reciprocal hg38/mm10 chain resources with pinned hashes, reconstructs
 strict within-gene matched windows for the frozen candidates, requires full single-block
 forward mapping plus >=95% reciprocal overlap, and tests exact NOVA2 coverage separately
@@ -304,7 +304,7 @@ Quantas/BED12 supplements are checksum-pinned at sample/contrast level, and the 
 Gad2, and Pcp2 catalogs pass unique-event-to-coordinate QC.
 
 Stage 27 is implemented as `nova2_perturbation.py` plus
-`real_data/brainseq/_h/27.nova2_perturbation.sh`, following the frozen
+`02_module_discovery/brainseq/_h/27.nova2_perturbation.sh`, following the frozen
 `real_data/NOVA2_PERTURBATION_ANALYSIS_SPEC.md`. It deterministically reconciles
 duplicate Quantas rows, retains one-to-many BED12 event coordinates, derives
 strand-aware 50/100/250-nt intronic flanks, requires strict reciprocal mm10/hg38
@@ -365,7 +365,7 @@ What landed:
   pinned and mismatched -> raises. The count guard is kept as a cheap first check.
 - 5 tests in `tests/test_neuronal_clip_fetch.py`, including the exact failure mode the count
   guard could not see: same number of nominations, different nominations.
-- New committed wrapper `real_data/brainseq/_h/21b.neuronal_clip_freeze.sh` — the freeze had
+- New committed wrapper `02_module_discovery/brainseq/_h/21b.neuronal_clip_freeze.sh` — the freeze had
   been run by hand, which was its own reproducibility gap.
 
 Grounded diff of the re-freeze (old vs new `candidate_manifest.parquet`): 17 -> 17
