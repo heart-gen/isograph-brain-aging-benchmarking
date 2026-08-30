@@ -39,8 +39,8 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     # 02 — module discovery; the cohort x region artifact store lives beneath it
     "modules": ("02_module_discovery",),
     # 03 — module trust
-    "trust.stability": ("real_data", "stability", "_m"),
-    "trust.replication": ("real_data", "replication", "_m"),
+    "trust.stability": ("03_module_trust", "_m", "stability"),
+    "trust.replication": ("03_module_trust", "_m", "replication"),
     # 04 — module characterization
     "characterize": ("real_data", "_m"),
     # 05 — genetic anchoring

@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=01:00:00
 #SBATCH --array=0-5
-#SBATCH --output=real_data/stability/_m/logs/mtrust-rep-%A_%a.log
+#SBATCH --output=03_module_trust/_m/stability/logs/mtrust-rep-%A_%a.log
 
 ## Q3 cross-cohort aging replication (module_trust `replication` subcommand).
 ##
@@ -15,10 +15,10 @@
 ## produces the "N of M modules replicate" per-pair tables had no reproducible launcher.
 ## Array covers {isograph, wgcna} x {caudate, hippocampus, dlpfc_ba9}.
 ##
-## Writes real_data/stability/_m/module_trust/module_aging_replication__{pair}__{method}.parquet
+## Writes 03_module_trust/_m/stability/module_trust/module_aging_replication__{pair}__{method}.parquet
 ## Requires Q1 `stability` to have run for both cohorts of each pair.
 ##
-## Usage: sbatch real_data/stability/_h/09.module_trust_replication.sh
+## Usage: sbatch 03_module_trust/_h/09.module_trust_replication.sh
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
@@ -26,7 +26,7 @@ PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
 cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: submit from repo root."; exit 1; }
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/stability/_m/logs
+mkdir -p 03_module_trust/_m/stability/logs
 
 METHODS=(isograph wgcna)
 PAIRS=(caudate hippocampus dlpfc_ba9)

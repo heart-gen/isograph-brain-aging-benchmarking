@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 #SBATCH --array=0-11
-#SBATCH --output=real_data/stability/_m/logs/rep-perm-%A_%a.log
+#SBATCH --output=03_module_trust/_m/stability/logs/rep-perm-%A_%a.log
 
 ## Empirical null for the cross-cohort aging-replication count (reviewer item 2).
 ##
@@ -24,8 +24,8 @@
 ## never permuted.  Each task asserts the reconstructed eigengenes reproduce the published
 ## age_linear.parquet before permuting.
 ##
-## Usage: sbatch real_data/stability/_h/10.replication_permutation.sh
-##        sbatch real_data/stability/_h/10.replication_permutation.sh --min-jaccard 0.05
+## Usage: sbatch 03_module_trust/_h/12.replication_permutation.sh
+##        sbatch 03_module_trust/_h/12.replication_permutation.sh --min-jaccard 0.05
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
@@ -33,7 +33,7 @@ PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
 cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: submit from repo root."; exit 1; }
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/stability/_m/logs
+mkdir -p 03_module_trust/_m/stability/logs
 
 METHODS=(isograph wgcna)
 STATS=(pearson partial_linear spline_f)

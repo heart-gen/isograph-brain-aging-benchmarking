@@ -1,9 +1,9 @@
 """Per-module trust funnel for real-data IsoGraph modules (see
-``real_data/stability/MODULE_TRUST_PLAN.md``).
+``03_module_trust/docs/MODULE_TRUST_PLAN.md``).
 
 Q1 (this module, ``stability`` command): which *production* modules are stable enough to
 trust? A production module's gene set is scored for how tightly its genes stay co-clustered
-across the split-half ensemble (`real_data/stability/_m/partitions/`), relative to a
+across the split-half ensemble (`03_module_trust/_m/stability/partitions/`), relative to a
 size-matched permutation null. Trusted = co-assignment density exceeds chance at BH-FDR<0.05.
 
 Primary statistic — **co-assignment density** (the user-chosen Q1 gate): among a module's

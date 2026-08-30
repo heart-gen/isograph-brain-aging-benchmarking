@@ -115,7 +115,7 @@ complementary readouts:
   (Spearman) across cohorts.
 
 Run with `python -m isograph_benchmark.real_data.replication` (driver:
-`real_data/replication/_h/01.replication.sh`); outputs under `real_data/replication/_m/`
+`03_module_trust/_h/10.replication.sh`); outputs under `03_module_trust/_m/replication/`
 (`<method>_module_match.parquet`, `replication_summary.parquet`, `replication_summary.json`).
 
 **Results (both arms complete).** Per-module best-match Jaccard and preservation rate:
@@ -161,7 +161,7 @@ For each preserved+aging matched pair it computes the GO-term Jaccard
 (|shared terms| / |union|) and the shared term names, and runs a pooled permutation test
 (1,000 permutations): is the mean GO Jaccard of the matched pairs higher than when each
 source module is paired with a *random* target module from the same cohort/region? Driver:
-`real_data/replication/_h/02.replication_go.sh`; outputs `<method>_go_overlap.parquet`
+`03_module_trust/_h/11.replication_go.sh`; outputs `<method>_go_overlap.parquet`
 (per pair) and `replication_go_summary.{parquet,json}`.
 
 This requires per-module GO for both cohorts' matched regions; the BrainSEQ aging GO
@@ -201,8 +201,8 @@ the quantifier and preprocessing **fixed** (stay inside one cohort), randomly sp
 samples 50/50 over 5 seeds, refit the *same* method on each half with the *same* feature
 set, and measure partition agreement (ARI, NMI) over genes assigned in both halves — the
 same metrics as the cross-cohort test. `isograph_benchmark/real_data/stability.py` fits
-IsoGraph (drivers `real_data/stability/_h/01.stability_isograph.sh`, WGCNA reference
-`stability_wgcna.R` / `02`, aggregator `03`); outputs `real_data/stability/_m/stability_summary.{parquet,json}`
+IsoGraph (drivers `03_module_trust/_h/01.stability_isograph.sh`, WGCNA reference
+`stability_wgcna.R` / `02`, aggregator `03`); outputs `03_module_trust/_m/stability/stability_summary.{parquet,json}`
 and `stability_pairs.parquet`.
 
 **Results (mean over 5 seeds; cross-cohort full-data fits shown for contrast).**

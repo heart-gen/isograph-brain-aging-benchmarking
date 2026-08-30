@@ -2,7 +2,7 @@
 # Stage the collapse-fix C (resolution-sweep giant cap) split-half A/B.
 #
 # Runs a SELF-CONTAINED A/B in an isolated sandbox partitions dir so the committed
-# production partitions (real_data/stability/_m/partitions) are untouched, and the
+# production partitions (03_module_trust/_m/stability/partitions) are untouched, and the
 # baseline is regenerated on CURRENT main (weighted/seeded Leiden) so the only
 # difference vs the candidate is the giant cap. The Jun-12 production baseline
 # predates the determinism fix (d603938, Jun-21) and would otherwise confound the
@@ -18,7 +18,7 @@
 # sweep is the re-test before any production default flip.)
 #
 # Usage (LOGIN NODE -- this only submits jobs, it is not itself a SLURM job):
-#   bash real_data/stability/_h/05.gcap_ab.sh
+#   bash 03_module_trust/_h/08.gcap_ab.sh
 set -euo pipefail
 
 PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${PWD}}"
@@ -26,11 +26,11 @@ cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: run from the repo root."; exit 1; }
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 
-SANDBOX="${PROJECT_ROOT}/real_data/stability/_m_gcap_ab/partitions"
-mkdir -p "${SANDBOX}" real_data/stability/_m/logs
+SANDBOX="${PROJECT_ROOT}/03_module_trust/_m/stability_gcap_ab/partitions"
+mkdir -p "${SANDBOX}" 03_module_trust/_m/stability/logs
 echo "A/B sandbox partitions: ${SANDBOX}"
 
-DRIVER=real_data/stability/_h/01.stability_isograph.sh
+DRIVER=03_module_trust/_h/01.stability_isograph.sh
 # 48G (24 x 2000M) so dlpfc (array task 3) does not OOM; 6h covers 10 serial fits on
 # the largest region. CLI overrides the driver's 32G/3h directives; --array=1-6 stays.
 COMMON=(--account=bio260021p --cpus-per-task=24 --time=06:00:00)
@@ -48,6 +48,6 @@ echo "candidate arm (isograph_gcap15): ${JID_B}"
 JID_AGG=$(sbatch --account=bio260021p \
     --dependency=afterok:${JID_A}:${JID_B} \
     --export=ALL,STABILITY_PARTITIONS_DIR=${SANDBOX} \
-    real_data/stability/_h/03.stability_aggregate.sh | awk '{print $NF}')
+    03_module_trust/_h/03.stability_aggregate.sh | awk '{print $NF}')
 echo "aggregate (afterok ${JID_A}:${JID_B}): ${JID_AGG}"
 echo "summary.json will land under: ${SANDBOX%/partitions}"

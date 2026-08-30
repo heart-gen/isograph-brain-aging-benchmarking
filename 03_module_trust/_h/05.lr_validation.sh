@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=24  # 24 x 2000M = 48G; a full-data dlpfc fit needs ~48G
 #SBATCH --time=04:00:00
 #SBATCH --array=1-7
-#SBATCH --output=real_data/stability/_m/logs/%x-%A_%a.log
+#SBATCH --output=03_module_trust/_m/stability/logs/%x-%A_%a.log
 
 # Validation gate B.2 — single-LR/optimizer config. One FULL-data IsoGraph fit per region
 # at a single fixed learning rate (NO per-region tuning) with gradient clipping, recording
@@ -27,7 +27,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/stability/_m/logs
+mkdir -p 03_module_trust/_m/stability/logs
 
 # array index -> (cohort, region): 6 trust-funnel regions + the diverging GTEx region.
 SPECS=(
