@@ -103,7 +103,7 @@ gene-abundance baseline — with driver switches that are genuine structural iso
 
 ## Figure and table notes
 
-- **Main figure — module trust funnel (`03_module_trust/_m/stability/figures/figTrustFunnel.{pdf,png}`,
+- **Main figure — module trust funnel (`manuscript/_m/figures/figTrustFunnel.{pdf,png}`,
   built by `manuscript/_h/trust_funnel_figure.R`).** Single full-width figure,
   four panels left→right mirroring the funnel, no in-panel titles (interpretation in caption):
   - **(A) Q1 stability:** per-module co-assignment density vs the size-matched null, IsoGraph

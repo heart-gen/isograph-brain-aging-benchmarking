@@ -416,7 +416,7 @@ panel is:
 The forest plot is the inferential result; the locus track is an illustration. If
 only one RBP succeeds, report an RBP-specific supplementary result rather than a
 general neuronal-regulon panel. Promotion must also respect the Cell Genomics
-display-item limit already documented in `MANUSCRIPT_PLAN.md`.
+display-item limit already documented in `manuscript/MANUSCRIPT_PLAN.md`.
 
 ## 11. Reviewer Objections and Responses
 

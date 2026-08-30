@@ -25,8 +25,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-DD_DIR  <- rel("real_data", "_m", "deep_dive")
-FIG_DIR <- rel("real_data", "_m", "figures")
+DD_DIR  <- rel("05_genetic_anchoring", "_m", "deep_dive")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito, shared with the other real-data figures.
@@ -110,7 +110,7 @@ pA <- ggplot() +
 # ===========================================================================
 # Panel B - S-LDSC single-annot enrichment of the aging switch layer, by trait
 # ===========================================================================
-ld <- as.data.frame(read_parquet(rel("real_data", "ldsc", "_m", "ldsc_partitioned.parquet")))
+ld <- as.data.frame(read_parquet(rel("05_genetic_anchoring", "_m", "ldsc", "ldsc_partitioned.parquet")))
 lb <- ld |>
   filter(annotation == "aging", model %in% c("cis_only", "sqtl_only", "eqtl_only")) |>
   mutate(annot = recode(model, cis_only = "cis", sqtl_only = "sQTL", eqtl_only = "eQTL"),

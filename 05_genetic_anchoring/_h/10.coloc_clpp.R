@@ -32,7 +32,7 @@ suppressPackageStartupMessages({
 args     <- commandArgs(trailingOnly = TRUE)
 ANALYSIS <- if (length(args) >= 1) args[1] else "brainseq-sczd"
 ROOT     <- Sys.getenv("ISOGRAPH_BENCHMARK_ROOT", unset = getwd())
-MDIR     <- file.path(ROOT, "real_data", "coloc", "_m", ANALYSIS)
+MDIR     <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc", ANALYSIS)
 SUSIE_D  <- file.path(MDIR, "susie")
 OUTD     <- file.path(MDIR, "coloc")
 dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)

@@ -20,8 +20,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-BC_FILE <- rel("real_data", "_m", "baseline_comparison", "baseline_comparison_pooled.parquet")
-FIG_DIR <- rel("real_data", "_m", "figures")
+BC_FILE <- rel("04_module_characterization", "_m", "baseline_comparison", "baseline_comparison_pooled.parquet")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito; fill encodes the FEATURE class so the switch-vs-abundance story reads off colour.

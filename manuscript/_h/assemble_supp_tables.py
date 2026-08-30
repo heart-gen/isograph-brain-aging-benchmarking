@@ -10,19 +10,19 @@ Run: python manuscript/_h/assemble_supp_tables.py   (login node, no SLURM)
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
-RD = ROOT / "real_data"
-OUT = RD / "_m" / "supp_tables"
-OUT.mkdir(parents=True, exist_ok=True)
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from isograph_benchmark.paths import ensure_dir, region_store, stage_out  # noqa: E402
 
-QTL = RD / "_m" / "qtl_anchoring_meta"
-BASE = RD / "_m" / "baseline_comparison"
-TRUST = RD / "stability" / "_m" / "module_trust"
-GATE = RD / "brainseq" / "caudate_sczd" / "_m"
+OUT = ensure_dir(stage_out("manuscript", "supp_tables"))
+QTL = stage_out("anchoring", "qtl_anchoring_meta")
+BASE = stage_out("characterize", "baseline_comparison")
+TRUST = stage_out("trust.stability", "module_trust")
+GATE = region_store("brainseq", "caudate_sczd")
 
 
 def write(df: pd.DataFrame, name: str) -> None:

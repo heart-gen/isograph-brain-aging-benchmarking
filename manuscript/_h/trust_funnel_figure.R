@@ -20,8 +20,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-MT_DIR  <- rel("real_data", "stability", "_m", "module_trust")
-FIG_DIR <- rel("real_data", "stability", "_m", "figures")
+MT_DIR  <- rel("03_module_trust", "_m", "stability", "module_trust")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito: IsoGraph vermillion, WGCNA reddish purple (shared with synthetic_benchmark.R).

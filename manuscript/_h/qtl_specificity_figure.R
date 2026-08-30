@@ -20,8 +20,8 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-MT_DIR  <- rel("real_data", "_m", "qtl_anchoring_meta")
-FIG_DIR <- rel("real_data", "_m", "figures")
+MT_DIR  <- rel("05_genetic_anchoring", "_m", "qtl_anchoring_meta")
+FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito (shared with the other real-data figures).

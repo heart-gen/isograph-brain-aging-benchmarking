@@ -11,24 +11,24 @@ its curated literature layer. It backs the biology payoff (Fig 4) and gives the
 main text an at-a-glance biology table (all other biology tables are supplementary).
 
 NB the synthetic-benchmark summary is recommended to move to the supplement
-(see MANUSCRIPT_PLAN.md Sec 15), so Table 2 here is intended as the biology main table.
+(see manuscript/MANUSCRIPT_PLAN.md Sec 15), so Table 2 here is intended as the biology main table.
 
 Run: python manuscript/_h/assemble_main_tables.py   (login node, no SLURM)
 """
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
-RD = ROOT / "real_data"
-OUT = RD / "_m" / "main_tables"
-OUT.mkdir(parents=True, exist_ok=True)
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from isograph_benchmark.paths import ensure_dir, stage_out  # noqa: E402
 
-DEEP = RD / "_m" / "deep_dive"
-QTL = RD / "_m" / "qtl_anchoring_meta"
+OUT = ensure_dir(stage_out("manuscript", "main_tables"))
+DEEP = stage_out("anchoring", "deep_dive")
+QTL = stage_out("anchoring", "qtl_anchoring_meta")
 
 # eCAVIAR CLPP thresholds used by the coloc pipeline (coloc_summary.py):
 # >= 0.01 "colocalized" (standard permissive eCAVIAR bar); >= 0.05 "strong".
