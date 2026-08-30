@@ -28,7 +28,7 @@ Five layers (A is the headline):
   Convergence. Do multiple SCZ-risk loci land in the same age-sensitive modules, and are their
      driver switches directionally disrupted the same way?
 
-Outputs under real_data/_m/scz_age_projection/ (parquet + Manubot SCZ_AGE_PROJECTION.md).
+Outputs under 05_genetic_anchoring/_m/scz_age_projection/ (parquet + Manubot SCZ_AGE_PROJECTION.md).
 Genotype dosages are produced upstream by plink2 (eqtl env) in the SLURM wrapper.
 """
 from __future__ import annotations

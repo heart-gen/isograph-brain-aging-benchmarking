@@ -57,7 +57,7 @@ sha256sum "${CONFIG}"
 "${PYTHON}" -m isograph_benchmark.real_data.neuronal_clip_fetch \
     --config "${CONFIG}" fetch --extract "$@"
 
-log_message "dataset manifest: reports/neuronal_clip/dataset_manifest.tsv"
-log_message "candidate manifest: reports/neuronal_clip/candidate_manifest.parquet"
-log_message "context QC: reports/neuronal_clip/context_qc.tsv"
+log_message "dataset manifest: 07_rbp_regulation/_m/neuronal_clip_manifests/dataset_manifest.tsv"
+log_message "candidate manifest: 07_rbp_regulation/_m/neuronal_clip_manifests/candidate_manifest.parquet"
+log_message "context QC: 07_rbp_regulation/_m/neuronal_clip_manifests/context_qc.tsv"
 log_message "**** complete ****"

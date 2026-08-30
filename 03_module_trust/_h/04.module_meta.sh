@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=16  # 16 x 2000M = 32G; per-gene SVD reconstruction over the half-fits
 #SBATCH --time=02:00:00
-#SBATCH --output=03_module_trust/_m/stability/logs/%x-%j.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%j.log
 
 # Step 0 (post-hoc, no VAE re-fit): reconstruct per-half module eigengene Age effect +
 # driver transcripts for the split-half partitions. SVD-heavy -> SLURM only. Override
@@ -23,7 +23,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 COHORT="${COHORT:-brainseq}"
 REGION="${REGION:-caudate}"

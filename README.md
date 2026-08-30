@@ -32,14 +32,14 @@ against ground-truth synthetic modules and switching genes.
 Real-data module interpretation is run with:
 
 ```bash
-sbatch 02_module_discovery/brainseq/_h/04.interpret_modules.sh
-sbatch 02_module_discovery/gtex/_h/04.interpret_modules.sh
+sbatch 04_module_characterization/_h/01.interpret_modules_brainseq.sh
+sbatch 04_module_characterization/_h/02.interpret_modules_gtex.sh
 ```
 
 By default, real-data interpretation uses the GENCODE v47 primary-assembly GTF
 at `/ocean/projects/bio250020p/shared/resources/genomes/human/gencode-v47/gtf/gencode.v47.primary_assembly.annotation.gtf`
 to add structural transcript annotations for selected module genes. The GTF
-parse cache is written under ignored `real_data/_m/tmp/`.
+parse cache is written under ignored `04_module_characterization/_m/tmp/`.
 
 BrainSEQ `caudate_sczd` is diagnosis-focused: IsoGraph is fit with `Dx` as the
 trait and downstream module associations are written to `diagnosis_assoc.parquet`.

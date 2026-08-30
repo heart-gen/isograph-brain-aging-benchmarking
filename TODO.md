@@ -11,7 +11,7 @@ of its items are now covered under Mechanistic validation below.
 ## Done — do not redo
 
 * [x] **Validate major IsoGraph switches using junction counts or PSI.**
-  `validate_switch_splicing.py` + `02_module_discovery/brainseq/_h/16.validate_switch_splicing.sh`.
+  `validate_switch_splicing.py` + `06_switch_mechanism/_h/03.validate_switch_splicing_brainseq.sh`.
   Caudate marginal OR ~105 vs module OR ~2.3.
 * [x] **Adjust human-cohort analyses for estimated cell-type composition.**
   `celltype_composition.py` — joins the committed MuSiC BrainSEQ deconvolution and
@@ -23,7 +23,7 @@ of its items are now covered under Mechanistic validation below.
   count-preserving Jaccard null shows WGCNA's negative-control recovery (0.500) is
   fully explained by its module-count structure (z=0.47, perm p=0.746).
 * [x] **Direct genetic analysis of module eigengenes.**
-  `module_genetic_anchoring.py` + `02_module_discovery/brainseq/_h/21.module_anchoring.sh` —
+  `module_genetic_anchoring.py` + `05_genetic_anchoring/_h/04.module_anchoring.sh` —
   per-module splicing-specificity contrast against a permutation null of random
   gene sets, closing the "pooling does not show any individual module is anchored"
   objection. Plus S-LDSC + coloc (`ldsc_annot_prep.py`, `coloc_*.py`).
@@ -90,7 +90,7 @@ a main figure.
 
 * [~] **Confirm top transcript pairs and disease-linked events using long-read brain
   RNA-seq.** Tier-1 done (`longread_switch_confirm.py` +
-  `02_module_discovery/brainseq/_h/29.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
+  `06_switch_mechanism/_h/07.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
   8180677 Bambu quants, confirms 60.5% of GTEx cortical switch genes.
   A matched null now exists (`switch_orthogonal_confirm.py --mode global-null`, 2026-08-28)
   and it is sobering: switch pairs are switch-like 0.6466 of the time against an
@@ -117,7 +117,7 @@ a main figure.
   `05.sweep_leiden.sh` / `07.sweep_leiden_with_abundance.sh` compute the sweep; the
   giant-module size criterion (>=900 genes) is itself phenotype-blind.
   **GAP: the published justification is phenotype-AWARE** —
-  `real_data/gwas/_m/GWAS_RESOLUTION_SUMMARY.md` argues 5.0 by showing it removes a
+  `05_genetic_anchoring/_m/gwas/GWAS_RESOLUTION_SUMMARY.md` argues 5.0 by showing it removes a
   GWAS enrichment artifact. A reviewer asked for selection on stability BEFORE any
   trait is consulted. Needed: a phenotype-blind stability-vs-resolution curve with
   the choice made on it, and the GWAS result demoted to post-hoc confirmation.
@@ -164,7 +164,7 @@ a main figure.
 
 * [x] **Test schizophrenia findings for medication, toxicology, smoking and related
   confounding where available.** DONE 2026-08-28 — `scz_confound_sensitivity.py` +
-  `real_data/_h/36.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
+  `06_switch_mechanism/_h/10.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
   operative clause: BrainSEQ releases **none** of medication, toxicology or smoking, so
   the CLI emits the availability audit as a re-runnable output and then tests the three
   tiers it can (measured covariates the published model omits; molecular proxies for
@@ -189,7 +189,7 @@ a main figure.
   technical axis absent from `BRAINSEQ_DISCOVERY_COVARIATES` (which carries RIN,
   mapping_rate, mito_rate, SNP_PC1-5). Report the sensitivity as a sensitivity.
 * [x] **Remaining sensitivity analyses** — harness built and RUN 2026-08-28,
-  `switch_feature_sensitivity.py` + `real_data/_h/37.switch_feature_sensitivity.sh`,
+  `switch_feature_sensitivity.py` + `06_switch_mechanism/_h/11.switch_feature_sensitivity.sh`,
   covering all five axes (pseudocount, transcript-expression filter, minor-isoform
   threshold, identifiability by transcript number, quantification pipeline). Gated on an
   exact rebuild of the published switch channel (max |diff| 0.0). **GAP: the module
@@ -224,11 +224,11 @@ carried furthest.
   `nova2_perturbation.py`. Verdict is an **informative sparse null** driven by the
   cross-species mm10/hg38 reciprocal-mapping bottleneck (~3-5% of windows retained).
   Perturbation is designed but not performed:
-  `real_data/_m/rbp_target_panel/WETLAB_PERTURBATION_DESIGN.md` with the assayable
-  pair list from `rbp_pair_assayability.py` + `real_data/_h/34.rbp_pair_assayability.sh`
+  `07_rbp_regulation/_m/rbp_target_panel/WETLAB_PERTURBATION_DESIGN.md` with the assayable
+  pair list from `rbp_pair_assayability.py` + `07_rbp_regulation/_h/06.rbp_pair_assayability.sh`
   (NONO 11 / ELAVL1 6 / KHDRBS1 8 measurable-and-responsive pairs).
   **Wet-lab CLOSED 2026-08-28 (out of scope, prioritized and handed off).**
-  `real_data/_m/rbp_target_panel/WETLAB_HANDOFF.md` states the priority order the design
+  `07_rbp_regulation/_m/rbp_target_panel/WETLAB_HANDOFF.md` states the priority order the design
   doc did not: P1 = NONO + KHDRBS1 together (the adjudicating contrast; NONO alone can
   only confirm and cannot separate a regulon from a generic abundant-RBP effect), P2 =
   add ELAVL1 (broadest nomination but the thinnest assayable panel, 2/14 tier-1 genes
@@ -237,11 +237,11 @@ carried furthest.
   (manuscript repo `content/04.discussion.md`, commit ba19cdd) together with the
   HepG2/K562-not-brain eCLIP caveat, rather than left implied.
   The HepG2/K562-not-brain caveat on the ENCODE eCLIP panels is written into
-  `real_data/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
+  `07_rbp_regulation/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
   `rbp_binding.py`, so it survives regeneration.
 * [x] **Validate the shared SNCA alternative-first-exon mechanism across independent
   data types or cohorts.** DONE 2026-08-28 (computational arm) —
-  `switch_orthogonal_confirm.py` + `real_data/_h/35.switch_orthogonal_confirm.sh` scores
+  `switch_orthogonal_confirm.py` + `06_switch_mechanism/_h/05.switch_orthogonal_confirm.sh` scores
   the sQTL-anchored transcript pair itself, for all 12 splicing-led genes, in ONT
   long-read DLPFC against switch pairs matched on abundance decile.
   **Set-level: confirmed.** 0.453 switch-like vs a matched null of 0.252 (p=5e-4);

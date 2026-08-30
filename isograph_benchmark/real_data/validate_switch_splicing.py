@@ -40,7 +40,7 @@ so the model is identical to every other real-data association in the paper:
      (junction not among the gene's PSI events, or gene not expressed) are kept as
      explicit NaN rows rather than dropped.
 
-Outputs land in ``real_data/_m/switch_validation/<cohort>_<region>_<trait>/``.
+Outputs land in ``06_switch_mechanism/_m/switch_validation/<cohort>_<region>_<trait>/``.
 
 Interpretation notes (from the first runs):
   * Analysis A (age) is the headline. In caudate (Phase 3, n=238) IsoGraph age-switch

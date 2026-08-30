@@ -32,7 +32,7 @@ says so.
 This is confirmation of discovered structure on an orthogonal modality -- exactly the
 frontier-modality anchor the short-read critique asks for -- not a rediscovery.
 
-Outputs land in ``real_data/_m/longread_switch_confirm/``:
+Outputs land in ``06_switch_mechanism/_m/longread_switch_confirm/``:
   * ``pair_confirmation.parquet`` -- per switch pair: transcripts, detection, mean IF,
     cross-sample usage anti-correlation, passed-through structural consequence flags.
   * ``gene_confirmation.parquet`` -- per switch gene: expressed / multi-isoform /

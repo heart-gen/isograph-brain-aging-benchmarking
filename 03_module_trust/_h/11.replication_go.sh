@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:30:00
-#SBATCH --output=03_module_trust/_m/replication/logs/%x-%j.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%j.log
 
 # Cross-cohort GO consistency for replicated, age-associated modules. Requires
 # the replication module-match tables (01.replication.sh) and the per-module GO
@@ -25,7 +25,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/replication/logs
+mkdir -p 03_module_trust/_m/logs
 
 module purge
 module load anaconda3/2024.10-1

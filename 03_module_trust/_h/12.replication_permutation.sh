@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 #SBATCH --array=0-11
-#SBATCH --output=03_module_trust/_m/stability/logs/rep-perm-%A_%a.log
+#SBATCH --output=03_module_trust/_m/logs/rep-perm-%A_%a.log
 
 ## Empirical null for the cross-cohort aging-replication count (reviewer item 2).
 ##
@@ -33,7 +33,7 @@ PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
 cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: submit from repo root."; exit 1; }
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 METHODS=(isograph wgcna)
 STATS=(pearson partial_linear spline_f)

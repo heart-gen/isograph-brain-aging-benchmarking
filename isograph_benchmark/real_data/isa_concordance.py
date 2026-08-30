@@ -43,7 +43,7 @@ differential_expression):
     OR=7-12 in the right direction. The empirical-FDR positive count is still reported
     as a conservative secondary, but is never the headline.
 
-Outputs land in ``real_data/_m/isa_concordance/<cohort>_<region>_<trait>/``:
+Outputs land in ``06_switch_mechanism/_m/isa_concordance/<cohort>_<region>_<trait>/``:
   * ``gene_concordance.parquet`` -- per-gene switch_pos / evidence / isa_emp_q / n_tx.
   * ``saturn_transcript_results.tsv.gz`` -- raw satuRn transcript-level output.
   * ``summary.json`` -- MWU p + rank-biserial, adjusted OR/p, median evidence,

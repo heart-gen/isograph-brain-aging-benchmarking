@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=02:00:00
 #SBATCH --array=1-6
-#SBATCH --output=03_module_trust/_m/stability/logs/%x-%A_%a.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%A_%a.log
 
 # WGCNA within-cohort split-half stability (abundance-network reference ceiling) for
 # the same 6 cohort-regions. Writes per-half partitions to the shared partitions/
@@ -22,7 +22,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
     echo "ERROR: submit from the repo root or set ISOGRAPH_BENCHMARK_ROOT."
     exit 1
 fi
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 SPECS=(
     "brainseq caudate"

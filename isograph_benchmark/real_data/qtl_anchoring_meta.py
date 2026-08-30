@@ -11,7 +11,7 @@ underpowered tissue lacks.
 The per-analysis log-OR standard error is recovered from the saved 95% CI (matched
 logistic rows) or from OR + p-value (unmatched Fisher fallback rows).
 
-Writes under real_data/_m/qtl_anchoring_meta/:
+Writes under 05_genetic_anchoring/_m/qtl_anchoring_meta/:
   qtl_anchoring_meta.parquet — pooled OR/CI/p, heterogeneity (Q, I2), k per cell.
   per_analysis.parquet       — the collected per-analysis rows with derived se.
   QTL_ANCHORING_META.md      — the sQTL-vs-eQTL pooled contrast writeup.

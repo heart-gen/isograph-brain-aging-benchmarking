@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=1
 #SBATCH --time=00:10:00
-#SBATCH --output=03_module_trust/_m/stability/logs/%x-%j.log
+#SBATCH --output=03_module_trust/_m/logs/%x-%j.log
 
 # Tabulate the B.2 single-LR full-data RMSE rows into the gate verdict. Light; chain on the
 # fitting array:  sbatch --dependency=afterok:<lr_jobid> 07.lr_aggregate.sh
@@ -22,7 +22,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 module purge
 module load anaconda3/2024.10-1

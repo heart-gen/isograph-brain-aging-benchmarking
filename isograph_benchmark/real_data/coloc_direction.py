@@ -227,7 +227,7 @@ def _write_report(coloc_dir: Path, analysis: str, out: pd.DataFrame) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description="Signed direction + isoform event per coloc hit.")
     p.add_argument("--analysis", nargs="*", default=None,
-                   help="analysis dir(s) under real_data/coloc/_m; default: all with "
+                   help="analysis dir(s) under 05_genetic_anchoring/_m/coloc; default: all with "
                         "a coloc/coloc_colocalized_genes.tsv")
     args = p.parse_args()
     analyses = args.analysis or sorted(

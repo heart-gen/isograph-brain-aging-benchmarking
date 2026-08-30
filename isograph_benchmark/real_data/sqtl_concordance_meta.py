@@ -12,7 +12,7 @@ draw at its own n_tx, so the null already absorbs the small-n_tx genes that infl
 |rho| mechanically). This is the same flip-invariant, permutation-calibrated logic
 as the per-cohort test, just pooled for power.
 
-Writes under real_data/_m/sqtl_concordance_meta/:
+Writes under 05_genetic_anchoring/_m/sqtl_concordance_meta/:
   sqtl_concordance_meta.parquet -- pooled n_genes, mean_abs_rho, null mean, p, per set.
   per_cohort.parquet            -- per (cohort, module_set) mean_abs_rho + n_genes.
   SQTL_CONCORDANCE_META.md      -- pooled writeup.
@@ -116,7 +116,7 @@ def _write_report(out_dir: Path, summary: pd.DataFrame, pooled: pd.DataFrame) ->
         "the sQTL allele reference and the switch-axis orientation are arbitrary.",
         "",
         "Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` "
-        "(after the per-cohort array in `02_module_discovery/brainseq/_h/14.sqtl_concordance.sh`).",
+        "(after the per-cohort array in `05_genetic_anchoring/_h/03.sqtl_concordance.sh`).",
         "",
         "## Pooled concordance by module set",
         "",

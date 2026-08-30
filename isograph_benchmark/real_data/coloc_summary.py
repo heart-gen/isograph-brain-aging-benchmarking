@@ -13,7 +13,7 @@ A gene is "testable" for a kind if it has >=1 GTEx credible set of that kind at 
 carried into fine-mapping. Rates are reported per kind over that kind's own testable
 set, so the sQTL/eQTL contrast is not confounded by differing CS availability.
 
-Reads real_data/coloc/_m/<analysis>/coloc/clpp_results.tsv. Writes alongside:
+Reads 05_genetic_anchoring/_m/coloc/<analysis>/coloc/clpp_results.tsv. Writes alongside:
   coloc_contrast.parquet      — rate table by kind x go_invisible
   COLOC_SUMMARY.md            — Manubot writeup
   coloc_colocalized_genes.tsv — colocalized gene list (CLPP>=0.01) for a supp table
@@ -124,7 +124,7 @@ def _write_report(out_dir: Path, analysis: str, region: str | None,
         "the genes of IsoGraph's phenotype-associated co-switch modules. Paired across "
         "sQTL and eQTL. CLPP >= 0.01 = colocalized (eCAVIAR convention); >= 0.05 = strong.",
         "",
-        "Reproduce: `Rscript real_data/coloc/_h/03.coloc_clpp.R " + analysis + "` then "
+        "Reproduce: `Rscript 05_genetic_anchoring/_h/10.coloc_clpp.R " + analysis + "` then "
         "`python -m isograph_benchmark.real_data.coloc_summary --analysis " + analysis + "`.",
         "",
         "## Colocalization rate by QTL kind and module class",

@@ -15,11 +15,11 @@ on-disk artifacts. No `git add` done yet. Interpreters/SLURM conventions per `AG
 - `isograph_benchmark/real_data/celltype_composition.py` — subcommands `fractions` (BrNum→
   sample_id join of the committed MuSiC proportions from
   `../sex_context_brain/cell_proportion_estimate/_m/`; marker-depletion cut) and `meta`
-  (with-vs-without rollup → `real_data/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md`).
+  (with-vs-without rollup → `04_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md`).
 - `incremental_association.py` — added `--composition` flag: adds cell-type fractions as
   inference covariates (reference type dropped for the simplex), writes to
   `incremental_association_composition/` so the canonical baseline is preserved.
-- SLURM wrapper `02_module_discovery/brainseq/_h/19.celltype_composition.sh` (array 1–4). **Ran clean
+- SLURM wrapper `04_module_characterization/_h/10.celltype_composition_brainseq.sh` (array 1–4). **Ran clean
   as job 42833041.**
 
 **Result (gene-level composition-unique = DTU-without-DGE signal, base → composition-adjusted)**
@@ -55,7 +55,7 @@ on-disk artifacts. No `git add` done yet. Interpreters/SLURM conventions per `AG
 (peak-dense RBPs blanket the transcriptome), so hardened to a **within-gene contrast**: binding
 at each gene's SWITCHED exon vs its CONSTITUTIVE (shared) exon, exact McNemar over discordant
 genes, BH-FDR. Neutralizes peak abundance (U2AF2/HNRNPU correctly read null).
-Outputs `real_data/_m/rbp/{rbp_binding_calls,rbp_binding_support,rbp_binding_regulon}.parquet`
+Outputs `07_rbp_regulation/_m/rbp/{rbp_binding_calls,rbp_binding_support,rbp_binding_regulon}.parquet`
 + `RBP_BINDING_SUMMARY.md`.
 
 **B1 fix (statistical, 2026-08-05).** The earlier headline pooled BH-FDR across all 192
@@ -108,8 +108,8 @@ ELAVL1, QKI, MBNL1, PUM1/2, IGF2BP1/2/3. Honest partial coverage.
 
 **To resume**
 1. `python -m isograph_benchmark.real_data.rbp_binding run` (moderate compute — SLURM: add a
-   wrapper `02_module_discovery/brainseq/_h/20.rbp_binding.sh`; interval overlap over 17 regions).
-3. Read `real_data/_m/rbp/RBP_BINDING_SUMMARY.md`: the per-RBP binding-supported count
+   wrapper `07_rbp_regulation/_h/05.rbp_binding.sh`; interval overlap over 17 regions).
+3. Read `07_rbp_regulation/_m/rbp/RBP_BINDING_SUMMARY.md`: the per-RBP binding-supported count
    (17/39) and the small median switched−constitutive gap (0.013). Supports the Fig 4 RBP
    sentence with binding *capacity* for a subset of factors — **not** an "evidence-backed"
    neuronal-occupancy upgrade (see B1 fix and the neuronal-CLIP honest null above).
@@ -119,7 +119,7 @@ ELAVL1, QKI, MBNL1, PUM1/2, IGF2BP1/2/3. Honest partial coverage.
 ## Item 3 — Module-level genetic anchoring — ✅ DONE (nuanced result)
 
 **Ran:** `module_genetic_anchoring.py` array (job 42833717, 17 analyses, n_perm=1000) + `--meta`.
-Outputs `real_data/_m/module_genetic_anchoring_meta/` (`MODULE_GENETIC_ANCHORING_META.md`,
+Outputs `05_genetic_anchoring/_m/module_genetic_anchoring_meta/` (`MODULE_GENETIC_ANCHORING_META.md`,
 `_all.parquet`, `_meta.parquet`) + per-analysis `MODULE_GENETIC_ANCHORING.md`.
 
 **Result (177 pheno-sig modules; per-module log sQTL-OR − log eQTL-OR vs size-matched perm null):**
@@ -150,7 +150,7 @@ result doesn't show any individual module is anchored; this tests each module as
 **To resume**
 1. `python -m isograph_benchmark.real_data.module_genetic_anchoring --analysis brainseq-sczd`
    (then `brainseq-aging`, `gtex-aging`). Permutation loop (default n_perm=1000 × 2 logits/
-   module) is the heavy part → SLURM wrapper `02_module_discovery/brainseq/_h/21.module_anchoring.sh`.
+   module) is the heavy part → SLURM wrapper `05_genetic_anchoring/_h/04.module_anchoring.sh`.
 2. Add a cross-analysis meta rollup (mirror `qtl_anchoring_meta`) if ≥1 module is anchored.
 3. **Deeper follow-ons (need new controlled-genotype extraction, not built):** eigenswitch ×
    TOPMed genotype eigen-QTL (reuse `scz_age_projection.load_genotypes` + plink2 in eqtl env);
@@ -171,10 +171,10 @@ runs MuSiC in-repo against the **same Tran/LIBD snRNA references** (seed 13) use
   branch, `gtex-aging` in `fractions`, and a GTEx replication section in `meta`
   (`02_module_discovery/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md` + a section appended to the
   shared `COMPOSITION_ADJUSTMENT_SUMMARY.md`).
-- `02_module_discovery/gtex/_h/09.gtex_music_deconv.R` — self-contained MuSiC deconvolution (inlines the
+- `04_module_characterization/_h/gtex_music_deconv.R` — self-contained MuSiC deconvolution (inlines the
   board-level cell-type mapping incl. striatal MSN D1/D2; reads the exported bulk parquet via
   arrow; writes `music-proportions-gtex-<region>.tsv` + `marker_stats_genes.gtex-<region>.csv`).
-- `02_module_discovery/gtex/_h/09.gtex_composition.sh` — array 1–8: export → R MuSiC → fractions →
+- `04_module_characterization/_h/11.gtex_composition.sh` — array 1–8: export → R MuSiC → fractions →
   `incremental_association --composition`, per region.
 
 **Region coverage (honest):** only the **8 GTEx regions with a defensibly matched Tran

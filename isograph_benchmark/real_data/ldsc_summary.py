@@ -1,6 +1,6 @@
 """S-LDSC summary: parse partitioned-heritability results into a tidy table + writeup.
 
-Reads every `<trait>_<model>.results` under real_data/ldsc/_m/<annotation>/results/ and
+Reads every `<trait>_<model>.results` under 05_genetic_anchoring/_m/ldsc/<annotation>/results/ and
 assembles the genetic-anchoring-beyond-MAGMA statistics for both cases:
 
   * disease  — SCZ heritability partitioned on the SCZD switch layer's QTL annotations.
@@ -14,7 +14,7 @@ Four models per trait, each on baselineLD v2.2:
   joint — baseline + sqtl_switch + eqtl_switch, for the head-to-head splicing-vs-
     expression conditional contrast.
 
-The coefficient z-score gives a one-sided p (tau > 0). Writes, under real_data/ldsc/_m/:
+The coefficient z-score gives a one-sided p (tau > 0). Writes, under 05_genetic_anchoring/_m/ldsc/:
   ldsc_partitioned.parquet — tidy (trait, case, annotation, model, annot, prop_snps,
                              prop_h2, enrichment, enrichment_p, coef, coef_se, coef_z,
                              coef_p)

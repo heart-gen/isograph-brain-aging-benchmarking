@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=01:00:00
 #SBATCH --array=0-5
-#SBATCH --output=03_module_trust/_m/stability/logs/mtrust-rep-%A_%a.log
+#SBATCH --output=03_module_trust/_m/logs/mtrust-rep-%A_%a.log
 
 ## Q3 cross-cohort aging replication (module_trust `replication` subcommand).
 ##
@@ -26,7 +26,7 @@ PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${SLURM_SUBMIT_DIR:-${PWD}}}"
 cd "${PROJECT_ROOT}"
 [[ -f .here && -d isograph_benchmark ]] || { echo "ERROR: submit from repo root."; exit 1; }
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p 03_module_trust/_m/stability/logs
+mkdir -p 03_module_trust/_m/logs
 
 METHODS=(isograph wgcna)
 PAIRS=(caudate hippocampus dlpfc_ba9)

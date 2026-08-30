@@ -21,7 +21,7 @@ GTEx signif_pairs (eQTL: phenotype_id = gene; sQTL: group_id = gene). GTEx varia
 hg38; the S-LDSC panel is hg19, so variant ids are lifted via the GTEx v8 lookup's
 `variant_id_b37` field (no chain file needed). Autosomes only.
 
-Writes real_data/ldsc/_m/<analysis>/beds/{sqtl_switch,eqtl_switch,cis_switch}_hg19.bed
+Writes 05_genetic_anchoring/_m/ldsc/<analysis>/beds/{sqtl_switch,eqtl_switch,cis_switch}_hg19.bed
 plus annot_snps.tsv (variant -> hg19 chr/pos, kind) for provenance.
 """
 from __future__ import annotations
