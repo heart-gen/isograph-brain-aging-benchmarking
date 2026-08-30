@@ -1,7 +1,7 @@
 # IsoGraph module trust funnel
 
 Modular analysis summary for Manubot integration. Generated from
-`real_data/stability/_m/module_trust/` at repo commit `c5df65c`. Every numeric claim
+`03_module_trust/_m/stability/module_trust/` at repo commit `c5df65c`. Every numeric claim
 below is reproduced from the result parquet files named in each section; do not edit the
 numbers by hand — regenerate from the tables.
 
@@ -21,7 +21,7 @@ funnel asks four sequential questions and only passes survivors downstream:
 
 ## Inputs
 
-- **Split-half ensemble** — `real_data/stability/_m/partitions/` (5 seeds × 2 halves ×
+- **Split-half ensemble** — `03_module_trust/_m/stability/partitions/` (5 seeds × 2 halves ×
   region × method) and the per-fit sidecars `modules_meta/` (eigengene, Age effect, driver
   loadings/kME). Supplies the resampling evidence for Q1 and Q2.
 - **Production full-data fits** — `real_data/{brainseq,gtex}/<region>/_m/isograph_vae/`
@@ -103,8 +103,8 @@ gene-abundance baseline — with driver switches that are genuine structural iso
 
 ## Figure and table notes
 
-- **Main figure — module trust funnel (`real_data/stability/_m/figures/figTrustFunnel.{pdf,png}`,
-  built by `real_data/stability/_h/trust_funnel_figure.R`).** Single full-width figure,
+- **Main figure — module trust funnel (`03_module_trust/_m/stability/figures/figTrustFunnel.{pdf,png}`,
+  built by `manuscript/_h/trust_funnel_figure.R`).** Single full-width figure,
   four panels left→right mirroring the funnel, no in-panel titles (interpretation in caption):
   - **(A) Q1 stability:** per-module co-assignment density vs the size-matched null, IsoGraph
     vs WGCNA, with the trusted count annotated (236/266 vs 64/73). Dot/strip over a null band;
@@ -128,11 +128,11 @@ gene-abundance baseline — with driver switches that are genuine structural iso
 
 ## Reproducibility information
 
-- Analysis directory: `real_data/stability/_m/module_trust/`
+- Analysis directory: `03_module_trust/_m/stability/module_trust/`
 - Primary script: `isograph_benchmark/real_data/module_trust.py`
   (subcommands `stability`, `within`, `meta`, `replication`, `replication-pooled`,
   `complementarity`)
-- SLURM drivers: `real_data/stability/_h/01.stability_isograph.sh`,
+- SLURM drivers: `03_module_trust/_h/01.stability_isograph.sh`,
   `02.stability_wgcna.sh`, `03.stability_aggregate.sh`, `04.module_meta.sh`; cross-cohort
   replication driver `module_trust_replication.sh` (array idx 1–8).
 - Inputs: `partitions/`, `modules_meta/`, production `isograph_vae/` and `wgcna_gene/`
@@ -142,7 +142,7 @@ gene-abundance baseline — with driver switches that are genuine structural iso
 - Key parameters: permutation null n = 1,000 (stability) / 10,000 (pooled); trust FDR < 0.05
   (Benjamini–Hochberg); top-k drivers k = 5; random seed 13.
 - Git commit: `c5df65c`. Last replication run logged 2026-06-28
-  (`real_data/stability/_m/logs/mtrust-rep-41805157_*.log`).
+  (`03_module_trust/_m/stability/logs/mtrust-rep-41805157_*.log`).
 - Compute environment: PSC Bridges-2 RM-shared; IsoGraph v0.1.5, Python 3.12.13,
   numpy 2.4.4, pandas 2.3.3, scipy 1.17.1
   (`/ocean/projects/bio260021p/shared/opt/envs/isograph`).

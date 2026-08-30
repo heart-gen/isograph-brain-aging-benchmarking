@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=24  # 24 x 2000M = 48G; dlpfc (idx 3) peaks ~46G, OOMs at 32G
 #SBATCH --time=04:00:00
 #SBATCH --array=1-6
-#SBATCH --output=real_data/stability/_m/logs/%x-%A_%a.log
+#SBATCH --output=03_module_trust/_m/stability/logs/%x-%A_%a.log
 
 # IsoGraph within-cohort split-half stability for the 3 matched regions in each
 # cohort (6 array tasks). Each task refits IsoGraph on both 50/50 sample halves for
@@ -25,7 +25,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/stability/_m/logs
+mkdir -p 03_module_trust/_m/stability/logs
 
 # array index -> (cohort, region)
 SPECS=(

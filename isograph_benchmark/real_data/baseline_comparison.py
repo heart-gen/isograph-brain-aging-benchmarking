@@ -16,7 +16,7 @@ consistency (isograph vs classical wgcna_gene only — the matched baselines wer
 not run through replication).
 
 Reads, per region, <_m>/module_enrichment/{<method>_modules.parquet, summary.json}
-and real_data/replication/_m/replication_go_summary.parquet.
+and 03_module_trust/_m/replication/replication_go_summary.parquet.
 
 Writes under real_data/_m/baseline_comparison/:
   baseline_comparison.parquet        — one row per (cohort, region, method).

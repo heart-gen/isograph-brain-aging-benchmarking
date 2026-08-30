@@ -1,6 +1,6 @@
 """Assemble real-data supplementary tables from the analysis parquet ledgers.
 
-Reads the committed result parquets under real_data/_m and real_data/stability/_m,
+Reads the committed result parquets under real_data/_m and 03_module_trust/_m/stability,
 emits one clean CSV per supplementary table under real_data/_m/supp_tables/, and a
 machine-checkable manifest. Presentation only; every number is copied verbatim from
 the source ledgers -- regenerate, do not hand-edit.

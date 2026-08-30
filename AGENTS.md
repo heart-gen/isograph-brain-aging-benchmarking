@@ -411,7 +411,7 @@ p=0.180, Gad2 OR 1.8 p=0.688; 100-nt Emx1 OR 1.0 p=1.0).
 
 ## Pointers
 
-- Stability / trust harness: `real_data/stability/` (+ `MODULE_TRUST_PLAN.md`,
+- Stability / trust harness: `03_module_trust/` (+ `docs/MODULE_TRUST_PLAN.md`,
   `SOFTWARE_ROBUSTNESS_PLAN.md`).
 - Real-data analysis modules: `isograph_benchmark/real_data/` (`interpret_modules.py`,
   `module_enrichment.py`, `replication_go.py`, `incremental_association.py`,

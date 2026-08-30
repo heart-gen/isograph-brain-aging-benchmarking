@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:30:00
-#SBATCH --output=real_data/replication/_m/logs/%x-%j.log
+#SBATCH --output=03_module_trust/_m/replication/logs/%x-%j.log
 
 # BrainSEQ vs GTEx cross-cohort replication for the three matched brain regions
 # (caudate, hippocampus, dlpfc/BA9): module preservation (cross-cohort best-match
@@ -28,7 +28,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/replication/_m/logs
+mkdir -p 03_module_trust/_m/replication/logs
 
 module purge
 module load anaconda3/2024.10-1

@@ -23,7 +23,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | 219/240 paired Wilcoxon favour IsoGraph over WGCNA; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
 | Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `01_synthetic_benchmark/03_metrics/figures/` |
-| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `real_data/stability/`, `figTrustFunnel`, `tableS7` | 
+| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
 | QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00); GO-visible weakest at 1.104 (p=0.022, I²=0.68); IsoGraph-only vs matched WGCNA baselines | Strong (matched-baseline null) | Matched-baseline null (primary control); GO-visible = low end of a gradient, NOT a null; IVW+DL meta | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
 | Colocalization / deep-dive | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
@@ -286,7 +286,7 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Requirement: state the discovery-vs-inference split explicitly.
 
 ### Methods: Trust funnel / stability
-- Evidence: real_data/stability/; split-half + perm null.
+- Evidence: 03_module_trust/; split-half + perm null.
 
 ### Methods: QTL anchoring + contrast meta
 - Evidence: qtl_anchoring.py (+--method), qtl_anchoring_meta.py; power-matched logistic; IVW+DL.

@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=02:00:00
 #SBATCH --array=0-3
-#SBATCH --output=real_data/stability/_m/logs/%x-%A_%a.log
+#SBATCH --output=03_module_trust/_m/stability/logs/%x-%A_%a.log
 
 ## Reviewer item 7: are the cross-cohort matched modules functionally preserved despite
 ## their low gene overlap (median gene Jaccard ~0.02)? Compares each matched pair's GO-term
@@ -21,7 +21,7 @@
 ## the isograph tree, and switch_consequence skips regions with no phenotype-significant
 ## switch genes (3 of the 6 regions here), so structure_r has no data. The report's
 ## "Data coverage" section names the absent inputs -- n/a is not a null result.
-## Usage: sbatch real_data/stability/_h/11.replication_functional.sh [--n-perm N]
+## Usage: sbatch 03_module_trust/_h/13.replication_functional.sh [--n-perm N]
 ##
 ## Requires: 09.module_trust_replication.sh (the matched pairs), module_enrichment,
 ## celltype_composition, and 15.switch_consequence.sh.
@@ -37,7 +37,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/stability/_m/logs
+mkdir -p 03_module_trust/_m/stability/logs
 
 SPECS=(
     "isograph linear"

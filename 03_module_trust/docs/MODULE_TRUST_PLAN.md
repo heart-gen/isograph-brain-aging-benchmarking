@@ -36,7 +36,7 @@ headline biology (the complementary DTU layer)
 
 ## 2. Data sources
 
-- **Split-half fits** (`real_data/stability/_m/partitions/`, 5 seeds × 2 halves × 6 regions,
+- **Split-half fits** (`03_module_trust/_m/stability/partitions/`, 5 seeds × 2 halves × 6 regions,
   per method incl. `isograph`, `isograph_reliability`, `isograph_tin`): the resample
   ensemble for Q1 (stability) and Q2 (driver reproducibility, within-cohort).
 - **Production full-data fits** (`real_data/{brainseq,gtex}/<region>/_m/isograph_vae/modules.parquet`
