@@ -71,8 +71,8 @@ def collect(run_root: Path) -> pd.DataFrame:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-root", default="benchmark/01_synthetic/_o/runs")
-    parser.add_argument("--out", default="benchmark/01_synthetic/_m/synthetic_results.parquet")
+    parser.add_argument("--run-root", default="01_synthetic_benchmark/01_synthetic/_o/runs")
+    parser.add_argument("--out", default="01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet")
     args = parser.parse_args()
     results = collect(rel(args.run_root))
     out = rel(args.out)

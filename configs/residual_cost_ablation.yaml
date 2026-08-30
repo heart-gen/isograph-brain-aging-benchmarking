@@ -4,7 +4,7 @@
 # This is a SEPARATE grid from configs/synthetic_grid.yaml, with its own dataset root, so
 # it cannot touch the archived benchmark datasets. It exists because 1,204 of the cached
 # datasets -- including every core switch scenario -- no longer regenerate from the current
-# generator (see benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md), so their sample tables
+# generator (see 01_synthetic_benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md), so their sample tables
 # could not be given the covariates isograph_vae_residual needs. The ablation is a
 # WITHIN-dataset paired comparison, so it does not need to be commensurable with the
 # archived grid: it only needs both arms run on identical fresh data.

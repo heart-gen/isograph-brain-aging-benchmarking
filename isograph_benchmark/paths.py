@@ -35,7 +35,7 @@ def ensure_dir(path: Path) -> Path:
 # relocated by editing one tuple below.
 OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     # 01 — synthetic benchmark (stage root; sub-stages 00_design .. 03_metrics)
-    "synthetic": ("benchmark",),
+    "synthetic": ("01_synthetic_benchmark",),
     # 02 — module discovery; the cohort x region artifact store lives beneath it
     "modules": ("real_data",),
     # 03 — module trust
