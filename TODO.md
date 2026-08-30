@@ -148,7 +148,7 @@ a main figure.
   tissue and (ii) that its PSI anti-correlates with the partner junction beyond the
   compositional-closure baseline established by `switch_orthogonal_confirm --mode
   global-null` (never against zero). Run CTSH in **hippocampus** and SNCA in
-  **DLPFC + caudate**. Wrapper `02_module_discovery/brainseq/_h/38.junction_coloc_confirm.sh`.
+  **DLPFC + caudate**. Wrapper `06_switch_mechanism/_h/12.junction_coloc_confirm.sh`.
   **Decision rule, pre-registered:** if the junctions validate here, report the
   short-read junction result as the orthogonal confirmation and cite the long-read
   failure as an assay limitation (5' bias / region), not as a negative. If they do not
