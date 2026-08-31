@@ -43,6 +43,7 @@ from isograph_benchmark.real_data.qtl_anchoring import (
     matched_enrichment,
     resolve_tissue,
 )
+from isograph_benchmark.real_data.partition_provenance import load_enrichment
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
 _ANALYSES = {
@@ -89,10 +90,12 @@ def run_module_anchoring(analysis: str, region: str | None, variant: str, fdr: f
     iso_per_gene = isoform_counts(gtf_cache)
 
     enrich_path = iso_dir.parent / "module_enrichment" / "isograph_modules.parquet"
-    if not enrich_path.exists():
+    enrich = load_enrichment(
+        enrich_path, modules, context=f"module_genetic_anchoring {analysis}/{region or ''}"
+    )
+    if enrich is None:
         print(f"[{analysis}/{region}] no module_enrichment table — skipping", flush=True)
         return pd.DataFrame()
-    enrich = pd.read_parquet(enrich_path)
     enrich["module_id"] = enrich["module_id"].astype(str)
     sig = enrich[enrich["pheno_fdr"] <= fdr]
     if sig.empty:

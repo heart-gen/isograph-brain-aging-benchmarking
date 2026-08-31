@@ -153,7 +153,11 @@ def _gene_tags(art, fdr: float) -> tuple[pd.DataFrame, str]:
     if not sg.empty:
         return sg[["gene", "module_id", "go_invisible"]].drop_duplicates(), "switch_genes"
     enrich_path = art.parent / "module_enrichment" / "isograph_modules.parquet"
-    inv = build_gene_sets(art, enrich_path, fdr).get("go_invisible_modules", set())
+    # _gene_tags is called with the artifact dir only, so name the region from the path
+    # (…/<cohort>/<region>/_m/isograph_vae) rather than from unavailable arguments.
+    inv = build_gene_sets(art, enrich_path, fdr,
+                          context=f"rbp_regulon {art.parent.parent.name}"
+                          ).get("go_invisible_modules", set())
     mods = pd.read_parquet(art / "modules.parquet")
     mods["gene"] = _bare(mods["gene_id"])
     mods["module_id"] = mods["module_id"].astype(str)

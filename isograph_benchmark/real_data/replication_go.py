@@ -35,6 +35,7 @@ import json
 import numpy as np
 import pandas as pd
 
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
 from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 from isograph_benchmark.real_data.replication import REGION_PAIRS
 
@@ -64,7 +65,9 @@ def _go_sets(cohort: str, region: str, method: str) -> dict[str, set]:
     mod_path = base / f"{prefix}_modules.parquet"
     if not go_path.exists() or not mod_path.exists():
         return {}
-    all_modules = pd.read_parquet(mod_path)["module_id"].unique()
+    all_modules = load_region_enrichment(
+        cohort, region, prefix, context=f"replication_go {cohort}/{region} [{method}]"
+    )["module_id"].unique()
     sets: dict[str, set] = {m: set() for m in all_modules}
     go = pd.read_parquet(go_path)
     if not go.empty:

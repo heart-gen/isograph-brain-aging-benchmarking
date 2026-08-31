@@ -77,6 +77,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
 from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 from isograph_benchmark.real_data.go_invisible_gate import gene_symbol_map
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_PATH
@@ -117,10 +118,11 @@ def _module_trust() -> pd.DataFrame:
     """
     rows = []
     for tree, region in _REGIONS:
-        p = region_store(tree, region, "module_enrichment", "isograph_modules.parquet")
-        if not p.exists():
+        d = load_region_enrichment(
+            tree, region, "isograph", context=f"rbp_target_panel {tree}/{region}"
+        )
+        if d is None:
             continue
-        d = pd.read_parquet(p)
         d = d[d["method"] == "isograph"] if "method" in d.columns else d
         keep = ["module_id", "n_genes", "n_go_terms", "pheno_fdr"]
         if "top_go_terms" in d.columns:

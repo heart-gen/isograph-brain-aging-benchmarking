@@ -45,6 +45,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
 from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.module_trust import (
     METHOD_DIRS, PROD_ROOTS, REGION_PAIRS, _out_dir,
@@ -83,7 +84,11 @@ def _go_sets(cohort: str, region: str, method: str) -> dict[str, set]:
     if not (go_path.exists() and mod_path.exists()):
         return {}
     sets: dict[str, set] = {
-        str(m): set() for m in pd.read_parquet(mod_path)["module_id"].unique()
+        str(m): set()
+        for m in load_region_enrichment(
+            cohort, region, prefix,
+            context=f"replication_functional {cohort}/{region} [{method}]",
+        )["module_id"].unique()
     }
     go = pd.read_parquet(go_path)
     for mid, grp in go.groupby("module_id"):

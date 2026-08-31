@@ -29,6 +29,7 @@ import pandas as pd
 
 from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_PATH
+from isograph_benchmark.real_data.partition_provenance import load_enrichment
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
 FUNCTIONAL_COLS = ("cds_changed", "coding_status_change", "biotype_switch", "utr_changed")
@@ -100,7 +101,12 @@ def _top_switch_genes(t: pd.DataFrame, symbols: dict[str, str], n: int) -> str:
 def run_gate(analysis: str, region: str | None, variant: str, fdr: float, top_n: int,
              gtf_path: Path | None) -> pd.DataFrame:
     iso_dir = _artifact_dir(analysis, region, variant)
-    enrich = pd.read_parquet(iso_dir.parent / "module_enrichment" / "isograph_modules.parquet")
+    enrich = load_enrichment(
+        iso_dir.parent / "module_enrichment" / "isograph_modules.parquet",
+        pd.read_parquet(iso_dir / "modules.parquet"),
+        context=f"go_invisible_gate {analysis}/{region or ''}",
+        required=True,
+    )
     enrich["module_id"] = enrich["module_id"].astype(str)
     interpret_dir = iso_dir / "module_interpret"
 
