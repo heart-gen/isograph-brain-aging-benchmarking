@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "amygdala",
+  "tissue": "Brain_Amygdala",
+  "variant": "standard",
+  "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 18171,
+  "universe_sizes": {
+    "sQTL": 11105,
+    "eQTL": 13823
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 13169,
+      "n_constraint_complete": 11105,
+      "frac_retained": 0.8433
+    },
+    "eQTL": {
+      "n_tested": 18117,
+      "n_constraint_complete": 13823,
+      "frac_retained": 0.763
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 3886,
+    "pheno_sig_modules": 1509,
+    "go_invisible_modules": 576,
+    "go_visible_modules": 933
+  }
+}

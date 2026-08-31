@@ -31,7 +31,7 @@ so ``structure_r`` has no data on either side of some pairs.  A missing input yi
 rather than an error, so the report carries an explicit **Data coverage** section naming
 which inputs were absent; an "n/a" row must never be read as a null result.
 
-Outputs (under ``real_data/replication/_m/``):
+Outputs (under ``03_module_trust/_m/replication/``):
     functional_preservation__{method}__{model}.parquet    one row per matched pair
     functional_preservation__{method}__{model}__stats.json
     FUNCTIONAL_PRESERVATION__{method}__{model}.md
@@ -45,7 +45,8 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.module_trust import (
     METHOD_DIRS, PROD_ROOTS, REGION_PAIRS, _out_dir,
 )
@@ -77,13 +78,17 @@ def _gene_stem(s: pd.Series) -> pd.Series:
 
 def _go_sets(cohort: str, region: str, method: str) -> dict[str, set]:
     """module_id -> set of enriched GO:BP term ids (empty set when none passed)."""
-    base = rel("real_data", cohort, region, "_m", "module_enrichment")
+    base = region_store(cohort, region, "module_enrichment")
     prefix = _ENRICH_PREFIX[method]
     go_path, mod_path = base / f"{prefix}_module_go.parquet", base / f"{prefix}_modules.parquet"
     if not (go_path.exists() and mod_path.exists()):
         return {}
     sets: dict[str, set] = {
-        str(m): set() for m in pd.read_parquet(mod_path)["module_id"].unique()
+        str(m): set()
+        for m in load_region_enrichment(
+            cohort, region, prefix,
+            context=f"replication_functional {cohort}/{region} [{method}]",
+        )["module_id"].unique()
     }
     go = pd.read_parquet(go_path)
     for mid, grp in go.groupby("module_id"):
@@ -135,7 +140,7 @@ def _probe(cohort: str, region: str, method: str) -> dict[str, bool]:
     Absent inputs propagate to NaN measures rather than raising, so record them: the
     difference between "no signal" and "no data" is not recoverable from the numbers.
     """
-    base = rel("real_data", cohort, region, "_m", "module_enrichment")
+    base = region_store(cohort, region, "module_enrichment")
     prefix = _ENRICH_PREFIX[method]
     root = PROD_ROOTS[(cohort, region)]
     return {
@@ -222,7 +227,7 @@ def _matched_table(method: str, model: str) -> pd.DataFrame:
         path = _out_dir() / f"{stem}__{pair}__{method}.parquet"
         if not path.exists():
             raise SystemExit(
-                f"missing {path}; run real_data/stability/_h/09.module_trust_replication.sh"
+                f"missing {path}; run 03_module_trust/_h/09.module_trust_replication.sh"
                 + (f" --model {model}" if model != "linear" else ""))
         frames.append(pd.read_parquet(path))
     return pd.concat(frames, ignore_index=True)
@@ -292,7 +297,7 @@ def run(method: str, model: str, n_perm: int, seed: int, n_boot: int) -> None:
         null_by_pair[pair] = draws
 
     out = pd.DataFrame(rows)
-    outdir = ensure_dir(rel("real_data", "replication", "_m"))
+    outdir = ensure_dir(stage_out("trust.replication"))
     # method AND model in every filename: the array runs both methods concurrently and the
     # linear/spline runs are separate results, so a fixed name silently loses one of them.
     stem = f"{method}__{model}"

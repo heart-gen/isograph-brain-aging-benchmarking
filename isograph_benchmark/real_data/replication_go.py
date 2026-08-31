@@ -23,7 +23,7 @@ Usage::
     python -m isograph_benchmark.real_data.replication_go            # both methods
     python -m isograph_benchmark.real_data.replication_go --methods isograph_vae
 
-Outputs (under ``real_data/replication/_m/``):
+Outputs (under ``03_module_trust/_m/replication/``):
     <method>_go_overlap.parquet   per preserved+aging pair: GO overlap + shared terms
     replication_go_summary.parquet / .json   per-method pooled test
 """
@@ -35,7 +35,8 @@ import json
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
+from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 from isograph_benchmark.real_data.replication import REGION_PAIRS
 
 DEFAULT_METHODS = ["isograph_vae", "wgcna_gene"]
@@ -59,12 +60,14 @@ def _region_map() -> dict[str, tuple[str, str]]:
 def _go_sets(cohort: str, region: str, method: str) -> dict[str, set]:
     """module_id -> set of enriched BP term IDs (empty set for modules w/o terms)."""
     prefix = _PREFIX[method]
-    base = rel("real_data", cohort, region, "_m", "module_enrichment")
+    base = region_store(cohort, region, "module_enrichment")
     go_path = base / f"{prefix}_module_go.parquet"
     mod_path = base / f"{prefix}_modules.parquet"
     if not go_path.exists() or not mod_path.exists():
         return {}
-    all_modules = pd.read_parquet(mod_path)["module_id"].unique()
+    all_modules = load_region_enrichment(
+        cohort, region, prefix, context=f"replication_go {cohort}/{region} [{method}]"
+    )["module_id"].unique()
     sets: dict[str, set] = {m: set() for m in all_modules}
     go = pd.read_parquet(go_path)
     if not go.empty:
@@ -80,7 +83,7 @@ def _jaccard(a: set, b: set) -> float:
 
 def run_method(method: str, rng: np.random.Generator) -> tuple[pd.DataFrame, dict]:
     rmap = _region_map()
-    match_path = rel("real_data", "replication", "_m", f"{method}_module_match.parquet")
+    match_path = stage_out("trust.replication", f"{method}_module_match.parquet")
     if not match_path.exists():
         print(f"  [{method}] no module_match table — run replication.py first; skipping")
         return pd.DataFrame(), {}
@@ -153,7 +156,7 @@ def _shared_names(method, cohort, region, term_ids: set) -> list[str]:
     if not term_ids:
         return []
     prefix = _PREFIX[method]
-    go_path = rel("real_data", cohort, region, "_m", "module_enrichment", f"{prefix}_module_go.parquet")
+    go_path = region_store(cohort, region, "module_enrichment", f"{prefix}_module_go.parquet")
     if not go_path.exists():
         return [str(t) for t in term_ids]
     go = pd.read_parquet(go_path).drop_duplicates("term_id").set_index("term_id")["term_name"]
@@ -165,7 +168,7 @@ def main() -> None:
     ap.add_argument("--methods", nargs="+", default=DEFAULT_METHODS)
     args = ap.parse_args()
 
-    out_dir = ensure_dir(rel("real_data", "replication", "_m"))
+    out_dir = ensure_dir(stage_out("trust.replication"))
     rng = np.random.default_rng(SEED)
 
     summaries = []

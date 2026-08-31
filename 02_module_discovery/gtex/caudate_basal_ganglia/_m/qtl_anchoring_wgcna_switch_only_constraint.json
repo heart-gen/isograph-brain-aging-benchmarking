@@ -1,0 +1,32 @@
+{
+  "analysis": "gtex-aging",
+  "region": "caudate_basal_ganglia",
+  "tissue": "Brain_Caudate_basal_ganglia",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 7247,
+  "universe_sizes": {
+    "sQTL": 5122,
+    "eQTL": 5903
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 5985,
+      "n_constraint_complete": 5122,
+      "frac_retained": 0.8558
+    },
+    "eQTL": {
+      "n_tested": 7229,
+      "n_constraint_complete": 5903,
+      "frac_retained": 0.8166
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 7247,
+    "pheno_sig_modules": 234,
+    "go_visible_modules": 234
+  }
+}

@@ -15,14 +15,15 @@ mechanistic capstone for the genetic-anchoring headline.
 Only credible-set-based colocalization is possible: GTEx v11 ships SuSiE fine-mapping
 (SuSiE_summary parquet: per phenotype, the 95% credible-set variants with PIP), not
 full cis allpairs, so downstream (coloc_clpp.R) uses eCAVIAR CLPP = sum PIP_gwas *
-PIP_qtl over shared variants, plus coloc.susie where LD permits. This restricts the
+PIP_qtl over shared variants. coloc.susie is NOT run: GTEx ships
+credible-set summaries, not full SuSiE objects (see 10.coloc_clpp.R). This restricts the
 test to genome-wide-significant loci; disclosed as scope.
 
 Matching: IsoGraph modules and GTEx SuSiE both carry Ensembl gene_id, matched bare
 (unversioned). hg19 gene coordinates (for the PGC3 window + LD panel, both b37) come
 from MAGMA's NCBI37.3.gene.loc keyed by the GTEx symbol. PGC3 EUR is b37, matching.
 
-Writes under real_data/coloc/_m/<analysis>[/<region>]/:
+Writes under 05_genetic_anchoring/_m/coloc/<analysis>[/<region>]/:
   candidate_genes.tsv   — switch gene, module, go_invisible, symbol, hg19 coords, lead SNP/P, retained
   candidate_loci.tsv    — merged retained ±1Mb windows (LOCUS_ID, chr, start, stop, genes)
   qtl_credible_sets.tsv — gene x tissue x kind(sQTL/eQTL) x CS variant, PIP (b38 ids)
@@ -36,7 +37,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
 from isograph_benchmark.real_data.qtl_anchoring import (
     _GTEX_TISSUE,
@@ -274,8 +275,8 @@ def run(gene_source: str, trait: str, region: str | None, variant: str, fdr: flo
         xqtl_dir: Path, tissues: list[str], min_recurrence: int) -> None:
     spec = gt.get(trait)
     tag = gene_source + (f"_{region}" if region else "") + f"__{trait}"
-    out_dir = ensure_dir(rel("real_data", "coloc", "_m", tag))
-    tmp_dir = ensure_dir(rel("real_data", "coloc", "_m", "_tmp"))
+    out_dir = ensure_dir(stage_out("anchoring.coloc", tag))
+    tmp_dir = ensure_dir(stage_out("anchoring.coloc", "_tmp"))
 
     switch = _resolve_switch_genes(gene_source, region, variant, fdr, min_recurrence)
     genes = set(switch["gene"])

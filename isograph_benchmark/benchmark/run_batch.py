@@ -54,11 +54,11 @@ def run_one(run_id: str, grid: str, log_dir: Path, force: bool = False) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch-file", default="benchmark/01_synthetic/_m/synthetic_batches.parquet")
+    parser.add_argument("--batch-file", default="01_synthetic_benchmark/01_synthetic/_m/synthetic_batches.parquet")
     parser.add_argument("--batch-index", type=int)
     parser.add_argument("--batch-id")
-    parser.add_argument("--grid", default="benchmark/00_design/_m/synthetic_run_grid.parquet")
-    parser.add_argument("--log-dir", default="benchmark/01_synthetic/_m/logs")
+    parser.add_argument("--grid", default="01_synthetic_benchmark/00_design/_m/synthetic_run_grid.parquet")
+    parser.add_argument("--log-dir", default="01_synthetic_benchmark/01_synthetic/_m/logs")
     parser.add_argument("--stop-margin-min", type=float, default=10.0)
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()

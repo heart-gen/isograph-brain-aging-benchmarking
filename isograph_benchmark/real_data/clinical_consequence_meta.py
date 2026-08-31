@@ -13,9 +13,9 @@ import numpy as np
 import pandas as pd
 from scipy.stats import combine_pvalues
 
-from isograph_benchmark.paths import rel
+from isograph_benchmark.paths import cohort_dir, stage_out
 
-_ROOTS = [rel("real_data", "brainseq"), rel("real_data", "gtex")]
+_ROOTS = [cohort_dir("brainseq"), cohort_dir("gtex")]
 
 
 def _collect(name: str) -> pd.DataFrame:
@@ -60,7 +60,7 @@ def run() -> pd.DataFrame:
         })
     meta = pd.DataFrame(rows).sort_values(["scope", "stratum"] if "scope" in
                                           pd.DataFrame(rows).columns else ["stratum"])
-    out = rel("real_data", "_m", "clinical_consequence_meta.parquet")
+    out = stage_out("mechanism", "clinical_consequence_meta.parquet")
     out.parent.mkdir(parents=True, exist_ok=True)
     meta.to_parquet(out, index=False)
     _write_report(meta)
@@ -87,7 +87,7 @@ def _write_report(meta: pd.DataFrame) -> None:
             f"| {getattr(r, 'scope', 'all_exons')} | {r.stratum} | {r.n_regions} | "
             f"{r.median_loeuf_switch:.3f} | {r.loeuf_fisher_p:.2e} | {r.n_ratio_gt1_p05} | "
             f"{r.n_ratio_lt1_p05} | {r.median_ratio:.2f} | {r.fisher_p:.2e} |")
-    (rel("real_data", "_m", "CLINICAL_CONSEQUENCE_META.md")).write_text("\n".join(lines) + "\n")
+    (stage_out("mechanism", "CLINICAL_CONSEQUENCE_META.md")).write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:

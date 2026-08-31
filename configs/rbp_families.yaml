@@ -5,7 +5,7 @@ families:
   # Average-linkage cut on distance = 1 - (max-over-offsets mean column correlation).
   # ATtRACT's motifs are short and degenerate, so similarity is continuous rather than
   # clustered and no cut is uniquely correct: see the cut-sensitivity table in
-  # real_data/_m/rbp/RBP_MOTIF_FAMILIES.md. 0.25 keeps the known hnRNP / ELAVL / SRSF /
+  # 07_rbp_regulation/_m/rbp/RBP_MOTIF_FAMILIES.md. 0.25 keeps the known hnRNP / ELAVL / SRSF /
   # PTBP groups together without collapsing everything into one family.
   cut: 0.25
   # Minimum overlapping columns for an offset to be scored.

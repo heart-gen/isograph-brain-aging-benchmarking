@@ -18,7 +18,7 @@ from statsmodels.stats.multitest import multipletests
 from statsmodels.tools.sm_exceptions import PerfectSeparationError
 
 from isograph_benchmark.config import load_yaml
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store
 from isograph_benchmark.real_data.neuronal_clip_fetch import sha256
 from isograph_benchmark.real_data.neuronal_clip_motif_qc import (
     _sense_sequence,
@@ -88,12 +88,7 @@ def _load_pairs() -> tuple[pd.DataFrame, dict[str, str]]:
     frames: list[pd.DataFrame] = []
     hashes: dict[str, str] = {}
     for tree, region in _REGIONS:
-        path = rel(
-            "real_data",
-            tree,
-            region,
-            "_m",
-            "isograph_vae",
+        path = region_store(tree, region, "isograph_vae",
             "module_interpret",
             "structure_switch_pairs.parquet",
         )
@@ -355,7 +350,7 @@ def _tagged_pair_calls(
         ].copy()
         if region_pairs.empty:
             continue
-        artifact = rel("real_data", tree, region, "_m", "isograph_vae")
+        artifact = region_store(tree, region, "isograph_vae")
         tags, pool_source = _gene_tags(artifact, float(stage["discovery_fdr"]))
         if tags.empty:
             continue

@@ -6,7 +6,7 @@
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=8
 #SBATCH --time=06:00:00
-#SBATCH --output=real_data/gtex/_m/logs/rebuild-counts-%j.log
+#SBATCH --output=02_module_discovery/gtex/_m/logs/rebuild-counts-%j.log
 
 # Rebuild the GTEx v11 brain bundles from RSEM transcript expected_count (count
 # scale) instead of TPM, with a CPM>=1 gene filter for BrainSEQ parity.
@@ -26,7 +26,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
 fi
 export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/gtex/_m/logs
+mkdir -p 02_module_discovery/gtex/_m/logs
 
 module purge
 module load anaconda3/2024.10-1

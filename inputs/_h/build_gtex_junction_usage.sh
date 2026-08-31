@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=10
 #SBATCH --time=02:00:00
 #SBATCH --array=0-12
-#SBATCH --output=real_data/gtex/_m/logs/gtex-junction-usage-%A_%a.log
+#SBATCH --output=02_module_discovery/gtex/_m/logs/gtex-junction-usage-%A_%a.log
 
 ## Ingest GTEx v11 STAR junction counts -> per-region within-gene junction usage
 ## (build_gtex_junction_usage.py). Streams the 523,817 x 19,788 junction GCT once per
@@ -25,7 +25,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
     exit 1
 fi
 export PYTHONPATH="${PROJECT_ROOT}:/ocean/projects/bio260021p/kbenjamin/software/IsoGraph/src${PYTHONPATH:+:${PYTHONPATH}}"
-mkdir -p real_data/gtex/_m/logs
+mkdir -p 02_module_discovery/gtex/_m/logs
 
 REGIONS=(
     amygdala anterior_cingulate_cortex_ba24 caudate_basal_ganglia

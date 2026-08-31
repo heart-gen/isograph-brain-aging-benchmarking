@@ -44,7 +44,7 @@ from isograph.models.multiplex import (
 )
 from isograph.models.vae import VaeNetworkModel, _build_node_diagnostics
 from isograph.workflow.config import VaeModelConfig
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import analysis_store, ensure_dir, rel
 from isograph_benchmark.real_data.run_models import (
     _PROMOTED_VAE,
     _filter_expressed_transcripts,
@@ -90,15 +90,7 @@ def _bundle_path(analysis: str, region: str | None) -> Path:
 
 
 def _region_dir(analysis: str, region: str | None) -> Path:
-    if analysis == "brainseq-sczd":
-        return rel("real_data", "brainseq", "caudate_sczd", "_m")
-    if analysis == "brainseq-aging":
-        assert region is not None
-        return rel("real_data", "brainseq", region, "_m")
-    if analysis == "gtex-aging":
-        assert region is not None
-        return rel("real_data", "gtex", region, "_m")
-    raise ValueError(f"Unknown analysis: {analysis!r}")
+    return analysis_store(analysis, region)
 
 
 def _trait_spec(analysis: str) -> tuple[str, list[str]]:

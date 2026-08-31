@@ -33,7 +33,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_CACHE
 from isograph_benchmark.real_data.qtl_anchoring import (
     DEFAULT_XQTL_DIR,
@@ -43,6 +43,7 @@ from isograph_benchmark.real_data.qtl_anchoring import (
     matched_enrichment,
     resolve_tissue,
 )
+from isograph_benchmark.real_data.partition_provenance import load_enrichment
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
 _ANALYSES = {
@@ -89,10 +90,12 @@ def run_module_anchoring(analysis: str, region: str | None, variant: str, fdr: f
     iso_per_gene = isoform_counts(gtf_cache)
 
     enrich_path = iso_dir.parent / "module_enrichment" / "isograph_modules.parquet"
-    if not enrich_path.exists():
+    enrich = load_enrichment(
+        enrich_path, modules, context=f"module_genetic_anchoring {analysis}/{region or ''}"
+    )
+    if enrich is None:
         print(f"[{analysis}/{region}] no module_enrichment table — skipping", flush=True)
         return pd.DataFrame()
-    enrich = pd.read_parquet(enrich_path)
     enrich["module_id"] = enrich["module_id"].astype(str)
     sig = enrich[enrich["pheno_fdr"] <= fdr]
     if sig.empty:
@@ -201,7 +204,7 @@ def meta(variant: str) -> None:
         print("[meta] no per-analysis parquets found", flush=True)
         return
     allm = pd.concat(frames, ignore_index=True)
-    out = ensure_dir(rel("real_data", "_m", "module_genetic_anchoring_meta"))
+    out = ensure_dir(stage_out("anchoring", "module_genetic_anchoring_meta"))
     allm.to_parquet(out / "module_genetic_anchoring_all.parquet", index=False, compression="zstd")
 
     est = allm[np.isfinite(allm["contrast_log"]) & allm["perm_p"].notna()].copy()

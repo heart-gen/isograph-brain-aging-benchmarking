@@ -25,7 +25,7 @@ Subcommands:
   fit-isograph  fit IsoGraph on both halves for each seed; write per-half partitions
   aggregate     read all per-half partitions (both methods) -> ARI/NMI -> summary
 
-WGCNA partitions are produced by ``real_data/stability/_h/stability_wgcna.R`` (R/WGCNA)
+WGCNA partitions are produced by ``03_module_trust/_h/stability_wgcna.R`` (R/WGCNA)
 and written to the same ``partitions/`` dir, so ``aggregate`` treats both methods
 uniformly. Splits are drawn independently per method with seed = k (k = 0..seeds-1);
 we compare the mean +/- SD over seeds, not a paired per-split test, so identical
@@ -53,7 +53,7 @@ from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.vae import VaeNetworkModel
 from isograph.workflow.config import VaeModelConfig
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
 from isograph_benchmark.real_data.replication import REGION_PAIRS
 
@@ -94,7 +94,7 @@ def _partitions_dir():
     override = os.environ.get("STABILITY_PARTITIONS_DIR")
     if override:
         return ensure_dir(Path(override))
-    return ensure_dir(rel("real_data", "stability", "_m", "partitions"))
+    return ensure_dir(stage_out("trust.stability", "partitions"))
 
 
 def _split_indices(n: int, seed: int) -> tuple[np.ndarray, np.ndarray]:
@@ -289,8 +289,8 @@ def _cross_cohort_rows() -> list[dict]:
     rows = []
     for method, mdir in name.items():
         for bs, gt, label in REGION_PAIRS:
-            bp = rel("real_data", "brainseq", bs, "_m", mdir, "modules.parquet")
-            gp = rel("real_data", "gtex", gt, "_m", mdir, "modules.parquet")
+            bp = region_store("brainseq", bs, mdir, "modules.parquet")
+            gp = region_store("gtex", gt, mdir, "modules.parquet")
             if not (bp.exists() and gp.exists()):
                 continue
             a = pd.read_parquet(bp)[["gene_id", "module_id"]]; a["gene_id"] = a["gene_id"].astype(str)
@@ -363,7 +363,7 @@ def _rmse_dir():
     override = os.environ.get("STABILITY_RMSE_DIR")
     if override:
         return ensure_dir(Path(override))
-    return ensure_dir(rel("real_data", "stability", "_m", "lr_validation"))
+    return ensure_dir(stage_out("trust.stability", "lr_validation"))
 
 
 def fit_rmse(cohort: str, region: str, lr: float = 1e-3,

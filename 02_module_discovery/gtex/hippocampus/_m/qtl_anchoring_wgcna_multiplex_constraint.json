@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 17234,
+  "universe_sizes": {
+    "sQTL": 10967,
+    "eQTL": 13196
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 12905,
+      "n_constraint_complete": 10967,
+      "frac_retained": 0.8498
+    },
+    "eQTL": {
+      "n_tested": 17207,
+      "n_constraint_complete": 13196,
+      "frac_retained": 0.7669
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 17234,
+    "pheno_sig_modules": 6023,
+    "go_invisible_modules": 287,
+    "go_visible_modules": 5807
+  }
+}

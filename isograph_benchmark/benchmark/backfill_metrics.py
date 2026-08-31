@@ -1,6 +1,6 @@
 """Backfill the partition metrics (reviewer items 1 and 4) onto completed benchmark runs.
 
-The 13k runs under ``benchmark/01_synthetic/_o/runs`` each keep their fitted
+The 13k runs under ``01_synthetic_benchmark/01_synthetic/_o/runs`` each keep their fitted
 ``modules.parquet``, and every dataset keeps its ``truth_modules.parquet`` — so ARI, AMI,
 the homogeneity/completeness decomposition and the module-count-preserving Jaccard null can
 all be recomputed without re-fitting a single model.
@@ -170,8 +170,8 @@ def backfill_run(
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--run-root", default="benchmark/01_synthetic/_o/runs")
-    ap.add_argument("--out-dir", default="benchmark/01_synthetic/_m/partition_backfill")
+    ap.add_argument("--run-root", default="01_synthetic_benchmark/01_synthetic/_o/runs")
+    ap.add_argument("--out-dir", default="01_synthetic_benchmark/01_synthetic/_m/partition_backfill")
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--n-shards", type=int, default=1)
     ap.add_argument("--n-perm", type=int, default=DEFAULT_N_PERM)

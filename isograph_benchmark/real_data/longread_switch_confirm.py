@@ -32,7 +32,7 @@ says so.
 This is confirmation of discovered structure on an orthogonal modality -- exactly the
 frontier-modality anchor the short-read critique asks for -- not a rediscovery.
 
-Outputs land in ``real_data/_m/longread_switch_confirm/``:
+Outputs land in ``06_switch_mechanism/_m/longread_switch_confirm/``:
   * ``pair_confirmation.parquet`` -- per switch pair: transcripts, detection, mean IF,
     cross-sample usage anti-correlation, passed-through structural consequence flags.
   * ``gene_confirmation.parquet`` -- per switch gene: expressed / multi-isoform /
@@ -54,7 +54,7 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.validate_switch_splicing import (
     _artifact_dir,
     _module_switch_genes,
@@ -77,7 +77,7 @@ def _default_data_dir():
 
 
 def _out_dir():
-    return ensure_dir(rel("real_data", "_m", "longread_switch_confirm"))
+    return ensure_dir(stage_out("mechanism", "longread_switch_confirm"))
 
 
 # --------------------------------------------------------------------------- #

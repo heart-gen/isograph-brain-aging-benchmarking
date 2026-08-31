@@ -390,11 +390,11 @@ def summarize_interpretation(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate IsoGraph module interpretation on synthetic truth.")
-    parser.add_argument("--results", default="benchmark/01_synthetic/_m/synthetic_results.parquet")
-    parser.add_argument("--run-root", default="benchmark/01_synthetic/_o/runs")
-    parser.add_argument("--dataset-root", default="benchmark/01_synthetic/_m/datasets")
-    parser.add_argument("--output-root", default="benchmark/02_interpret/_o/runs")
-    parser.add_argument("--out-dir", default="benchmark/02_interpret/_m")
+    parser.add_argument("--results", default="01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet")
+    parser.add_argument("--run-root", default="01_synthetic_benchmark/01_synthetic/_o/runs")
+    parser.add_argument("--dataset-root", default="01_synthetic_benchmark/01_synthetic/_m/datasets")
+    parser.add_argument("--output-root", default="01_synthetic_benchmark/02_interpret/_o/runs")
+    parser.add_argument("--out-dir", default="01_synthetic_benchmark/02_interpret/_m")
     parser.add_argument("--method", action="append", dest="methods", help="Method to evaluate. Can be repeated.")
     parser.add_argument("--force", action="store_true", help="Regenerate existing explain-module outputs.")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of completed runs for smoke tests.")

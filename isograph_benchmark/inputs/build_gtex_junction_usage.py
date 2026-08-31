@@ -27,7 +27,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel
 
 _GCT = rel("inputs", "raw", "gtex_v11", "counts",
            "GTEx_Analysis_2025-08-22_v11_STARv2.7.11b_junctions.gct.gz")
@@ -51,7 +51,7 @@ def _region_samples(region: str) -> list[str]:
 
 
 def _switch_scored_genes(region: str) -> set[str]:
-    fs = pd.read_parquet(rel("real_data", "gtex", region, "_m", "isograph_vae",
+    fs = pd.read_parquet(region_store("gtex", region, "isograph_vae",
                              "feature_scores.parquet"), columns=["gene_id", "feature_type"])
     return set(_strip_ver(fs.loc[fs["feature_type"] == "switch", "gene_id"]))
 

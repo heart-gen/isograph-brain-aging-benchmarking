@@ -26,14 +26,14 @@ import pandas as pd
 
 from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.base import compute_module_gene_roles, compute_trait_associations
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel
 from isograph_benchmark.real_data.run_models import diagnosis_association
 
 DEFAULT_LEIDEN_RESOLUTION = 10.0
 DEFAULT_SEED = 13
 DEFAULT_MIN_MODULE_SIZE = 20
 
-ARTIFACT_DIR = rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae")
+ARTIFACT_DIR = region_store("brainseq", "caudate_sczd", "isograph_vae")
 BUNDLE_PATH = rel("inputs", "bundles", "brainseq_sczd", "caudate")
 
 COVARIATE_COLS = [

@@ -1,0 +1,22 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cortex",
+  "tissue": "Brain_Cortex",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "continuous",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 17876,
+  "universe_sizes": {
+    "sQTL": 13376,
+    "eQTL": 17847
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 17876,
+    "pheno_sig_modules": 9147,
+    "go_invisible_modules": 1730,
+    "go_visible_modules": 8243
+  }
+}

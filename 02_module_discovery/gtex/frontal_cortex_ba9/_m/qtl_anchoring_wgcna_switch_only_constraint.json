@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "tissue": "Brain_Frontal_Cortex_BA9",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 7661,
+  "universe_sizes": {
+    "sQTL": 5629,
+    "eQTL": 6323
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 6553,
+      "n_constraint_complete": 5629,
+      "frac_retained": 0.859
+    },
+    "eQTL": {
+      "n_tested": 7651,
+      "n_constraint_complete": 6323,
+      "frac_retained": 0.8264
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 7661,
+    "pheno_sig_modules": 5883,
+    "go_invisible_modules": 859,
+    "go_visible_modules": 5024
+  }
+}

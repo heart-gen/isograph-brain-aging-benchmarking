@@ -16,9 +16,9 @@ consistency (isograph vs classical wgcna_gene only — the matched baselines wer
 not run through replication).
 
 Reads, per region, <_m>/module_enrichment/{<method>_modules.parquet, summary.json}
-and real_data/replication/_m/replication_go_summary.parquet.
+and 03_module_trust/_m/replication/replication_go_summary.parquet.
 
-Writes under real_data/_m/baseline_comparison/:
+Writes under 04_module_characterization/_m/baseline_comparison/:
   baseline_comparison.parquet        — one row per (cohort, region, method).
   baseline_comparison_pooled.parquet — one row per method, pooled across regions.
   BASELINE_COMPARISON.md             — comparison table + honest win/tie/loss read.
@@ -32,7 +32,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, stage_out
 
 # canonical label -> per-region module table basename
 METHOD_FILES = {
@@ -56,7 +56,7 @@ REPL_METHOD = {"isograph_vae": "isograph", "wgcna_gene": "wgcna_gene"}
 def _regions(cohorts: tuple[str, ...]) -> list[tuple[str, str, Path]]:
     out = []
     for cohort in cohorts:
-        base = rel("real_data", cohort)
+        base = cohort_dir(cohort)
         if not base.is_dir():
             continue
         for region in sorted(d.name for d in base.iterdir() if d.is_dir()):
@@ -121,7 +121,7 @@ def _pool(per: pd.DataFrame) -> pd.DataFrame:
 
 
 def _replication() -> pd.DataFrame:
-    path = rel("real_data", "replication", "_m", "replication_go_summary.parquet")
+    path = stage_out("trust.replication", "replication_go_summary.parquet")
     if not path.exists():
         return pd.DataFrame()
     r = pd.read_parquet(path)
@@ -131,7 +131,7 @@ def _replication() -> pd.DataFrame:
 
 def run(cohorts: tuple[str, ...] = ("brainseq", "gtex"), fdr: float = 0.10) -> pd.DataFrame:
     per = collect(cohorts, fdr)
-    out_dir = ensure_dir(rel("real_data", "_m", "baseline_comparison"))
+    out_dir = ensure_dir(stage_out("characterize", "baseline_comparison"))
     if per.empty:
         print("no module_enrichment summaries found")
         return per
