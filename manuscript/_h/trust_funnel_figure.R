@@ -78,7 +78,13 @@ stab <- load_stage("module_stability__")
 trust_counts <- stab |>
   group_by(method) |>
   summarise(trusted = sum(trusted), M = n(), .groups = "drop") |>
-  mutate(lab = sprintf("%s trusted\n%d / %d", METHOD_LABELS[method], trusted, M))
+  # Report the rate, not just the count. IsoGraph 236/266 and WGCNA 64/73 are the SAME
+  # trusted fraction (~89% vs ~88%); the claim this panel supports is that IsoGraph
+  # modules are trustworthy in absolute terms at ~3.6x finer granularity, NOT that
+  # IsoGraph beats WGCNA on trust. Showing the percentage keeps the annotation honest
+  # against the paper's own not-globally-superior framing.
+  mutate(lab = sprintf("%s\n%d / %d trusted (%.0f%%)",
+                       METHOD_LABELS[method], trusted, M, 100 * trusted / M))
 null_band <- stab |> group_by(method) |>
   summarise(null = median(null_mean, na.rm = TRUE), .groups = "drop")
 
@@ -87,8 +93,8 @@ pA <- ggplot(stab, aes(method, coassign_density)) +
   geom_jitter(aes(colour = trusted), width = 0.18, height = 0, size = 0.5, alpha = 0.7) +
   geom_crossbar(data = null_band, aes(x = method, y = null, ymin = null, ymax = null),
                 width = 0.55, linewidth = 0.4, colour = "grey25", linetype = "dashed") +
-  geom_text(data = trust_counts, aes(x = method, y = 1.02, label = lab),
-            size = 2.5, vjust = 0, lineheight = 0.9) +
+  geom_text(data = trust_counts, aes(x = method, y = 1.03, label = lab),
+            size = 2.35, vjust = 0, lineheight = 0.95) +
   scale_fill_manual(values = METHOD_COLORS, guide = "none") +
   scale_colour_manual(values = TRUST_COLORS, labels = c(`TRUE` = "Trusted (FDR<0.05)",
                                                         `FALSE` = "Not trusted")) +
@@ -142,10 +148,14 @@ perm_p <- function(method) {
 rep_counts <- rep |> group_by(method) |>
   summarise(rep = sum(replicates), M = n(), .groups = "drop") |>
   mutate(p_emp = vapply(method, perm_p, numeric(1)),
-         lab = sprintf("%s: %d / %d concordant%s", METHOD_LABELS[method], rep, M,
-                       ifelse(is.finite(p_emp),
-                              sprintf("  (perm P = %.3f)", p_emp), "")))
+         lab = sprintf("%s  %d/%d, P = %s", METHOD_LABELS[method], rep, M,
+                       ifelse(is.finite(p_emp), sprintf("%.3f", p_emp), "NA")))
+# Keep every annotation line short. The previous format ran ~46 characters and was
+# clipped by the panel edge, so BOTH permutation p-values were invisible in the
+# rendered figure. Header carries the word the counts mean; the rows carry the numbers.
+rep_lab <- paste(c("Cross-cohort concordant modules", rep_counts$lab), collapse = "\n")
 lim <- max(abs(c(rep$age_effect_bs, rep$age_effect_gtex)), na.rm = TRUE)
+lim_pad <- lim * 1.04   # slack so the longest annotation line cannot touch the edge
 
 pC <- ggplot(rep, aes(age_effect_bs, age_effect_gtex)) +
   geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey80") +
@@ -155,9 +165,9 @@ pC <- ggplot(rep, aes(age_effect_bs, age_effect_gtex)) +
   scale_colour_manual(values = METHOD_COLORS, labels = METHOD_LABELS) +
   scale_alpha_manual(values = c(`TRUE` = 0.95, `FALSE` = 0.3), guide = "none") +
   scale_size_manual(values = c(`TRUE` = 1.5, `FALSE` = 0.7), guide = "none") +
-  annotate("text", x = -lim, y = lim, hjust = 0, vjust = 1, size = 2.4, lineheight = 0.95,
-           label = paste(rep_counts$lab, collapse = "\n")) +
-  coord_equal(xlim = c(-lim, lim), ylim = c(-lim, lim)) +
+  annotate("text", x = -lim_pad, y = lim_pad, hjust = 0, vjust = 1, size = 2.3,
+           lineheight = 0.95, label = rep_lab) +
+  coord_equal(xlim = c(-lim_pad, lim_pad), ylim = c(-lim_pad, lim_pad)) +
   labs(x = "BrainSEQ age effect", y = "GTEx age effect") +
   theme_pub() + theme(legend.position = "bottom")
 
@@ -188,8 +198,11 @@ pD <- ggplot(dd, aes(switch, mean_frac)) +
 # Assemble: (A | B) / (C | D), full width
 # ---------------------------------------------------------------------------
 fig <- (pA | pB) / (pC | pD) +
+  plot_layout(guides = "collect") +
   plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 10, face = "bold"))
+  theme(plot.tag = element_text(size = 10, face = "bold"),
+        legend.position = "bottom", legend.box = "horizontal",
+        legend.margin = margin(0, 8, 0, 0, "pt"))
 
 save_fig(fig, "figTrustFunnel", width = 7.2, height = 6.6)
 cat("Done. Output in", FIG_DIR, "\n")

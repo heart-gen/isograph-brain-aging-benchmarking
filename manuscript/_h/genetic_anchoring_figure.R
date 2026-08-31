@@ -4,7 +4,15 @@
 # (B) S-LDSC partitioned heritability of the aging switch layer across five traits
 #     (single-annot cis/sQTL/eQTL enrichment) - splicing- vs expression-lean by trait;
 # (C) the 12 splicing-led resolved coloc genes (max CLPP, coloured by trait span; all GO-invisible);
-# (D) verdict breakdown over all 68 colocalized genes.
+# (D) verdict breakdown over all 68 colocalized genes;
+# (E) SCZ-risk convergence on age-sensitive switch modules (folded in from the former
+#     standalone figSczConvergence, which carried no figure number).
+# NOTE on panel A: SNCA is an ILLUSTRATIVE mechanism panel, not evidence. Its anchored
+# isoform sits at 0.29% of the gene's long-read output
+# (06_switch_mechanism/_m/switch_orthogonal_confirm: max_anchored_if = 0.0029,
+# confirmed_at_usable_abundance = FALSE), and ORTHOGONAL_CONFIRMATION.md states that no
+# single locus should carry a main figure on its own. The set-level evidence is panels
+# B-D plus figOrthogonalConfirm; the legend must say so.
 # Reads 05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet,
 #       05_genetic_anchoring/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
 #       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet; writes figGeneticAnchoring.{pdf,png}.
@@ -124,7 +132,9 @@ pB <- ggplot(lb, aes(trait, enrichment, fill = annot)) +
   geom_text(aes(label = star, y = enrichment + 0.15),
             position = position_dodge(width = 0.75), size = 3, vjust = 0.6) +
   scale_fill_manual(values = ANNOT_COLORS, name = NULL) +
-  labs(x = NULL, y = "Partitioned h² enrichment\n(aging switch layer)") +
+  labs(x = NULL,
+       y = expression(atop("Partitioned " * italic(h)^2 * " enrichment",
+                           "(aging switch layer)"))) +
   theme_pub() + theme(legend.position = c(0.5, 0.92), legend.direction = "horizontal")
 
 # ===========================================================================
@@ -173,21 +183,58 @@ VD_COLORS <- c("splicing-led\n(resolved switch)" = "#D55E00",
 
 pD <- ggplot(vd, aes(n, v, fill = v)) +
   geom_col(width = 0.7, colour = NA) +
-  geom_text(aes(label = n), hjust = -0.3, size = 3) +
+  geom_text(aes(label = n), hjust = -0.35, size = 3) +
   scale_fill_manual(values = VD_COLORS, guide = "none") +
-  scale_x_continuous(expand = expansion(mult = c(0.02, 0.12))) +
+  scale_x_continuous(expand = expansion(mult = c(0.02, 0.20))) +
   labs(x = "colocalized genes (n = 68)", y = NULL) +
   theme_pub() +
   theme(panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ===========================================================================
-# Assemble: A wide on top; B | C on the middle; D bottom-left with legend space
+# Panel E - SCZ-risk loci converge on age-sensitive switch modules
+# Folded in from the former standalone figSczConvergence, which was built and
+# committed but carried no number in FIGURE_ORDERING.md and could not be cited.
+# The per-module candidate RBP regulators shown in the standalone version move to
+# supplementary Table S18; at half width they would not fit legibly.
 # ===========================================================================
-fig <- (pA) / (pB | pC) / (pD | plot_spacer()) +
-  plot_layout(heights = c(1.0, 1.15, 0.7)) +
+COHORT_LAB <- c(gtex_caudate_bg = "GTEx", brainseq_caudate = "BrainSEQ")
+COHORT_COL <- c(GTEx = "#0072B2", BrainSEQ = "#E69F00")
+
+conv <- as.data.frame(read_parquet(rel("05_genetic_anchoring", "_m",
+                                       "scz_age_projection", "convergence.parquet"))) |>
+  mutate(cohort = unname(COHORT_LAB[source]),
+         ylab   = paste0(cohort, " ", module_id, " ", sig_star(scz_p))) |>
+  arrange(n_coloc_loci, scz_p)
+conv$ylab <- factor(conv$ylab, levels = conv$ylab)
+
+pE <- ggplot(conv, aes(n_coloc_loci, ylab, colour = cohort)) +
+  geom_segment(aes(x = 0, xend = n_coloc_loci, yend = ylab), linewidth = 0.55) +
+  geom_point(aes(size = n_go_invisible)) +
+  scale_colour_manual(values = COHORT_COL, name = "Aging cohort") +
+  scale_size_continuous(range = c(1.4, 3.6), breaks = c(0, 3, 6, 9),
+                        name = "GO-invisible\nmembers") +
+  scale_x_continuous(limits = c(0, 7), breaks = 0:6,
+                     expand = expansion(mult = c(0, 0.02))) +
+  labs(x = "Independent SCZ-colocalized loci in module", y = NULL) +
+  guides(colour = guide_legend(order = 1, override.aes = list(size = 2.2)),
+         size   = guide_legend(order = 2)) +
+  theme_pub() +
+  theme(axis.text.y = element_text(size = 6.6),
+        legend.position = "right", legend.box = "vertical",
+        legend.margin = margin(0, 0, 0, 0),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
+
+# ===========================================================================
+# Assemble: A on top (illustrative, deliberately the shortest row); B | C; D | E.
+# The former layout gave panel D a full-width row beside an empty plot_spacer();
+# panel E now fills that slot with the disease-convergence result.
+# ===========================================================================
+fig <- (pA) / (pB | pC) / (pD | pE) +
+  plot_layout(heights = c(0.85, 1.15, 0.9)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figGeneticAnchoring", width = 7.2, height = 8.4)
+save_fig(fig, "figGeneticAnchoring", width = 7.2, height = 8.6)
 cat("Done. Output in", FIG_DIR, "\n")

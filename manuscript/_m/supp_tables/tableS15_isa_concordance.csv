@@ -1,0 +1,18 @@
+analysis,cohort,region,trait,caller,n_genes,n_switch_genes,n_background_genes,median_evidence_switch,median_evidence_background,rank_biserial,mwu_p,adjusted_or,adjusted_p
+brainseq_caudate_age,brainseq,caudate,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11648,876,10772,1.7272,1.3257,0.1447,0.0,1.1655,0.0
+brainseq_caudate_dx,brainseq,caudate,dx,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11563,171,11392,1.2862,0.9349,0.242,0.0,1.2669,0.0
+brainseq_dlpfc_age,brainseq,dlpfc,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11554,0,11554,,1.0408,,,,
+brainseq_hippocampus_age,brainseq,hippocampus,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11114,0,11114,,0.9301,,,,
+gtex_amygdala_age,gtex,amygdala,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10031,1031,9000,1.776,1.2186,0.2386,0.0,1.3007,0.0
+gtex_anterior_cingulate_cortex_ba24_age,gtex,anterior_cingulate_cortex_ba24,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10403,2805,7598,2.1587,1.5678,0.1711,0.0,1.1633,0.0
+gtex_caudate_basal_ganglia_age,gtex,caudate_basal_ganglia,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10607,0,10607,,0.9722,,,,
+gtex_cerebellar_hemisphere_age,gtex,cerebellar_hemisphere,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10956,0,10956,,0.7216,,,,
+gtex_cerebellum_age,gtex,cerebellum,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11092,646,10446,1.6002,1.0704,0.2677,0.0,1.2588,0.0
+gtex_cortex_age,gtex,cortex,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11008,1241,9767,2.7433,1.6289,0.2849,0.0,1.1852,0.0
+gtex_frontal_cortex_ba9_age,gtex,frontal_cortex_ba9,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10756,5047,5709,1.7351,1.3894,0.1061,0.0,1.1214,0.0
+gtex_hippocampus_age,gtex,hippocampus,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10180,1915,8265,2.1072,1.2255,0.3093,0.0,1.3969,0.0
+gtex_hypothalamus_age,gtex,hypothalamus,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10771,407,10364,1.4432,1.3584,0.0556,0.0284,1.0098,0.8153
+gtex_nucleus_accumbens_basal_ganglia_age,gtex,nucleus_accumbens_basal_ganglia,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10717,71,10646,0.861,0.9121,-0.0727,0.8548,0.9707,0.8278
+gtex_putamen_basal_ganglia_age,gtex,putamen_basal_ganglia,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10105,0,10105,,0.787,,,,
+gtex_spinal_cord_cervical_c_1_age,gtex,spinal_cord_cervical_c_1,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10368,44,10324,0.5438,0.6953,-0.0488,0.7119,1.2386,0.3319
+gtex_substantia_nigra_age,gtex,substantia_nigra,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10184,42,10142,1.7661,0.8499,0.4395,0.0,1.7362,0.0

@@ -20,6 +20,15 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S10 | `deep_dive/deep_dive_rbp.tsv` | `_m/rbp/{rbp_switch_calls,rbp_regulon}.parquet` | per-gene switched + module-enriched RBP regulators |
 | S11 | `deep_dive/deep_dive_exon_clinical.tsv` | per-region `clinical_consequence/exon_clinvar.parquet` | per-gene/exon switched-vs-constitutive ClinVar & CDS annotation |
 | S12 | `deep_dive/deep_dive_literature.tsv` | `deep_dive/deep_dive_literature.parquet` | curated known-isoform-biology literature per resolved splicing-led gene (with Manubot citekeys) |
+| S13 | `tableS13_composition_adjustment.csv` | `composition_adjustment.parquet` + `composition_adjustment_gtex.parquet` | how much of the DTU-without-DGE layer survives cell-type adjustment (backs Fig 5) |
+| S14 | `tableS14_longread_orthogonal_confirmation.csv` | `switch_orthogonal_confirm/anchored_gene_confirmation.parquet` | per-gene long-read confirmation of the anchored switch pairs (backs S-real-8) |
+| S15 | `tableS15_isa_concordance.csv` | `isa_concordance/*/summary.json` | independent-caller (satuRn) DTU concordance across all 17 analyses (backs S-real-9) |
+| S16 | `tableS16_module_genetic_anchoring.csv` | `module_genetic_anchoring_meta/` | per-module splicing anchoring vs a size-matched permutation null — **a table on purpose, not a figure** |
+| S17 | `tableS17_rbp_eclip_binding_support.csv` | `rbp/rbp_binding_support.parquet` | per-RBP eCLIP binding capacity, switched vs constitutive exons (backs S-real-6B) |
+| S18 | `tableS18_scz_convergence.csv` | `scz_age_projection/convergence.parquet` | SCZ-risk convergence per module with candidate RBP regulators (backs Fig 4E) |
+| S19 | `tableS19_qtl_anchoring_sensitivity.csv` | `qtl_anchoring_meta/` + `qtl_anchoring_meta/sensitivity/<arm>/` | splicing-specificity contrast under the primary arm and the three pre-specified sensitivities — constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose (backs Fig 3) |
+| S20a | `tableS20a_coloc_convergence_global.csv` | `module_coloc_convergence/global.parquet` | per (trait, source) coloc concentration vs a size-matched null, and anchored-module enrichment under BOTH denominators (all module genes vs the CLPP-tested pool) — backs S-real-10A/C |
+| S20b | `tableS20b_coloc_convergence_per_module.csv` | `module_coloc_convergence/convergence.parquet` | per-module colocalizing gene and locus counts for all five traits, with the `testable` flag and the leave-one-locus-out worst case — backs S-real-10B |
 
 Tables S8–S12 (the per-gene deep-dive) live under `05_genetic_anchoring/_m/deep_dive/` and are regenerated
 by `05_genetic_anchoring/_h/15.build_deep_dive.sh` (not the `assemble_supp_tables.py` assembler). Together they

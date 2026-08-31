@@ -11,7 +11,9 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 > `content/*.md`. This plan therefore audits and *re-anchors* an existing plan rather than
 > inventing one, and flags the two things still genuinely open: the Cell Genomics re-target
 > mechanics. (The SCZ age-projection convergence layer, in flight when this plan was first drafted,
-> is now **complete and significant** — P=0.0058, committed 8f1d315; see the inventory and Results 6.)
+> is complete but the convergence result is **RETRACTED 2026-08-30** — the hypergeometric used the
+> wrong background; against the coloc-tested pool it is null (P=0.40). See Results 6 and
+> `module_coloc_convergence.py`. The module-disruption layers are unaffected.)
 
 ---
 
@@ -34,7 +36,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Clinical consequence | Is the switch layer constrained but non-coding? | gnomAD LOEUF + ClinVar | Switch genes more LoF-constrained (LOEUF 0.72 vs 0.94); switched exons LOWER ClinVar P/LP (ratio 0.18) | Strong | Fisher-combined MWU; CDS-only robustness | CLI + SLURM | `CLINICAL_CONSEQUENCE_META.md` |
 | Three-baseline comparison | Is IsoGraph globally superior to WGCNA? | 17 analyses × 4 methods | **No.** Phenotype rate lives in switch features (both switch-fed win); GO abundance-dominated; one clean effect: isograph > wgcna_multiplex on identical features | Strong (scope-bounding) | Per-module rates; matched features | Login aggregation CLI | `BASELINE_COMPARISON_SUMMARY.md` |
 | Abundance/switch separability | Is the switch channel non-redundant with abundance? | Incremental association | Axes ~orthogonal (median \|r\|≈0.13); 34 SCZD / 43 caudate composition-unique genes; NREP flat abundance (p=0.93) but switch p=7e-5 | Strong | De-confounded incremental test | CLI + SLURM | `figSeparation`, `abundance_structure_separation.py` |
-| **SCZ age-projection (NEW)** | Do SCZ-risk loci converge on age-sensitive switch programs disrupted in disease? | BrainSEQ caudate_sczd + TOPMed genotypes | **[RESOLVED 2026-07-20]** convergence hypergeom **P=0.0058** (15/32 coloc loci in age-sensitive SCZ-GWAS modules vs 25% bg); disruption B 4/10, D 3/10, C 10/10; named regulators (M002→SNRNP70/ZCRB1, M008→ZC3H10/RBM14/CELF5, M006→DDX58/ADAR/YTHDC1); single-locus genotype concordance **null** 28/62 P=0.81 → supplementary | Established (module-level) | Convergence enrich + preservation + age-deviation + direction concordance; genotype layer null/underpowered (n~62) | CLI + SLURM (18), seeds, 2000 perm | `scz_age_projection.py`, `SCZ_AGE_PROJECTION.md`, `convergence.parquet`, `mechanism_rbp.parquet` |
+| **SCZ age-projection (NEW)** | Do SCZ-risk loci converge on age-sensitive switch programs disrupted in disease? | BrainSEQ caudate_sczd + TOPMed genotypes | **[RETRACTED 2026-08-30]** The convergence hypergeometric used ALL module genes as the background. A gene can only colocalize if it was coloc-TESTED (under a GWAS peak with a QTL credible set), and anchored modules are *defined* by MAGMA SCZ enrichment, so their genes enter the tested pool preferentially. Against the tested pool the background is already 45% and the same 15/31 = 48% is **null (P=0.40)**. `module_coloc_convergence.py` repeats this for all five traits with a size-matched permutation null: **no concentration anywhere (P=0.19-1.00), no module survives FDR (min q=0.23)**. The convergence claim is withdrawn; the module-disruption layers (B 4/10, D 3/10, C 10/10) and the named candidate regulators are unaffected and stand on their own. Disruption layers: disruption B 4/10, D 3/10, C 10/10; named regulators (M002→SNRNP70/ZCRB1, M008→ZC3H10/RBM14/CELF5, M006→DDX58/ADAR/YTHDC1); single-locus genotype concordance **null** 28/62 P=0.81 → supplementary | Established (module-level) | Convergence enrich + preservation + age-deviation + direction concordance; genotype layer null/underpowered (n~62) | CLI + SLURM (18), seeds, 2000 perm | `scz_age_projection.py`, `SCZ_AGE_PROJECTION.md`, `convergence.parquet`, `mechanism_rbp.parquet` |
 
 ### 2. Established Findings
 
@@ -198,7 +200,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 **Tradeoffs:** Rests on coloc posteriors that are modest; the defensible unit is the *set-level* pattern, and the paper must repeatedly say so.
 
-**Conditions that would change the recommendation:** The SCZ age-projection convergence came back **significant** (P=0.0058), so the "risk loci converge on age-sensitive programs" sub-claim is now supported as main text (had it been null it would have stayed supplementary). The remaining swing factor is coloc robustness — the per-gene genetics stays set-level.
+**Conditions that would change the recommendation:** The SCZ age-projection convergence is **RETRACTED** (P=0.40 against the coloc-tested background; the P=0.0058 used an all-genes background inflated by shared ascertainment), so the "risk loci converge on age-sensitive programs" sub-claim moves OUT of main text. What remains main-text-worthy is that the age-sensitive modules are disrupted in disease (B/C/D), which is a different and independent claim. The remaining swing factor is coloc robustness — the per-gene genetics stays set-level.
 
 **Confidence:** Moderate-to-high (evidence is strong and self-controlled; per-gene genetics is suggestive).
 
@@ -230,7 +232,8 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Modules are reproducible + replicate aging | Finding 5 | Established | Trust (Fig 2) | — |
 | Method recovers switch modules on truth | Finding 6 | Established | Foundation (Fig 1) | Synthetic |
 | IsoGraph is complementary, not superior | Finding 1 | Established | Honest bound (Supp) | Deliberately limiting |
-| SCZ-risk loci converge on age-sensitive programs disrupted in disease | SCZ projection | **Established (module-level)** P=0.0058 | Main-text Results 6 / Fig 4E | Per-locus genotype layer null (supp); coloc is set-level |
+| ~~SCZ-risk loci converge on age-sensitive programs~~ (RETRACTED) | SCZ projection | **Not supported** — P=0.40 vs the coloc-tested background (was P=0.0058 vs an all-genes background) | Demote from Fig 4E; honest version is S-real-10 | Ascertainment: MAGMA anchoring and coloc testing select on the same GWAS |
+| Age-sensitive switch modules are disrupted in SCZ | SCZ projection | **Established (module-level)** B 4/10, D 3/10, C 10/10 | Main-text Results 6 | Independent of the retracted convergence test |
 
 ### 13. Recommended Results Outline
 
@@ -262,8 +265,12 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Role: biological payoff. Transition: "do risk loci converge as a program in disease?"
 - Confidence: Moderate (set-level).
 
-### Results 6 (NEW): SCZ-risk loci converge on age-sensitive switch programs disrupted in disease
-- Evidence: convergence hypergeom **P=0.0058** (15/32 loci in anchored modules); disruption B 4/10, D 3/10, C 10/10; named regulators (M002 SNRNP70/ZCRB1; M008 ZC3H10/RBM14/CELF5; M006 DDX58/ADAR/YTHDC1). Single-locus genotype concordance null (28/62, P=0.81) → Supp.
+### Results 6 (NEW): Age-sensitive switch programs are disrupted in schizophrenia
+
+_(Retitled 2026-08-30. The former title asserted convergence of SCZ-risk loci on these
+programs; that test is retracted — see the RETRACTED note below. What survives is module
+disruption in disease, which does not depend on it.)_
+- Evidence: ~~convergence hypergeom P=0.0058 (15/32 loci in anchored modules)~~ **RETRACTED 2026-08-30, P=0.40 on the coloc-tested background**; disruption B 4/10, D 3/10, C 10/10; named regulators (M002 SNRNP70/ZCRB1; M008 ZC3H10/RBM14/CELF5; M006 DDX58/ADAR/YTHDC1). Single-locus genotype concordance null (28/62, P=0.81) → Supp.
 - Role: extends Fig 4 into disease convergence. **Convergence is significant → promote to a main-text Results unit** (as Fig 4E or a standalone panel). Watch the ≤7 display-item cap (see §15).
 - Confidence: Moderate — module-level convergence is significant; per-locus genotype resolution is underpowered (n~62), disclose as such.
 
@@ -315,7 +322,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast 1.163 pheno-sig (p=3.6e-7) / 1.172 GO-invisible (p=2.3e-5, I²=0.00), GO-visible weakest (1.104, p=0.022, I²=0.68 — not a null), IsoGraph-only vs matched WGCNA (all ns). **Reproducible:** `manuscript/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
 | **Main Table 2 — Splicing-led colocalized genes (NEW, built; reframed)** | deep-dive panel + literature | Finding 4 | **Main companion OR keep in Supp (S8/S9)** | Per-gene resolution; **CLPP posteriors are individually modest** — coloc threshold is eCAVIAR CLPP≥0.01 ("strong" ≥0.05), only **4/12 clear 0.05** and only CTSH (0.39) is substantial. Caption states the claim is *set-level coherence*, NOT per-locus significance (which lives in the contrast table + S-LDSC). Max CLPP carries confidence stars (`*` >0.01, `**` >0.05, `***` >0.10 → 1×`***`, 3×`**`, 8×`*`). Reproducible: same builder → `table3_splicing_led_genes.{csv,md}`. | Moderate | **Main or Supp** |
 | S-real-1 (baseline rates) | baseline_comparison | Finding 1 | **Keep in Supp** | Bounds, not advances | High | Supp |
-| **New: SCZ convergence panel** | SCZ projection (significant, P=0.0058) | Results 6 | **Add as Fig 4E or new S-real-8** | Convergence is significant → extends anchoring to disease convergence; per-locus genotype layer stays supp | Moderate | **Main (Fig 4E) or Supp** |
+| **SCZ convergence panel** | SCZ projection (**RETRACTED**, P=0.40 on the correct background) | Results 6 | **Remove from Fig 4E**; the honest all-trait version is S-real-10 (`figColocConvergence`) | A count-only panel cannot support convergence: it shows neither the size-matched null nor the tested-pool denominator | — | **Supp only (S-real-10)** |
 | RBP intronic/combined scope | new intronic scan | S-real-6 mechanism | **Fold into S-real-6 or its table (S10)** | Strengthens regulon call with intronic niche | Moderate | Supp table |
 
 > **Note — synthetic Table 1 → Supplement: DONE.** Regenerated clean (six core accuracy scenarios ×
@@ -403,8 +410,8 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 
 **[REQUIREMENT] Submission constraints (verified 2026-07-20):** Cell Genomics research Article — **<8,000 words** (excl. refs/STAR Methods/supp), **≤7 display items counting figures AND tables** (current plan = Fig 1–4 + QTL-contrast table = 5, with room for a 6th SCZ panel; synthetic benchmark table demoted to supp), structured summary. **STAR Methods** required with a **Key Resources Table** + a **Resource Availability** block (Lead contact / Materials availability / Data and code availability). **Mandatory before acceptance:** all original code in a DOI-minting repo (Zenodo) with the DOI reported, and a data-and-code-availability statement listing every accession + DOI. Still to verify on the live pages: reference style, supplemental caps, Highlights/graphical-abstract, and inclusion/ethics wording.
 
-**[RECOMMENDATION] Preferred manuscript strategy:** Biology-led, genetics-anchored complementary-layer framing; Results ordered method→trust→GO-invisible DTU→splicing-QTL anchoring (headline)→variant resolution→disease convergence (now significant, P=0.0058); keep the superiority bound in the supplement; state the set-level nature of the genetic claims repeatedly.
+**[RECOMMENDATION] Preferred manuscript strategy:** Biology-led, genetics-anchored complementary-layer framing; Results ordered method→trust→GO-invisible DTU→splicing-QTL anchoring (headline)→variant resolution→module disruption in disease (B/C/D; the *convergence* test is retracted, P=0.40); keep the superiority bound in the supplement; state the set-level nature of the genetic claims repeatedly.
 
-**[RESOLVED 2026-07-20] Former highest-priority issue:** The SCZ age-projection convergence is **significant** (hypergeom P=0.0058), so "SCZ-risk loci converge on age-sensitive switch programs disrupted in disease" is supported as a **main-text Results unit** (Results 6 / Fig 4E), with named candidate RBP regulators and the null single-locus genotype layer disclosed as supplementary. Committed to `main` (8f1d315).
+**[RETRACTED 2026-08-30; was RESOLVED 2026-07-20] Former highest-priority issue:** The SCZ age-projection convergence is **not supported** (hypergeom P=0.40 against the coloc-tested pool; the reported P=0.0058 used an all-genes background confounded by shared ascertainment). "SCZ-risk loci converge on age-sensitive switch programs" is **withdrawn** as a main-text unit. The surviving main-text claim is the weaker and separate "age-sensitive switch modules are disrupted in SCZ" (B/C/D), with named candidate RBP regulators and the null single-locus genotype layer disclosed as supplementary. Committed to `main` (8f1d315).
 
 **[UNRESOLVED] Highest-priority open issue now:** Display-item budget + the Cell Genomics re-target mechanics (STAR Methods, Key Resources Table, DACA with minted DOIs). With Results 6 promoted, main items could reach Fig 1–4 + Table 2 + (Table 3?) + SCZ panel — decide which of {Table 3, SCZ-as-standalone} stays main vs supplement to hold ≤7.
