@@ -1,0 +1,30 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellar_hemisphere",
+  "tissue": "Brain_Cerebellar_Hemisphere",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 6749,
+  "universe_sizes": {
+    "sQTL": 5079,
+    "eQTL": 5599
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 5823,
+      "n_constraint_complete": 5079,
+      "frac_retained": 0.8722
+    },
+    "eQTL": {
+      "n_tested": 6739,
+      "n_constraint_complete": 5599,
+      "frac_retained": 0.8308
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 6749
+  }
+}

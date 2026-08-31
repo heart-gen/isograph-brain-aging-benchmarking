@@ -1,0 +1,32 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "caudate",
+  "tissue": "Brain_Caudate_basal_ganglia",
+  "variant": "standard",
+  "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 17976,
+  "universe_sizes": {
+    "sQTL": 11162,
+    "eQTL": 13128
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 13117,
+      "n_constraint_complete": 11162,
+      "frac_retained": 0.851
+    },
+    "eQTL": {
+      "n_tested": 17344,
+      "n_constraint_complete": 13128,
+      "frac_retained": 0.7569
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 5795,
+    "pheno_sig_modules": 1502,
+    "go_invisible_modules": 1502
+  }
+}

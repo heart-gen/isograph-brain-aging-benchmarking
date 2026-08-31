@@ -1,0 +1,21 @@
+{
+  "analysis": "gtex-aging",
+  "region": "nucleus_accumbens_basal_ganglia",
+  "tissue": "Brain_Nucleus_accumbens_basal_ganglia",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "continuous",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 17117,
+  "universe_sizes": {
+    "sQTL": 12981,
+    "eQTL": 17088
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 17117,
+    "pheno_sig_modules": 420,
+    "go_visible_modules": 420
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "anterior_cingulate_cortex_ba24",
+  "tissue": "Brain_Anterior_cingulate_cortex_BA24",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 17612,
+  "universe_sizes": {
+    "sQTL": 11205,
+    "eQTL": 13476
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 13291,
+      "n_constraint_complete": 11205,
+      "frac_retained": 0.8431
+    },
+    "eQTL": {
+      "n_tested": 17572,
+      "n_constraint_complete": 13476,
+      "frac_retained": 0.7669
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 17612,
+    "pheno_sig_modules": 13600,
+    "go_invisible_modules": 2152,
+    "go_visible_modules": 13009
+  }
+}

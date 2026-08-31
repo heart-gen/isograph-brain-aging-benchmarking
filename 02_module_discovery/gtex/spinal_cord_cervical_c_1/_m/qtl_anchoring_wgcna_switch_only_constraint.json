@@ -1,0 +1,30 @@
+{
+  "analysis": "gtex-aging",
+  "region": "spinal_cord_cervical_c_1",
+  "tissue": "Brain_Spinal_cord_cervical_c-1",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 5388,
+  "universe_sizes": {
+    "sQTL": 3827,
+    "eQTL": 4491
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 4380,
+      "n_constraint_complete": 3827,
+      "frac_retained": 0.8737
+    },
+    "eQTL": {
+      "n_tested": 5377,
+      "n_constraint_complete": 4491,
+      "frac_retained": 0.8352
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 5388
+  }
+}

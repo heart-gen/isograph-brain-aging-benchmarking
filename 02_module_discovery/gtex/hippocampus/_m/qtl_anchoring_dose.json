@@ -1,0 +1,22 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hippocampus",
+  "tissue": "Brain_Hippocampus",
+  "variant": "standard",
+  "method": "isograph",
+  "outcome": "dose",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 18424,
+  "universe_sizes": {
+    "sQTL": 13348,
+    "eQTL": 18372
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 6771,
+    "pheno_sig_modules": 3033,
+    "go_invisible_modules": 1094,
+    "go_visible_modules": 1939
+  }
+}
