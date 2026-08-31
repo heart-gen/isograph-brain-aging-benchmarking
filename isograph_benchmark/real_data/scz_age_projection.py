@@ -26,7 +26,13 @@ Five layers (A is the headline):
   D. Age-state deviation. Fit each module eigengene's age trajectory in CONTROLS; test whether
      cases deviate from the control-expected state (accelerated-aging residual ~ Dx).
   Convergence. Do multiple SCZ-risk loci land in the same age-sensitive modules, and are their
-     driver switches directionally disrupted the same way?
+     driver switches directionally disrupted the same way? **The answer is no**, once the
+     background is the coloc-TESTED gene pool rather than all module genes: anchored modules are
+     defined by MAGMA SCZ enrichment and so enter the coloc test preferentially, and conditioning
+     on that removes the effect (48% vs a 45% tested-pool background, P=0.40; the superseded
+     all-genes background gave 25% and P=0.004). See module_coloc_convergence.py, which repeats
+     this for all five traits against a size-matched permutation null and finds no concentration
+     anywhere. Layers B/C/D (disruption of the age-sensitive modules in disease) are unaffected.
 
 Outputs under 05_genetic_anchoring/_m/scz_age_projection/ (parquet + Manubot SCZ_AGE_PROJECTION.md).
 Genotype dosages are produced upstream by plink2 (eqtl env) in the SLURM wrapper.
@@ -382,20 +388,41 @@ def layer_convergence(A, scz_mods):
     rows = []
     hits = A.dropna(subset=["dx_beta_switch"])
     coloc_genes = set(hits["gene"])
-    # hypergeometric: coloc genes concentrated in anchored (age-sensitive) modules?
+    # Hypergeometric: are coloc genes concentrated in anchored (age-sensitive) modules?
+    #
+    # THE DENOMINATOR MATTERS AND AN EARLIER VERSION OF THIS GOT IT WRONG. Using ALL
+    # module genes as the background gave 15/31 = 48% vs 25%, P=0.004 — the published
+    # convergence headline. But a gene can only appear in `coloc_genes` if it was
+    # COLOC-TESTED, i.e. if it sat under a SCZ GWAS peak with a QTL credible set. Anchored
+    # modules are defined by MAGMA SCZ P<0.05, so their genes preferentially sit under SCZ
+    # peaks and preferentially enter the tested pool: the tested pool is already ~45%
+    # anchored, and against it 48% is null (P=0.40). MAGMA anchoring and coloc testing
+    # select on the same GWAS signal, so the all-genes background measures that shared
+    # ascertainment, not convergence.
+    #
+    # The tested pool is therefore the background, and the all-genes figure is retained
+    # only so the inflation stays visible. See module_coloc_convergence.py, which runs
+    # this comparison for all five traits with a size-matched permutation null.
     anch_genes, all_genes = set(), set()
     for (src, mid), rec in scz_mods.items():
         all_genes |= set(rec["genes"])
         if rec["anchored"]:
             anch_genes |= set(rec["genes"])
-    N = len(all_genes); K = len(anch_genes)
-    drawn = coloc_genes & all_genes
-    x = len(coloc_genes & anch_genes)
-    enrich_p = float(stats.hypergeom.sf(x - 1, N, K, len(drawn))) if len(drawn) else np.nan
+    tested = set(A["gene"]) & all_genes          # every gene that could have been a hit
+    tested_anch = tested & anch_genes
+    N, K = len(tested), len(tested_anch)
+    drawn = coloc_genes & tested
+    x = len(coloc_genes & tested_anch)
+    enrich_p = float(stats.hypergeom.sf(x - 1, N, K, len(drawn))) if (len(drawn) and N) else np.nan
+    N_all, K_all = len(all_genes), len(anch_genes)
     enrich = {"n_coloc_in_pool": len(drawn), "n_coloc_in_anchored": x,
-              "frac_anchored_pool": K / N if N else np.nan,
+              "n_tested_pool": N, "frac_anchored_pool": K / N if N else np.nan,
               "frac_coloc_anchored": x / len(drawn) if drawn else np.nan,
-              "hyperg_p": enrich_p}
+              "hyperg_p": enrich_p,
+              # superseded all-module-genes background, kept to show the ascertainment
+              "frac_anchored_allgenes": K_all / N_all if N_all else np.nan,
+              "hyperg_p_allgenes_denom": float(
+                  stats.hypergeom.sf(x - 1, N_all, K_all, len(drawn))) if len(drawn) else np.nan}
     for (src, mid), rec in scz_mods.items():
         if not rec["anchored"]:
             continue
@@ -452,7 +479,7 @@ def _fdr(df, pcol, into):
 
 
 def _write_report(A, GXD, B, C, D, conv, mech=None):
-    L = ["# SCZ-risk loci converge on age-sensitive isoform-switch programs disrupted in disease",
+    L = ["# Age-sensitive isoform-switch programs in schizophrenia",
          "",
          "Age-sensitive co-switching modules are defined out-of-cohort in the independent aging "
          "caudate fits (GTEx caudate basal ganglia + BrainSeq caudate) and restricted to those "
@@ -469,21 +496,39 @@ def _write_report(A, GXD, B, C, D, conv, mech=None):
     # ---- HEADLINE: genetic convergence + module-level disruption (best-powered result) --------
     if conv is not None and not conv.empty:
         en = conv.attrs.get("enrich", {})
-        L += ["## Headline — SCZ-risk loci converge on age-sensitive switch programs disrupted in disease",
-              ""]
+        L += ["## SCZ-risk loci and age-sensitive switch programs", ""]
         if en and np.isfinite(en.get("hyperg_p", np.nan)):
-            L += [f"Schizophrenia-colocalized switch genes are **concentrated in the age-sensitive "
-                  f"(SCZ-GWAS-enriched) modules**: {en['n_coloc_in_anchored']}/{en['n_coloc_in_pool']} "
-                  f"({en['frac_coloc_anchored']:.0%}) of pooled coloc loci fall in anchored modules vs a "
-                  f"{en['frac_anchored_pool']:.0%} background (hypergeometric P={en['hyperg_p']:.3g}). "
-                  "Multiple independent SCZ-risk loci land on the *same* co-switching programs:", ""]
-        L += ["| source | module | # SCZ loci | # GO-invisible | max same-dir frac | SCZ MAGMA P |",
+            sig = en["hyperg_p"] < 0.05
+            L += [
+                ("Schizophrenia-colocalized switch genes are **concentrated in the "
+                 if sig else
+                 "Schizophrenia-colocalized switch genes are **not concentrated in the ") +
+                f"age-sensitive (SCZ-GWAS-enriched) modules**: "
+                f"{en['n_coloc_in_anchored']}/{en['n_coloc_in_pool']} "
+                f"({en['frac_coloc_anchored']:.0%}) of coloc genes fall in anchored modules, against a "
+                f"{en['frac_anchored_pool']:.0%} background among the genes that were coloc-TESTED "
+                f"(hypergeometric P={en['hyperg_p']:.3g}).",
+                "",
+                "> **The background is the whole result, and an earlier version of this report used the "
+                "wrong one.** Against *all* module genes the background is only "
+                f"{en.get('frac_anchored_allgenes', float('nan')):.0%} and the same counts give "
+                f"P={en.get('hyperg_p_allgenes_denom', float('nan')):.3g} — the previously reported "
+                "convergence headline. That comparison is confounded by ascertainment: a gene can only "
+                "colocalize if it sat under a SCZ GWAS peak with a QTL credible set, and anchored modules "
+                "are *defined* by MAGMA SCZ enrichment, so their genes enter the tested pool "
+                "preferentially. Conditioning on what could have been a hit removes the effect. "
+                "`module_coloc_convergence.py` repeats this for all five traits with a size-matched "
+                "permutation null and finds no concentration anywhere (P = 0.19–1.00).",
+                "",
+                "The modules carrying the most colocalized loci are listed below; with these counts the "
+                "per-module numbers are descriptive, not evidence of convergence.", ""]
+        L += ["| source | module | # coloc genes | # GO-invisible | max same-dir frac | SCZ MAGMA P |",
               "|--------|--------|-----------|----------------|-------------------|-------------|"]
         for r in conv.head(6).itertuples():
             L.append(f"| {r.source} | {r.module_id} | {r.n_coloc_loci} | {r.n_go_invisible} | "
                      f"{r.frac_same_dx_direction:.2f} | {r.scz_p:.2g} |")
         L += ["",
-              "These converged-on modules are directionally disrupted in disease: they recapitulate "
+              "Independently of that null, the age-sensitive modules are directionally disrupted in disease: they recapitulate "
               f"the aging switch direction gene-by-gene in **{nB}/{len(B) if B is not None else 0}** "
               f"modules (B), show case deviation from the control age trajectory in **{nD}/"
               f"{len(D) if D is not None else 0}** modules (D), and stay co-switch-coherent in disease "
@@ -491,10 +536,12 @@ def _write_report(A, GXD, B, C, D, conv, mech=None):
         # candidate trans-regulators — the mechanism hypothesis per convergent module
         if mech is not None and not mech.empty:
             L += ["### Candidate trans-regulators (mechanism)", "",
-                  "Each convergent module's members are tested for shared RBP binding-site switching "
+                  "Each listed module's members are tested for shared RBP binding-site switching "
                   "(rbp_regulon --scope combined; mature+intronic motif scan). Significant RBPs "
                   "(q<0.05) are candidate trans regulators coordinating the co-switch program — a "
-                  "named, testable mechanism rather than a set-level correlation:", "",
+                  "named, testable hypothesis. These modules are NOT established as points of "
+                  "SCZ-risk convergence (see the background caveat above); the regulators are "
+                  "candidates for the modules' own co-switching, not for a convergence effect:", "",
                   "| source | module | # SCZ loci | top candidate RBP regulators (q) |",
                   "|--------|--------|-----------|----------------------------------|"]
             convtop = conv.head(6) if conv is not None else pd.DataFrame()

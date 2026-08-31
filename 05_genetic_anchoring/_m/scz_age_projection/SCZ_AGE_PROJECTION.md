@@ -1,12 +1,16 @@
-# SCZ-risk loci converge on age-sensitive isoform-switch programs disrupted in disease
+# Age-sensitive isoform-switch programs in schizophrenia
 
 Age-sensitive co-switching modules are defined out-of-cohort in the independent aging caudate fits (GTEx caudate basal ganglia + BrainSeq caudate) and restricted to those enriched for schizophrenia GWAS (MAGMA SCZ P<0.05). Their **behaviour** is tested in an independent SCZ case/control cohort (BrainSeq caudate_sczd) with numeric age and TOPMed genotypes. Effects are abundance-conditioned (DTU-without-DGE).
 
-## Headline — SCZ-risk loci converge on age-sensitive switch programs disrupted in disease
+## SCZ-risk loci and age-sensitive switch programs
 
-Schizophrenia-colocalized switch genes are **concentrated in the age-sensitive (SCZ-GWAS-enriched) modules**: 15/32 (47%) of pooled coloc loci fall in anchored modules vs a 25% background (hypergeometric P=0.0058). Multiple independent SCZ-risk loci land on the *same* co-switching programs:
+Schizophrenia-colocalized switch genes are **not concentrated in the age-sensitive (SCZ-GWAS-enriched) modules**: 15/32 (47%) of coloc genes fall in anchored modules, against a 47% background among the genes that were coloc-TESTED (hypergeometric P=1).
 
-| source | module | # SCZ loci | # GO-invisible | max same-dir frac | SCZ MAGMA P |
+> **The background is the whole result, and an earlier version of this report used the wrong one.** Against *all* module genes the background is only 25% and the same counts give P=0.0058 — the previously reported convergence headline. That comparison is confounded by ascertainment: a gene can only colocalize if it sat under a SCZ GWAS peak with a QTL credible set, and anchored modules are *defined* by MAGMA SCZ enrichment, so their genes enter the tested pool preferentially. Conditioning on what could have been a hit removes the effect. `module_coloc_convergence.py` repeats this for all five traits with a size-matched permutation null and finds no concentration anywhere (P = 0.19–1.00).
+
+The modules carrying the most colocalized loci are listed below; with these counts the per-module numbers are descriptive, not evidence of convergence.
+
+| source | module | # coloc genes | # GO-invisible | max same-dir frac | SCZ MAGMA P |
 |--------|--------|-----------|----------------|-------------------|-------------|
 | gtex_caudate_bg | M002 | 6 | 8 | 0.67 | 0.011 |
 | gtex_caudate_bg | M004 | 3 | 5 | 0.58 | 0.048 |
@@ -15,19 +19,19 @@ Schizophrenia-colocalized switch genes are **concentrated in the age-sensitive (
 | gtex_caudate_bg | M006 | 1 | 0 | 1.00 | 0.035 |
 | brainseq_caudate | M001 | 1 | 0 | 1.00 | 0.017 |
 
-These converged-on modules are directionally disrupted in disease: they recapitulate the aging switch direction gene-by-gene in **4/10** modules (B), show case deviation from the control age trajectory in **3/10** modules (D), and stay co-switch-coherent in disease in **10/10** modules (C).
+Independently of that null, the age-sensitive modules are directionally disrupted in disease: they recapitulate the aging switch direction gene-by-gene in **4/10** modules (B), show case deviation from the control age trajectory in **3/10** modules (D), and stay co-switch-coherent in disease in **10/10** modules (C).
 
 ### Candidate trans-regulators (mechanism)
 
-Each convergent module's members are tested for shared RBP binding-site switching (rbp_regulon --scope combined; mature+intronic motif scan). Significant RBPs (q<0.05) are candidate trans regulators coordinating the co-switch program — a named, testable mechanism rather than a set-level correlation:
+Each listed module's members are tested for shared RBP binding-site switching (rbp_regulon --scope combined; mature+intronic motif scan). Significant RBPs (q<0.05) are candidate trans regulators coordinating the co-switch program — a named, testable hypothesis. These modules are NOT established as points of SCZ-risk convergence (see the background caveat above); the regulators are candidates for the modules' own co-switching, not for a convergence effect:
 
 | source | module | # SCZ loci | top candidate RBP regulators (q) |
 |--------|--------|-----------|----------------------------------|
-| gtex_caudate_bg | M002 | 6 | SNRNP70(q=0.013); ZCRB1(q=0.045) |
+| gtex_caudate_bg | M002 | 6 | IGF2BP1(q=0.0061) |
 | gtex_caudate_bg | M004 | 3 | — |
-| gtex_caudate_bg | M008 | 3 | ZC3H10(q=0.0037); RBM14(q=0.006); RBMS1(q=0.016); RBM6(q=0.022); CELF5(q=0.023) |
+| gtex_caudate_bg | M008 | 3 | RBM14(q=0.015); RBM6(q=0.023); RBMS1(q=0.025); RBM24(q=0.029); HNRNPA3(q=0.045) |
 | brainseq_caudate | M004 | 2 | — |
-| gtex_caudate_bg | M006 | 1 | DDX58(q=0.00012); ADAR(q=0.0012); AKAP1(q=0.0022); YTHDC1(q=0.0024); PABPC4(q=0.0029) |
+| gtex_caudate_bg | M006 | 1 | DDX58(q=0.0001); GRSF1(q=0.0016); ADAR(q=0.0016); TARDBP(q=0.0016); PTBP2(q=0.0039) |
 | brainseq_caudate | M001 | 1 | — |
 
 _Motif-based candidate regulation (predicted binding-site gain/loss between switch isoforms), not experimental validation._
