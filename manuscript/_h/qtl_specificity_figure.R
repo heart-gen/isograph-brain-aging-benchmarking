@@ -78,8 +78,7 @@ pA <- ggplot(a, aes(set, or, colour = xqtl)) +
                   size = 0.35, linewidth = 0.5) +
   scale_colour_manual(values = QTL_COLORS) +
   labs(x = NULL, y = "cis-QTL odds ratio\n(module vs background)") +
-  theme_pub() + theme(legend.position = c(0.82, 0.18),
-                      axis.text.x = element_text(angle = 25, hjust = 1))
+  theme_pub()   # guides are collected to a single strip at the figure foot
 
 # ---------------------------------------------------------------------------
 # Panel B - splicing-specificity contrast (sQTL OR / eQTL OR), IsoGraph, 17 analyses
@@ -115,17 +114,18 @@ pC <- ggplot(c_df, aes(ratio, set, colour = method)) +
                   size = 0.32, linewidth = 0.5) +
   scale_colour_manual(values = METHOD_COLORS, labels = METHOD_LABELS) +
   labs(x = "Splicing specificity, shared tissues", y = NULL) +
-  theme_pub() + theme(legend.position = "bottom",
-                      panel.grid.major.y = element_blank(),
+  theme_pub() + theme(panel.grid.major.y = element_blank(),
                       panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ---------------------------------------------------------------------------
 # Assemble: A on top, B | C below
 # ---------------------------------------------------------------------------
 fig <- pA / (pB | pC) +
-  plot_layout(heights = c(1, 1.05)) +
+  plot_layout(heights = c(1, 1.05), guides = "collect") +
   plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 10, face = "bold"))
+  theme(plot.tag = element_text(size = 10, face = "bold"),
+        legend.position = "bottom", legend.box = "horizontal",
+        legend.margin = margin(0, 10, 0, 0, "pt"))
 
 save_fig(fig, "figQtlSpecificity", width = 7.2, height = 6.0)
 cat("Done. Output in", FIG_DIR, "\n")

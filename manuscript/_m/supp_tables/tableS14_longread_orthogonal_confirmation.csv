@@ -1,0 +1,13 @@
+gene,gene_name,traits,max_clpp,n_anchored_pairs,n_pairs_detected,n_switch_like,n_pairs_usable,n_switch_like_usable,best_usage_spearman,max_anchored_if,orthogonally_confirmed,confirmed_at_usable_abundance
+ENSG00000288701,PRRC2B,scz,0.0172,20,6,4,10,4,-0.6923,0.2808,True,True
+ENSG00000186815,TPCN1,ad,0.0112,25,12,4,10,3,-0.838,0.8941,True,True
+ENSG00000087157,PGS1,als,0.093,20,6,3,5,2,-0.8462,0.8175,True,True
+ENSG00000278311,GGNBP2,als,0.0108,10,4,3,5,2,-0.6972,0.9304,True,True
+ENSG00000100239,PPP6R2,"als,scz",0.0653,25,2,2,10,2,-0.9161,0.9036,True,True
+ENSG00000089486,CDIP1,scz,0.0281,25,4,2,5,1,-0.986,0.3064,True,True
+ENSG00000075711,DLG1,scz,0.0258,15,4,2,5,1,-0.393,0.4002,True,True
+ENSG00000121749,TBC1D15,pd,0.0174,25,2,2,10,2,-0.3818,0.8944,True,True
+ENSG00000145335,SNCA,"lbd,pd",0.0376,5,5,1,0,0,-0.3626,0.0029,True,False
+ENSG00000099889,ARVCF,scz,0.01,15,1,1,5,1,-0.972,0.4048,True,True
+ENSG00000103811,CTSH,ad,0.3855,25,1,0,0,0,-0.1341,0.004,False,False
+ENSG00000258366,RTEL1,scz,0.0101,25,6,0,10,0,-0.4375,0.5452,False,False
