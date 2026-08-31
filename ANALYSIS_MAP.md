@@ -48,7 +48,7 @@ that reaches the paper.
 | Incremental association | `real_data/incremental_association.py` | `_h/06–07` | `<store>/incremental_association/` | S-real-4 |
 | Abundance/switch separation | `real_data/abundance_structure_separation.py` | `_h/08` | `_m/incremental_effect_sizes.parquet` | S-real-4 |
 | Composition-unique genes | `real_data/characterize_composition_unique.py` | `_h/09` | `_m/composition_adjustment.parquet` | S-real-4 |
-| Cell-type composition | `real_data/celltype_composition.py` + MuSiC R | `_h/10–11` | `02_module_discovery/gtex/_m/composition/` | — |
+| Cell-type composition | `real_data/celltype_composition.py` + MuSiC R | `_h/10–11` | `_m/composition_adjustment.parquet`, `02_module_discovery/gtex/_m/composition/` | **Fig 5** `figCompositionRobustness`, Table S13 |
 | Tier projection | `real_data/project_tiers.py` | `_h/12–13` | `<store>/tier_checks/` | — |
 | Three-baseline comparison | `real_data/baseline_comparison.py` | `_h/14` | `_m/baseline_comparison/` | S-real-1, S1/S2 |
 
@@ -57,14 +57,18 @@ that reaches the paper.
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
 | xQTL anchoring (17 analyses) | `real_data/qtl_anchoring.py` | `05_genetic_anchoring/_h/01–02` | `<store>/qtl_anchoring.parquet` | Fig 3 |
+| xQTL anchoring sensitivity (17 x 3 arms) | `real_data/qtl_anchoring.py --outcome/--covariate-set` | `05_genetic_anchoring/_h/17` | `<store>/qtl_anchoring_{constraint,continuous,dose}.parquet` | Table S19 |
 | Contrast meta-analysis | `real_data/qtl_anchoring_meta.py` | (login) | `_m/qtl_anchoring_meta/` | **Fig 3, Table 1**, S3–S5 |
+| Module-level coloc convergence (5 traits) | `real_data/module_coloc_convergence.py` | `05_genetic_anchoring/_h/18` | `_m/module_coloc_convergence/` | S-real-10, Tables S20a/b |
+| Sensitivity meta-analysis | `real_data/qtl_anchoring_meta.py --outcome/--covariate-set` | (login) | `_m/qtl_anchoring_meta/sensitivity/<arm>/` | Table S19 |
 | sQTL direction concordance | `real_data/sqtl_concordance.py`, `sqtl_concordance_meta.py` | `_h/03` | `_m/sqtl_concordance_meta/` | — |
-| Module genetic anchoring | `real_data/module_genetic_anchoring.py` | `_h/04` | `_m/module_genetic_anchoring_meta/` | Fig 4 |
+| Module genetic anchoring | `real_data/module_genetic_anchoring.py` | `_h/04` | `_m/module_genetic_anchoring_meta/` | Table S16 only — **no figure by design** (pooled-gene, not per-module) |
 | MAGMA module-GWAS | `gwas/prepare_magma_inputs.py` | `_h/05–07` | `_m/gwas/magma_results_combined.parquet` | S-real-2 |
 | Colocalization (SuSiE + eCAVIAR) | `real_data/coloc_{prep,summary,isoform_events,direction,meta}.py` | `_h/08–11` | `_m/coloc/` | Fig 4, S8/S9 |
+| Per-gene sQTL-vs-eQTL coloc contrast | `real_data/coloc_modality_contrast.py` + `_h/20.coloc_modality_abf.R` | `_h/19–21` | `_m/coloc_modality_contrast/` | *(pending full run)* |
 | S-LDSC partitioned heritability | `real_data/ldsc_annot_prep.py`, `ldsc_summary.py` | `_h/12–14` | `_m/ldsc/ldsc_partitioned.parquet` | Fig 4B |
 | Per-gene deep dive | `real_data/gene_deep_dive.py` | `_h/15` | `_m/deep_dive/` | **Table 2**, S8–S12 |
-| SCZ age projection | `real_data/scz_age_projection.py` | `_h/16` | `_m/scz_age_projection/` | `figSczConvergence` |
+| SCZ age projection | `real_data/scz_age_projection.py` | `_h/16` | `_m/scz_age_projection/` | **Fig 4E** (folded from `figSczConvergence`), Table S18 |
 
 ## 06 — Switch mechanism
 
@@ -72,8 +76,8 @@ that reaches the paper.
 |---|---|---|---|---|
 | Switch consequence + meta | `real_data/switch_consequence[_meta].py` | `06_switch_mechanism/_h/01–02` | `_m/switch_consequence_meta.parquet` | S-real-5 |
 | PSI / junction validation | `real_data/validate_switch_splicing.py` | `_h/03–04` | `_m/switch_validation/` | — |
-| Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/05` | `_m/switch_orthogonal_confirm/` | — |
-| ISA / satuRn concordance | `real_data/isa_concordance.py` | `_h/06` | `_m/isa_concordance/` | — |
+| Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/05` | `_m/switch_orthogonal_confirm/` | **S-real-8** `figOrthogonalConfirm`, Table S14 |
+| ISA / satuRn concordance | `real_data/isa_concordance.py` | `_h/06` | `_m/isa_concordance/` | **S-real-9** `figIsaConcordance`, Table S15 |
 | Long-read confirmation | `real_data/longread_switch_confirm.py` | `_h/07` | `_m/longread_switch_confirm/` | — |
 | Clinical consequence | `real_data/clinical_consequence[_meta].py` | `_h/08–09` | `_m/clinical_consequence_meta.parquet` | S-real-7 |
 | SCZ confound sensitivity | `real_data/scz_confound_sensitivity.py` | `_h/10` | `_m/scz_confound_sensitivity/` | — |
@@ -85,7 +89,7 @@ that reaches the paper.
 |---|---|---|---|---|
 | Motif families | `real_data/rbp_motif_families.py` | `07_rbp_regulation/_h/01` | `_m/rbp/rbp_motif_families.parquet` | S-real-6 |
 | Regulons (mature + intronic) | `real_data/rbp_scan[_intronic].py`, `rbp_regulon.py` | `_h/02–03` | `_m/rbp/rbp_regulon*.parquet` | S-real-6, S10 |
-| CLIP binding evidence | `real_data/rbp_binding.py` | `_h/04–05` | `_m/rbp/rbp_binding*.parquet` | S-real-6 |
+| CLIP binding evidence | `real_data/rbp_binding.py` | `_h/04–05` | `_m/rbp/rbp_binding*.parquet` | S-real-6 panel B, Table S17 |
 | Target panel / assayability | `real_data/rbp_pair_assayability.py`, `rbp_target_panel.py` | `_h/06–07` | `_m/rbp_target_panel/` | — |
 | Neuronal CLIP | `real_data/neuronal_clip_*.py` | `_h/08–11` | `_m/neuronal_clip/` | — |
 | NOVA family / NOVA2 | `real_data/nova_family_renomination.py`, `nova2_*.py` | `_h/12–14` | `_m/neuronal_clip/nova*/` | — |
