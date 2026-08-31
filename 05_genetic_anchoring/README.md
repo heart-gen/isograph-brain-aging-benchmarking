@@ -8,13 +8,15 @@ onto specific isoform switches? This stage carries the paper's headline.
 | Step | Wrapper | Produces |
 |---|---|---|
 | 01–02 | `qtl_anchoring`, `qtl_anchoring_matched` | Power-matched logistic sQTL/eQTL enrichment per analysis (17 analyses) |
+| 18 | `module_coloc_convergence` | Module-level coloc convergence for AD/PD/LBD/ALS/SCZ: size-matched permutation null + anchored-module enrichment against the CLPP-tested pool. Generalises the SCZ-only layer in `scz_age_projection.py` |
+| 17 | `qtl_anchoring_sensitivity` | Pre-specified sensitivity arms: constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose. Writes to its own files; the primary arm from 01 is untouched |
 | 03 | `sqtl_concordance` | Switch-transcript → LeafCutter-intron direction concordance |
 | 04 | `module_anchoring` | Module-level genetic anchoring |
 | 05–07 | `prep_module_gene_sets`, `run_magma`, `plot_magma` | MAGMA module-GWAS enrichment (`configs/gwas_magma.yaml`) |
 | 08–11 | `coloc_prep`, `locus_ld`, `coloc_clpp`, `coloc_direction` | GTEx v11 SuSiE × 5 GWAS colocalization (eCAVIAR CLPP) |
 | 12–14 | `ldsc_annot_prep`, `ldsc_make_annot_ldscores`, `ldsc_munge_h2` | S-LDSC partitioned heritability (baselineLD v2.2) |
 | 15 | `build_deep_dive` | Per-gene deep dive: anchor → switch → consequence |
-| 16 | `scz_age_projection` | Do SCZ-risk loci converge on age-sensitive switch programs? |
+| 16 | `scz_age_projection` | Are age-sensitive switch programs disrupted in SCZ? (the *convergence* sub-test is RETRACTED 2026-08-30 — wrong background; see `module_coloc_convergence`) |
 
 ## The headline, stated honestly
 

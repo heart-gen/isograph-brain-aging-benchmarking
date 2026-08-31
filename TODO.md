@@ -8,6 +8,20 @@ Superseded framing note: the old "Additional analysis for Nature Communications"
 section is gone — the target is Cell Genomics (retargeted 2026-07-16) and all three
 of its items are now covered under Mechanistic validation below.
 
+## In progress
+
+* [~] **Per-gene sQTL-vs-eQTL colocalization contrast** (`coloc_modality_contrast.py`,
+  `05_genetic_anchoring/_h/19–21`). Puts the splicing-specificity claim on per-gene
+  footing: `coloc::coloc.abf` on GTEx v11 cis **all-pairs** (available since
+  2026-08-30), asking whether disease colocalizes with a switch gene's splicing QTL
+  more than with the *same gene's* expression QTL, at the same locus, in the same
+  tissue. Because the contrast is within-gene, the module membership that selected the
+  gene cancels — unlike the set-level ratio-of-ORs in `qtl_anchoring_meta`.
+  Built and validated end-to-end on chr22/Brain_Cortex (273 fits, 91 paired cells);
+  86/86 tests pass. **Gap: the 13-tissue array (`_h/20`) has not been run**, so there
+  is no result yet. Run `sbatch 05_genetic_anchoring/_h/20.coloc_modality_abf.sh` then
+  `sbatch 05_genetic_anchoring/_h/21.coloc_modality_meta.sh`.
+
 ## Done — do not redo
 
 * [x] **Validate major IsoGraph switches using junction counts or PSI.**
@@ -124,6 +138,54 @@ a main figure.
   Edge thresholds have no documented selection criterion at all.
 
 ## Open
+
+* [ ] **Rewrite the prose that still asserts the retired GO-invisible localisation.**
+  The 2026-08-29 re-run of `qtl_anchoring` changed a headline. Cause (diagnosed
+  2026-08-30, now guarded — see below): commit `8376556` ran the anchoring against a
+  refreshed IsoGraph fit but the *pre-refresh* `module_enrichment` table. Leiden module
+  ids are re-assigned on every fit (median same-id Jaccard between the two cortex fits =
+  **0.000**), so the join did not merely use stale numbers — it handed each module some
+  other module's `pheno_fdr` and `n_go_terms`. The GO-invisible / GO-visible partition
+  the published contrast rested on was a relabelling.
+
+  | module set | k old->new | ratio old->new | p old->new |
+  | --- | --- | --- | --- |
+  | all_modules | 17 -> 17 | 1.068 -> 1.068 | 1.4e-5 -> 1.3e-5 |
+  | pheno_sig | 12 -> 12 | 1.163 -> **1.111** | 3.6e-7 -> **3.6e-4** |
+  | go_invisible | 10 -> **11** | 1.172 -> **1.068** | 2.3e-5 -> **0.077 (n.s.)** |
+  | go_visible | 11 -> 11 | 1.104 -> 1.084 | 0.022 -> 0.050 |
+
+  `all_modules` is bit-identical — the control proving the pipeline itself is unchanged.
+  **Survives:** anchoring in the phenotype-associated modules, and the IsoGraph-only
+  result against the matched WGCNA baselines (null everywhere, p >= 0.41; 1.108, p=0.001,
+  I2=0.00 on the 8-tissue common set). **Does not survive:** "concentrates specifically in
+  the GO-invisible modules" — GO-invisible (1.068) and GO-visible (1.084) are now
+  indistinguishable, so the GO-invisible framing rests on the *content* gate (S-real-3),
+  not on genetics.
+
+  **Work:** rewrite `manuscript/MANUSCRIPT_PLAN.md` sections 15 and 20 and
+  `manuscript/GENETIC_ANCHORING_RESULTS.md`, both of which still carry the old
+  1.172 / I2=0.00 localisation. `QTL_ANCHORING_META.md:71` ("strongest for the
+  GO-invisible modules") also contradicts its own table and must go. Table 1's legend and
+  `FIGURE_ORDERING.md` were already corrected on 2026-08-29. **Never quote a pre-2026-08-29
+  anchoring number.** This is a scientific call about what the paper now claims, which is
+  why it is a task and not a mechanical fix.
+
+* [x] **Guard the stale-partition join that caused the above.** DONE 2026-08-30 —
+  `isograph_benchmark/real_data/partition_provenance.py` + `tests/test_partition_provenance.py`
+  (10 tests) + `scripts/audit_partition_provenance.py`. Two tiers: `module_enrichment` now
+  stamps a sha256 of the sorted `(gene_id, module_id)` assignment into the parquet metadata,
+  and every consumer additionally checks module-id set equality plus per-module `n_genes`,
+  which works on the already-committed tables with no regeneration. Wired into all ten
+  consumers (`qtl_anchoring` — which covers `coloc_prep` and `sqtl_concordance` via
+  `build_gene_sets` — `module_genetic_anchoring`, `go_invisible_gate`, `rbp_regulon`,
+  `rbp_target_panel`, `replication_go`, `replication_functional`). Verified to fire on the
+  actual 2026-06-29 pairing. Audit of all 442 committed `module_id`-keyed outputs found the
+  damage confined to `qtl_anchoring`: `go_invisible_gate` matches the current enrichment
+  table exactly, and every other consumer post-dates the refresh.
+  **The audit must be keyed on (cohort, region)** — region names are not unique across
+  cohorts, and keying on region alone silently merges BrainSEQ hippocampus (50 modules)
+  with GTEx hippocampus (41), producing 54 false positives.
 
 * [ ] **Known-junction orthogonal validation of the SNCA and CTSH coloc events
   (BrainSEQ short-read, in-house).** The long-read arm failed on these two genes for two
