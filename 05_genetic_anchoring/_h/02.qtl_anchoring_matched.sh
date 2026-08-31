@@ -18,6 +18,7 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
     echo "ERROR: submit from the repo root or set ISOGRAPH_BENCHMARK_ROOT."
     exit 1
 fi
+export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}:/ocean/projects/bio260021p/kbenjamin/software/IsoGraph/src${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p 05_genetic_anchoring/_m/logs
 
@@ -34,8 +35,12 @@ IDX="${SLURM_ARRAY_TASK_ID:-0}"
 METHOD="${METHODS[$((IDX / ${#REGIONS[@]}))]}"
 REGION="${REGIONS[$((IDX % ${#REGIONS[@]}))]}"
 
+if ! command -v module >/dev/null 2>&1; then
+    source /etc/profile.d/modules.sh 2>/dev/null || source /usr/share/lmod/lmod/init/bash 2>/dev/null || true
+fi
 module purge
 module load anaconda3/2024.10-1
+source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
 log_message "**** xQTL anchoring (matched): ${METHOD} gtex-aging ${REGION} ****"

@@ -1,0 +1,30 @@
+{
+  "analysis": "gtex-aging",
+  "region": "substantia_nigra",
+  "tissue": "Brain_Substantia_nigra",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 16786,
+  "universe_sizes": {
+    "sQTL": 10949,
+    "eQTL": 13094
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 12856,
+      "n_constraint_complete": 10949,
+      "frac_retained": 0.8517
+    },
+    "eQTL": {
+      "n_tested": 16763,
+      "n_constraint_complete": 13094,
+      "frac_retained": 0.7811
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 16786
+  }
+}

@@ -26,6 +26,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from isograph_benchmark.paths import ensure_dir, stage_out
+from isograph_benchmark.real_data.qtl_anchoring import variant_suffix
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 from isograph_benchmark.stats.meta_analysis import meta, meta_keys
 
@@ -57,10 +58,11 @@ def _logor_se(row: pd.Series) -> float:
     return np.nan
 
 
-def collect(variant: str, methods: tuple[str, ...]) -> pd.DataFrame:
+def collect(variant: str, methods: tuple[str, ...],
+            outcome: str = "binary", covariate_set: str = "standard") -> pd.DataFrame:
     parts = []
     for method in methods:
-        suffix = "" if method == "isograph" else f"_{method}"
+        suffix = variant_suffix(method, outcome, covariate_set)
         for analysis, region in ANALYSES:
             path = (_artifact_dir(analysis, region, variant).parent
                     / f"qtl_anchoring{suffix}.parquet")
@@ -85,7 +87,7 @@ def _meta(group: pd.DataFrame) -> pd.Series:
     return meta(group, effect_name="or", count_col="n_foreground")
 
 
-def _diff_rows(per: pd.DataFrame) -> pd.DataFrame:
+def _diff_rows(per: pd.DataFrame, extra: tuple[str, ...] = ()) -> pd.DataFrame:
     """Per (graph_method, analysis, module_set) sQTL-minus-eQTL log-OR difference.
 
     Removes the shared baseline (co-switch/network genes are cis-QTL-depleted for both
@@ -93,24 +95,27 @@ def _diff_rows(per: pd.DataFrame) -> pd.DataFrame:
     treats the two estimates as independent, which is conservative because they share
     the foreground genes (positively correlated).
     """
-    wide = per.pivot_table(index=["graph_method", "analysis", "region", "module_set"],
-                           columns="xqtl_kind", values=["beta", "se"])
+    keys = ["graph_method", *extra, "analysis", "region", "module_set"]
+    wide = per.pivot_table(index=keys, columns="xqtl_kind", values=["beta", "se"])
     rows = []
-    for (gm, analysis, region, mset), r in wide.iterrows():
+    for idx, r in wide.iterrows():
+        gm, *mid = idx
+        analysis, region, mset = mid[-3:]
+        extra_vals = dict(zip(extra, mid[:-3]))
         bs, be = r[("beta", "sQTL")], r[("beta", "eQTL")]
         ss, se_ = r[("se", "sQTL")], r[("se", "eQTL")]
         if np.all(np.isfinite([bs, be, ss, se_])) and ss > 0 and se_ > 0:
-            rows.append({"graph_method": gm, "analysis": analysis, "region": region,
-                         "module_set": mset, "beta": bs - be,
+            rows.append({"graph_method": gm, **extra_vals, "analysis": analysis,
+                         "region": region, "module_set": mset, "beta": bs - be,
                          "se": np.sqrt(ss**2 + se_**2)})
     return pd.DataFrame(rows)
 
 
-def _contrast(diff: pd.DataFrame) -> pd.DataFrame:
+def _contrast(diff: pd.DataFrame, extra: tuple[str, ...] = ()) -> pd.DataFrame:
     """Meta-analyse the splicing-specificity difference per (graph_method, module set)."""
     if diff.empty:
         return diff
-    meta = (diff.groupby(["graph_method", "module_set"], sort=False)
+    meta = (diff.groupby(["graph_method", *extra, "module_set"], sort=False)
             .apply(_meta, include_groups=False).reset_index())
     return meta.rename(columns={"or_fe": "ratio_fe", "or_fe_low": "ratio_fe_low",
                                 "or_fe_high": "ratio_fe_high", "or_re": "ratio_re"})
@@ -133,31 +138,49 @@ def _restrict_common(diff: pd.DataFrame) -> pd.DataFrame:
 
 def run_meta(variant: str = "standard",
              methods: tuple[str, ...] = ("isograph", "wgcna_switch_only",
-                                         "wgcna_multiplex")) -> pd.DataFrame:
-    per = collect(variant, methods)
-    out_dir = ensure_dir(stage_out("anchoring", "qtl_anchoring_meta"))
+                                         "wgcna_multiplex"),
+             outcome: str = "binary", covariate_set: str = "standard") -> pd.DataFrame:
+    """Pool the per-tissue anchoring results.
+
+    The PRIMARY arm (binary outcome, standard covariates) writes to
+    ``qtl_anchoring_meta/`` exactly as before. Every sensitivity arm writes to
+    ``qtl_anchoring_meta/sensitivity/<outcome>_<covariate_set>/`` so it can never
+    overwrite the numbers the figures and tables are built from.
+
+    The constraint arm's per-tissue files carry BOTH covariate sets fitted on the same
+    gene subset, so ``covariate_set`` joins the grouping keys there and the pooled
+    table shows the adjusted and unadjusted contrasts side by side.
+    """
+    per = collect(variant, methods, outcome, covariate_set)
+    primary = outcome == "binary" and covariate_set == "standard"
+    out_dir = ensure_dir(stage_out("anchoring", "qtl_anchoring_meta") if primary
+                         else stage_out("anchoring", "qtl_anchoring_meta", "sensitivity",
+                                        f"{outcome}_{covariate_set}"))
+    # Only the constraint arm carries two covariate sets worth separating.
+    extra = ("covariate_set",) if (not primary and per.get("covariate_set") is not None
+                                   and per["covariate_set"].nunique() > 1) else ()
     if per.empty:
         print("no qtl_anchoring*.parquet outputs found")
         return per
     per.to_parquet(out_dir / "per_analysis.parquet", index=False, compression="zstd")
     by_mset = lambda s: s.map(_MSET_ORDER).fillna(9) if s.name == "module_set" else s
     by_method = lambda s: s.map(_METHOD_ORDER).fillna(9) if s.name == "graph_method" else s
-    meta = (per.groupby(["graph_method", "xqtl_kind", "module_set"], sort=False)
+    meta = (per.groupby(["graph_method", *extra, "xqtl_kind", "module_set"], sort=False)
             .apply(_meta, include_groups=False).reset_index())
-    meta = meta.sort_values(["graph_method", "module_set", "xqtl_kind"],
+    meta = meta.sort_values(["graph_method", *extra, "module_set", "xqtl_kind"],
                             key=lambda s: by_method(by_mset(s)))
     meta.to_parquet(out_dir / "qtl_anchoring_meta.parquet", index=False, compression="zstd")
 
-    diff = _diff_rows(per)
-    contrast = _contrast(diff)
-    contrast_common = _contrast(_restrict_common(diff))
+    diff = _diff_rows(per, extra)
+    contrast = _contrast(diff, extra)
+    contrast_common = _contrast(_restrict_common(diff), extra)
     if not contrast.empty:
-        contrast = contrast.sort_values(["graph_method", "module_set"],
+        contrast = contrast.sort_values(["graph_method", *extra, "module_set"],
                                         key=lambda s: by_method(by_mset(s)))
         contrast.to_parquet(out_dir / "qtl_anchoring_meta_contrast.parquet",
                             index=False, compression="zstd")
     if not contrast_common.empty:
-        contrast_common = contrast_common.sort_values(["module_set", "graph_method"],
+        contrast_common = contrast_common.sort_values(["module_set", "graph_method", *extra],
                                                       key=lambda s: by_method(by_mset(s)))
         contrast_common.to_parquet(out_dir / "qtl_anchoring_meta_contrast_common.parquet",
                                    index=False, compression="zstd")
@@ -265,15 +288,21 @@ def main() -> None:
     p.add_argument("--variant", default="standard")
     p.add_argument("--methods", nargs="+",
                    default=["isograph", "wgcna_switch_only", "wgcna_multiplex"])
+    p.add_argument("--outcome", default="binary",
+                   choices=["binary", "continuous", "dose"],
+                   help="which anchoring arm to pool (default: the primary binary arm)")
+    p.add_argument("--covariate-set", default="standard",
+                   choices=["standard", "constraint"])
     args = p.parse_args()
-    meta = run_meta(args.variant, tuple(args.methods))
+    meta = run_meta(args.variant, tuple(args.methods), args.outcome, args.covariate_set)
     if not meta.empty:
         for kind in ("sQTL", "eQTL"):
             sub = meta[meta.xqtl_kind == kind]
             print(f"\n{kind} pooled (FE):")
             for _, r in sub.iterrows():
-                print(f"  {r['graph_method']:18} {r['module_set']:22} k={int(r['k']):2}  "
-                      f"OR={r['or_fe']:.2f}  p={r['p_fe']:.1e}")
+                cs = f" [{r['covariate_set']}]" if "covariate_set" in sub.columns else ""
+                print(f"  {r['graph_method']:18} {r['module_set']:22}{cs} "
+                      f"k={int(r['k']):2}  OR={r['or_fe']:.2f}  p={r['p_fe']:.1e}")
 
 
 if __name__ == "__main__":

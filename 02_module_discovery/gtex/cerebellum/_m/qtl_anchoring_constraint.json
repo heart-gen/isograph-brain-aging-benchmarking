@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cerebellum",
+  "tissue": "Brain_Cerebellum",
+  "variant": "standard",
+  "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 18939,
+  "universe_sizes": {
+    "sQTL": 11076,
+    "eQTL": 13542
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 13122,
+      "n_constraint_complete": 11076,
+      "frac_retained": 0.8441
+    },
+    "eQTL": {
+      "n_tested": 18901,
+      "n_constraint_complete": 13542,
+      "frac_retained": 0.7165
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 2804,
+    "pheno_sig_modules": 939,
+    "go_invisible_modules": 570,
+    "go_visible_modules": 369
+  }
+}

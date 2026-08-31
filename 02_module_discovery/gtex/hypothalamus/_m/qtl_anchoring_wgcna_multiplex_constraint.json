@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "hypothalamus",
+  "tissue": "Brain_Hypothalamus",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 17736,
+  "universe_sizes": {
+    "sQTL": 11347,
+    "eQTL": 13358
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 13466,
+      "n_constraint_complete": 11347,
+      "frac_retained": 0.8426
+    },
+    "eQTL": {
+      "n_tested": 17691,
+      "n_constraint_complete": 13358,
+      "frac_retained": 0.7551
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 17736,
+    "pheno_sig_modules": 731,
+    "go_invisible_modules": 173,
+    "go_visible_modules": 558
+  }
+}
