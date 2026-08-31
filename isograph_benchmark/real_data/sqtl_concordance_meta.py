@@ -12,7 +12,7 @@ draw at its own n_tx, so the null already absorbs the small-n_tx genes that infl
 |rho| mechanically). This is the same flip-invariant, permutation-calibrated logic
 as the per-cohort test, just pooled for power.
 
-Writes under real_data/_m/sqtl_concordance_meta/:
+Writes under 05_genetic_anchoring/_m/sqtl_concordance_meta/:
   sqtl_concordance_meta.parquet -- pooled n_genes, mean_abs_rho, null mean, p, per set.
   per_cohort.parquet            -- per (cohort, module_set) mean_abs_rho + n_genes.
   SQTL_CONCORDANCE_META.md      -- pooled writeup.
@@ -26,7 +26,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.sqtl_concordance import _N_PERM, _SEED, _perm_null
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
@@ -88,7 +88,7 @@ def meta(variant: str) -> pd.DataFrame:
                   .agg(n_genes=("rho", "size"), mean_abs_rho=("rho", lambda s: round(s.abs().mean(), 4)))
                   .reset_index())
 
-    out_dir = ensure_dir(rel("real_data", "_m", "sqtl_concordance_meta"))
+    out_dir = ensure_dir(stage_out("anchoring", "sqtl_concordance_meta"))
     summary.to_parquet(out_dir / "sqtl_concordance_meta.parquet", index=False, compression="zstd")
     per_cohort.to_parquet(out_dir / "per_cohort.parquet", index=False, compression="zstd")
     (out_dir / "sqtl_concordance_meta.json").write_text(json.dumps(
@@ -116,7 +116,7 @@ def _write_report(out_dir: Path, summary: pd.DataFrame, pooled: pd.DataFrame) ->
         "the sQTL allele reference and the switch-axis orientation are arbitrary.",
         "",
         "Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` "
-        "(after the per-cohort array in `real_data/brainseq/_h/14.sqtl_concordance.sh`).",
+        "(after the per-cohort array in `05_genetic_anchoring/_h/03.sqtl_concordance.sh`).",
         "",
         "## Pooled concordance by module set",
         "",

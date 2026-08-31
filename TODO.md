@@ -8,22 +8,36 @@ Superseded framing note: the old "Additional analysis for Nature Communications"
 section is gone — the target is Cell Genomics (retargeted 2026-07-16) and all three
 of its items are now covered under Mechanistic validation below.
 
+## In progress
+
+* [~] **Per-gene sQTL-vs-eQTL colocalization contrast** (`coloc_modality_contrast.py`,
+  `05_genetic_anchoring/_h/19–21`). Puts the splicing-specificity claim on per-gene
+  footing: `coloc::coloc.abf` on GTEx v11 cis **all-pairs** (available since
+  2026-08-30), asking whether disease colocalizes with a switch gene's splicing QTL
+  more than with the *same gene's* expression QTL, at the same locus, in the same
+  tissue. Because the contrast is within-gene, the module membership that selected the
+  gene cancels — unlike the set-level ratio-of-ORs in `qtl_anchoring_meta`.
+  Built and validated end-to-end on chr22/Brain_Cortex (273 fits, 91 paired cells);
+  86/86 tests pass. **Gap: the 13-tissue array (`_h/20`) has not been run**, so there
+  is no result yet. Run `sbatch 05_genetic_anchoring/_h/20.coloc_modality_abf.sh` then
+  `sbatch 05_genetic_anchoring/_h/21.coloc_modality_meta.sh`.
+
 ## Done — do not redo
 
 * [x] **Validate major IsoGraph switches using junction counts or PSI.**
-  `validate_switch_splicing.py` + `real_data/brainseq/_h/16.validate_switch_splicing.sh`.
+  `validate_switch_splicing.py` + `06_switch_mechanism/_h/03.validate_switch_splicing_brainseq.sh`.
   Caudate marginal OR ~105 vs module OR ~2.3.
 * [x] **Adjust human-cohort analyses for estimated cell-type composition.**
   `celltype_composition.py` — joins the committed MuSiC BrainSEQ deconvolution and
   supplies a marker-depletion cut; consumed by `incremental_association`.
 * [x] **Reconcile and validate the benchmark recovery-metric definition.**
-  `benchmark/partition_metrics.py` + `backfill_metrics.py`, 15 unit tests,
-  `benchmark/03_metrics/_m/PARTITION_METRICS.md`. Best-match Jaccard reproduces the
+  `01_synthetic_benchmark/partition_metrics.py` + `backfill_metrics.py`, 15 unit tests,
+  `01_synthetic_benchmark/03_metrics/_m/PARTITION_METRICS.md`. Best-match Jaccard reproduces the
   published `module_recovery_score` to 2.22e-16 over all 13,060 runs, and the
   count-preserving Jaccard null shows WGCNA's negative-control recovery (0.500) is
   fully explained by its module-count structure (z=0.47, perm p=0.746).
 * [x] **Direct genetic analysis of module eigengenes.**
-  `module_genetic_anchoring.py` + `real_data/brainseq/_h/21.module_anchoring.sh` —
+  `module_genetic_anchoring.py` + `05_genetic_anchoring/_h/04.module_anchoring.sh` —
   per-module splicing-specificity contrast against a permutation null of random
   gene sets, closing the "pooling does not show any individual module is anchored"
   objection. Plus S-LDSC + coloc (`ldsc_annot_prep.py`, `coloc_*.py`).
@@ -33,7 +47,7 @@ of its items are now covered under Mechanistic validation below.
   `isograph_vae`, `isograph_vae_reliability` (estimability), `isograph_vae_multiplex`,
   `isograph_vae_residual` — plus `project_tiers.py`, which derives the switch_only /
   switch_primary / multiplex edge tiers from ONE fit so the latent is held constant.
-  Residualization cost on unconfounded data: `benchmark/03_metrics/_m/RESIDUAL_COST.md`.
+  Residualization cost on unconfounded data: `01_synthetic_benchmark/03_metrics/_m/RESIDUAL_COST.md`.
 * [x] **Sensitivity to counts versus TPM.** N/A — no method ever consumes TPM.
   BrainSEQ uses Salmon counts, GTEx RSEM expected counts, synthetic simulated counts;
   TPM is archived as a data product (`build_parquet.convert_gtex_transcript_tpm`) and
@@ -90,7 +104,7 @@ a main figure.
 
 * [~] **Confirm top transcript pairs and disease-linked events using long-read brain
   RNA-seq.** Tier-1 done (`longread_switch_confirm.py` +
-  `real_data/brainseq/_h/29.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
+  `06_switch_mechanism/_h/07.longread_switch_confirm.sh`): ONT DLPFC BA9/46, Zenodo
   8180677 Bambu quants, confirms 60.5% of GTEx cortical switch genes.
   A matched null now exists (`switch_orthogonal_confirm.py --mode global-null`, 2026-08-28)
   and it is sobering: switch pairs are switch-like 0.6466 of the time against an
@@ -117,13 +131,61 @@ a main figure.
   `05.sweep_leiden.sh` / `07.sweep_leiden_with_abundance.sh` compute the sweep; the
   giant-module size criterion (>=900 genes) is itself phenotype-blind.
   **GAP: the published justification is phenotype-AWARE** —
-  `real_data/gwas/_m/GWAS_RESOLUTION_SUMMARY.md` argues 5.0 by showing it removes a
+  `05_genetic_anchoring/_m/gwas/GWAS_RESOLUTION_SUMMARY.md` argues 5.0 by showing it removes a
   GWAS enrichment artifact. A reviewer asked for selection on stability BEFORE any
   trait is consulted. Needed: a phenotype-blind stability-vs-resolution curve with
   the choice made on it, and the GWAS result demoted to post-hoc confirmation.
   Edge thresholds have no documented selection criterion at all.
 
 ## Open
+
+* [ ] **Rewrite the prose that still asserts the retired GO-invisible localisation.**
+  The 2026-08-29 re-run of `qtl_anchoring` changed a headline. Cause (diagnosed
+  2026-08-30, now guarded — see below): commit `8376556` ran the anchoring against a
+  refreshed IsoGraph fit but the *pre-refresh* `module_enrichment` table. Leiden module
+  ids are re-assigned on every fit (median same-id Jaccard between the two cortex fits =
+  **0.000**), so the join did not merely use stale numbers — it handed each module some
+  other module's `pheno_fdr` and `n_go_terms`. The GO-invisible / GO-visible partition
+  the published contrast rested on was a relabelling.
+
+  | module set | k old->new | ratio old->new | p old->new |
+  | --- | --- | --- | --- |
+  | all_modules | 17 -> 17 | 1.068 -> 1.068 | 1.4e-5 -> 1.3e-5 |
+  | pheno_sig | 12 -> 12 | 1.163 -> **1.111** | 3.6e-7 -> **3.6e-4** |
+  | go_invisible | 10 -> **11** | 1.172 -> **1.068** | 2.3e-5 -> **0.077 (n.s.)** |
+  | go_visible | 11 -> 11 | 1.104 -> 1.084 | 0.022 -> 0.050 |
+
+  `all_modules` is bit-identical — the control proving the pipeline itself is unchanged.
+  **Survives:** anchoring in the phenotype-associated modules, and the IsoGraph-only
+  result against the matched WGCNA baselines (null everywhere, p >= 0.41; 1.108, p=0.001,
+  I2=0.00 on the 8-tissue common set). **Does not survive:** "concentrates specifically in
+  the GO-invisible modules" — GO-invisible (1.068) and GO-visible (1.084) are now
+  indistinguishable, so the GO-invisible framing rests on the *content* gate (S-real-3),
+  not on genetics.
+
+  **Work:** rewrite `manuscript/MANUSCRIPT_PLAN.md` sections 15 and 20 and
+  `manuscript/GENETIC_ANCHORING_RESULTS.md`, both of which still carry the old
+  1.172 / I2=0.00 localisation. `QTL_ANCHORING_META.md:71` ("strongest for the
+  GO-invisible modules") also contradicts its own table and must go. Table 1's legend and
+  `FIGURE_ORDERING.md` were already corrected on 2026-08-29. **Never quote a pre-2026-08-29
+  anchoring number.** This is a scientific call about what the paper now claims, which is
+  why it is a task and not a mechanical fix.
+
+* [x] **Guard the stale-partition join that caused the above.** DONE 2026-08-30 —
+  `isograph_benchmark/real_data/partition_provenance.py` + `tests/test_partition_provenance.py`
+  (10 tests) + `scripts/audit_partition_provenance.py`. Two tiers: `module_enrichment` now
+  stamps a sha256 of the sorted `(gene_id, module_id)` assignment into the parquet metadata,
+  and every consumer additionally checks module-id set equality plus per-module `n_genes`,
+  which works on the already-committed tables with no regeneration. Wired into all ten
+  consumers (`qtl_anchoring` — which covers `coloc_prep` and `sqtl_concordance` via
+  `build_gene_sets` — `module_genetic_anchoring`, `go_invisible_gate`, `rbp_regulon`,
+  `rbp_target_panel`, `replication_go`, `replication_functional`). Verified to fire on the
+  actual 2026-06-29 pairing. Audit of all 442 committed `module_id`-keyed outputs found the
+  damage confined to `qtl_anchoring`: `go_invisible_gate` matches the current enrichment
+  table exactly, and every other consumer post-dates the refresh.
+  **The audit must be keyed on (cohort, region)** — region names are not unique across
+  cohorts, and keying on region alone silently merges BrainSEQ hippocampus (50 modules)
+  with GTEx hippocampus (41), producing 54 false positives.
 
 * [ ] **Known-junction orthogonal validation of the SNCA and CTSH coloc events
   (BrainSEQ short-read, in-house).** The long-read arm failed on these two genes for two
@@ -148,7 +210,7 @@ a main figure.
   tissue and (ii) that its PSI anti-correlates with the partner junction beyond the
   compositional-closure baseline established by `switch_orthogonal_confirm --mode
   global-null` (never against zero). Run CTSH in **hippocampus** and SNCA in
-  **DLPFC + caudate**. Wrapper `real_data/brainseq/_h/38.junction_coloc_confirm.sh`.
+  **DLPFC + caudate**. Wrapper `06_switch_mechanism/_h/12.junction_coloc_confirm.sh`.
   **Decision rule, pre-registered:** if the junctions validate here, report the
   short-read junction result as the orthogonal confirmation and cite the long-read
   failure as an assay limitation (5' bias / region), not as a negative. If they do not
@@ -164,7 +226,7 @@ a main figure.
 
 * [x] **Test schizophrenia findings for medication, toxicology, smoking and related
   confounding where available.** DONE 2026-08-28 — `scz_confound_sensitivity.py` +
-  `real_data/_h/36.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
+  `06_switch_mechanism/_h/10.scz_confound_sensitivity.sh`. The reviewer's "where available" is the
   operative clause: BrainSEQ releases **none** of medication, toxicology or smoking, so
   the CLI emits the availability audit as a re-runnable output and then tests the three
   tiers it can (measured covariates the published model omits; molecular proxies for
@@ -189,7 +251,7 @@ a main figure.
   technical axis absent from `BRAINSEQ_DISCOVERY_COVARIATES` (which carries RIN,
   mapping_rate, mito_rate, SNP_PC1-5). Report the sensitivity as a sensitivity.
 * [x] **Remaining sensitivity analyses** — harness built and RUN 2026-08-28,
-  `switch_feature_sensitivity.py` + `real_data/_h/37.switch_feature_sensitivity.sh`,
+  `switch_feature_sensitivity.py` + `06_switch_mechanism/_h/11.switch_feature_sensitivity.sh`,
   covering all five axes (pseudocount, transcript-expression filter, minor-isoform
   threshold, identifiability by transcript number, quantification pipeline). Gated on an
   exact rebuild of the published switch channel (max |diff| 0.0). **GAP: the module
@@ -224,11 +286,11 @@ carried furthest.
   `nova2_perturbation.py`. Verdict is an **informative sparse null** driven by the
   cross-species mm10/hg38 reciprocal-mapping bottleneck (~3-5% of windows retained).
   Perturbation is designed but not performed:
-  `real_data/_m/rbp_target_panel/WETLAB_PERTURBATION_DESIGN.md` with the assayable
-  pair list from `rbp_pair_assayability.py` + `real_data/_h/34.rbp_pair_assayability.sh`
+  `07_rbp_regulation/_m/rbp_target_panel/WETLAB_PERTURBATION_DESIGN.md` with the assayable
+  pair list from `rbp_pair_assayability.py` + `07_rbp_regulation/_h/06.rbp_pair_assayability.sh`
   (NONO 11 / ELAVL1 6 / KHDRBS1 8 measurable-and-responsive pairs).
   **Wet-lab CLOSED 2026-08-28 (out of scope, prioritized and handed off).**
-  `real_data/_m/rbp_target_panel/WETLAB_HANDOFF.md` states the priority order the design
+  `07_rbp_regulation/_m/rbp_target_panel/WETLAB_HANDOFF.md` states the priority order the design
   doc did not: P1 = NONO + KHDRBS1 together (the adjudicating contrast; NONO alone can
   only confirm and cannot separate a regulon from a generic abundant-RBP effect), P2 =
   add ELAVL1 (broadest nomination but the thinnest assayable panel, 2/14 tier-1 genes
@@ -237,11 +299,11 @@ carried furthest.
   (manuscript repo `content/04.discussion.md`, commit ba19cdd) together with the
   HepG2/K562-not-brain eCLIP caveat, rather than left implied.
   The HepG2/K562-not-brain caveat on the ENCODE eCLIP panels is written into
-  `real_data/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
+  `07_rbp_regulation/_m/rbp/RBP_REGULON_SUMMARY.md` (Results and Limitations) and into
   `rbp_binding.py`, so it survives regeneration.
 * [x] **Validate the shared SNCA alternative-first-exon mechanism across independent
   data types or cohorts.** DONE 2026-08-28 (computational arm) —
-  `switch_orthogonal_confirm.py` + `real_data/_h/35.switch_orthogonal_confirm.sh` scores
+  `switch_orthogonal_confirm.py` + `06_switch_mechanism/_h/05.switch_orthogonal_confirm.sh` scores
   the sQTL-anchored transcript pair itself, for all 12 splicing-led genes, in ONT
   long-read DLPFC against switch pairs matched on abundance decile.
   **Set-level: confirmed.** 0.453 switch-like vs a matched null of 0.252 (p=5e-4);

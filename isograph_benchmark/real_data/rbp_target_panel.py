@@ -57,7 +57,7 @@ The panel is tiered:
                                  anchor: the program-level control, so the experiment is not
                                  reduced to validating GWAS loci.
 
-Outputs (real_data/_m/rbp_target_panel/<RBP>/):
+Outputs (07_rbp_regulation/_m/rbp_target_panel/<RBP>/):
   rbp_target_evidence.parquet/tsv     one row per eligible (gene, region)
   rbp_target_candidates.parquet/tsv   one row per eligible gene, ranked (the full universe)
   rbp_target_panel.parquet/tsv        the tiered panel
@@ -77,7 +77,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.real_data.partition_provenance import load_region_enrichment
+from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 from isograph_benchmark.real_data.go_invisible_gate import gene_symbol_map
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_PATH
 from isograph_benchmark.real_data.qtl_anchoring import _bare
@@ -85,9 +86,9 @@ from isograph_benchmark.real_data.rbp_regulon import (
     _REGIONS, _UNIT_COUNTS, _load_counts, _presence,
 )
 
-_RBP_DIR = rel("real_data", "_m", "rbp")
-_OUT_ROOT = rel("real_data", "_m", "rbp_target_panel")
-_DEEP_DIVE = rel("real_data", "_m", "deep_dive")
+_RBP_DIR = stage_out("regulation", "rbp")
+_OUT_ROOT = stage_out("regulation", "rbp_target_panel")
+_DEEP_DIVE = stage_out("anchoring", "deep_dive")
 _TREE_OF = {region: tree for tree, region in _REGIONS}
 
 
@@ -117,10 +118,11 @@ def _module_trust() -> pd.DataFrame:
     """
     rows = []
     for tree, region in _REGIONS:
-        p = rel("real_data", tree, region, "_m", "module_enrichment", "isograph_modules.parquet")
-        if not p.exists():
+        d = load_region_enrichment(
+            tree, region, "isograph", context=f"rbp_target_panel {tree}/{region}"
+        )
+        if d is None:
             continue
-        d = pd.read_parquet(p)
         d = d[d["method"] == "isograph"] if "method" in d.columns else d
         keep = ["module_id", "n_genes", "n_go_terms", "pheno_fdr"]
         if "top_go_terms" in d.columns:
@@ -142,7 +144,7 @@ def _gene_roles() -> pd.DataFrame:
     the module places them there on switching alone, with no abundance channel."""
     rows = []
     for tree, region in _REGIONS:
-        p = rel("real_data", tree, region, "_m", "isograph_vae", "module_gene_roles.parquet")
+        p = region_store(tree, region, "isograph_vae", "module_gene_roles.parquet")
         if not p.exists():
             continue
         d = pd.read_parquet(p)
@@ -427,7 +429,7 @@ def motif_switch_pairs(genes: set[str], rbp: str, scope: str, bg_mode: str) -> p
 
     frames = []
     for tree, region in _REGIONS:
-        p = rel("real_data", tree, region, "_m", "isograph_vae", "module_interpret",
+        p = region_store(tree, region, "isograph_vae", "module_interpret",
                 "structure_switch_pairs.parquet")
         if not p.exists():
             continue

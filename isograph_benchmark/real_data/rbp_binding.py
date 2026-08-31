@@ -38,13 +38,13 @@ import pandas as pd
 from scipy.stats import hypergeom
 from statsmodels.stats.multitest import multipletests
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
 from isograph_benchmark.real_data.interpret_modules import DEFAULT_GTF_CACHE
 from isograph_benchmark.real_data.qtl_anchoring import _bare
 from isograph_benchmark.real_data.rbp_regulon import _REGIONS, _gene_tags, _TREE_OF
 
 _BIND_DIR = rel("inputs", "raw", "rbp_binding")
-_OUT_DIR = rel("real_data", "_m", "rbp")
+_OUT_DIR = stage_out("regulation", "rbp")
 _ENCODE = "https://www.encodeproject.org"
 # ENCODE eCLIP peak beds carry output_type "peaks" (IDR-reproducible peaks from the
 # eCLIP pipeline); we take the GRCh38 bed from each of an RBP's eCLIP experiments.
@@ -283,7 +283,7 @@ def _load_peaks(rbp: str, bind_dir: Path) -> dict | None:
 
 def _binding_calls_region(region_tree: str, region: str, gtf: pd.DataFrame,
                           rbps: list[str], bind_dir: Path, fdr: float) -> pd.DataFrame:
-    art = rel("real_data", region_tree, region, "_m", "isograph_vae")
+    art = region_store(region_tree, region, "isograph_vae")
     sp_path = art / "module_interpret" / "structure_switch_pairs.parquet"
     if not sp_path.exists():
         return pd.DataFrame()
@@ -352,7 +352,7 @@ def _family_note(rbp_support: pd.DataFrame) -> str:
     "17 of 39 RBPs" overstates the evidence when several of those RBPs share a
     near-identical motif, so the family-collapsed count is reported next to it.
     """
-    fam_path = rel("real_data", "_m", "rbp", "rbp_motif_families.parquet")
+    fam_path = stage_out("regulation", "rbp", "rbp_motif_families.parquet")
     if not fam_path.exists() or rbp_support.empty:
         return ""
     fam = pd.read_parquet(fam_path, columns=["rbp", "family_id"]).drop_duplicates()

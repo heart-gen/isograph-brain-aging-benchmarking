@@ -21,7 +21,7 @@ GTEx signif_pairs (eQTL: phenotype_id = gene; sQTL: group_id = gene). GTEx varia
 hg38; the S-LDSC panel is hg19, so variant ids are lifted via the GTEx v8 lookup's
 `variant_id_b37` field (no chain file needed). Autosomes only.
 
-Writes real_data/ldsc/_m/<analysis>/beds/{sqtl_switch,eqtl_switch,cis_switch}_hg19.bed
+Writes 05_genetic_anchoring/_m/ldsc/<analysis>/beds/{sqtl_switch,eqtl_switch,cis_switch}_hg19.bed
 plus annot_snps.tsv (variant -> hg19 chr/pos, kind) for provenance.
 """
 from __future__ import annotations
@@ -33,7 +33,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.coloc_prep import load_switch_genes
 from isograph_benchmark.real_data.qtl_anchoring import _GTEX_TISSUE, _bare
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
@@ -73,7 +73,7 @@ def lift_to_hg19(variant_ids: set[str]) -> pd.DataFrame:
     the b38 variant_id string for common SNPs; v11-only ids drop out (fine for S-LDSC,
     which only annotates reference-panel SNPs anyway).
     """
-    tmp = ensure_dir(rel("real_data", "ldsc", "_m", "_tmp")) / "_want_variants.txt"
+    tmp = ensure_dir(stage_out("anchoring.ldsc", "_tmp")) / "_want_variants.txt"
     tmp.write_text("\n".join(sorted(variant_ids)) + "\n")
     # cols: 1 variant_id(b38) ... 8 variant_id_b37 (chr_pos_ref_alt_b37)
     awk = (r'NR==FNR{w[$1]=1;next} ($1 in w) && $8!="" {print $1"\t"$8}')
@@ -150,7 +150,7 @@ def run(analysis: str, region: str | None, variant: str, fdr: float,
         xqtl_dir: Path, tissues: list[str]) -> None:
     genes = _collect_switch_genes([(analysis, region)], variant, fdr)
     print(f"IsoGraph switch genes (phenotype-associated modules): {len(genes)}")
-    out_dir = ensure_dir(rel("real_data", "ldsc", "_m", analysis + (f"_{region}" if region else "")))
+    out_dir = ensure_dir(stage_out("anchoring.ldsc", analysis + (f"_{region}" if region else "")))
     _build_annotation(genes, out_dir, xqtl_dir, tissues)
 
 
@@ -161,7 +161,7 @@ def run_bundle(bundle: str, variant: str, fdr: float, xqtl_dir: Path,
           f"(min_recurrence={min_recurrence}):")
     genes = _collect_switch_genes(pairs, variant, fdr, min_recurrence)
     print(f"'{bundle}' core switch genes: {len(genes)}")
-    out_dir = ensure_dir(rel("real_data", "ldsc", "_m", bundle))
+    out_dir = ensure_dir(stage_out("anchoring.ldsc", bundle))
     _build_annotation(genes, out_dir, xqtl_dir, tissues)
 
 

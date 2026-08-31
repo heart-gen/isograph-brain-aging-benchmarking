@@ -7,11 +7,11 @@ from typing import Any
 import pandas as pd
 import yaml
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 
 
 DEFAULT_CONFIG = rel("configs", "gwas_magma.yaml")
-DEFAULT_OUTPUT_DIR = rel("real_data", "gwas", "_m", "tmp", "magma_pvals")
+DEFAULT_OUTPUT_DIR = stage_out("anchoring.gwas", "tmp", "magma_pvals")
 
 
 def _as_list(value: Any) -> list[Any]:

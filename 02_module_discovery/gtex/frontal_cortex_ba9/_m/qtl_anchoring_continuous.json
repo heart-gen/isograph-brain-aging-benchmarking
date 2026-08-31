@@ -1,0 +1,22 @@
+{
+  "analysis": "gtex-aging",
+  "region": "frontal_cortex_ba9",
+  "tissue": "Brain_Frontal_Cortex_BA9",
+  "variant": "standard",
+  "method": "isograph",
+  "outcome": "continuous",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 18291,
+  "universe_sizes": {
+    "sQTL": 13673,
+    "eQTL": 18246
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 8251,
+    "pheno_sig_modules": 7004,
+    "go_invisible_modules": 3159,
+    "go_visible_modules": 3845
+  }
+}

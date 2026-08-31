@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 
 from isograph_benchmark.paths import ensure_dir
+from isograph_benchmark.real_data.partition_provenance import write_with_fingerprint
 from isograph_benchmark.real_data.go_enrichment import GoAnnotations, HAS_GOATOOLS
 from isograph_benchmark.real_data.sweep_leiden import _DEFAULT_GO_CACHE, _artifact_dir
 
@@ -151,7 +152,11 @@ def characterize_method(analysis, region, method, variant, helper) -> pd.DataFra
         rows.append(row)
     df = pd.DataFrame(rows)
     out = ensure_dir(md.parent / "module_enrichment")
-    df.to_parquet(out / f"{method}_modules.parquet", index=False, compression="zstd")
+    # Stamp the fit this table describes. Module ids are re-assigned on every fit, so
+    # a downstream join on module_id is only meaningful against THIS partition; the
+    # fingerprint lets consumers reject a stale table instead of silently scrambling
+    # pheno_fdr / n_go_terms across modules.
+    write_with_fingerprint(df, out / f"{method}_modules.parquet", modules)
     go_full.to_parquet(out / f"{method}_module_go.parquet", index=False, compression="zstd")
     return df
 

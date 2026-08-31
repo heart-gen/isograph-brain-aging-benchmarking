@@ -1,6 +1,6 @@
 """Cross-trait rollup of the coloc capstone: one table over disease + aging traits.
 
-Each `real_data/coloc/_m/<gene_source>__<trait>/coloc/` holds a per-trait CLPP contrast
+Each `05_genetic_anchoring/_m/coloc/<gene_source>__<trait>/coloc/` holds a per-trait CLPP contrast
 (coloc_summary.py). This aggregates them into the manuscript-facing cross-trait view:
 
   * per-trait colocalization counts (sQTL / eQTL, total / strong, GO-invisible share);
@@ -8,7 +8,7 @@ Each `real_data/coloc/_m/<gene_source>__<trait>/coloc/` holds a per-trait CLPP c
     named-candidate evidence — canonical neurodegeneration genes (e.g. SNCA for LBD,
     TPP1/SCFD1 for ALS) anchored to switch modules through splicing.
 
-Writes real_data/coloc/_m/COLOC_META.md and coloc_meta.parquet (+ colocalized_genes.tsv).
+Writes 05_genetic_anchoring/_m/coloc/COLOC_META.md and coloc_meta.parquet (+ colocalized_genes.tsv).
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ import argparse
 
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.gwas_traits import TRAITS
 
 CLPP_STRONG = 0.05
@@ -33,7 +33,7 @@ def _source_of(dirname: str) -> str:
 
 
 def collect() -> tuple[pd.DataFrame, pd.DataFrame]:
-    base = rel("real_data", "coloc", "_m")
+    base = stage_out("anchoring.coloc")
     counts, genes = [], []
     for d in sorted(base.glob("*__*")):
         cdir = d / "coloc"
@@ -118,7 +118,7 @@ def _write_report(cnt: pd.DataFrame, gdf: pd.DataFrame, out_dir) -> None:
 
 def main() -> None:
     argparse.ArgumentParser(description="Cross-trait coloc rollup.").parse_args()
-    out_dir = ensure_dir(rel("real_data", "coloc", "_m"))
+    out_dir = ensure_dir(stage_out("anchoring.coloc"))
     cnt, gdf = collect()
     if cnt.empty:
         raise SystemExit("No coloc contrasts found.")

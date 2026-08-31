@@ -90,7 +90,7 @@ traits:
   # et al. 2014); the intended cohort is a 2024 FTD GWAS that has not been
   # provided, so FTD is dropped rather than mixing 2014 effects with a 2024 N.
 
-output_dir: real_data/gwas/_m/tmp/magma_pvals
+output_dir: 05_genetic_anchoring/_m/gwas/tmp/magma_pvals
 mhc:
   chromosome: 6
   start: 25000000

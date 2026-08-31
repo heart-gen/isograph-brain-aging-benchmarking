@@ -1,0 +1,32 @@
+{
+  "analysis": "gtex-aging",
+  "region": "putamen_basal_ganglia",
+  "tissue": "Brain_Putamen_basal_ganglia",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 7108,
+  "universe_sizes": {
+    "sQTL": 5030,
+    "eQTL": 5800
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 5848,
+      "n_constraint_complete": 5030,
+      "frac_retained": 0.8601
+    },
+    "eQTL": {
+      "n_tested": 7086,
+      "n_constraint_complete": 5800,
+      "frac_retained": 0.8185
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 7108,
+    "pheno_sig_modules": 93,
+    "go_visible_modules": 93
+  }
+}

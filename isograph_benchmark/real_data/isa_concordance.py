@@ -43,7 +43,7 @@ differential_expression):
     OR=7-12 in the right direction. The empirical-FDR positive count is still reported
     as a conservative secondary, but is never the headline.
 
-Outputs land in ``real_data/_m/isa_concordance/<cohort>_<region>_<trait>/``:
+Outputs land in ``06_switch_mechanism/_m/isa_concordance/<cohort>_<region>_<trait>/``:
   * ``gene_concordance.parquet`` -- per-gene switch_pos / evidence / isa_emp_q / n_tx.
   * ``saturn_transcript_results.tsv.gz`` -- raw satuRn transcript-level output.
   * ``summary.json`` -- MWU p + rank-biserial, adjusted OR/p, median evidence,
@@ -63,7 +63,7 @@ from scipy import stats
 
 from isograph.io.artifacts import load_dataset_bundle
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
 from isograph_benchmark.real_data.validate_switch_splicing import (
     BRAINSEQ_AGING_REGIONS,
@@ -106,7 +106,7 @@ def _exposure_spec(trait: str) -> dict:
 
 
 def _out_dir(cohort: str, region: str, trait: str):
-    return ensure_dir(rel("real_data", "_m", "isa_concordance", f"{cohort}_{region}_{trait}"))
+    return ensure_dir(stage_out("mechanism", "isa_concordance", f"{cohort}_{region}_{trait}"))
 
 
 # --------------------------------------------------------------------------- #

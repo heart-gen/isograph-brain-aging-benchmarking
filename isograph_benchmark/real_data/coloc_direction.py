@@ -34,11 +34,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, rel, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
 from isograph_benchmark.real_data.qtl_anchoring import _bare
 
-_COLOC_ROOT = rel("real_data", "coloc", "_m")
+_COLOC_ROOT = stage_out("anchoring.coloc")
 _XQTL_DIR = rel("inputs", "raw", "gtex_v11", "xqtl")
 _KIND_SUFFIX = {"sQTL": "sQTLs", "eQTL": "eQTLs"}
 
@@ -227,7 +227,7 @@ def _write_report(coloc_dir: Path, analysis: str, out: pd.DataFrame) -> None:
 def main() -> None:
     p = argparse.ArgumentParser(description="Signed direction + isoform event per coloc hit.")
     p.add_argument("--analysis", nargs="*", default=None,
-                   help="analysis dir(s) under real_data/coloc/_m; default: all with "
+                   help="analysis dir(s) under 05_genetic_anchoring/_m/coloc; default: all with "
                         "a coloc/coloc_colocalized_genes.tsv")
     args = p.parse_args()
     analyses = args.analysis or sorted(

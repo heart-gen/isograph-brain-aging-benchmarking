@@ -44,7 +44,7 @@ Usage
     # full pass (SLURM); aborts before any write if the built-in probe fails
     python -m isograph_benchmark.benchmark.refresh_sample_tables --shard 0 --n-shards 8
 
-Outputs (under ``benchmark/01_synthetic/_m/``):
+Outputs (under ``01_synthetic_benchmark/01_synthetic/_m/``):
     sample_table_refresh__shard{i}.parquet   one row per dataset, with both fingerprints
     SAMPLE_TABLE_REFRESH.md                  written by --collect once all shards land
 """

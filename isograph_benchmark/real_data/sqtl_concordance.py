@@ -297,7 +297,7 @@ def _write_report(out_dir: Path, analysis: str, region: str | None, tissue: str,
         "within-gene test is underpowered: a single lead sQTL variant often tags "
         "introns with near-constant per-transcript direction, so per-cohort |rho| "
         "hugs the null; the pooled meta and the diagnosis live in "
-        "`real_data/_m/sqtl_concordance_meta/`.",
+        "`05_genetic_anchoring/_m/sqtl_concordance_meta/`.",
         "- The statistic is flip-invariant by construction: the sQTL allele reference "
         "and the module switch-axis orientation are both arbitrary, so only the "
         "*relative* within-gene direction structure is testable. The disease-anchored "

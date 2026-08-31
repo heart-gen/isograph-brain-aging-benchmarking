@@ -34,14 +34,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import rel
+from isograph_benchmark.paths import cohort_dir, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
 from isograph_benchmark.real_data.qtl_anchoring import _GTEX_TISSUE, _bare
 
-_COLOC_ROOT = rel("real_data", "coloc", "_m")
-_GTEX_ROOT = rel("real_data", "gtex")
-_BRAINSEQ_ROOT = rel("real_data", "brainseq")
-_GTF_CACHE = rel("real_data", "_m", "tmp",
+_COLOC_ROOT = stage_out("anchoring.coloc")
+_GTEX_ROOT = cohort_dir("gtex")
+_BRAINSEQ_ROOT = cohort_dir("brainseq")
+_GTF_CACHE = stage_out("tmp",
                  "gencode.v47.primary_assembly.annotation.gtf_cache.parquet")
 
 # GTEx tissue name (as recorded on each coloc hit) -> region artifact dir.

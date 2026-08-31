@@ -1,0 +1,33 @@
+{
+  "analysis": "gtex-aging",
+  "region": "cortex",
+  "tissue": "Brain_Cortex",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "constraint",
+  "fdr": 0.05,
+  "n_universe_genes": 4309,
+  "universe_sizes": {
+    "sQTL": 3121,
+    "eQTL": 3528
+  },
+  "covariate_coverage": {
+    "sQTL": {
+      "n_tested": 3628,
+      "n_constraint_complete": 3121,
+      "frac_retained": 0.8603
+    },
+    "eQTL": {
+      "n_tested": 4298,
+      "n_constraint_complete": 3528,
+      "frac_retained": 0.8208
+    }
+  },
+  "module_set_sizes": {
+    "all_modules": 4309,
+    "pheno_sig_modules": 3491,
+    "go_invisible_modules": 1298,
+    "go_visible_modules": 2193
+  }
+}

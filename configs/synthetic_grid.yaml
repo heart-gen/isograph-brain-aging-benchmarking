@@ -24,7 +24,7 @@ base_seed: 13
 #     b. The sample tables cannot be repaired. 1,204 cached datasets -- every core switch
 #        scenario -- no longer regenerate from the current generator, so their covariates
 #        cannot be backfilled without replacing the expression data every published number
-#        was computed on. See benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md.
+#        was computed on. See 01_synthetic_benchmark/01_synthetic/_m/SAMPLE_TABLE_REFRESH.md.
 #
 #   312 rows on abundance_switch_mixed. These ARE runnable and are simply unfinished: all
 #   400 of those datasets reproduced exactly and had their sample tables refreshed, so
@@ -33,7 +33,7 @@ base_seed: 13
 #
 # The cost question is answered instead by a self-contained paired ablation on FRESH,
 # generator-pinned datasets: configs/residual_cost_ablation.yaml ->
-# isograph_benchmark/benchmark/residual_cost.py -> benchmark/03_metrics/_m/RESIDUAL_COST.md.
+# isograph_benchmark/benchmark/residual_cost.py -> 01_synthetic_benchmark/03_metrics/_m/RESIDUAL_COST.md.
 # Note its scope: in unconfounded scenarios RIN, neuron_frac and batch are constants that
 # build_design_matrix drops, so what is measured is the cost of residualizing LIBRARY DEPTH
 # ONLY -- not residualization in general.

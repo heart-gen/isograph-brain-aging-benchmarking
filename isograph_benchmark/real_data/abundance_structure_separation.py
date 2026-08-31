@@ -29,7 +29,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.incremental_association import (
     _channel_matrix,
     _covariate_cols,  # noqa: F401  (kept for parity; not required here)
@@ -237,7 +237,7 @@ def _write_effect_report(eff: pd.DataFrame) -> None:
                 f"{fmt(med)} | {fmt(q90)} | {fmt(cu_v)} | {fmt(ne_v)} | "
                 f"{fmt(ratio, '{:.1f}x')} |")
         lines.append("")
-    out = rel("real_data", "_m", "EFFECT_SIZES.md")
+    out = stage_out("characterize", "EFFECT_SIZES.md")
     out.write_text("\n".join(lines) + "\n")
 
 
@@ -255,7 +255,7 @@ def run(analysis: str, region: str | None, variant: str, gene: str | None) -> No
     # region's artifact dir.
     eff = incremental_effect_sizes(variant)
     if not eff.empty:
-        eff_out = ensure_dir(rel("real_data", "_m")) / "incremental_effect_sizes.parquet"
+        eff_out = ensure_dir(stage_out("characterize")) / "incremental_effect_sizes.parquet"
         eff.to_parquet(eff_out, index=False, compression="zstd")
         _write_effect_report(eff)
 

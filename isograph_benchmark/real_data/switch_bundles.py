@@ -11,7 +11,7 @@ Pooling the aging analyses gives one aging switch-gene set with enough QTL SNPs 
 well-powered S-LDSC heritability partition and enough loci for coloc, mirroring how the
 disease case draws on the one SCZD analysis. Each entry is an ``(analysis, region)``
 pair understood by :func:`isograph_benchmark.real_data.sweep_leiden._artifact_dir`.
-Mirrors the analysis grid in ``real_data/brainseq/_h/13.qtl_anchoring.sh``.
+Mirrors the analysis grid in ``05_genetic_anchoring/_h/01.qtl_anchoring.sh``.
 """
 from __future__ import annotations
 

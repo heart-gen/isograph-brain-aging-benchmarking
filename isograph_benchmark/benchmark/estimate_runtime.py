@@ -10,8 +10,8 @@ from isograph_benchmark.paths import ensure_dir, rel
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--run-root", default="benchmark/01_synthetic/_o/runs")
-    parser.add_argument("--out", default="benchmark/00_design/_m/runtime_estimates.parquet")
+    parser.add_argument("--run-root", default="01_synthetic_benchmark/01_synthetic/_o/runs")
+    parser.add_argument("--out", default="01_synthetic_benchmark/00_design/_m/runtime_estimates.parquet")
     parser.add_argument("--multiplier", type=float, default=1.25)
     args = parser.parse_args()
 

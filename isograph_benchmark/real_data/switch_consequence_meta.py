@@ -23,10 +23,10 @@ import numpy as np
 import pandas as pd
 from scipy.stats import combine_pvalues
 
-from isograph_benchmark.paths import rel
+from isograph_benchmark.paths import cohort_dir, stage_out
 from isograph_benchmark.stats.meta_analysis import meta
 
-_ROOTS = [rel("real_data", "brainseq"), rel("real_data", "gtex")]
+_ROOTS = [cohort_dir("brainseq"), cohort_dir("gtex")]
 
 # Regions whose contrast is case/control rather than age.  Everything else is an aging arm.
 _DISEASE_REGIONS = {"brainseq_caudate_sczd", "caudate_sczd"}
@@ -81,7 +81,7 @@ def run(pooled_all: bool = True) -> pd.DataFrame:
         rows.append(row)
 
     meta_df = pd.DataFrame(rows).sort_values(groups).reset_index(drop=True)
-    out = rel("real_data", "_m", "switch_consequence_meta.parquet")
+    out = stage_out("mechanism", "switch_consequence_meta.parquet")
     out.parent.mkdir(parents=True, exist_ok=True)
     meta_df.to_parquet(out, index=False)
     _write_report(meta_df, has_se)
@@ -128,7 +128,7 @@ def _write_report(meta_df: pd.DataFrame, has_se: bool) -> None:
                 f"| {r.analysis_class} | {r.stratum} | {r.consequence} | {r.n_regions} | "
                 f"{r.n_enriched_p05} | {r.n_depleted_p05} | {r.median_enrichment:.2f} | "
                 f"{r.median_obs_rate:.3f} | {r.fisher_p:.2e} |")
-    (rel("real_data", "_m", "SWITCH_CONSEQUENCE_META.md")).write_text("\n".join(lines) + "\n")
+    (stage_out("mechanism", "SWITCH_CONSEQUENCE_META.md")).write_text("\n".join(lines) + "\n")
 
 
 def main() -> None:

@@ -1,0 +1,19 @@
+{
+  "analysis": "gtex-aging",
+  "region": "spinal_cord_cervical_c_1",
+  "tissue": "Brain_Spinal_cord_cervical_c-1",
+  "variant": "standard",
+  "method": "wgcna_multiplex",
+  "outcome": "continuous",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 17203,
+  "universe_sizes": {
+    "sQTL": 12939,
+    "eQTL": 17165
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 17203
+  }
+}

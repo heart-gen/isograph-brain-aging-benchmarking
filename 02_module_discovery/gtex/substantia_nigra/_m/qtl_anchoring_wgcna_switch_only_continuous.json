@@ -1,0 +1,22 @@
+{
+  "analysis": "gtex-aging",
+  "region": "substantia_nigra",
+  "tissue": "Brain_Substantia_nigra",
+  "variant": "standard",
+  "method": "wgcna_switch_only",
+  "outcome": "continuous",
+  "covariate_set": "standard",
+  "fdr": 0.05,
+  "n_universe_genes": 6737,
+  "universe_sizes": {
+    "sQTL": 5506,
+    "eQTL": 6721
+  },
+  "covariate_coverage": {},
+  "module_set_sizes": {
+    "all_modules": 6737,
+    "pheno_sig_modules": 5790,
+    "go_invisible_modules": 158,
+    "go_visible_modules": 5632
+  }
+}

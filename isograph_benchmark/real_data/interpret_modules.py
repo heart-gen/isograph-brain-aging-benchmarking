@@ -9,14 +9,14 @@ import numpy as np
 import pandas as pd
 
 from isograph_benchmark.interpretation import explain_artifact_modules, summarize_explain_results
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, region_store, rel, stage_out
 
 
 DEFAULT_GTF_PATH = Path(
     "/ocean/projects/bio250020p/shared/resources/genomes/human/gencode-v47/gtf/"
     "gencode.v47.primary_assembly.annotation.gtf"
 )
-DEFAULT_GTF_CACHE = rel("real_data", "_m", "tmp", "gencode.v47.primary_assembly.annotation.gtf_cache.parquet")
+DEFAULT_GTF_CACHE = stage_out("tmp", "gencode.v47.primary_assembly.annotation.gtf_cache.parquet")
 
 
 @dataclass(frozen=True)
@@ -39,7 +39,7 @@ def iter_targets(scope: str) -> list[InterpretTarget]:
     targets: list[InterpretTarget] = []
     if scope in {"all", "brainseq"}:
         for region in ["caudate", "hippocampus", "dlpfc"]:
-            artifact_dir = rel("real_data", "brainseq", region, "_m", "isograph_vae")
+            artifact_dir = region_store("brainseq", region, "isograph_vae")
             targets.append(
                 InterpretTarget(
                     collection="brainseq",
@@ -52,7 +52,7 @@ def iter_targets(scope: str) -> list[InterpretTarget]:
                     ),
                 )
             )
-        sczd_artifact_dir = rel("real_data", "brainseq", "caudate_sczd", "_m", "isograph_vae")
+        sczd_artifact_dir = region_store("brainseq", "caudate_sczd", "isograph_vae")
         targets.append(
             InterpretTarget(
                 collection="brainseq",
@@ -65,7 +65,7 @@ def iter_targets(scope: str) -> list[InterpretTarget]:
 
     if scope in {"all", "gtex"}:
         for region in _existing_gtex_regions():
-            artifact_dir = rel("real_data", "gtex", region, "_m", "isograph_vae")
+            artifact_dir = region_store("gtex", region, "isograph_vae")
             targets.append(
                 InterpretTarget(
                     collection="gtex",
@@ -256,7 +256,7 @@ def run_real_data_interpretation(
         )
         if not summary.empty:
             parts.append(summary)
-            collection_out = ensure_dir(rel("real_data", target.collection, "_m"))
+            collection_out = ensure_dir(cohort_dir(target.collection, "_m"))
             current = pd.concat(
                 [part for part in parts if (part["collection"] == target.collection).all()],
                 ignore_index=True,
@@ -269,7 +269,7 @@ def run_real_data_interpretation(
     result = pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
     if not result.empty:
         for collection, frame in result.groupby("collection"):
-            out = ensure_dir(rel("real_data", collection, "_m"))
+            out = ensure_dir(cohort_dir(collection, "_m"))
             frame.to_parquet(out / "module_interpret_summary.parquet", index=False, compression="zstd")
     return result
 

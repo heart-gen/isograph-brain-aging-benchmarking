@@ -7,14 +7,14 @@ manuscript figures. It is the *driver* and *evaluation* layer; the method under
 evaluation, **IsoGraph**, is a separate installable package (see
 [The IsoGraph software](#the-isograph-software) below).
 
-This README mirrors the scientific summary in `benchmark/README.md` and adds the
+This README mirrors the scientific summary in `01_synthetic_benchmark/README.md` and adds the
 software and pipeline details needed to run or extend the analyses.
 
 ## Package layout
 
 | Module | Responsibility |
 |---|---|
-| `benchmark/` | Synthetic data generation (`synthetic_data.py`), per-run execution (`run_one.py`), metric computation, and module interpretation (`interpret_modules.py`) |
+| `01_synthetic_benchmark/` | Synthetic data generation (`synthetic_data.py`), per-run execution (`run_one.py`), metric computation, and module interpretation (`interpret_modules.py`) |
 | `stats/` | Bootstrap CIs and per-(scenario, method, metric) summaries (`summarize.py`); paired Wilcoxon tests with rank-biserial + Cliff's δ effect sizes and BH-FDR (`hypothesis_tests.py`) |
 | `figures/` | Manuscript figure generation (`synthetic_benchmark.R`): Fig 1, Table 1, and supplementary panels figS1–figS11 |
 | `real_data/` | BrainSEQ and GTEx model fits and downstream analysis (`run_models.py`, `incremental_association.py`, `module_enrichment.py`, `sweep_leiden.py`) |
@@ -22,7 +22,7 @@ software and pipeline details needed to run or extend the analyses.
 | `gwas/`, `checks/` | GWAS-overlap utilities and pipeline integrity checks |
 | `paths.py` | Repo-relative path resolution (`rel`, `ensure_dir`) used throughout |
 
-The on-disk pipeline lives under `benchmark/` in the repository root and runs in four
+The on-disk pipeline lives under `01_synthetic_benchmark/` in the repository root and runs in four
 ordered stages:
 
 ```
@@ -67,23 +67,23 @@ Spearman correlation.
   switch-magnitude recovery is modest.
 
 Full numbers, effect sizes, and the per-scenario narrative are in
-[`benchmark/README.md`](../benchmark/README.md).
+[`01_synthetic_benchmark/README.md`](../benchmark/README.md).
 
 ## Running the pipeline
 
 ```bash
 # Stage 00–01: build grid + run all cells (SLURM array jobs)
-sbatch benchmark/00_design/_h/*.sh
-sbatch benchmark/01_synthetic/_h/*.sh
+sbatch 01_synthetic_benchmark/00_design/_h/*.sh
+sbatch 01_synthetic_benchmark/01_synthetic/_h/*.sh
 
 # Stage 02: interpretation scoring
-sbatch benchmark/02_interpret/_h/step_1.sh
-sbatch benchmark/02_interpret/_h/step_2.sh
+sbatch 01_synthetic_benchmark/02_interpret/_h/step_1.sh
+sbatch 01_synthetic_benchmark/02_interpret/_h/step_2.sh
 
 # Stage 03: collect → summarize (CIs + paired tests + effect sizes) → figures
-sbatch benchmark/03_metrics/_h/step_1_collect.sh
+sbatch 01_synthetic_benchmark/03_metrics/_h/step_1_collect.sh
 python -m isograph_benchmark.stats.summarize
-sbatch benchmark/03_metrics/_h/step_3_figures.sh
+sbatch 01_synthetic_benchmark/03_metrics/_h/step_3_figures.sh
 ```
 
 Environment on Bridges-2: the Python pipeline uses the `isograph` env at

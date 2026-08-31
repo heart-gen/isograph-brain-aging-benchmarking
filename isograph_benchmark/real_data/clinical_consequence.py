@@ -38,7 +38,7 @@ import pandas as pd
 from scipy.stats import mannwhitneyu
 
 from isograph.explain.structure import parse_gtf
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import ensure_dir, region_store, rel
 from isograph_benchmark.real_data.coloc_prep import load_switch_genes
 from isograph_benchmark.real_data.interpret_modules import (
     DEFAULT_GTF_CACHE,
@@ -350,7 +350,7 @@ def _write_report(out_dir: Path, region: str, summary: pd.DataFrame,
 
 def _default_artifact_dir(region: str, resolution: str) -> Path:
     sub = "brainseq" if region in {"caudate", "caudate_sczd", "hippocampus", "dlpfc"} else "gtex"
-    return rel("real_data", sub, region, "_m", resolution)
+    return region_store(sub, region, resolution)
 
 
 def main() -> None:
