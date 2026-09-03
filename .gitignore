@@ -91,3 +91,5 @@ inputs/processed/gtex_v11/*/junction_usage.parquet
 # only the intronic one would be an inconsistent half-measure. Regenerable by re-running
 # rbp_scan_intronic.py with the flat background.
 07_rbp_regulation/_m/rbp/rbp_counts_intronic_flatbg.parquet
+reports/markdowns/
+reports/pi/
