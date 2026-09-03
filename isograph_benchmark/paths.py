@@ -54,6 +54,9 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     "regulation": ("07_rbp_regulation", "_m"),
     # manuscript display items
     "manuscript": ("manuscript", "_m"),
+    # PI-facing review reports and their frozen evidence inventory
+    "reports": ("reports", "pi"),
+    "reports.evidence": ("reports", "pi", "_evidence"),
     # shared gitignored scratch (GTF parse cache, id maps)
     "tmp": ("04_module_characterization", "_m", "tmp"),
 }
