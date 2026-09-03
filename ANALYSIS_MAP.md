@@ -22,7 +22,7 @@ that reaches the paper.
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
 | IsoGraph fits | `real_data/run_models.py` | `02_module_discovery/_h/01–04` | `<cohort>/<region>/_m/isograph_vae[_with_abundance]/` | all |
-| Leiden resolution sweep | `real_data/sweep_leiden.py` | `_h/05–06` | `<store>/leiden_sweep.parquet` | S-real-2 |
+| Leiden resolution sweep | `real_data/sweep_leiden.py` | `_h/05–06` | `<store>/isograph_vae/leiden_sweep_results.parquet` (BrainSEQ only) | S-real-2 |
 | Classical WGCNA baseline | `_h/07–09.wgcna_gene_*.R` | `_h/07–09` | `<store>/wgcna_gene/` | S-real-1 |
 | Matched-feature WGCNA baselines | `real_data/run_matched_wgcna.py` | `_h/10–11` | `<store>/wgcna_{switch_only,multiplex}/` | Fig 3 (internal control) |
 | Refit / reprojection QC | `real_data/qc_covariate_test.py`, `tier_checks.py` | `_h/12–14` | `<store>/{qc_covariate_test,tier_checks}/` | — |
@@ -31,7 +31,7 @@ that reaches the paper.
 
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
-| Split-half stability | `real_data/stability.py` | `03_module_trust/_h/01–03` | `_m/stability/{partitions,stability_summary}` | Fig 2 |
+| Split-half stability | `real_data/stability.py` | `03_module_trust/_h/01–03` | `_m/stability/{partitions/,stability_summary.parquet}` | Fig 2 |
 | Per-module trust funnel | `real_data/module_trust.py` | `_h/04, 09` | `_m/stability/{module_trust,modules_meta}/` | Fig 2, S7 |
 | LR / software robustness | `real_data/stability.py` | `_h/05–07` | `_m/stability/lr_validation/` | — |
 | Giant-cap ablation | `real_data/stability.py` | `_h/08` | `_m/stability_gcap_ab/` | — |
@@ -45,7 +45,7 @@ that reaches the paper.
 | Module interpretation | `real_data/interpret_modules.py` | `04_module_characterization/_h/01–02` | `<store>/isograph_vae/module_interpret/` | S-real-5 |
 | GO:BP enrichment | `real_data/module_enrichment.py`, `go_enrichment.py` | `_h/03–04` | `<store>/module_enrichment/` | S-real-1 |
 | GO-invisible gate | `real_data/go_invisible_gate.py` | `_h/05` | `<caudate_sczd store>/go_invisible_gate.parquet` | S-real-3, S6 |
-| Incremental association | `real_data/incremental_association.py` | `_h/06–07` | `<store>/incremental_association/` | S-real-4 |
+| Incremental association | `real_data/incremental_association.py` | `_h/06–07` | `<store>/isograph_vae/incremental_association/` | S-real-4 |
 | Abundance/switch separation | `real_data/abundance_structure_separation.py` | `_h/08` | `_m/incremental_effect_sizes.parquet` | S-real-4 |
 | Composition-unique genes | `real_data/characterize_composition_unique.py` | `_h/09` | `_m/composition_adjustment.parquet` | S-real-4 |
 | Cell-type composition | `real_data/celltype_composition.py` + MuSiC R | `_h/10–11` | `_m/composition_adjustment.parquet`, `02_module_discovery/gtex/_m/composition/` | **Fig 5** `figCompositionRobustness`, Table S13 |
@@ -65,7 +65,7 @@ that reaches the paper.
 | Module genetic anchoring | `real_data/module_genetic_anchoring.py` | `_h/04` | `_m/module_genetic_anchoring_meta/` | Table S16 only — **no figure by design** (pooled-gene, not per-module) |
 | MAGMA module-GWAS | `gwas/prepare_magma_inputs.py` | `_h/05–07` | `_m/gwas/magma_results_combined.parquet` | S-real-2 |
 | Colocalization (SuSiE + eCAVIAR) | `real_data/coloc_{prep,summary,isoform_events,direction,meta}.py` | `_h/08–11` | `_m/coloc/` | Fig 4, S8/S9 |
-| Per-gene sQTL-vs-eQTL coloc contrast | `real_data/coloc_modality_contrast.py` + `_h/20.coloc_modality_abf.R` | `_h/19–21` | `_m/coloc_modality_contrast/` | *(pending full run)* |
+| Per-gene sQTL-vs-eQTL coloc contrast | `real_data/coloc_modality_contrast.py` + `_h/20.coloc_modality_abf.R` | `_h/19–21` | `_m/coloc_modality_contrast/` | *(run 2026-09-01, 4 arms — **null**; reported as a negative control, no figure)* |
 | S-LDSC partitioned heritability | `real_data/ldsc_annot_prep.py`, `ldsc_summary.py` | `_h/12–14` | `_m/ldsc/ldsc_partitioned.parquet` | Fig 4B |
 | Per-gene deep dive | `real_data/gene_deep_dive.py` | `_h/15` | `_m/deep_dive/` | **Table 2**, S8–S12 |
 | SCZ age projection | `real_data/scz_age_projection.py` | `_h/16` | `_m/scz_age_projection/` | **Fig 4E** (folded from `figSczConvergence`), Table S18 |

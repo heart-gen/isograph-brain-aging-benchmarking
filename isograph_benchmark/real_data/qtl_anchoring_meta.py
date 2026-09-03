@@ -259,8 +259,15 @@ def _write_report(out_dir: Path, per: pd.DataFrame, meta: pd.DataFrame,
         "— expected: coordinated/network genes are more constrained and carry fewer "
         "common-variant cis-QTL. This shared baseline is NOT the result.",
         "- **The result is the splicing-specificity contrast: sQTL OR / eQTL OR > 1**, "
-        "strongest for the GO-invisible modules — splicing-QTL is spared relative to "
-        "expression-QTL exactly where the DTU-without-DGE value concentrates.",
+        "carried by the phenotype-associated modules — splicing-QTL is spared relative "
+        "to expression-QTL in the modules that track the trait.",
+        "- **Do NOT read a GO-invisible localisation off this table.** On the 2026-08-29 "
+        "refresh the `go_invisible_modules` and `go_visible_modules` arms are "
+        "statistically indistinguishable, so neither is the site of the effect and "
+        "neither is a null. The DTU-without-DGE claim rests on the GO-invisible content "
+        "gate, not on these genetics. An earlier framing made `go_invisible` the "
+        "headline; it came from a stale `module_enrichment` join that relabelled the "
+        "partition and must not be restored.",
         "- **If the matched WGCNA baselines show the SAME specificity**, the splicing-QTL "
         "signal is a property of the switch features (which both methods share), not of "
         "IsoGraph's inference — the genetic-anchoring analog of the three-baseline result. "
@@ -269,8 +276,8 @@ def _write_report(out_dir: Path, per: pd.DataFrame, meta: pd.DataFrame,
         "- **Primary internal control = the matched WGCNA baselines**, not "
         "`go_visible_modules`. The baselines hold the switch features fixed and vary only "
         "the inference, so a null there localises the effect to IsoGraph's inference. "
-        "`go_visible_modules` is a secondary control on module CONTENT and is only ever a "
-        "relative contrast — read it as the low end of a gradient, not as an on/off null.",
+        "`go_visible_modules` is a secondary, exploratory stratification on module "
+        "CONTENT and is only ever a relative contrast — never an on/off null.",
         "- High I2 flags between-tissue heterogeneity; prefer RE there. A nominally "
         "significant ratio carrying high I2 is driven by a few tissues, not by a "
         "consistent effect, and is weaker evidence than a smaller ratio at I2 near 0 — "

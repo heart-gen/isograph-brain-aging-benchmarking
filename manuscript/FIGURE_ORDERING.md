@@ -50,8 +50,11 @@ baselines that consume the same switch features.
 **What does not:** the "concentrates specifically in the GO-invisible, DTU-without-DGE
 modules, homogeneously across tissues" refinement. GO-invisible (1.068) and GO-visible
 (1.084) are now indistinguishable. **Any drafted prose asserting the GO-invisible
-localisation must be rewritten** — this includes `MANUSCRIPT_PLAN.md` §15/§20 and
-`GENETIC_ANCHORING_RESULTS.md`, which still carry the old 1.172 / I²=0.00 framing.
+localisation must be rewritten.** Done 2026-09-01 across `MANUSCRIPT_PLAN.md`,
+`GENETIC_ANCHORING_RESULTS.md`, `QTL_ANCHORING_SUMMARY.md`, `AGENTS.md`, both READMEs,
+and the `qtl_anchoring_meta.py` generator that emits `QTL_ANCHORING_META.md` (the meta
+regenerates bit-identically, max|diff| = 0 — prose only). **Never quote a pre-2026-08-29
+anchoring number.**
 
 ### Fig 4A — the SNCA panel is illustrative, not evidence
 
@@ -173,9 +176,11 @@ GO-invisible localisation claims are now wrong** — rewrite before use.
 1. **Graphical abstract.** Fig 1A–C is the natural basis for one, but a Cell Press
    graphical abstract is a separate artwork and has not been drawn. Whether Cell Genomics
    research Articles require one is still unverified (`MANUSCRIPT_PLAN.md` §11).
-2. **Prose must be rewritten for the Fig 3 refresh.** `MANUSCRIPT_PLAN.md` §15/§20 and
-   `GENETIC_ANCHORING_RESULTS.md` still assert the GO-invisible localisation (1.172,
-   I²=0.00) that the refreshed inputs do not support.
+2. ~~**Prose must be rewritten for the Fig 3 refresh.**~~ **DONE 2026-09-01.** Every
+   drafted assertion of the GO-invisible genetic localisation is rewritten; Fig 3's
+   claim is now the phenotype-associated contrast (1.111, p=3.6e-4) with the
+   matched-baseline null as its control. Fig 4E (`figColocConvergence` replacement)
+   remains open — see the Fig 4 row above.
 3. **`CELL_GENOMICS_IMPACT_PROGRESS.md` Item 2 is stale.** It reports 17/39
    binding-supported RBPs at a median gap of 0.013; the committed
    `rbp_binding_support.parquet` now holds 38 RBPs, 25 supported, median gap 0.024

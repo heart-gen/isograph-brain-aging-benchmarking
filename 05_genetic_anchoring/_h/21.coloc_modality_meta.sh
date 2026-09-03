@@ -37,7 +37,9 @@ module load anaconda3/2024.10-1
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
-log_message "**** coloc modality contrast: meta ****"
+# Arm defaults to `switch`; pass --arm background (etc.) through "$@", or via
+#   sbatch 05_genetic_anchoring/_h/21.coloc_modality_meta.sh --arm background
+log_message "**** coloc modality contrast: meta ${*:-(switch)} ****"
 python -m isograph_benchmark.real_data.coloc_modality_contrast --stage meta "$@"
 conda deactivate
 log_message "**** Complete ****"

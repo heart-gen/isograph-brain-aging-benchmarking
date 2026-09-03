@@ -18,7 +18,7 @@ answers one question and feeds the next.
 | [`02_module_discovery/`](02_module_discovery/README.md) | What modules exist in postmortem human brain? | IsoGraph fits + 3 matched WGCNA baselines; the cohort × region artifact store |
 | [`03_module_trust/`](03_module_trust/README.md) | Are they reproducible, or is a fine partition noise? | 236/266 chance-trusted; 25 aging replications — **Fig 2** |
 | [`04_module_characterization/`](04_module_characterization/README.md) | What are they, and do they add signal beyond abundance? | 4/4 disease modules GO-invisible; axes near-orthogonal; **the scope bound** |
-| [`05_genetic_anchoring/`](05_genetic_anchoring/README.md) | Are they genetically real? Where does disease risk land? | Splicing-specificity contrast 1.172 in the GO-invisible layer — **Fig 3, Fig 4** |
+| [`05_genetic_anchoring/`](05_genetic_anchoring/README.md) | Are they genetically real? Where does disease risk land? | Splicing-specificity contrast 1.111 in the phenotype-associated layer, IsoGraph-only — **Fig 3, Fig 4** |
 | [`06_switch_mechanism/`](06_switch_mechanism/README.md) | Are the switches real, and what do they do? | Productive UTR/CDS remodeling, not decay |
 | [`07_rbp_regulation/`](07_rbp_regulation/README.md) | What trans factors could drive the co-switching? | 829 module × RBP regulon hits (candidates, not binding data) |
 | [`manuscript/`](manuscript/README.md) | — | Every display item + its builder |

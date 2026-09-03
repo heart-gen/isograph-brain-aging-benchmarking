@@ -48,7 +48,13 @@ module load anaconda3/2024.10-1
 source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio250020p/shared/opt/env/R_env
 
-log_message "**** coloc.abf modality contrast: ${TISSUE} (task ${IDX}) ****"
+# Gene pool. `switch` (default) is the IsoGraph arm and writes to the top-level dir;
+# background / wgcna_switch / wgcna_multiplex write under arms/<arm>/. Loci and GWAS are
+# identical across arms. Override per submission:
+#   sbatch --export=ALL,COLOC_MODALITY_ARM=background 05_genetic_anchoring/_h/20....sh
+export COLOC_MODALITY_ARM="${COLOC_MODALITY_ARM:-switch}"
+
+log_message "**** coloc.abf modality contrast: ${TISSUE} (task ${IDX}, arm ${COLOC_MODALITY_ARM}) ****"
 Rscript 05_genetic_anchoring/_h/20.coloc_modality_abf.R "${TISSUE}"
 conda deactivate
 log_message "**** Complete: ${TISSUE} ****"

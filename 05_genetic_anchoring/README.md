@@ -23,14 +23,22 @@ onto specific isoform switches? This stage carries the paper's headline.
 Co-switch genes are cis-QTL **depleted for both** sQTL and eQTL — coordinated network
 genes are constrained. That shared baseline is not the result. The result is the paired
 **splicing-specificity contrast** (sQTL OR / eQTL OR within analysis), which removes it:
-all 1.068 (p=1.3e-5), pheno-sig 1.163 (p=3.6e-7), **GO-invisible 1.172 (p=2.3e-5,
-I²=0.00)**, GO-visible 1.104 (p=0.022, I²=0.68).
+all 1.068 (95% CI 1.037–1.100, p=1.3e-5, I²=0.29), **pheno-sig 1.111 (1.048–1.177,
+p=3.6e-4, I²=0.23)**, GO-invisible 1.068 (0.993–1.148, p=0.077, n.s.), GO-visible 1.084
+(1.000–1.174, p=0.050).
+
+Numbers are the 2026-08-29 refresh (`qtl_anchoring_meta_contrast.parquet`). **Never quote
+a pre-2026-08-29 anchoring number** — the earlier figures rested on a stale
+`module_enrichment` join that relabelled the GO partition.
 
 Two things not to overclaim:
 
-- **GO-visible is not a clean internal null.** It is the low, heterogeneous end of a
-  gradient. The primary internal control is the **matched WGCNA baselines** from stage 02,
-  which are null everywhere (0.970–1.017, p=0.44–0.86).
+- **The effect does not localise to the GO-invisible modules.** GO-invisible (1.068,
+  p=0.077) and GO-visible (1.084, p=0.050) are indistinguishable, so neither is a null and
+  neither is the site of the effect — it is carried by the **phenotype-associated** set.
+  The DTU-without-DGE claim rests on the GO-invisible content gate (S-real-3), not on
+  genetics. The primary internal control is the **matched WGCNA baselines** from stage 02,
+  which are null everywhere (0.959–1.021, p=0.30–0.86).
 - **Per-gene CLPP posteriors are individually modest** (inclusion at ≥0.01; only 4/12
   reach 0.05; only CTSH at 0.39). The genetic-anchoring significance rests on the
   set-level contrast and S-LDSC, not on per-locus colocalization. Frame the 12

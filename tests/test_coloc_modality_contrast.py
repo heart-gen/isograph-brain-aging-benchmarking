@@ -15,15 +15,21 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from isograph_benchmark.paths import stage_out
 from isograph_benchmark.real_data.coloc_modality_contrast import (
     ANALYSES,
+    ARMS_GENE_POOL,
     MIN_SHARED_SNPS,
     P12_PRIMARY,
     PP4_CALL,
     _FIXED_CASE_N,
+    _WGCNA_ENRICH,
+    _WGCNA_FIT,
     collapse_genes,
+    out_dir,
     pair_cells,
     paired_tests,
+    run_prep,
 )
 
 R_BIN = "/ocean/projects/bio250020p/shared/opt/env/R_env/bin/Rscript"
@@ -139,3 +145,122 @@ def test_coloc_abf_posteriors_do_not_depend_on_gwas_n_or_s():
     p = subprocess.run([R_BIN, "-e", script], capture_output=True, text=True, timeout=300)
     assert p.returncode == 0, p.stderr[-2000:]
     assert p.stdout.strip().endswith("TRUE"), p.stdout[-2000:]
+
+
+# --------------------------------------------------------------------------- #
+# Arms: the method comparison lives in gene selection, so the arms must differ
+# only there
+# --------------------------------------------------------------------------- #
+def test_arm_out_dirs_are_distinct_and_switch_keeps_the_top_level():
+    """`switch` must keep its original directory or the completed run is orphaned."""
+    base = stage_out("anchoring", "coloc_modality_contrast")
+    assert out_dir("switch") == base
+    seen = {arm: out_dir(arm) for arm in ARMS_GENE_POOL}
+    assert len(set(seen.values())) == len(ARMS_GENE_POOL), seen
+    for arm in ARMS_GENE_POOL:
+        if arm != "switch":
+            assert seen[arm].parent.name == "arms"
+            assert seen[arm].name == arm
+
+
+def test_unknown_arm_is_rejected():
+    with pytest.raises(SystemExit):
+        run_prep(analyses=(), arm="not_an_arm")
+
+
+def test_wgcna_arm_registry_matches_module_enrichment_naming():
+    """The WGCNA fit dir and its enrichment file are named differently.
+
+    `wgcna_switch` lives in `wgcna_switch_only/` but is written as
+    `wgcna_switch_modules.parquet`. Getting that mapping wrong would silently read
+    another method's partition, which is exactly the class of bug
+    partition_provenance.py exists to stop.
+    """
+    from isograph_benchmark.real_data.module_enrichment import METHOD_DIRS
+    for arm, fit in _WGCNA_FIT.items():
+        assert METHOD_DIRS[arm] == fit, (arm, fit, METHOD_DIRS.get(arm))
+        assert _WGCNA_ENRICH[arm] == f"{arm}_modules.parquet"
+
+
+def test_background_arm_is_a_superset_of_the_switch_arm():
+    """The background arm must CONTAIN the switch genes at the same loci.
+
+    This is what makes the switch-vs-non-switch split locus-matched. If a switch
+    (locus, gene) pair were missing from the background pool, the two groups would sit
+    at different loci and the comparison would be confounded by locus composition.
+    """
+    base = stage_out("anchoring", "coloc_modality_contrast")
+    sw_f = base / "targets.parquet"
+    bg_f = base / "arms" / "background" / "targets.parquet"
+    if not (sw_f.exists() and bg_f.exists()):
+        pytest.skip("arms not prepped in this checkout")
+    s = pd.read_parquet(sw_f)
+    b = pd.read_parquet(bg_f)
+    ks = set(zip(s["analysis"], s["LOCUS_ID"], s["gene"]))
+    kb = set(zip(b["analysis"], b["LOCUS_ID"], b["gene"]))
+    assert ks <= kb, f"{len(ks - kb)} switch pairs missing from the background arm"
+    assert int(b["is_switch"].sum()) == len(ks)
+
+
+def test_every_arm_reuses_the_same_loci():
+    """Loci are held fixed across arms; only the gene pool may vary.
+
+    An arm may drop a locus that contains none of its genes, but it must never
+    introduce a locus the switch arm did not have -- that would mean the GWAS side
+    changed and the arms were no longer comparable.
+    """
+    base = stage_out("anchoring", "coloc_modality_contrast")
+    sw_f = base / "targets.parquet"
+    if not sw_f.exists():
+        pytest.skip("switch arm not prepped in this checkout")
+    s = pd.read_parquet(sw_f)
+    ref = set(zip(s["analysis"], s["LOCUS_ID"]))
+    for arm in ARMS_GENE_POOL:
+        if arm == "switch":
+            continue
+        f = base / "arms" / arm / "targets.parquet"
+        if not f.exists():
+            continue
+        t = pd.read_parquet(f)
+        got = set(zip(t["analysis"], t["LOCUS_ID"]))
+        assert got <= ref, f"{arm} introduced loci absent from the switch arm"
+
+
+def test_genes_outside_a_module_are_not_silently_dropped():
+    """The background arm is 87% genes with no module_id; they must survive pairing.
+
+    `pivot_table` groups with dropna=True, so a NaN in any index key deletes the row.
+    module_id / go_invisible are legitimately NaN for genes in no IsoGraph module --
+    exactly the population the background arm exists to measure. Without the sentinel
+    fill the background arm would collapse to the switch arm and still look valid,
+    which is the kind of failure that produces a confident wrong answer.
+    """
+    rows = []
+    for gene, mod in (("G1", "M001"), ("G2", None)):
+        for modality, pp3, pp4 in (("sQTL", 0.1, 0.8), ("eQTL", 0.5, 0.2)):
+            rows.append({
+                "analysis": "aging__scz", "trait": "scz", "LOCUS_ID": "locus01_chr1",
+                "gene": gene, "module_id": mod, "go_invisible": None,
+                "tissue": "Brain_Cortex", "modality": modality,
+                "p12": P12_PRIMARY, "PP3": pp3, "PP4": pp4, "nsnps": 500,
+            })
+    wide = pair_cells(pd.DataFrame(rows))
+    assert set(wide["gene"]) == {"G1", "G2"}, "module-less gene was dropped"
+    assert set(collapse_genes(wide)["gene"]) == {"G1", "G2"}
+
+
+def test_sensitivity_loop_does_not_shadow_the_gene_pool_arm():
+    """`run_meta`'s sensitivity loop must not rebind the `arm` parameter.
+
+    `ARMS` (sensitivity: p12 / PP4 call / SNP floor) and `ARMS_GENE_POOL` (which genes
+    are tested) are different axes that both got called "arm". A loop written
+    `for arm, kw in ARMS:` silently overwrites the function argument, so every use of
+    `arm` after the loop -- the background arm's switch/non-switch split, and the gene
+    pool named in the report -- would take the value of the LAST sensitivity arm.
+    Nothing raises; the split just never runs and the report is mislabelled.
+    """
+    import inspect
+    from isograph_benchmark.real_data import coloc_modality_contrast as m
+    src = inspect.getsource(m.run_meta)
+    assert "for arm, kw in ARMS" not in src, "sensitivity loop shadows the arm parameter"
+    assert "for sens_arm, kw in ARMS" in src

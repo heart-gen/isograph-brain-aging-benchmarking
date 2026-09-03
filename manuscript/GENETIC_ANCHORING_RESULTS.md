@@ -145,3 +145,12 @@ read against the matched-baseline control of Fig 3 (the sQTL-sparing specificity
 on identical WGCNA feature matrices) and the bounding supplement S-real-1 (on per-module rates
 IsoGraph is not globally superior): together they place the genetic anchoring as evidence that a
 **complementary** layer is real, not that the method dominates.
+
+**Do not merge the two GO-invisible statements in this section with Fig 3's.** The claim here is
+about *content*: the 12 splicing-led colocalized genes happen to sit in modules that gene-level
+pathway enrichment would miss (n = 12, descriptive, no test against a GO-visible comparator).
+Fig 3's set-level sQTL/eQTL contrast does **not** localise to the GO-invisible modules — on the
+2026-08-29 refresh GO-invisible (1.068, p = 0.077) and GO-visible (1.084, p = 0.050) are
+indistinguishable, and the contrast is carried by the phenotype-associated set (1.111,
+p = 3.6e-4). Earlier drafts asserted a genetic GO-invisible localisation; that is retracted, and
+the descriptive coloc observation above must not be used to re-import it.

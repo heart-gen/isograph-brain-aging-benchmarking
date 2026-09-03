@@ -93,3 +93,9 @@ inputs/processed/gtex_v11/*/junction_usage.parquet
 07_rbp_regulation/_m/rbp/rbp_counts_intronic_flatbg.parquet
 reports/markdowns/
 reports/pi/
+
+# Per-tissue coloc.abf shards from the 13-task SLURM array, across all four gene-pool
+# arms (166 MB). Each arm's committed `cells.parquet` is the merge of its own shards,
+# so nothing downstream reads these. Regenerable with
+# `sbatch 05_genetic_anchoring/_h/20.coloc_modality_abf.sh` (+ COLOC_MODALITY_ARM).
+05_genetic_anchoring/_m/coloc_modality_contrast/**/abf/
