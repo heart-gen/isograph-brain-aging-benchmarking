@@ -89,12 +89,17 @@ def load_switch_genes(iso_dir: Path, fdr: float) -> pd.DataFrame:
     return keep[["gene", "module_id", "go_invisible"]].drop_duplicates()
 
 
-def load_qtl_credible_sets(xqtl_dir: Path, tissues: list[str], genes: set[str]) -> pd.DataFrame:
+def load_qtl_credible_sets(xqtl_dir: Path, tissues: list[str],
+                           genes: set[str] | None) -> pd.DataFrame:
     """GTEx brain sQTL + eQTL credible-set variants for the given genes (bare Ensembl).
 
     Schemas differ: the eQTL SuSiE summary keys the gene in `phenotype_id` (Ensembl,
     versioned) and has no `gene_id`; the sQTL summary keys the intron in
     `phenotype_id` and the gene in `gene_id`. Both carry `gene_name`.
+
+    `genes=None` returns the whole credible-set universe unfiltered, which is how
+    `coloc_modality_contrast` builds its background arm: that arm needs every gene
+    passing this same testability gate, not just the switch genes.
     """
     rows = []
     base = ["phenotype_id", "gene_name", "variant_id", "pip", "cs_id", "cs_size"]
@@ -107,7 +112,8 @@ def load_qtl_credible_sets(xqtl_dir: Path, tissues: list[str], genes: set[str]) 
                 continue
             d = pd.read_parquet(path, columns=cols)
             d["gene"] = _bare(d[gene_col])
-            d = d[d["gene"].isin(genes)]
+            if genes is not None:
+                d = d[d["gene"].isin(genes)]
             if d.empty:
                 continue
             d["tissue"] = tissue

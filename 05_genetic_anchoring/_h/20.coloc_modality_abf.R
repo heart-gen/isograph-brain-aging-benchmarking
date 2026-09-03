@@ -36,9 +36,19 @@ TISSUE <- args[1]
 ONE_CHR <- if (length(args) >= 2) as.integer(args[2]) else NA_integer_
 ROOT   <- Sys.getenv("ISOGRAPH_BENCHMARK_ROOT", unset = getwd())
 GTEX   <- "/ocean/projects/bio250020p/shared/resources/public-data/gtex_v11"
-MDIR   <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc_modality_contrast")
+## Which gene pool is tested at the loci. The loci, the GWAS and every coloc setting are
+## identical across arms -- only the gene set differs -- so an arm is selected purely by
+## swapping the directory the targets are read from and the results are written to.
+## `switch` keeps the original top-level directory so the completed run is untouched.
+ARM    <- Sys.getenv("COLOC_MODALITY_ARM", unset = "switch")
+if (!ARM %in% c("switch", "background", "wgcna_switch", "wgcna_multiplex"))
+    stop("unknown COLOC_MODALITY_ARM: ", ARM)
+BASE   <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc_modality_contrast")
+MDIR   <- if (ARM == "switch") BASE else file.path(BASE, "arms", ARM)
+if (!dir.exists(MDIR)) stop("missing arm dir ", MDIR, " (run --stage prep --arm ", ARM, ")")
 BRIDGE <- file.path(ROOT, "inputs", "raw", "gtex_v11", "variant_bridge")
 OUTD   <- file.path(MDIR, "abf"); dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
+message(sprintf("[arm] %s -> %s", ARM, MDIR))
 
 P12       <- c(1e-5, 5e-6, 1e-6)   # 1e-5 = coloc default = primary
 MIN_SHARED <- 50L                  # emit the row; the meta stage applies the real floor
