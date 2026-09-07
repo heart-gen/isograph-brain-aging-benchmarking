@@ -116,3 +116,38 @@ def test_targets_do_not_require_a_reported_competitor():
     assert not snca.empty
     assert (snca["n_competing"] == 0).all()
     assert set(snca["region"]) <= {"dlpfc", "caudate"}
+
+
+# --------------------------------------------------------------------------- #
+# upstream parser (validate_switch_splicing)
+# --------------------------------------------------------------------------- #
+def test_validate_switch_splicing_parses_both_event_arms():
+    """The shared PSI parser must see an event's second arm.
+
+    Regression for the same defect fixed in this module: `_JUNC_RE` requires a `chrN:`
+    prefix on every match, but a LIBD event_info names the chromosome once and then lists
+    both arms, so it captured only the first. Junctions carried by a second arm were
+    silently reported as unmeasured, which undercounted analysis B (9/17 -> 11/17, and
+    5 -> 11 exact two-endpoint matches).
+    """
+    from isograph_benchmark.real_data import validate_switch_splicing as vss
+
+    info = "A3:chr15:78937496-78939140:78937423-78939140:-"
+    coords = [int(a) for pair in vss._EVENT_PAIR_RE.findall(info) for a in pair]
+    assert coords == [78937496, 78939140, 78937423, 78939140]
+    # the old pattern is kept for single-junction strings, where it is correct
+    assert vss._parse_junction("chr15:78937423-78939140(-)") == ("chr15", 78937423, 78939140)
+
+
+def test_match_event_still_requires_the_right_chromosome():
+    """Dropping chr from the coordinate pattern must not lose chromosome specificity."""
+    import pandas as pd
+
+    from isograph_benchmark.real_data import validate_switch_splicing as vss
+
+    events = pd.DataFrame({
+        "event_id": ["e1"], "chrom": ["chr4"],
+        "coords": [[78937423, 78939140]],
+    })
+    assert vss._match_event("chr15", 78937423, 78939140, events) == (None, 0)
+    assert vss._match_event("chr4", 78937423, 78939140, events) == ("e1", 2)

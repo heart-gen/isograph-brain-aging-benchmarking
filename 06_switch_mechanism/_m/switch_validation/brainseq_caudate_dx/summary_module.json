@@ -25,7 +25,7 @@
   },
   "event_resolved": {
     "n_resolved_junctions": 17,
-    "n_matched_to_psi": 9,
+    "n_matched_to_psi": 11,
     "n_both_significant": 0,
     "n_concordant": 0,
     "alpha": 0.05
