@@ -56,8 +56,13 @@ Interpretation notes (from the first runs):
     the switch is regulated by the risk VARIANT, not that it differs on average between
     cases and controls (an allele-frequency-diluted signal). Accordingly the Dx/age
     event tests are near-null; what Analysis B does establish is STRUCTURAL
-    corroboration -- 9/17 GWAS-implicated switch junctions are independently detected
-    as real, used PSI events. The strong genetic replication is the sQTL (genotype ->
+    corroboration -- **11/17** GWAS-implicated switch junctions are independently
+    detected as real, used PSI events, and all 11 match at BOTH endpoints.
+    (Was "9/17, of which 5 matched both endpoints" before the 2026-09-03 `_EVENT_PAIR_RE`
+    fix: the old chr-anchored parse saw only an event's first arm, so junctions carried by
+    a second arm went unmatched and four of the nine "matches" were loose single-endpoint
+    hits. The corrected count is both larger and stricter. Analysis A is unaffected -- it
+    never reads event coordinates -- so the caudate OR ~105 is unchanged.) The strong genetic replication is the sQTL (genotype ->
     junction-PSI) test, which needs the controlled TOPMed genotypes (follow-on).
 """
 from __future__ import annotations
@@ -86,6 +91,21 @@ from isograph_benchmark.real_data.sweep_leiden import (
 
 _META_COLS = ("feature_id", "gene_id", "feature_type", "n_transcripts")
 _JUNC_RE = re.compile(r"(chr[\w]+):(\d+)-(\d+)")
+
+# Every "start-end" pair in a LIBD ``event_info`` string, chromosome NOT required.
+#
+# An event_info names the chromosome once and then lists BOTH arms, e.g.
+#     A3:chr15:78937496-78939140:78937423-78939140:-
+#     AF:chr4:89835692-89836127:89836213:89835692-89838252:89838315:-
+# so ``_JUNC_RE.findall`` -- which requires a ``chrN:`` prefix on every match -- captures
+# only the FIRST arm and every event's competing arm is invisible. A switch junction that
+# happens to be an event's second arm then fails to match any event and is reported as
+# "not measured", which is indistinguishable from the junction being absent from the data.
+# CTSH's anchored junction chr15:78937423-78939140 is exactly such a case.
+#
+# Dropping the chromosome from the pattern loses no specificity: `_match_event` compares
+# ``ev["chrom"]`` against the junction's chromosome before ever looking at the coordinates.
+_EVENT_PAIR_RE = re.compile(r"(\d+)-(\d+)")
 _COORD_MATCH_TOL = 5  # bp tolerance when matching a switch junction to a PSI event
 
 BRAINSEQ_AGING_REGIONS = ("caudate", "hippocampus", "dlpfc")
@@ -224,7 +244,7 @@ def _load_splice(cohort: str, region: str, sample_ids: list[str], genes: set[str
 
     samp = [c for c in psi.columns if c in sample_ids]
     coords = [
-        [int(a) for pair in _JUNC_RE.findall(str(info)) for a in pair[1:]]
+        [int(a) for pair in _EVENT_PAIR_RE.findall(str(info)) for a in pair]
         for info in psi["event_info"]
     ]
     meta = pd.DataFrame({
