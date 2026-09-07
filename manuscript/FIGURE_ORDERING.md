@@ -23,7 +23,7 @@ cell-type composition" (the confound that decides whether any of it is believed)
 | **1** | `manuscript/_m/figures/figConceptOverview.{pdf,png}` | **What an isoform switch is, and that IsoGraph recovers them where truth is known.** (A) one gene, two isoforms, usage crossing over with age while total gene abundance stays flat — the event a DGE pipeline cannot see; (B) the DGE x DTU quadrant map, naming the DTU-without-DGE cell as the paper's contribution; (C) the method in one row (per-gene switch features → VAE latent → gene-gene graph → co-switch modules); (D) module recovery and (E) switch-gene detection over 7,080 synthetic runs, six core scenarios × six methods. Panels A–C are drawn from explicit coordinates and carry no data — they illustrate a definition. Built by `manuscript/_h/concept_overview_figure.R`. The exhaustive 24-panel grid this replaces (`01_synthetic_benchmark/03_metrics/figures/fig1_benchmark_overview`) is retained as built and is the right content for the supplement alongside S1–S12. |
 | **2** | `manuscript/_m/figures/figTrustFunnel.{pdf,png}` | On real brain data IsoGraph's modules are per-module trustworthy: 236/266 chance-trusted across six regions (89%), switch drivers reproduce (ρ≈0.77–0.82), and 25/130 modules are concordant for aging cross-cohort (perm P = 0.014). **Panel A is a granularity claim, not a superiority claim** — WGCNA's trusted rate is 64/73 (88%), the same rate at ~3.6× coarser granularity, and the annotation now shows both percentages so the panel cannot be misread. The WGCNA concordance arm is also above its own null (3/53, perm P = 0.040). |
 | **3** | `manuscript/_m/figures/figQtlSpecificity.{pdf,png}` | IsoGraph's phenotype-associated switch modules are genetically anchored — splicing QTL are spared relative to eQTL (ratio 1.111, 95% CI 1.048–1.177, p = 3.6e-4, I²=0.23; 1.108 on the 8-tissue matched-baseline set, p = 0.001, I²=0.00) — and **the effect is IsoGraph-only**: the matched WGCNA baselines, which consume identical switch features, are null in every module set (p ≥ 0.41). |
-| **4** | `manuscript/_m/figures/figGeneticAnchoring.{pdf,png}` | Disease variants resolve to isoform switches: (A) SNCA risk alleles for LBD and PD both raise usage of the same alternative-first-exon junction, mapping onto one GO-invisible IsoGraph switch pair; (B) the aging switch layer carries partitioned heritability across five traits (splicing- vs expression-lean by trait); (C) 12 splicing-led colocalized genes; (D) of 68 colocalized genes, 12 are splicing-led, 23 splicing-unresolved, 33 expression-led; (E) **RETRACTED 2026-08-30 — this panel must be removed or replaced.** It showed 15/32 SCZ colocalized loci in age-sensitive switch modules against a 25% background (P = 0.0058), but that background is ALL module genes; a gene can only colocalize if it was coloc-tested, and anchored modules are defined by MAGMA SCZ enrichment, so they enter the tested pool preferentially. Against the tested pool the same counts give P = 0.40–1.0. The honest all-trait version, with a size-matched null and both denominators drawn, is **S-real-10** (`figColocConvergence`). Built by `manuscript/_h/genetic_anchoring_figure.R`; summary `05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_SUMMARY.md`. |
+| **4** | `manuscript/_m/figures/figGeneticAnchoring.{pdf,png}` | Disease variants resolve to isoform switches: (A) SNCA risk alleles for LBD and PD both raise usage of the same alternative-first-exon junction, mapping onto one GO-invisible IsoGraph switch pair — **orthogonally confirmed 2026-09-03** in BrainSEQ short-read junction data (minor-form usage 0.189 DLPFC / 0.234 caudate on the exact anchored-vs-canonical contrast drawn here, vs 0.29% in ONT long-read: the long-read failure was an assay limitation). CTSH failed the same test (0.016–0.020) and is not shown; (B) the aging switch layer carries partitioned heritability across five traits (splicing- vs expression-lean by trait); (C) 12 splicing-led colocalized genes; (D) of 68 colocalized genes, 12 are splicing-led, 23 splicing-unresolved, 33 expression-led; (E) **REPLACED 2026-09-03.** Colocalizing genes do *not* concentrate in particular modules, in any trait: observed concentration (sum of squared per-module counts) against a size-matched null that holds module sizes fixed, null in all 10 (trait, cohort) cells (permutation P = 0.19–1.00). This is panel A of S-real-10, lifted into the main figure so the negative control travels with the claim. *What it replaced:* a count-only panel showing 15/32 SCZ colocalized loci in age-sensitive switch modules against a 25% background (P = 0.0058) — retracted 2026-08-30 because that background is ALL module genes, whereas a gene can only colocalize if it was coloc-tested and anchored modules are defined by MAGMA SCZ enrichment, so they enter the tested pool preferentially. Against the tested pool the same counts give P = 0.40–1.0. S-real-10 (`figColocConvergence`) retains the full three-panel treatment including both denominators. Built by `manuscript/_h/genetic_anchoring_figure.R`; summary `05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_SUMMARY.md`. |
 | **5** | `manuscript/_m/figures/figCompositionRobustness.{pdf,png}` | **The switch layer is not simply shifting cell-type proportions — but only partly.** Composition-adjusted counts survive in the limbic/striatal aging arm (BrainSEQ caudate 43→17, DLPFC 8→15; GTEx 6/8 deconvolved regions retain) and **collapse entirely in the two GTEx cortical regions** (531→0, 438→0), while the SCZD disease signal is largely composition-confounded (34→2). Confounder-vs-mediator is unresolvable from these data and the legend says so. Module member genes are not bags of cell-type markers (0/3,716 depleted; 33/3,716 enriched). Built by `manuscript/_h/composition_robustness_figure.R`. |
 
 ### Fig 3 — what the 2026-08-29 refresh changed
@@ -115,9 +115,11 @@ Real-data supplements:
 ### Retired / folded display items
 
 - **`figSczConvergence`** — was built and committed but carried no figure number and could
-  not be cited. Folded into **Fig 4E**. `manuscript/_h/scz_convergence_figure.R` is kept
-  because it is the reproducible standalone builder for the same result; its per-module
-  candidate RBP regulators, which do not fit legibly at half width, are in Table S18.
+  not be cited. Briefly folded into **Fig 4E**, then **retired outright on 2026-09-03**
+  when that panel was replaced: the result it shows was retracted 2026-08-30 (see the
+  Fig 4 row). `manuscript/_h/scz_convergence_figure.R` is kept as the reproducible builder
+  for the retracted analysis, but **its output must not be cited as evidence**; the
+  per-module candidate RBP regulators remain available in Table S18.
 
 ### Deliberately NOT built
 
@@ -138,7 +140,7 @@ known-isoform-biology literature (S12); and the validation layer — cell-type c
 adjustment (S13, backs Fig 5), long-read orthogonal confirmation (S14, backs S-real-8),
 satuRn concordance (S15, backs S-real-9), module-level genetic anchoring (S16, replaces a
 figure), per-RBP eCLIP binding support (S17, backs S-real-6B) and SCZ convergence with its
-candidate regulators (S18, backs Fig 4E). The synthetic benchmark summary —
+candidate regulators (S18, backs S-real-10; it backed Fig 4E before that panel was replaced). The synthetic benchmark summary —
 **supplementary**, moved out of the main text
 (`01_synthetic_benchmark/03_metrics/_m/tableS_benchmark_summary.csv`; six core accuracy scenarios ×
 six main methods) — and the scale-compute table (`tableS_scale_compute_summary.csv`) accompany
@@ -160,7 +162,7 @@ GO-invisible localisation claims are now wrong** — rewrite before use.
    Fig 3's bottom legend truncated "WGCNA multiplex" to "WGCNA mult"; Fig 4B's y-axis
    rendered "Partitioned h.. enrichment" because the superscript-two glyph is absent from
    the export font (now drawn with plotmath).
-3. **Two orphans resolved.** `figSczConvergence` → Fig 4E; `figS12` numbered.
+3. **Two orphans resolved.** `figSczConvergence` → Fig 4E (that panel was itself replaced on 2026-09-03; see below); `figS12` numbered.
 4. **Fig 1 rebuilt schematic-first** (`figConceptOverview`) — the paper no longer opens
    with a 24-panel boxplot grid, and it now defines its central object before using it.
 5. **Three display items built** from analyses that had none: Fig 5
@@ -179,8 +181,9 @@ GO-invisible localisation claims are now wrong** — rewrite before use.
 2. ~~**Prose must be rewritten for the Fig 3 refresh.**~~ **DONE 2026-09-01.** Every
    drafted assertion of the GO-invisible genetic localisation is rewritten; Fig 3's
    claim is now the phenotype-associated contrast (1.111, p=3.6e-4) with the
-   matched-baseline null as its control. Fig 4E (`figColocConvergence` replacement)
-   remains open — see the Fig 4 row above.
+   matched-baseline null as its control. ~~Fig 4E (`figColocConvergence` replacement)
+   remains open~~ — **DONE 2026-09-03**: panel E now carries the size-matched-null test
+   (null in 10/10 cells); see the Fig 4 row above.
 3. **`CELL_GENOMICS_IMPACT_PROGRESS.md` Item 2 is stale.** It reports 17/39
    binding-supported RBPs at a median gap of 0.013; the committed
    `rbp_binding_support.parquet` now holds 38 RBPs, 25 supported, median gap 0.024

@@ -1,0 +1,17 @@
+{
+  "genes": [
+    "SNCA",
+    "CTSH"
+  ],
+  "regions": [
+    "hippocampus",
+    "dlpfc",
+    "caudate"
+  ],
+  "alpha": 0.05,
+  "min_n": 30,
+  "n_background_genes": 300,
+  "max_pairs": 400,
+  "min_usage": 0.05,
+  "seed": 13
+}

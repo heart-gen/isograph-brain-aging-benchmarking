@@ -14,6 +14,7 @@ they do to the protein, and do the results survive sensitivity analysis?
 | 07 | `longread_switch_confirm` | ONT DLPFC long-read confirmation (Aguzzoli-Heberle 2024) |
 | 08–09 | `download_clinical`, `clinical_consequence` | gnomAD LOEUF constraint + ClinVar pathogenic density |
 | 10–11 | `scz_confound_sensitivity`, `switch_feature_sensitivity` | Medication/toxicology/smoking availability audit; five feature-construction axes |
+| 12 | `junction_coloc_confirm` | Short-read BrainSEQ junction confirmation of the anchored SNCA/CTSH switches |
 
 ## Key results
 
@@ -24,6 +25,20 @@ they do to the protein, and do the results survive sensitivity analysis?
 - Switch genes are more LoF-constrained than genome-wide (median LOEUF 0.72 vs 0.94),
   while switched exons carry *lower* ClinVar P/LP density (ratio 0.18) — expected
   alternative-exon biology.
+- **SNCA's anchored switch is confirmed in short read; CTSH's is not** (step 12). On the
+  exact contrast Fig 4A draws — the anchored proximal first exon against the canonical
+  distal one — minor-form usage is **0.189 in DLPFC (n = 222)** and **0.234 in caudate
+  (n = 238)**, far above the pre-registered 0.05 threshold. The ONT long-read check (step
+  07) had put the anchored isoform at **0.29%** and failed it; short read measures the
+  junction the sQTL actually tags rather than a whole-transcript proxy, at ~20x the n, so
+  the long-read result is an assay limitation rather than a refutation. **CTSH reaches only
+  0.016–0.020** in hippocampus and therefore stays off any main figure.
+
+  Two things about step 12 are worth knowing before reusing this machinery. First, the
+  statistic is `min(median PSI, 1 - median PSI)`: PSI orientation is undocumented for the
+  LIBD tables, and this is invariant to it. Second, the analysis n is the **aging bundle**
+  (238 adult controls in hippocampus), not the 452 sample columns in the PSI file — the
+  same sample definition as every other aging analysis here.
 
 ## Two sensitivity results that must be reported as stated
 

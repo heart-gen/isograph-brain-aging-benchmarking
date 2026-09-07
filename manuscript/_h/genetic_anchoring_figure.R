@@ -5,8 +5,16 @@
 #     (single-annot cis/sQTL/eQTL enrichment) - splicing- vs expression-lean by trait;
 # (C) the 12 splicing-led resolved coloc genes (max CLPP, coloured by trait span; all GO-invisible);
 # (D) verdict breakdown over all 68 colocalized genes;
-# (E) SCZ-risk convergence on age-sensitive switch modules (folded in from the former
-#     standalone figSczConvergence, which carried no figure number).
+# (E) Colocalizing genes do NOT concentrate in particular modules, in any trait: observed
+#     concentration against a size-matched null that holds module sizes fixed.
+#     RETRACTION NOTE: panel E previously showed per-module SCZ coloc counts (folded in
+#     from the former standalone figSczConvergence) and was read as convergence. It was
+#     retracted 2026-08-30. Counts alone cannot support that claim -- a gene can only
+#     colocalize if it was coloc-TESTED, and MAGMA-anchored modules are enriched for the
+#     same GWAS that decides which genes enter the test, so the tested pool is already
+#     anchored-rich. Against ALL module genes SCZ/GTEx gives P = 0.0095; against the
+#     tested pool the same counts give P = 0.30. This panel now shows the honest
+#     all-trait test instead, which is null in all 10 (trait, cohort) cells.
 # NOTE on panel A: SNCA is an ILLUSTRATIVE mechanism panel, not evidence. Its anchored
 # isoform sits at 0.29% of the gene's long-read output
 # (06_switch_mechanism/_m/switch_orthogonal_confirm: max_anchored_if = 0.0029,
@@ -15,7 +23,9 @@
 # B-D plus figOrthogonalConfirm; the legend must say so.
 # Reads 05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet,
 #       05_genetic_anchoring/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
-#       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet; writes figGeneticAnchoring.{pdf,png}.
+#       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet,
+#       05_genetic_anchoring/_m/module_coloc_convergence/global.parquet;
+#       writes figGeneticAnchoring.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/genetic_anchoring_figure.R
 suppressPackageStartupMessages({
@@ -192,44 +202,57 @@ pD <- ggplot(vd, aes(n, v, fill = v)) +
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ===========================================================================
-# Panel E - SCZ-risk loci converge on age-sensitive switch modules
-# Folded in from the former standalone figSczConvergence, which was built and
-# committed but carried no number in FIGURE_ORDERING.md and could not be cited.
-# The per-module candidate RBP regulators shown in the standalone version move to
-# supplementary Table S18; at half width they would not fit legibly.
+# Panel E - colocalizing genes do not concentrate in modules, in any trait
+# Replaces the retracted SCZ count panel (see the retraction note in the header).
+# The statistic is the sum of squared per-module hit counts; the null redraws the same
+# number of hit genes from the same TESTED pool, so module sizes are held fixed by
+# construction and a big module cannot look convergent just for being big. This is
+# panel A of S-real-10 (figColocConvergence), which carries the full three-panel
+# treatment including both denominators.
 # ===========================================================================
 COHORT_LAB <- c(gtex_caudate_bg = "GTEx", brainseq_caudate = "BrainSEQ")
-COHORT_COL <- c(GTEx = "#0072B2", BrainSEQ = "#E69F00")
+TRAIT_ORDER <- c("AD", "PD", "LBD", "ALS", "SCZ")
+OBS_COL  <- "#D55E00"
+NULL_COL <- "grey45"
 
 conv <- as.data.frame(read_parquet(rel("05_genetic_anchoring", "_m",
-                                       "scz_age_projection", "convergence.parquet"))) |>
+                                       "module_coloc_convergence", "global.parquet"))) |>
+  filter(n_coloc_genes > 0) |>
   mutate(cohort = unname(COHORT_LAB[source]),
-         ylab   = paste0(cohort, " ", module_id, " ", sig_star(scz_p))) |>
-  arrange(n_coloc_loci, scz_p)
-conv$ylab <- factor(conv$ylab, levels = conv$ylab)
+         trait  = factor(trait, TRAIT_ORDER),
+         lab    = paste0(trait, " / ", cohort),
+         plab   = sprintf("P = %.2f", concentration_p)) |>
+  arrange(trait, cohort)
+conv$lab <- factor(conv$lab, levels = rev(conv$lab))
 
-pE <- ggplot(conv, aes(n_coloc_loci, ylab, colour = cohort)) +
-  geom_segment(aes(x = 0, xend = n_coloc_loci, yend = ylab), linewidth = 0.55) +
-  geom_point(aes(size = n_go_invisible)) +
-  scale_colour_manual(values = COHORT_COL, name = "Aging cohort") +
-  scale_size_continuous(range = c(1.4, 3.6), breaks = c(0, 3, 6, 9),
-                        name = "GO-invisible\nmembers") +
-  scale_x_continuous(limits = c(0, 7), breaks = 0:6,
-                     expand = expansion(mult = c(0, 0.02))) +
-  labs(x = "Independent SCZ-colocalized loci in module", y = NULL) +
-  guides(colour = guide_legend(order = 1, override.aes = list(size = 2.2)),
-         size   = guide_legend(order = 2)) +
+stopifnot(nrow(conv) > 0, all(conv$concentration_p >= 0.05))
+
+# Headroom for the P labels derived from the data, so a larger future value cannot be
+# pushed off-panel (the same defect that silently dropped two points from S-real-10).
+xmaxE <- max(c(conv$concentration_obs, conv$concentration_null_mean), na.rm = TRUE) * 1.42
+
+pE <- ggplot(conv, aes(y = lab)) +
+  geom_segment(aes(x = concentration_null_mean, xend = concentration_obs, yend = lab),
+               linewidth = 0.4, colour = "grey70") +
+  geom_point(aes(x = concentration_null_mean, shape = "Size-matched null"),
+             colour = NULL_COL, size = 1.9) +
+  geom_point(aes(x = concentration_obs, shape = "Observed"),
+             colour = OBS_COL, size = 2.2) +
+  geom_text(aes(x = xmaxE, label = plab), hjust = 1, size = 2.1, colour = "grey30") +
+  scale_shape_manual(values = c(Observed = 16, `Size-matched null` = 18), name = NULL) +
+  scale_x_continuous(limits = c(0, xmaxE), expand = expansion(mult = c(0.01, 0))) +
+  labs(x = "Concentration of coloc genes across modules\n(sum of squared per-module counts)",
+       y = NULL) +
   theme_pub() +
   theme(axis.text.y = element_text(size = 6.6),
-        legend.position = "right", legend.box = "vertical",
-        legend.margin = margin(0, 0, 0, 0),
+        legend.position = "bottom", legend.margin = margin(0, 0, 0, 0),
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ===========================================================================
 # Assemble: A on top (illustrative, deliberately the shortest row); B | C; D | E.
-# The former layout gave panel D a full-width row beside an empty plot_spacer();
-# panel E now fills that slot with the disease-convergence result.
+# Panel E fills the slot that once held an empty plot_spacer(); it now carries the
+# convergence NULL rather than the retracted count panel.
 # ===========================================================================
 fig <- (pA) / (pB | pC) / (pD | pE) +
   plot_layout(heights = c(0.85, 1.15, 0.9)) +

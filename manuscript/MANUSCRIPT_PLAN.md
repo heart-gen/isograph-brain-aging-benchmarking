@@ -23,7 +23,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 | Analysis | Question | Data | Main finding | Evidence strength | Validation | Reproducibility | Sources |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | 219/240 paired Wilcoxon favour IsoGraph over WGCNA; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
+| Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | Module recovery favours IsoGraph in 7/15 scenarios (13,410 runs, 16 scenarios) — wins where switching dominates, loses when abundance-dominated or degraded; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
 | Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `01_synthetic_benchmark/03_metrics/figures/` |
 | Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
@@ -32,7 +32,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Partitioned heritability (S-LDSC) | Does switch layer carry disease heritability? | baselineLD v2.2 × 5 traits | Aging sQTL annotation enriched all neurodeg traits (LBD 7.17×, PD 3.80×, AD 3.37×, ALS 2.96×, SCZ 1.74×); disease-SCZ is eQTL-led | Moderate–strong | Single- + joint-annotation models | `05_genetic_anchoring/_m/ldsc/` | `LDSC_SUMMARY.md` |
 | GWAS/MAGMA resolution | Is module-GWAS enrichment a size artifact? | MAGMA per module | At res 5.0 giant-module artifact disappears (0/8 sig giant vs 18/43 res2.0, 79/99 gene-level WGCNA); SCZ signal survives 6 regions | Strong (artifact control) | Resolution sweep + WGCNA comparison | CLI + SLURM | `GWAS_RESOLUTION_SUMMARY.md`, `figGwasResolution` |
 | Switch consequence | What do the switches do structurally? | Within-gene perm null | Only productive UTR (1.27×, 10/10) + CDS (1.04×, 10/10) enriched; degradative classes never; identical in GO-invisible | Strong | Within-gene perm null; Fisher-combined | CLI + SLURM | `SWITCH_CONSEQUENCE_SUMMARY.md` |
-| RBP regulons | Do modules share candidate trans-regulators? | ATtRACT PWMs + MOODS | 829 module×RBP sig (q<0.05), 129 RBPs; recurrent neuronal 3′UTR/splicing factors (KHDRBS1 8/10…) | Moderate (motif prediction, not binding) | Per-module over-rep test; recurrence across regions | CLI + SLURM (mature/intronic/combined) | `RBP_REGULON_SUMMARY.md` |
+| RBP regulons | Do modules share candidate trans-regulators? | ATtRACT PWMs + MOODS | 714 module×RBP sig (hypergeometric q<0.05), 138 RBPs over 14 regions; 310 under the opportunity-adjusted GLM with only 43 in common; recurrent neuronal 3′UTR/splicing factors (KHDRBS1/ELAVL4/PPRC1 8/14…) | Moderate (motif prediction, not binding) | Per-module over-rep test; recurrence across regions | CLI + SLURM (mature/intronic/combined) | `RBP_REGULON_SUMMARY.md` |
 | Clinical consequence | Is the switch layer constrained but non-coding? | gnomAD LOEUF + ClinVar | Switch genes more LoF-constrained (LOEUF 0.72 vs 0.94); switched exons LOWER ClinVar P/LP (ratio 0.18) | Strong | Fisher-combined MWU; CDS-only robustness | CLI + SLURM | `CLINICAL_CONSEQUENCE_META.md` |
 | Three-baseline comparison | Is IsoGraph globally superior to WGCNA? | 17 analyses × 4 methods | **No.** Phenotype rate lives in switch features (both switch-fed win); GO abundance-dominated; one clean effect: isograph > wgcna_multiplex on identical features | Strong (scope-bounding) | Per-module rates; matched features | Login aggregation CLI | `BASELINE_COMPARISON_SUMMARY.md` |
 | Abundance/switch separability | Is the switch channel non-redundant with abundance? | Incremental association | Axes ~orthogonal (median \|r\|≈0.13); 34 SCZD / 43 caudate composition-unique genes; NREP flat abundance (p=0.93) but switch p=7e-5 | Strong | De-confounded incremental test | CLI + SLURM | `figSeparation`, `abundance_structure_separation.py` |
@@ -58,6 +58,19 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 #### Finding 3: The phenotype-associated switch layer is genetically anchored to splicing, method-specifically
 **Evidence status:** Established (strongest orthogonal result).
 **Key quantitative evidence:** sQTL/eQTL specificity contrast **1.111 pheno-sig (95% CI 1.048–1.177, p=3.6e-4, I²=0.23)**, all_modules 1.068 (p=1.3e-5). IsoGraph-only on the 8-tissue common subset: pheno_sig 1.108 (p=0.001, I²=0.00) and all_modules 1.105 (p=5.8e-6) vs matched WGCNA baselines null (0.968 / 0.980, p≥0.41).
+**SNCA is orthogonally confirmed; CTSH is not (2026-09-03).** BrainSEQ short-read junction
+PSI on the exact Fig 4A contrast gives minor-form usage 0.189 (DLPFC, n=222) and 0.234
+(caudate, n=238) against a pre-registered 0.05 threshold, versus 0.29% in ONT long-read —
+so the long-read failure was an assay limitation and SNCA may carry a main figure. CTSH
+reaches only 0.016–0.020 in hippocampus and stays off any main figure, per the same
+pre-registered rule. CLI `junction_coloc_confirm.py`, wrapper `06_switch_mechanism/_h/12`.
+
+**Both negative controls are now written into `GENETIC_ANCHORING_RESULTS.md`** (section
+"Two negative controls bound the genetic claim", added 2026-09-03): the per-gene modality
+contrast is null in all four gene pools, and module-level coloc convergence is null in 10/10
+(trait, cohort) cells. Fig 3's claim is set-level and survives both; neither may be quoted as
+corroborating it.
+
 **Scope bound — the effect does not localise to the GO-invisible modules.** GO-invisible (1.068, p=0.077) and GO-visible (1.084, p=0.050) are indistinguishable on the 2026-08-29 refresh, so this finding is about the *phenotype-associated* set, not the DTU-without-DGE subset. The GO-invisible claim rests on the content gate (Finding 2 / S-real-3) instead. **Never quote a pre-2026-08-29 anchoring number** — the retired 1.172 / I²=0.00 came from a stale `module_enrichment` join that relabelled the GO partition.
 **Validation:** the matched-baseline null is the primary internal control (identical switch features, inference varied); IVW-FE + DL-RE meta over 17 analyses.
 **Limitations:** estimand is the *contrast* not raw OR (co-switch genes cis-QTL depleted for both); cis-sQTL anchors member-gene splicing, not the coordination itself; bulk GTEx under-samples cell-type-specific splicing.
@@ -78,7 +91,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 #### Finding 6: On synthetic ground truth IsoGraph recovers switch modules and residualization buys confound-robustness
 **Evidence status:** Established.
-**Key quantitative evidence:** 219/240 paired Wilcoxon favour IsoGraph; complete switch-gene detection; figS8 residualization holds under composition/batch/depth.
+**Key quantitative evidence:** module recovery favours IsoGraph in 7 of 15 scenarios — a conditional win (switching-dominated) and not a general one; complete switch-gene detection; figS8 residualization holds under composition/batch/depth.
 **Limitations:** RNA-degradation is the honest exception (figS9 abundance fallback).
 **Repository sources:** `fig1`, `tableS_benchmark_summary` (supp), `figS8/figS9`.
 
@@ -209,7 +222,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 #### Alternative Framing: Methods-first (benchmark-led)
 **Central claim:** IsoGraph is a new isoform-switch network method that beats WGCNA.
-**Supporting evidence:** synthetic Fig 1 (219/240), trust funnel.
+**Supporting evidence:** synthetic Fig 1 (7/15 scenarios on module recovery), trust funnel.
 **Advantages:** clean, quantitative, Nature-Methods-shaped.
 **Weaknesses:** directly contradicted by Finding 1 (not globally superior); would overclaim.
 **Why not preferred:** the repository's own scope-bounding analysis forbids a superiority headline.
@@ -233,7 +246,8 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Modules are reproducible + replicate aging | Finding 5 | Established | Trust (Fig 2) | — |
 | Method recovers switch modules on truth | Finding 6 | Established | Foundation (Fig 1) | Synthetic |
 | IsoGraph is complementary, not superior | Finding 1 | Established | Honest bound (Supp) | Deliberately limiting |
-| ~~SCZ-risk loci converge on age-sensitive programs~~ (RETRACTED) | SCZ projection | **Not supported** — P=0.40 vs the coloc-tested background (was P=0.0058 vs an all-genes background) | Demote from Fig 4E; honest version is S-real-10 | Ascertainment: MAGMA anchoring and coloc testing select on the same GWAS |
+| ~~SCZ-risk loci converge on age-sensitive programs~~ (RETRACTED) | SCZ projection | **Not supported** — P=0.40 vs the coloc-tested background (was P=0.0058 vs an all-genes background) | Fig 4E now carries the size-matched null instead (done 2026-09-03); full version is S-real-10 | Ascertainment: MAGMA anchoring and coloc testing select on the same GWAS |
+| ~~Switch genes prefer splicing over expression colocalization, per gene~~ (NULL) | Per-gene coloc modality contrast | **Not supported** — splicing share of discordant genes ~31% in all four gene pools; locus-matched switch 20/46 vs non-switch 88/188, Fisher exact P=0.88; conditional posterior null in the switch arm (P=0.39) | Report as a negative control in Results; **no figure** | Within-gene design means module selection cancels; the expression-favouring skew is GTEx eQTL discovery power. Does **not** contradict Fig 3 — different estimand — but does not corroborate it either |
 | Age-sensitive switch modules are disrupted in SCZ | SCZ projection | **Established (module-level)** B 4/10, D 3/10, C 10/10 | Main-text Results 6 | Independent of the retracted convergence test |
 
 ### 13. Recommended Results Outline
@@ -242,7 +256,7 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 
 ```markdown
 ### Results 1: IsoGraph recovers isoform-switch modules on synthetic ground truth (Fig 1)
-- Evidence: 219/240 paired Wilcoxon; complete switch-gene detection; figS8/S9 confound robustness.
+- Evidence: module recovery favours IsoGraph in 7/15 scenarios; complete switch-gene detection; figS8/S9 confound robustness.
 - Role: foundation. Placement: first. Transition: "but does it recover *trustworthy* structure on real brain?"
 - Confidence: High.
 
@@ -273,7 +287,7 @@ _(Retitled 2026-08-30. The former title asserted convergence of SCZ-risk loci on
 programs; that test is retracted — see the RETRACTED note below. What survives is module
 disruption in disease, which does not depend on it.)_
 - Evidence: ~~convergence hypergeom P=0.0058 (15/32 loci in anchored modules)~~ **RETRACTED 2026-08-30, P=0.40 on the coloc-tested background**; disruption B 4/10, D 3/10, C 10/10; named regulators (M002 SNRNP70/ZCRB1; M008 ZC3H10/RBM14/CELF5; M006 DDX58/ADAR/YTHDC1). Single-locus genotype concordance null (28/62, P=0.81) → Supp.
-- Role: extends Fig 4 into disease convergence. **Convergence is significant → promote to a main-text Results unit** (as Fig 4E or a standalone panel). Watch the ≤7 display-item cap (see §15).
+- Role: **superseded.** The convergence result was retracted 2026-08-30 (ascertainment); it is not significant on the coloc-tested denominator. Fig 4E now carries the *null* instead, as of 2026-09-03. Do not promote this to a Results unit.
 - Confidence: Moderate — module-level convergence is significant; per-locus genotype resolution is underpowered (n~62), disclose as such.
 
 ### Results (bound): IsoGraph is complementary, not globally superior (S-real-1)
@@ -324,7 +338,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast **1.111 pheno-sig (p=3.6e-4)** / 1.068 all_modules (p=1.3e-5), IsoGraph-only vs matched WGCNA (null everywhere, p≥0.41). Does **not** localise to GO-invisible (1.068, p=0.077 vs GO-visible 1.084, p=0.050) — the legend in `assemble_main_tables.py` says so explicitly and must not be softened. **Reproducible:** `manuscript/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
 | **Main Table 2 — Splicing-led colocalized genes (NEW, built; reframed)** | deep-dive panel + literature | Finding 4 | **Main companion OR keep in Supp (S8/S9)** | Per-gene resolution; **CLPP posteriors are individually modest** — coloc threshold is eCAVIAR CLPP≥0.01 ("strong" ≥0.05), only **4/12 clear 0.05** and only CTSH (0.39) is substantial. Caption states the claim is *set-level coherence*, NOT per-locus significance (which lives in the contrast table + S-LDSC). Max CLPP carries confidence stars (`*` >0.01, `**` >0.05, `***` >0.10 → 1×`***`, 3×`**`, 8×`*`). Reproducible: same builder → `table3_splicing_led_genes.{csv,md}`. | Moderate | **Main or Supp** |
 | S-real-1 (baseline rates) | baseline_comparison | Finding 1 | **Keep in Supp** | Bounds, not advances | High | Supp |
-| **SCZ convergence panel** | SCZ projection (**RETRACTED**, P=0.40 on the correct background) | Results 6 | **Remove from Fig 4E**; the honest all-trait version is S-real-10 (`figColocConvergence`) | A count-only panel cannot support convergence: it shows neither the size-matched null nor the tested-pool denominator | — | **Supp only (S-real-10)** |
+| **SCZ convergence panel** | SCZ projection (**RETRACTED**, P=0.40 on the correct background) | Results 6 | ~~Remove from Fig 4E~~ — **DONE 2026-09-03**: Fig 4E now shows the size-matched-null test for all five traits (null in 10/10 cells), lifted from S-real-10; the full three-panel version stays as S-real-10 (`figColocConvergence`) | A count-only panel cannot support convergence: it shows neither the size-matched null nor the tested-pool denominator | — | **Fig 4E (null panel) + S-real-10** |
 | RBP intronic/combined scope | new intronic scan | S-real-6 mechanism | **Fold into S-real-6 or its table (S10)** | Strengthens regulon call with intronic niche | Moderate | Supp table |
 
 > **Note — synthetic Table 1 → Supplement: DONE.** Regenerated clean (six core accuracy scenarios ×
@@ -397,7 +411,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 
 | Proposed work | Category | Evidence gap addressed | Effect | Priority |
 | --- | --- | --- | --- | --- |
-| Decide Results-6 / SCZ-panel placement (analysis DONE, significant) | Impact-enhancing | Disease-convergence sub-claim | Main-text Results unit vs Fig 4E vs supp | **High** |
+| ~~Decide Results-6 / SCZ-panel placement~~ — **CLOSED 2026-09-03** | Impact-enhancing | Disease-convergence sub-claim **withdrawn** (ascertainment) | Fig 4E now shows the size-matched-null test; S-real-10 keeps the full treatment | — |
 | Retrieve + reconcile Cell Genomics author instructions | Submission-critical | Unverified requirements | Unblocks formatting | **High** |
 | STAR Methods conversion + Key Resources Table | Submission-critical | Format compliance | Required for submission | **High** |
 | Pin `[citation needed]` citekeys (eCAVIAR, GTEx v11, SuSiE, gnomAD, baselineLD) | Submission-critical | Missing citations | Removes placeholders | High |
