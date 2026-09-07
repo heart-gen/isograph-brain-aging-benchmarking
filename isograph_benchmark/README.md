@@ -40,7 +40,7 @@ ordered stages:
 The benchmark evaluates IsoGraph's variational backend (`isograph_vae`) against a
 gene-level WGCNA baseline (`wgcna_gene`) [@doi:10.1186/1471-2105-9-559], plus IsoGraph's
 multiplex, residualizing, reliability, GPU, and linear variants where the scenario calls
-for them. It spans **15 scenarios** and **12,530 paired runs** at **15–30 seeds per
+for them. It spans **16 scenarios** and **13,410 paired runs** at **15–30 seeds per
 cell**, on shared `dataset_id` values so every comparison is paired on identical data.
 Metrics include module recovery, switch-gene detection rate, predicted-module count,
 edge count, runtime, and (multiplex scenarios) per-gene channel-role recovery;

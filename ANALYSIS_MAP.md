@@ -74,6 +74,7 @@ that reaches the paper.
 
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
+| Short-read junction confirmation (SNCA/CTSH) | `real_data/junction_coloc_confirm.py` | `06_switch_mechanism/_h/12` | `_m/junction_coloc_confirm/` | Fig 4A (confirms SNCA; CTSH withheld) |
 | Switch consequence + meta | `real_data/switch_consequence[_meta].py` | `06_switch_mechanism/_h/01–02` | `_m/switch_consequence_meta.parquet` | S-real-5 |
 | PSI / junction validation | `real_data/validate_switch_splicing.py` | `_h/03–04` | `_m/switch_validation/` | — |
 | Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/05` | `_m/switch_orthogonal_confirm/` | **S-real-8** `figOrthogonalConfirm`, Table S14 |

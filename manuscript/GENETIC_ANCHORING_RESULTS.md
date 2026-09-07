@@ -40,7 +40,17 @@ chr4:89,835,692–89,836,127, mapping onto one IsoGraph switch pair (ENST0000050
 ENST00000618500) in a GO-invisible module. The event is an **alternative first exon**: the
 switch isoforms use chr4:89,836,127–89,836,213 in place of the canonical distal first exon
 (ENST00000336904; chr4:89,838,252–89,838,315), a 5′-regulatory rather than protein-coding
-change. eCAVIAR posteriors are modest (max 0.39, CTSH in AD hippocampus; most < 0.1), so the
+change. **This exact contrast is confirmed orthogonally in BrainSEQ short-read**
+(`06_switch_mechanism/_m/junction_coloc_confirm/`): the LIBD PSI event measuring the
+anchored proximal exon against the canonical distal one gives a minor-form usage of
+**0.189 in DLPFC (n = 222) and 0.234 in caudate (n = 238)** — both forms carry substantial
+usage, so the switch is real and used in the regions the colocalization was found in.
+An earlier ONT long-read check put the anchored isoform at 0.29% of gene output and failed
+to confirm it; short-read junction data, which measures the junction the sQTL actually tags
+rather than a whole-transcript proxy at ~20x the long-read n, places it two orders of
+magnitude higher. The long-read failure is therefore an assay limitation, not a refutation.
+**CTSH does not confirm**: its anchored acceptor reaches only 0.016–0.020 minor-form usage
+in hippocampus, below the pre-registered 0.05 threshold, so CTSH stays off any main figure. eCAVIAR posteriors are modest (max 0.39, CTSH in AD hippocampus; most < 0.1), so the
 strength of the splicing-led set is its **coherence** — cross-disease concordance and uniform
 GO-invisibility — not any single high-posterior locus. Schizophrenia produced no GTEx-concordant
 event but five BrainSeq-replicated splicing events (Fig 4C–D).
@@ -85,10 +95,15 @@ The 3′UTR/CDS remodeling above is the substrate read out by sequence-specific 
 proteins, motivating a shared-*trans*-factor test for module coordination. Scanning switch-pair
 transcripts against ATtRACT human RBP PWMs with MOODS [@doi:10.1093/database/baw035;
 @doi:10.1093/bioinformatics/btp554] and testing per-module over-representation of within-pair
-binding-site switches, **829 module × RBP pairs were significant at BH q < 0.05 (245 in
-GO-invisible modules), spanning 129 distinct RBPs** across 16,973 tests — coordination is broad,
-not driven by one factor. The most reproducible regulons were neuronal 3′UTR/splicing factors:
-KHDRBS1 (SAM68) in 8/10 regions; A1CF, KHDRBS3, RBMS3, PPIE, RNASEL, and U2AF2 in 7/10; and a
+binding-site switches, **714 module × RBP pairs were significant at BH q < 0.05 (149 in
+GO-invisible modules), spanning 138 distinct RBPs of 160 tested** across 34,240 module × RBP
+cells in 14 regions — coordination is broad, not driven by one factor. Under the
+opportunity-adjusted GLM (transcript length, GC, UTR composition) 310 cells are significant,
+but **only 43 overlap the hypergeometric set**, so the adjustment reshuffles the ranking rather
+than thinning it; the adjusted arm is the one to quote for a regulon claim. The most
+reproducible regulons were neuronal 3′UTR/splicing factors:
+KHDRBS1 (SAM68), ELAVL4 and PPRC1 in 8/14 regions; CPEB4, RBMS3, RNASEL, ELAVL3, RBM14 and
+ADAR in 7/14; and a
 frontal-cortex module (M008) enriched for PPIE (3.22×, q = 1.4×10⁻⁴⁰) and the neuronal ELAV
 proteins ELAVL4/3/2. The recurrence of APA/3′UTR regulators (NUDT21, CPEB2/4, ELAV, RBMS)
 mirrors the 3′UTR remodeling of the previous section. Motif presence is a computational
@@ -133,6 +148,51 @@ colocalized gene's mechanistic vignette without the hand-written narrative.
 
 ---
 
+## Two negative controls bound the genetic claim
+
+Source: `05_genetic_anchoring/_m/coloc_modality_contrast/` (all four arms) and
+`05_genetic_anchoring/_m/module_coloc_convergence/MODULE_COLOC_CONVERGENCE.md` (Fig 4E, S-real-10).
+
+The set-level contrast of Fig 3 says that, *as a set*, phenotype-associated switch modules are
+spared at splicing QTL relative to expression QTL. Two pre-specified tests asked whether that
+survives at finer resolution. Neither does, and we report both.
+
+**At per-gene resolution there is no modality preference attributable to module membership.**
+We ran `coloc.abf` on GTEx v11 all-pairs for every gene at each GWAS locus, once against the
+gene's sQTL and once against its eQTL — 126,390 fits over 13 brain tissues [citation needed:
+coloc]. Because the two modalities are compared *within* a gene, module membership cancels, so
+the only channel by which a module-detection method can move the statistic is which genes it
+selects. We therefore ran four gene pools: IsoGraph switch genes, all testable genes at the same
+loci, and the two matched-feature WGCNA baselines. The splicing share of discordant genes is
+**~31% in every pool** — IsoGraph switch 20 splicing-only vs 46 expression-only (0.303),
+background 108/234 (0.316), WGCNA-switch 59/129 (0.314), WGCNA-multiplex 95/209 (0.313) — and
+the apparent significance of the expression-favouring skew tracks pool size alone (exact McNemar
+P = 1.9 × 10⁻³ to 5.5 × 10⁻¹¹). The decisive comparison is locus-matched: within the background
+pool, where both groups sit at the *same* loci under the same estimator, switch genes give 20/46
+and non-switch genes 88/188 (**Fisher exact P = 0.88**). On the power-corrected conditional
+posterior PP4/(PP3+PP4) the switch arm is null (0.2415 vs 0.2383, Wilcoxon P = 0.39) while the
+background is significantly splicing-leaning (0.2575 vs 0.2413, P = 9.6 × 10⁻¹¹) — that is,
+non-switch genes look *more* splicing-skewed, not less. The expression-favouring skew is
+therefore GTEx eQTL discovery power, not biology, and **this test does not corroborate the
+set-level contrast in either direction**. Fig 3 and this test are different estimands — a
+set-level ratio of odds ratios against matched baselines, versus a within-gene modality
+comparison — and only the former supports the splicing-specificity claim.
+
+**Colocalizing genes do not concentrate in particular modules, in any trait (Fig 4E).** Against
+a size-matched permutation null that holds module sizes fixed, no (trait, cohort) cell is more
+concentrated than chance (P = 0.19–1.00, 10/10 cells), and no individual module survives FDR
+(min q = 0.23 over 46 testable rows). This retracts a convergence result we previously reported:
+SCZ colocalized genes appeared enriched in MAGMA-anchored age-sensitive modules (15/31 = 48% vs
+a 25% background, P = 0.0095 for GTEx caudate) only because the denominator was *all* module
+genes. A gene can colocalize only if it was coloc-tested, and anchored modules are defined by
+MAGMA enrichment for the same GWAS that decides which genes enter the test, so the tested pool
+is already anchored-rich; against it the same counts are null (**P = 0.30**). The convergence
+claim is withdrawn. The module-disruption and candidate-regulator layers of that analysis do not
+depend on the denominator and stand.
+
+Both nulls narrow the claim in the same direction: the genetic anchoring is a property of the
+switch layer **as a set**, not of individual switch genes or of individual modules.
+
 ## Integration & limitations
 
 Colocalization posteriors are modest and bulk-tissue-derived, so per-gene claims are suggestive;
@@ -142,9 +202,11 @@ LoF-constrained genes with non-coding switch consequence. RBP motif calls are se
 predictions, not measured binding, and do not yet test whether the lead QTL variant sits inside a
 switched-exon motif (the outstanding genomic-intronic-scope extension). This section should be
 read against the matched-baseline control of Fig 3 (the sQTL-sparing specificity is IsoGraph-only
-on identical WGCNA feature matrices) and the bounding supplement S-real-1 (on per-module rates
-IsoGraph is not globally superior): together they place the genetic anchoring as evidence that a
-**complementary** layer is real, not that the method dominates.
+on identical WGCNA feature matrices), the two negative controls above (the per-gene modality test
+and the module-convergence test are both null), and the bounding supplement S-real-1 (on
+per-module rates IsoGraph is not globally superior): together they place the genetic anchoring as
+evidence that a **complementary** layer is real, at set level, not that the method dominates or
+that individual switch genes and modules are separately anchored.
 
 **Do not merge the two GO-invisible statements in this section with Fig 3's.** The claim here is
 about *content*: the 12 splicing-led colocalized genes happen to sit in modules that gene-level

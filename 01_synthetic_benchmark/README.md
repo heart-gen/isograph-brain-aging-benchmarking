@@ -41,15 +41,18 @@ they turn those features into a gene-gene network and modules.
 
 We generated paired synthetic datasets with known module structure, isoform-switch
 ground truth, and (where relevant) abundance-channel ground truth. The grid spans
-**15 scenarios** evaluated over **12,530 completed runs** with **15–30 random seeds
+**16 scenarios** evaluated over **13,410 completed runs** with **15–30 random seeds
 per scenario × method cell** (`configs/synthetic_grid.yaml`). Here a "completed run"
 is one **scenario × method × dataset-seed cell** — i.e. one fitted model on one dataset
 (each run has a unique `run_id`). All methods are run on the *same* `dataset_id` values
 within a scenario, so every method-vs-baseline comparison is paired on identical data.
 
-*(Earlier manuscript drafts quoted "9,440 runs across 1,204 synthetic datasets"; that
-figure is stale. The current grid is 12,530 runs across 15 scenarios — the Introduction,
-Methods, Results, and figure captions should all use 12,530 / 15.)*
+*(Earlier drafts quoted "9,440 runs across 1,204 synthetic datasets", and later
+"12,530 runs across 15 scenarios"; both are stale. The current grid, counted from
+`01_synthetic/_m/synthetic_results.parquet`, is **13,410 runs across 16 scenarios** —
+the Introduction, Methods, Results, and figure captions should all use 13,410 / 16.
+The pairwise-test table carries 15 scenarios, not 16, because `multi_isoform_switch`
+has no WGCNA comparison arm.)*
 
 Core scenarios use 400 genes × 160 samples; dedicated scale scenarios extend to
 1,000–12,000 genes (`scale`) and to a BrainSEQ-matched 16,000 genes × 300 samples
@@ -361,7 +364,7 @@ are numerically matched, so the GPU build is a drop-in accelerator, not a differ
 
 ## Summary
 
-Across 12,530 paired synthetic runs — every method fit on the **same** per-gene
+Across 13,410 paired synthetic runs — every method fit on the **same** per-gene
 switch + abundance feature matrix — IsoGraph's VAE backend recovers switch-defined
 modules more accurately than WGCNA whenever isoform switching is the dominant signal
 (large rank-biserial effects, full-family FDR < 0.05), is more specific under the null,
