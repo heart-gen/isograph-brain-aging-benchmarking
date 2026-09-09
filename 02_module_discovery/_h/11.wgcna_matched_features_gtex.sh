@@ -21,8 +21,11 @@ if [[ ! -f .here || ! -d isograph_benchmark ]]; then
     exit 1
 fi
 mkdir -p 02_module_discovery/_m/logs
-module purge
-module load anaconda3/2024.10-1
-conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+# Call the env directly instead of `module load` + `conda activate`: in a non-login shell
+# `module` is undefined, and with `set -euo pipefail` an ARRAY TASK then dies before it
+# reaches the analysis -- silently losing regions from the run. Putting the env's bin on
+# PATH also supplies the Rscript that _check_rscript() looks for.
+ENV_ROOT=/ocean/projects/bio260021p/shared/opt/envs/isograph
+export PATH="${ENV_ROOT}/bin:${PATH}"
 export PYTHONPATH="${PROJECT_ROOT}:/ocean/projects/bio260021p/kbenjamin/software/IsoGraph/src${PYTHONPATH:+:${PYTHONPATH}}"
-python -m isograph_benchmark.real_data.run_matched_wgcna gtex-aging --region "${REGION}" "$@"
+"${ENV_ROOT}/bin/python" -m isograph_benchmark.real_data.run_matched_wgcna gtex-aging --region "${REGION}" "$@"

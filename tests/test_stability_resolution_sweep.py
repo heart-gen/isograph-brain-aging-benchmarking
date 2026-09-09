@@ -128,3 +128,34 @@ def test_saved_edges_keep_only_what_reclustering_needs(tmp_path, monkeypatch):
     st._write_edges(fat, "gtex", "cortex", "isograph", 0, "A")
     back = pd.read_parquet(st._edges_path("gtex", "cortex", "isograph", 0, "A"))
     assert list(back.columns) == ["source", "target", "weight"]
+
+
+# --------------------------------------------------------------------------- #
+# resume must not silently no-op the edge-saving pass
+# --------------------------------------------------------------------------- #
+def test_resume_key_includes_the_edges_when_saving(tmp_path, monkeypatch):
+    """--save-edges on an already-fitted region must still fit; the partition alone is not
+    a complete record of what the invocation produces.
+
+    Without this the sweep's prerequisite pass is a silent no-op on exactly the regions that
+    matter -- the ones already fitted -- and its skip message reads like a normal resume.
+    """
+    parts = tmp_path / "partitions"; edges = tmp_path / "edges"
+    parts.mkdir(); edges.mkdir()
+    monkeypatch.setattr(st, "_partitions_dir", lambda: parts)
+    monkeypatch.setattr(st, "_edges_dir", lambda: edges)
+
+    st._write_partition(pd.DataFrame({"gene_id": ["g1"], "module_id": ["M000"]}),
+                        "gtex", "cortex", "isograph", 0, "A")
+    part = parts / "isograph__gtex__cortex__seed0__A.parquet"
+    edge = st._edges_path("gtex", "cortex", "isograph", 0, "A")
+    assert part.exists() and not edge.exists()
+
+    def resume_done(save_edges):
+        return part.exists() and (not save_edges or edge.exists())
+
+    assert resume_done(save_edges=False), "a plain resume should still skip"
+    assert not resume_done(save_edges=True), "an edge-saving pass must not skip"
+
+    st._write_edges(_planted_edges().head(3), "gtex", "cortex", "isograph", 0, "A")
+    assert resume_done(save_edges=True), "once both exist, resume should skip"

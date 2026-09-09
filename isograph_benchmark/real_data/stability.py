@@ -271,7 +271,13 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
             halves = tuple(h for h in halves if h[0] == only_half)
         for half, idx in halves:
             out = _partitions_dir() / f"{method}__{cohort}__{region}__seed{k}__{half}.parquet"
-            if out.exists():
+            # Resume must be keyed on EVERYTHING this invocation produces, not just the
+            # partition. With --save-edges on an already-fitted region the partition alone
+            # would skip every fit and the run would exit having written no graphs at all --
+            # a silent no-op, since the skip message looks like a normal resume.
+            done = out.exists() and (
+                not save_edges or _edges_path(cohort, region, method, k, half).exists())
+            if done:
                 print(f"  seed{k} {half}: exists, skipping", flush=True)
                 continue
             t0 = time.time()
