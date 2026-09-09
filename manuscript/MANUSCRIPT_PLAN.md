@@ -262,6 +262,31 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 
 ### Results 2: The real-data modules are per-module trustworthy and replicate aging (Fig 2)
 - Evidence: 236/266 chance-trusted; ρ 0.77–0.82; 25 vs 6 aging replications.
+- **Declare the model with the number.** The replication count is `25/130 matched module
+  pairs, complement covariate mode, linear age model` (matching permutation p = 0.014,
+  null 16.47 ± 3.50). `complement` is the pre-specified mode — the IsoGraph fit already
+  residualized discovery covariates, so the `full` arm is double adjustment and its
+  collapse to 2/130 is expected arithmetic, not a refutation. State the mode in the
+  sentence, not only in Methods.
+- **The linear age model is a justified choice, not a convenience.** The df = 3 spline arm
+  gives 15/130 (p = 0.15) at the same covariate mode, and a reader is entitled to know
+  whether that is the spline correcting a misspecified line or the line being cheaper. It
+  is the latter, tested directly: across all 266 modules in all six cohort × region fits,
+  **not one** shows detectable curvature in its age trajectory (Wald second-difference
+  contrast inside the spline's own fit; 0 at nominal p < 0.05 where chance alone predicts
+  13.3; smallest p = 0.71; median χ² = 0.007 on 1 df). The contrast is well powered
+  precisely because the shared uncertainty of the projected effects cancels. Nor does the
+  spline find different modules: 4/266 are spline-only significant against 78/266
+  linear-only — the 4 is the chance rate. Aging is linear in these data at module
+  resolution, so the extra 2 df buy nothing and cost power.
+- **Placement:** spline arm → Supplement as a declared sensitivity, cited from the Results
+  sentence in one clause ("the count is lower under a df = 3 spline, which these data do
+  not support — Supp. Table X"). Do **not** present it as a co-equal arm; that would imply
+  a model choice the data reject.
+- Evidence CLI: `isograph_benchmark/real_data/age_model_curvature.py` (+
+  `03_module_trust/_h/14.age_model_curvature.sh`) →
+  `03_module_trust/_m/stability/module_trust/age_model_curvature__isograph.{parquet,json}`.
+  Refits nothing; reads the committed `age_spline`/`age_linear` tables.
 - Role: answers "fine partition = noise?". Transition: "what *are* the disease-associated ones?"
 - Confidence: High.
 
@@ -289,6 +314,46 @@ disruption in disease, which does not depend on it.)_
 - Evidence: ~~convergence hypergeom P=0.0058 (15/32 loci in anchored modules)~~ **RETRACTED 2026-08-30, P=0.40 on the coloc-tested background**; disruption B 4/10, D 3/10, C 10/10; named regulators (M002 SNRNP70/ZCRB1; M008 ZC3H10/RBM14/CELF5; M006 DDX58/ADAR/YTHDC1). Single-locus genotype concordance null (28/62, P=0.81) → Supp.
 - Role: **superseded.** The convergence result was retracted 2026-08-30 (ascertainment); it is not significant on the coloc-tested denominator. Fig 4E now carries the *null* instead, as of 2026-09-03. Do not promote this to a Results unit.
 - Confidence: Moderate — module-level convergence is significant; per-locus genotype resolution is underpowered (n~62), disclose as such.
+
+### Results (bound): The aging switch layer is composition-robust; the schizophrenia layer is not (Fig 5)
+- Evidence: MuSiC cell-type adjustment of the de-confounded gene-level switch test.
+  Aging caudate 43 → 17 composition-unique genes (40% retained), aging DLPFC 8 → 15
+  (adjustment is not uniformly attenuating — this is the internal control), aging
+  hippocampus 0 → 0 (contributes nothing either way; say so rather than counting it as a
+  pass). SCZD caudate **34 → 2 (6%)**. Module member genes are not marker bags
+  (0/3,716 depleted, 33/3,716 enriched). GTEx replication is region-dependent: 6/8
+  deconvolved regions retain a composition-robust signal, the two cortical regions
+  collapse to zero.
+- **Decision (P1-6): concede the disease arm as composition-entangled, and say why that is
+  a biological hypothesis rather than a failure.** The aging claim is the one that
+  survives adjustment and is the one to lead with. For schizophrenia, write the two
+  readings explicitly and do not adjudicate between them from bulk data:
+  - *Confounder reading:* cell-type proportions differ between cases and controls for
+    reasons incidental to the switch layer (sampling, dissection, agonal state), and
+    adjustment is the correct control. Then 2/34 is the honest count.
+  - *Mediator reading:* the composition shift **is** part of the disease — schizophrenia
+    post-mortem cortex and striatum carry real differences in interneuron and glial
+    proportions — in which case adjusting for it removes signal that lies on the causal
+    path, and 34 → 2 is over-adjustment, not deflation of a false positive.
+  Bulk RNA-seq cannot separate these: proportion and per-cell composition are confounded
+  in the same measurement by construction, and no covariate arrangement inside a bulk
+  design breaks that. This is a limit of the assay, not of the model.
+- **Future work, stated in the Discussion:** resolving it requires the switch layer to be
+  measured *within* cell types — single-nucleus (or single-cell) RNA-seq of the same
+  regions, with enough depth or long reads to quantify isoform usage per nucleus. If the
+  switches persist within matched cell types, the mediator reading holds and the disease
+  layer is real; if they disappear once cell type is fixed, the confounder reading holds
+  and the disease claim should not have been made. Name this as the decisive experiment
+  rather than gesturing at "further work" — it is a specific, falsifiable follow-up, and
+  saying so converts the collapse from a weakness into a scoped next step.
+- **Do not** make any SCZD-specific composition-independent claim on these data. The
+  disease-side claims that stand are the ones that do not route through composition:
+  the GO-invisible content gate (Results 3), the module-level genetic anchoring
+  (Results 4), and module disruption in disease (Results 6).
+- Role: the confound reviewers will press hardest, answered in the open. Placement: main
+  (Fig 5), with the mediation discussion in the Discussion.
+- Confidence: Moderate — direction clear, counts small enough that a handful of genes
+  moves the percentage substantially; disclose the n.
 
 ### Results (bound): IsoGraph is complementary, not globally superior (S-real-1)
 - Evidence: three-baseline rates; abundance/switch separability.

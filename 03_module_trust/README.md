@@ -35,3 +35,29 @@ gene-level comparison. See `docs/MODULE_TRUST_PLAN.md`.
 
 Main **Fig 2** `figTrustFunnel`; supplementary `tableS7_module_trust_funnel`.
 Design notes: `docs/MODULE_TRUST_PLAN.md`, `docs/SOFTWARE_ROBUSTNESS_PLAN.md`.
+
+## Age model: why the linear arm is quoted
+
+The cross-cohort aging replication count is **25/130 matched module pairs, `complement`
+covariate mode, linear age model** (matching permutation p = 0.014). The df = 3 spline
+arm gives 15/130 (p = 0.15) at the same covariate mode.
+
+That gap is a power cost, not a correction, and `14.age_model_curvature.sh` is the test
+that says so. It applies a Wald second-difference contrast inside the spline's own fit —
+is each module's projected age trajectory distinguishable from a straight line? Across all
+266 modules in all six cohort x region fits, none is (0 at nominal p < 0.05 against 13.3
+expected by chance; smallest p = 0.71). The contrast is well powered because the projected
+effects share nearly all their uncertainty and every contrast row sums to zero, so the
+shared part cancels. The spline also finds no *different* modules: 4/266 spline-only
+significant against 78/266 linear-only, and 4 is the chance rate.
+
+So aging is linear at module resolution here, the spline spends 2 df on noise, and the
+spline arm belongs in the supplement as a declared sensitivity.
+
+The test needs the full projection covariance (`cov_age_ij`) and refuses to run on the
+diagonal alone — dropping the off-diagonal terms would inflate the variance by exactly the
+shared term the contrast cancels, and so would manufacture a null. The WGCNA baseline's
+`age_spline.parquet` carries only per-point standard errors, so it cannot be tested here.
+
+    sbatch 03_module_trust/_h/14.age_model_curvature.sh
+    # -> _m/stability/module_trust/age_model_curvature__isograph.{parquet,json}
