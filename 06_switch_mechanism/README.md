@@ -25,6 +25,25 @@ they do to the protein, and do the results survive sensitivity analysis?
 - Switch genes are more LoF-constrained than genome-wide (median LOEUF 0.72 vs 0.94),
   while switched exons carry *lower* ClinVar P/LP density (ratio 0.18) — expected
   alternative-exon biology.
+- **The long-read switch-like rate must never be quoted without its null, and not on the
+  all-pairs denominator.** Step 07 reports `pair_switch_like_rate` = **0.084** (5,173/61,302
+  in BA9; 1,341/15,878 in cortex) — that denominator is *every* prespecified switch pair,
+  including the ~73% never detected in n = 12 ONT samples, so it is a detection rate times a
+  concordance rate and cannot be compared to anything. Step 05 supplies the comparison the
+  number was missing, on the **detected-pair** denominator and against pairs drawn from the
+  *same genes*, scored on the *same samples* by the *same code*, matched on abundance decile:
+
+  | Set | switch-like | matched null | P |
+  |---|---|---|---|
+  | All IsoGraph switch pairs (18,268 detected) | 0.647 | 0.639 | 0.022 |
+  | Genetically anchored pairs (53 detected) | 0.453 | 0.252 | 5e-4 |
+  | …restricted to usable abundance (30) | 0.600 | 0.304 | 5e-4 |
+
+  The global arm barely clears its null because **compositional closure** puts the null at
+  0.639 before any biology: within-gene isoform fractions sum to one, so any two isoforms of
+  a gene are negatively correlated by construction. The anchored subset is the result; the
+  global switch-like rate is not. See `_m/switch_orthogonal_confirm/GLOBAL_NULL.md`.
+
 - **SNCA's anchored switch is confirmed in short read; CTSH's is not** (step 12). On the
   exact contrast Fig 4A draws — the anchored proximal first exon against the canonical
   distal one — minor-form usage is **0.189 in DLPFC (n = 222)** and **0.234 in caudate
@@ -56,7 +75,7 @@ they do to the protein, and do the results survive sensitivity analysis?
   the stability of the representation and its trait signal, not of an independently
   refit network.
 
-**CLIs:** `isograph_benchmark/real_data/{switch_consequence,switch_consequence_meta,validate_switch_splicing,switch_orthogonal_confirm,isa_concordance,longread_switch_confirm,clinical_consequence,clinical_consequence_meta,scz_confound_sensitivity,switch_feature_sensitivity}.py`.
+**CLIs:** `isograph_benchmark/real_data/{switch_consequence,switch_consequence_meta,validate_switch_splicing,switch_orthogonal_confirm,isa_concordance,longread_switch_confirm,clinical_consequence,clinical_consequence_meta,scz_confound_sensitivity,switch_feature_sensitivity,junction_coloc_confirm}.py`.
 
 ## Display items
 

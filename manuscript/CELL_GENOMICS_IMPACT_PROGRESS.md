@@ -63,17 +63,25 @@ Outputs `07_rbp_regulation/_m/rbp/{rbp_binding_calls,rbp_binding_support,rbp_bin
 that family counts the *same* signal once per region (MATR3 ×5, QKI ×4 = one signal replicated),
 inflating the "supported" count. Corrected to an **independence-respecting unit**: one two-sided
 exact McNemar **per RBP** over its *unique nominated regulon genes* (deduped across regions,
-bound if bound in ANY region's switch definition), BH across the 39 testable RBPs. The 192
-per-regulon rows are retained **descriptively** (`rbp_binding_regulon.parquet`), not as an FDR
-family.
+bound if bound in ANY region's switch definition), BH across the testable RBPs (38 in the
+canonical GC-matched arm, 39 in the deprecated flat arm). The per-regulon rows are retained
+**descriptively** (`rbp_binding_regulon.parquet`, 193 rows GC / 192 flat), not as an FDR family.
 
-**Result (per-RBP headline, 39 testable RBPs):**
-- **31/39 directionally preferential**; **17/39 binding-supported** (preferential AND BH q≤0.05).
-- **Median switched−constitutive gap = 0.013** — small and near-universal. This is binding
+**Result (per-RBP headline, GC-matched background, 38 testable RBPs):**
+- **31/38 directionally preferential**; **25/38 binding-supported** (preferential AND BH q≤0.05),
+  spanning **55 of 66** independent motif families.
+- **Median switched−constitutive gap = 0.024** — small and near-universal. This is binding
   **capacity** at alternative vs constitutive exons, **not** factor-specific occupancy of the
   predicted regulons.
-- Largest gaps: **MATR3** (0.115, q≈0), HNRNPK (0.107), HNRNPC (0.070), TIAL1 (0.053),
-  PCBP2/GRSF1 (~0.05), QKI (0.042), ELAVL1 (0.040), NONO (0.039), **KHDRBS1/SAM68** (0.032).
+- Largest gaps: **PCBP2** (0.116), **MATR3** (0.105, q≈0), HNRNPC (0.078), HNRNPM (0.074),
+  HNRNPU (0.062), TIAL1 (0.060), ELAVL1 (0.054), PUM2 (0.045), GRSF1 (0.043), QKI (0.040).
+
+> **Which background.** The numbers above are the **GC-matched** arm
+> (`RBP_BINDING_SUMMARY.md`, `rbp_binding_support.parquet`) — the canonical one. The
+> **flat-background** arm (`*_flatbg`) gives 31/39 preferential, 17/39 supported, median gap
+> 0.013, and is deprecated: it inflates AU-rich binders (ELAVL, CPEB, hnRNPD). This document
+> quoted the flat arm as the headline until 2026-09-09; the same deprecated arm produced the
+> "829 hits / 129 RBPs" front-page error corrected in `3d54ff0`. Quote the GC arm.
 
 **Interpretation (corrected — do NOT call this "evidence-backed").** A subset of nominated factors
 (led by MATR3) bind their regulon genes' switched exons at a modestly higher rate than the
@@ -110,7 +118,8 @@ ELAVL1, QKI, MBNL1, PUM1/2, IGF2BP1/2/3. Honest partial coverage.
 1. `python -m isograph_benchmark.real_data.rbp_binding run` (moderate compute — SLURM: add a
    wrapper `07_rbp_regulation/_h/05.rbp_binding.sh`; interval overlap over 17 regions).
 3. Read `07_rbp_regulation/_m/rbp/RBP_BINDING_SUMMARY.md`: the per-RBP binding-supported count
-   (17/39) and the small median switched−constitutive gap (0.013). Supports the Fig 4 RBP
+   (25/38, GC-matched background) and the small median switched−constitutive gap (0.024).
+   Do **not** read `RBP_BINDING_SUMMARY_flatbg.md` for the headline. Supports the Fig 4 RBP
    sentence with binding *capacity* for a subset of factors — **not** an "evidence-backed"
    neuronal-occupancy upgrade (see B1 fix and the neuronal-CLIP honest null above).
 
@@ -217,7 +226,8 @@ reviewer-defensive: the test is clearly not rigged to always "survive."
 
 ## Resume checklist
 - [x] Item 2: eCLIP fetch + overlap done; B1 fixed (per-RBP independence-respecting unit,
-  17/39 binding-supported, median gap 0.013 = binding capacity); neuronal-CLIP tiers are an honest null.
+  25/38 binding-supported at a GC-matched background, median gap 0.024 = binding capacity);
+  neuronal-CLIP tiers are an honest null.
 - [ ] Item 3: run module anchoring (SLURM) → meta → decide on eigen-QTL / S-LDSC depth.
 - [ ] Fold Item 1 result into the manuscript (adjusted SCZD count + mediator caveat;
       composition-robust aging layer as the lead DTU claim).
