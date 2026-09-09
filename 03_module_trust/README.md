@@ -90,8 +90,41 @@ non-canonical resolution is tagged `isograph_resXpY` and aggregates as its own m
 the curve falls out of `stability_summary` and the committed canonical partitions are never
 touched (the sweep skips 5.0 by design).
 
-Read the outcome honestly: if the stability optimum sits far from 5.0, that is a result and
-it moves published numbers.
+### Result (grid run 2026-09-09): split-half agreement cannot select a resolution
+
+| resolution | mean ARI | mean NMI | mean modules | mean genes compared |
+|---|---|---|---|---|
+| 0.5 | **0.412** | 0.352 | 5.3 | 4,722 |
+| 1.0 | 0.363 | 0.336 | 7.7 | 4,699 |
+| 2.0 | 0.318 | 0.307 | 17.3 | 4,633 |
+| 3.0 | 0.263 | 0.330 | 31.9 | 4,219 |
+| **5.0 (canonical)** | 0.279 | 0.407 | 46.5 | 3,409 |
+| 8.0 | 0.329 | 0.472 | 49.7 | 2,523 |
+| 12.0 | 0.358 | 0.518 | 50.9 | 1,977 |
+| 20.0 | 0.398 | **0.564** | 47.4 | 1,416 |
+
+**Do not read the ARI column as a criterion.** It is U-shaped with a minimum at 3–5, so a
+naive reading picks 0.5 — where there are **5.3 modules**. That is the granularity confound
+this project already retired the cross-cohort Jaccard for (see the Caveat above), now in a
+second guise: ARI is inflated at the coarse end by giant modules and at the fine end by a
+collapsing comparison set, since the genes assigned to modules of size ≥ 20 in *both* halves
+fall from 4,722 to 1,416 across the grid. The two ends are not comparable to each other, let
+alone to the middle.
+
+NMI, which is far less inflated by a few giant modules, moves the other way: it rises
+monotonically through 5.0 and keeps rising. So the two agreement metrics disagree in
+direction, and both track granularity rather than reproducibility.
+
+**What this licenses us to say.** The phenotype-blind stability criterion the reviewer asks
+for does not exist in the assumed form — split-half agreement does not have an interior
+optimum to read a resolution off. It does not vindicate 5.0 and it does not condemn it: 5.0
+sits at the ARI minimum but partway up a monotone NMI rise, still assigning 3,409 genes.
+Report the curve, state why neither metric selects, and keep the ≥900-gene giant-module
+criterion as the stated basis — now with the sweep as a disclosed sensitivity rather than an
+absent analysis.
+
+Reproduce with `16.stability_resolution_sweep.sh` then `03.stability_aggregate.sh`; the
+per-resolution rows live in `stability_summary.parquet` under method `isograph_resXpY`.
 
 ## Display items
 
