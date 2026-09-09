@@ -48,6 +48,31 @@ is a different estimand — see the Q3-pooled section of
 `_m/stability/module_trust/MODULE_TRUST_SUMMARY.md` for why the quantifier gap separates
 them.
 
+## The split-half partitions were a generation behind (fixed 2026-09-09)
+
+`fit-isograph` writes the split halves that the trust funnel validates production modules
+against, and `_vae_config` pins them to the production resolution *precisely so* the funnel
+validates the modules the paper ships. The committed partitions did not honour that: they
+carried **7–26 modules per region** — the `isograph_vae_res2` scale (10–18) — while
+production is 39–50 and a fresh half at the canonical 5.0 gives 29–67. Half-sample size does
+not explain it; the fresh halves have *more* modules than production, not fewer.
+`brainseq/dlpfc` was a **mixture**: nine of its ten files were current and one (seed0 A, 9
+modules) was not, which is the `out.exists()` resume-skip leaving stale files in place.
+
+Re-fitting all 60 halves at 5.0 moved the funnel **in the project's favour**, which is worth
+stating plainly since the correction could as easily have gone the other way:
+
+| | before | after |
+|---|---|---|
+| Chance-trusted modules | 236/266 (89%) | **250/266 (94%)** |
+| Split-half ARI (median over regions) | 0.21 | **0.35** |
+| Cross-cohort aging replications | 25/130, perm p = 0.014 | **23/130, perm p = 0.034** |
+| df = 3 spline arm | 15/130, p = 0.152 | 15/130, p = 0.146 |
+| Pooled arm | null | null |
+
+The WGCNA arm was untouched and needed no correction — its halves (5–33 modules) already
+bracket its production fits (5–25).
+
 ## Choosing the resolution without looking at a trait
 
 The canonical Leiden resolution (5.0) was selected using a phenotype-aware argument — the
@@ -75,9 +100,9 @@ Design notes: `docs/MODULE_TRUST_PLAN.md`, `docs/SOFTWARE_ROBUSTNESS_PLAN.md`.
 
 ## Age model: why the linear arm is quoted
 
-The cross-cohort aging replication count is **25/130 matched module pairs, `complement`
-covariate mode, linear age model** (matching permutation p = 0.014). The df = 3 spline
-arm gives 15/130 (p = 0.15) at the same covariate mode.
+The cross-cohort aging replication count is **23/130 matched module pairs, `complement`
+covariate mode, linear age model** (matching permutation p = 0.034). The df = 3 spline
+arm gives 15/130 (p = 0.146) at the same covariate mode.
 
 That gap is a power cost, not a correction, and `14.age_model_curvature.sh` is the test
 that says so. It applies a Wald second-difference contrast inside the spline's own fit —

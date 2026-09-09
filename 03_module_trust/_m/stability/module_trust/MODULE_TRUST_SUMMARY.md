@@ -77,8 +77,8 @@ switch) is stable even where hard gene-membership Jaccard is low
 
 **Q3 — cross-cohort aging replication.** Matching trusted BrainSEQ modules to GTEx modules in
 the paired region and testing the aging effect on independent quantifiers, IsoGraph modules
-replicate (sign-concordant **and** jointly significant) at **3/45 caudate, 9/35 DLPFC, and
-13/50 hippocampus = 25 replicating modules**; sign concordance alone holds for 69/130. The
+replicate (sign-concordant **and** jointly significant) at **2/44 caudate, 8/36 DLPFC, and
+13/50 hippocampus = 23 replicating modules**; sign concordance alone holds for 68/130. The
 matched WGCNA baseline replicates at **1/21, 5/25, 0/7 = 6 modules**. Surviving the
 Salmon↔RSEM quantifier gap is genuine biological replication, and IsoGraph carries ~4× as
 many cross-cohort-replicating aging modules as the abundance baseline
@@ -95,9 +95,9 @@ was selecting on module size. Re-gated and re-run over exactly the 130 pairs beh
 
 | Arm | IsoGraph | WGCNA |
 |---|---|---|
-| Stouffer directional meta-Z **[headline]** | Z = −0.68, perm p = 0.113 (K = 84) | Z = −1.16, perm p = 0.079 (K = 28) |
-| Sign concordance | 69/130 = 53%, perm p = 0.034 | 27/53 = 51%, perm p = 0.086 |
-| Spearman magnitude | ρ = 0.125, perm p = 0.079 | ρ = 0.107, perm p = 0.229 |
+| Stouffer directional meta-Z **[headline]** | Z = −1.15, perm p = 0.122 (K = 82) | Z = −1.16, perm p = 0.079 (K = 28) |
+| Sign concordance | 68/130 = 52%, perm p = 0.066 | 27/53 = 51%, perm p = 0.086 |
+| Spearman magnitude | ρ = 0.108, perm p = 0.110 | ρ = 0.107, perm p = 0.229 |
 
 **Read this as null for both methods.** The headline arm does not clear, and its Z is
 slightly *negative* in both. The one nominal p < 0.05 is a 53% sign concordance — three
@@ -111,7 +111,7 @@ estimands, and the quantifier gap separates them. Stage 06 measures per-gene swi
 effects as essentially *uncorrelated* between Salmon and RSEM (Pearson 0.007 caudate, −0.002
 hippocampus), so a meta-analysis that combines effect directions and magnitudes across
 cohorts has almost nothing to combine, while a count of sign-concordant *and* jointly
-significant matches tested against a matching permutation null can still clear. The 25 vs 6
+significant matches tested against a matching permutation null can still clear. The 23 vs 6
 per-region comparison is unaffected — the pooled arm reads the same rows — but pooling must
 not be quoted as corroborating it.
 
@@ -125,7 +125,7 @@ consistent with the project-wide honest read that gene abundance dominates the b
 signal and IsoGraph contributes a complementary, mechanistically-resolved switch layer rather
 than a globally-superior partition (`module_complementarity__*__isograph.parquet`).
 
-**Headline:** *Of IsoGraph's 236 chance-trusted aging modules across six brain regions, the
+**Headline:** *Of IsoGraph's 250 chance-trusted aging modules across six brain regions, the
 switch drivers reproduce across resamples (ρ ≈ 0.77–0.82) and 25 modules replicate their
 aging association across independent cohorts and quantifiers — ~4× the matched
 gene-abundance baseline — with driver switches that are genuine structural isoform changes.*

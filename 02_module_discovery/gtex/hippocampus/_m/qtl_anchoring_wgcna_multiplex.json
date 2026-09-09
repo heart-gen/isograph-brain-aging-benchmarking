@@ -4,16 +4,19 @@
   "tissue": "Brain_Hippocampus",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17234,
+  "n_universe_genes": 17252,
   "universe_sizes": {
-    "sQTL": 12905,
-    "eQTL": 17207
+    "sQTL": 12913,
+    "eQTL": 17225
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17234,
-    "pheno_sig_modules": 6023,
-    "go_invisible_modules": 287,
-    "go_visible_modules": 5807
+    "all_modules": 17252,
+    "pheno_sig_modules": 6503,
+    "go_invisible_modules": 291,
+    "go_visible_modules": 6280
   }
 }

@@ -3,17 +3,11 @@
   "region": "caudate_basal_ganglia",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 42,
-      "n_go_enriched": 11,
-      "frac_go_enriched": 0.262,
+    "wgcna_switch": {
+      "n_modules": 12,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.417,
       "n_pheno_sig_fdr10": 1
-    },
-    "wgcna": {
-      "n_modules": 6,
-      "n_go_enriched": 6,
-      "frac_go_enriched": 1.0,
-      "n_pheno_sig_fdr10": 2
     }
   }
 }

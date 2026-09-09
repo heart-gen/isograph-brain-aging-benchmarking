@@ -4,16 +4,19 @@
   "tissue": "Brain_Frontal_Cortex_BA9",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17604,
+  "n_universe_genes": 17596,
   "universe_sizes": {
-    "sQTL": 13415,
-    "eQTL": 17569
+    "sQTL": 13397,
+    "eQTL": 17561
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17604,
-    "pheno_sig_modules": 10070,
-    "go_invisible_modules": 1898,
-    "go_visible_modules": 9258
+    "all_modules": 17596,
+    "pheno_sig_modules": 10035,
+    "go_invisible_modules": 1888,
+    "go_visible_modules": 9210
   }
 }

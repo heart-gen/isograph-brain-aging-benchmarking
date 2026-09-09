@@ -3,17 +3,11 @@
   "region": "nucleus_accumbens_basal_ganglia",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 32,
-      "n_go_enriched": 10,
-      "frac_go_enriched": 0.312,
+    "wgcna_multiplex": {
+      "n_modules": 16,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.812,
       "n_pheno_sig_fdr10": 1
-    },
-    "wgcna": {
-      "n_modules": 8,
-      "n_go_enriched": 7,
-      "frac_go_enriched": 0.875,
-      "n_pheno_sig_fdr10": 0
     }
   }
 }

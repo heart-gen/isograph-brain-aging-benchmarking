@@ -4,13 +4,16 @@
   "tissue": "Brain_Cerebellar_Hemisphere",
   "variant": "standard",
   "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 6749,
+  "n_universe_genes": 6758,
   "universe_sizes": {
-    "sQTL": 5823,
-    "eQTL": 6739
+    "sQTL": 5814,
+    "eQTL": 6748
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 6749
+    "all_modules": 6758
   }
 }
