@@ -46,10 +46,12 @@ import pandas as pd
 import MOODS.scan
 import MOODS.tools
 
+from isograph_benchmark.paths import cohort_dir, stage_out
+
 _REPO = Path(__file__).resolve().parents[2]
 _MOTIF_DIR = _REPO / "inputs" / "rbp_motifs"
 _FASTA = _REPO / "inputs" / "raw" / "gencode_v47" / "gencode.v47.transcripts.fa.gz"
-_OUT_DIR = _REPO / "real_data" / "_m" / "rbp"
+_OUT_DIR = stage_out("regulation", "rbp")
 _OUT = _OUT_DIR / "rbp_counts.parquet"
 _FAM_OUT = _OUT_DIR / "rbp_family_counts.parquet"
 _FAMILIES = _OUT_DIR / "rbp_motif_families.parquet"
@@ -71,7 +73,7 @@ def _needed_transcripts() -> set[str]:
     """Every transcript in any region's structure_switch_pairs (versioned IDs)."""
     tx: set[str] = set()
     for tree in ("brainseq", "gtex"):
-        root = _REPO / "real_data" / tree
+        root = cohort_dir(tree)
         if not root.exists():
             continue
         for region_dir in sorted(p for p in root.iterdir() if p.is_dir()):
@@ -374,7 +376,7 @@ def run(gtf_cache: Path, gc_bins: int, purine_bins: int, flat_too: bool,
 def main() -> None:
     p = argparse.ArgumentParser(description="Scan switch isoforms for ATtRACT RBP motifs.")
     p.add_argument("--gtf-cache", default=str(
-        _REPO / "real_data" / "_m" / "tmp"
+        stage_out("tmp")
         / "gencode.v47.primary_assembly.annotation.gtf_cache.parquet"))
     p.add_argument("--gc-bins", type=int, default=_GC_BINS)
     p.add_argument("--purine-bins", type=int, default=_PURINE_BINS)

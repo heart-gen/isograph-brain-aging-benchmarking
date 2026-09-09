@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import chi2, hypergeom, norm, spearmanr
 
-from isograph_benchmark.paths import ensure_dir, rel, stage_out
+from isograph_benchmark.paths import OUTPUT_DIRS, ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.stability import (
     COHORTS, SEED_BASE, _filter_expressed_transcripts, _split_indices,
 )
@@ -35,13 +35,15 @@ from isograph_benchmark.real_data.stability import (
 # production output dir name <- split-half partition method tag
 METHOD_DIRS = {"isograph": "isograph_vae", "wgcna": "wgcna_gene"}
 # (cohort, region) -> production fit root
+_STORE = OUTPUT_DIRS["modules"]
+
 PROD_ROOTS = {
-    ("brainseq", "caudate"): ("real_data", "brainseq", "caudate", "_m"),
-    ("brainseq", "hippocampus"): ("real_data", "brainseq", "hippocampus", "_m"),
-    ("brainseq", "dlpfc"): ("real_data", "brainseq", "dlpfc", "_m"),
-    ("gtex", "caudate_basal_ganglia"): ("real_data", "gtex", "caudate_basal_ganglia", "_m"),
-    ("gtex", "hippocampus"): ("real_data", "gtex", "hippocampus", "_m"),
-    ("gtex", "frontal_cortex_ba9"): ("real_data", "gtex", "frontal_cortex_ba9", "_m"),
+    ("brainseq", "caudate"): (*_STORE, "brainseq", "caudate", "_m"),
+    ("brainseq", "hippocampus"): (*_STORE, "brainseq", "hippocampus", "_m"),
+    ("brainseq", "dlpfc"): (*_STORE, "brainseq", "dlpfc", "_m"),
+    ("gtex", "caudate_basal_ganglia"): (*_STORE, "gtex", "caudate_basal_ganglia", "_m"),
+    ("gtex", "hippocampus"): (*_STORE, "gtex", "hippocampus", "_m"),
+    ("gtex", "frontal_cortex_ba9"): (*_STORE, "gtex", "frontal_cortex_ba9", "_m"),
 }
 
 # cross-cohort caudate-matched pairs (BrainSEQ region, GTEx region) for Q3 replication
