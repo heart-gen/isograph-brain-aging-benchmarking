@@ -64,6 +64,12 @@ if [[ -n "${STABILITY_MAX_MODULE_FRAC:-}" ]]; then CAP_FLAG="--max-module-frac $
 #   sbatch --export=ALL,STABILITY_LEIDEN_GIANT_FRAC=0.15 ...
 GCAP_FLAG=""
 if [[ -n "${STABILITY_LEIDEN_GIANT_FRAC:-}" ]]; then GCAP_FLAG="--leiden-giant-frac ${STABILITY_LEIDEN_GIANT_FRAC}"; fi
+# Persist each split half's gene-gene graph, so 16.stability_resolution_sweep.sh can
+# re-cluster it across a resolution grid instead of refitting the VAE per resolution.
+# Costs ~4 MB per half and nothing in compute. Set via:
+#   sbatch --export=ALL,STABILITY_SAVE_EDGES=1 ...
+SAVE_EDGES_FLAG=""
+if [[ "${STABILITY_SAVE_EDGES:-0}" == "1" ]]; then SAVE_EDGES_FLAG="--save-edges"; fi
 
 module purge
 module load anaconda3/2024.10-1
@@ -80,7 +86,8 @@ for ((k = 0; k < SEEDS; k++)); do
         log_message "  seed ${k} half ${half} ..."
         python -m isograph_benchmark.real_data.stability fit-isograph \
             --cohort "${COHORT}" --region "${REGION}" --seed "${k}" --half "${half}" \
-            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${FLOOR_FLAG} ${CAP_FLAG} ${GCAP_FLAG}
+            --consensus "${CONSENSUS}" ${RELIABILITY_FLAG} ${FLOOR_FLAG} ${CAP_FLAG} ${GCAP_FLAG} \
+            ${SAVE_EDGES_FLAG}
     done
 done
 conda deactivate

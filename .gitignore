@@ -99,3 +99,7 @@ reports/pi/
 # so nothing downstream reads these. Regenerable with
 # `sbatch 05_genetic_anchoring/_h/20.coloc_modality_abf.sh` (+ COLOC_MODALITY_ARM).
 05_genetic_anchoring/_m/coloc_modality_contrast/**/abf/
+
+# Split-half gene-gene graphs cached for the Leiden resolution sweep (03_h/16).
+# Regenerable from 01.stability_isograph.sh --save-edges; ~4 MB x seeds x halves x regions.
+03_module_trust/_m/stability/edges/

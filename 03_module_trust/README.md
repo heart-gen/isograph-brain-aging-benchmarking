@@ -21,6 +21,7 @@ pipeline, which is what makes the second arm a real replication.
 | 12–13 | `replication_permutation`, `replication_functional` | Permutation null + functional preservation |
 | 14 | `age_model_curvature` | Curvature test licensing the linear age model |
 | 15 | `replication_pooled` | Q3 pooled over all region pairs (Stouffer meta-Z + permutation arms) |
+| 16 | `stability_resolution_sweep` | Phenotype-blind Leiden resolution curve (re-clusters saved split-half graphs) |
 
 `_m/` holds `stability/` and `replication/`, plus the resolution-2.0 and giant-cap
 variants as named siblings (`stability_res2`, `stability_gcap_ab`, `replication_res2`).
@@ -46,6 +47,26 @@ WGCNA Z = −1.16, p = 0.079). It does not corroborate the per-region 25-vs-6 co
 is a different estimand — see the Q3-pooled section of
 `_m/stability/module_trust/MODULE_TRUST_SUMMARY.md` for why the quantifier gap separates
 them.
+
+## Choosing the resolution without looking at a trait
+
+The canonical Leiden resolution (5.0) was selected using a phenotype-aware argument — the
+≥900-gene giant module produced a GWAS artifact at 2.0 — which is a standing reviewer
+objection. Step 16 answers it on split-half stability instead:
+
+    sbatch --export=ALL,STABILITY_SAVE_EDGES=1 03_module_trust/_h/01.stability_isograph.sh
+    sbatch 03_module_trust/_h/16.stability_resolution_sweep.sh
+    sbatch 03_module_trust/_h/03.stability_aggregate.sh
+
+The sweep **re-clusters saved graphs and refits nothing**. A gene-gene graph does not depend
+on the Leiden resolution — only the clustering step does — so one fit pass with
+`--save-edges` supports the whole grid, instead of one 30–48G fit pass per resolution. Each
+non-canonical resolution is tagged `isograph_resXpY` and aggregates as its own method, so
+the curve falls out of `stability_summary` and the committed canonical partitions are never
+touched (the sweep skips 5.0 by design).
+
+Read the outcome honestly: if the stability optimum sits far from 5.0, that is a result and
+it moves published numbers.
 
 ## Display items
 
