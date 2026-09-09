@@ -81,7 +81,7 @@ canonical GC-matched arm, 39 in the deprecated flat arm). The per-regulon rows a
 > **flat-background** arm (`*_flatbg`) gives 31/39 preferential, 17/39 supported, median gap
 > 0.013, and is deprecated: it inflates AU-rich binders (ELAVL, CPEB, hnRNPD). This document
 > quoted the flat arm as the headline until 2026-09-09; the same deprecated arm produced the
-> "829 hits / 129 RBPs" front-page error corrected in `3d54ff0`. Quote the GC arm.
+> "829 hits / 129 RBPs" front-page error corrected in `41e293f`. Quote the GC arm.
 
 **Interpretation (corrected — do NOT call this "evidence-backed").** A subset of nominated factors
 (led by MATR3) bind their regulon genes' switched exons at a modestly higher rate than the
