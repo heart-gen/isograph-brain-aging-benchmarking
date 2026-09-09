@@ -86,6 +86,31 @@ COHORTS = {
 }
 
 
+#: Split-half fits must cluster at the SAME resolution as production, or the trust funnel
+#: validates a partition the paper does not ship. Mirrors run_models.CANONICAL_LEIDEN_RESOLUTION.
+CANONICAL_LEIDEN_RESOLUTION = 5.0
+
+
+def _res_token(leiden_resolution: float) -> str:
+    """Method-name suffix for a non-canonical resolution ('' at the canonical one).
+
+    The canonical resolution stays UNSUFFIXED so existing partition filenames, the
+    `out.exists()` skip in ``fit`` and every committed aggregate keep working untouched.
+    """
+    if leiden_resolution == CANONICAL_LEIDEN_RESOLUTION:
+        return ""
+    return "_res" + f"{leiden_resolution:g}".replace(".", "p")
+
+
+def _edges_dir():
+    """Saved split-half edge tables, the input to ``sweep``.
+
+    Regenerable from the fits and large (~4 MB per half), so gitignored: this is a cache
+    that buys a resolution sweep without R x the VAE fits, not an output.
+    """
+    return ensure_dir(_partitions_dir().parent / "edges")
+
+
 def _partitions_dir():
     # Optional sandbox override so an A/B can be run in isolation (fresh baseline +
     # candidate arms) without overwriting the committed production partitions. The
@@ -111,13 +136,15 @@ def _vae_config(spec: dict, consensus_runs: int = 1, reliability: bool = False,
                 max_module_frac: float | None = None,
                 leiden_giant_frac: float | None = None,
                 lr_override: float | None = None,
-                grad_clip_norm: float | None = None) -> VaeModelConfig:
+                grad_clip_norm: float | None = None,
+                leiden_resolution: float = CANONICAL_LEIDEN_RESOLUTION) -> VaeModelConfig:
     covariates = list(spec["covariates"]) + list(extra_covariates or [])
     kw = dict(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=covariates,
         min_module_size=20, trait_columns=[spec["age_col"]], random_state=VAE_SEED,
-        allow_abundance_abundance=False, alpha_switch=0.5, leiden_resolution=5.0,
+        allow_abundance_abundance=False, alpha_switch=0.5,
+        leiden_resolution=leiden_resolution,
         # Promoted production defaults (mirror run_models._PROMOTED_VAE, 2026-06-24):
         # the split-half baseline must equal the shipped config so the trust funnel
         # validates the ACTUAL production modules. grad_clip_norm=1.0 (single-LR gate
@@ -179,7 +206,9 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                  reliability: bool = False, min_minor_usage: float = 0.1,
                  reliability_floor: float = 0.0,
                  max_module_frac: float | None = None,
-                 leiden_giant_frac: float | None = None) -> None:
+                 leiden_giant_frac: float | None = None,
+                 leiden_resolution: float = CANONICAL_LEIDEN_RESOLUTION,
+                 save_edges: bool = False) -> None:
     """Fit IsoGraph on both split-halves for every seed in ``range(seeds)``, or for a
     single ``only_seed`` / ``only_half`` when given.
 
@@ -209,6 +238,10 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
         method += f"_cap{int(round(max_module_frac * 100)):02d}"
     if leiden_giant_frac is not None:
         method += f"_gcap{int(round(leiden_giant_frac * 100)):02d}"
+    # A non-canonical resolution is a DIFFERENT method as far as `aggregate` is concerned,
+    # which is exactly what a stability-vs-resolution curve wants: one summary row per
+    # resolution, and no chance of overwriting the canonical partitions.
+    method += _res_token(leiden_resolution)
     bundle = load_dataset_bundle(rel(*spec["bundle_root"], region))
     sample_table = bundle.sample_table.reset_index(drop=True)
     tc = bundle.matrices["transcript_counts"]
@@ -225,7 +258,8 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                       reliability=reliability, min_minor_usage=min_minor_usage,
                       reliability_floor=reliability_floor,
                       max_module_frac=max_module_frac,
-                      leiden_giant_frac=leiden_giant_frac)
+                      leiden_giant_frac=leiden_giant_frac,
+                      leiden_resolution=leiden_resolution)
     ks = [only_seed] if only_seed is not None else list(range(seeds))
     print(f"[{cohort}/{region}] {n} samples, {tc.shape[0]} transcripts | "
           f"method={method} | seeds {ks}", flush=True)
@@ -248,6 +282,10 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
                 )
                 mods = art.module_table[["gene_id", "module_id"]]
                 _write_partition(mods, cohort, region, method, k, half)
+                if save_edges:
+                    # Written BEFORE `del art`: this graph is what `sweep` re-clusters, and
+                    # regenerating it costs another VAE fit.
+                    _write_edges(art.edge_table, cohort, region, method, k, half)
                 print(f"  seed{k} {half}: {mods['module_id'].nunique()} modules, "
                       f"{len(idx)} samples, {time.time() - t0:.0f}s", flush=True)
                 del art, mods
@@ -259,6 +297,67 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
 # ---------------------------------------------------------------------------
 # Aggregation: ARI/NMI per (method, cohort, region, seed) + within-vs-cross summary
 # ---------------------------------------------------------------------------
+def _edges_path(cohort, region, method, seed, half):
+    return _edges_dir() / f"{method}__{cohort}__{region}__seed{seed}__{half}.parquet"
+
+
+def _write_edges(edges: pd.DataFrame, cohort, region, method, seed, half) -> None:
+    """Persist one split half's gene-gene graph so `sweep` can re-cluster it."""
+    cols = [c for c in ("source", "target", "weight") if c in edges.columns]
+    edges[cols].to_parquet(
+        _edges_path(cohort, region, method, seed, half), index=False, compression="zstd")
+
+
+def sweep(cohort: str, region: str, resolutions: list[float], method: str = "isograph",
+          seeds: int | None = None, min_module_size: int = 20) -> None:
+    """Re-cluster saved split-half graphs across a resolution grid; write partitions.
+
+    The point of doing it this way: a stability-vs-resolution curve needs the SAME split
+    halves clustered at every resolution, and re-fitting the VAE per resolution would cost
+    len(resolutions) x the fits at ~30G each. The graph does not depend on the resolution --
+    only the Leiden step does -- so one `fit-isograph --save-edges` pass supports the whole
+    grid. This mirrors what `sweep_leiden` already does for the production fits, and reuses
+    its clustering entry point so the two cannot drift apart.
+
+    Partitions land under the same `_resXpY` method tags `fit` would have written, so
+    `aggregate` picks them up and emits one stability row per resolution with no further
+    work. The canonical resolution is skipped when its partitions already exist -- it is the
+    committed baseline, not something a sweep should rewrite.
+    """
+    from isograph_benchmark.real_data.sweep_leiden import _build_module_table
+
+    edge_files = sorted(_edges_dir().glob(f"{method}__{cohort}__{region}__seed*__*.parquet"))
+    if not edge_files:
+        raise SystemExit(
+            f"no saved graphs for {method}/{cohort}/{region} in {_edges_dir()} — run "
+            f"`fit-isograph --cohort {cohort} --region {region} --save-edges` first")
+    if seeds is not None:
+        edge_files = [f for f in edge_files
+                      if int(f.stem.split("__seed")[1].split("__")[0]) < seeds]
+
+    for res in resolutions:
+        tag = method + _res_token(res)
+        if not _res_token(res):
+            print(f"  res={res:g}: canonical, skipping (it is the committed baseline)",
+                  flush=True)
+            continue
+        for f in edge_files:
+            stem = f.stem.split("__")
+            k, half = int(stem[3].removeprefix("seed")), stem[4]
+            out = _partitions_dir() / f"{tag}__{cohort}__{region}__seed{k}__{half}.parquet"
+            if out.exists():
+                print(f"  res={res:g} seed{k} {half}: exists, skipping", flush=True)
+                continue
+            edges = pd.read_parquet(f)
+            nodes = sorted(set(edges["source"].astype(str)) | set(edges["target"].astype(str)))
+            mods = _build_module_table(edges, nodes, res, seed=VAE_SEED,
+                                       min_module_size=min_module_size)
+            _write_partition(mods, cohort, region, tag, k, half)
+            print(f"  res={res:g} seed{k} {half}: {mods['module_id'].nunique()} modules "
+                  f"over {len(nodes)} nodes", flush=True)
+    print("run `aggregate` for the stability-vs-resolution curve", flush=True)
+
+
 def _agreement(a: pd.DataFrame, b: pd.DataFrame) -> dict:
     ca = a.set_index("gene_id")["module_id"]
     cb = b.set_index("gene_id")["module_id"]
@@ -502,6 +601,28 @@ def main() -> None:
                     help="collapse fix C: select the smallest Leiden resolution whose "
                          "largest module is <= this fraction of genes (e.g. 0.15), instead "
                          "of post-hoc splitting. Tags partitions '_gcapNN'.")
+    fi.add_argument("--leiden-resolution", type=float, default=CANONICAL_LEIDEN_RESOLUTION,
+                    metavar="R",
+                    help=f"Leiden resolution for the split-half fits (default "
+                         f"{CANONICAL_LEIDEN_RESOLUTION:g}, matching production). A "
+                         f"non-canonical value tags partitions '_resXpY' so it aggregates "
+                         f"as its own method and cannot overwrite the canonical ones.")
+    fi.add_argument("--save-edges", action="store_true",
+                    help="persist each split half's gene-gene graph, so `sweep` can "
+                         "re-cluster it across a resolution grid without refitting the VAE")
+    sw = sub.add_parser("sweep",
+                        help="re-cluster SAVED split-half graphs across a resolution grid "
+                             "(no VAE refits); then run `aggregate` for the stability curve")
+    sw.add_argument("--cohort", required=True, choices=list(COHORTS))
+    sw.add_argument("--region", required=True)
+    sw.add_argument("--resolutions", type=float, nargs="+", required=True, metavar="R",
+                    help="resolution grid, e.g. --resolutions 1 2 3 5 8 12")
+    sw.add_argument("--method", default="isograph",
+                    help="method tag whose saved graphs to re-cluster (default isograph)")
+    sw.add_argument("--seeds", type=int, default=None,
+                    help="use only seeds 0..N-1 of the saved graphs")
+    sw.add_argument("--min-module-size", type=int, default=20,
+                    help="minimum module size, matching the production VAE config")
     sub.add_parser("aggregate", help="compute ARI/NMI over all partitions and summarize")
 
     fr = sub.add_parser("fit-rmse",
@@ -525,7 +646,13 @@ def main() -> None:
                      min_minor_usage=args.min_minor_usage,
                      reliability_floor=args.reliability_floor,
                      max_module_frac=args.max_module_frac,
-                     leiden_giant_frac=args.leiden_giant_frac)
+                     leiden_giant_frac=args.leiden_giant_frac,
+                     leiden_resolution=args.leiden_resolution,
+                     save_edges=args.save_edges)
+    elif args.cmd == "sweep":
+        sweep(args.cohort, args.region, args.resolutions,
+              method=args.method, seeds=args.seeds,
+              min_module_size=args.min_module_size)
     elif args.cmd == "fit-rmse":
         gc_norm = args.grad_clip_norm if args.grad_clip_norm and args.grad_clip_norm > 0 else None
         fit_rmse(args.cohort, args.region, lr=args.lr, grad_clip_norm=gc_norm)
