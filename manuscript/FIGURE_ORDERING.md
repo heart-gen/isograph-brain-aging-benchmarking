@@ -184,7 +184,9 @@ GO-invisible localisation claims are now wrong** — rewrite before use.
    matched-baseline null as its control. ~~Fig 4E (`figColocConvergence` replacement)
    remains open~~ — **DONE 2026-09-03**: panel E now carries the size-matched-null test
    (null in 10/10 cells); see the Fig 4 row above.
-3. **`CELL_GENOMICS_IMPACT_PROGRESS.md` Item 2 is stale.** It reports 17/39
-   binding-supported RBPs at a median gap of 0.013; the committed
-   `rbp_binding_support.parquet` now holds 38 RBPs, 25 supported, median gap 0.024
-   (the GC-background rescan). S-real-6 and Table S17 use the parquet.
+3. ~~**`CELL_GENOMICS_IMPACT_PROGRESS.md` Item 2 is stale.**~~ **DONE 2026-09-09.** It
+   quoted the deprecated flat-background arm (17/39 supported, median gap 0.013) as the
+   headline; requoted to the canonical GC-matched arm the committed
+   `rbp_binding_support.parquet` holds — 38 RBPs, 31 preferential, 25 supported, median
+   gap 0.024 — with an explicit note naming which arm is which. S-real-6 and Table S17
+   read the parquet and were never affected.
