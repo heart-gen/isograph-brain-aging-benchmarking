@@ -4,13 +4,16 @@
   "tissue": "Brain_Spinal_cord_cervical_c-1",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17203,
+  "n_universe_genes": 17174,
   "universe_sizes": {
-    "sQTL": 12939,
-    "eQTL": 17165
+    "sQTL": 12934,
+    "eQTL": 17137
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17203
+    "all_modules": 17174
   }
 }

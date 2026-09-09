@@ -3,17 +3,11 @@
   "region": "caudate",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 46,
-      "n_go_enriched": 5,
-      "frac_go_enriched": 0.109,
-      "n_pheno_sig_fdr10": 14
-    },
-    "wgcna": {
-      "n_modules": 21,
-      "n_go_enriched": 17,
-      "frac_go_enriched": 0.81,
-      "n_pheno_sig_fdr10": 1
+    "wgcna_multiplex": {
+      "n_modules": 27,
+      "n_go_enriched": 22,
+      "frac_go_enriched": 0.815,
+      "n_pheno_sig_fdr10": 3
     }
   }
 }

@@ -3,17 +3,11 @@
   "region": "cerebellum",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 31,
-      "n_go_enriched": 7,
-      "frac_go_enriched": 0.226,
-      "n_pheno_sig_fdr10": 8
-    },
-    "wgcna": {
-      "n_modules": 16,
-      "n_go_enriched": 13,
-      "frac_go_enriched": 0.812,
-      "n_pheno_sig_fdr10": 8
+    "wgcna_multiplex": {
+      "n_modules": 32,
+      "n_go_enriched": 21,
+      "frac_go_enriched": 0.656,
+      "n_pheno_sig_fdr10": 12
     }
   }
 }

@@ -4,16 +4,19 @@
   "tissue": "Brain_Amygdala",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17803,
+  "n_universe_genes": 17799,
   "universe_sizes": {
-    "sQTL": 13051,
-    "eQTL": 17757
+    "sQTL": 13048,
+    "eQTL": 17753
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17803,
-    "pheno_sig_modules": 7430,
-    "go_invisible_modules": 1005,
-    "go_visible_modules": 6945
+    "all_modules": 17799,
+    "pheno_sig_modules": 10959,
+    "go_invisible_modules": 1050,
+    "go_visible_modules": 10635
   }
 }

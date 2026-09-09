@@ -4,13 +4,16 @@
   "tissue": "Brain_Substantia_nigra",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 16786,
+  "n_universe_genes": 16810,
   "universe_sizes": {
-    "sQTL": 12856,
-    "eQTL": 16763
+    "sQTL": 12890,
+    "eQTL": 16787
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 16786
+    "all_modules": 16810
   }
 }

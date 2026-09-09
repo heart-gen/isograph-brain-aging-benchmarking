@@ -3,17 +3,11 @@
   "region": "hippocampus",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 41,
-      "n_go_enriched": 15,
-      "frac_go_enriched": 0.366,
-      "n_pheno_sig_fdr10": 14
-    },
-    "wgcna": {
-      "n_modules": 5,
-      "n_go_enriched": 4,
-      "frac_go_enriched": 0.8,
-      "n_pheno_sig_fdr10": 1
+    "wgcna_multiplex": {
+      "n_modules": 17,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.765,
+      "n_pheno_sig_fdr10": 6
     }
   }
 }

@@ -10,8 +10,8 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | isograph | switch+abundance | 17 | 39.0 | 70.0 | 0.274 | 0.082 | 0.235 | 180 |
 | wgcna_gene | abundance | 17 | 8.0 | 387.0 | 0.18 | 0.171 | 0.885 | 34 |
-| wgcna_switch_only | switch-only | 16 | 13.5 | 127.0 | 0.336 | 0.196 | 0.381 | 75 |
-| wgcna_multiplex | switch+abundance | 16 | 18.5 | 271.0 | 0.189 | 0.136 | 0.758 | 53 |
+| wgcna_switch_only | switch-only | 16 | 13.0 | 143.0 | 0.384 | 0.198 | 0.403 | 72 |
+| wgcna_multiplex | switch+abundance | 16 | 19.5 | 284.0 | 0.189 | 0.136 | 0.755 | 57 |
 
 ## Caudate (representative single region)
 
@@ -19,8 +19,8 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 | --- | --- | --- | --- | --- | --- |
 | isograph | switch+abundance | 46 | 0.304 | 0.0 | 0.109 |
 | wgcna_gene | abundance | 21 | 0.048 | 0.048 | 0.81 |
-| wgcna_switch_only | switch-only | 11 | 0.273 | 0.091 | 0.273 |
-| wgcna_multiplex | switch+abundance | 28 | 0.036 | 0.036 | 0.786 |
+| wgcna_switch_only | switch-only | 10 | 0.3 | 0.1 | 0.3 |
+| wgcna_multiplex | switch+abundance | 27 | 0.111 | 0.111 | 0.815 |
 
 ## The features-vs-method question
 

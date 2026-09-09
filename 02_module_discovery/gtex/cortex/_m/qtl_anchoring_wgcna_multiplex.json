@@ -4,16 +4,19 @@
   "tissue": "Brain_Cortex",
   "variant": "standard",
   "method": "wgcna_multiplex",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17876,
+  "n_universe_genes": 17889,
   "universe_sizes": {
     "sQTL": 13376,
-    "eQTL": 17847
+    "eQTL": 17851
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17876,
-    "pheno_sig_modules": 9147,
-    "go_invisible_modules": 1730,
-    "go_visible_modules": 8243
+    "all_modules": 17889,
+    "pheno_sig_modules": 9325,
+    "go_invisible_modules": 1687,
+    "go_visible_modules": 8450
   }
 }

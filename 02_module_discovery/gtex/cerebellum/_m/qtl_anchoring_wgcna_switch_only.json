@@ -4,16 +4,19 @@
   "tissue": "Brain_Cerebellum",
   "variant": "standard",
   "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 949,
+  "n_universe_genes": 132,
   "universe_sizes": {
-    "sQTL": 804,
-    "eQTL": 949
+    "sQTL": 112,
+    "eQTL": 132
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 949,
-    "pheno_sig_modules": 663,
-    "go_invisible_modules": 311,
-    "go_visible_modules": 352
+    "all_modules": 132,
+    "pheno_sig_modules": 132,
+    "go_invisible_modules": 95,
+    "go_visible_modules": 37
   }
 }

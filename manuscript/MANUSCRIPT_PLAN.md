@@ -25,7 +25,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | Module recovery favours IsoGraph in 7/15 scenarios (13,410 runs, 16 scenarios) — wins where switching dominates, loses when abundance-dominated or degraded; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
 | Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `01_synthetic_benchmark/03_metrics/figures/` |
-| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 236/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 25 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
+| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 250/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 23 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
 | QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio **1.111 pheno-sig (p=3.6e-4)**, all 1.068 (p=1.3e-5); GO-invisible 1.068 (p=0.077) and GO-visible 1.084 (p=0.050) indistinguishable — **no GO-invisible localisation**; IsoGraph-only vs matched WGCNA baselines | Strong (matched-baseline null) | Matched-baseline null (primary control); IVW+DL meta; 2026-08-29 refresh — never quote earlier numbers | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
 | Colocalization / deep-dive | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
@@ -85,7 +85,7 @@ corroborating it.
 
 #### Finding 5: IsoGraph's real-data modules are reproducible and replicate aging associations
 **Evidence status:** Established.
-**Key quantitative evidence:** 236/266 chance-trusted; driver ρ 0.77–0.82; 25 cross-cohort aging replications vs ~6 for matched abundance baseline.
+**Key quantitative evidence:** 250/266 chance-trusted; driver ρ 0.77–0.82; 23 cross-cohort aging replications vs ~6 for matched abundance baseline.
 **Validation:** split-half stability, size-matched permutation null, cross-cohort replication.
 **Repository sources:** `figTrustFunnel`, `tableS7`, AGENTS.md §4.
 
@@ -261,15 +261,15 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Confidence: High.
 
 ### Results 2: The real-data modules are per-module trustworthy and replicate aging (Fig 2)
-- Evidence: 236/266 chance-trusted; ρ 0.77–0.82; 25 vs 6 aging replications.
-- **Declare the model with the number.** The replication count is `25/130 matched module
-  pairs, complement covariate mode, linear age model` (matching permutation p = 0.014,
-  null 16.47 ± 3.50). `complement` is the pre-specified mode — the IsoGraph fit already
+- Evidence: 250/266 chance-trusted; ρ 0.77–0.82; 23 vs 6 aging replications.
+- **Declare the model with the number.** The replication count is `23/130 matched module
+  pairs, complement covariate mode, linear age model` (matching permutation p = 0.034,
+  null 16.08 ± 3.47). `complement` is the pre-specified mode — the IsoGraph fit already
   residualized discovery covariates, so the `full` arm is double adjustment and its
   collapse to 2/130 is expected arithmetic, not a refutation. State the mode in the
   sentence, not only in Methods.
 - **The linear age model is a justified choice, not a convenience.** The df = 3 spline arm
-  gives 15/130 (p = 0.15) at the same covariate mode, and a reader is entitled to know
+  gives 15/130 (p = 0.146) at the same covariate mode, and a reader is entitled to know
   whether that is the spline correcting a misspecified line or the line being cheaper. It
   is the latter, tested directly: across all 266 modules in all six cohort × region fits,
   **not one** shows detectable curvature in its age trajectory (Wald second-difference

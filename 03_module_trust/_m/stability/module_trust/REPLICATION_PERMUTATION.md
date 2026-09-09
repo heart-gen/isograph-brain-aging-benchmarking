@@ -11,11 +11,11 @@ Covariate modes: `full` adds every covariate; `complement` adds only those the f
 | covariates | statistic | T_obs | n pairs | null | null mean ± sd | p_emp |
 |---|---|---|---|---|---|---|
 | complement | pearson | 25 | 130 | age | 2.18 ± 3.39 | 0.0007999 |
-| complement | pearson | 25 | 130 | matching | 16.47 ± 3.50 | 0.0142 |
+| complement | pearson | 23 | 130 | matching | 16.08 ± 3.47 | 0.034 |
 | complement | partial_linear | 24 | 130 | age | 2.01 ± 3.28 | 0.0013 |
 | complement | partial_linear | 24 | 130 | matching | 15.35 ± 3.41 | 0.0123 |
 | complement | spline_f | 15 | 130 | age | 1.91 ± 3.10 | 0.0103 |
-| complement | spline_f | 15 | 130 | matching | 11.35 ± 3.03 | 0.1521 |
+| complement | spline_f | 15 | 130 | matching | 11.31 ± 3.01 | 0.1463 |
 | none | pearson | 25 | 130 | age | 2.10 ± 3.29 | 0.0007999 |
 | none | pearson | 25 | 130 | matching | 16.47 ± 3.50 | 0.0142 |
 | none | partial_linear | 25 | 130 | age | 2.10 ± 3.29 | 0.0007999 |
@@ -58,52 +58,6 @@ Statistics: `pearson` = Pearson r, no covariates (the published statistic); `par
 
 ## How to write this up
 
-The primary (covariate-adjusted spline) count is **15/130**, p_emp=0.1521 against the matching null. The published covariate-free Pearson count is **25/130**, p_emp=0.0142.
+The primary (covariate-adjusted spline) count is **15/130**, p_emp=0.1463 against the matching null. The published covariate-free Pearson count is **23/130**, p_emp=0.034.
 
 **The count does not survive under the primary model.** Per the pre-registered decision rule the word "replication" must not be used; the honest wording is "matched modules with concordant age effects", reported alongside the covariate-free sensitivity analysis and the note that the two disagree.
-
-## Which component moves when the age model changes
-
-Panel C of the trust funnel stays on the **linear (covariate-free Pearson) arm**. That is a
-deliberate choice and it is not a claim that the linear arm is the better model — it is the
-arm the count and the permutation p above are computed on, and switching the panel to the
-spline would present a number whose null the panel does not show. The asymmetry belongs in
-the text instead, and is recorded here.
-
-From `module_trust replication-model-contrast --method {isograph,wgcna}`
-(`replication_model_contrast__{method}.parquet`; it re-fits nothing, reading only the
-per-pair tables the two `replication --model` runs already wrote):
-
-| method | model | n pairs | sign_match | both_sig | concordant | discovery p<0.05 | replication p<0.05 |
-|---|---|---|---|---|---|---|---|
-| isograph | linear | 130 | 69 | 51 | 25 | 84 | 81 |
-| isograph | spline | 130 | **69** | **8** | 2 | **20** | 67 |
-| wgcna | linear | 53 | 27 | 10 | 3 | 28 | 15 |
-| wgcna | spline | 53 | 32 | 5 | 1 | 11 | 22 |
-
-**The two models do not disagree about the direction of aging.** For IsoGraph `sign_match`
-is identical to the module — 69/130 under both — so every module that agrees in sign under
-one model agrees under the other. The entire drop is `both_sig`, 51 -> 8.
-
-**And that drop is one-sided.** BrainSEQ modules clearing p<0.05 fall 84 -> 20 under
-covariate adjustment while GTEx falls only 81 -> 67; the WGCNA arm shows the same asymmetry
-(28 -> 11 against 15 -> 22, the replication cohort actually gaining). So the covariate
-adjustment is removing discovery-cohort age signal specifically. The most likely reading is
-that a substantial part of the BrainSEQ age association is carried by covariates that
-co-vary with age in that cohort, which is a statement about BrainSEQ, not about the
-matching or about IsoGraph.
-
-**What this does and does not license.** It does not relax the pre-registered wording rule:
-the count still fails to separate from the matching null under the primary model, so
-"replication" is still not used, and the honest phrase remains "matched modules with
-concordant age effects". What it adds is that the failure is a power/adjustment effect on
-the discovery side rather than a directional disagreement — which is a materially different
-caveat and should be stated as such rather than left as an unexplained discrepancy between
-two numbers.
-
-**Do not equate the contrast table's spline count with a row of the grid above.** The
-contrast reads the production `age_spline.parquet` fit, whereas the grid's `spline_f` rows
-vary with covariate mode, running from T_obs = 15 (`complement`) to 3 (`full`) for IsoGraph.
-The counts are therefore not interchangeable. What is invariant across all of them is the
-decomposition's direction: sign agreement is stable and both-cohort significance is what
-collapses.

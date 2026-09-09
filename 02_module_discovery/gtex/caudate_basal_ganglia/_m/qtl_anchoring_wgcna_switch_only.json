@@ -4,15 +4,18 @@
   "tissue": "Brain_Caudate_basal_ganglia",
   "variant": "standard",
   "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 7247,
+  "n_universe_genes": 7246,
   "universe_sizes": {
-    "sQTL": 5985,
-    "eQTL": 7229
+    "sQTL": 5981,
+    "eQTL": 7228
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 7247,
-    "pheno_sig_modules": 234,
-    "go_visible_modules": 234
+    "all_modules": 7246,
+    "pheno_sig_modules": 210,
+    "go_visible_modules": 210
   }
 }

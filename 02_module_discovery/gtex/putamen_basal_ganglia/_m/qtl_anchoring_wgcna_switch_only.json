@@ -4,15 +4,18 @@
   "tissue": "Brain_Putamen_basal_ganglia",
   "variant": "standard",
   "method": "wgcna_switch_only",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 7108,
+  "n_universe_genes": 7094,
   "universe_sizes": {
-    "sQTL": 5848,
-    "eQTL": 7086
+    "sQTL": 5824,
+    "eQTL": 7071
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 7108,
-    "pheno_sig_modules": 93,
-    "go_visible_modules": 93
+    "all_modules": 7094,
+    "pheno_sig_modules": 98,
+    "go_visible_modules": 98
   }
 }

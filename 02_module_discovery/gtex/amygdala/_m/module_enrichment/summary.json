@@ -3,17 +3,11 @@
   "region": "amygdala",
   "variant": "standard",
   "methods": {
-    "isograph": {
-      "n_modules": 27,
-      "n_go_enriched": 7,
-      "frac_go_enriched": 0.259,
-      "n_pheno_sig_fdr10": 14
-    },
-    "wgcna": {
-      "n_modules": 7,
-      "n_go_enriched": 6,
-      "frac_go_enriched": 0.857,
-      "n_pheno_sig_fdr10": 0
+    "wgcna_multiplex": {
+      "n_modules": 18,
+      "n_go_enriched": 14,
+      "frac_go_enriched": 0.778,
+      "n_pheno_sig_fdr10": 8
     }
   }
 }
