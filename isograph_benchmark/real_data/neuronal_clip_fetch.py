@@ -17,7 +17,7 @@ from typing import Any
 import pandas as pd
 
 from isograph_benchmark.config import load_yaml
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir, rel
 from isograph_benchmark.real_data.qtl_anchoring import _bare
 from isograph_benchmark.real_data.rbp_regulon import _REGIONS
 
@@ -123,8 +123,7 @@ def freeze_candidates(cfg: dict[str, Any]) -> Path:
         tree = region_tree.get(region)
         if tree is None:
             raise ValueError(f"No canonical analysis tree for region {region!r}")
-        pair_path = rel(
-            "real_data",
+        pair_path = cohort_dir(
             tree,
             region,
             "_m",

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 from isograph_benchmark.config import load_yaml
-from isograph_benchmark.paths import ensure_dir, rel
+from isograph_benchmark.paths import cohort_dir, ensure_dir
 from isograph_benchmark.real_data.neuronal_clip_fetch import sha256
 from isograph_benchmark.real_data.neuronal_clip_validation import (
     DEFAULT_CONFIG,
@@ -197,8 +197,7 @@ def _global_structural_audit(counts_path: Path) -> dict[str, Any]:
     nova_switches = 0
     opportunity_switches = 0
     for tree, region in _REGIONS:
-        path = rel(
-            "real_data",
+        path = cohort_dir(
             tree,
             region,
             "_m",

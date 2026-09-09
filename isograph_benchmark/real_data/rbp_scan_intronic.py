@@ -30,6 +30,7 @@ import pyfaidx
 import MOODS.scan
 import MOODS.tools
 
+from isograph_benchmark.paths import stage_out
 from isograph_benchmark.real_data.rbp_scan import (
     _PSEUDOCOUNT,
     _P_THRESH,
@@ -46,7 +47,7 @@ _GENOME_FA = Path(
 _GTF = Path(
     "/ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/"
     "gtf/gencode.v47.annotation.gtf")
-_RBP_DIR = _REPO / "real_data" / "_m" / "rbp"
+_RBP_DIR = stage_out("regulation", "rbp")
 _OUT = _RBP_DIR / "rbp_counts_intronic.parquet"
 _FAM_OUT = _RBP_DIR / "rbp_family_counts_intronic.parquet"
 _FAMILIES = _RBP_DIR / "rbp_motif_families.parquet"

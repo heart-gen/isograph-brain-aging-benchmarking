@@ -49,7 +49,13 @@ from scipy import stats
 
 from isograph.features.channels import gene_feature_channels
 from isograph.io.artifacts import load_dataset_bundle
-from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
+from isograph_benchmark.paths import (
+    OUTPUT_DIRS,
+    ensure_dir,
+    region_store,
+    rel,
+    stage_out,
+)
 from isograph_benchmark.real_data.run_models import (
     _filter_expressed_transcripts,
     linear_age_association,
@@ -61,13 +67,13 @@ PUBLISHED = {"pseudocount": 0.5, "min_count": 10.0, "min_fraction": 0.70, "min_u
 COHORTS = {
     "brainseq": {
         "bundle": ("inputs", "bundles", "brainseq_v1"),
-        "artifacts": ("real_data", "brainseq"),
+        "artifacts": (*OUTPUT_DIRS["modules"], "brainseq"),
         "age_col": "Age",
         "quantifier": "Salmon",
     },
     "gtex": {
         "bundle": ("inputs", "bundles", "gtex_v11_brain"),
-        "artifacts": ("real_data", "gtex"),
+        "artifacts": (*OUTPUT_DIRS["modules"], "gtex"),
         "age_col": "AGE",
         "quantifier": "RSEM",
     },
