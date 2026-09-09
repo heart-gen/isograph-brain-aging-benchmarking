@@ -1,0 +1,17 @@
+{
+  "method": "wgcna",
+  "n_pairs_reproducible": 53,
+  "min_jaccard": 0.0,
+  "n_perm": 10000,
+  "sig": 0.05,
+  "stouffer_K": 28,
+  "stouffer_Z": -1.1637810928438224,
+  "stouffer_p_normal": 0.8777436318782084,
+  "stouffer_p_perm": 0.07889211078892111,
+  "sign_concordant": 27,
+  "sign_frac": 0.5094339622641509,
+  "sign_p_perm": 0.08639136086391361,
+  "sign_p_binom_vs_0.5": 0.5,
+  "spearman_rho": 0.1068429784007116,
+  "spearman_p_perm": 0.22947705229477053
+}

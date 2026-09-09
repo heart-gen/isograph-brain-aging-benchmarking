@@ -19,17 +19,33 @@ pipeline, which is what makes the second arm a real replication.
 | 09 | `module_trust_replication` | Q3 cross-cohort aging replication of trusted modules |
 | 10–11 | `replication`, `replication_go` | Cross-cohort module matching + GO consistency |
 | 12–13 | `replication_permutation`, `replication_functional` | Permutation null + functional preservation |
+| 14 | `age_model_curvature` | Curvature test licensing the linear age model |
+| 15 | `replication_pooled` | Q3 pooled over all region pairs (Stouffer meta-Z + permutation arms) |
 
 `_m/` holds `stability/` and `replication/`, plus the resolution-2.0 and giant-cap
 variants as named siblings (`stability_res2`, `stability_gcap_ab`, `replication_res2`).
 
-**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,replication_functional}.py`.
+**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,replication_functional,age_model_curvature}.py`.
 
 ## Caveat
 
 Cross-cohort **module** Jaccard is granularity-confounded — a method with few giant
 modules wins it mechanically — so it is retired as a quality gate in favour of
 gene-level comparison. See `docs/MODULE_TRUST_PLAN.md`.
+
+It is retired *as a gate*, not as a reported quantity, and step 15 is the cautionary
+example. Its `--min-jaccard` defaulted to 0.25, which admits WGCNA's giant modules
+(max 0.65 here) and excludes IsoGraph's fine ones (max 0.12) — so both pooled tables sat
+at **0 rows** for months, read by anything that opened them as "nothing replicates". The
+default is now 0.0 and a zero result writes no parquet at all, only a stats json naming
+the gate. If you add a Jaccard threshold anywhere, check first whether it is measuring
+replication or measuring module size.
+
+**The pooled arm is null for both methods** (IsoGraph Stouffer Z = −0.68, perm p = 0.113;
+WGCNA Z = −1.16, p = 0.079). It does not corroborate the per-region 25-vs-6 count, which
+is a different estimand — see the Q3-pooled section of
+`_m/stability/module_trust/MODULE_TRUST_SUMMARY.md` for why the quantifier gap separates
+them.
 
 ## Display items
 
