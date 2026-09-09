@@ -82,9 +82,38 @@ replicate (sign-concordant **and** jointly significant) at **3/45 caudate, 9/35 
 matched WGCNA baseline replicates at **1/21, 5/25, 0/7 = 6 modules**. Surviving the
 Salmon↔RSEM quantifier gap is genuine biological replication, and IsoGraph carries ~4× as
 many cross-cohort-replicating aging modules as the abundance baseline
-(`module_aging_replication__*__{isograph,wgcna}.parquet`). The pooled-Stouffer table is empty
-by design: with three region pairs the pooled permutation cannot reach p < 0.05 (n = 3 floor),
-so replication is reported per region, not pooled.
+(`module_aging_replication__*__{isograph,wgcna}.parquet`).
+
+**Q3 pooled — the pooled arm is null, and that is reported, not hidden (2026-09-09).** The
+pooled table was previously empty and this document called it "empty by design (n = 3
+floor)". Both halves of that were wrong: the arm pools 130 *modules*, not 3 region pairs, so
+the floor argument does not apply, and it was empty because the gate demanded cross-cohort
+gene Jaccard ≥ 0.25 — the granularity-confounded metric this project retired, on which
+IsoGraph's fine partition tops out at 0.12 while WGCNA's giant modules reach 0.65. The gate
+was selecting on module size. Re-gated and re-run over exactly the 130 pairs behind the
+25-module count (it reproduces all 25):
+
+| Arm | IsoGraph | WGCNA |
+|---|---|---|
+| Stouffer directional meta-Z **[headline]** | Z = −0.68, perm p = 0.113 (K = 84) | Z = −1.16, perm p = 0.079 (K = 28) |
+| Sign concordance | 69/130 = 53%, perm p = 0.034 | 27/53 = 51%, perm p = 0.086 |
+| Spearman magnitude | ρ = 0.125, perm p = 0.079 | ρ = 0.107, perm p = 0.229 |
+
+**Read this as null for both methods.** The headline arm does not clear, and its Z is
+slightly *negative* in both. The one nominal p < 0.05 is a 53% sign concordance — three
+points over chance — which is not a result to lead with. Note the analytic and permutation
+p-values for Stouffer disagree sharply (0.75 vs 0.113) because a global directional bias in
+aging shifts the permutation null; the permutation value is the one to quote, exactly as the
+docstring specifies.
+
+Why the continuous arms fail where the count-based per-region test clears: they are different
+estimands, and the quantifier gap separates them. Stage 06 measures per-gene switch-age
+effects as essentially *uncorrelated* between Salmon and RSEM (Pearson 0.007 caudate, −0.002
+hippocampus), so a meta-analysis that combines effect directions and magnitudes across
+cohorts has almost nothing to combine, while a count of sign-concordant *and* jointly
+significant matches tested against a matching permutation null can still clear. The 25 vs 6
+per-region comparison is unaffected — the pooled arm reads the same rows — but pooling must
+not be quoted as corroborating it.
 
 **Q4 — complementarity.** For age-significant trusted modules the structural annotation of
 the top driver switches is near-universal — CDS-change, biotype-switch, and

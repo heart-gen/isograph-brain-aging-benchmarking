@@ -21,6 +21,7 @@ No new model fits — pure partition arithmetic over artifacts already on disk.
 from __future__ import annotations
 
 import argparse
+import json
 from math import comb
 
 import numpy as np
@@ -380,16 +381,35 @@ def replication_pooled(method: str, k: int, sig: float, min_jaccard: float,
               f">=2-3 pairs to clear the binomial sign floor. Run Q1 `stability` for the "
               f"missing pairs ({skipped}) for the powered result.", flush=True)
     allm = pd.concat(frames, ignore_index=True)
+    # `>= min_jaccard` with the default 0.0 keeps every module that HAS a best match with a
+    # measurable Age effect: `_crosscohort_rows` leaves `gtex_match` None when no GTEx module
+    # shares a gene, and the notna filters below drop those. Raising min_jaccard turns the
+    # cross-cohort module Jaccard back into a gate -- see the default's rationale at the
+    # argparse definition before doing so.
     rep = allm[(allm["gene_jaccard"] >= min_jaccard)
                & allm["age_effect_bs"].notna()
                & allm["age_effect_gtex"].notna()].reset_index(drop=True)
     path = _out_dir() / f"module_aging_replication_pooled__{method}.parquet"
-    rep.to_parquet(path, index=False)
+    spath = _out_dir() / f"module_aging_replication_pooled__{method}__stats.json"
 
     n = len(rep)
     if n == 0:
-        raise SystemExit(f"no reproducible matched pairs (gene Jaccard >= {min_jaccard}) "
-                         f"pooled across {list(REGION_PAIRS)}")
+        # Write NOTHING readable as a result. A 0-row parquet here is worse than no file:
+        # every consumer reads it as "no module replicates" when it in fact means the gate
+        # admitted nothing. Record the zero in the stats json, where the gate is visible,
+        # and remove any stale parquet so a later reader cannot pick up a previous run's.
+        path.unlink(missing_ok=True)
+        spath.write_text(json.dumps({
+            "method": method, "n_pairs_reproducible": 0, "min_jaccard": min_jaccard,
+            "n_modules_before_gate": int(len(allm)),
+            "max_gene_jaccard": float(allm["gene_jaccard"].max()) if len(allm) else None,
+            "region_pairs": list(used),
+            "note": "gate admitted no module; no result written",
+        }, indent=2))
+        raise SystemExit(f"no matched pairs cleared gene Jaccard >= {min_jaccard} "
+                         f"(max observed {allm['gene_jaccard'].max():.3f} over {len(allm)} "
+                         f"modules) pooled across {list(REGION_PAIRS)}; wrote {spath}")
+    rep.to_parquet(path, index=False)
     eb = rep["age_effect_bs"].to_numpy()
     eg = rep["age_effect_gtex"].to_numpy()
     pg = rep["age_p_gtex"].to_numpy()
@@ -433,8 +453,6 @@ def replication_pooled(method: str, k: int, sig: float, min_jaccard: float,
         "sign_p_perm": p_sign_perm, "sign_p_binom_vs_0.5": p_binom,
         "spearman_rho": rho, "spearman_p_perm": p_rho,
     }
-    spath = _out_dir() / f"module_aging_replication_pooled__{method}__stats.json"
-    import json
     spath.write_text(json.dumps(stats, indent=2))
 
     print(f"\n=== Q3 POOLED cross-cohort aging replication ({method}) ===", flush=True)
@@ -904,8 +922,15 @@ def main() -> None:
     pl.add_argument("--method", default="isograph", choices=list(METHOD_DIRS))
     pl.add_argument("--k", type=int, default=5, help="top-k driver transcripts for driver Jaccard")
     pl.add_argument("--sig", type=float, default=0.05, help="Age p cutoff for discovery-significant")
-    pl.add_argument("--min-jaccard", type=float, default=0.25,
-                    help="gene-set Jaccard for a reproducible cross-cohort match")
+    pl.add_argument("--min-jaccard", type=float, default=0.0,
+                    help="minimum gene-set Jaccard for a cross-cohort match. DEFAULT 0.0 = "
+                         "any module with a best match and a measurable Age effect. The old "
+                         "0.25 default emptied this arm: cross-cohort module Jaccard is "
+                         "granularity-confounded (retired as a quality gate for that reason), "
+                         "and IsoGraph's fine partition tops out at 0.12 while WGCNA's few "
+                         "giant modules reach 0.65 on the same data -- so the threshold "
+                         "selected on module size, not on replication. Pass 0.25 to reproduce "
+                         "the old arm as a sensitivity.")
     pl.add_argument("--n-perm", type=int, default=10000)
     pl.add_argument("--seed", type=int, default=13)
     cm = sub.add_parser("complementarity", help="Q4: DTU-without-DGE / WGCNA-complementarity")
