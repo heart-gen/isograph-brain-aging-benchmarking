@@ -40,9 +40,104 @@ Counter-line 3 is the least discussed internally and the most dangerous external
 S-LDSC is the size-robust test the field trusts and it is currently summarised in-repo as
 supporting the switch layer without stating that the splicing arm does not survive correction.
 
-**Neither experiment below rescues counter-line 3.** It is a power and annotation-resolution
-problem in GTEx bulk brain sQTL, and the honest handling is disclosure plus the framing fix in
-§3.3 — not a new experiment.
+**Counter-line 3 is a GTEx power problem, not an unfixable one.** The first draft called it
+unrescuable; that was too strong. It cannot be fixed *within GTEx*, but BrainSEQ carries 452–500
+genotyped donors per region against GTEx brain's ~181–300, in the same cohort the switches were
+discovered in — see §0.4.2. Disclosure plus the §3.4 framing fix is the fallback if that fails,
+not the first move.
+
+---
+
+## 0.4 Experiment 0 — exhaust the computational genetics first *(added 2026-09-10)*
+
+**This should run before either wet-lab arm, and most of it is already computed.** The plan as
+first drafted went straight to the bench; that was premature.
+
+### 0.4.1 The anchored gene list is built on the wrong statistic
+
+The 12-gene list in §1.1 comes from **CLPP** (eCAVIAR-style), where the best non-CTSH value is
+0.093. But `coloc.abf` over the GTEx v11 all-pairs data has *already been run* for the switch
+arm — 1,647 gene × trait cells over 1,156 genes — and it is far more informative:
+
+| | CLPP (current list) | coloc.abf PP4 (already in repo) |
+| --- | --- | --- |
+| SNCA (LBD) | 0.038 | **0.975 sQTL / 0.113 eQTL** |
+| PGS1 (ALS) | 0.093 | **0.976 / 0.165** |
+| CDIP1 (SCZ) | 0.028 | **0.935 / 0.761** |
+| TPCN1 (AD) | 0.011 | **0.804 / 0.418** |
+| CTSH (AD) | 0.386 | 0.989 / 0.993 — colocalizes for *both* modalities |
+
+**Forty gene × trait cells reach PP4_sQTL ≥ 0.8, and 13 of them are splicing-specific**
+(PP4_sQTL ≥ 0.8 with PP4_eQTL < 0.5) — the exact pattern the paper's thesis predicts, at the
+per-locus resolution the paper currently says it lacks:
+
+| Gene | Trait | PP4 sQTL | PP4 eQTL | Gap |
+| --- | --- | --- | --- | --- |
+| SNCA | LBD | 0.975 | 0.113 | 0.862 |
+| KLC1 | SCZ | 0.855 | 0.033 | 0.822 |
+| PLCB2 | SCZ | 0.975 | 0.157 | 0.818 |
+| PGS1 | ALS | 0.976 | 0.165 | 0.811 |
+| NDUFS3 | AD | 0.864 | 0.099 | 0.765 |
+| AZI2 | PD | 0.803 | 0.145 | 0.658 |
+| **UNC13A** | ALS | 0.970 | 0.377 | 0.594 |
+| TXNDC15 | ALS | 0.969 | 0.379 | 0.590 |
+| SPAG9 | AD | 0.839 | 0.298 | 0.540 |
+| WIPI2 | ALS | 0.893 | 0.478 | 0.414 |
+| TPCN1 | AD | 0.804 | 0.418 | 0.386 |
+| ASB3 | SCZ | 0.859 | 0.478 | 0.382 |
+| **PICALM** | AD | 0.818 | 0.491 | 0.327 |
+
+**UNC13A and PICALM are the result to lead with.** UNC13A's ALS risk is *known* to act through
+splicing — the TDP-43-dependent cryptic exon — and PICALM is an established AD gene with a
+described splicing mechanism. An unsupervised switch-module method independently recovering
+both, splicing-specifically, is a known-biology positive control the paper is not currently
+using. Report them as recovery of established mechanism, not as discovery.
+
+**Caveat to state plainly:** conditioning on PP4_sQTL ≥ 0.8 and then observing PP4_eQTL < 0.5
+is a selection, so 13/40 is not an unbiased splicing-specificity estimate — §0.2 counter-line 1
+remains the unbiased test and remains null. These 13 are *locus nominations*, which is a
+different and legitimate job.
+
+### 0.4.2 BrainSEQ junction QTLs — the highest-value item on this page
+
+Counter-line 3 was described in the first draft as unrescuable because it is a GTEx bulk sQTL
+power problem. That is true of GTEx and **false of the project as a whole**: BrainSEQ genotypes
+are already in the repository (`inputs/raw/brainseq/genotypes/TOPMed_LIBD.{pgen,pvar,psam}`),
+alongside the PSI/junction tables the SNCA test already used.
+
+| | GTEx brain | BrainSEQ |
+| --- | --- | --- |
+| n per region | ~181–300 | **452–500** (caudate 487, DLPFC 500, hippocampus 452) |
+| Cohort | different from discovery | **same cohort the switches were discovered in** |
+| Regions | broad, shallow | caudate / DLPFC / hippocampus, matched to the aging arm |
+
+Mapping junction QTLs in BrainSEQ gives ~1.7–2× the donors, in the same tissue, on the same
+junctions, in the cohort that generated the hypothesis. It is the single most direct attack on
+both counter-line 1 (per-gene power) and counter-line 3 (S-LDSC splicing power), it needs no
+new samples, and it is compute-only.
+
+### 0.4.3 SMR + HEIDI
+
+Worth adding, as a complement rather than a replacement:
+
+- gives a **directional effect estimate**, which coloc does not;
+- **HEIDI** discriminates a shared causal variant from linkage — the objection coloc handles
+  only through PP3/PP4 balance;
+- pairs naturally with the **SuSiE fine-mapping GTEx v11 already ships**
+  (`*.v11.sQTLs.SuSiE_summary.parquet`), so the instrument selection is not hand-rolled.
+
+Assumptions to respect: SMR assumes a single causal variant per probe, and HEIDI is
+underpowered at small n — so run it *with* coloc, and disagreements are informative rather than
+embarrassing.
+
+### 0.4.4 Revised order
+
+1. Re-anchor the locus list on `coloc.abf` PP4 rather than CLPP — **already computed**, a
+   re-analysis, not a run.
+2. Map BrainSEQ junction QTLs; repeat the anchoring and the per-gene modality contrast there.
+3. SMR + HEIDI on both QTL sources.
+4. **Only then** decide how much wet-lab is still needed. Steps 1–3 may reduce Experiment A to
+   a single confirmatory reporter assay on SNCA, or make it unnecessary for the resource claim.
 
 ---
 
@@ -87,10 +182,13 @@ intersection and say why.**
   Best joint genetic and expression evidence; PPP6R2 is additionally cross-trait.
 - **Secondary: DLG1** (CLPP 0.026, IF 0.400, SCZ) — a synaptic scaffold, so a functional readout
   has interpretable neuronal meaning.
-- **Narrative only: SNCA.** Already confirmed at the junction level in short read (minor-form
-  usage **0.189** DLPFC n = 222, **0.234** caudate n = 238, against a pre-registered 0.05
-  threshold). Do **not** build the functional assay on it — at 0.3% long-read usage the
-  effect size available to any biochemical readout is marginal.
+- **Promoted to primary: SNCA.** *(Corrected 2026-09-10 — the earlier draft demoted SNCA on
+  the ONT 0.29% figure, which is the number this project had already concluded was an assay
+  limitation. Quoting it as a reason not to assay the gene was an error.)* The short-read
+  junction test puts minor-form usage at **0.188 in DLPFC** and **0.234 in caudate**, with
+  **99.5% of 222 donors** above the 5% threshold — a well-measured, well-used switch. Paired
+  with `coloc.abf` PP4_sQTL **0.975** vs PP4_eQTL **0.113** for LBD (§0.4), SNCA has the best
+  joint genetic and expression evidence of any locus here.
 
 ### 1.3 Assay, chosen from the consequence data
 
@@ -108,7 +206,19 @@ Because UTR remodeling is the dominant enriched consequence (1.279, 9/9 regions)
    allele shifts isoform usage in the direction the coloc predicts. This is the step that ties
    the switch to the *genetics* rather than to aging alone.
 
-### 1.4 Pre-registered decision rule
+### 1.4 What the junction test did and did not establish
+
+The SNCA/CTSH junction analysis used `min(median PSI, 1 − median PSI)` — deliberately
+convention-free, because PSI orientation is undocumented for the LIBD tables. It asks whether
+**both forms are actually used**. That is an existence-and-usage result, and it is conclusive:
+SNCA's anchored switch is real, well-measured and abundant; CTSH's is not.
+
+It is **not** a genotype-association test and **not** a functional test. So for SNCA the open
+question is no longer "is the switch real" — it is "does the risk allele drive it, and does the
+resulting UTR change do anything". Step 3 below (allelic direction) and the reporter assay are
+what remain, and they are a smaller ask than the earlier draft implied.
+
+### 1.5 Pre-registered decision rule
 
 Write this before running, in the manner already used for SNCA/CTSH:
 
@@ -215,17 +325,27 @@ plausible SDs, which brackets the bulk effects.
 
 ### 3.1 If you run one thing
 
-**Experiment A, step 1 alone** — isoform-resolved quantification of PGS1, PPP6R2 and DLG1 in an
-independent brain panel. It is the cheapest item on this page, it is the one a reviewer will
-demand first, and it either produces a main-figure mechanism panel or tells you to stop early.
+**Experiment 0 (§0.4) — the computational genetics, not the bench.** Re-anchoring on the
+`coloc.abf` posteriors already sitting in the repo costs a re-analysis and replaces a CLPP list
+topping out at 0.093 with 13 splicing-specific loci at PP4 ≥ 0.8, including UNC13A and PICALM.
+Mapping BrainSEQ junction QTLs costs compute and attacks both of the counter-lines a reviewer
+will press hardest. Neither needs a sample.
 
 ### 3.2 If you run two
 
-Add **Experiment B option 2** (targeted junction capture on snRNA-seq nuclei) for the same gene
-set. Together these answer "is the switch real and does it live in a cell type" for the named
-loci, without committing to a full long-read single-nucleus atlas.
+Add **Experiment A step 3** — allelic direction for SNCA and the strongest new splicing-specific
+loci in heterozygous BrainSEQ donors. With genotypes and PSI already in hand this is close to
+free, and it is the step that ties a switch to its *risk allele* rather than to aging. The
+reporter assay and the snRNA-seq arm come after, sized by what remains open.
 
-### 3.3 Framing fixes that cost nothing and should happen regardless
+### 3.3 Correction to the first draft
+
+This plan originally led with the bench and demoted SNCA on the ONT 0.29% usage figure. Both
+were wrong. The 0.29% is the assay limitation this project had already diagnosed; short read
+puts the same switch at 18.8% in 99.5% of donors. And the computational genetics — coloc.abf,
+BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work. They should be.
+
+### 3.4 Framing fixes that cost nothing and should happen regardless
 
 1. `MANUSCRIPT_PLAN.md` §12 still lists **"Splicing-QTL specifically anchor the GO-invisible
    switch layer"** as *Established* and as the Fig 3 headline. It is null (1.068, p = 0.077).
@@ -251,3 +371,7 @@ loci, without committing to a full long-read single-nucleus atlas.
 | Per-gene coloc Fisher p = 0.88 | `05_genetic_anchoring/_m/coloc_modality_contrast/` |
 | S-LDSC tau p-values | `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` |
 | Power tables | Computed 2026-09-09; two-sample t and Fisher-z, α = 0.05 two-sided, power = 0.80 |
+| coloc.abf PP4 (all 40 strong hits, 13 splicing-specific) | `05_genetic_anchoring/_m/coloc_modality_contrast/genes.parquet`, switch arm — 1,647 cells / 1,156 genes over GTEx v11 all-pairs |
+| SNCA minor-form usage 0.188, 99.5% of 222 donors | `06_switch_mechanism/_m/junction_coloc_confirm/junction_confirm.parquet` |
+| BrainSEQ genotypes | `inputs/raw/brainseq/genotypes/TOPMed_LIBD.{pgen,pvar,psam}` (TOPMed-imputed, PLINK2) |
+| GTEx v11 sQTL SuSiE fine-mapping | `/ocean/projects/bio250020p/shared/resources/public-data/gtex_v11/GTEx_Analysis_v11_sQTL/*.SuSiE_summary.parquet` |
