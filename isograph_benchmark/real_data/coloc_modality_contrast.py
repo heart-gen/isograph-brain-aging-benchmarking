@@ -188,7 +188,7 @@ def out_dir(arm: str = "switch") -> Path:
     `switch` keeps the top-level directory it already wrote to, so the completed run is
     not moved or invalidated; every other arm gets `arms/<arm>/`.
     """
-    base = stage_out("anchoring", "coloc_modality_contrast")
+    base = stage_out("anchoring.coloc_modality")
     return ensure_dir(base if arm == "switch" else base / "arms" / arm)
 
 
@@ -579,15 +579,48 @@ def pair_cells(abf: pd.DataFrame, p12: float = P12_PRIMARY,
     return wide
 
 
-def collapse_genes(wide: pd.DataFrame) -> pd.DataFrame:
-    """Best tissue per (analysis, locus, gene), symmetrically for both modalities."""
+def collapse_genes(wide: pd.DataFrame, call: float = PP4_CALL) -> pd.DataFrame:
+    """Best tissue per (analysis, locus, gene), symmetrically for both modalities.
+
+    The maximum is taken over the SAME 13 tissues on both arms, so it does not bias the
+    paired contrast. It does, however, make the per-gene headline number a maximum over
+    13 correlated tests, which reads as a single posterior unless the spread is shown
+    beside it. So the collapse also records how many tissues actually clear the call and
+    where the maximum came from: a gene at PP4 0.97 in 8 of 13 tissues and a gene at
+    PP4 0.97 in 1 of 13 are different claims, and only the first survives being asked
+    which tissue it is in. `tissue_pp4_sQTL` keeps the full per-tissue vector so a
+    reviewer can see the pattern without re-deriving it from `cells.parquet`.
+    """
     keys = _cell_keys(wide)
-    agg = wide.groupby(keys, dropna=False).agg(
+    d = wide.sort_values("PP4_sQTL", ascending=False)
+
+    def _vec(g: pd.DataFrame) -> str:
+        o = g.sort_values("PP4_sQTL", ascending=False)
+        return ";".join(f"{t}={v:.3f}" for t, v in zip(o["tissue"], o["PP4_sQTL"]))
+
+    agg = d.groupby(keys, dropna=False).agg(
         n_tissue=("tissue", "nunique"),
         PP4_sQTL=("PP4_sQTL", "max"), PP4_eQTL=("PP4_eQTL", "max"),
         cond_sQTL=("cond_sQTL", "max"), cond_eQTL=("cond_eQTL", "max"),
         nsnps=("nsnps_sQTL", "median"),
+        max_tissue_sQTL=("tissue", "first"),
+        median_PP4_sQTL=("PP4_sQTL", "median"),
+        median_PP4_eQTL=("PP4_eQTL", "median"),
     ).reset_index()
+
+    hits = (d.assign(_s=d["PP4_sQTL"] >= call, _e=d["PP4_eQTL"] >= call)
+             .groupby(keys, dropna=False)
+             .agg(n_tissue_sQTL_coloc=("_s", "sum"), n_tissue_eQTL_coloc=("_e", "sum"))
+             .reset_index())
+    agg = agg.merge(hits, on=keys, how="left")
+
+    vec = (d.groupby(keys, dropna=False)[["tissue", "PP4_sQTL"]]
+             .apply(_vec, include_groups=False).rename("tissue_pp4_sQTL").reset_index())
+    agg = agg.merge(vec, on=keys, how="left")
+    # Fraction of testable tissues in which the sQTL call holds -- the consistency
+    # statistic that should travel with the maximum wherever it is quoted.
+    agg["frac_tissue_sQTL_coloc"] = np.where(
+        agg["n_tissue"] > 0, agg["n_tissue_sQTL_coloc"] / agg["n_tissue"], np.nan)
     return agg
 
 
@@ -689,7 +722,7 @@ def run_meta(src: Path | None = None, arm: str = "switch") -> Path:
     rows = []
     for sens_arm, kw in ARMS:
         w = pair_cells(abf, p12=kw["p12"], min_shared=kw.get("min_shared", MIN_SHARED_SNPS))
-        g = collapse_genes(w)
+        g = collapse_genes(w, call=kw["call"])
         for (analysis, trait), sub in g.groupby(["analysis", "trait"]):
             rows.append({"arm": sens_arm, "analysis": analysis, "trait": trait,
                          "p12": kw["p12"], "pp4_call": kw["call"],

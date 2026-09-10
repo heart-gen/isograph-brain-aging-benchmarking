@@ -114,6 +114,32 @@ def _load_brainseq_qc_metrics(region: str) -> pd.DataFrame:
     return metrics[["sample_rnum", "mapping_rate", "mito_rate", "r_rna_rate"]]
 
 
+def _load_transcript_annotation() -> pd.DataFrame:
+    """GENCODE v47 transcript -> gene / name / type map.
+
+    The file lives under `inputs/raw/`, which is gitignored (it is 32 MB and derived), so
+    a clean checkout will not have it. It is regenerated deterministically from the
+    GENCODE v47 GTF rather than tracked. Without this guard the absence surfaces as a bare
+    FileNotFoundError from deep inside bundle construction, which is how it went unnoticed
+    that the BrainSEQ bundles were not rebuildable at all.
+    """
+    f = rel("inputs", "raw", "brainseq", "annotations", "transcript-annotation.tsv")
+    if not f.exists():
+        raise SystemExit(
+            f"missing transcript annotation: {f}\n"
+            "It is derived, not tracked. Regenerate it (and verify it reproduces the "
+            "committed bundles) with:\n"
+            "    python -m isograph_benchmark.inputs.build_transcript_annotation --verify"
+        )
+    d = pd.read_csv(f, sep="\t")
+    need = {"transcript_id", "gene_id", "transcript_name", "transcript_type"}
+    missing = need - set(d.columns)
+    if missing:
+        raise SystemExit(f"{f} is missing columns {sorted(missing)}; regenerate it with "
+                         "isograph_benchmark.inputs.build_transcript_annotation")
+    return d
+
+
 def build_brainseq_bundle(
     region: str,
     allowed_diagnoses: list[str] | None = None,
@@ -162,9 +188,7 @@ def build_brainseq_bundle(
     filtered_ids = [r for r in all_sample_ids if r in set(samples["RNum"])]
     samples = samples.set_index("RNum").loc[filtered_ids].reset_index().rename(columns={"RNum": "sample_id"})
 
-    tx_annot = pd.read_csv(
-        rel("inputs", "raw", "brainseq", "annotations", "transcript-annotation.tsv"), sep="\t"
-    )
+    tx_annot = _load_transcript_annotation()
     tx_feature, tx_matrix = _matrix_from_wide_subset(tx, ["Name", "Length", "EffectiveLength"], filtered_ids)
     tx_feature = tx_feature.rename(columns={"Name": "transcript_id"}).merge(
         tx_annot[["transcript_id", "gene_id", "transcript_name", "transcript_type"]],

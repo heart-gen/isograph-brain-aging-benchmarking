@@ -1,0 +1,161 @@
+# Curated literature splice events, for the locus event audit (Analysis 2).
+#
+# WHAT THIS FILE IS FOR
+# ---------------------
+# The audit asks whether a colocalizing GTEx sQTL intron corresponds to the splice event
+# the literature actually implicates at that locus. Without that check, "UNC13A
+# colocalizes with an sQTL" and "we recovered the TDP-43 cryptic-exon mechanism" are
+# different claims that look identical in a results table.
+#
+# STATUS IS LOAD-BEARING, NOT DECORATIVE
+# --------------------------------------
+#   reviewed  -- coordinates independently verified in THIS repo against GENCODE v47 and
+#                the local GRCh38 genotype panel. Only a `reviewed` record can promote a
+#                locus to `known_mechanism_recovered`.
+#   proposed  -- the literature supports a splice mechanism at the locus, but the precise
+#                event has not been pinned to coordinates here. A `proposed` record is
+#                REPORTED and NEVER AFFECTS THE TIER. It exists so the open question is
+#                visible in the output rather than remembered.
+#
+# `status` and `evidence_class` are SEPARATE AXES and must not be conflated.
+# `status` is about COORDINATE PROVENANCE -- were the bounds verified here.
+# `evidence_class` is about HOW STRONG THE UNDERLYING CLAIM IS:
+#
+#   functional_validation -- the event was demonstrated experimentally (e.g. minigene,
+#                            knockdown). Strongest. May promote to known_mechanism_recovered.
+#   coloc_association     -- a colocalization established a SHARED CAUSAL VARIANT between
+#                            the disease and splicing signals. May promote.
+#   twas_association      -- a TWAS linked predicted splicing to the disease. MAY NOT
+#                            PROMOTE. TWAS tests association between genetically predicted
+#                            expression/splicing and a trait; it does NOT establish a
+#                            shared causal variant, and an LD-driven co-regulation at the
+#                            locus produces the same signal. Colocalization is the more
+#                            conservative test and is the standard this project holds
+#                            itself to elsewhere, so a TWAS-only anchor caps a locus at
+#                            `disease_locus_splice_linked`.
+#
+# Coordinates are 1-based inclusive, GRCh38, matching the GENCODE v47 GTF cache. Any
+# record whose source publication predates GRCh38 must be lifted over and re-verified
+# before it can become `reviewed` -- a rename is not a liftover.
+#
+# Sources are cited by PMID and DOI. Nothing in this file may be written from recall.
+
+events:
+  - gene: UNC13A
+    gene_id: ENSG00000130477
+    trait: als
+    status: reviewed
+    event_type: cryptic_exon_harbouring_intron
+    evidence_class: functional_validation
+    chrom: chr19
+    start: 17641557
+    end: 17642844
+    strand: "-"
+    intron_number: 20
+    match_mode: exact
+    match_tolerance: 2
+    sources:
+      - pmid: "35197626"
+        doi: 10.1038/s41586-022-04424-7
+        note: >-
+          Ma et al., Nature 2022. "TDP-43 represses cryptic exon inclusion in the FTD-ALS
+          gene UNC13A." Abstract: "The top variants associated with FTD or ALS risk in
+          humans are located in the intron harbouring the cryptic exon."
+      - pmid: "35197628"
+        doi: 10.1038/s41586-022-04436-3
+        note: >-
+          Brown et al., Nature 2022. "TDP-43 loss and ALS-risk SNPs drive mis-splicing and
+          depletion of UNC13A." Full text: "Using two minigenes containing exon 20,
+          intron 20 and exon 21, with and without the two ALS- and FTLD-linked variants,
+          we determined that the risk variants enhanced CE upon TDP-43 loss."
+    risk_variants: [rs12608932, rs12973192, rs56041637]
+    verification: >-
+      Derived locally, not quoted. rs12608932 is at chr19:17,641,880 in the project's own
+      GRCh38 TOPMed panel (genotypes/qtl/all_samples/chr19.pvar). UNC13A
+      (ENSG00000130477, minus strand) exon structure was read from the GENCODE v47 GTF
+      cache; the longest protein-coding transcript, ENST00000551649.5 (45 exons), places
+      that variant inside the 20th intron counted 5'->3', spanning
+      chr19:17,641,557-17,642,844 (1,288 bp). That independently reproduces the papers'
+      "intron 20, between exons 20 and 21" from annotation alone.
+    gtex_phenotype_id: "chr19:17641556:17642845:clu_28407_-:ENSG00000130477.16"
+    gtex_phenotype_note: >-
+      GTEx v11 DOES carry an sQTL intron phenotype at this exact intron, and its bounds
+      (17,641,556-17,642,845) reproduce the GENCODE-derived interval to within the 1 bp
+      that LeafCutter and GENCODE differ by at each end -- an independent confirmation of
+      the coordinates above. Two things follow. First, the event is testable in GTEx, so
+      a non-match is a real result rather than a missing phenotype. Second, it is NOT
+      GTEx's grouped-permutation representative intron for UNC13A, so the representative
+      arm never tested it: only the all-introns arm (COLOC_SIGNAL_SQTL=all) can. Of the
+      brain tissues checked (Cerebellar Hemisphere, Cortex, Frontal Cortex BA9, Spinal
+      cord) the phenotype is present ONLY in Cerebellar Hemisphere, which is consistent
+      with a TDP-43-loss-dependent cryptic exon being close to absent in normal tissue.
+    scope: >-
+      The interval is the cryptic-exon-HARBOURING INTRON, not the cryptic exon itself.
+      The CE is a sub-interval whose exact bounds are in the papers' supplementary data
+      and were not verified here. Intron resolution is the right unit anyway: GTEx's sQTL
+      phenotype is a LeafCutter intron-excision ratio, so the strongest available question
+      is whether the colocalizing intron IS this intron.
+
+  - gene: PICALM
+    gene_id: ENSG00000073921
+    trait: ad
+    status: reviewed
+    event_type: gwas_anchored_intron_excision_cluster
+    evidence_class: twas_association
+    chrom: chr11
+    start: 86026368
+    end: 86031468
+    strand: "-"
+    match_mode: exact
+    match_tolerance: 2
+    gtex_phenotype_id: "chr11:86026367:86031469:clu_9274_-:ENSG00000073921.18"
+    sources:
+      - pmid: "30297968"
+        doi: 10.1038/s41588-018-0238-1
+        note: >-
+          Raj et al., Nat Genet 2018. "Integrative transcriptome analyses of the aging
+          brain implicate altered splicing in Alzheimer's disease susceptibility."
+          Abstract: "We report that altered splicing is the mechanism for the effects of
+          the PICALM, CLU and PTK2B susceptibility alleles."
+        supplementary: >-
+          Supplementary Table 11 (TWAS), file 41588_2018_238_MOESM10_ESM.xlsx, md5
+          c29d708ec9ece1c93eaaca7e7b3e5f13. PICALM row: Intron.Usage.Cluster
+          "11:85737409:85742511:clu_7404", BEST.GWAS.ID rs3851179, BEST.GWAS.Z -7.91,
+          TWAS.Z 3.52. Local copy: inputs/raw/literature/raj2018/.
+    which_event_and_why: >-
+      The locus carries more than one PICALM splicing signal and they are NOT the same
+      event, so picking the wrong one would have silently mis-stated the result.
+      Supplementary Table 10 (the FDR<0.05 sQTL catalogue, MOESM9, md5
+      ff1b3ebf75e59345a0db0169ab4be949) lists exactly one PICALM sQTL --
+      "11:85689136:85692172:clu_7402", lead SNP rs540422 -- which lifts to
+      chr11:85,978,093-85,981,129 (GRCh38). That is a real PICALM sQTL but it is NOT the
+      event carrying the AD association. The TWAS table anchors PICALM's splicing
+      association on rs3851179, the canonical PICALM AD GWAS lead (GWAS Z = -7.91), and
+      on a DIFFERENT cluster, clu_7404. The reviewed interval above is clu_7404.
+    verification: >-
+      Derived locally, not quoted. The paper imputed against HRC r1.1 and reports GRCh37
+      coordinates, so the interval was lifted rather than copied. 187 variants flanking
+      the cluster carry an rsID in both the hg19 1000G EUR panel and this project's
+      GRCh38 TOPMed panel; their offsets are +288,958 (107) and +288,957 (80), a 1 bp
+      ambiguity. Both candidates resolve onto the SAME annotated feature: GENCODE v47
+      carries a PICALM intron at chr11:86,026,368-86,031,468 (5,101 bp), which fixes the
+      interval independently of the offset. As a cross-check, rs3851179 itself lifts
+      85,868,640 -> 86,157,598.
+    gtex_phenotype_note: >-
+      GTEx v11 carries an sQTL phenotype at this exact intron in 5 of the 6 brain tissues
+      checked (all but Anterior cingulate BA24), with LeafCutter bounds
+      86,026,367-86,031,469 -- the same 1 bp offset from GENCODE seen at UNC13A. So the
+      event is testable and a non-match is a real result. It is NOT GTEx's
+      grouped-permutation representative intron for PICALM, so the representative arm
+      never tested it; only the all-introns arm can.
+    caution: >-
+      PICALM is an established AD locus with evidence that the susceptibility allele acts
+      through splicing, but it is not an established causal-splicing positive control in
+      the way UNC13A's cryptic exon is: the TWAS Z is 3.52, and some isoform-associated
+      variants at this locus are not independently associated with AD after conditioning
+      on the main signal. Decisively: the anchor is a **TWAS** association (TWAS.Z 3.52),
+      not a colocalization. TWAS does not establish a shared causal variant -- LD-driven
+      co-regulation at the locus yields the same signal -- so this record is capped at
+      `disease_locus_splice_linked` by `evidence_class` regardless of how well the
+      coordinates match. Promoting it would require a colocalization or a functional
+      demonstration of the event, neither of which this source provides.
