@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -29,6 +30,7 @@ from isograph_benchmark.real_data.coloc_signal_susie import (
     P12_SWEEP,
     apply_hierarchy,
     best_signal_pair,
+    results_dir,
 )
 
 R_BIN = "/ocean/projects/bio250020p/shared/opt/env/R_env/bin/Rscript"
@@ -55,6 +57,29 @@ def test_best_signal_pair_keeps_the_maximum_but_records_how_many_were_tested():
     assert len(out) == 1
     assert out["PP4"].iloc[0] == pytest.approx(0.97)
     assert out["n_signal_pairs"].iloc[0] == 3
+
+
+def test_n_signal_pairs_counts_pairs_not_rows_across_the_p12_sweep():
+    """The R stage emits every signal pair once per prior. A raw row count would report
+    3 pairs as 15; counting (idx1, idx2) is exact even when a prior drops a pair."""
+    rows = [{"idx2": i, "p12": p, "PP4": 0.5}
+            for p in P12_SWEEP for i in (1, 2, 3)]
+    # coloc.susie failed for one pair at one prior -- the sweep is not always complete.
+    rows = [r for r in rows if not (r["idx2"] == 3 and r["p12"] == P12_SWEEP[0])]
+    out = best_signal_pair(_pairs(rows))
+    assert out["n_signal_pairs"].iloc[0] == 3
+
+
+def test_all_introns_results_land_beside_representative_not_on_top_of_it():
+    """Both sqtl modes name their shards <analysis>__<tissue>.parquet, so they must not
+    share a directory: an all-introns run would otherwise overwrite the representative
+    results it exists to be compared against."""
+    base = Path("/tmp/coloc_signal")
+    rep = results_dir(base, "representative")
+    allx = results_dir(base, "all")
+    assert rep == base
+    assert allx != rep
+    assert rep in allx.parents
 
 
 def test_gtex_agreement_filter_excludes_signals_gtex_did_not_find():

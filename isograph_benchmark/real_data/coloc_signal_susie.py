@@ -185,6 +185,18 @@ def run_prep(arm: str = "switch", dest: Path | None = None) -> Path:
 # --------------------------------------------------------------------------- #
 # Stage: meta
 # --------------------------------------------------------------------------- #
+def results_dir(src: Path, sqtl: str = "representative") -> Path:
+    """Where one (arm, sqtl) run's shards and meta outputs live.
+
+    The gene-pool arm already splits on directory; the sqtl phenotype choice needs the
+    same, because both modes name their shards <analysis>__<tissue>.parquet. Without the
+    split an all-introns run overwrites the representative-intron results it exists to be
+    compared against. Prep artefacts (targets, representative map, GTEx credible sets,
+    GWAS SuSiE cache) are shared and stay in the arm dir.
+    """
+    return src if sqtl == "representative" else src / "all_introns"
+
+
 def _load_susie(src: Path) -> pd.DataFrame:
     d = src / "susie"
     if not d.exists():
@@ -216,11 +228,37 @@ def best_signal_pair(pairs: pd.DataFrame, require_gtex_match: bool = True
     if d.empty:
         return d
     keys = ["analysis", "trait", "LOCUS_ID", "gene", "tissue", "modality"]
-    d = d.sort_values("PP4", ascending=False)
-    best = d.groupby(keys, dropna=False, as_index=False).first()
-    n = (pairs.groupby(keys, dropna=False, as_index=False)
-              .size().rename(columns={"size": "n_signal_pairs"}))
-    return best.merge(n, on=keys, how="left")
+
+    # The R stage emits one row per (signal pair x p12) so the prior can be swept for
+    # free. The PRIMARY result must be read at the pre-specified prior only: taking the
+    # maximum over the sweep would silently report every locus at the most permissive
+    # prior in the grid, which is a different and much weaker claim. (SNCA/LBD reads
+    # 0.974 at p12=1e-5 and 0.997 at 1e-4 -- the sweep is the sensitivity, not the
+    # answer.)
+    prim = d[d["p12"] == P12_PRIMARY]
+    if prim.empty:
+        raise SystemExit(f"no rows at the primary prior p12={P12_PRIMARY}")
+    best = (prim.sort_values("PP4", ascending=False)
+                .groupby(keys, dropna=False, as_index=False).first())
+
+    # Prior sensitivity, carried alongside: the range the cell's best PP4 spans across the
+    # whole sweep, so a hit can be reported as surviving a RANGE of priors.
+    sw = (d.groupby(keys + ["p12"], dropna=False, as_index=False)["PP4"].max()
+            .groupby(keys, dropna=False, as_index=False)
+            .agg(PP4_min_over_p12=("PP4", "min"), PP4_max_over_p12=("PP4", "max")))
+    # Count DISTINCT signal pairs, not rows: the R stage emits each pair once per p12, so
+    # a raw row count multiplies by the sweep length. Counting (idx1, idx2) is exact even
+    # when coloc.susie fails for one prior and not another, which dividing by the sweep
+    # length would silently get wrong.
+    idx = ["idx1", "idx2"] if {"idx1", "idx2"} <= set(pairs.columns) else []
+    if idx:
+        n = (pairs.drop_duplicates(keys + idx)
+                  .groupby(keys, dropna=False, as_index=False)
+                  .size().rename(columns={"size": "n_signal_pairs"}))
+    else:
+        n = (pairs.groupby(keys, dropna=False, as_index=False)
+                  .size().rename(columns={"size": "n_signal_pairs"}))
+    return best.merge(sw, on=keys, how="left").merge(n, on=keys, how="left")
 
 
 def apply_hierarchy(susie: pd.DataFrame, abf: pd.DataFrame) -> pd.DataFrame:
@@ -262,8 +300,10 @@ def _abf_cells(arm: str) -> pd.DataFrame:
 
 
 def run_meta(arm: str = "switch", src: Path | None = None,
-             require_gtex_match: bool = True) -> Path:
-    src = src or out_dir(arm)
+             require_gtex_match: bool = True,
+             sqtl: str = "representative") -> Path:
+    src = results_dir(src or out_dir(arm), sqtl)
+    src.mkdir(parents=True, exist_ok=True)
     pairs = _load_susie(src)
     print(f"  loaded {len(pairs):,} coloc.susie signal-pair rows over "
           f"{pairs['analysis'].nunique()} analyses, {pairs['gene'].nunique():,} genes")
@@ -323,7 +363,7 @@ def run_meta(arm: str = "switch", src: Path | None = None,
     contrast.to_parquet(src / "contrast.parquet", index=False)
 
     _write_report(src, arm, pairs, cells, merged, genes, contrast,
-                  primary_label=primary_label)
+                  primary_label=primary_label, sqtl=sqtl)
     print(f"\n  wrote {src}")
     return src
 
@@ -338,12 +378,23 @@ def _fmt(v, nd=3):
 
 def _write_report(src: Path, arm: str, pairs: pd.DataFrame, cells: dict,
                   merged: pd.DataFrame, genes: pd.DataFrame,
-                  contrast: pd.DataFrame, primary_label: str) -> None:
+                  contrast: pd.DataFrame, primary_label: str,
+                  sqtl: str = "representative") -> None:
     L: list[str] = []
     A = L.append
     A("# Signal-level colocalization (coloc.susie)")
     A("")
-    A(f"Gene pool arm: `{arm}`. Primary signal filter: `{primary_label}`.")
+    A(f"Gene pool arm: `{arm}`. Primary signal filter: `{primary_label}`. "
+      f"sQTL phenotypes: `{sqtl}`.")
+    A("")
+    if sqtl == "representative":
+        A("Each gene contributes GTEx's single grouped-permutation representative intron, "
+          "so a locus whose disease-relevant event is not that intron cannot colocalize "
+          "here however real it is. The `all` arm is what tests a named event.")
+    else:
+        A("Every intron phenotype of each gene is tested, not only GTEx's grouped-"
+          "permutation representative, so a named literature event is testable. The "
+          "`coloc.abf` fallback rows still come from the representative-intron layer.")
     A("")
     A("`coloc.susie` fine-maps both traits and colocalizes credible set against "
       "credible set, so a locus carrying more than one causal signal is not forced "
@@ -412,6 +463,9 @@ def main(argv=None) -> None:
     ap.add_argument("--all-signals", action="store_true",
                     help="do not require re-fit QTL credible sets to agree with GTEx's "
                          "own (reported as a sensitivity arm, never as primary)")
+    ap.add_argument("--sqtl", choices=("representative", "all"), default="representative",
+                    help="which sQTL phenotypes the shards were produced from; must match "
+                         "COLOC_SIGNAL_SQTL, and selects the results subdirectory")
     ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args(argv)
 
@@ -419,7 +473,7 @@ def main(argv=None) -> None:
         run_prep(arm=args.arm, dest=args.out)
     else:
         run_meta(arm=args.arm, src=args.out,
-                 require_gtex_match=not args.all_signals)
+                 require_gtex_match=not args.all_signals, sqtl=args.sqtl)
 
 
 if __name__ == "__main__":

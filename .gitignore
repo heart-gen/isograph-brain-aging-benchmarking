@@ -122,3 +122,12 @@ reports/pi/
 # phASER screen scratch: the coarse bucket key list is a run-local intermediate of the
 # single-pass stream over the multi-GB allelic-count file, regenerated every run.
 06_switch_mechanism/_m/ase_switch_direction/**/_buckets.txt
+
+# BrainSEQ swQTL/eQTL nominal cis output (18 GB of tensorQTL cis_qtl_pairs shards, plus
+# the two phenotype BEDs per region) and the per-locus GWAS SuSiE cache (348 MB of RDS).
+# Same class as 05_genetic_anchoring/_m/coloc/*/ above: regenerable from _h/22-23 and
+# _h/25, Zenodo-bound. The lean permutation results, paired contrasts, phenotype
+# summaries and reports stay tracked.
+05_genetic_anchoring/_m/brainseq_switch_qtl/*/*/qtl/*cis_qtl_pairs*.parquet
+05_genetic_anchoring/_m/brainseq_switch_qtl/*/*/phenotypes_*.bed.gz*
+05_genetic_anchoring/_m/coloc_signal_susie/gwas_susie/

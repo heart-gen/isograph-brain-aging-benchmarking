@@ -27,6 +27,11 @@
 # Gene pool and sQTL phenotype choice are env-selected, per submission:
 #   sbatch --export=ALL,COLOC_SIGNAL_ARM=background  05_genetic_anchoring/_h/23....sh
 #   sbatch --export=ALL,COLOC_SIGNAL_SQTL=all        05_genetic_anchoring/_h/23....sh
+#
+# Each axis writes to its own directory, because both modes name their shards
+# <analysis>__<tissue>.parquet: arm -> arms/<arm>/, sqtl=all -> all_introns/. The meta
+# stage must be told which set to read, and the flag has to match the env var:
+#   python -m isograph_benchmark.real_data.coloc_signal_susie --stage meta --sqtl all
 # Usage: sbatch 05_genetic_anchoring/_h/23.coloc_signal_susie.sh
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
