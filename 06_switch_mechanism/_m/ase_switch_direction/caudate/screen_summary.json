@@ -1,0 +1,14 @@
+{
+  "region": "caudate",
+  "n_fail_only_both_isoform_rule": 25,
+  "n_fail_only_donor_count": 2,
+  "median_depth_of_donor_rich_failures": 28.0,
+  "n_pairs_with_unique_sequence": 151,
+  "n_pairs_with_any_informative_site": 37,
+  "n_pairs_testable": 3,
+  "n_genes_testable": 2,
+  "min_donors_informative": 30,
+  "min_reads_per_donor": 5,
+  "median_donors_per_pair": 93.0,
+  "max_donors_per_pair": 367
+}

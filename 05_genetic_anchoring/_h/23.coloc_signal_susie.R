@@ -42,7 +42,7 @@
 ## Usage:  Rscript 05_genetic_anchoring/_h/23.coloc_signal_susie.R <analysis> <tissue> [chr]
 ## Env:    COLOC_SIGNAL_ARM        gene pool (default "switch"), mirrors the abf arms
 ##         COLOC_SIGNAL_SQTL       "representative" (default) | "all"
-## Output: <signal dir>/susie/<analysis>__<tissue>[.chr<N>].parquet
+## Output: <signal dir>[/all_introns]/susie/<analysis>__<tissue>[.chr<N>].parquet
 suppressPackageStartupMessages({
     library(data.table); library(arrow); library(susieR); library(coloc)
 })
@@ -66,7 +66,12 @@ GDIR   <- file.path(BASE, "gwas_susie", ANALYSIS)
 if (!dir.exists(GDIR)) stop("missing GWAS SuSiE cache ", GDIR, " (run 22.coloc_gwas_susie.sh)")
 CDIR   <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc", ANALYSIS, "susie")
 BRIDGE <- file.path(ROOT, "inputs", "raw", "gtex_v11", "variant_bridge")
-OUTD   <- file.path(MDIR, "susie"); dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
+## The sqtl phenotype choice gets its own directory, exactly as the gene-pool arm does.
+## Both modes write <analysis>__<tissue>.parquet, so without this split an all-introns
+## run would silently overwrite the representative-intron shards it is meant to be
+## compared against.
+RDIR   <- if (SQTL_MODE == "representative") MDIR else file.path(MDIR, "all_introns")
+OUTD   <- file.path(RDIR, "susie"); dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
 
 L_MAX      <- 10L
 MIN_SHARED <- 50L        # emit the row; the meta stage applies the real (100) floor

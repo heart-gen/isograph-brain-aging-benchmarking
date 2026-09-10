@@ -84,6 +84,11 @@ grouped-permutation representative intron, so the representative arm never teste
 is a limitation of the nomination design, not evidence against the loci; the all-introns
 arm (`COLOC_SIGNAL_SQTL=all`) is what settles it.
 
+That arm writes under `_m/coloc_signal_susie/all_introns/` and is read back with
+`--stage meta --sqtl all`. Both modes name their shards `<analysis>__<tissue>.parquet`, so
+the directory split is what keeps an all-introns run from overwriting the representative
+results it exists to be compared against.
+
 Two gates gate the top tier, and they are independent. `status: reviewed` means the
 coordinates were verified here. `evidence_class` must be `functional_validation` or
 `coloc_association` — **a TWAS anchor may not promote**, because TWAS does not establish a

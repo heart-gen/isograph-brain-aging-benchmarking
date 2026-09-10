@@ -1,0 +1,38 @@
+{
+  "region": "caudate",
+  "arm": "all_samples",
+  "n_samples_pre_genotype": 444,
+  "n_samples": 420,
+  "n_donors": 420,
+  "filters": "Dataset=BrainSeq_Phase3_Caudate, dropped!='t', Age > 13, all diagnoses",
+  "expression_filter": "gene CPM>=1 in >=42 samples",
+  "dx": {
+    "Control": 231,
+    "SCZD": 146,
+    "Bipolar": 42,
+    "MDD": 1
+  },
+  "race": {
+    "CAUC": 229,
+    "AA": 191
+  },
+  "covariates": [
+    "SNP_PC1",
+    "SNP_PC2",
+    "SNP_PC3",
+    "SNP_PC4",
+    "SNP_PC5",
+    "Sex",
+    "Dx",
+    "RIN",
+    "mito_rate",
+    "mapping_rate"
+  ],
+  "cis_window": 1000000,
+  "n_switch_genes": 17161,
+  "n_abundance_genes": 20471,
+  "expr_n_genes_before": 78932,
+  "expr_n_genes_after": 20525,
+  "expr_n_transcripts_before": 384354,
+  "expr_n_transcripts_after": 232980
+}

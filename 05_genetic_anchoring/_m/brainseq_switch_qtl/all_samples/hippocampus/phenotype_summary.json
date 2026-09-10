@@ -1,0 +1,37 @@
+{
+  "region": "hippocampus",
+  "arm": "all_samples",
+  "n_samples_pre_genotype": 395,
+  "n_samples": 362,
+  "n_donors": 362,
+  "filters": "Dataset=BrainSeq_Phase2_HIPPO, dropped!='t', Age > 13, all diagnoses",
+  "expression_filter": "gene CPM>=1 in >=37 samples",
+  "dx": {
+    "Control": 236,
+    "SCZD": 125,
+    "MDD": 1
+  },
+  "race": {
+    "AA": 187,
+    "CAUC": 175
+  },
+  "covariates": [
+    "SNP_PC1",
+    "SNP_PC2",
+    "SNP_PC3",
+    "SNP_PC4",
+    "SNP_PC5",
+    "Sex",
+    "Dx",
+    "RIN",
+    "mito_rate",
+    "mapping_rate"
+  ],
+  "cis_window": 1000000,
+  "n_switch_genes": 16730,
+  "n_abundance_genes": 19627,
+  "expr_n_genes_before": 78932,
+  "expr_n_genes_after": 19675,
+  "expr_n_transcripts_before": 384354,
+  "expr_n_transcripts_after": 230103
+}

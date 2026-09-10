@@ -592,10 +592,13 @@ def collapse_genes(wide: pd.DataFrame, call: float = PP4_CALL) -> pd.DataFrame:
     reviewer can see the pattern without re-deriving it from `cells.parquet`.
     """
     keys = _cell_keys(wide)
-    d = wide.sort_values("PP4_sQTL", ascending=False)
+    # Stable sorts, and tissue as the tie-break: PP4 ties are common (a gene with no
+    # signal scores the same tiny posterior in every tissue), and an unstable sort makes
+    # `tissue_pp4_sQTL` differ between runs on identical inputs for no reason.
+    d = wide.sort_values(["PP4_sQTL", "tissue"], ascending=[False, True], kind="stable")
 
     def _vec(g: pd.DataFrame) -> str:
-        o = g.sort_values("PP4_sQTL", ascending=False)
+        o = g.sort_values(["PP4_sQTL", "tissue"], ascending=[False, True], kind="stable")
         return ";".join(f"{t}={v:.3f}" for t, v in zip(o["tissue"], o["PP4_sQTL"]))
 
     agg = d.groupby(keys, dropna=False).agg(
