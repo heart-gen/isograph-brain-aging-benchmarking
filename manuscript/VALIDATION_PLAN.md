@@ -202,9 +202,39 @@ Because UTR remodeling is the dominant enriched consequence (1.279, 9/9 regions)
    destabilised-GFP backbone; measure steady-state output and, with actinomycin-D chase,
    transcript half-life. Read out **relative** difference between the two UTRs, in a neuronal
    line (SH-SY5Y or iPSC-derived neurons).
-3. **Allelic direction (PGS1, PPP6R2 only).** In heterozygous donors, test whether the risk
-   allele shifts isoform usage in the direction the coloc predicts. This is the step that ties
-   the switch to the *genetics* rather than to aging alone.
+3. **Allelic direction — use the existing phASER ASE data, not a new assay.**
+   *(Added 2026-09-10 on co-author suggestion; supersedes the population-level allelic test the
+   first draft proposed.)*
+
+   `/ocean/projects/bio260021p/shared/resources/processed-data/ase-files/{caudate,dlpfc,hippocampus}/`
+   holds phASER output for BrainSEQ in exactly the three aging regions — 578 GB, including
+   `haplotypes`, `variant_connections`, `haplotypic_counts`, `site_ase`, `allelic_counts` and
+   `gene_ae`. The phasing, which is the expensive part, is already done.
+
+   **`gene_ae` is keyed on ENST, not ENSG** — one row per *transcript* per donor with
+   `aCount`/`bCount`/`log2_aFC` and a `gw_phased` flag. That is allele-specific *isoform*
+   quantification, which is the axis a switch lives on.
+
+   The test: for a switch pair (T₁, T₂) in the same gene and the same genome-wide phase block,
+   ask whether the haplotype ratio **differs between the two transcripts**. A cis variant that
+   drives the switch shifts T₁ and T₂ in opposite directions on the same haplotype; a variant
+   that only drives expression shifts both together. **Each donor is its own control**, so trans
+   effects, population structure, cell composition and environment all cancel — a cleaner design
+   than any population-level allelic association.
+
+   Three caveats, all real:
+   - **Per-donor depth is thin.** Allelic counts need reads over heterozygous sites; spot-checking
+     SNCA transcripts in one caudate donor gives `totalCount` of 0–2 per transcript. Power comes
+     from aggregating heterozygotes across n ≈ 450 donors per region (beta-binomial or
+     phASER-POP style), not from any single sample.
+   - **Use `gw_phased = 1` rows only.** Cross-transcript comparison requires haplotype A to mean
+     the same haplotype for both transcripts.
+   - **For a specific junction, prefer junction-spanning allelic reads** (`allelic_counts` /
+     `site_ase` intersected with the junction) over whole-transcript counts, which inherit the
+     same read-assignment ambiguity that makes isoform quantification hard in the first place.
+
+   Do **not** use `gene_ae` aggregated to the gene, or the gene-level `aFC`: allelic imbalance in
+   total gene output is the *eQTL* axis and would be the wrong test for a switch.
 
 ### 1.4 What the junction test did and did not establish
 
@@ -333,10 +363,11 @@ will press hardest. Neither needs a sample.
 
 ### 3.2 If you run two
 
-Add **Experiment A step 3** — allelic direction for SNCA and the strongest new splicing-specific
-loci in heterozygous BrainSEQ donors. With genotypes and PSI already in hand this is close to
-free, and it is the step that ties a switch to its *risk allele* rather than to aging. The
-reporter assay and the snRNA-seq arm come after, sized by what remains open.
+Add **Experiment A step 3** — allelic direction from the existing BrainSEQ phASER ASE data
+(§1.2). Transcript-level haplotypic counts already exist for caudate, DLPFC and hippocampus, so
+this is a re-analysis rather than an experiment, and each donor acts as its own control. It is
+the step that ties a switch to its *risk allele* rather than to aging. The reporter assay and
+the snRNA-seq arm come after, sized by what remains open.
 
 ### 3.3 Correction to the first draft
 
@@ -370,6 +401,7 @@ BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work
 | Composition table | `04_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md` |
 | Per-gene coloc Fisher p = 0.88 | `05_genetic_anchoring/_m/coloc_modality_contrast/` |
 | S-LDSC tau p-values | `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` |
+| BrainSEQ phASER ASE (transcript-level `gene_ae`, haplotypic counts, phasing) | `/ocean/projects/bio260021p/shared/resources/processed-data/ase-files/{caudate,dlpfc,hippocampus}/` — 578 GB; see `ASE_GENERATION.md` |
 | Power tables | Computed 2026-09-09; two-sample t and Fisher-z, α = 0.05 two-sided, power = 0.80 |
 | coloc.abf PP4 (all 40 strong hits, 13 splicing-specific) | `05_genetic_anchoring/_m/coloc_modality_contrast/genes.parquet`, switch arm — 1,647 cells / 1,156 genes over GTEx v11 all-pairs |
 | SNCA minor-form usage 0.188, 99.5% of 222 donors | `06_switch_mechanism/_m/junction_coloc_confirm/junction_confirm.parquet` |
