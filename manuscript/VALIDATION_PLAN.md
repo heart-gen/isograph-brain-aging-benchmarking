@@ -263,11 +263,27 @@ not at the tier this experiment is meant to reach.
 
 ---
 
-## 2. Experiment B — snRNA-seq and the composition question
+## 2. Future grant aim — snRNA-seq and the composition question
+
+> **Scoped out of this manuscript, 2026-09-10.** At the n = 40 that would make it a real study,
+> single-nucleus long read is too expensive to serve as functional validation for this paper,
+> and — per the power analysis in §2.3 — an aging-correlation design at that n is *worse
+> powered than the bulk experiment it would adjudicate*. It is a good standalone aim and a poor
+> validation step.
+>
+> **For this manuscript:** disclose the composition question as a stated limitation, with the
+> decisive experiment named in the Discussion. That is already the agreed handling for the SCZD
+> arm (P1 round-1 item 6).
+>
+> **As a grant aim:** the design below is the one to propose — n = 40 donors sampled at the
+> extremes of the cell-type proportion distribution (20 per group), short-read cell-type labels
+> paired with long-read isoform quantification on the same nuclei, powered to ΔPSI ≈ 0.04–0.13
+> depending on between-donor variance. The sections that follow are written to be liftable into
+> an aims page.
 
 **Question.** Do the switches persist *within* matched cell types, or are they a proportion shift?
 
-### 2.1 What is at stake
+### 2.1 What is at stake (preliminary data for the aim)
 
 | Contrast | comp_unique base → adjusted | Retained |
 | --- | --- | --- |
@@ -316,7 +332,7 @@ between-donor PSI standard deviation:
 | 10 | 0.063 | 0.100 | 0.125 | 0.188 |
 | 20 | 0.044 | 0.071 | 0.089 | 0.133 |
 | 30 | 0.036 | 0.058 | 0.072 | 0.109 |
-| 40 | 0.031 | 0.050 | 0.063 | 0.094 |
+| **40 (20/group — the proposed grant n)** | **0.031** | **0.050** | **0.063** | **0.094** |
 | 50 | 0.028 | 0.045 | 0.056 | 0.084 |
 
 Age as a **continuous** predictor is the trap:
@@ -334,7 +350,7 @@ detects \|r\| ≥ 0.18.** Any realistically sized single-nucleus aging study is 
 the experiment it is meant to adjudicate*, so a null result would be uninterpretable. Do not run
 this as an age-correlation study.
 
-**Design that works:** frame it as a *composition* test, not an aging test. Sample donors at the
+**Design for the aim:** frame it as a *composition* test, not an aging test. Sample donors at the
 extremes of the cell-type proportion distribution (or case/control for the SCZD arm), and ask
 whether the switch persists within matched cell types across that contrast. Extreme sampling buys
 back effect size that continuous age cannot. n = 20–30 per group detects ΔPSI ≈ 0.04–0.09 at
@@ -369,14 +385,23 @@ this is a re-analysis rather than an experiment, and each donor acts as its own 
 the step that ties a switch to its *risk allele* rather than to aging. The reporter assay and
 the snRNA-seq arm come after, sized by what remains open.
 
-### 3.3 Correction to the first draft
+### 3.3 What is deliberately not in scope
+
+**Single-nucleus long read is a grant aim, not a validation step** (§2). At n = 40 it costs more
+than the rest of this page combined and, as an aging-correlation design, is worse powered than
+the bulk study it would adjudicate. The composition question is disclosed as a limitation for
+this manuscript and proposed as future work — which is already the agreed handling for the SCZD
+arm. §2 is kept here in aims-page form so the preliminary data, the technical constraint and the
+power table travel together when it is written up.
+
+### 3.4 Correction to the first draft
 
 This plan originally led with the bench and demoted SNCA on the ONT 0.29% usage figure. Both
 were wrong. The 0.29% is the assay limitation this project had already diagnosed; short read
 puts the same switch at 18.8% in 99.5% of donors. And the computational genetics — coloc.abf,
 BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work. They should be.
 
-### 3.4 Framing fixes that cost nothing and should happen regardless
+### 3.5 Framing fixes that cost nothing and should happen regardless
 
 1. `MANUSCRIPT_PLAN.md` §12 still lists **"Splicing-QTL specifically anchor the GO-invisible
    switch layer"** as *Established* and as the Fig 3 headline. It is null (1.068, p = 0.077).
