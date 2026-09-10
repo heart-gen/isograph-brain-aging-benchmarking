@@ -80,3 +80,37 @@ they do to the protein, and do the results survive sensitivity analysis?
 ## Display items
 
 S-real-5 `figSwitchConsequence`, S-real-7 `figClinicalConsequence`.
+
+
+## phASER allelic direction — screened, and where the follow-on must run
+
+`ase_switch_direction.py --stage screen` asks whether the existing BrainSEQ phASER release
+can support an allele-specific test of an isoform switch. It cannot, and the reason is not
+the one the QC tables suggest.
+
+**Depth is not the blocker.** The phASER QC tables report a median `gene_ae` depth of 1-2
+reads, but that is the whole-transcript-interval aggregation. Restricted to
+isoform-discriminating exonic sequence, the donors that carry signal carry plenty: SNCA has
+243 donors at median 77 reads. Of 37 caudate switch pairs with any informative site, 28
+have enough donors at adequate depth.
+
+**The blocker is structural.** Only 5 of 37 pairs are informative on BOTH isoforms; 25 fail
+on that alone with donors and depth to spare. A pair where one isoform is a truncation of
+the other has no unique exonic sequence on that side, so there is nothing to contrast
+however deeply it is sequenced. Three pairs (two genes) clear the screen — too few to carry
+a claim.
+
+**The rescue, and where it has to run.** Exonic-unique segments are a one-sided
+discriminator; a discriminating *junction* is two-sided by construction. Counting reads
+that cross a discriminating junction while carrying a phased heterozygous site would test
+many of those 25 pairs. That needs read-level alignments and, specifically, the
+**WASP-tagged ASE-grade BAMs** — reference mapping bias at heterozygous sites is the
+dominant confound in a within-donor allelic contrast, and `ASE_GENERATION.md` is explicit
+that a non-WASP alignment is not ASE-final.
+
+Those BAMs are **not on Bridges-2**. The validated manifest's `bam_path` and `source_file`
+both point at Northwestern's **Quest**, `/gpfs/projects/b1042/HEART-GeN-Lab/ase-processing/`,
+and neither PSC project share holds a BAM or CRAM. CRAM is not the obstacle — samtools,
+pysam and GATK all read it and the GRCh38 reference is available — the obstacle is that the
+reads and their WASP tags exist only on Quest. **Run the junction-level arm on Quest
+(b1042), where the alignments and the storage are.**

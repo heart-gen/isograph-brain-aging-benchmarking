@@ -65,6 +65,9 @@ that reaches the paper.
 | Module genetic anchoring | `real_data/module_genetic_anchoring.py` | `_h/04` | `_m/module_genetic_anchoring_meta/` | Table S16 only — **no figure by design** (pooled-gene, not per-module) |
 | MAGMA module-GWAS | `gwas/prepare_magma_inputs.py` | `_h/05–07` | `_m/gwas/magma_results_combined.parquet` | S-real-2 |
 | Colocalization (SuSiE + eCAVIAR) | `real_data/coloc_{prep,summary,isoform_events,direction,meta}.py` | `_h/08–11` | `_m/coloc/` | Fig 4, S8/S9 |
+| **Signal-level coloc (`coloc.susie`)** | `real_data/coloc_signal_susie.py` + `_h/22.coloc_gwas_susie.R`, `_h/23.coloc_signal_susie.R` | `_h/22–23` | `_m/coloc_signal_susie/` | *(estimator hierarchy: susie > abf > CLPP)* |
+| **Locus event audit** | `real_data/locus_event_audit.py` (`configs/known_splice_events.yaml`) | `_h/24` | `_m/locus_event_audit/<nominations>/` | *(tiering of UNC13A / PICALM / SNCA)* |
+| **BrainSEQ switch-QTL (S_g) vs abundance-QTL (A_g)** | `real_data/brainseq_switch_qtl.py` | `_h/25` (GPU) | `_m/brainseq_switch_qtl/<arm>/<region>/` | *(same-tissue genetic anchoring, not replication)* |
 | Per-gene sQTL-vs-eQTL coloc contrast | `real_data/coloc_modality_contrast.py` + `_h/20.coloc_modality_abf.R` | `_h/19–21` | `_m/coloc_modality_contrast/` | *(run 2026-09-01, 4 arms — **null**; reported as a negative control, no figure)* |
 | S-LDSC partitioned heritability | `real_data/ldsc_annot_prep.py`, `ldsc_summary.py` | `_h/12–14` | `_m/ldsc/ldsc_partitioned.parquet` | Fig 4B |
 | Per-gene deep dive | `real_data/gene_deep_dive.py` | `_h/15` | `_m/deep_dive/` | **Table 2**, S8–S12 |
@@ -77,6 +80,7 @@ that reaches the paper.
 | Short-read junction confirmation (SNCA/CTSH) | `real_data/junction_coloc_confirm.py` | `06_switch_mechanism/_h/12` | `_m/junction_coloc_confirm/` | Fig 4A (confirms SNCA; CTSH withheld) |
 | Switch consequence + meta | `real_data/switch_consequence[_meta].py` | `06_switch_mechanism/_h/01–02` | `_m/switch_consequence_meta.parquet` | S-real-5 |
 | PSI / junction validation | `real_data/validate_switch_splicing.py` | `_h/03–04` | `_m/switch_validation/` | — |
+| **phASER allelic feasibility screen** | `real_data/ase_switch_direction.py` | *(login)* | `_m/ase_switch_direction/<region>/` | *(gate: is an allele-specific switch test supported at all?)* |
 | Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/05` | `_m/switch_orthogonal_confirm/` | **S-real-8** `figOrthogonalConfirm`, Table S14 |
 | ISA / satuRn concordance | `real_data/isa_concordance.py` | `_h/06` | `_m/isa_concordance/` | **S-real-9** `figIsaConcordance`, Table S15 |
 | Long-read confirmation | `real_data/longread_switch_confirm.py` | `_h/07` | `_m/longread_switch_confirm/` | — |
