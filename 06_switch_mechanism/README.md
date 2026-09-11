@@ -9,7 +9,7 @@ they do to the protein, and do the results survive sensitivity analysis?
 |---|---|---|
 | 01–02 | `switch_consequence`, `switch_consequence_meta` | Structural consequence of the switch axis under a within-gene permutation null; cross-region meta |
 | 03–04 | `validate_switch_splicing_{brainseq,gtex}` | Orthogonal PSI / junction validation of switch pairs |
-| 05 | `switch_orthogonal_confirm` | Anchored + global-null confirmation against the compositional-closure baseline |
+| 05 | `switch_orthogonal_confirm` | Anchored + global-null confirmation against the compositional-closure baseline. `--events signal` scores the `coloc.susie` nominations (from `coloc_isoform_events --layer signal`) into `signal_coloc/`; the default CLPP arm and its S-real-8 / S14 outputs are unchanged |
 | 06 | `isa_concordance` | Concordance with satuRn / ISA differential transcript usage |
 | 07 | `longread_switch_confirm` | ONT DLPFC long-read confirmation (Aguzzoli-Heberle 2024) |
 | 08–09 | `download_clinical`, `clinical_consequence` | gnomAD LOEUF constraint + ClinVar pathogenic density |

@@ -13,6 +13,16 @@
 ##   --mode global-null  matched null for the overall long-read switch-like rate
 ## Extra arguments are forwarded, e.g.
 ##   sbatch 06_switch_mechanism/_h/05.switch_orthogonal_confirm.sh --mode global-null
+##
+## --events picks the colocalization layer the anchored pairs come from:
+##   clpp    (default) eCAVIAR events; writes _m/switch_orthogonal_confirm/ (S-real-8, S14)
+##   signal  coloc.susie all-introns nominations; writes _m/switch_orthogonal_confirm/signal_coloc/
+##           Cross-tissue exceptions (UNC13A; coloc_isoform_events.CROSS_TISSUE_EXCEPTIONS) are
+##           scored by the same code into exception_pair_confirmation.parquet, kept out of the
+##           set-level comparison and its background -- they change the interpretation.
+## The signal layer needs its event table first (login-node safe):
+##   python -m isograph_benchmark.real_data.coloc_isoform_events --layer signal
+##   sbatch 06_switch_mechanism/_h/05.switch_orthogonal_confirm.sh --events signal
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 

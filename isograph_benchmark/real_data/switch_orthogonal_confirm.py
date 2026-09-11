@@ -63,14 +63,37 @@ _COLOC_EVENTS = stage_out("anchoring.coloc", "coloc_isoform_events_combined.parq
 _PAIR_CONFIRMATION = stage_out("mechanism", "longread_switch_confirm", "pair_confirmation.parquet"
 )
 
+# Which colocalization layer supplies the anchored events. `clpp` is the eCAVIAR layer the
+# committed S-real-8 / Table S14 were built on and stays the default so they reproduce;
+# `signal` is the coloc.susie all-introns nominations. Each layer scores its events by its
+# own posterior and writes its own directory -- neither may overwrite the other.
+EVENT_LAYERS = ("clpp", "signal")
+EVIDENCE_COL = {"clpp": "clpp", "signal": "PP4_sQTL"}
+
 # Abundance strata for matching. Pairs are binned on the mean isoform fraction of their
 # better-expressed member, which is what actually governs whether a usage correlation is
 # estimable at n=12.
 _N_STRATA = 10
 
 
-def _out_dir() -> Path:
-    return ensure_dir(stage_out("mechanism", "switch_orthogonal_confirm"))
+def out_path(layer: str = "clpp") -> Path:
+    """Output directory for an event layer (pure; creates nothing)."""
+    base = stage_out("mechanism", "switch_orthogonal_confirm")
+    if layer not in EVENT_LAYERS:
+        raise SystemExit(f"unknown event layer {layer!r}; choose from {EVENT_LAYERS}")
+    return base if layer == "clpp" else base / "signal_coloc"
+
+
+def _out_dir(layer: str = "clpp") -> Path:
+    return ensure_dir(out_path(layer))
+
+
+def events_path(layer: str = "clpp") -> Path:
+    if layer == "clpp":
+        return _COLOC_EVENTS
+    # Imported here: global-null mode never needs the coloc stack.
+    from isograph_benchmark.real_data.coloc_isoform_events import signal_events_path
+    return signal_events_path()
 
 
 def _md_table(frame: pd.DataFrame, floats: int = 4) -> str:
@@ -93,15 +116,40 @@ def _md_table(frame: pd.DataFrame, floats: int = 4) -> str:
 # --------------------------------------------------------------------------- #
 # Anchored pairs from the colocalization layer
 # --------------------------------------------------------------------------- #
-def load_anchored_events() -> pd.DataFrame:
-    """Splicing-led coloc events: an sQTL junction that lands on a switch-pair isoform."""
-    ev = pd.read_parquet(_COLOC_EVENTS)
+def load_anchored_events(layer: str = "clpp") -> pd.DataFrame:
+    """Anchored coloc events: a colocalizing sQTL junction that lands on a switch-pair isoform."""
+    path = events_path(layer)
+    if not path.exists():
+        flag = " --layer signal" if layer == "signal" else ""
+        raise SystemExit(f"missing {path}; run coloc_isoform_events{flag} first")
+    ev = pd.read_parquet(path)
     ev = ev[ev["junction_in_switch_pair"].fillna(False).astype(bool)].copy()
     ev["gene"] = _strip_ver(ev["gene"].astype(str))
     return ev
 
 
-def anchored_pairs(events: pd.DataFrame) -> pd.DataFrame:
+def exception_events(ev: pd.DataFrame) -> pd.DataFrame:
+    """Cross-tissue exception events: the colocalizing tissue has no IsoGraph switch pair for
+    the gene, so the pair is taken from the regions where the junction's transcripts ARE pair
+    members. Its `switch_pair` is swapped in so `anchored_pairs` scores it unchanged. These rows
+    are scored apart from the set-level statistic and never pooled into it."""
+    if "cross_tissue_in_switch_pair" not in ev.columns:
+        return ev.iloc[0:0].copy()
+    ex = ev[ev["cross_tissue_in_switch_pair"].fillna(False).astype(bool)
+            & ~ev["junction_in_switch_pair"].fillna(False).astype(bool)].copy()
+    ex["switch_pair"] = ex["cross_tissue_switch_pair"]
+    ex["gene"] = _strip_ver(ex["gene"].astype(str))
+    return ex
+
+
+def load_exception_events(layer: str = "clpp") -> pd.DataFrame:
+    """Only the signal layer carries cross-tissue exceptions; the CLPP layer has none."""
+    if layer != "signal":
+        return pd.DataFrame()
+    return exception_events(pd.read_parquet(events_path(layer)))
+
+
+def anchored_pairs(events: pd.DataFrame, ev_col: str = "clpp") -> pd.DataFrame:
     """One row per (event, anchored transcript, partner transcript).
 
     ``junction_transcripts`` names the transcripts carrying the colocalizing junction;
@@ -135,7 +183,7 @@ def anchored_pairs(events: pd.DataFrame) -> pd.DataFrame:
                         "iso_region": rec["iso_region"],
                         "best_rsid": rec["best_rsid"],
                         "junction": rec["junction"],
-                        "clpp": rec["clpp"],
+                        ev_col: rec[ev_col],
                         "go_invisible": rec["go_invisible"],
                         "anchored_tx": a,
                         "partner_tx": partner,
@@ -145,7 +193,7 @@ def anchored_pairs(events: pd.DataFrame) -> pd.DataFrame:
     if out.empty:
         return out
     # One row per (gene, anchored, partner); keep the strongest supporting event.
-    out = out.sort_values("clpp", ascending=False)
+    out = out.sort_values(ev_col, ascending=False)
     keep = out.drop_duplicates(subset=["gene", "anchored_tx", "partner_tx"], keep="first")
     grouped = (
         out.groupby(["gene", "anchored_tx", "partner_tx"])
@@ -376,16 +424,53 @@ def _load_matrix(data_dir: Path, keep_genes: set[str], min_count: float, min_sam
     return tx, frac, sample_cols
 
 
-def run_anchored(args) -> None:
-    out_dir = _out_dir()
-    events = load_anchored_events()
-    pairs = anchored_pairs(events)
-    if pairs.empty:
-        raise SystemExit("no splicing-led anchored pairs found")
+def score_exceptions(ex_pairs: pd.DataFrame, tx, frac, bg: pd.DataFrame, args,
+                     out_dir: Path) -> dict:
+    """Score cross-tissue exception pairs by the same primitive, apart from the set-level test.
 
+    The switch pair for these genes was called in a region other than the one the sQTL
+    colocalizes in, so a switch-like result says the junction's transcripts behave like a
+    switch in long-read DLPFC -- not that the tissue-matched switch is genetically anchored.
+    They are reported beside the anchored set, with the abundance-matched background rate for
+    context, and never pooled into it.
+    """
+    if ex_pairs.empty:
+        return {"scope": "cross_tissue_exception", "genes": [], "n_pairs": 0}
+    ex = score_pairs(ex_pairs.assign(t1=ex_pairs["anchored_tx"], t2=ex_pairs["partner_tx"]),
+                     tx, frac, args.min_samples_corr)
+    ex = qualify_abundance(ex, args.min_anchored_if)
+    ex.to_parquet(out_dir / "exception_pair_confirmation.parquet", index=False)
+    det = ex[ex["pair_detected"]]
+    return {
+        "scope": "cross_tissue_exception",
+        "genes": sorted(ex["gene_name"].dropna().astype(str).unique()),
+        "n_pairs": int(len(ex)),
+        "n_detected": int(ex["pair_detected"].sum()),
+        "n_switch_like": int(ex["switch_like"].sum()),
+        "n_usable": int(ex["anchored_usable"].sum()),
+        "n_switch_like_usable": int(ex["switch_like_usable"].sum()),
+        "max_anchored_if": float(ex["t1_mean_if"].max()),
+        "matched_background": (matched_null(det, bg, "switch_like_rate", args.n_draws,
+                                            args.seed) if len(det) else {}),
+    }
+
+
+def run_anchored(args) -> None:
+    layer = args.events
+    ev_col = EVIDENCE_COL[layer]
+    out_dir = _out_dir(layer)
+    events = load_anchored_events(layer)
+    pairs = anchored_pairs(events, ev_col)
+    if pairs.empty:
+        raise SystemExit(f"no anchored pairs found in the {layer} event layer")
+
+    # Cross-tissue exceptions (signal layer only) are scored by the same code but kept out of
+    # the set-level statistic, and out of the background so they cannot leak into either side.
+    ex_pairs = anchored_pairs(load_exception_events(layer), ev_col)
     focal_genes = set(pairs["gene"])
-    bg = background_switch_pairs(focal_genes)
-    keep = focal_genes | set(bg["gene"])
+    ex_genes = set(ex_pairs["gene"]) if len(ex_pairs) else set()
+    bg = background_switch_pairs(focal_genes | ex_genes)
+    keep = focal_genes | ex_genes | set(bg["gene"])
     tx, frac, sample_cols = _load_matrix(
         Path(args.data_dir) if args.data_dir else _default_data_dir(),
         keep,
@@ -406,7 +491,7 @@ def run_anchored(args) -> None:
         scored.groupby(["gene", "gene_name"])
         .agg(
             traits=("traits", lambda s: ",".join(sorted({t for v in s for t in str(v).split(",")}))),
-            max_clpp=("clpp", "max"),
+            **{f"max_{ev_col}": (ev_col, "max")},
             n_anchored_pairs=("t1", "size"),
             n_pairs_detected=("pair_detected", "sum"),
             n_switch_like=("switch_like", "sum"),
@@ -416,7 +501,7 @@ def run_anchored(args) -> None:
             max_anchored_if=("t1_mean_if", "max"),
         )
         .reset_index()
-        .sort_values(["n_switch_like", "max_clpp"], ascending=False)
+        .sort_values(["n_switch_like", f"max_{ev_col}"], ascending=False)
     )
     per_gene["orthogonally_confirmed"] = per_gene["n_switch_like"] > 0
     per_gene["confirmed_at_usable_abundance"] = per_gene["n_switch_like_usable"] > 0
@@ -431,9 +516,13 @@ def run_anchored(args) -> None:
     nulls["switch_like_rate_usable_only"] = matched_null(
         usable, bg, "switch_like_rate", args.n_draws, args.seed
     )
+    exceptions = score_exceptions(ex_pairs, tx, frac, bg, args, out_dir)
 
     summary = {
         "mode": "anchored",
+        "event_layer": layer,
+        "evidence_column": ev_col,
+        "cross_tissue_exceptions": exceptions,
         "question": (
             "Do the genetically anchored (sQTL-colocalizing) IsoGraph switch pairs behave "
             "like switches in orthogonal ONT long-read DLPFC data?"
@@ -453,7 +542,8 @@ def run_anchored(args) -> None:
         ),
         "n_genes_tested": int(len(per_gene)),
         "background": {
-            "universe": "IsoGraph switch pairs scored in long-read, splicing-led genes excluded",
+            "universe": "IsoGraph switch pairs scored in long-read, "
+                        f"{'splicing-led' if layer == 'clpp' else 'anchored'} genes excluded",
             "n_pairs": int(len(bg)),
             "switch_like_rate_unmatched": float(bg["switch_like"].mean()),
         },
@@ -539,25 +629,38 @@ def _write_anchored_report(
     n_conf = summary["n_genes_orthogonally_confirmed"]
     n_tested = summary["n_genes_tested"]
     sl = summary["matched_null"]["switch_like_rate"]
+    layer = summary.get("event_layer", "clpp")
+    events_flag = "" if layer == "clpp" else f" --events {layer}"
+    source = (
+        "The splicing-led genes are the manuscript's DTU-without-DGE class, and every call "
+        "rests on GTEx short-read sQTL alone."
+        if layer == "clpp" else
+        "The anchored events here come from the signal-level colocalization layer "
+        "(`coloc.susie`, all-introns arm): each tissue where a nomination's sQTL reaches the "
+        "call, resolved to the transcripts that splice that intron. It is a separate arm from "
+        "the eCAVIAR (CLPP) events behind S-real-8 and the two are not pooled. Every call "
+        "still rests on GTEx short-read sQTL alone."
+    )
 
     lines = [
-        "# Orthogonal long-read confirmation of genetically anchored switch pairs",
+        "# Orthogonal long-read confirmation of genetically anchored switch pairs"
+        + ("" if layer == "clpp" else " — signal-level coloc"),
         "",
-        f"Generated by `switch_orthogonal_confirm.py --mode anchored` "
+        f"Generated by `switch_orthogonal_confirm.py --mode anchored{events_flag}` "
         f"(seed {summary['thresholds']['seed']}, {summary['thresholds']['n_draws']} draws).",
         "",
         "## Question",
         "",
         summary["question"],
         "",
-        "The splicing-led genes are the manuscript's DTU-without-DGE class, and every call "
-        "rests on GTEx short-read sQTL alone. This scores the *specific anchored transcript "
+        source + " This scores the *specific anchored transcript "
         "pair* -- not the gene -- on an independent platform, lab, cohort and quantifier "
         f"({summary['longread_dataset']}).",
         "",
         "## Result",
         "",
-        f"- {summary['n_anchored_pairs']} anchored pairs over {n_tested} splicing-led genes; "
+        f"- {summary['n_anchored_pairs']} anchored pairs over {n_tested} "
+        f"{'splicing-led' if layer == 'clpp' else 'anchored'} genes; "
         f"{summary['n_anchored_pairs_detected']} detected in long-read.",
         f"- **{summary['n_anchored_pairs_switch_like']} are switch-like** "
         f"(both isoforms detected, usage negatively rank-correlated).",
@@ -573,7 +676,8 @@ def _write_anchored_report(
     su = summary["matched_null"].get("switch_like_rate_usable_only", {})
     if isinstance(sl.get("observed"), float):
         lines += [
-            f"Against an abundance-matched background of {sl['n_background']} non-splicing-led "
+            f"Against an abundance-matched background of {sl['n_background']} "
+            f"{'non-splicing-led' if layer == 'clpp' else 'non-anchored'} "
             f"IsoGraph switch pairs, the anchored switch-like rate is "
             f"**{sl['observed']:.3f}** versus a matched-null mean of {sl['null_mean']:.3f} "
             f"(95% null interval {sl['null_q025']:.3f}-{sl['null_q975']:.3f}, "
@@ -585,24 +689,68 @@ def _write_anchored_report(
             "",
         ]
     if isinstance(su.get("observed"), float):
+        # The CLPP prose was written against that layer's measured result; the signal layer
+        # states the same comparison without presuming which way it came out.
         lines += [
             f"Restricted to the {su['n_focal']} pairs whose anchored isoform is itself "
-            f"usably expressed, the rate rises to **{su['observed']:.3f}** against a matched "
+            f"usably expressed, the rate {'rises to' if layer == 'clpp' else 'is'} "
+            f"**{su['observed']:.3f}** against a matched "
             f"null of {su['null_mean']:.3f} "
-            f"(p = {su['p_empirical_two_sided']:.3g}) -- the effect is not an artefact of "
-            "counting near-absent isoforms.",
+            f"(p = {su['p_empirical_two_sided']:.3g})"
+            + (" -- the effect is not an artefact of counting near-absent isoforms."
+               if layer == "clpp" else "."),
             "",
             "### The set-level result does not transfer to every gene",
             "",
-            "Two of the twelve fail the abundance qualification entirely, and they are the "
-            "two the manuscript is most tempted to feature. Their anchored isoform -- the "
-            "transcript the disease variant acts through -- sits below 0.5% of the gene's "
-            "long-read output, so no usage correlation computed on it is interpretable. "
-            "Read the confirmation at the level of the splicing-led *set*, which is where "
-            "the matched comparison is made, and do not promote a single locus to a main "
-            "figure on the strength of it.",
-            "",
         ]
+        if layer == "clpp":
+            lines += [
+                "Two of the twelve fail the abundance qualification entirely, and they are the "
+                "two the manuscript is most tempted to feature. Their anchored isoform -- the "
+                "transcript the disease variant acts through -- sits below 0.5% of the gene's "
+                "long-read output, so no usage correlation computed on it is interpretable. "
+                "Read the confirmation at the level of the splicing-led *set*, which is where "
+                "the matched comparison is made, and do not promote a single locus to a main "
+                "figure on the strength of it.",
+                "",
+            ]
+        else:
+            thr = summary["thresholds"]["min_anchored_if"]
+            low = per_gene.loc[~(per_gene["max_anchored_if"] >= thr), "gene_name"]
+            names = ", ".join(sorted(map(str, low)))
+            lines += [
+                f"{len(low)} of {n_tested} genes fail the abundance qualification entirely"
+                + (f" ({names})" if len(low) else "")
+                + f": their anchored isoform never reaches {thr:g} mean isoform fraction in "
+                "long read, so no usage correlation computed on it is interpretable. Read the "
+                "confirmation at the level of the anchored *set*, where the matched comparison "
+                "is made, and not locus by locus.",
+                "",
+            ]
+    ex = summary.get("cross_tissue_exceptions") or {}
+    if ex.get("n_pairs"):
+        bgm = ex.get("matched_background") or {}
+        lines += [
+            "## Cross-tissue exceptions (reviewed, not pooled)",
+            "",
+            f"{', '.join(ex['genes'])}: the colocalizing tissue has no IsoGraph switch pair for "
+            "the gene, so the pair was taken from the regions where the colocalizing junction's "
+            "transcripts ARE switch-pair members (`cross_tissue_regions` in the event table). "
+            "That changes the reading: a switch-like result says these transcripts behave like "
+            "a switch in long-read DLPFC, not that a tissue-matched switch is genetically "
+            "anchored. The pairs are scored by the same code but kept out of the set-level "
+            "comparison above and out of its background.",
+            "",
+            f"- {ex['n_pairs']} pairs; {ex['n_detected']} detected; **{ex['n_switch_like']} "
+            f"switch-like**; {ex['n_switch_like_usable']} of {ex['n_usable']} at usable "
+            f"abundance (max anchored isoform fraction {ex['max_anchored_if']:.3f}).",
+        ]
+        if isinstance(bgm.get("observed"), float):
+            lines.append(
+                f"- Detected-pair switch-like rate {bgm['observed']:.3f} against an "
+                f"abundance-matched background mean of {bgm['null_mean']:.3f} "
+                f"(n = {bgm['n_focal']}; descriptive at this n, not a test).")
+        lines += ["", "Per pair: `exception_pair_confirmation.parquet`.", ""]
     lines += [
         "## Per gene",
         "",
@@ -614,7 +762,7 @@ def _write_anchored_report(
             [
                 "gene_name",
                 "traits",
-                "clpp",
+                summary.get("evidence_column", "clpp"),
                 "anchored_tx",
                 "partner_tx",
                 "t1_mean_if",
@@ -711,6 +859,10 @@ def _write_global_null_report(out_dir: Path, summary: dict) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--mode", choices=["anchored", "global-null"], default="anchored")
+    ap.add_argument("--events", choices=EVENT_LAYERS, default="clpp",
+                    help="anchored mode: coloc layer supplying the anchored events. clpp "
+                         "(default; S-real-8 / Table S14) or signal (coloc.susie all-introns "
+                         "nominations; run coloc_isoform_events --layer signal first)")
     ap.add_argument("--data-dir", default=None, help="long-read matrix dir")
     ap.add_argument("--min-count", type=float, default=5.0,
                     help="per-sample count for a transcript to count as detected")
