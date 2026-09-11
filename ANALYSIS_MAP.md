@@ -68,6 +68,9 @@ that reaches the paper.
 | **Signal-level coloc (`coloc.susie`)** | `real_data/coloc_signal_susie.py` + `_h/22.coloc_gwas_susie.R`, `_h/23.coloc_signal_susie.R` | `_h/22–23` | `_m/coloc_signal_susie/` | *(estimator hierarchy: susie > abf > CLPP)* |
 | **Locus event audit** | `real_data/locus_event_audit.py` (`configs/known_splice_events.yaml`) | `_h/24` | `_m/locus_event_audit/<nominations>/` | *(tiering of UNC13A / PICALM / SNCA)* |
 | **BrainSEQ switch-QTL (S_g) vs abundance-QTL (A_g)** | `real_data/brainseq_switch_qtl.py` | `_h/25` (GPU) | `_m/brainseq_switch_qtl/<arm>/<region>/` | *(same-tissue genetic anchoring, not replication)* |
+| **BrainSEQ QTL checks: S_g reproduction / sign pin, A_g positive control** | `real_data/brainseq_qtl_checks.py` | `_h/28` | `_m/brainseq_switch_qtl/<arm>/checks/` | *(gate before any BrainSEQ QTL result is read)* |
+| **Locus LD robustness audit** | `_h/26.locus_ld_robustness.R` | `_h/26` | `_m/locus_ld_robustness/<analysis>__<LOCUS_ID>/` | *(required before a recovered or headline locus carries a claim)* |
+| **SMR + HEIDI** | `real_data/smr_heidi.py` | `_h/27` | `_m/smr_heidi/<source>/` | *(orthogonal corroboration beneath coloc; GTEx only until BrainSEQ `ea_only` QTL exist)* |
 | Per-gene sQTL-vs-eQTL coloc contrast | `real_data/coloc_modality_contrast.py` + `_h/20.coloc_modality_abf.R` | `_h/19–21` | `_m/coloc_modality_contrast/` | *(run 2026-09-01, 4 arms — **null**; reported as a negative control, no figure)* |
 | S-LDSC partitioned heritability | `real_data/ldsc_annot_prep.py`, `ldsc_summary.py` | `_h/12–14` | `_m/ldsc/ldsc_partitioned.parquet` | Fig 4B |
 | Per-gene deep dive | `real_data/gene_deep_dive.py` | `_h/15` | `_m/deep_dive/` | **Table 2**, S8–S12 |
@@ -82,6 +85,7 @@ that reaches the paper.
 | PSI / junction validation | `real_data/validate_switch_splicing.py` | `_h/03–04` | `_m/switch_validation/` | — |
 | **phASER allelic feasibility screen** | `real_data/ase_switch_direction.py` | *(login)* | `_m/ase_switch_direction/<region>/` | *(gate: is an allele-specific switch test supported at all?)* |
 | Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/05` | `_m/switch_orthogonal_confirm/` | **S-real-8** `figOrthogonalConfirm`, Table S14 |
+| **Orthogonal confirmation, signal-level coloc** | `real_data/coloc_isoform_events.py --layer signal` → `switch_orthogonal_confirm.py --events signal` | `_h/05 --events signal` | `05_genetic_anchoring/_m/coloc_signal_susie/all_introns/coloc_isoform_events.parquet`, `_m/switch_orthogonal_confirm/signal_coloc/` | *(Analysis 6: long-read check over the coloc.susie nominations; the CLPP arm above is unchanged)* |
 | ISA / satuRn concordance | `real_data/isa_concordance.py` | `_h/06` | `_m/isa_concordance/` | **S-real-9** `figIsaConcordance`, Table S15 |
 | Long-read confirmation | `real_data/longread_switch_confirm.py` | `_h/07` | `_m/longread_switch_confirm/` | — |
 | Clinical consequence | `real_data/clinical_consequence[_meta].py` | `_h/08–09` | `_m/clinical_consequence_meta.parquet` | S-real-7 |

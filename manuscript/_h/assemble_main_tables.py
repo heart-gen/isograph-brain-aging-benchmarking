@@ -213,7 +213,11 @@ def main() -> None:
     n_mod = int(((mc > CLPP_STRONG) & (mc <= CLPP_HIGH)).sum())
     legend3 = (
         "**Table 3. Genes where a disease-GWAS-colocalizing sQTL resolves onto an "
-        "IsoGraph switch pair (splicing-led genes).** The 12 genes at which a brain "
+        "IsoGraph switch pair (splicing-led genes; eCAVIAR CLPP layer).** This table "
+        "is the eCAVIAR colocalization layer, retained as orthogonal sensitivity "
+        "evidence; locus nominations rest on the signal-level hierarchy (coloc.susie "
+        "> coloc.abf), reported separately, whose gene list overlaps this one only in "
+        "part. The 12 genes at which a brain "
         "sQTL colocalizing with a GWAS credible set (eCAVIAR CLPP) maps onto an "
         "IsoGraph switch pair -- the DTU-without-DGE class; all 12 lie in GO-invisible "
         "modules. Max CLPP confidence tiers: * suggestive (>0.01, the coloc inclusion "

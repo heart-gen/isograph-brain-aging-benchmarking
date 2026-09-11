@@ -12,7 +12,86 @@ genetically real and disease-relevant.
 
 ---
 
-## Disease variants colocalize onto GO-invisible isoform switches
+## Signal-level colocalization nominates candidate loci, and an event audit bounds them
+
+Source: `05_genetic_anchoring/_m/coloc_signal_susie/all_introns/COLOC_SIGNAL_SUSIE.md`,
+`05_genetic_anchoring/_m/locus_event_audit/susie_all_introns/LOCUS_EVENT_AUDIT.md`
+(regenerated 2026-09-11). *This section is the primary locus-nomination layer. The eCAVIAR (CLPP)
+section that follows is retained as orthogonal sensitivity evidence and must not be quoted as
+signal-level.*
+
+eCAVIAR CLPP multiplies credible-set inclusion probabilities, so it cannot represent a locus
+carrying more than one causal signal and yields individually modest posteriors. We therefore
+re-fine-mapped every GTEx v11 QTL from the all-pairs release with `susie_rss` on the GWAS's own
+1000 Genomes European LD and colocalized signal against signal with `coloc.susie`
+[@doi:10.1371/journal.pgen.1009440], keeping a re-fitted QTL credible set only where it agrees with
+GTEx's own in-sample credible set and falling back to `coloc.abf`
+[@doi:10.1371/journal.pgen.1004383] where either side does not fine-map. The fallback is the
+majority estimator and is reported as such: only 230 of 579 GWAS loci fine-map, and 2,933 of
+42,130 (cell, QTL class) rows — 7.0% — are scored signal against signal. Testing every intron
+phenotype of each gene (the all-introns arm), **42 gene × trait pairs (40 genes) reach
+PP4_sQTL ≥ 0.8** at the prespecified prior $p_{12} = 10^{-5}$; 17 are headlined by `coloc.susie`
+and 25 by `coloc.abf`. Across the $p_{12}$ sweep, 7 calls hold at $10^{-6}$, 20 from
+$5\times10^{-6}$, and 15 only from the primary prior.
+
+Fourteen of the 42 are **sQTL-preferential** (PP4_eQTL < 0.5). That count is a selection — a
+strong sQTL posterior is required first — so it nominates loci rather than estimating splicing
+specificity, and a low eQTL posterior can equally reflect no eQTL, low power, a different causal
+architecture or multiple signals. The unbiased within-gene comparison, run on GTEx's
+representative intron so each gene contributes one phenotype per QTL class, shows no splicing
+preference (21 splicing-only vs 43 expression-only discordant genes, exact McNemar P = 0.008 in
+the expression direction; conditional-posterior Wilcoxon P = 0.33).
+
+**SNCA** is the strongest signal-level nomination. In LBD, PP4_sQTL is 0.974 against PP4_eQTL
+0.113, reaching the call in 11 of 13 tissues, with SuSiE resolving two QTL signals of which only
+one colocalizes — the multi-signal architecture `coloc.abf` cannot represent. The PD signal
+colocalizes with the same intron (chr4:89,835,692–89,836,127; PP4_sQTL 0.974, 8 tissues). Both
+calls sit just below 0.8 at $p_{12} = 10^{-6}$ (PP4 0.79).
+
+**A posterior names a gene, not an event.** An event audit walked each nomination from GWAS signal
+to sQTL signal to intron phenotype to driver transcript, and compared the colocalizing intron with
+curated, coordinate-verified literature events. No locus recovered a known mechanism. The *UNC13A*
+ALS signal (PP4_sQTL 0.961; cerebellum and cerebellar hemisphere) colocalizes at
+chr19:17,630,750–17,632,782, ~9 kb from the intron harbouring the TDP-43-dependent cryptic exon
+[@doi:10.1038/s41586-022-04424-7; @doi:10.1038/s41586-022-04436-3]. GTEx carries an sQTL phenotype
+at that intron in exactly those two tissues and it did not colocalize, so the signal is
+context-distinct from the known event rather than a near miss. *PICALM* (AD) colocalizes only
+under `coloc.abf` on the primary grid (PP4_sQTL 0.818, cortex), because its locus exceeds the
+12,000-SNP fine-mapping limit, and at an intron distinct from the transcriptome-wide-association
+event reported at the locus [@doi:10.1038/s41588-018-0238-1]. In a prespecified 30,000-SNP
+sensitivity arm it colocalizes at signal level on the same intron (PP4 0.813) with an LD-robust
+GWAS fit, but the call falls to 0.30 at $p_{12} = 10^{-6}$. The remaining 40 nominations have no
+curated event and stand as novel splice-led candidates.
+
+**The signal-level anchored switches behave like switches in orthogonal long-read data.** For 64
+events in 24 nominated genes, the colocalizing intron maps onto a transcript of the gene's
+tissue-matched IsoGraph switch pair. Scored in ONT long-read DLPFC (n = 12)
+[@doi:10.1038/s41587-024-02245-9] against IsoGraph switch pairs from other genes matched on
+abundance decile, 0.565 of the 124 detected anchored pairs are switch-like against a matched-null
+mean of 0.238 (95% null interval 0.169–0.315; empirical P = 5 × 10⁻⁴), and 0.672 against 0.298
+among the 61 pairs whose anchored isoform is usably expressed. The mean usage correlation itself
+does not separate from its null (−0.104 vs −0.131, P = 0.50), so the evidence is the rate of
+switch-like pairs read against the compositional background, not the strength of
+anti-correlation. Six genes, SNCA and CTSH among them, never reach usable abundance for the
+anchored isoform, so the confirmation holds for the set, not locus by locus. UNC13A and PICALM
+cannot enter this test: neither has an IsoGraph switch pair in the tissue where it colocalizes.
+
+**SMR agrees with most nominations, as expected, and disagrees at one informative locus.** SMR
+and HEIDI [@doi:10.1038/ng.3538] were run on each nomination's colocalizing intron in every tissue
+where its sQTL call holds, using the same GWAS and GTEx summary statistics as colocalization, so
+agreement is a consistency check rather than independent evidence. Of the 42 nominations, 29 have
+at least one tissue in which the colocalizing intron is SMR-significant (Bonferroni within trait
+and QTL class) without HEIDI rejecting a single shared variant ($p_{HEIDI} \geq 0.01$), including
+SNCA in LBD (11 of 11 tissues), UNC13A (2 of 2) and PICALM (1 of 1); 9 have no cis-QTL instrument
+at $p < 5 \times 10^{-8}$ in any tissue. The disagreement is SNCA in PD: the same intron colocalizes
+in 8 tissues, yet SMR is not significant after correction in 7 (minimum $p_{SMR}$ 1.1 × 10⁻³) and
+HEIDI rejects in the eighth (median $p_{HEIDI}$ 7 × 10⁻¹¹). A HEIDI rejection does not overrule a
+signal-level colocalization, but the PD arm of the shared SNCA event is supported by
+colocalization alone, and the disagreement is reported as such. The HEIDI cut matters: of the 113
+primary tissue probes not rejected at 0.01, 20 would be rejected at 0.05. No `b_SMR` is read as
+causal direction.
+
+## Disease variants colocalize onto GO-invisible isoform switches (eCAVIAR CLPP layer)
 
 Source: `05_genetic_anchoring/_m/coloc/SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md`,
 `05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
