@@ -1,0 +1,7 @@
+panel	panel_n	overlap	source
+rna_filter_passing	444	444	expanded_sample_table
+all_samples	2438	420	/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl/all_samples/chr22.psam
+ea_only	1578	229	/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl/ea_only/chr22.psam
+aa_only	526	191	/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl/aa_only/chr22.psam
+ea_aa_samples	2104	420	/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl/ea_aa_samples/chr22.psam
+legacy_AA_EA	1938	436	/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/inputs/raw/brainseq/genotypes/TOPMed_LIBD.psam

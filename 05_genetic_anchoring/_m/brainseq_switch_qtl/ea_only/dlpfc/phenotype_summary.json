@@ -1,0 +1,39 @@
+{
+  "region": "dlpfc",
+  "arm": "ea_only",
+  "n_samples_pre_genotype": 397,
+  "n_samples": 169,
+  "n_donors": 169,
+  "filters": "Dataset=BrainSeq_Phase2_DLPFC, dropped!='t', Age > 13, all diagnoses",
+  "expression_filter": "gene CPM>=1 in >=17 samples",
+  "transcript_filter": "count > 10 in >= 70% of samples (run_models._filter_expressed_transcripts, as in discovery)",
+  "n_transcripts_expressed_genes": 235167,
+  "n_transcripts_after_tx_filter": 59981,
+  "dx": {
+    "Control": 100,
+    "SCZD": 68,
+    "MDD": 1
+  },
+  "race": {
+    "CAUC": 169
+  },
+  "covariates": [
+    "SNP_PC1",
+    "SNP_PC2",
+    "SNP_PC3",
+    "SNP_PC4",
+    "SNP_PC5",
+    "Sex",
+    "Dx",
+    "RIN",
+    "mito_rate",
+    "mapping_rate"
+  ],
+  "cis_window": 1000000,
+  "n_switch_genes": 11518,
+  "n_abundance_genes": 20734,
+  "expr_n_genes_before": 78932,
+  "expr_n_genes_after": 20783,
+  "expr_n_transcripts_before": 384354,
+  "expr_n_transcripts_after": 235167
+}
