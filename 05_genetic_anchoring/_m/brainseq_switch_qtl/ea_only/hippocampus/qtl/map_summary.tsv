@@ -1,0 +1,3 @@
+modality	label	n_phenotypes	n_sig_q05	n_donors	n_covariates	n_hidden_factors
+switch	S_g	10605	523	175	41	30
+abundance	A_g	18694	4057	175	41	30
