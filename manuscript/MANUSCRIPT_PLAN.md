@@ -28,7 +28,8 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 250/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 23 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 4/4 pheno-sig SCZD modules GO-invisible (M026/M020/M010/M023), all carry real anticorrelated switch pairs, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
 | QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio **1.111 pheno-sig (p=3.6e-4)**, all 1.068 (p=1.3e-5); GO-invisible 1.068 (p=0.077) and GO-visible 1.084 (p=0.050) indistinguishable — **no GO-invisible localisation**; IsoGraph-only vs matched WGCNA baselines | Strong (matched-baseline null) | Matched-baseline null (primary control); IVW+DL meta; 2026-08-29 refresh — never quote earlier numbers | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
-| Colocalization / deep-dive | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
+| Colocalization / deep-dive (**eCAVIAR CLPP layer**, retained as orthogonal sensitivity evidence) | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
+| **Signal-level colocalization + event audit** (primary nomination layer, 2026-09-11) | Which loci colocalize signal-against-signal, and do they name the literature event? | GTEx v11 all-pairs re-fine-mapped; `coloc.susie` > `coloc.abf` > CLPP; 5 GWAS | 42 gene × trait nominations (40 genes); 14 sQTL-preferential (a selected set — paired McNemar/Wilcoxon shows no splicing preference); 7.0% of (cell, modality) rows signal-level, 25/42 headlines abf; tiers 0 known / 1 context-distinct (UNC13A) / 1 disease-locus-linked (PICALM) / 40 novel; SNCA LBD PP4_sQTL 0.974 vs eQTL 0.113, 11/13 tissues | Moderate (fallback-heavy; 15/42 calls hold only at the primary prior) | GTEx credible-set agreement filter; p12 sweep; locus LD audit; curated-event testability read from GTEx all-pairs | CLI + SLURM | `05_genetic_anchoring/_m/coloc_signal_susie/`, `_m/locus_event_audit/` |
 | Partitioned heritability (S-LDSC) | Does switch layer carry disease heritability? | baselineLD v2.2 × 5 traits | Aging sQTL annotation enriched all neurodeg traits (LBD 7.17×, PD 3.80×, AD 3.37×, ALS 2.96×, SCZ 1.74×); disease-SCZ is eQTL-led | Moderate–strong | Single- + joint-annotation models | `05_genetic_anchoring/_m/ldsc/` | `LDSC_SUMMARY.md` |
 | GWAS/MAGMA resolution | Is module-GWAS enrichment a size artifact? | MAGMA per module | At res 5.0 giant-module artifact disappears (0/8 sig giant vs 18/43 res2.0, 79/99 gene-level WGCNA); SCZ signal survives 6 regions | Strong (artifact control) | Resolution sweep + WGCNA comparison | CLI + SLURM | `GWAS_RESOLUTION_SUMMARY.md`, `figGwasResolution` |
 | Switch consequence | What do the switches do structurally? | Within-gene perm null | Only productive UTR (1.27×, 10/10) + CDS (1.04×, 10/10) enriched; degradative classes never; identical in GO-invisible | Strong | Within-gene perm null; Fisher-combined | CLI + SLURM | `SWITCH_CONSEQUENCE_SUMMARY.md` |
@@ -76,11 +77,11 @@ corroborating it.
 **Limitations:** estimand is the *contrast* not raw OR (co-switch genes cis-QTL depleted for both); cis-sQTL anchors member-gene splicing, not the coordination itself; bulk GTEx under-samples cell-type-specific splicing.
 **Repository sources:** `QTL_ANCHORING_SUMMARY.md`.
 
-#### Finding 4: Disease variants colocalize onto GO-invisible isoform switches; SNCA is the coherent exemplar
-**Evidence status:** Supported at set level; suggestive per-gene.
-**Key quantitative evidence:** 12/12 splicing-led genes GO-invisible; SNCA risk alleles for LBD (rs7680557) and PD (rs1471483) both raise usage of the same alt-first-exon junction on one switch pair.
-**Validation:** GTEx-tissue-matched concordance (9 events, 2-bp junction floor); cross-disease concordance; curated literature layer (4 genes with matching known isoform biology).
-**Limitations:** eCAVIAR posteriors modest (max 0.39); per-gene claims suggestive — defensible claim is the *set-level pattern*.
+#### Finding 4: Disease variants colocalize onto candidate isoform switches; SNCA is the coherent exemplar
+**Evidence status:** Supported at set level; locus nominations per gene. *(Revised 2026-09-11: the primary nomination layer is signal-level colocalization; the eCAVIAR numbers are the sensitivity layer.)*
+**Key quantitative evidence:** signal-level hierarchy (`coloc.susie` > `coloc.abf` > CLPP): 42 gene × trait nominations, 14 sQTL-preferential (a selected set); SNCA LBD PP4_sQTL 0.974 vs eQTL 0.113 in 11/13 tissues, PD 0.974 on the same intron. eCAVIAR layer: 12/12 splicing-led genes GO-invisible (descriptive, n = 12); SNCA risk alleles for LBD (rs7680557) and PD (rs1471483) both raise usage of the same alt-first-exon junction on one switch pair.
+**Validation:** event audit against curated, coordinate-verified events (0 known mechanisms recovered; UNC13A context-distinct; PICALM disease-locus-linked); GTEx credible-set agreement filter; p12 sweep; GTEx-tissue-matched concordance (9 CLPP events, 2-bp junction floor); cross-disease concordance.
+**Limitations:** only 7.0% of (cell, modality) rows fine-map on both sides and 25/42 headlines are `coloc.abf`; 15/42 calls hold only at the primary prior; the paired within-gene modality test shows no splicing preference; UNC13A and PICALM are **not** recovered mechanisms; eCAVIAR posteriors modest (max 0.39). Defensible claim is the *set-level pattern* plus locus nominations.
 **Repository sources:** `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/`.
 
 #### Finding 5: IsoGraph's real-data modules are reproducible and replicate aging associations
@@ -232,7 +233,7 @@ corroborating it.
 **Central claim:** A shared SNCA alt-first-exon switch underlies LBD+PD risk.
 **Supporting evidence:** SNCA cross-disease concordance.
 **Advantages:** concrete, memorable.
-**Weaknesses:** single locus, modest CLPP; overweights one gene.
+**Weaknesses:** single locus; strong at signal level (PP4_sQTL 0.974 in LBD) but just below the call at p12 = 1e-6, with no functional or allelic test; overweights one gene.
 **Why not preferred:** the strength is set-level coherence, not one locus.
 **Evidence that could make it preferable:** high-posterior functional validation of the SNCA switch (not in repo).
 
@@ -301,10 +302,10 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Role: headline orthogonal validation. Transition: "which variants, on which switches?"
 - Confidence: High.
 
-### Results 5: Disease variants resolve onto specific isoform switches (Fig 4)
-- Evidence: 12 splicing-led all GO-invisible; SNCA LBD+PD alt-first-exon; RBP regulons (S-real-6); clinical consequence (S-real-7).
-- Role: biological payoff. Transition: "do risk loci converge as a program in disease?"
-- Confidence: Moderate (set-level).
+### Results 5: Disease variants colocalize with candidate isoform switches (Fig 4)
+- Evidence: signal-level colocalization (42 nominations, 14 sQTL-preferential; `coloc.susie` > `coloc.abf` > CLPP) with the event audit (0 known mechanisms recovered; UNC13A context-distinct; PICALM disease-locus-linked); SNCA LBD+PD on the same intron at signal level; eCAVIAR layer as sensitivity (12 splicing-led, all GO-invisible); RBP regulons (S-real-6); clinical consequence (S-real-7).
+- Role: biological payoff. Transition: "do risk loci converge as a program in disease?" — answered no: module-level convergence is null for all five traits.
+- Confidence: Moderate (set-level; locus nominations, not causal assignments).
 
 ### Results 6 (NEW): Age-sensitive switch programs are disrupted in schizophrenia
 

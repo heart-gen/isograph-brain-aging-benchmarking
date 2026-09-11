@@ -15,8 +15,9 @@ for each number is in the appendix.
 | --- | --- | --- |
 | Splicing-specificity contrast, phenotype-associated modules | **1.111** (95% CI 1.048–1.177), p = 3.6e-4, I² = 0.23 | Matched WGCNA baselines on *identical* features: null (switch-only 1.015 p = 0.74; multiplex 1.044 p = 0.070) |
 | Same contrast, IsoGraph-only method effect (13 shared tissues) | **1.112**, p = 6.5e-4 | Isolates VAE + Leiden inference from the feature matrix |
-| Long-read confirmation, genetically anchored pairs | switch-like **0.453 vs matched null 0.252**, p = 5e-4 (n = 53 detected pairs) | Abundance-decile-matched pairs from the *same genes*, *same samples*, *same code* |
+| Long-read confirmation, genetically anchored pairs (eCAVIAR layer) | switch-like **0.453 vs matched null 0.252**, p = 5e-4 (n = 53 detected pairs) | Abundance-decile-matched IsoGraph switch pairs from *other* genes, *same samples*, *same code* |
 | …restricted to usably expressed anchored isoforms | **0.600 vs 0.304**, p = 5e-4 (n = 30) | as above |
+| Long-read confirmation, anchored pairs from the **signal-level nominations** (2026-09-11) | switch-like **0.565 vs 0.238**, p = 5e-4 (n = 124 detected pairs, 24 genes); usable only **0.672 vs 0.298** (n = 61) | as above; a separate arm, not pooled with the eCAVIAR pairs. UNC13A and PICALM cannot enter: neither has a switch pair in the tissue where it colocalizes |
 | Module trust funnel | **250/266** chance-trusted (94%), 6 regions | Split-half permutation null |
 | Cross-cohort aging replication | **23/130**, matching-permutation p = 0.034 | Independent cohorts, different quantifiers |
 | Switch consequence | UTR-remodeled **1.279** (9/9 regions), CDS-changed **1.044** (9/9); NMD, biotype and coding-status all *depleted* | Within-gene permutation null |
@@ -53,50 +54,69 @@ not the first move.
 **This should run before either wet-lab arm, and most of it is already computed.** The plan as
 first drafted went straight to the bench; that was premature.
 
-### 0.4.1 The anchored gene list is built on the wrong statistic
+### 0.4.1 The anchored gene list was built on the wrong statistic — now re-anchored
 
 The 12-gene list in §1.1 comes from **CLPP** (eCAVIAR-style), where the best non-CTSH value is
-0.093. But `coloc.abf` over the GTEx v11 all-pairs data has *already been run* for the switch
-arm — 1,647 gene × trait cells over 1,156 genes — and it is far more informative:
+0.093. *(Rewritten 2026-09-11.)* The first version of this section re-anchored on the
+`coloc.abf` posteriors in `coloc_modality_contrast/` and read the result as splicing-specific
+recovery of UNC13A and PICALM. The co-author review asked for signal-level colocalization, an
+event-level audit, and sQTL-preferential rather than splice-specific language. All three are now
+implemented, and the UNC13A / PICALM reading did not survive them.
 
-| | CLPP (current list) | coloc.abf PP4 (already in repo) |
+**Estimator hierarchy: `coloc.susie` > `coloc.abf` > CLPP.** `coloc.susie` on re-fine-mapped GTEx
+v11 QTL (a re-fit credible set is kept only where it agrees with GTEx's own), `coloc.abf` where
+either side does not fine-map (flagged with a `fallback_reason`, never dropped), and CLPP kept as
+orthogonal sensitivity evidence. Only 230 of 579 GWAS loci fine-map and 7.0% of (cell, modality)
+rows are scored at signal level, so the fallback is the majority estimator.
+
+| | CLPP (§1.1 list) | signal-level hierarchy, all-introns arm (PP4 sQTL / eQTL, estimator) |
 | --- | --- | --- |
-| SNCA (LBD) | 0.038 | **0.975 sQTL / 0.113 eQTL** |
-| PGS1 (ALS) | 0.093 | **0.976 / 0.165** |
-| CDIP1 (SCZ) | 0.028 | **0.935 / 0.761** |
-| TPCN1 (AD) | 0.011 | **0.804 / 0.418** |
-| CTSH (AD) | 0.386 | 0.989 / 0.993 — colocalizes for *both* modalities |
+| SNCA (LBD) | 0.038 | **0.974 / 0.113**, `coloc.susie`, 11/13 tissues |
+| PGS1 (ALS) | 0.093 | **0.976 / 0.165**, `coloc.abf` (no GWAS credible set), 13/13 |
+| CDIP1 (SCZ) | 0.028 | 0.949 / 0.854, `coloc.susie` |
+| TPCN1 (AD) | 0.011 | 0.861 / 0.819, `coloc.susie` |
+| CTSH (AD) | 0.386 | 0.989 / 0.993, `coloc.abf` — colocalizes for *both* modalities |
 
-**Forty gene × trait cells reach PP4_sQTL ≥ 0.8, and 13 of them are splicing-specific**
-(PP4_sQTL ≥ 0.8 with PP4_eQTL < 0.5) — the exact pattern the paper's thesis predicts, at the
-per-locus resolution the paper currently says it lacks:
+**42 gene × trait cells (40 genes) reach PP4_sQTL ≥ 0.8, and 14 are sQTL-preferential**
+(PP4_eQTL < 0.5). That is sQTL-preferential colocalization under prespecified thresholds — strong
+evidence for sQTL colocalization without comparable evidence for eQTL colocalization — and **not**
+splice-specific mediation: a low eQTL PP4 can reflect no eQTL, no power, a different causal
+architecture, or multiple signals.
 
-| Gene | Trait | PP4 sQTL | PP4 eQTL | Gap |
-| --- | --- | --- | --- | --- |
-| SNCA | LBD | 0.975 | 0.113 | 0.862 |
-| KLC1 | SCZ | 0.855 | 0.033 | 0.822 |
-| PLCB2 | SCZ | 0.975 | 0.157 | 0.818 |
-| PGS1 | ALS | 0.976 | 0.165 | 0.811 |
-| NDUFS3 | AD | 0.864 | 0.099 | 0.765 |
-| AZI2 | PD | 0.803 | 0.145 | 0.658 |
-| **UNC13A** | ALS | 0.970 | 0.377 | 0.594 |
-| TXNDC15 | ALS | 0.969 | 0.379 | 0.590 |
-| SPAG9 | AD | 0.839 | 0.298 | 0.540 |
-| WIPI2 | ALS | 0.893 | 0.478 | 0.414 |
-| TPCN1 | AD | 0.804 | 0.418 | 0.386 |
-| ASB3 | SCZ | 0.859 | 0.478 | 0.382 |
-| **PICALM** | AD | 0.818 | 0.491 | 0.327 |
+| Gene | Trait | PP4 sQTL | PP4 eQTL | estimator | call holds from p12 |
+| --- | --- | --- | --- | --- | --- |
+| GABBR2 | SCZ | 0.976 | 0.085 | susie | 1e-6 |
+| PGS1 | ALS | 0.976 | 0.165 | abf | 1e-6 |
+| PLCB2 | SCZ | 0.975 | 0.157 | abf | 5e-6 |
+| SNCA | LBD | 0.974 | 0.113 | susie | 5e-6 |
+| SNCA | PD | 0.974 | 0.382 | susie | 5e-6 |
+| TXNDC15 | ALS | 0.969 | 0.379 | abf | 5e-6 |
+| **UNC13A** | ALS | 0.961 | 0.377 | susie | 5e-6 |
+| WIPI2 | ALS | 0.893 | 0.478 | abf | 5e-6 |
+| KLC1 | SCZ | 0.882 | 0.033 | susie | 1e-5 |
+| NDUFS3 | AD | 0.864 | 0.099 | abf | 1e-5 |
+| ASB3 | SCZ | 0.859 | 0.478 | abf | 1e-5 |
+| SPAG9 | AD | 0.839 | 0.298 | abf | 1e-5 |
+| **PICALM** | AD | 0.818 | 0.491 | abf | 1e-5 |
+| AZI2 | PD | 0.803 | 0.145 | abf | 1e-5 |
 
-**UNC13A and PICALM are the result to lead with.** UNC13A's ALS risk is *known* to act through
-splicing — the TDP-43-dependent cryptic exon — and PICALM is an established AD gene with a
-described splicing mechanism. An unsupervised switch-module method independently recovering
-both, splicing-specifically, is a known-biology positive control the paper is not currently
-using. Report them as recovery of established mechanism, not as discovery.
+**UNC13A and PICALM are not recovered mechanisms.** The event audit
+(`05_genetic_anchoring/_m/locus_event_audit/susie_all_introns/`) walks GWAS signal → sQTL signal →
+intron phenotype → driver transcript against curated, coordinate-verified literature events:
 
-**Caveat to state plainly:** conditioning on PP4_sQTL ≥ 0.8 and then observing PP4_eQTL < 0.5
-is a selection, so 13/40 is not an unbiased splicing-specificity estimate — §0.2 counter-line 1
-remains the unbiased test and remains null. These 13 are *locus nominations*, which is a
-different and legitimate job.
+| Tier | Loci |
+| --- | --- |
+| `known_mechanism_recovered` | none |
+| `context_distinct_splice_colocalization` | **UNC13A** — colocalizes at chr19:17,630,750-17,632,782 in cerebellum and cerebellar hemisphere; the TDP-43 cryptic-exon intron 20 (chr19:17,641,557-17,642,844) is testable in exactly those two tissues and does not colocalize |
+| `disease_locus_splice_linked` | **PICALM** — `coloc.abf` only on the primary grid (locus over the 12,000-SNP guard), at an intron ~45 kb from the TWAS-anchored AD event, which could not promote in any case. In the 30,000-SNP sensitivity arm it reaches `context_distinct` at PP4 0.813: LD-robust, but prior-sensitive (0.303 at p12 = 1e-6) |
+| `novel_splice_led_candidate` | the other 40, including SNCA |
+
+**Caveat to state plainly:** conditioning on PP4_sQTL ≥ 0.8 and then observing PP4_eQTL < 0.5 is a
+selection, so 14/42 is not an unbiased splicing-specificity estimate. The unbiased test is the
+paired within-gene comparison, and it shows no splicing preference at signal level either
+(representative arm, pooled: 21 splicing-only vs 43 expression-only discordant genes, McNemar
+P = 0.008 in the *expression* direction; conditional-posterior Wilcoxon P = 0.33). These 14 are
+*locus nominations*, which is a different and legitimate job.
 
 ### 0.4.2 BrainSEQ junction QTLs — the highest-value item on this page
 
@@ -107,8 +127,9 @@ alongside the PSI/junction tables the SNCA test already used.
 
 | | GTEx brain | BrainSEQ |
 | --- | --- | --- |
-| n per region | ~181–300 | **452–500** (caudate 487, DLPFC 500, hippocampus 452) |
-| Cohort | different from discovery | **same cohort the switches were discovered in** |
+| n per region | ~181–300 | junction phenotypes 452–500 (caudate 487, DLPFC 500, hippocampus 452); **switch-QTL arm 420 / 360 / 362 genotyped donors** (caudate / DLPFC / hippocampus, `Age > 13`, not dropped) |
+| Cohort | different from discovery | **same cohort the switches were discovered in** — same-tissue genetic anchoring, *not* independent replication |
+| Ancestry | predominantly European | roughly half African-ancestry — anything colocalized against the EUR GWAS needs the EA-only arm |
 | Regions | broad, shallow | caudate / DLPFC / hippocampus, matched to the aging arm |
 
 Mapping junction QTLs in BrainSEQ gives ~1.7–2× the donors, in the same tissue, on the same
@@ -116,26 +137,36 @@ junctions, in the cohort that generated the hypothesis. It is the single most di
 both counter-line 1 (per-gene power) and counter-line 3 (S-LDSC splicing power), it needs no
 new samples, and it is compute-only.
 
-### 0.4.3 SMR + HEIDI
+### 0.4.3 SMR + HEIDI — corroboration beneath coloc, not a co-equal test
 
-Worth adding, as a complement rather than a replacement:
+*(Revised 2026-09-11 per co-author review; built as `05_genetic_anchoring/_h/27.smr_heidi.sh`.)*
+Scoped to the signal-level nominations, on GTEx v11 QTL with 1000G EUR LD. What it adds, and what
+it may not be read as:
 
-- gives a **directional effect estimate**, which coloc does not;
-- **HEIDI** discriminates a shared causal variant from linkage — the objection coloc handles
-  only through PP3/PP4 balance;
-- pairs naturally with the **SuSiE fine-mapping GTEx v11 already ships**
-  (`*.v11.sQTLs.SuSiE_summary.parquet`), so the instrument selection is not hand-rolled.
-
-Assumptions to respect: SMR assumes a single causal variant per probe, and HEIDI is
-underpowered at small n — so run it *with* coloc, and disagreements are informative rather than
-embarrassing.
+- **`b_SMR` is a signed ratio-type estimate** relating genetically predicted molecular phenotype
+  to disease under a single-causal-variant, no-pleiotropy model. It does **not** establish causal
+  direction in the biological sense and cannot distinguish causality from horizontal pleiotropy.
+  For an intron-excision probe the sign is also compositional within its LeafCutter cluster.
+- **HEIDI** tests compatibility with one shared causal variant versus distinct linked variants.
+  **Failing to reject HEIDI is not proof of sharing**, especially at GTEx brain n.
+- **A HEIDI rejection does not overrule a strong multi-signal colocalization**, and SMR
+  significance does not promote a locus coloc did not support. Disagreements are reported as
+  disagreements (`agreement` categories in `SMR_HEIDI.md`).
+- **BrainSEQ QTL are not used** until an EA-only mapping exists: the cohort is roughly half
+  African-ancestry, and its LD does not match the EUR GWAS or the 1000G EUR panel.
 
 ### 0.4.4 Revised order
 
-1. Re-anchor the locus list on `coloc.abf` PP4 rather than CLPP — **already computed**, a
-   re-analysis, not a run.
-2. Map BrainSEQ junction QTLs; repeat the anchoring and the per-gene modality contrast there.
-3. SMR + HEIDI on both QTL sources.
+1. ~~Re-anchor the locus list on `coloc.abf` PP4 rather than CLPP.~~ **Done 2026-09-11 at signal
+   level** (§0.4.1), with the event audit and the long-read check re-run on the new nominations
+   (§0.1).
+2. Map BrainSEQ switch and junction QTLs; repeat the anchoring and the per-gene modality contrast
+   there. Same-tissue genetic anchoring, not replication; the EA-only arm is required for anything
+   colocalized against the EUR GWAS.
+3. ~~SMR + HEIDI on both QTL sources.~~ **GTEx done 2026-09-11** (§0.4.3): 29/42 nominations have a
+   tissue where the colocalizing intron is SMR-significant with HEIDI not rejected; SNCA/PD
+   disagrees (not significant in 7 of 8 tissues, HEIDI rejects in the eighth). BrainSEQ waits for
+   EA-only QTL.
 4. **Only then** decide how much wet-lab is still needed. Steps 1–3 may reduce Experiment A to
    a single confirmatory reporter assay on SNCA, or make it unnecessary for the resource claim.
 
@@ -187,8 +218,9 @@ intersection and say why.**
   limitation. Quoting it as a reason not to assay the gene was an error.)* The short-read
   junction test puts minor-form usage at **0.188 in DLPFC** and **0.234 in caudate**, with
   **99.5% of 222 donors** above the 5% threshold — a well-measured, well-used switch. Paired
-  with `coloc.abf` PP4_sQTL **0.975** vs PP4_eQTL **0.113** for LBD (§0.4), SNCA has the best
-  joint genetic and expression evidence of any locus here.
+  with signal-level `coloc.susie` PP4_sQTL **0.974** vs PP4_eQTL **0.113** for LBD in 11/13
+  tissues (§0.4.1; the call sits just below 0.8 at p12 = 1e-6), SNCA has the best joint genetic
+  and expression evidence of any locus here.
 
 ### 1.3 Assay, chosen from the consequence data
 
@@ -371,11 +403,13 @@ plausible SDs, which brackets the bulk effects.
 
 ### 3.1 If you run one thing
 
-**Experiment 0 (§0.4) — the computational genetics, not the bench.** Re-anchoring on the
-`coloc.abf` posteriors already sitting in the repo costs a re-analysis and replaces a CLPP list
-topping out at 0.093 with 13 splicing-specific loci at PP4 ≥ 0.8, including UNC13A and PICALM.
-Mapping BrainSEQ junction QTLs costs compute and attacks both of the counter-lines a reviewer
-will press hardest. Neither needs a sample.
+**Experiment 0 (§0.4) — the computational genetics, not the bench.** *(Updated 2026-09-11.)* The
+re-anchoring is done, at signal level: it replaces a CLPP list topping out at 0.093 with 42
+nominations at PP4_sQTL ≥ 0.8, 14 of them sQTL-preferential, and an event audit that recovers no
+known mechanism — UNC13A is context-distinct from its cryptic exon, and PICALM is not signal-level
+on the primary grid. What remains is mapping BrainSEQ switch QTL — same-tissue genetic anchoring in
+the discovery cohort, not independent replication — which costs compute and attacks both of the
+counter-lines a reviewer will press hardest. Neither needs a sample.
 
 ### 3.2 If you run two
 
@@ -428,7 +462,11 @@ BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work
 | S-LDSC tau p-values | `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` |
 | BrainSEQ phASER ASE (transcript-level `gene_ae`, haplotypic counts, phasing) | `/ocean/projects/bio260021p/shared/resources/processed-data/ase-files/{caudate,dlpfc,hippocampus}/` — 578 GB; see `ASE_GENERATION.md` |
 | Power tables | Computed 2026-09-09; two-sample t and Fisher-z, α = 0.05 two-sided, power = 0.80 |
-| coloc.abf PP4 (all 40 strong hits, 13 splicing-specific) | `05_genetic_anchoring/_m/coloc_modality_contrast/genes.parquet`, switch arm — 1,647 cells / 1,156 genes over GTEx v11 all-pairs |
+| *(superseded)* coloc.abf PP4 (40 strong hits, 13 sQTL-preferential) | `05_genetic_anchoring/_m/coloc_modality_contrast/genes.parquet`, switch arm — 1,647 cells / 1,156 genes over GTEx v11 all-pairs |
+| Signal-level nominations (42, 14 sQTL-preferential), descriptors, paired contrast | `05_genetic_anchoring/_m/coloc_signal_susie/all_introns/{genes,cells_hierarchy}.parquet`; contrast in `05_genetic_anchoring/_m/coloc_signal_susie/contrast.parquet` (representative arm) — regenerated 2026-09-11 |
+| Event-audit tiers, curated-event testability | `05_genetic_anchoring/_m/locus_event_audit/susie_all_introns/`; PICALM sensitivity tier in `susie_all_introns__max_snps_30000/` |
+| SMR + HEIDI agreement (29/42; SNCA/PD disagreement) | `05_genetic_anchoring/_m/smr_heidi/gtex/{smr_results.parquet,SMR_HEIDI.md}` |
+| Signal-level long-read 0.565 / 0.238, 0.672 / 0.298 | `06_switch_mechanism/_m/switch_orthogonal_confirm/signal_coloc/anchored_summary.json` |
 | SNCA minor-form usage 0.188, 99.5% of 222 donors | `06_switch_mechanism/_m/junction_coloc_confirm/junction_confirm.parquet` |
 | BrainSEQ genotypes | `inputs/raw/brainseq/genotypes/TOPMed_LIBD.{pgen,pvar,psam}` (TOPMed-imputed, PLINK2) |
 | GTEx v11 sQTL SuSiE fine-mapping | `/ocean/projects/bio250020p/shared/resources/public-data/gtex_v11/GTEx_Analysis_v11_sQTL/*.SuSiE_summary.parquet` |
