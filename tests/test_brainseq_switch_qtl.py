@@ -171,3 +171,25 @@ def test_the_agreed_sample_filter_is_what_the_code_applies():
     assert "Dx" in QTL_COVARIATES, "expanded cohort mixes diagnoses; Dx must be adjusted"
     for pc in ("SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"):
         assert pc in QTL_COVARIATES, "admixed cohort needs genotype PCs"
+
+
+def test_a_sub_panel_arm_uses_its_own_genotype_pcs():
+    """EA-only mapping adjusts for PCs computed within the EA panel, not the multi-ancestry
+    PCs the bundle carries; all_samples keeps the bundle PCs untouched."""
+    from isograph_benchmark.real_data.brainseq_switch_qtl import arm_genotype_pcs
+    samples = pd.DataFrame({"BrNum": ["Br1", "Br2"], "RIN": [7.0, 8.0],
+                            "SNP_PC1": [0.5, -0.5], "SNP_PC2": [0.1, 0.2]})
+    ea = pd.DataFrame({"#IID": ["Br2", "Br1", "Br9"], "PC1": [0.02, 0.01, 0.0],
+                       "PC2": [0.3, 0.4, 0.0]})
+    assert arm_genotype_pcs(samples, "all_samples") is samples
+    out = arm_genotype_pcs(samples, "ea_only", pcs=ea).set_index("BrNum")
+    assert out.loc["Br1", "SNP_PC1"] == 0.01 and out.loc["Br2", "SNP_PC2"] == 0.3
+    assert out.loc["Br1", "RIN"] == 7.0
+
+
+def test_a_donor_without_sub_panel_pcs_is_refused_not_imputed():
+    from isograph_benchmark.real_data.brainseq_switch_qtl import arm_genotype_pcs
+    samples = pd.DataFrame({"BrNum": ["Br1", "Br2"], "SNP_PC1": [0.5, -0.5]})
+    ea = pd.DataFrame({"#IID": ["Br1"], "PC1": [0.01]})
+    with pytest.raises(SystemExit):
+        arm_genotype_pcs(samples, "ea_only", pcs=ea)

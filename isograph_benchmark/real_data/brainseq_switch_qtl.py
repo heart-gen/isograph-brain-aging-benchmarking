@@ -218,6 +218,40 @@ def reconcile_genotype_panels(region: str) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# Genotype PCs per arm. `all_samples` keeps the discovery bundle's multi-ancestry PCs (the
+# same PCA the rest of the repo adjusts for, so its committed results reproduce). A
+# sub-panel arm must use PCs computed WITHIN that panel: in an EA-only model the
+# multi-ancestry PCs spend their leading axes on the AA/EA split the arm has already
+# removed, and leave the within-EA structure unadjusted.
+ARM_PCS: dict[str, Path | None] = {
+    "all_samples": None,
+    "ea_only": _GENO_ROOT / "genetic_similarity" / "ea_only" / "TOPMed_LIBD.EA.eigenvec",
+}
+
+
+def arm_genotype_pcs(samples: pd.DataFrame, arm: str,
+                     pcs: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Swap in the arm's own genotype PCs (`SNP_PC*`), keyed by BrNum. Refuses a donor
+    without them rather than letting a median fill stand in for ancestry."""
+    f = ARM_PCS.get(arm)
+    if f is None:
+        return samples
+    if pcs is None:
+        if not f.exists():
+            raise SystemExit(f"missing {arm} genotype PCs: {f}")
+        pcs = pd.read_csv(f, sep="\t")
+    pcs = pcs.rename(columns={"#IID": "BrNum", **{f"PC{i}": f"SNP_PC{i}" for i in range(1, 11)}})
+    pc_cols = [c for c in pcs.columns if c.startswith("SNP_PC")]
+    pcs = pcs[["BrNum", *pc_cols]].assign(BrNum=lambda x: x["BrNum"].astype(str))
+    out = (samples.drop(columns=[c for c in samples.columns if c.startswith("SNP_PC")])
+                  .assign(BrNum=lambda x: x["BrNum"].astype(str))
+                  .merge(pcs, on="BrNum", how="left"))
+    n_missing = int(out["SNP_PC1"].isna().sum())
+    if n_missing:
+        raise SystemExit(f"{n_missing} {arm} donors have no {arm} genotype PCs in {f}")
+    return out
+
+
 def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
     """Recompute S_g / A_g on the expanded set and write tensorQTL BED phenotypes."""
     from isograph.features.channels import gene_feature_channels
@@ -237,6 +271,7 @@ def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
     samples = samples[samples["BrNum"].astype(str).isin(geno)].copy()
     if samples.empty:
         raise SystemExit(f"no genotyped samples for {region}/{arm}")
+    samples = arm_genotype_pcs(samples, arm)
 
     src = rel("inputs", "processed", "brainseq", region)
     tx = pd.read_parquet(src / "tx_counts.parquet")
@@ -260,6 +295,17 @@ def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
     gene_feature, gene_matrix, tx_feature, tx_matrix, expr_stats = \
         _restrict_to_expressed_genes(gene_feature, gene_matrix, tx_feature, tx_matrix,
                                      gene_keep)
+
+    # The SAME transcript filter the discovery fits apply before the switch coordinate
+    # (`run_models._filter_expressed_transcripts`: count > 10 in >= 70% of samples), computed
+    # here over the QTL sample set. Omitting it is not a detail: CLR PC1 over every annotated
+    # transcript of an expressed gene is dominated by near-zero isoforms. On the discovery
+    # libraries the unfiltered coordinate matched the discovery S_g at median |r| 0.36, the
+    # filtered one at 1.000 (2026-09-11, `brainseq_qtl_checks --stage signpin`). It changes only
+    # the switch channel; A_g is read from the gene counts below.
+    from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+    n_tx_expressed_genes = int(tx_matrix.shape[0])
+    tx_matrix, tx_feature = _filter_expressed_transcripts(tx_matrix, tx_feature)
 
     # Deterministic per-gene transforms; `design=None` because covariates enter the QTL
     # model, not the phenotype (the 2026-06-28 covariate-adjustment policy).
@@ -295,6 +341,10 @@ def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
         "filters": f"Dataset={_region_dataset(region)}, dropped!='t', "
                    f"Age {'>=' if AGE_INCLUSIVE else '>'} {AGE_MIN:g}, all diagnoses",
         "expression_filter": expr_note,
+        "transcript_filter": ("count > 10 in >= 70% of samples "
+                              "(run_models._filter_expressed_transcripts, as in discovery)"),
+        "n_transcripts_expressed_genes": n_tx_expressed_genes,
+        "n_transcripts_after_tx_filter": int(tx_matrix.shape[0]),
         "dx": samples["Dx"].value_counts().to_dict(),
         "race": samples["Race"].value_counts().to_dict(),
         "covariates": list(QTL_COVARIATES),
