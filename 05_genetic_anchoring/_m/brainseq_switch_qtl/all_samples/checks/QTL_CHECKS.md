@@ -6,11 +6,13 @@ Two checks required before any BrainSEQ QTL result is read. Neither modifies the
 
 `S_g` is PC1 of a within-gene CLR composition, oriented by `stable_sign` on the largest loading; recomputed on the expanded QTL cohort it can land on the opposite sign from the discovery fit. Per gene, the recomputed and discovery `S_g` are correlated over the libraries both contain (at least 20). A negative r is a flip; |r| < 0.5 marks a gene whose PC1 is a different axis on the expanded cohort, for which no sign makes a directional comparison meaningful. Pinned slopes are in `qtl/cis_qtl_switch.sign_pinned.parquet`; p-values, q-values and hidden factors are unaffected by construction.
 
-| region | shared libraries | genes compared | sign flipped | median abs r | axis-unstable | swQTL genes | swQTL flipped | swQTL axis-unstable |
-|---|---|---|---|---|---|---|---|---|
-| caudate | 223 | 11,636 | 5,262 (0.452) | 0.345 | 6,808 | 1,583 | 443 | 554 |
-| dlpfc | 198 | 11,541 | 5,232 (0.453) | 0.305 | 6,935 | 1,292 | 338 | 439 |
-| hippocampus | 213 | 11,098 | 5,080 (0.458) | 0.330 | 6,597 | 956 | 269 | 338 |
+**Pre-specified gate:** the recomputed `S_g` must reproduce the discovery coordinate at median |r| >= 0.99. Below that the arm mapped a different phenotype, and no sign pin can repair it: re-map before reading any swQTL result. (The first all_samples arm omitted the discovery transcript filter and sat at 0.31-0.35; recomputed with it, the same libraries reproduce at 1.000.)
+
+| region | shared libraries | genes compared | median abs r | reproduces discovery | sign flipped | axis-unstable | swQTL genes | swQTL flipped | swQTL axis-unstable |
+|---|---|---|---|---|---|---|---|---|---|
+| caudate | 223 | 11,517 | 1.000 | **yes** | 863 (0.075) | 439 | 1,678 | 112 | 74 |
+| dlpfc | 198 | 11,462 | 1.000 | **yes** | 846 (0.074) | 447 | 1,481 | 112 | 53 |
+| hippocampus | 213 | 10,972 | 1.000 | **yes** | 844 (0.077) | 491 | 1,111 | 83 | 54 |
 
 ## Positive control: the `A_g` eQTL arm against GTEx v11 brain eGenes
 

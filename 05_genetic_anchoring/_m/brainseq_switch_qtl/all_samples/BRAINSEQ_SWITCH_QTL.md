@@ -10,9 +10,9 @@ Does genetic variation preferentially regulate the **relative-isoform** axis (`S
 
 | region | genes | swQTL | eQTL | switch-only | abundance-only | both |
 |---|---|---|---|---|---|---|
-| caudate | 16,546 | 1,583 | 9,310 | 253 | 7,980 | 1,330 |
-| dlpfc | 16,612 | 1,292 | 8,945 | 230 | 7,883 | 1,062 |
-| hippocampus | 16,128 | 956 | 6,591 | 243 | 5,878 | 713 |
+| caudate | 11,135 | 1,678 | 6,384 | 386 | 5,092 | 1,292 |
+| dlpfc | 11,080 | 1,481 | 6,025 | 348 | 4,892 | 1,133 |
+| hippocampus | 10,607 | 1,111 | 4,328 | 337 | 3,554 | 774 |
 
 ## Primary statistics
 
@@ -20,9 +20,9 @@ Does genetic variation preferentially regulate the **relative-isoform** axis (`S
 
 | region | pi1(A given S) | pi1(S given A) | n both | same lead variant | median abs slope S | median abs slope A | Wilcoxon P |
 |---|---|---|---|---|---|---|---|
-| caudate | 0.928 | 0.295 | 1,330 | 295 (0.22) | 0.553 | 0.449 | 2.17e-18 |
-| dlpfc | 0.918 | 0.272 | 1,062 | 237 (0.22) | 0.607 | 0.556 | 0.00104 |
-| hippocampus | 0.864 | 0.266 | 713 | 153 (0.21) | 0.583 | 0.412 | 8.88e-28 |
+| caudate | 0.894 | 0.409 | 1,292 | 141 (0.11) | 0.502 | 0.365 | 0 |
+| dlpfc | 0.876 | 0.413 | 1,133 | 140 (0.12) | 0.556 | 0.415 | 3.72e-36 |
+| hippocampus | 0.847 | 0.370 | 774 | 87 (0.11) | 0.550 | 0.307 | 0 |
 
 `yield_by_power_bin.parquet` carries the same yields within deciles of the number of variants tested, which is where most of the precision difference lives.
 

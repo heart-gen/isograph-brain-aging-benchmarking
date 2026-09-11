@@ -1,3 +1,3 @@
 modality	label	n_phenotypes	n_sig_q05	n_donors	n_covariates	n_hidden_factors
-switch	S_g	16128	956	362	41	30
+switch	S_g	10607	1111	362	41	30
 abundance	A_g	18889	7446	362	41	30
