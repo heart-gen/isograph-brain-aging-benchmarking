@@ -32,6 +32,22 @@
 # <analysis>__<tissue>.parquet: arm -> arms/<arm>/, sqtl=all -> all_introns/. The meta
 # stage must be told which set to read, and the flag has to match the env var:
 #   python -m isograph_benchmark.real_data.coloc_signal_susie --stage meta --sqtl all
+#
+# The all-introns arm needs MORE than the directives below and must override them. GTEx
+# carries ~12 intron phenotypes per gene, so the sQTL side goes from one SuSiE fit per
+# gene to twelve (~6.5x the total work, measured on a chr22 smoke test). Submit it as:
+#   sbatch --export=ALL,COLOC_SIGNAL_SQTL=all --time=24:00:00 --cpus-per-task=24 \
+#          05_genetic_anchoring/_h/23.coloc_signal_susie.sh
+# The 12h/16cpu defaults are sized for the representative arm, whose slowest task ran
+# 66 min; the same task all-introns projects to ~7h, which is too close to that ceiling.
+#
+# GWAS SNP-guard sensitivity arms. This stage reads COLOC_GWAS_MAX_SNPS exactly as stage A
+# does, so a stage-A cache built at a non-default guard is used only by a stage-B run
+# exporting the same value, and both land under _m/coloc_signal_susie/sensitivity/
+# max_snps_<N>/ instead of on top of the primary shards. aging__ad is tasks 0-12:
+#   sbatch --export=ALL,COLOC_GWAS_MAX_SNPS=30000 --array=0-12 --cpus-per-task=32 \
+#          05_genetic_anchoring/_h/23.coloc_signal_susie.sh
+#   python -m isograph_benchmark.real_data.coloc_signal_susie --stage meta --max-snps 30000
 # Usage: sbatch 05_genetic_anchoring/_h/23.coloc_signal_susie.sh
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }

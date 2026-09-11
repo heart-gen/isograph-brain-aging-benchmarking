@@ -22,6 +22,8 @@
 ##
 ## Usage:  Rscript 05_genetic_anchoring/_h/22.coloc_gwas_susie.R <analysis>
 ## Output: 05_genetic_anchoring/_m/coloc_signal_susie/gwas_susie/<analysis>/
+##         (or .../coloc_signal_susie/sensitivity/max_snps_<N>/gwas_susie/<analysis>/ when
+##          COLOC_GWAS_MAX_SNPS is not the primary 12,000)
 ##           <LOCUS_ID>.rds        -- annotated susie fit + snp set + n
 ##           _status.tsv           -- one row per locus: fitted / skipped and why
 suppressPackageStartupMessages({
@@ -36,16 +38,61 @@ ANALYSIS <- args[1]
 ROOT     <- Sys.getenv("ISOGRAPH_BENCHMARK_ROOT", unset = getwd())
 CDIR     <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc", ANALYSIS)
 SUSIE_D  <- file.path(CDIR, "susie")
-OUTD     <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc_signal_susie",
-                      "gwas_susie", ANALYSIS)
-dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
 PANEL_DIR <- "/ocean/projects/bio250020p/shared/resources/ldsc/1000G_EUR_Phase3_plink"
 
 ## Identical to 10.coloc_clpp.R, deliberately: the two estimators must not differ because
 ## one of them quietly fine-mapped a different SNP set.
 L_MAX    <- 10L
-MAX_SNPS <- 12000L
 MIN_SNPS <- 20L
+
+## MAX_SNPS is a COMPUTE guard, not a statistical one: susie_rss is O(L*p^2) per
+## iteration and the locus LD is held dense, so a big locus is expensive rather than
+## invalid. The 12,000 default is inherited from 10.coloc_clpp.R and must stay the
+## default so the two estimators keep fine-mapping the same SNP sets.
+##
+## It is nonetheless load-bearing on the RESULT, not just the runtime: 61 of the 579
+## loci exceed it (median 14,664 SNPs, max 28,677) and are dropped before any fit, so
+## they are absent from the signal-level layer entirely -- silently, since a dropped
+## locus looks exactly like a locus with no credible set unless _status.tsv is read.
+## PICALM's AD locus (locus60_chr11, 15,713 SNPs) is one of them, which is why PICALM
+## has no coloc.susie row in either sQTL arm.
+##
+## Raising it is therefore a real recovery run, and env-overridable so that run is
+## explicit and reproducible instead of an edited constant:
+##   COLOC_GWAS_MAX_SNPS=30000 sbatch ... 22.coloc_gwas_susie.sh
+## Two cautions when raising it. Memory goes as p^2 (30,000 SNPs -> 7.2 GB for the LD
+## subset alone, before susie's own copies; the AD recovery peaked at 48.2 GB and needs
+## --cpus-per-task=32).
+##
+## And the guard turns out not to be statistically neutral. MEASURED, aging__ad,
+## 2026-09-10: loci exceeding the guard were EMPIRICALLY ENRICHED for greater
+## GWAS-reference-LD inconsistency. All 11 recovered loci had s_rss >= 0.310 against a
+## median of 0.255 over all 49 fitted, and the largest sat at the top of the whole
+## distribution (locus88_chr17, 28,677 SNPs, s_rss 0.739; locus96_chr19, s_rss 0.699).
+## That is a correlation between a compute threshold and statistical difficulty, not an
+## explanation of it -- this run does not establish WHY the two travel together, and
+## writing that they do because large loci sit in long-range LD would assert a mechanism
+## the data does not support. Read s_rss per locus before believing any recovered
+## credible set, and do not promote a high-s_rss recovered locus to a headline.
+MAX_SNPS <- {
+    v <- Sys.getenv("COLOC_GWAS_MAX_SNPS", "12000")
+    n <- suppressWarnings(as.integer(v))
+    if (is.na(n) || n < MIN_SNPS) stop("COLOC_GWAS_MAX_SNPS not a usable integer: ", v)
+    n
+}
+message("MAX_SNPS = ", MAX_SNPS)
+
+## A non-default guard is a scoped SENSITIVITY arm and gets its own root. Before this split
+## existed, the 2026-09-10 aging__ad recovery at 30,000 overwrote the 12,000 primary cache
+## (and, through stage B, the primary AD shards) in place. Stage B and
+## `coloc_signal_susie --stage meta --max-snps` resolve the same root from the same value.
+MAX_SNPS_PRIMARY <- 12000L
+SIG_ROOT <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc_signal_susie")
+if (MAX_SNPS != MAX_SNPS_PRIMARY)
+    SIG_ROOT <- file.path(SIG_ROOT, "sensitivity", sprintf("max_snps_%d", MAX_SNPS))
+OUTD <- file.path(SIG_ROOT, "gwas_susie", ANALYSIS)
+dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
+message("GWAS SuSiE cache -> ", OUTD)
 
 loci <- fread(file.path(SUSIE_D, "loci_testable.tsv"))
 excl_f <- file.path(CDIR, "exclude_regions.tsv")
