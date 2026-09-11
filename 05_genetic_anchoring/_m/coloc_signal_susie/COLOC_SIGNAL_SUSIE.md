@@ -8,10 +8,16 @@ Each gene contributes GTEx's single grouped-permutation representative intron, s
 
 ## What was fit
 
-- signal-pair posteriors: 23,925
-- cells surviving `gtex_matched`: 2,881 (432 genes)
-- cells surviving `all_signals`: 3,545 (464 genes)
-- estimator hierarchy: **2,881 coloc.susie**, 39,249 coloc.abf fallback
+- signal-pair posteriors: 23,910
+- cells surviving `gtex_matched`: 2,878 (432 genes)
+- cells surviving `all_signals`: 3,542 (464 genes)
+- estimator hierarchy: **2,878 coloc.susie**, 39,252 coloc.abf fallback
+  - why coloc.abf, first place the cell left the signal-level pipeline:
+    - `gwas_no_credible_set`: 16,043
+    - `no_qtl_credible_set`: 11,771
+    - `gwas_locus_over_max_snps`: 10,774
+    - `qtl_cs_not_matching_gtex`: 664
+- prior robustness of the 340 cells calling at the primary prior: abf `intermediate` 122, abf `primary_prior` 71, abf `robust` 24, susie `intermediate` 78, susie `primary_prior` 25, susie `robust` 20
 
 ## Reference-LD caveat
 

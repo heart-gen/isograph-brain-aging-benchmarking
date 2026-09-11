@@ -42,7 +42,10 @@
 ## Usage:  Rscript 05_genetic_anchoring/_h/23.coloc_signal_susie.R <analysis> <tissue> [chr]
 ## Env:    COLOC_SIGNAL_ARM        gene pool (default "switch"), mirrors the abf arms
 ##         COLOC_SIGNAL_SQTL       "representative" (default) | "all"
-## Output: <signal dir>[/all_introns]/susie/<analysis>__<tissue>[.chr<N>].parquet
+##         COLOC_GWAS_MAX_SNPS     GWAS SNP guard of the stage-A cache to use (default
+##                                 12000 = primary; any other value is a sensitivity arm)
+## Output: <signal dir>[/sensitivity/max_snps_<N>][/arms/<arm>][/all_introns]/susie/
+##         <analysis>__<tissue>[.chr<N>].parquet
 suppressPackageStartupMessages({
     library(data.table); library(arrow); library(susieR); library(coloc)
 })
@@ -58,11 +61,21 @@ PANEL_DIR <- "/ocean/projects/bio250020p/shared/resources/ldsc/1000G_EUR_Phase3_
 ARM    <- Sys.getenv("COLOC_SIGNAL_ARM", unset = "switch")
 SQTL_MODE <- Sys.getenv("COLOC_SIGNAL_SQTL", unset = "representative")
 stopifnot(SQTL_MODE %in% c("representative", "all"))
+## Same env var, same rule as stage A: a non-default GWAS SNP guard is a SENSITIVITY arm,
+## read from and written to its own root, so it cannot overwrite the primary shards. Prep
+## artefacts (targets, representative map, GTEx credible sets) do not depend on the guard
+## and are always read from the primary arm dir.
+MAX_SNPS_PRIMARY <- 12000L
+MAX_SNPS <- suppressWarnings(as.integer(Sys.getenv("COLOC_GWAS_MAX_SNPS", "12000")))
+if (is.na(MAX_SNPS)) stop("COLOC_GWAS_MAX_SNPS not an integer")
 
 BASE <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc_signal_susie")
 MDIR <- if (ARM == "switch") BASE else file.path(BASE, "arms", ARM)
 if (!dir.exists(MDIR)) stop("missing arm dir ", MDIR, " (run --stage prep --arm ", ARM, ")")
-GDIR   <- file.path(BASE, "gwas_susie", ANALYSIS)
+SIG  <- if (MAX_SNPS == MAX_SNPS_PRIMARY) BASE else
+        file.path(BASE, "sensitivity", sprintf("max_snps_%d", MAX_SNPS))
+SDIR <- if (ARM == "switch") SIG else file.path(SIG, "arms", ARM)
+GDIR   <- file.path(SIG, "gwas_susie", ANALYSIS)
 if (!dir.exists(GDIR)) stop("missing GWAS SuSiE cache ", GDIR, " (run 22.coloc_gwas_susie.sh)")
 CDIR   <- file.path(ROOT, "05_genetic_anchoring", "_m", "coloc", ANALYSIS, "susie")
 BRIDGE <- file.path(ROOT, "inputs", "raw", "gtex_v11", "variant_bridge")
@@ -70,7 +83,7 @@ BRIDGE <- file.path(ROOT, "inputs", "raw", "gtex_v11", "variant_bridge")
 ## Both modes write <analysis>__<tissue>.parquet, so without this split an all-introns
 ## run would silently overwrite the representative-intron shards it is meant to be
 ## compared against.
-RDIR   <- if (SQTL_MODE == "representative") MDIR else file.path(MDIR, "all_introns")
+RDIR   <- if (SQTL_MODE == "representative") SDIR else file.path(SDIR, "all_introns")
 OUTD   <- file.path(RDIR, "susie"); dir.create(OUTD, recursive = TRUE, showWarnings = FALSE)
 
 L_MAX      <- 10L

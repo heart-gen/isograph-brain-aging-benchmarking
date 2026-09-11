@@ -26,11 +26,19 @@ import pandas as pd
 import pytest
 
 from isograph_benchmark.real_data.coloc_signal_susie import (
+    FALLBACK_REASONS,
+    MAX_SNPS_PRIMARY,
     P12_PRIMARY,
     P12_SWEEP,
+    PRIOR_ROBUSTNESS,
     apply_hierarchy,
     best_signal_pair,
+    fallback_reasons,
+    p12_survival,
+    prior_robustness,
     results_dir,
+    scope_fallback,
+    signal_root,
 )
 
 R_BIN = "/ocean/projects/bio250020p/shared/opt/env/R_env/bin/Rscript"
@@ -70,6 +78,31 @@ def test_n_signal_pairs_counts_pairs_not_rows_across_the_p12_sweep():
     assert out["n_signal_pairs"].iloc[0] == 3
 
 
+def test_all_introns_pairs_are_identified_by_intron_not_by_credible_set_index():
+    """SuSiE numbers credible sets from 1 within each fit, so every intron of a gene has
+    an (idx1=1, idx2=1). Identifying a pair by the indices alone collapses a 12-intron
+    gene onto the pair count of one intron, and hides that its PP4 is a maximum over 12
+    tests -- which is the whole thing the all-introns arm has to be honest about."""
+    rows = [{"phenotype_id": f"chr19:{s}:{s + 900}:clu_1_-:ENSG1", "idx2": 1, "PP4": pp}
+            for s, pp in ((17630750, 0.31), (17641556, 0.88), (17650000, 0.12))]
+    out = best_signal_pair(_pairs(rows))
+    assert len(out) == 1
+    assert out["n_signal_pairs"].iloc[0] == 3
+    assert out["n_phenotypes_tested"].iloc[0] == 3
+    # The winning intron must be named: the audit asks whether it IS the curated event.
+    assert out["phenotype_id"].iloc[0] == "chr19:17641556:17642456:clu_1_-:ENSG1"
+
+
+def test_representative_arm_reports_one_phenotype_so_the_arms_stay_comparable():
+    """Adding phenotype_id to the pair identity must not move the representative arm: it
+    is constant per cell there, so the count is unchanged and n_phenotypes_tested is 1."""
+    rows = [{"phenotype_id": "ENSG1.12", "idx2": i, "PP4": pp}
+            for i, pp in ((1, 0.12), (2, 0.97), (3, 0.40))]
+    out = best_signal_pair(_pairs(rows))
+    assert out["n_signal_pairs"].iloc[0] == 3
+    assert out["n_phenotypes_tested"].iloc[0] == 1
+
+
 def test_all_introns_results_land_beside_representative_not_on_top_of_it():
     """Both sqtl modes name their shards <analysis>__<tissue>.parquet, so they must not
     share a directory: an all-introns run would otherwise overwrite the representative
@@ -80,6 +113,34 @@ def test_all_introns_results_land_beside_representative_not_on_top_of_it():
     assert rep == base
     assert allx != rep
     assert rep in allx.parents
+
+
+def test_a_raised_snp_guard_resolves_to_shards_the_primary_meta_never_reads():
+    """The 2026-09-10 aging__ad recovery at MAX_SNPS=30000 was written into the primary
+    directories and replaced the 12,000 AD shards in place. A non-default guard must
+    resolve to shard dirs disjoint from the primary ones, for both sqtl modes and any arm."""
+    prim = signal_root("switch")
+    sens = signal_root("switch", 30000)
+    assert signal_root("switch", MAX_SNPS_PRIMARY) == prim
+    assert sens != prim
+    shard_dirs = {results_dir(r, sq) / "susie"
+                  for r in (prim, sens) for sq in ("representative", "all")}
+    assert len(shard_dirs) == 4
+    # `_load_susie` lists one directory, but none may nest inside another either.
+    for a in shard_dirs:
+        for b in shard_dirs:
+            assert a == b or a not in b.parents
+    assert signal_root("background", 30000) == sens / "arms" / "background"
+
+
+def test_the_primary_keeps_every_fallback_but_a_sensitivity_root_only_what_it_reran():
+    """Primary: an analysis whose GWAS fine-mapped nowhere still stands on abf, and must.
+    Sensitivity: only the re-run analyses, or the other five would be counted as scored in
+    an arm they were never run in."""
+    abf = pd.DataFrame({"analysis": ["aging__ad", "aging__als", "aging__scz"],
+                        "PP4": [0.8, 0.1, 0.2]})
+    assert len(scope_fallback(abf, {"aging__ad"})) == 3
+    assert scope_fallback(abf, {"aging__ad"}, 30000)["analysis"].tolist() == ["aging__ad"]
 
 
 def test_gtex_agreement_filter_excludes_signals_gtex_did_not_find():
@@ -140,6 +201,83 @@ def test_p12_sweep_brackets_the_coloc_default():
     reported as surviving a RANGE of priors rather than one arbitrary choice."""
     assert P12_PRIMARY in P12_SWEEP
     assert min(P12_SWEEP) < P12_PRIMARY < max(P12_SWEEP)
+
+
+# --------------------------------------------------------------------------- #
+# Evidence-strength descriptors
+# --------------------------------------------------------------------------- #
+def test_p12_survival_reports_the_lowest_prior_that_still_calls():
+    """PICALM/AD in cortex, as measured: the call holds from the primary prior up, and not
+    below it. That is a different claim from a call that holds at 1e-6."""
+    rows = [{"p12": p, "PP4": pp}
+            for p, pp in zip(P12_SWEEP, (0.303, 0.685, 0.813, 0.956, 0.978))]
+    s = p12_survival(_pairs(rows), _KEYS)
+    assert s["p12_min_call"].iloc[0] == pytest.approx(P12_PRIMARY)
+    assert s["PP4_at_p12_sweep_min"].iloc[0] == pytest.approx(0.303)
+    assert prior_robustness(s["p12_min_call"].iloc[0]) == "primary_prior"
+
+
+def test_prior_robustness_labels_every_point_of_the_sweep():
+    assert [prior_robustness(p) for p in P12_SWEEP] == [
+        "robust", "intermediate", "primary_prior", "permissive_prior", "permissive_prior"]
+    assert prior_robustness(np.nan) == "none"
+    assert set(PRIOR_ROBUSTNESS) == {"robust", "intermediate", "primary_prior",
+                                     "permissive_prior", "none"}
+
+
+def test_prior_survival_is_read_on_gtex_matched_pairs_only():
+    """An unmatched pair calling at 1e-6 is exactly what the agreement filter removes. It
+    must not make the cell look robust to the prior through the back door."""
+    rows = []
+    for p in P12_SWEEP:
+        rows.append({"idx2": 1, "p12": p, "PP4": 0.99, "cs_matches_gtex": False})
+        rows.append({"idx2": 2, "p12": p, "PP4": 0.85 if p >= P12_PRIMARY else 0.50,
+                     "cs_matches_gtex": True})
+    out = best_signal_pair(_pairs(rows))
+    assert out["p12_min_call"].iloc[0] == pytest.approx(P12_PRIMARY)
+    assert out["PP4_at_p12_sweep_min"].iloc[0] == pytest.approx(0.50)
+
+
+def test_a_pair_below_the_shared_snp_floor_is_not_a_signal_level_result():
+    d = _pairs([{"idx2": 1, "PP4": 0.95, "n_shared": 60},
+                {"idx2": 2, "PP4": 0.40, "n_shared": 4000}])
+    assert best_signal_pair(d)["PP4"].iloc[0] == pytest.approx(0.40)
+
+
+def test_fallback_reason_names_the_first_place_a_cell_left_the_pipeline():
+    base = dict(analysis="aging__ad", trait="ad", gene="ENSG1", tissue="Brain_Cortex",
+                modality="sQTL", estimator="abf", PP4=0.85)
+    cells = pd.DataFrame([
+        {**base, "LOCUS_ID": "big"},
+        {**base, "LOCUS_ID": "thin"},
+        {**base, "LOCUS_ID": "flat"},
+        {**base, "LOCUS_ID": "absent"},
+        {**base, "LOCUS_ID": "ok", "gene": "Q0"},
+        {**base, "LOCUS_ID": "ok", "gene": "Q1"},
+        {**base, "LOCUS_ID": "ok", "gene": "Q2"},
+        {**base, "LOCUS_ID": "ok", "gene": "Q3", "estimator": "susie"},
+    ])
+    st = dict(analysis="aging__ad")
+    status = pd.DataFrame([
+        {**st, "LOCUS_ID": "big", "fitted": False, "n_cs": np.nan,
+         "reason": "15713 SNPs > MAX_SNPS (long-range LD)"},
+        {**st, "LOCUS_ID": "thin", "fitted": False, "n_cs": np.nan, "reason": "<20 usable SNPs"},
+        {**st, "LOCUS_ID": "flat", "fitted": True, "n_cs": 0, "reason": "no GWAS credible set"},
+        {**st, "LOCUS_ID": "ok", "fitted": True, "n_cs": 1, "reason": "ok"},
+    ])
+    pk = dict(analysis="aging__ad", trait="ad", LOCUS_ID="ok", tissue="Brain_Cortex",
+              modality="sQTL")
+    pairs = pd.DataFrame([{**pk, "gene": "Q1", "cs_matches_gtex": False},
+                          {**pk, "gene": "Q2", "cs_matches_gtex": True},
+                          {**pk, "gene": "Q3", "cs_matches_gtex": True}])
+    why = fallback_reasons(cells, status, pairs).tolist()
+    assert why == ["gwas_locus_over_max_snps", "gwas_too_few_snps", "gwas_no_credible_set",
+                   "gwas_not_in_stage_a", "no_qtl_credible_set", "qtl_cs_not_matching_gtex",
+                   "susie_pair_filtered", None]
+    assert set(filter(None, why)) == set(FALLBACK_REASONS)
+    # Without the agreement filter an unmatched pair is not a reason to fall back.
+    loose = fallback_reasons(cells, status, pairs, require_gtex_match=False).tolist()
+    assert loose[5] == "susie_pair_filtered"
 
 
 # --------------------------------------------------------------------------- #
