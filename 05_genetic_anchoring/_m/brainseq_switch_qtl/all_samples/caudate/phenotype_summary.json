@@ -6,6 +6,9 @@
   "n_donors": 420,
   "filters": "Dataset=BrainSeq_Phase3_Caudate, dropped!='t', Age > 13, all diagnoses",
   "expression_filter": "gene CPM>=1 in >=42 samples",
+  "transcript_filter": "count > 10 in >= 70% of samples (run_models._filter_expressed_transcripts, as in discovery)",
+  "n_transcripts_expressed_genes": 232980,
+  "n_transcripts_after_tx_filter": 58297,
   "dx": {
     "Control": 231,
     "SCZD": 146,
@@ -29,7 +32,7 @@
     "mapping_rate"
   ],
   "cis_window": 1000000,
-  "n_switch_genes": 17161,
+  "n_switch_genes": 11543,
   "n_abundance_genes": 20471,
   "expr_n_genes_before": 78932,
   "expr_n_genes_after": 20525,
