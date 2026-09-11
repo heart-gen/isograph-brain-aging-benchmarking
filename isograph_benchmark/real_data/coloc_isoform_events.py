@@ -25,6 +25,11 @@ usage toward the junction-containing pole, and we can name the structural event 
 
 Output (<analysis>/coloc/): coloc_isoform_events.parquet + COLOC_ISOFORM_EVENTS.md, plus
 a combined parquet across analyses.
+
+`--layer signal` resolves the signal-level (`coloc.susie`, all-introns arm) nominations
+instead, through the same resolver, and writes beside them under
+`coloc_signal_susie/all_introns/`. It is a second event table, not a replacement: the CLPP
+table stays what the committed displays read, and the signal table carries no direction.
 """
 from __future__ import annotations
 
@@ -36,6 +41,17 @@ import pandas as pd
 
 from isograph_benchmark.paths import cohort_dir, stage_out
 from isograph_benchmark.real_data import gwas_traits as gt
+from isograph_benchmark.real_data.coloc_signal_susie import (
+    prior_robustness,
+    results_dir,
+    signal_root,
+)
+from isograph_benchmark.real_data.locus_event_audit import (
+    CONTEXT_DISTINCT_ARM,
+    PP4_CALL,
+    _parse_gtex_intron,
+    load_nominations,
+)
 from isograph_benchmark.real_data.qtl_anchoring import _GTEX_TISSUE, _bare
 
 _COLOC_ROOT = stage_out("anchoring.coloc")
@@ -172,6 +188,77 @@ def _switch_struct_label(ev: "_RegionEvidence", members: set[str]) -> str:
 
 
 # --------------------------------------------------------------------------- main run
+def _resolve_event(d, analysis: str, trait: str, case: str, introns: dict,
+                   evidence_cache: dict) -> dict:
+    """One colocalized (gene, tissue, junction) -> the IsoGraph switch it lands on.
+
+    Both coloc layers resolve through here, so a CLPP event and a signal-level event are
+    matched to transcripts, to tissue-matched switch evidence and to BrainSeq by identical
+    code. `d` carries gene, gene_name, kind, tissue and intron_event, plus whatever
+    direction and CLPP fields its layer has; an absent field resolves to missing.
+    """
+    g = d["gene"]
+    gene_introns = introns.get(g, {})
+    region = _TISSUE_REGION.get(d["tissue"])
+    ev = _get_evidence(evidence_cache, _GTEX_ROOT, region) if region else None
+    members = ev.members.get(g, set()) if ev else set()
+
+    rec = {
+        "analysis": analysis, "gene_source": analysis.rsplit("__", 1)[0],
+        "trait": trait, "case": case,
+        "gene": g, "gene_name": d.get("gene_name"), "kind": d["kind"],
+        "tissue": d["tissue"], "iso_region": region or "",
+        "best_rsid": d.get("best_rsid"), "risk_allele": d.get("risk_allele"),
+        "risk_qtl_effect": d.get("risk_qtl_effect"),
+        "junction": d.get("intron_event"), "clpp": d.get("clpp"),
+        "go_invisible": d.get("go_invisible"),
+        "switch_pair": " | ".join(sorted(members)) if members else "",
+        "n_switch_pairs": ev.n_pairs.get(g, 0) if ev else 0,
+    }
+
+    matched, matched_in_pair, matched_r = [], False, []
+    parsed = _parse_intron_event(d.get("intron_event")) if d["kind"] == "sQTL" else None
+    if parsed is not None:
+        chrom, s, e = parsed
+        matched = _match_junction(chrom, s, e, gene_introns)
+        for tx in matched:
+            matched_in_pair = matched_in_pair or (tx in members)
+            pr = ev.pol.get((g, tx)) if ev else None
+            if pr is not None:
+                matched_r.append(float(pr.r))
+    rec["junction_transcripts"] = ",".join(matched)
+    rec["junction_in_switch_pair"] = matched_in_pair
+    rec["junction_transcript_polarity_r"] = float(np.mean(matched_r)) if matched_r else np.nan
+    # Structural nature of the switch = union of changes across its pair isoforms
+    # (flags in structure_annotations are per-transcript vs a reference, so the switch
+    # is described by pooling the True flags over the switching pair members).
+    rec["structural_consequence"] = (
+        _switch_struct_label(ev, members) if (ev and matched_in_pair) else "")
+    rec["concordant"] = (matched_in_pair if (d["kind"] == "sQTL" and matched)
+                         else pd.NA)
+
+    # BrainSeq independent-cohort replication: same gene, matching region, junction
+    # transcript is also an IsoGraph switch-pair isoform out of GTEx.
+    bs_region, bs_members, bs_rep = "", set(), pd.NA
+    for cand in _TISSUE_BRAINSEQ.get(d["tissue"], []):
+        # for disease hits prefer the diagnosis cohort; skip caudate_sczd for aging.
+        if cand == "caudate_sczd" and case != "disease":
+            continue
+        if cand != "caudate_sczd" and case == "disease" and cand == "caudate":
+            pass  # aging caudate still a valid independent cohort for a disease hit
+        bev = _get_evidence(evidence_cache, _BRAINSEQ_ROOT, cand)
+        m = bev.members.get(g, set())
+        if m:
+            bs_region, bs_members = cand, m
+            if matched:
+                bs_rep = any(tx in m for tx in matched)
+            break
+    rec["brainseq_region"] = bs_region
+    rec["brainseq_switch_pair"] = " | ".join(sorted(bs_members)) if bs_members else ""
+    rec["brainseq_replicates_switch"] = bs_rep
+    return rec
+
+
 def run(analysis: str, introns: dict, evidence_cache: dict) -> pd.DataFrame:
     coloc_dir = _COLOC_ROOT / analysis / "coloc"
     dpath = coloc_dir / "coloc_direction.parquet"
@@ -186,66 +273,7 @@ def run(analysis: str, introns: dict, evidence_cache: dict) -> pd.DataFrame:
 
     rows = []
     for _, d in direction.iterrows():
-        g = d["gene"]
-        gene_introns = introns.get(g, {})
-        region = _TISSUE_REGION.get(d["tissue"])
-        ev = _get_evidence(evidence_cache, _GTEX_ROOT, region) if region else None
-        members = ev.members.get(g, set()) if ev else set()
-
-        rec = {
-            "analysis": analysis, "gene_source": analysis.rsplit("__", 1)[0],
-            "trait": trait, "case": case,
-            "gene": g, "gene_name": d.get("gene_name"), "kind": d["kind"],
-            "tissue": d["tissue"], "iso_region": region or "",
-            "best_rsid": d["best_rsid"], "risk_allele": d.get("risk_allele"),
-            "risk_qtl_effect": d.get("risk_qtl_effect"),
-            "junction": d.get("intron_event"), "clpp": d.get("clpp"),
-            "go_invisible": d.get("go_invisible"),
-            "switch_pair": " | ".join(sorted(members)) if members else "",
-            "n_switch_pairs": ev.n_pairs.get(g, 0) if ev else 0,
-        }
-
-        matched, matched_in_pair, matched_r = [], False, []
-        parsed = _parse_intron_event(d.get("intron_event")) if d["kind"] == "sQTL" else None
-        if parsed is not None:
-            chrom, s, e = parsed
-            matched = _match_junction(chrom, s, e, gene_introns)
-            for tx in matched:
-                matched_in_pair = matched_in_pair or (tx in members)
-                pr = ev.pol.get((g, tx)) if ev else None
-                if pr is not None:
-                    matched_r.append(float(pr.r))
-        rec["junction_transcripts"] = ",".join(matched)
-        rec["junction_in_switch_pair"] = matched_in_pair
-        rec["junction_transcript_polarity_r"] = float(np.mean(matched_r)) if matched_r else np.nan
-        # Structural nature of the switch = union of changes across its pair isoforms
-        # (flags in structure_annotations are per-transcript vs a reference, so the switch
-        # is described by pooling the True flags over the switching pair members).
-        rec["structural_consequence"] = (
-            _switch_struct_label(ev, members) if (ev and matched_in_pair) else "")
-        rec["concordant"] = (matched_in_pair if (d["kind"] == "sQTL" and matched)
-                             else pd.NA)
-
-        # BrainSeq independent-cohort replication: same gene, matching region, junction
-        # transcript is also an IsoGraph switch-pair isoform out of GTEx.
-        bs_region, bs_members, bs_rep = "", set(), pd.NA
-        for cand in _TISSUE_BRAINSEQ.get(d["tissue"], []):
-            # for disease hits prefer the diagnosis cohort; skip caudate_sczd for aging.
-            if cand == "caudate_sczd" and case != "disease":
-                continue
-            if cand != "caudate_sczd" and case == "disease" and cand == "caudate":
-                pass  # aging caudate still a valid independent cohort for a disease hit
-            bev = _get_evidence(evidence_cache, _BRAINSEQ_ROOT, cand)
-            m = bev.members.get(g, set())
-            if m:
-                bs_region, bs_members = cand, m
-                if matched:
-                    bs_rep = any(tx in m for tx in matched)
-                break
-        rec["brainseq_region"] = bs_region
-        rec["brainseq_switch_pair"] = " | ".join(sorted(bs_members)) if bs_members else ""
-        rec["brainseq_replicates_switch"] = bs_rep
-
+        rec = _resolve_event(d, analysis, trait, case, introns, evidence_cache)
         rec["resolved_event"] = _event_sentence(d, rec)
         rows.append(rec)
 
@@ -309,13 +337,228 @@ def _write_report(coloc_dir: Path, analysis: str, out: pd.DataFrame) -> None:
     (coloc_dir / "COLOC_ISOFORM_EVENTS.md").write_text("\n".join(lines) + "\n")
 
 
+# ----------------------------------------------------------------- signal-level layer
+def signal_events_path() -> Path:
+    """The signal-level event table: beside the all-introns nominations it resolves, and
+    never on top of the CLPP layer's combined table, which the committed displays read."""
+    return results_dir(signal_root("switch"), "all") / "coloc_isoform_events.parquet"
+
+
+def signal_event_cells(nom: pd.DataFrame, cells: pd.DataFrame, srep: pd.DataFrame,
+                       call: float = PP4_CALL) -> pd.DataFrame:
+    """The per-tissue sQTL colocalizations behind each signal-level nomination.
+
+    This is the selection the locus event audit tiers on, so both name the same introns:
+    a nominated (analysis, trait, locus, gene), each tissue where its sQTL PP4 reaches the
+    call, and the intron that tissue's call used. A `coloc.abf` fallback cell has no fitted
+    intron, so it names GTEx's representative one and keeps `estimator_sQTL = abf` -- it
+    resolves an event, but it tested only that intron.
+    """
+    keys = ["analysis", "trait", "LOCUS_ID", "gene"]
+    c = cells[cells["PP4_sQTL"] >= call].merge(nom[keys].drop_duplicates(), on=keys,
+                                              how="inner")
+    rep = (srep[["gene", "tissue", "phenotype_id"]].drop_duplicates(["gene", "tissue"])
+           .rename(columns={"phenotype_id": "_rep"}))
+    c = c.merge(rep, on=["gene", "tissue"], how="left")
+    pid = c["phenotype_id"] if "phenotype_id" in c.columns else pd.Series(None, index=c.index)
+    c["phenotype_id"] = pid.where(pid.notna(), c["_rep"])
+    c = c.drop(columns="_rep")
+    parsed = c["phenotype_id"].map(_parse_gtex_intron)
+    c = c[parsed.notna()].copy()
+
+    def _event(pid: str) -> str:
+        chrom, s, e = _parse_gtex_intron(pid)
+        f = pid.split(":")
+        strand = f[3].rsplit("_", 1)[-1] if len(f) > 3 else ""
+        return f"{chrom}:{s}-{e}({strand})" if strand in ("+", "-") else f"{chrom}:{s}-{e}"
+
+    c["intron_event"] = c["phenotype_id"].map(_event)
+    return c.reset_index(drop=True)
+
+
+def _is_true(s: pd.Series) -> pd.Series:
+    return s.map(lambda v: v is True)
+
+
+def _signal_event_sentence(rec: dict) -> str:
+    tx = rec["junction_transcripts"] or "unmapped transcript"
+    conc = ("matches an IsoGraph switch-pair isoform" if rec["junction_in_switch_pair"]
+            else "not in the IsoGraph switch pair for this tissue")
+    rep = (f"; replicated in BrainSeq {rec['brainseq_region']}"
+           if rec["brainseq_replicates_switch"] is True else "")
+    struct = rec["structural_consequence"] or "structural change n/a"
+    return (f"junction {rec['junction']} colocalizes (PP4 {rec['PP4_sQTL']:.2f}, "
+            f"{rec['estimator']}; {tx}; {conc}{rep}) — {struct}; direction not resolved")
+
+
+# Genes reviewed in the long-read arm even when the colocalizing tissue carries no IsoGraph
+# switch pair for them (user decision, 2026-09-11). UNC13A's ALS signal colocalizes only in
+# the two cerebellar tissues, where IsoGraph called no UNC13A switch, yet the transcripts that
+# splice its colocalizing intron are switch-pair members in other GTEx brain regions,
+# including frontal cortex BA9 -- the long-read tissue. The exception changes what the test
+# means, not whether it runs: the pair is then a switch defined in another region, so these
+# rows are flagged `cross_tissue_exception`, never counted as tissue-concordant, and scored
+# apart from the set-level statistic.
+CROSS_TISSUE_EXCEPTIONS: tuple[str, ...] = ("UNC13A",)
+
+
+def cross_tissue_switch_pairs(junction_tx: set[str], gene: str,
+                              members_by_region: dict[str, dict[str, set[str]]]
+                              ) -> tuple[list[str], set[str]]:
+    """Regions whose switch pair for `gene` contains a junction transcript, and the union of
+    those pairs' members. Pure: `members_by_region` maps region -> gene -> pair members."""
+    regions, members = [], set()
+    for region in sorted(members_by_region):
+        m = members_by_region[region].get(gene, set())
+        if m & junction_tx:
+            regions.append(region)
+            members |= m
+    return regions, members
+
+
+def _cross_tissue_fields(rec: dict, symbol, exceptions: set[str], cache: dict) -> dict:
+    out = {"switch_pair_scope": "tissue_matched" if rec["junction_in_switch_pair"] else "none",
+           "cross_tissue_regions": "", "cross_tissue_switch_pair": "",
+           "cross_tissue_in_switch_pair": False}
+    if (rec["junction_in_switch_pair"] or str(symbol) not in exceptions
+            or not rec["junction_transcripts"]):
+        return out
+    by_region = {r: _get_evidence(cache, _GTEX_ROOT, r).members
+                 for r in sorted(set(_TISSUE_REGION.values()))}
+    regions, members = cross_tissue_switch_pairs(
+        set(rec["junction_transcripts"].split(",")), rec["gene"], by_region)
+    if regions:
+        out.update(switch_pair_scope="cross_tissue_exception",
+                   cross_tissue_regions=";".join(regions),
+                   cross_tissue_switch_pair=" | ".join(sorted(members)),
+                   cross_tissue_in_switch_pair=True)
+    return out
+
+
+def run_signal(call: float = PP4_CALL,
+               cross_tissue_exceptions: tuple[str, ...] = CROSS_TISSUE_EXCEPTIONS
+               ) -> pd.DataFrame:
+    nom, cells = load_nominations("susie", call=call, sqtl_arm=CONTEXT_DISTINCT_ARM)
+    srep_f = stage_out("anchoring.coloc_modality") / "sqtl_representative.parquet"
+    srep = (pd.read_parquet(srep_f) if srep_f.exists()
+            else pd.DataFrame(columns=["gene", "tissue", "phenotype_id"]))
+    ec = signal_event_cells(nom, cells, srep, call)
+    if ec.empty:
+        raise SystemExit("no signal-level sQTL colocalizations to resolve")
+    introns = _transcript_introns(set(ec["gene"]))
+    cache: dict = {}
+    exceptions = {str(g) for g in cross_tissue_exceptions}
+
+    rows = []
+    for d in ec.to_dict("records"):
+        trait = str(d["trait"])
+        rec = _resolve_event({**d, "gene_name": d.get("symbol"), "kind": "sQTL"},
+                             str(d["analysis"]), trait, gt.get(trait).case, introns, cache)
+        # A CLPP column here would be a posterior this layer never computed, and no signed
+        # direction exists at signal level (`coloc_direction` is the CLPP layer's).
+        del rec["clpp"]
+        rec.update(_cross_tissue_fields(rec, d.get("symbol"), exceptions, cache))
+        p12 = d.get("p12_min_call")
+        p12 = float(p12) if pd.notna(p12) else np.nan
+        rec.update({
+            "LOCUS_ID": d["LOCUS_ID"], "phenotype_id": d["phenotype_id"],
+            "PP4_sQTL": float(d["PP4_sQTL"]),
+            "PP4_eQTL": float(d["PP4_eQTL"]) if pd.notna(d.get("PP4_eQTL")) else np.nan,
+            "estimator": d.get("estimator_sQTL"),
+            "p12_min_call": p12,
+            "prior_robustness": prior_robustness(p12),
+            "fallback_reason": d.get("fallback_reason"),
+            "coloc_layer": "signal",
+        })
+        rec["resolved_event"] = _signal_event_sentence(rec)
+        rows.append(rec)
+
+    out = (pd.DataFrame(rows)
+           .sort_values(["trait", "gene_name", "PP4_sQTL"], ascending=[True, True, False])
+           .reset_index(drop=True))
+    dest = signal_events_path()
+    out.to_parquet(dest, index=False)
+    _write_signal_report(dest.parent, out, call)
+    conc = out[_is_true(out["junction_in_switch_pair"])]
+    print(f"signal layer: {len(out)} events over "
+          f"{len(out[['trait', 'gene']].drop_duplicates())} gene x trait nominations; "
+          f"on a switch-pair isoform: {len(conc)} events, "
+          f"{conc['gene'].nunique()} genes -> {dest}")
+    return out
+
+
+def _write_signal_report(dest: Path, out: pd.DataFrame, call: float) -> None:
+    conc = out[_is_true(out["junction_in_switch_pair"])]
+    n_nom = len(out[["trait", "gene"]].drop_duplicates())
+    lines = [
+        "# Resolved isoform events — signal-level colocalization (all-introns arm)", "",
+        f"Every tissue where a `coloc.susie` nomination's sQTL reaches PP4 >= {call}, the "
+        "intron that call used, and the IsoGraph switch it lands on in the same GTEx tissue. "
+        "Junction matching, switch evidence and the BrainSeq check are the same code as the "
+        "CLPP layer (`coloc/coloc_isoform_events_combined.parquet`), which this table sits "
+        "beside and does not replace.", "",
+        "Three differences from the CLPP layer, each limiting what a row can say:", "",
+        "- **No direction.** The risk-allele-signed effect is resolved only for the CLPP "
+        "layer (`coloc_direction`); `risk_qtl_effect` is empty here rather than borrowed.",
+        "- **`estimator = abf` rows name GTEx's representative intron**, the only one the "
+        "fallback scored. They resolve an event but never tested the gene's other introns.",
+        "- **One intron per tissue:** the intron behind that tissue's call. Other introns "
+        "of the gene that also colocalize are in `signal_pairs.parquet`, not here.", "",
+        f"- events (nomination x tissue): **{len(out)}** over **{n_nom}** gene x trait "
+        "nominations",
+        f"- signal-level (`susie`): **{int((out['estimator'] == 'susie').sum())}**; "
+        f"abf fallback: **{int((out['estimator'] == 'abf').sum())}**",
+        f"- junction mapped to a GENCODE v47 transcript: "
+        f"**{int((out['junction_transcripts'] != '').sum())}/{len(out)}**",
+        f"- junction on an IsoGraph switch-pair isoform in the same tissue: "
+        f"**{len(conc)}** events, **{len(conc[['trait', 'gene']].drop_duplicates())}** "
+        "gene x trait",
+        f"- also a switch-pair isoform in the matching BrainSeq region: "
+        f"**{int(_is_true(out['brainseq_replicates_switch']).sum())}**",
+        f"- cross-tissue exceptions (switch pair taken from another region; flagged, never "
+        f"counted as tissue-concordant, scored apart in the long-read arm): "
+        f"**{int(_is_true(out['cross_tissue_in_switch_pair']).sum())}** events "
+        f"({', '.join(sorted(out.loc[_is_true(out['cross_tissue_in_switch_pair']), 'gene_name'].astype(str).unique())) or 'none'})",
+        "",
+        "| gene | trait | tissue | junction | PP4 | estimator | prior | transcripts | "
+        "switch pair | BrainSeq | structural event |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for r in out.itertuples(index=False):
+        c = ("yes" if r.concordant is True else "no" if r.concordant is False else "—")
+        if r.cross_tissue_in_switch_pair is True:
+            c = f"cross-tissue exception ({r.cross_tissue_regions})"
+        b = ("yes" if r.brainseq_replicates_switch is True
+             else "no" if r.brainseq_replicates_switch is False else "—")
+        lines.append(
+            f"| {r.gene_name} | {r.trait.upper()} | {r.iso_region} | {r.junction} | "
+            f"{r.PP4_sQTL:.3f} | {r.estimator} | {r.prior_robustness} | "
+            f"{r.junction_transcripts or '—'} | {c} | {b} | {r.structural_consequence or '—'} |")
+    (dest / "COLOC_ISOFORM_EVENTS.md").write_text("\n".join(lines) + "\n")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(
         description="Resolve the isoform event per colocalized gene (join sQTL direction "
                     "to the tissue-matched IsoGraph switch + BrainSeq replication).")
+    p.add_argument("--layer", choices=("clpp", "signal"), default="clpp",
+                   help="clpp: eCAVIAR coloc_direction events (default; the layer the "
+                        "committed displays read). signal: coloc.susie all-introns "
+                        "nominations, written beside them")
     p.add_argument("--analysis", nargs="*", default=None,
                    help="analysis dir(s); default: all with coloc_direction.parquet")
+    p.add_argument("--cross-tissue-exception", nargs="*", metavar="SYMBOL",
+                   default=list(CROSS_TISSUE_EXCEPTIONS),
+                   help="signal layer: genes whose switch pair may come from a region other "
+                        "than the colocalizing tissue (flagged, scored apart; default: "
+                        f"{' '.join(CROSS_TISSUE_EXCEPTIONS)}). Pass with no symbols to disable")
     args = p.parse_args()
+    if args.layer == "signal":
+        if args.analysis:
+            raise SystemExit("--analysis selects CLPP analysis dirs; the signal layer "
+                             "resolves every signal-level nomination")
+        run_signal(cross_tissue_exceptions=tuple(args.cross_tissue_exception))
+        return
     analyses = args.analysis or sorted(
         d.name for d in _COLOC_ROOT.iterdir()
         if (d / "coloc" / "coloc_direction.parquet").exists())
