@@ -43,6 +43,8 @@
 #   sbatch 05_genetic_anchoring/_h/25.brainseq_switch_qtl.sh                  # all regions, both stages
 #   sbatch 05_genetic_anchoring/_h/25.brainseq_switch_qtl.sh caudate          # one region
 #   sbatch --export=ALL,SWQTL_ARM=ea_only 05_genetic_anchoring/_h/25....sh    # the coloc arm
+#     (ea_only adjusts for genotype PCs computed WITHIN the EA panel -- `ARM_PCS` in
+#     brainseq_switch_qtl.py; all_samples keeps the bundle's multi-ancestry PCs)
 #   sbatch --export=ALL,SWQTL_STAGE=map   05_genetic_anchoring/_h/25....sh    # re-map only
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
