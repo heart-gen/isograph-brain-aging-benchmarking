@@ -165,8 +165,9 @@ it may not be read as:
    colocalized against the EUR GWAS.
 3. ~~SMR + HEIDI on both QTL sources.~~ **GTEx done 2026-09-11** (§0.4.3): 29/42 nominations have a
    tissue where the colocalizing intron is SMR-significant with HEIDI not rejected; SNCA/PD
-   disagrees (not significant in 7 of 8 tissues, HEIDI rejects in the eighth). BrainSEQ waits for
-   EA-only QTL.
+   disagrees, and the disagreement is a HEIDI rejection rather than an absence of SMR signal
+   (HEIDI rejects in all 8 instrumented sQTL tissues, 6 of which clear the family threshold).
+   BrainSEQ waits for EA-only QTL.
 4. **Only then** decide how much wet-lab is still needed. Steps 1–3 may reduce Experiment A to
    a single confirmatory reporter assay on SNCA, or make it unnecessary for the resource claim.
 
@@ -250,9 +251,14 @@ Because UTR remodeling is the dominant enriched consequence (1.279, 9/9 regions)
    The test: for a switch pair (T₁, T₂) in the same gene and the same genome-wide phase block,
    ask whether the haplotype ratio **differs between the two transcripts**. A cis variant that
    drives the switch shifts T₁ and T₂ in opposite directions on the same haplotype; a variant
-   that only drives expression shifts both together. **Each donor is its own control**, so trans
-   effects, population structure, cell composition and environment all cancel — a cleaner design
-   than any population-level allelic association.
+   that only drives expression shifts both together. **Each donor is its own control**, so the
+   within-donor design removes population-structure confounding and controls much donor-level
+   trans and environmental variation — a cleaner design than any population-level allelic
+   association. It does not remove everything, and three things survive it: bulk cell composition
+   does **not** cancel if the allele-specific effects themselves differ by cell type; residual
+   reference-mapping bias remains; and random allelic imbalance remains. WASP filtering was
+   applied when the ASE data were generated (`qc/wasp_qc.tsv`, per-sample `wasp_vcfs/`), which
+   mitigates the mapping bias rather than eliminating it.
 
    Three caveats, all real:
    - **Per-donor depth is thin.** Allelic counts need reads over heterozygous sites; spot-checking
@@ -437,13 +443,22 @@ BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work
 
 ### 3.5 Framing fixes that cost nothing and should happen regardless
 
-1. `MANUSCRIPT_PLAN.md` §12 still lists **"Splicing-QTL specifically anchor the GO-invisible
-   switch layer"** as *Established* and as the Fig 3 headline. It is null (1.068, p = 0.077).
-   `FIGURE_ORDERING.md` was corrected to the phenotype-associated claim; the claims table was
-   not. **These two documents currently disagree about the paper's headline.**
-2. State the S-LDSC splicing arm as it is: one of six nominal, uncorrected. Presenting it as
-   support invites counter-line 3 to be discovered by a reviewer instead of disclosed by you.
-3. `reports/pi/00_OVERVIEW.md` §8 is stale — 89% should be 94%, and SNCA is no longer "uncertain".
+**All three applied 2026-09-12.**
+
+1. ~~`MANUSCRIPT_PLAN.md` §12 still lists **"Splicing-QTL specifically anchor the GO-invisible
+   switch layer"** as *Established* and as the Fig 3 headline.~~ **Fixed.** The row now reads
+   "The phenotype-associated switch layer is genetically anchored to splicing,
+   method-specifically", with the non-localisation (1.068, p = 0.077 vs GO-visible 1.084) as its
+   caveat, so the claims table and `FIGURE_ORDERING.md` no longer disagree about the headline.
+2. ~~State the S-LDSC splicing arm as it is: one of six nominal, uncorrected.~~ **Fixed.** The
+   Table 3 legend used to cite partitioned heritability as set-level support; it now says the
+   S-LDSC splicing arm does not support the claim and gives the 1-of-6 / AD p = 0.0355 /
+   uncorrected numbers inline. The fix went into the generator,
+   `manuscript/_h/assemble_main_tables.py`, not the emitted `.md` — regenerate the tables.
+3. ~~`reports/pi/00_OVERVIEW.md` §8 is stale — 89% should be 94%, and SNCA is no longer
+   "uncertain".~~ **Fixed** — though §8 itself had already been corrected; the stale 89% /
+   25-of-130 numbers were surviving in the stage table and the §03 narrative instead, and both
+   now carry the post-2026-09-09 split-half re-fit (250/266, 23/130, perm P = 0.034).
 
 ---
 

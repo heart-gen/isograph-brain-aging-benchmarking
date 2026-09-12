@@ -45,7 +45,11 @@ Two things not to overclaim:
   neither is the site of the effect — it is carried by the **phenotype-associated** set.
   The DTU-without-DGE claim rests on the GO-invisible content gate (S-real-3), not on
   genetics. The primary internal control is the **matched WGCNA baselines** from stage 02,
-  which are null everywhere (0.959–1.021, p=0.30–0.86).
+  which reach significance in no module set (0.968–1.066, p=0.053–0.71, fixed effects).
+  After the 2026-09-09 baseline re-fit the closest baseline is `wgcna_multiplex` on the
+  phenotype-associated set at 1.046 (p=0.053, I²=0.75), so state the control as "no baseline
+  clears 0.05" rather than "the baselines are flat"; the pre-re-fit range (0.959–1.021,
+  p=0.30–0.86) is stale.
 - **Per-gene CLPP posteriors are individually modest** (inclusion at ≥0.01; only 4/12
   reach 0.05; only CTSH at 0.39). The genetic-anchoring significance rests on the
   set-level contrast and S-LDSC, not on per-locus colocalization. The 12 splicing-led genes
@@ -125,11 +129,14 @@ not fine-map, which weakens any colocalization claimed there.
 uses the same GWAS and GTEx summary statistics as coloc, so agreement is a consistency check, not
 independent evidence. 29/42 nominations have at least one tissue where the colocalizing intron is
 SMR-significant with HEIDI not rejected (SNCA/LBD 11/11, UNC13A 2/2, PICALM 1/1); 9 have no
-instrument at 5e-8. **SNCA/PD disagrees**: 7/8 tissues are not significant after Bonferroni (min
-p_SMR 1.1e-3) and HEIDI rejects in the eighth (median p_HEIDI 7e-11). Report it as a
-disagreement; it does not overrule the colocalization. The HEIDI cut is 0.01 as prespecified; 20
-of 113 not-rejected primary tissue probes would be rejected at 0.05, and ZNF232/AD and GPM6A/SCZ
-would lose every tissue.
+instrument at 5e-8. **SNCA/PD disagrees, and the disagreement is a HEIDI rejection rather than an
+absence of SMR signal.** All 8 sQTL tissues are instrumented; 6 clear the family Bonferroni
+threshold (0.05/20 = 2.5e-3) at p_SMR 1.1e-3 to 2.2e-3, and HEIDI rejects in every one of them.
+The other 2 fall just short of the threshold (p_SMR 2.5e-3 and 4.2e-3) and HEIDI rejects there
+too: p_HEIDI is below 1e-6 in all 8, median 6.9e-11. The eQTL arm has no instrument at 5e-8 in
+any of the 8. Report it as a disagreement; it does not overrule the colocalization.
+The HEIDI cut is 0.01 as prespecified; 20 of 113 not-rejected primary tissue probes would be
+rejected at 0.05, and ZNF232/AD and GPM6A/SCZ would lose every tissue.
 
 Two gates gate the top tier, and they are independent. `status: reviewed` means the
 coordinates were verified here. `evidence_class` must be `functional_validation` or

@@ -167,7 +167,7 @@ result doesn't show any individual module is anchored; this tests each module as
 
 ---
 
-## Item 4 — GTEx composition (aging replication arm) — 🔄 BUILT + RUNNING
+## Item 4 — GTEx composition (aging replication arm) — ✅ DONE (partial replication)
 
 **Why:** Item 1 showed the composition-robust aging DTU layer survives in BrainSEQ (caudate 17,
 DLPFC 15). This replicates that de-confounding in the independent GTEx cohort, so the lead
@@ -228,7 +228,9 @@ reviewer-defensive: the test is clearly not rigged to always "survive."
 - [x] Item 2: eCLIP fetch + overlap done; B1 fixed (per-RBP independence-respecting unit,
   25/38 binding-supported at a GC-matched background, median gap 0.024 = binding capacity);
   neuronal-CLIP tiers are an honest null.
-- [ ] Item 3: run module anchoring (SLURM) → meta → decide on eigen-QTL / S-LDSC depth.
+- [x] Item 3: run module anchoring (SLURM) → meta → decide on eigen-QTL / S-LDSC depth.
+      DONE — see §Item 3 above for the nuanced result; the eigen-switch QTL was rejected on
+      power and module-level coloc convergence came back null in 10/10 (trait, cohort) cells.
 - [ ] Fold Item 1 result into the manuscript (adjusted SCZD count + mediator caveat;
       composition-robust aging layer as the lead DTU claim).
 - [ ] Decide commit/PR scope (nothing staged yet; never `git add -A`).

@@ -58,7 +58,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 
 #### Finding 3: The phenotype-associated switch layer is genetically anchored to splicing, method-specifically
 **Evidence status:** Established (strongest orthogonal result).
-**Key quantitative evidence:** sQTL/eQTL specificity contrast **1.111 pheno-sig (95% CI 1.048–1.177, p=3.6e-4, I²=0.23)**, all_modules 1.068 (p=1.3e-5). IsoGraph-only on the 8-tissue common subset: pheno_sig 1.108 (p=0.001, I²=0.00) and all_modules 1.105 (p=5.8e-6) vs matched WGCNA baselines null (0.968 / 0.980, p≥0.41).
+**Key quantitative evidence:** sQTL/eQTL specificity contrast **1.111 pheno-sig (95% CI 1.048–1.177, p=3.6e-4, I²=0.23)**, all_modules 1.068 (p=1.3e-5). IsoGraph-only on the 8-tissue common subset: pheno_sig 1.112 (p=6.5e-4, I²=0.00) and all_modules 1.110 (p=2.4e-6) vs matched WGCNA baselines, **neither of which clears 0.05** — `wgcna_switch_only` 1.015 (p=0.74) and `wgcna_multiplex` 1.044 (p=0.070, I²=0.80). **Updated 2026-09-12** to the 2026-09-09 matched-baseline re-fit; the pre-re-fit baselines (0.968 / 0.980, p≥0.41) are stale and must not be quoted. The control is now "no baseline reaches significance", not "every baseline is flat".
 **SNCA is orthogonally confirmed; CTSH is not (2026-09-03).** BrainSEQ short-read junction
 PSI on the exact Fig 4A contrast gives minor-form usage 0.189 (DLPFC, n=222) and 0.234
 (caudate, n=238) against a pre-registered 0.05 threshold, versus 0.29% in ONT long-read —
@@ -115,7 +115,7 @@ corroborating it.
 | GO-invisible gate module count: 8 modules (2 GO-visible) vs 4 modules (all GO-invisible) | Pre-refit prose vs post-refit `go_invisible_gate.parquet` (2026-06-29) | Wrong number in older narrative | **Resolved in-repo:** cite the regenerated parquet (4, all GO-invisible). Ensure no drafted prose still says 8/2. |
 | Coloc gene count phrasing: "68 genes" vs "141 events in 68 genes" vs "12+23+33" split | `GENETIC_ANCHORING_RESULTS.md` internal | 12+23+33 = 68 ✓ but "141 colocalized isoform events" vs Fig4D "68 colocalized genes" needs one canonical count in caption | Reconcile event-count vs gene-count wording in Fig 4 caption before submission |
 | Target journal: AGENTS.md header + §5 say Cell Genomics; `FIGURE_ORDERING.md` header still says "Nature Methods" | AGENTS.md vs FIGURE_ORDERING.md | Stale label | Update FIGURE_ORDERING.md header to Cell Genomics |
-| Fig 3 headline (full 17-analysis) vs common-subset | `qtl_anchoring_meta_contrast{,_common}.parquet` (pheno-sig 1.111 full vs 1.108 on the 8 tissues common to all methods) | Both correct for different subsets | State which subset each number is from in the caption |
+| Fig 3 headline (full 17-analysis) vs common-subset | `qtl_anchoring_meta_contrast{,_common}.parquet` (pheno-sig 1.111 full vs 1.112 on the 8 tissues common to all methods) | Both correct for different subsets | State which subset each number is from in the caption |
 
 ### 5. Reproducibility Status
 
@@ -241,7 +241,7 @@ corroborating it.
 
 | Proposed claim | Repository evidence | Evidence status | Narrative role | Principal caveat |
 | --- | --- | --- | --- | --- |
-| Splicing-QTL specifically anchor the GO-invisible switch layer (IsoGraph-only) | Finding 3 | Established | **Headline (Fig 3)** | Estimand is the contrast |
+| The phenotype-associated switch layer is genetically anchored to splicing, method-specifically (IsoGraph-only) | Finding 3 | Established | **Headline (Fig 3)** | Estimand is the contrast; does **not** localise to GO-invisible (1.068, p=0.077, vs GO-visible 1.084) |
 | Disease variants colocalize onto GO-invisible switches (SNCA exemplar) | Finding 4 | Supported/set-level | **Payoff (Fig 4)** | Modest posteriors |
 | Disease switch modules are real GO-invisible DTU | Finding 2 | Established | Mechanism bridge | One cohort |
 | Modules are reproducible + replicate aging | Finding 5 | Established | Trust (Fig 2) | — |
@@ -297,7 +297,7 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Confidence: High (one cohort — say so).
 
 ### Results 4: Splicing-QTL specifically anchor the phenotype-associated layer — an IsoGraph method effect (Fig 3) [HEADLINE]
-- Evidence: contrast 1.111 pheno-sig (p=3.6e-4) / 1.068 all_modules (p=1.3e-5); IsoGraph-only vs matched WGCNA (null, p≥0.41) — the primary internal control; S-LDSC heritability.
+- Evidence: contrast 1.111 pheno-sig (p=3.6e-4) / 1.068 all_modules (p=1.3e-5); IsoGraph-only vs matched WGCNA (no baseline clears 0.05; closest is wgcna_multiplex pheno-sig 1.046, p=0.053, I²=0.75) — the primary internal control. S-LDSC does **not** support it (splicing arm 1 of 6 nominal, uncorrected).
 - **Do not claim GO-invisible localisation here:** GO-invisible (1.068, p=0.077) and GO-visible (1.084, p=0.050) are indistinguishable. The DTU-without-DGE claim is Results 3's content gate, not this genetic one.
 - Role: headline orthogonal validation. Transition: "which variants, on which switches?"
 - Confidence: High.
@@ -401,7 +401,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | --- | --- | --- | --- | --- | --- | --- |
 | Fig 1–4 as ordered | benchmark + trust + QTL + anchoring | Findings 6/5/3/4 | **Keep as-is** | Dependency-correct, biology-led | High | Main |
 | ~~Synthetic benchmark summary~~ (`tableS_benchmark_summary.csv`) | 01_synthetic_benchmark/03_metrics | Finding 6 | **MOVED TO SUPPLEMENT — DONE** | Demoted from main; regenerated clean (6 core scenarios × 6 methods, no NA rows) and renamed via `synthetic_benchmark.R` (`ISOGRAPH_TABLES_ONLY=1`). References updated in `FIGURE_ORDERING.md` + `01_synthetic_benchmark/03_metrics/README.md`. | High | **Supp ✓** |
-| **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast **1.111 pheno-sig (p=3.6e-4)** / 1.068 all_modules (p=1.3e-5), IsoGraph-only vs matched WGCNA (null everywhere, p≥0.41). Does **not** localise to GO-invisible (1.068, p=0.077 vs GO-visible 1.084, p=0.050) — the legend in `assemble_main_tables.py` says so explicitly and must not be softened. **Reproducible:** `manuscript/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
+| **Main Table 1 — sQTL/eQTL splicing-specificity contrast (NEW, built)** | qtl_anchoring_meta contrast | Finding 3 | **PRIMARY main biology table** | The p-value-bearing anchor: contrast **1.111 pheno-sig (p=3.6e-4)** / 1.068 all_modules (p=1.3e-5), IsoGraph-only vs matched WGCNA (no baseline clears 0.05; closest wgcna_multiplex pheno-sig 1.046, p=0.053, I²=0.75). Does **not** localise to GO-invisible (1.068, p=0.077 vs GO-visible 1.084, p=0.050) — the legend in `assemble_main_tables.py` says so explicitly and must not be softened. **Reproducible:** `manuscript/_h/assemble_main_tables.py` → `table2_qtl_specificity_contrast.{csv,md}` (file keeps `table2_` stem; main-text number = Table 1). | High | **Main** |
 | **Main Table 2 — Splicing-led colocalized genes (NEW, built; reframed)** | deep-dive panel + literature | Finding 4 | **Main companion OR keep in Supp (S8/S9)** | Per-gene resolution; **CLPP posteriors are individually modest** — coloc threshold is eCAVIAR CLPP≥0.01 ("strong" ≥0.05), only **4/12 clear 0.05** and only CTSH (0.39) is substantial. Caption states the claim is *set-level coherence*, NOT per-locus significance (which lives in the contrast table + S-LDSC). Max CLPP carries confidence stars (`*` >0.01, `**` >0.05, `***` >0.10 → 1×`***`, 3×`**`, 8×`*`). Reproducible: same builder → `table3_splicing_led_genes.{csv,md}`. | Moderate | **Main or Supp** |
 | S-real-1 (baseline rates) | baseline_comparison | Finding 1 | **Keep in Supp** | Bounds, not advances | High | Supp |
 | **SCZ convergence panel** | SCZ projection (**RETRACTED**, P=0.40 on the correct background) | Results 6 | ~~Remove from Fig 4E~~ — **DONE 2026-09-03**: Fig 4E now shows the size-matched-null test for all five traits (null in 10/10 cells), lifted from S-real-10; the full three-panel version stays as S-real-10 (`figColocConvergence`) | A count-only panel cannot support convergence: it shows neither the size-matched null nor the tested-pool denominator | — | **Fig 4E (null panel) + S-real-10** |
