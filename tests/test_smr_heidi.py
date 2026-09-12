@@ -21,18 +21,31 @@ from isograph_benchmark.real_data.smr_heidi import (
     MA_COLS,
     PEQTL_SMR,
     SMR_OUT_COLS,
+    SMR_STATUS,
+    SOURCE_MODALITIES,
+    WEAK_F,
+    collect_attrition,
+    instrumented_family_sizes,
+    parse_smr_log,
+    smr_status,
+    tss_fallback_genes,
+    build_brainseq_targets,
     build_targets,
     check_qtl_source,
     classify,
     esd_rows,
+    esd_rows_brainseq,
     flist_rows,
     locus_chr,
     ma_from_loci,
     probe_coloc,
+    probe_coloc_brainseq,
     probe_gene,
     read_smr,
+    run_root,
     smr_command,
     smr_threshold,
+    source_root,
     write_ma,
 )
 
@@ -49,6 +62,179 @@ def _q(variants, af=None, slope=None):
     return pd.DataFrame({"phenotype_id": [SNCA_I] * n, "variant_id": variants,
                          "af": af or [0.3] * n, "pval_nominal": [1e-9] * n,
                          "slope": slope or [0.5] * n, "slope_se": [0.05] * n})
+
+
+# --------------------------------------------------------------------------- #
+# Multiple testing: two families, corrected apart
+# --------------------------------------------------------------------------- #
+def _probe_rows(primary_instrumented: int, secondary_instrumented: int,
+                uninstrumented: int = 2) -> pd.DataFrame:
+    rows = []
+    for i in range(primary_instrumented):
+        rows.append({"analysis": "aging__ad", "modality": "sQTL", "tissue": "Brain_Cortex",
+                     "probeID": f"P{i}", "probe_family": "primary", "p_SMR": 1e-6})
+    for i in range(secondary_instrumented):
+        rows.append({"analysis": "aging__ad", "modality": "sQTL", "tissue": "Brain_Cortex",
+                     "probeID": f"S{i}", "probe_family": "secondary", "p_SMR": 1e-6})
+    for i in range(uninstrumented):
+        rows.append({"analysis": "aging__ad", "modality": "sQTL", "tissue": "Brain_Cortex",
+                     "probeID": f"U{i}", "probe_family": "primary", "p_SMR": np.nan})
+    return pd.DataFrame(rows)
+
+
+def test_the_primary_denominator_does_not_count_the_secondary_family():
+    """The defect this replaced: the two families were pooled into one Bonferroni
+    denominator, and then only the primary count was printed, so the reported threshold
+    could not be reproduced from the reported n."""
+    fam = instrumented_family_sizes(_probe_rows(3, 4)).set_index("probe_family")
+    assert int(fam.at["primary", "n_instrumented_family"]) == 3
+    assert int(fam.at["secondary", "n_instrumented_family"]) == 4
+    assert 7 not in set(fam["n_instrumented_family"])
+
+
+def test_an_uninstrumented_probe_is_not_in_any_denominator():
+    """There is no p-value to correct, so counting it would only make the threshold stricter
+    for reasons unrelated to how many tests were done."""
+    fam = instrumented_family_sizes(_probe_rows(3, 0, uninstrumented=5))
+    assert int(fam.loc[fam["probe_family"] == "primary",
+                       "n_instrumented_family"].iloc[0]) == 3
+
+
+def test_the_same_probe_in_two_tissues_counts_twice():
+    d = _probe_rows(1, 0, uninstrumented=0)
+    d = pd.concat([d, d.assign(tissue="Brain_Cortex_2")], ignore_index=True)
+    fam = instrumented_family_sizes(d)
+    assert int(fam["n_instrumented_family"].iloc[0]) == 2
+
+
+# --------------------------------------------------------------------------- #
+# The SMR-side status axis, and the split of `neither`
+# --------------------------------------------------------------------------- #
+def test_smr_status_separates_untested_from_tested_and_null():
+    """`no_instrument` means the probe was never tested; folding it into a null was what
+    made `neither` the largest and least readable cell in both reports."""
+    assert smr_status(np.nan, np.nan, np.nan, 0.001) == "no_instrument"
+    assert smr_status(0.5, 0.4, 20, 0.001) == "instrumented_tested_null"
+    assert smr_status(1e-6, 0.4, 20, 0.001) == "smr_heidi_supported"
+    assert smr_status(1e-6, 1e-4, 20, 0.001) == "smr_signal_heidi_rejects"
+    assert smr_status(1e-6, np.nan, np.nan, 0.001) == "smr_signal_heidi_unavailable"
+    assert smr_status(1e-6, 0.4, 2, 0.001) == "smr_signal_heidi_unavailable"
+
+
+def test_every_status_the_classifier_can_emit_is_declared():
+    emitted = {smr_status(*a) for a in [
+        (np.nan, np.nan, np.nan, 0.001), (0.5, 0.4, 20, 0.001), (1e-6, 0.4, 20, 0.001),
+        (1e-6, 1e-4, 20, 0.001), (1e-6, np.nan, np.nan, 0.001)]}
+    assert emitted <= set(SMR_STATUS)
+    assert emitted == set(SMR_STATUS)
+
+
+def test_neither_is_split_by_whether_the_probe_was_ever_instrumented():
+    no_coloc = 0.1
+    assert classify(no_coloc, np.nan, np.nan, np.nan, 0.001) == "neither_no_instrument"
+    assert classify(no_coloc, 0.5, 0.4, 20, 0.001) == "neither_tested_null"
+    assert {"neither_no_instrument", "neither_tested_null"} <= set(AGREEMENT)
+    assert "neither" not in AGREEMENT
+
+
+def test_the_agreement_classes_still_track_smr_status_where_coloc_calls():
+    coloc = 0.95
+    assert classify(coloc, np.nan, np.nan, np.nan, 0.001) == "coloc_no_instrument"
+    assert classify(coloc, 0.5, 0.4, 20, 0.001) == "coloc_smr_not_significant"
+    assert classify(coloc, 1e-6, 0.4, 20, 0.001) == "coloc_and_smr_heidi_not_rejected"
+    assert classify(coloc, 1e-6, 1e-4, 20, 0.001) == "coloc_and_smr_heidi_rejected"
+    assert classify(coloc, 1e-6, 0.4, 2, 0.001) == "coloc_and_smr_heidi_untestable"
+
+
+def test_a_weak_instrument_marker_exists_and_is_only_a_marker():
+    """F is reported; nothing in the module may drop a probe for failing it."""
+    assert WEAK_F == 10.0
+
+
+# --------------------------------------------------------------------------- #
+# SNP attrition into HEIDI
+# --------------------------------------------------------------------------- #
+_LOG = """smr --bfile x --gwas-summary y
+
+16212 SNPs to be included from [/p/A_g.chr11.esi].
+489 individuals to be included from [/p/1000G.EUR.QC.11.fam].
+493922 SNPs to be included from [/p/1000G.EUR.QC.11.bim].
+2677 SNPs are included after allele checking.
+Genotype data for 489 individuals and 2677 SNPs to be included from [/p/1000G.EUR.QC.11.bed].
+5 Probes to be included from [/p/A_g.chr11.epi].
+eQTL summary data of 1 Probes to be included from [/p/A_g.chr11.besd].
+GWAS summary data of 214144 SNPs to be included from [/p/aging__scz.ma].
+"""
+
+
+def test_the_log_parser_reads_each_harmonization_step(tmp_path):
+    f = tmp_path / "A_g.chr11.log"
+    f.write_text(_LOG)
+    got = parse_smr_log(f)
+    assert got["n_besd_snps"] == 16212
+    assert got["n_panel_snps"] == 493922
+    assert got["n_smr_shared"] == 2677
+    assert got["n_gwas_snps"] == 214144
+    assert got["n_probes_epi"] == 5
+    assert got["n_probes_besd"] == 1
+
+
+def test_the_smr_shared_count_is_not_named_after_alleles():
+    """SMR prints it as "after allele checking", but it is the BESD n panel n GWAS count and
+    the GWAS side does essentially all of the cutting. The old name invited reading a
+    coverage number as an allele-QC failure, which is exactly what happened on 2026-09-11."""
+    from isograph_benchmark.real_data.smr_heidi import _ATTRITION
+
+    assert "n_smr_shared" in _ATTRITION
+    assert "n_allele_harmonized" not in _ATTRITION
+
+
+def test_a_step_the_log_never_printed_stays_nan_rather_than_zero(tmp_path):
+    """Zero would assert that everything was dropped; absence means SMR did not report it."""
+    f = tmp_path / "S_g.chr3.log"
+    f.write_text("16212 SNPs to be included from [/p/S_g.chr3.esi].\n")
+    got = parse_smr_log(f)
+    assert got["n_besd_snps"] == 16212
+    assert np.isnan(got["n_smr_shared"])
+    assert np.isnan(got["n_freq_mismatch"])
+
+
+def test_collect_attrition_keys_runs_by_path(tmp_path):
+    """Without the source inputs it reports only what the log carries -- and notably NOT a
+    BESD-retention fraction, whose denominator is imputation density rather than quality."""
+    d = tmp_path / "smr" / "aging__scz" / "caudate"
+    d.mkdir(parents=True)
+    (d / "A_g.chr11.log").write_text(_LOG)
+    out = collect_attrition(tmp_path)
+    assert len(out) == 1
+    r = out.iloc[0]
+    assert (r["analysis"], r["tissue"], r["modality"], r["chr"]) == (
+        "aging__scz", "caudate", "A_g", 11)
+    assert r["n_smr_shared"] == 2677
+    assert "frac_besd_retained" not in out.columns
+
+
+def test_collect_attrition_is_empty_when_nothing_has_run(tmp_path):
+    assert collect_attrition(tmp_path).empty
+
+
+# --------------------------------------------------------------------------- #
+# Probe-position fallback
+# --------------------------------------------------------------------------- #
+def test_a_gene_without_an_hg19_tss_is_flagged_as_a_position_fallback(monkeypatch):
+    """`flist_rows` centres such a probe on the median ESD position, which moves the cis
+    window and can change which SNPs are eligible instruments -- so it is QC, not a detail."""
+    import isograph_benchmark.real_data.smr_heidi as smr
+
+    targets = pd.DataFrame({"gene": ["ENSG1", "ENSG2"], "symbol": ["AAA", "BBB"]})
+    monkeypatch.setattr(smr, "gene_tss_hg19", lambda g: pd.DataFrame(
+        {"gene": ["ENSG1", "ENSG2"], "symbol": ["AAA", "BBB"],
+         "strand": ["+", "+"], "tss": [1_000_000, np.nan]}))
+    assert tss_fallback_genes(targets) == {"ENSG2"}
+
+
+def test_no_targets_means_no_fallbacks():
+    assert tss_fallback_genes(pd.DataFrame(columns=["gene", "symbol"])) == set()
 
 
 # --------------------------------------------------------------------------- #
@@ -192,7 +378,7 @@ def test_bonferroni_family_is_the_instrumented_probes():
     (0.95, np.nan, np.nan, np.nan, "coloc_no_instrument"),
     (0.10, 1e-6, 0.30, 12, "smr_without_coloc"),
     (np.nan, 1e-6, 0.30, 12, "smr_coloc_not_scored"),
-    (np.nan, 0.20, 0.30, 12, "neither"),
+    (np.nan, 0.20, 0.30, 12, "neither_tested_null"),
 ])
 def test_classification(pp4, p_smr, p_heidi, nsnp, expected):
     assert classify(pp4, p_smr, p_heidi, nsnp, threshold=1e-3) == expected
@@ -248,11 +434,100 @@ def test_probe_coloc_is_per_intron_and_abf_only_reaches_the_representative_intro
     assert pc.at["G2", "coloc_PP4_probe"] == pytest.approx(0.20)
 
 
-def test_brainseq_refuses_the_mixed_ancestry_arm_and_is_not_yet_wired():
+def test_brainseq_refuses_the_mixed_ancestry_arm_and_any_arm_whose_checks_failed():
     with pytest.raises(SystemExit, match="ea_only"):
-        check_qtl_source("brainseq", "all_samples")
-    with pytest.raises(SystemExit, match="not wired"):
-        check_qtl_source("brainseq", "ea_only")
+        check_qtl_source("brainseq", "all_samples", failures=[])
+    with pytest.raises(SystemExit, match="checks"):
+        check_qtl_source("brainseq", "ea_only", failures=["caudate: sign pin not run"])
+    assert check_qtl_source("brainseq", "ea_only", failures=[]) is None
     with pytest.raises(SystemExit, match="unknown"):
         check_qtl_source("somewhere")
     assert check_qtl_source("gtex") is None
+
+
+def test_source_roots_keep_the_brainseq_arm_apart_from_gtex():
+    g, b = source_root("gtex"), source_root("brainseq", "ea_only")
+    assert g.name == "gtex" and b.parts[-2:] == ("brainseq", "ea_only")
+    assert run_root("brainseq", 1e-5, "ea_only").parent.parent == b
+    assert run_root("brainseq", PEQTL_SMR, "ea_only") == b
+    with pytest.raises(SystemExit, match="--arm"):
+        source_root("brainseq")
+    assert SOURCE_MODALITIES == {"gtex": ("eQTL", "sQTL"), "brainseq": ("A_g", "S_g")}
+
+
+# --------------------------------------------------------------------------- #
+# BrainSEQ ESD and targets
+# --------------------------------------------------------------------------- #
+def _bs_q(rows):
+    return pd.DataFrame(rows, columns=["phenotype_id", "variant_id", "af", "slope"]).assign(
+        pval_nominal=1e-9, slope_se=0.05)
+
+
+def _alleles(rows):
+    return pd.DataFrame(rows, columns=["variant_id", "bs_ref", "bs_alt"])
+
+
+def test_brainseq_esd_effect_allele_is_alt_and_the_pin_turns_only_pinnable_genes():
+    """tensorQTL's slope is per ALT whichever way the panel codes the SNP, and an S_g slope
+    enters the ESD on the discovery axis only when the pin can orient that gene."""
+    q = _bs_q([("ENSG1.2", "rs1", 0.3, 0.5), ("ENSG1.2", "rs2", 0.6, -0.2),
+               ("ENSG2.1", "rs1", 0.3, 0.4)])
+    alleles = _alleles([("rs1", "A", "G"), ("rs2", "C", "T")])
+    bim = _bim([(4, "rs1", 0, 89_000_000, "G", "A"), (4, "rs2", 0, 89_000_500, "C", "T")])
+    pin = pd.DataFrame({"gene": ["ENSG1", "ENSG2"], "sign": [-1.0, -1.0],
+                        "pinnable": [True, False]})
+    e = esd_rows_brainseq(q, alleles, bim, pin).set_index(["phenotype_id", "SNP"])
+    assert set(ESD_COLS) - {"SNP"} <= set(e.columns)
+    assert (e.at[("ENSG1.2", "rs1"), "A1"], e.at[("ENSG1.2", "rs1"), "A2"]) == ("G", "A")
+    assert (e.at[("ENSG1.2", "rs2"), "A1"], e.at[("ENSG1.2", "rs2"), "A2"]) == ("T", "C")
+    assert e.at[("ENSG1.2", "rs1"), "Beta"] == pytest.approx(-0.5)     # pinned: flipped
+    assert e.at[("ENSG1.2", "rs2"), "Beta"] == pytest.approx(0.2)
+    assert e.at[("ENSG2.1", "rs1"), "Beta"] == pytest.approx(0.4)      # unpinnable: as mapped
+    assert e.at[("ENSG1.2", "rs1"), "Bp"] == 89_000_000                # hg19 panel position
+    raw = esd_rows_brainseq(q, alleles, bim).set_index(["phenotype_id", "SNP"])
+    assert raw.at[("ENSG1.2", "rs1"), "Beta"] == pytest.approx(0.5)    # A_g: never pinned
+
+
+def test_brainseq_esd_drops_ambiguous_mismatched_alleleless_and_monomorphic_variants():
+    q = _bs_q([("ENSG1.2", "rs1", 0.3, 0.5), ("ENSG1.2", "rs2", 0.3, 0.5),
+               ("ENSG1.2", "rs3", 0.3, 0.5), ("ENSG1.2", "rs4", 0.3, 0.5),
+               ("ENSG1.2", "rs5", 1.0, 0.5)])
+    alleles = _alleles([("rs1", "A", "T"), ("rs2", "A", "G"), ("rs3", "A", "G"),
+                        ("rs5", "A", "G")])                             # rs4 not in the pvar
+    bim = _bim([(1, "rs1", 0, 10, "A", "T"), (1, "rs2", 0, 20, "C", "T"),
+                (1, "rs3", 0, 30, "A", "G"), (1, "rs4", 0, 40, "A", "G"),
+                (1, "rs5", 0, 50, "A", "G")])
+    assert esd_rows_brainseq(q, alleles, bim)["SNP"].tolist() == ["rs3"]
+
+
+def test_brainseq_targets_cross_every_nominated_locus_with_every_region():
+    k = dict(analysis="aging__lbd", trait="lbd", LOCUS_ID="locus08_chr4")
+    gnom = pd.DataFrame([{**k, "gene": "G1", "symbol": "SNCA"}])
+    gcells = pd.DataFrame([{**k, "gene": "G1", "tissue": "Brain_Frontal_Cortex_BA9",
+                            "PP4_sQTL": 0.9}])
+    bnom = pd.DataFrame([{**k, "gene": "G1", "symbol": "SNCA"},
+                         {**k, "gene": "G2", "symbol": "MMRN1"}])
+    hier = pd.DataFrame([{**k, "gene": "G1", "tissue": "dlpfc", "modality": "S_g",
+                          "PP4": 0.88, "estimator": "susie"}])
+    t = build_brainseq_targets(
+        gnom, gcells, bnom, hier, ("caudate", "dlpfc"),
+        {"caudate": "Brain_Caudate_basal_ganglia", "dlpfc": "Brain_Frontal_Cortex_BA9"})
+    assert len(t) == 4 and (t["chr"] == 4).all()
+    s = t.set_index(["gene", "tissue"])
+    assert s.at[("G1", "dlpfc"), "target_source"] == "both"
+    assert s.at[("G2", "caudate"), "target_source"] == "brainseq"
+    assert s.at[("G2", "caudate"), "symbol"] == "MMRN1"
+    assert s.at[("G1", "dlpfc"), "gtex_call_in_matched_tissue"]
+    assert not s.at[("G1", "caudate"), "gtex_call_in_matched_tissue"]
+    assert s.at[("G1", "dlpfc"), "coloc_PP4_S_g"] == pytest.approx(0.88)
+    assert pd.isna(s.at[("G1", "dlpfc"), "coloc_PP4_A_g"])
+
+
+def test_brainseq_probe_coloc_is_the_hierarchy_cell_for_that_region_and_axis():
+    k = dict(analysis="aging__lbd", trait="lbd", LOCUS_ID="locus08_chr4", gene="G1",
+             tissue="dlpfc")
+    hier = pd.DataFrame([{**k, "modality": "S_g", "PP4": 0.88, "estimator": "susie"},
+                         {**k, "modality": "A_g", "PP4": 0.10, "estimator": "abf"}])
+    pc = probe_coloc_brainseq(hier).set_index(["tissue", "modality", "probe_key"])
+    assert pc.at[("dlpfc", "S_g", "G1"), "coloc_PP4_probe"] == pytest.approx(0.88)
+    assert pc.at[("dlpfc", "A_g", "G1"), "coloc_estimator_probe"] == "abf"

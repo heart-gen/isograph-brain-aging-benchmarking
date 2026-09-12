@@ -8,6 +8,7 @@ from isograph_benchmark.real_data.brainseq_qtl_checks import (
     CONTROL_MIN_STRONG_PAIRS,
     CONTROL_PI1_MIN,
     align_effects,
+    arm_check_failures,
     control_verdict,
     gene_replication,
     pin_slopes,
@@ -107,3 +108,21 @@ def test_control_verdict_applies_the_prespecified_rule():
     v, why = control_verdict(0.8, 1.0, CONTROL_MIN_STRONG_PAIRS - 1)
     assert v == "FAIL" and "pairs" in why
     assert control_verdict(np.nan, 0.97, 500)[0] == "FAIL"
+
+
+def test_downstream_gate_needs_both_checks_run_and_passed_in_every_region(tmp_path):
+    regions = ("caudate", "dlpfc")
+    assert len(arm_check_failures("ea_only", regions, tmp_path)) == 2   # neither summary exists
+
+    pd.DataFrame({"region": regions, "arm": "ea_only", "reproduces_discovery": [True, True],
+                  "median_abs_r": [0.9996, 0.9996]}).to_parquet(tmp_path / "sign_pin_summary.parquet")
+    pd.DataFrame({"region": regions, "arm": "ea_only", "verdict": ["PASS", "FAIL"],
+                  "fail_reasons": ["", "pi1 0.30 < 0.5"]}).to_parquet(
+        tmp_path / "positive_control_summary.parquet")
+    f = arm_check_failures("ea_only", regions, tmp_path)
+    assert len(f) == 1 and f[0].startswith("dlpfc") and "pi1" in f[0]
+
+    # A region the checks never covered is a failure, not a pass by omission.
+    assert len(arm_check_failures("ea_only", (*regions, "hippocampus"), tmp_path)) == 3
+    # Another arm's summary rows do not certify this arm.
+    assert len(arm_check_failures("all_samples", regions, tmp_path)) == 4

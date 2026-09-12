@@ -81,6 +81,48 @@ def checks_dir(arm: str) -> Path:
     return ensure_dir(stage_out("anchoring.brainseq_qtl", arm) / "checks")
 
 
+def arm_check_failures(arm: str, regions: tuple[str, ...] | list[str] | None = None,
+                       dest: Path | None = None) -> list[str]:
+    """Why an arm's QTL results may not be read yet; empty once both checks passed everywhere.
+
+    Downstream analyses (colocalization, SMR) call this rather than assume the checks ran. A
+    recomputed S_g that does not reproduce the discovery axis, or an A_g arm that fails the
+    positive control, means the mapping itself is suspect, and nothing should be built on it.
+    """
+    regions = list(regions or REGIONS)
+    dest = dest or (stage_out("anchoring.brainseq_qtl", arm) / "checks")
+    out: list[str] = []
+
+    sp = dest / "sign_pin_summary.parquet"
+    if not sp.exists():
+        out.append(f"no sign-pin summary at {sp}")
+    else:
+        s = pd.read_parquet(sp)
+        s = s[s["arm"] == arm] if "arm" in s.columns else s
+        for r in regions:
+            row = s[s["region"] == r]
+            if row.empty:
+                out.append(f"{r}: sign pin not run")
+            elif not bool(row["reproduces_discovery"].astype(bool).all()):
+                out.append(f"{r}: recomputed S_g does not reproduce the discovery axis "
+                           f"(median |r| {float(row['median_abs_r'].iloc[0]):.3f})")
+
+    pc = dest / "positive_control_summary.parquet"
+    if not pc.exists():
+        out.append(f"no positive-control summary at {pc}")
+    else:
+        c = pd.read_parquet(pc)
+        c = c[c["arm"] == arm] if "arm" in c.columns else c
+        for r in regions:
+            row = c[c["region"] == r]
+            if row.empty:
+                out.append(f"{r}: positive control not run")
+            elif (row["verdict"] != "PASS").any():
+                out.append(f"{r}: positive control {row['verdict'].iloc[0]} "
+                           f"({row['fail_reasons'].iloc[0]})")
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # Sign pin
 # --------------------------------------------------------------------------- #

@@ -14,18 +14,30 @@ never beside it. Three rules govern every sentence written from this module's ou
     horizontal pleiotropy). It does not establish causal direction in the biological sense
     and cannot distinguish causality from pleiotropy.
   * Failing to reject HEIDI is not proof of a shared variant. HEIDI is underpowered at GTEx
-    brain sample sizes, so p_HEIDI >= HEIDI_REJECT reads "not rejected", never "shared".
+    brain sample sizes, and more so at BrainSEQ's, so p_HEIDI >= HEIDI_REJECT reads "not
+    rejected", never "shared".
   * A HEIDI rejection does not overrule a strong signal-level colocalization, and a significant
     SMR estimate does not promote a locus coloc did not support. Disagreements are reported as
     disagreements, in `agreement`, and neither method adjudicates the other.
 
 SCOPE
 -----
-Only the loci the signal-level layer nominated (PP4_sQTL >= 0.8, all-introns arm), only in the
-tissues where that sQTL call holds, for every intron phenotype of the gene and for its eQTL.
-The colocalizing intron is the pre-specified primary sQTL probe; the gene's other introns are
-reported beside it so the SMR evidence is never a maximum chosen over introns after the fact.
-This is a scoped follow-up on nominated loci, not a transcriptome-wide scan, and its
+GTEx (`--qtl-source gtex`): only the loci the signal-level layer nominated (PP4_sQTL >= 0.8,
+all-introns arm), only in the tissues where that sQTL call holds, for every intron phenotype of
+the gene and for its eQTL. The colocalizing intron is the pre-specified primary sQTL probe; the
+gene's other introns are reported beside it so the SMR evidence is never a maximum chosen over
+introns after the fact.
+
+BrainSEQ (`--qtl-source brainseq --arm ea_only`): every GTEx signal-level nomination, plus every
+locus BrainSEQ's own colocalization nominates on the switch axis (PP4_S_g >= 0.8 in any region,
+`coloc_brainseq`), in all three BrainSEQ regions and on both axes (A_g, S_g). BrainSEQ regions
+are not GTEx tissues, so a nomination is tested in every region rather than only where a GTEx
+call holds; `gtex_call_in_matched_tissue` records whether the region's tissue-matched GTEx
+tissue carries the GTEx sQTL call. Each gene has exactly one S_g and one A_g phenotype, so every
+BrainSEQ probe is primary. The coloc posterior an SMR result is compared with is BrainSEQ's own,
+for the same region and axis.
+
+Either way this is a scoped follow-up on nominated loci, not a transcriptome-wide scan, and its
 multiple-testing family is the probes it actually instrumented.
 
 PRE-SPECIFIED SETTINGS
@@ -40,32 +52,41 @@ arm and writes to its own directory; the ESD/BESD files do not depend on it and 
 
 INPUTS, AND THE BUILD
 ---------------------
-LD reference: the 1000G EUR Phase 3 PLINK panel (hg19) the coloc layer fine-maps on.
+LD reference: the 1000G EUR Phase 3 PLINK panel (hg19) the coloc layer fine-maps on, for both
+sources. For BrainSEQ that is a choice, not a constraint: it keeps the two SMR sources different
+in their QTL alone, and HEIDI's LD-based test is better served by the reference panel than by a
+region's 169-229 donors. BrainSEQ's in-sample LD is used where it is decisive instead, on the QTL
+side of `coloc_brainseq`.
 GWAS: the per-locus summary statistics the coloc layer used, with the same long-range-LD
 exclusions, written as SMR `.ma`. Its frequency column is NA: the per-locus files carry none,
 and with a missing GWAS frequency SMR checks the QTL frequency against the reference panel
 alone (`freq_check`, src/SMR_data.cpp) rather than against a number invented here.
-QTL: GTEx v11 all-pairs nominal statistics. GRCh38 variant ids are bridged to rsIDs and each
+QTL, GTEx: v11 all-pairs nominal statistics. GRCh38 variant ids are bridged to rsIDs and each
 ESD position is the panel's hg19 position for that rsID, so GWAS, QTL and LD reference agree on
 position. The effect allele is the GTEx ALT allele, which is the allele `af` and `slope` refer
 to. Strand-ambiguous and panel-mismatched variants are dropped, as in the coloc layer. Probe
 positions are hg19 gene TSSs from MAGMA's NCBI37.3 gene.loc.
+QTL, BrainSEQ: the ea_only nominal cis statistics from `brainseq_switch_qtl`. Variant ids are
+already rsIDs; REF/ALT come from the arm's .pvar and are checked against the panel exactly as for
+GTEx, and the effect allele is ALT, which tensorQTL counts (the positive control confirmed it).
+S_g slopes are sign-pinned to the discovery fit before they enter the ESD, so b_SMR on S_g points
+along the discovery switch axis; a gene the pin cannot orient keeps its mapped sign and is
+flagged (`sign_pinned`, `axis_unstable`).
 
-BrainSEQ QTL are the plan's second source and are deliberately NOT wired. The cohort is roughly
-half African-ancestry while the GWAS and the LD panel are European, so the only defensible input
-is an `ea_only` mapping, which has not been run. `--qtl-source brainseq` refuses rather than
-produce an SMR estimate on mismatched ancestry.
+The BrainSEQ source is refused unless the arm is `ea_only` AND both `brainseq_qtl_checks` gates
+passed in every region. The mixed-ancestry arm is never accepted: the GWAS and the LD reference
+are European.
 
 STAGES
 ------
-  --stage prep   targets from the signal-level nominations, the (tissue, chr) work list, one
-                 `.ma` per analysis. Login-node safe.
-  --stage besd   per work-list task: GTEx all-pairs -> ESD -> `smr --make-besd`.
+  --stage prep   targets, the (tissue-or-region, chr) work list, one `.ma` per analysis.
+                 Login-node safe. BrainSEQ needs `coloc_brainseq --stage meta` first.
+  --stage besd   per work-list task: nominal statistics -> ESD -> `smr --make-besd`.
   --stage smr    per work-list task: `smr` for every analysis with targets in that cell.
   --stage meta   assemble, apply the multiple-testing family, join coloc per probe, classify,
                  report.
 
-Outputs under 05_genetic_anchoring/_m/smr_heidi/<source>/.
+Outputs under 05_genetic_anchoring/_m/smr_heidi/gtex/ and .../smr_heidi/brainseq/<arm>/.
 """
 from __future__ import annotations
 
@@ -83,7 +104,13 @@ from isograph_benchmark.real_data.coloc_signal_susie import results_dir, signal_
 
 SMR_BIN = Path("/ocean/projects/bio260021p/shared/opt/SMR/build/Release/smr")
 QTL_SOURCES: tuple[str, ...] = ("gtex", "brainseq")
-MODALITIES: tuple[str, ...] = ("eQTL", "sQTL")
+BRAINSEQ_ARMS: tuple[str, ...] = ("ea_only",)
+# The QTL axes each source carries: GTEx expression and intron excision; BrainSEQ's per-gene
+# abundance channel and switch coordinate.
+SOURCE_MODALITIES: dict[str, tuple[str, ...]] = {"gtex": ("eQTL", "sQTL"),
+                                                 "brainseq": ("A_g", "S_g")}
+MODALITIES: tuple[str, ...] = SOURCE_MODALITIES["gtex"]
+BRAINSEQ_FTYPE: dict[str, str] = {"A_g": "abundance", "S_g": "switch"}
 
 # SMR 1.4.2 defaults (src/SMR.cpp), passed explicitly on every call.
 PEQTL_SMR = 5e-8
@@ -119,8 +146,33 @@ AGREEMENT: tuple[str, ...] = (
     "coloc_no_instrument",                # coloc call, no cis-QTL reaches the SMR threshold
     "smr_without_coloc",                  # SMR significant where coloc scored below the call
     "smr_coloc_not_scored",               # SMR significant at a probe coloc never scored
-    "neither",
+    "neither_tested_null",                # no coloc call; instrumented, SMR not significant
+    "neither_no_instrument",              # no coloc call and never instrumented -- UNTESTED
 )
+
+# The SMR-side verdict, carried beside `agreement` because the two axes answer different
+# questions. The old vocabulary collapsed "never instrumented" into `neither`, which made the
+# largest cell of both reports unreadable: of the 2026-09-11 `neither` rows, 1,761/1,823 (GTEx)
+# and 219/231 (BrainSEQ) had no instrument at all and so were never tested for anything.
+SMR_STATUS: tuple[str, ...] = (
+    "no_instrument",                  # no cis-QTL clears --peqtl-smr; the probe is UNTESTED
+    "instrumented_tested_null",       # tested, SMR p above the family threshold
+    "smr_signal_heidi_unavailable",   # SMR significant, HEIDI skipped (< HEIDI_MIN_M SNPs)
+    "smr_signal_heidi_rejects",       # SMR significant, HEIDI rejects one shared variant
+    "smr_heidi_supported",            # SMR significant, HEIDI not rejected
+)
+
+# Instrument strength F = (b/se)^2 for the top cis-QTL SNP. Reported on every row and never
+# used to exclude one: a post hoc F filter on an already-thresholded instrument set is its own
+# selection. 10 is the conventional weak-instrument marker; at --peqtl-smr 5e-8, z ~ 5.45 and
+# F ~ 30, so weak instruments should be rare in the primary arm and common only if a relaxed
+# threshold is ever run.
+WEAK_F = 10.0
+
+# The two multiple-testing families. A gene's pre-designated probe is confirmatory; its other
+# introns localize the event and are corrected separately, so neither the primary threshold is
+# inflated by introns nor the introns escape correction when they are discussed.
+PROBE_FAMILIES: tuple[str, ...] = ("primary", "secondary")
 
 _AMBIGUOUS = {("A", "T"), ("T", "A"), ("C", "G"), ("G", "C")}
 _LOCUS_CHR = re.compile(r"_chr(\d+)$")
@@ -129,31 +181,50 @@ _LOCUS_CHR = re.compile(r"_chr(\d+)$")
 # --------------------------------------------------------------------------- #
 # Layout and the source guard
 # --------------------------------------------------------------------------- #
-def check_qtl_source(qtl_source: str, arm: str | None = None) -> None:
-    """Refuse any QTL source this module cannot use defensibly."""
+def check_qtl_source(qtl_source: str, arm: str | None = None,
+                     failures: list[str] | None = None) -> None:
+    """Refuse any QTL source this module cannot use defensibly.
+
+    `failures` is the BrainSEQ QTL-check verdict (`brainseq_qtl_checks.arm_check_failures`);
+    left None it is read from disk.
+    """
     if qtl_source not in QTL_SOURCES:
         raise SystemExit(f"unknown --qtl-source {qtl_source!r}; choose from {QTL_SOURCES}")
     if qtl_source != "brainseq":
         return
-    if arm != "ea_only":
+    if arm not in BRAINSEQ_ARMS:
         raise SystemExit(
             f"BrainSEQ SMR must use the `ea_only` arm, not {arm!r}: the cohort is roughly half "
             "African-ancestry while the GWAS and the 1000G EUR LD reference are European, so "
             "an SMR estimate or a HEIDI test on the mixed-ancestry QTL would rest on mismatched LD.")
-    qdir = stage_out("anchoring.brainseq_qtl") / "ea_only"
-    raise SystemExit(
-        "BrainSEQ SMR is not wired yet. It needs the ea_only QTL mapping under "
-        f"{qdir} (`brainseq_switch_qtl --stage map --arm ea_only`), which has not been run.")
+    if failures is None:
+        from isograph_benchmark.real_data.brainseq_qtl_checks import arm_check_failures
+
+        failures = arm_check_failures(arm)
+    if failures:
+        raise SystemExit(
+            f"BrainSEQ `{arm}` has not passed its QTL checks, so no SMR estimate is built on it: "
+            + "; ".join(failures) + " (run 28.brainseq_qtl_checks.sh)")
 
 
-def source_root(qtl_source: str = "gtex") -> Path:
+def modalities(qtl_source: str) -> tuple[str, ...]:
+    return SOURCE_MODALITIES[qtl_source]
+
+
+def source_root(qtl_source: str = "gtex", arm: str | None = None) -> Path:
     """Targets, GWAS `.ma` and BESD for one QTL source (independent of the SMR threshold)."""
-    return stage_out("anchoring.smr") / qtl_source
+    base = stage_out("anchoring.smr") / qtl_source
+    if qtl_source == "brainseq":
+        if not arm:
+            raise SystemExit("the BrainSEQ QTL source needs --arm")
+        base = base / arm
+    return base
 
 
-def run_root(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR) -> Path:
+def run_root(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
+             arm: str | None = None) -> Path:
     """SMR runs and meta outputs; a non-default instrument threshold is a sensitivity arm."""
-    base = source_root(qtl_source)
+    base = source_root(qtl_source, arm)
     return base if np.isclose(peqtl_smr, PEQTL_SMR) else (
         base / "sensitivity" / f"peqtl_smr_{peqtl_smr:g}")
 
@@ -170,7 +241,7 @@ def locus_chr(locus_id: str) -> int:
 
 
 def probe_gene(probe_id: str) -> str:
-    """Bare ENSG of a GTEx probe: `ENSG...v` (eQTL) or `chr:start:end:clu_N_s:ENSG...v` (sQTL)."""
+    """Bare ENSG of a probe: `ENSG...v` (eQTL, A_g, S_g) or `chr:start:end:clu_N_s:ENSG...v` (sQTL)."""
     return str(probe_id).split(":")[-1].split(".")[0]
 
 
@@ -192,6 +263,43 @@ def build_targets(nom: pd.DataFrame, cells: pd.DataFrame, call: float = PP4_CALL
         if k not in c.columns:
             c[k] = None
     return c[keep].sort_values(["analysis", "LOCUS_ID", "gene", "tissue"]).reset_index(drop=True)
+
+
+def build_brainseq_targets(gtex_nom: pd.DataFrame, gtex_cells: pd.DataFrame,
+                           bs_nom: pd.DataFrame, bs_cells: pd.DataFrame,
+                           regions, gtex_tissue: dict[str, str],
+                           call: float = PP4_CALL) -> pd.DataFrame:
+    """(nominated locus, gene, BrainSEQ region) cells for the BrainSEQ source.
+
+    The union of the GTEx signal-level nominations and BrainSEQ's own switch-axis nominations,
+    crossed with every region. `target_source` says which layer nominated the locus, and
+    `coloc_PP4_<axis>` carries BrainSEQ's coloc posterior for that region and axis.
+    """
+    keys = ["analysis", "trait", "LOCUS_ID", "gene"]
+    g = gtex_nom[[*keys, "symbol"]].drop_duplicates(keys).assign(_g=True)
+    b = bs_nom[[*keys, "symbol"]].drop_duplicates(keys).assign(_b=True)
+    u = g.merge(b, on=keys, how="outer", suffixes=("", "_bs"))
+    u["symbol"] = u["symbol"].fillna(u.pop("symbol_bs"))
+    in_g = u.pop("_g").notna()
+    in_b = u.pop("_b").notna()
+    u["target_source"] = np.select([in_g & in_b, in_g], ["both", "gtex"], "brainseq")
+
+    t = u.merge(pd.DataFrame({"tissue": list(regions)}), how="cross")
+    t["chr"] = t["LOCUS_ID"].map(locus_chr)
+    t["_gt"] = t["tissue"].map(gtex_tissue)
+    gc = (gtex_cells[[*keys, "tissue", "PP4_sQTL"]]
+          .rename(columns={"tissue": "_gt", "PP4_sQTL": "gtex_PP4_sQTL_matched"})
+          .drop_duplicates([*keys, "_gt"]))
+    t = t.merge(gc, on=[*keys, "_gt"], how="left").drop(columns="_gt")
+    t["gtex_call_in_matched_tissue"] = t["gtex_PP4_sQTL_matched"].fillna(0) >= call
+
+    for ax in SOURCE_MODALITIES["brainseq"]:
+        sub = (bs_cells[bs_cells["modality"] == ax][[*keys, "tissue", "PP4", "estimator"]]
+               .rename(columns={"PP4": f"coloc_PP4_{ax}", "estimator": f"coloc_estimator_{ax}"})
+               .drop_duplicates([*keys, "tissue"]))
+        t = t.merge(sub, on=[*keys, "tissue"], how="left")
+    t["coloc_phenotype_id"] = None
+    return t.sort_values(["analysis", "LOCUS_ID", "gene", "tissue"]).reset_index(drop=True)
 
 
 def ma_from_loci(loci: list[tuple[int, pd.DataFrame]], excl: pd.DataFrame, n: int) -> pd.DataFrame:
@@ -221,15 +329,7 @@ def write_ma(ma: pd.DataFrame, path: Path) -> None:
     ma.to_csv(path, sep="\t", index=False, na_rep="NA")
 
 
-def run_prep(qtl_source: str = "gtex", arm: str | None = None, call: float = PP4_CALL) -> Path:
-    check_qtl_source(qtl_source, arm)
-    from isograph_benchmark.real_data.locus_event_audit import load_nominations
-
-    nom, cells = load_nominations("susie", call=call, sqtl_arm="all")
-    t = build_targets(nom, cells, call=call)
-    if t.empty:
-        raise SystemExit("no nominated (locus, gene, tissue) cells; nothing to test")
-    dest = ensure_dir(source_root(qtl_source))
+def _write_prep(t: pd.DataFrame, dest: Path) -> Path:
     t.to_parquet(dest / "targets.parquet", index=False)
     work = t[["tissue", "chr"]].drop_duplicates().sort_values(["tissue", "chr"])
     work.to_csv(dest / "work_list.tsv", sep="\t", index=False)
@@ -249,6 +349,30 @@ def run_prep(qtl_source: str = "gtex", arm: str | None = None, call: float = PP4
     print(f"  {len(t)} (locus, gene, tissue) targets, {t['gene'].nunique()} genes, "
           f"{len(work)} (tissue, chr) tasks -> {dest}")
     return dest
+
+
+def run_prep(qtl_source: str = "gtex", arm: str | None = None, call: float = PP4_CALL) -> Path:
+    check_qtl_source(qtl_source, arm)
+    from isograph_benchmark.real_data.locus_event_audit import load_nominations
+
+    nom, cells = load_nominations("susie", call=call, sqtl_arm="all")
+    if qtl_source == "gtex":
+        t = build_targets(nom, cells, call=call)
+    else:
+        from isograph_benchmark.real_data.brainseq_qtl_checks import GTEX_TISSUE
+        from isograph_benchmark.real_data.coloc_brainseq import REGIONS, coloc_root
+
+        croot = coloc_root(arm)
+        need = [croot / "nominations.parquet", croot / "cells_hierarchy.parquet"]
+        missing = [str(p) for p in need if not p.exists()]
+        if missing:
+            raise SystemExit(f"missing {missing}; run `coloc_brainseq --stage meta` first -- "
+                             "BrainSEQ SMR is read against BrainSEQ's own colocalization")
+        t = build_brainseq_targets(nom, cells, pd.read_parquet(need[0]),
+                                   pd.read_parquet(need[1]), REGIONS, GTEX_TISSUE, call=call)
+    if t.empty:
+        raise SystemExit("no nominated (locus, gene, tissue) cells; nothing to test")
+    return _write_prep(t, ensure_dir(source_root(qtl_source, arm)))
 
 
 # --------------------------------------------------------------------------- #
@@ -283,6 +407,45 @@ def esd_rows(q: pd.DataFrame, bridge: pd.DataFrame, bim: pd.DataFrame) -> pd.Dat
     return out.drop_duplicates(["phenotype_id", "SNP"]).reset_index(drop=True)
 
 
+def esd_rows_brainseq(q: pd.DataFrame, alleles: pd.DataFrame, bim: pd.DataFrame,
+                      pin: pd.DataFrame | None = None) -> pd.DataFrame:
+    """BrainSEQ nominal statistics as SMR ESD rows, keyed by `phenotype_id`.
+
+    `q`: phenotype_id, variant_id (an rsID), af, pval_nominal, slope, slope_se. `alleles`: the
+    arm's .pvar REF/ALT per rsID (`bs_ref`, `bs_alt`). `bim`: the reference panel (hg19).
+    `pin`: for S_g, the sign pin per gene (`gene`, `sign`, `pinnable`). A pinnable gene's slope
+    is multiplied by its pin so b_SMR points along the discovery switch axis; a gene the pin
+    cannot orient keeps its mapped sign, and the meta stage flags it.
+    """
+    cols = ["phenotype_id", *ESD_COLS]
+    if q.empty:
+        return pd.DataFrame(columns=cols)
+    d = (q.merge(alleles[["variant_id", "bs_ref", "bs_alt"]], on="variant_id")
+          .merge(bim[["rsid", "bchr", "bp", "A1", "A2"]], left_on="variant_id", right_on="rsid"))
+    if d.empty:
+        return pd.DataFrame(columns=cols)
+    ref, alt = d["bs_ref"].astype(str).str.upper(), d["bs_alt"].astype(str).str.upper()
+    p1, p2 = d["A1"].astype(str).str.upper(), d["A2"].astype(str).str.upper()
+    same = ((ref == p1) & (alt == p2)) | ((ref == p2) & (alt == p1))
+    ambiguous = pd.Series([(a, b) in _AMBIGUOUS for a, b in zip(ref, alt)], index=d.index)
+    ok = same & ~ambiguous & (d["af"] > 0) & (d["af"] < 1) & (d["slope_se"] > 0)
+
+    beta = d["slope"].astype(float).to_numpy()
+    if pin is not None and len(pin):
+        p = pin.drop_duplicates("gene").set_index("gene")
+        sign = p["sign"].astype(float).where(p["pinnable"].astype(bool), 1.0)
+        beta = beta * d["phenotype_id"].map(probe_gene).map(sign).fillna(1.0).to_numpy()
+
+    keep = ok.to_numpy()
+    d = d[keep]
+    out = pd.DataFrame({"phenotype_id": d["phenotype_id"].values,
+                        "Chr": d["bchr"].astype(int).values, "SNP": d["rsid"].values,
+                        "Bp": d["bp"].astype(int).values, "A1": alt[keep].values,
+                        "A2": ref[keep].values, "Freq": d["af"].values, "Beta": beta[keep],
+                        "se": d["slope_se"].values, "p": d["pval_nominal"].values})
+    return out.drop_duplicates(["phenotype_id", "SNP"]).reset_index(drop=True)
+
+
 def gene_tss_hg19(genes: pd.DataFrame) -> pd.DataFrame:
     """(gene, symbol) -> hg19 TSS and strand from MAGMA's NCBI37.3 gene.loc."""
     from isograph_benchmark.real_data.coloc_prep import GENE_LOC_HG19
@@ -300,8 +463,8 @@ def flist_rows(esd: pd.DataFrame, genes: pd.DataFrame, esd_dir: Path) -> pd.Data
     """One `--eqtl-flist` row per probe.
 
     A probe whose gene has no hg19 TSS falls back to the median ESD position with orientation
-    NA. SMR uses the probe position only to centre its 2 Mb cis window, and GTEx's cis
-    variants (within 1 Mb of the TSS) already sit inside it.
+    NA. SMR uses the probe position only to centre its 2 Mb cis window, and the QTL cis variants
+    (within 1 Mb of the TSS in both sources) already sit inside it.
     """
     g = genes.drop_duplicates("gene").set_index("gene")
     rows = []
@@ -347,6 +510,35 @@ def read_gtex_qtl(tissue: str, chrom: int, genes: set[str], modality: str) -> pd
     return t[t["phenotype_id"].map(probe_gene).isin(genes)][cols]
 
 
+def read_brainseq_qtl(arm: str, region: str, chrom: int, genes: set[str],
+                      modality: str) -> pd.DataFrame:
+    """BrainSEQ nominal cis statistics for the target genes on one axis and chromosome."""
+    import pyarrow.dataset as pds
+
+    from isograph_benchmark.real_data.brainseq_switch_qtl import out_dir as qtl_dir
+
+    cols = ["phenotype_id", "variant_id", "af", "pval_nominal", "slope", "slope_se"]
+    qdir = qtl_dir(arm, region) / "qtl"
+    ftype = BRAINSEQ_FTYPE[modality]
+    perm = qdir / f"cis_qtl_{ftype}.parquet"
+    files = sorted(qdir.glob(f"{ftype}.chr{chrom}.cis_qtl_pairs.*.parquet"))
+    if not genes or not perm.exists() or not files:
+        return pd.DataFrame(columns=cols)
+    ids = pd.read_parquet(perm, columns=["phenotype_id"])["phenotype_id"].astype(str)
+    want = sorted(ids[ids.map(probe_gene).isin(genes)])
+    if not want:
+        return pd.DataFrame(columns=cols)
+    return (pds.dataset([str(f) for f in files], format="parquet")
+            .to_table(columns=cols, filter=pds.field("phenotype_id").isin(want)).to_pandas())
+
+
+def load_sign_pin(arm: str, region: str) -> pd.DataFrame:
+    f = stage_out("anchoring.brainseq_qtl", arm) / "checks" / f"sign_pin_{region}.parquet"
+    if not f.exists():
+        raise SystemExit(f"missing {f}; run 28.brainseq_qtl_checks.sh for {arm}")
+    return pd.read_parquet(f)[["gene", "r", "sign", "flipped", "axis_unstable", "pinnable"]]
+
+
 def _read_bim(chrom: int) -> pd.DataFrame:
     from isograph_benchmark.real_data.coloc_prep import PANEL_DIR
 
@@ -376,17 +568,30 @@ def _tasks(root: Path, task: int | None) -> pd.DataFrame:
 
 def run_besd(qtl_source: str = "gtex", task: int | None = None, arm: str | None = None) -> None:
     check_qtl_source(qtl_source, arm)
-    root = source_root(qtl_source)
+    root = source_root(qtl_source, arm)
     targets = pd.read_parquet(root / "targets.parquet")
     for w in _tasks(root, task).itertuples(index=False):
         tissue, ch = str(w.tissue), int(w.chr)
         sub = targets[(targets["tissue"] == tissue) & (targets["chr"] == ch)]
         genes = set(sub["gene"])
-        bridge = pd.read_parquet(cmc.BRIDGE_DIR / f"chr{ch}.parquet")
         bim = _read_bim(ch)
         tss = gene_tss_hg19(sub[["gene", "symbol"]])
-        for mod in MODALITIES:
-            esd = esd_rows(read_gtex_qtl(tissue, ch, genes, mod), bridge, bim)
+        if qtl_source == "gtex":
+            bridge = pd.read_parquet(cmc.BRIDGE_DIR / f"chr{ch}.parquet")
+            esds = {mod: esd_rows(read_gtex_qtl(tissue, ch, genes, mod), bridge, bim)
+                    for mod in modalities(qtl_source)}
+        else:
+            from isograph_benchmark.real_data.brainseq_qtl_checks import read_pvar_alleles
+
+            qs = {mod: read_brainseq_qtl(arm, tissue, ch, genes, mod)
+                  for mod in modalities(qtl_source)}
+            rsids = set().union(*(set(q["variant_id"]) for q in qs.values()))
+            alleles = (read_pvar_alleles(arm, ch, rsids) if rsids else
+                       pd.DataFrame(columns=["variant_id", "bs_ref", "bs_alt"]))
+            esds = {mod: esd_rows_brainseq(q, alleles, bim,
+                                           load_sign_pin(arm, tissue) if mod == "S_g" else None)
+                    for mod, q in qs.items()}
+        for mod, esd in esds.items():
             if esd.empty:
                 print(f"  {tissue} chr{ch} {mod}: no usable QTL rows")
                 continue
@@ -422,14 +627,14 @@ def run_smr(qtl_source: str = "gtex", task: int | None = None, peqtl_smr: float 
     check_qtl_source(qtl_source, arm)
     from isograph_benchmark.real_data.coloc_prep import PANEL_DIR
 
-    root, dest = source_root(qtl_source), run_root(qtl_source, peqtl_smr)
+    root, dest = source_root(qtl_source, arm), run_root(qtl_source, peqtl_smr, arm)
     targets = pd.read_parquet(root / "targets.parquet")
     for w in _tasks(root, task).itertuples(index=False):
         tissue, ch = str(w.tissue), int(w.chr)
         cell = targets[(targets["tissue"] == tissue) & (targets["chr"] == ch)]
         for analysis, sub in cell.groupby("analysis"):
             ma = root / "gwas" / f"{analysis}.ma"
-            for mod in MODALITIES:
+            for mod in modalities(qtl_source):
                 besd = root / "besd" / tissue / f"{mod}.chr{ch}"
                 if not Path(f"{besd}.besd").exists():
                     continue
@@ -463,30 +668,186 @@ def read_smr(path: Path) -> pd.DataFrame:
 
 
 def smr_threshold(n_instrumented: int, alpha: float = SMR_ALPHA) -> float:
+    """Bonferroni threshold for ONE family; the caller decides which family a probe is in."""
     return alpha / n_instrumented if n_instrumented > 0 else np.nan
 
 
-def classify(pp4, p_smr, p_heidi, nsnp_heidi, threshold, call: float = PP4_CALL) -> str:
-    coloc = pd.notna(pp4) and pp4 >= call
+def instrumented_family_sizes(d: pd.DataFrame) -> pd.DataFrame:
+    """Instrumented probe count per (analysis, modality, probe_family).
+
+    A distinct function because this count IS the multiple-testing denominator, and it was
+    the thing that went wrong: pooling the primary and secondary families gave AD sQTL a
+    denominator of 77 while the report printed the primary count, 31. A probe is counted once
+    per (tissue, probeID) -- the same probe in two tissues is two tests -- and only if it was
+    instrumented, because an untested probe carries no p-value to correct.
+    """
+    ins = d[d["p_SMR"].notna()]
+    if ins.empty:
+        return pd.DataFrame(columns=["analysis", "modality", "probe_family",
+                                     "n_instrumented_family"])
+    return (ins.drop_duplicates(["analysis", "modality", "probe_family", "tissue", "probeID"])
+               .groupby(["analysis", "modality", "probe_family"]).size()
+               .rename("n_instrumented_family").reset_index())
+
+
+def smr_status(p_smr, p_heidi, nsnp_heidi, threshold) -> str:
+    """The SMR-side verdict alone, with no coloc input (see `SMR_STATUS`).
+
+    HEIDI is reported as *unavailable* rather than folded into a null when SMR ran but HEIDI
+    could not: SMR skips the test below `HEIDI_MIN_M` SNPs, and a handful of SNPs is a weak
+    basis for either verdict.
+    """
     if pd.isna(p_smr):
-        return "coloc_no_instrument" if coloc else "neither"
-    sig = pd.notna(threshold) and p_smr <= threshold
-    if not coloc:
-        # An intron coloc never scored (no GTEx-matched QTL credible set) is not a coloc
-        # negative; keep it apart from one that was scored and fell short.
-        if not sig:
-            return "neither"
-        return "smr_without_coloc" if pd.notna(pp4) else "smr_coloc_not_scored"
-    if not sig:
-        return "coloc_smr_not_significant"
+        return "no_instrument"
+    if not (pd.notna(threshold) and p_smr <= threshold):
+        return "instrumented_tested_null"
     if pd.isna(p_heidi) or pd.isna(nsnp_heidi) or nsnp_heidi < HEIDI_MIN_M:
-        return "coloc_and_smr_heidi_untestable"
-    return ("coloc_and_smr_heidi_rejected" if p_heidi < HEIDI_REJECT
-            else "coloc_and_smr_heidi_not_rejected")
+        return "smr_signal_heidi_unavailable"
+    return "smr_signal_heidi_rejects" if p_heidi < HEIDI_REJECT else "smr_heidi_supported"
+
+
+def classify(pp4, p_smr, p_heidi, nsnp_heidi, threshold, call: float = PP4_CALL) -> str:
+    """The coloc x SMR cross-classification, built on `smr_status` so the two agree."""
+    coloc = pd.notna(pp4) and pp4 >= call
+    st = smr_status(p_smr, p_heidi, nsnp_heidi, threshold)
+    if st == "no_instrument":
+        return "coloc_no_instrument" if coloc else "neither_no_instrument"
+    if st == "instrumented_tested_null":
+        return "coloc_smr_not_significant" if coloc else "neither_tested_null"
+    if not coloc:
+        # A probe coloc never scored is not a coloc negative; keep it apart from one that was
+        # scored and fell short.
+        return "smr_without_coloc" if pd.notna(pp4) else "smr_coloc_not_scored"
+    return {"smr_signal_heidi_unavailable": "coloc_and_smr_heidi_untestable",
+            "smr_signal_heidi_rejects": "coloc_and_smr_heidi_rejected",
+            "smr_heidi_supported": "coloc_and_smr_heidi_not_rejected"}[st]
+
+
+# --------------------------------------------------------------------------- #
+# SNP attrition into HEIDI
+# --------------------------------------------------------------------------- #
+# Every SMR run prints what it kept at each harmonization step, and nothing read those logs
+# until 2026-09-11, when a BrainSEQ run turned out to have retained 2,677 of 16,212 BESD SNPs
+# (16.5%) against a ~92% norm elsewhere. HEIDI is computed on whatever survives, so the
+# retention IS a validity statistic, not a curiosity: a thin or unrepresentative surviving set
+# can look like "HEIDI underpowered" when the real cause is allele, id or panel-coverage loss.
+_ATTRITION = {
+    "n_besd_snps": re.compile(r"(\d+) SNPs to be included from \[[^\]]*\.esi\]"),
+    "n_panel_snps": re.compile(r"(\d+) SNPs to be included from \[[^\]]*\.bim\]"),
+    # SMR prints this as "included after allele checking", but it is the count AFTER the
+    # three-way BESD n reference n GWAS intersection. Measured 2026-09-11: the GWAS side does
+    # essentially all the cutting, and allele checking proper removes 0-4 SNPs per run. Naming
+    # it after alleles invites reading a GWAS-coverage number as an allele-QC failure.
+    "n_smr_shared": re.compile(r"(\d+) SNPs are included after allele checking"),
+    "n_gwas_snps": re.compile(r"GWAS summary data of (\d+) SNPs"),
+    "n_probes_epi": re.compile(r"(\d+) Probes to be included from \[[^\]]*\.epi\]"),
+    "n_probes_besd": re.compile(r"summary data of (\d+) Probes to be included from "
+                                r"\[[^\]]*\.besd\]"),
+    # SMR drops SNPs whose reference and QTL allele frequencies disagree by more than
+    # --diff-freq in more than --diff-freq-prop of probes; it says so only when it happens.
+    "n_freq_mismatch": re.compile(r"(\d+) SNPs? (?:are|were|is) (?:excluded|removed)[^.\n]*"
+                                  r"(?:frequenc|freq)", re.IGNORECASE),
+}
+
+
+def parse_smr_log(path: Path) -> dict:
+    """The per-run harmonization counts SMR prints. Missing lines stay NaN, never 0."""
+    text = Path(path).read_text(errors="replace")
+    out: dict[str, float] = {}
+    for key, rx in _ATTRITION.items():
+        m = rx.search(text)
+        out[key] = int(m.group(1)) if m else np.nan
+    return out
+
+
+def _attrition_steps(source_dir: Path, tissue: str, mod: str, ch: int, analysis: str,
+                     bims: dict, mas: dict) -> dict:
+    """The harmonization steps SMR does not separate, computed from its own inputs."""
+    esi = source_dir / "besd" / tissue / f"{mod}.chr{ch}.esi"
+    ma = source_dir / "gwas" / f"{analysis}.ma"
+    if not (esi.exists() and ma.exists()):
+        return {}
+    e = pd.read_csv(esi, sep="\t", header=None,
+                    names=["chr", "rsid", "cm", "bp", "A1", "A2", "freq"],
+                    dtype={"rsid": str, "A1": str, "A2": str})
+    if ch not in bims:
+        bims[ch] = _read_bim(ch)[["rsid", "A1", "A2"]]
+    if analysis not in mas:
+        mas[analysis] = set(pd.read_csv(ma, sep=r"\s+", usecols=["SNP"])["SNP"].astype(str))
+    m = e.merge(bims[ch], on="rsid", suffixes=("_e", "_b"))
+    pair_e = list(zip(m["A1_e"].str.upper(), m["A2_e"].str.upper()))
+    pair_b = list(zip(m["A1_b"].str.upper(), m["A2_b"].str.upper()))
+    ok = [set(a) == set(b) for a, b in zip(pair_e, pair_b)]
+    matched = m[ok]
+    return {
+        "n_besd_snps_counted": int(len(e)),
+        "n_panel_shared": int(len(m)),
+        "n_allele_match": int(len(matched)),
+        "n_strand_ambiguous": int(sum(p in _AMBIGUOUS for p in
+                                      (pair_e[i] for i, k in enumerate(ok) if k))),
+        "n_gwas_shared": int(matched["rsid"].isin(mas[analysis]).sum()),
+    }
+
+
+def collect_attrition(run_dir: Path, source_dir: Path | None = None) -> pd.DataFrame:
+    """Per (analysis, tissue, modality, chr) attrition trace into HEIDI.
+
+    Per-RUN resolution, which is what the inputs carry; the per-PROBE end of the trace is
+    `nsnp_HEIDI` in `smr_results.parquet` (itself capped at `HEIDI_MAX_M`).
+
+    The steps are computed from the BESD, the LD panel and the GWAS `.ma` directly rather than
+    read off SMR's log, because the log collapses them into one line whose name
+    ("after allele checking") describes the smallest of the three filters. Measured over all 200
+    BrainSEQ and 60 GTEx runs on 2026-09-11: rsID overlap with the panel and allele agreement are
+    both 100%, and the residual unexplained by the GWAS intersection is 0-4 SNPs per run. What
+    looks like "attrition" is overwhelmingly GWAS locus coverage, which is by construction --
+    the `.ma` files hold only the SNPs of the selected GWAS loci.
+    """
+    rows: list[dict] = []
+    bims: dict = {}
+    mas: dict = {}
+    for log in sorted((run_dir / "smr").rglob("*.log")):
+        m = _PROBE_FILE.match(log.name.replace(".log", ".probes"))
+        if not m:
+            continue
+        analysis, tissue = log.parent.parent.name, log.parent.name
+        mod, ch = m.group(1), int(m.group(2))
+        rec = {"analysis": analysis, "tissue": tissue, "modality": mod, "chr": ch}
+        rec.update(parse_smr_log(log))
+        if source_dir is not None:
+            rec.update(_attrition_steps(source_dir, tissue, mod, ch, analysis, bims, mas))
+        rows.append(rec)
+    if not rows:
+        return pd.DataFrame()
+    d = pd.DataFrame(rows)
+    # The QC fractions are the panel and allele steps. BESD-SNP "retention" is NOT one: its
+    # denominator is imputation density, so BrainSEQ (TOPMed, dense) scores far below GTEx
+    # (pre-filtered all-pairs) with nothing wrong in either -- 43.8% against 94.7% on the
+    # 2026-09-11 runs. Reporting that ratio as quality would manufacture a defect.
+    if "n_panel_shared" in d.columns:
+        d["frac_panel_shared"] = d["n_panel_shared"] / d["n_besd_snps_counted"]
+        d["frac_allele_match"] = d["n_allele_match"] / d["n_panel_shared"]
+        # The only genuine harmonization loss: SNPs in BESD n panel n GWAS that SMR still
+        # dropped (frequency-discrepancy filtering, duplicates).
+        d["n_harmonization_residual"] = d["n_gwas_shared"] - d["n_smr_shared"]
+    return d.sort_values(["analysis", "tissue", "modality", "chr"]).reset_index(drop=True)
+
+
+def tss_fallback_genes(targets: pd.DataFrame) -> set[str]:
+    """Genes that took `flist_rows`' median-ESD probe position for want of an hg19 TSS.
+
+    Recomputed here from the same inputs rather than recorded at BESD time, so the flag works
+    on runs already on disk. A fallback moves the 2 Mb cis window off the promoter, which
+    changes the eligible instrument set -- QC-failed until someone looks at the gene.
+    """
+    if targets.empty or "symbol" not in targets.columns:
+        return set()
+    t = gene_tss_hg19(targets[["gene", "symbol"]].drop_duplicates("gene"))
+    return set(t.loc[t["tss"].isna(), "gene"].astype(str))
 
 
 def probe_coloc(pairs: pd.DataFrame, hierarchy: pd.DataFrame, srep: pd.DataFrame) -> pd.DataFrame:
-    """The coloc posterior for each SMR probe, at the resolution the probe has.
+    """The GTEx coloc posterior for each SMR probe, at the resolution the probe has.
 
     SMR tests one phenotype per probe, so the comparison is per intron, not per cell: a
     signal-level PP4 for that intron (GTEx-matched pairs, primary prior, shared-SNP floor)
@@ -512,13 +873,36 @@ def probe_coloc(pairs: pd.DataFrame, hierarchy: pd.DataFrame, srep: pd.DataFrame
     return out.drop_duplicates([*k, "probe_key"], keep="first").reset_index(drop=True)
 
 
-_PROBE_FILE = re.compile(r"^(eQTL|sQTL)\.chr(\d+)\.probes$")
+def probe_coloc_brainseq(hierarchy: pd.DataFrame) -> pd.DataFrame:
+    """BrainSEQ's coloc posterior per (locus, region, axis, gene): one phenotype per gene, so
+    the hierarchy cell IS the probe."""
+    k = ["analysis", "trait", "LOCUS_ID", "tissue", "modality"]
+    return (hierarchy[[*k, "gene", "PP4", "estimator"]]
+            .rename(columns={"gene": "probe_key", "PP4": "coloc_PP4_probe",
+                             "estimator": "coloc_estimator_probe"})
+            .drop_duplicates([*k, "probe_key"]).reset_index(drop=True))
+
+
+def sign_pin_flags(arm: str, regions) -> pd.DataFrame:
+    """Per (gene, region): whether an S_g probe's b_SMR is oriented to the discovery axis."""
+    parts = []
+    for r in regions:
+        p = load_sign_pin(arm, r)
+        parts.append(pd.DataFrame({
+            "gene": p["gene"], "tissue": r, "modality": "S_g", "pin_r": p["r"],
+            "sign_pinned": p["pinnable"].astype(bool),
+            "axis_unstable": p["axis_unstable"].astype(bool)}))
+    return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame(
+        columns=["gene", "tissue", "modality", "pin_r", "sign_pinned", "axis_unstable"])
+
+
+_PROBE_FILE = re.compile(r"^(eQTL|sQTL|A_g|S_g)\.chr(\d+)\.probes$")
 
 
 def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
              arm: str | None = None) -> Path:
     check_qtl_source(qtl_source, arm)
-    root, dest = source_root(qtl_source), run_root(qtl_source, peqtl_smr)
+    root, dest = source_root(qtl_source, arm), run_root(qtl_source, peqtl_smr, arm)
     targets = pd.read_parquet(root / "targets.parquet")
 
     tested, results, runs = [], [], []
@@ -551,35 +935,62 @@ def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
         for c in stat:
             d[c] = np.nan
     d["gene"] = d["probeID"].map(probe_gene)
-    d = d.merge(targets[["analysis", "trait", "LOCUS_ID", "gene", "symbol", "tissue",
-                         "coloc_phenotype_id"]],
-                on=["analysis", "gene", "tissue"], how="inner")
-    d["probe_key"] = np.where(d["modality"] == "eQTL", d["gene"], d["probeID"])
+    tcols = ["analysis", "trait", "LOCUS_ID", "gene", "symbol", "tissue", "coloc_phenotype_id",
+             *(c for c in ("target_source", "gtex_call_in_matched_tissue") if c in targets.columns)]
+    d = d.merge(targets[tcols], on=["analysis", "gene", "tissue"], how="inner")
 
-    sig = results_dir(signal_root("switch"), "all")
-    pairs = pd.read_parquet(sig / "signal_pairs.parquet")
-    hier = pd.read_parquet(sig / "cells_hierarchy.parquet")
-    srep = pd.read_parquet(cmc.out_dir("switch") / "sqtl_representative.parquet")
-    d = d.merge(probe_coloc(pairs, hier, srep),
-                on=["analysis", "trait", "LOCUS_ID", "tissue", "modality", "probe_key"],
-                how="left")
-    d["primary_probe"] = (d["modality"] == "eQTL") | (
-        (d["probeID"] == d["coloc_phenotype_id"])
-        | (d["coloc_phenotype_id"].isna() & (d["coloc_estimator_probe"] == "abf")))
+    keys = ["analysis", "trait", "LOCUS_ID", "tissue", "modality", "probe_key"]
+    if qtl_source == "gtex":
+        d["probe_key"] = np.where(d["modality"] == "eQTL", d["gene"], d["probeID"])
+        sig = results_dir(signal_root("switch"), "all")
+        pairs = pd.read_parquet(sig / "signal_pairs.parquet")
+        hier = pd.read_parquet(sig / "cells_hierarchy.parquet")
+        srep = pd.read_parquet(cmc.out_dir("switch") / "sqtl_representative.parquet")
+        d = d.merge(probe_coloc(pairs, hier, srep), on=keys, how="left")
+        d["primary_probe"] = (d["modality"] == "eQTL") | (
+            (d["probeID"] == d["coloc_phenotype_id"])
+            | (d["coloc_phenotype_id"].isna() & (d["coloc_estimator_probe"] == "abf")))
+    else:
+        from isograph_benchmark.real_data.coloc_brainseq import coloc_root
 
-    # Multiple-testing family: instrumented (tissue, probe) within (analysis, modality).
-    fam = (d[d["p_SMR"].notna()].drop_duplicates(["analysis", "modality", "tissue", "probeID"])
-           .groupby(["analysis", "modality"]).size().rename("n_instrumented").reset_index())
-    d = d.merge(fam, on=["analysis", "modality"], how="left")
-    d["n_instrumented"] = d["n_instrumented"].fillna(0).astype(int)
-    d["smr_threshold"] = d["n_instrumented"].map(smr_threshold)
+        d["probe_key"] = d["gene"]
+        hier = pd.read_parquet(coloc_root(arm) / "cells_hierarchy.parquet")
+        d = d.merge(probe_coloc_brainseq(hier), on=keys, how="left")
+        d["primary_probe"] = True
+        d = d.merge(sign_pin_flags(arm, sorted(d["tissue"].unique())),
+                    on=["gene", "tissue", "modality"], how="left")
+
+    # TWO multiple-testing families, corrected apart (2026-09-11 review). Pooling them and then
+    # printing only the primary count made the reported threshold irreproducible: AD sQTL showed
+    # "31 instrumented" beside a threshold of 0.05/77, because the denominator silently included
+    # the 46 instrumented non-primary introns. Now each probe is corrected inside its own family.
+    d["probe_family"] = np.where(d["primary_probe"], "primary", "secondary")
+    fam = instrumented_family_sizes(d)
+    d = d.merge(fam, on=["analysis", "modality", "probe_family"], how="left")
+    d["n_instrumented_family"] = d["n_instrumented_family"].fillna(0).astype(int)
+    d["smr_threshold"] = d["n_instrumented_family"].map(smr_threshold)
+
+    # Instrument strength on every row; flagged, never filtered (see WEAK_F).
+    with np.errstate(invalid="ignore", divide="ignore"):
+        d["F_instrument"] = (d["b_eQTL"].astype(float) / d["se_eQTL"].astype(float)) ** 2
+    d["weak_instrument"] = d["F_instrument"] < WEAK_F
+
+    # Probe-position fallbacks: QC-failed until inspected, so carried as a column.
+    d["tss_fallback"] = d["gene"].astype(str).isin(tss_fallback_genes(targets))
+
+    d["smr_status"] = [smr_status(r.p_SMR, r.p_HEIDI, r.nsnp_HEIDI, r.smr_threshold)
+                       for r in d.itertuples(index=False)]
     d["agreement"] = [classify(r.coloc_PP4_probe, r.p_SMR, r.p_HEIDI, r.nsnp_HEIDI,
                                r.smr_threshold)
                       for r in d.itertuples(index=False)]
 
+    attrition = collect_attrition(dest, root)
+    if not attrition.empty:
+        attrition.to_parquet(dest / "snp_attrition.parquet", index=False)
+
     d.to_parquet(dest / "smr_results.parquet", index=False)
     pd.DataFrame(runs).to_csv(dest / "smr_runs.tsv", sep="\t", index=False)
-    _write_report(dest, d, qtl_source, peqtl_smr)
+    _write_report(dest, d, qtl_source, peqtl_smr, arm, attrition)
     print(f"  {len(d):,} probe rows; agreement: {d['agreement'].value_counts().to_dict()}")
     print(f"  wrote {dest}")
     return dest
@@ -593,35 +1004,80 @@ def _fmt(v, nd=3) -> str:
     return str(v)
 
 
-def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float) -> None:
+def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float,
+                  arm: str | None = None, attrition: pd.DataFrame | None = None) -> None:
+    brainseq = qtl_source == "brainseq"
     L: list[str] = []
     A = L.append
     A("# SMR + HEIDI on the signal-level colocalization nominations")
     A("")
-    A(f"QTL source: `{qtl_source}`. Instrument threshold `--peqtl-smr {peqtl_smr:g}`"
+    A(f"QTL source: `{qtl_source}`" + (f" (`{arm}` arm)" if brainseq else "")
+      + f". Instrument threshold `--peqtl-smr {peqtl_smr:g}`"
       + ("" if np.isclose(peqtl_smr, PEQTL_SMR) else " -- **SENSITIVITY ARM**") + ". "
       f"HEIDI SNPs at p < {PEQTL_HEIDI:g}, {HEIDI_MIN_M}-{HEIDI_MAX_M} SNPs, "
-      f"{CIS_WIND_KB} kb cis window. Significance: Bonferroni at {SMR_ALPHA} over instrumented "
-      f"probes per (analysis, modality). HEIDI rejects a single shared variant at p < "
-      f"{HEIDI_REJECT}.")
+      f"{CIS_WIND_KB} kb cis window. Significance: Bonferroni at {SMR_ALPHA} over the "
+      f"instrumented probes of the row's OWN family (primary confirmatory / secondary "
+      f"event-localization), never pooled across the two. HEIDI rejects a single shared "
+      f"variant at p < {HEIDI_REJECT}. LD reference: 1000G EUR.")
     A("")
     A("## How these numbers may be read")
     A("")
     A("- `b_SMR` is a signed ratio estimate relating genetically predicted phenotype to disease "
       "under a single-causal-variant, no-pleiotropy model. It does **not** establish causal "
       "direction and cannot distinguish causality from horizontal pleiotropy.")
-    A("- An sQTL probe is a LeafCutter intron-excision ratio, which is compositional within its "
-      "cluster: introns sharing a splice site trade usage, so sibling probes carry opposite "
-      "`b_SMR` signs by construction. A sign is read relative to its cluster, never alone.")
-    A("- Failing to reject HEIDI is **not** evidence of a shared variant; HEIDI is underpowered at "
-      "GTEx brain sample sizes. It reads \"not rejected\".")
+    if brainseq:
+        A("- BrainSEQ is the discovery cohort: agreement here is same-tissue genetic anchoring, "
+          "not replication. Each gene has one `A_g` (abundance) and one `S_g` (switch) probe, "
+          "compared with BrainSEQ's own coloc posterior for the same region and axis.")
+        A("- `S_g` is PC1 of the gene's within-gene composition. Its `b_SMR` is sign-pinned to "
+          "the discovery switch axis, so its sign is a direction along that axis, not \"more "
+          "splicing\"; a probe with `sign_pinned = False` keeps its mapped orientation, and "
+          "`axis_unstable` marks a gene whose recomputed axis differs from discovery. An `S_g` "
+          "result names no intron or event.")
+        A("- Failing to reject HEIDI is **not** evidence of a shared variant; at 169-229 donors "
+          "per region HEIDI is weaker still than at GTEx. It reads \"not rejected\".")
+    else:
+        A("- An sQTL probe is a LeafCutter intron-excision ratio, which is compositional within "
+          "its cluster: introns sharing a splice site trade usage, so sibling probes carry "
+          "opposite `b_SMR` signs by construction. A sign is read relative to its cluster, "
+          "never alone.")
+        A("- Failing to reject HEIDI is **not** evidence of a shared variant; HEIDI is "
+          "underpowered at GTEx brain sample sizes. It reads \"not rejected\".")
     A("- A HEIDI rejection does **not** overrule a strong signal-level colocalization, and SMR "
       "significance does not promote a locus coloc did not support. Disagreements stay "
       "disagreements.")
     A("")
-    A("## Agreement with coloc, primary probes")
-    A("")
     prim = d[d["primary_probe"]]
+    A("## What was testable, by family")
+    A("")
+    A("Two families, corrected apart. The **primary confirmatory family** holds one "
+      "pre-designated probe per gene; a gene's other introns form a **secondary "
+      "event-localization family** with its own Bonferroni correction, so the primary "
+      "threshold is not inflated by introns and the introns do not escape correction when they "
+      "are discussed. `F` is the instrument strength `(b_eQTL/se_eQTL)^2` of the top cis-QTL "
+      "SNP, reported on every row and never used to exclude one.")
+    A("")
+    A("| analysis | modality | family | probes | instrumented | threshold | "
+      "F median [min-max] | weak F | "
+      + " | ".join(f"`{s}`" for s in SMR_STATUS) + " |")
+    A("|---|---|---|---|---|---|---|---|" + "---|" * len(SMR_STATUS))
+    for (an, mod, fam), sub in d.groupby(["analysis", "modality", "probe_family"]):
+        cnt = sub["smr_status"].value_counts()
+        ins = sub[sub["p_SMR"].notna()]
+        f = ins["F_instrument"].dropna()
+        frange = ("—" if f.empty else
+                  f"{f.median():.0f} [{f.min():.0f}-{f.max():.0f}]")
+        A(f"| {an} | {mod} | {fam} | {len(sub)} | {len(ins)} | "
+          f"{_fmt(sub['smr_threshold'].iloc[0])} | {frange} | "
+          f"{int(ins['weak_instrument'].sum())} | "
+          + " | ".join(str(int(cnt.get(s, 0))) for s in SMR_STATUS) + " |")
+    A("")
+    A("**`no_instrument` is not a negative result** — the probe was never tested, because no "
+      "cis-QTL reached the instrument threshold. It is the largest cell in every arm here and "
+      "must never be read as evidence against a locus.")
+    A("")
+    A("## Agreement with coloc, primary confirmatory family")
+    A("")
     A("| analysis | modality | probes | instrumented | threshold | "
       + " | ".join(f"`{a}`" for a in AGREEMENT) + " |")
     A("|---|---|---|---|---|" + "---|" * len(AGREEMENT))
@@ -631,20 +1087,121 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
           f"{_fmt(sub['smr_threshold'].iloc[0])} | "
           + " | ".join(str(int(cnt.get(a, 0))) for a in AGREEMENT) + " |")
     A("")
+    sec = d[~d["primary_probe"]]
+    if len(sec):
+        A("### Secondary family (event localization)")
+        A("")
+        A("A gene's non-primary introns, corrected within their own family. These localize an "
+          "event; they are not additional confirmatory evidence for a locus.")
+        A("")
+        A("| analysis | modality | probes | instrumented | threshold | `smr_heidi_supported` | "
+          "`smr_signal_heidi_rejects` |")
+        A("|---|---|---|---|---|---|---|")
+        for (an, mod), sub in sec.groupby(["analysis", "modality"]):
+            cnt = sub["smr_status"].value_counts()
+            A(f"| {an} | {mod} | {len(sub)} | {int(sub['p_SMR'].notna().sum())} | "
+              f"{_fmt(sub['smr_threshold'].iloc[0])} | "
+              f"{int(cnt.get('smr_heidi_supported', 0))} | "
+              f"{int(cnt.get('smr_signal_heidi_rejects', 0))} |")
+        A("")
+    if attrition is not None and not attrition.empty and "frac_panel_shared" in attrition:
+        A("## SNP attrition into HEIDI")
+        A("")
+        A("HEIDI is computed on the SNPs shared by the BESD, the LD reference and the GWAS, so "
+          "what survives is worth stating. Per SMR run; the per-probe end of the trace is "
+          f"`nsnp_HEIDI` in the results table, itself capped at {HEIDI_MAX_M}.")
+        A("")
+        A("**The dominant filter is GWAS locus coverage, by construction** — the `.ma` files "
+          "carry only the SNPs of the selected GWAS loci, so a gene whose cis window extends "
+          "past its locus loses the remainder. That is not a QC failure and says nothing about "
+          "the QTL data.")
+        A("")
+        A("| step | median across runs |")
+        A("|---|---|")
+        A(f"| BESD SNPs in the probe's cis window | {attrition['n_besd_snps_counted'].median():,.0f} |")
+        A(f"| ... found in the LD panel by rsID | {attrition['frac_panel_shared'].median():.1%} |")
+        A(f"| ... with matching alleles | {attrition['frac_allele_match'].median():.1%} |")
+        A(f"| ... also carried by the GWAS | {attrition['n_gwas_shared'].median():,.0f} |")
+        A(f"| dropped by SMR beyond that (frequency check, duplicates) | "
+          f"{attrition['n_harmonization_residual'].median():,.0f} |")
+        A("")
+        worst = int(attrition["n_harmonization_residual"].max())
+        A(f"Genuine harmonization loss — SNPs present in all three and still dropped — peaks at "
+          f"**{worst}** SNPs in any run. The identifier and allele steps are the QC ones, and "
+          "both sit at 100%.")
+        A("")
+        A("**Do not compare BESD-SNP retention across QTL sources.** Its denominator is "
+          "imputation density: BrainSEQ's TOPMed cis windows carry several times the SNPs of "
+          "GTEx's pre-filtered all-pairs, so BrainSEQ retains a far smaller *fraction* of a far "
+          "larger set against the same GWAS loci. The ratio measures panel density, not quality.")
+        A("")
+    nfb = int(d["tss_fallback"].sum())
+    if nfb:
+        genes = sorted(set(d.loc[d["tss_fallback"], "symbol"].astype(str)))
+        A("## Probe-position fallbacks (QC)")
+        A("")
+        A(f"{nfb:,} probe rows over {len(genes)} genes had no hg19 TSS and took the median-ESD "
+          "position instead, which moves the 2 Mb cis window off the promoter and can change "
+          "which SNPs are eligible as instruments. **Treat these as QC-failed until inspected**: "
+          + ", ".join(f"`{g}`" for g in genes[:20])
+          + (" ..." if len(genes) > 20 else "") + ".")
+        A("")
+    if brainseq and "target_source" in prim.columns:
+        A("## GTEx nominations on the BrainSEQ switch axis")
+        A("")
+        A("Per GTEx signal-level nomination, the `S_g` agreement class in each region "
+          "(`*` = the region's tissue-matched GTEx tissue carries the GTEx sQTL call).")
+        A("")
+        s = prim[(prim["modality"] == "S_g") & prim["target_source"].isin(["gtex", "both"])]
+        regions = sorted(prim["tissue"].unique())
+        A("| gene | trait | " + " | ".join(regions) + " |")
+        A("|---|---|" + "---|" * len(regions))
+        for (sym, trait), sub in s.groupby(["symbol", "trait"], sort=True):
+            cells = []
+            for rg in regions:
+                r = sub[sub["tissue"] == rg]
+                if r.empty:
+                    cells.append("—")
+                    continue
+                r = r.iloc[0]
+                cells.append(f"`{r.agreement}`" + ("*" if bool(r.gtex_call_in_matched_tissue) else ""))
+            A(f"| {sym} | {trait} | " + " | ".join(cells) + " |")
+        A("")
     A("## Primary probes")
     A("")
-    A("| gene | trait | tissue | modality | coloc PP4 | b_SMR (se) | p_SMR | p_HEIDI (nsnp) | "
-      "agreement |")
-    A("|---|---|---|---|---|---|---|---|---|")
-    for r in prim.sort_values(["trait", "symbol", "tissue", "modality"]).itertuples(index=False):
-        A(f"| {r.symbol} | {r.trait} | {r.tissue} | {r.modality} | "
-          f"{_fmt(r.coloc_PP4_probe)} ({r.coloc_estimator_probe if pd.notna(r.coloc_estimator_probe) else '—'}) | "
-          f"{_fmt(r.b_SMR)} ({_fmt(r.se_SMR)}) | {_fmt(r.p_SMR)} | "
-          f"{_fmt(r.p_HEIDI)} ({_fmt(r.nsnp_HEIDI, 0)}) | `{r.agreement}` |")
+    if brainseq:
+        A("| gene | trait | region | axis | coloc PP4 | b_SMR (se) | p_SMR | p_HEIDI (nsnp) | "
+          "pin | agreement |")
+        A("|---|---|---|---|---|---|---|---|---|---|")
+    else:
+        A("| gene | trait | tissue | modality | coloc PP4 | b_SMR (se) | p_SMR | p_HEIDI (nsnp) | "
+          "agreement |")
+        A("|---|---|---|---|---|---|---|---|---|")
+    show = prim if not brainseq else prim[prim["p_SMR"].notna()
+                                          | (prim["coloc_PP4_probe"] >= PP4_CALL)]
+    for r in show.sort_values(["trait", "symbol", "tissue", "modality"]).itertuples(index=False):
+        est = r.coloc_estimator_probe if pd.notna(r.coloc_estimator_probe) else "—"
+        row = (f"| {r.symbol} | {r.trait} | {r.tissue} | {r.modality} | "
+               f"{_fmt(r.coloc_PP4_probe)} ({est}) | {_fmt(r.b_SMR)} ({_fmt(r.se_SMR)}) | "
+               f"{_fmt(r.p_SMR)} | {_fmt(r.p_HEIDI)} ({_fmt(r.nsnp_HEIDI, 0)}) | ")
+        if brainseq:
+            if r.modality != "S_g":
+                pin = ""
+            elif pd.isna(r.sign_pinned):
+                pin = "no pin"
+            else:
+                pin = ("pinned" if bool(r.sign_pinned) else "unpinned") + (
+                    ", axis unstable" if bool(r.axis_unstable) else "")
+            row += f"{pin} | "
+        A(row + f"`{r.agreement}` |")
     A("")
-    A("Non-primary sQTL probes (the gene's other introns) are in `smr_results.parquet` with "
-      "`primary_probe = False`; they are reported so the SMR evidence is not a maximum over "
-      "introns, and they are not summarized here.")
+    if brainseq:
+        A("Probes with neither an SMR instrument nor a coloc call are in `smr_results.parquet` "
+          "and not listed here.")
+    else:
+        A("Non-primary sQTL probes (the gene's other introns) are in `smr_results.parquet` with "
+          "`primary_probe = False`; they are reported so the SMR evidence is not a maximum over "
+          "introns, and they are not summarized here.")
     A("")
     (dest / "SMR_HEIDI.md").write_text("\n".join(L) + "\n")
 

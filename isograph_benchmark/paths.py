@@ -53,6 +53,8 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
         "05_genetic_anchoring", "_m", "coloc_signal_susie"),
     # BrainSEQ switch-QTL (S_g) / abundance-QTL (A_g) mapping and its junction layer
     "anchoring.brainseq_qtl": ("05_genetic_anchoring", "_m", "brainseq_switch_qtl"),
+    # signal-level coloc of the BrainSEQ S_g / A_g QTLs (EA-only), in-sample QTL LD
+    "anchoring.coloc_brainseq": ("05_genetic_anchoring", "_m", "coloc_brainseq"),
     "anchoring.smr": ("05_genetic_anchoring", "_m", "smr_heidi"),
     "anchoring.ldsc": ("05_genetic_anchoring", "_m", "ldsc"),
     "anchoring.gwas": ("05_genetic_anchoring", "_m", "gwas"),

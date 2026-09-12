@@ -35,6 +35,13 @@
 # shared, so run it after a primary array and skip the besd stage):
 #   sbatch --array=0-${N} --export=ALL,SMR_PEQTL=1e-5,SMR_SKIP_BESD=1 05_genetic_anchoring/_h/27.smr_heidi.sh
 #   python -m isograph_benchmark.real_data.smr_heidi --stage meta --peqtl-smr 1e-5
+#
+# BrainSEQ QTL source (EA-only; one task per (region, chr); refused unless both BrainSEQ QTL
+# checks passed, and read against BrainSEQ's own coloc, so coloc_brainseq --stage meta first):
+#   python -m isograph_benchmark.real_data.smr_heidi --stage prep --qtl-source brainseq --arm ea_only
+#   N=$(( $(wc -l < 05_genetic_anchoring/_m/smr_heidi/brainseq/ea_only/work_list.tsv) - 2 ))
+#   sbatch --array=0-${N} --export=ALL,SMR_QTL_SOURCE=brainseq,SMR_ARM=ea_only 05_genetic_anchoring/_h/27.smr_heidi.sh
+#   python -m isograph_benchmark.real_data.smr_heidi --stage meta --qtl-source brainseq --arm ea_only
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
@@ -47,6 +54,9 @@ mkdir -p 05_genetic_anchoring/_m/logs
 TASK="${SLURM_ARRAY_TASK_ID:-${1:-0}}"
 PEQTL="${SMR_PEQTL:-5e-8}"
 THREADS="${SLURM_CPUS_PER_TASK:-4}"
+SRC="${SMR_QTL_SOURCE:-gtex}"
+SRC_ARGS=(--qtl-source "${SRC}")
+[[ -n "${SMR_ARM:-}" ]] && SRC_ARGS+=(--arm "${SMR_ARM}")
 
 # Guard: some Bridges2 batch nodes start array tasks without Lmod initialised.
 if ! command -v module >/dev/null 2>&1; then
@@ -58,11 +68,11 @@ source "$(conda info --base)/etc/profile.d/conda.sh"
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
 if [[ -z "${SMR_SKIP_BESD:-}" ]]; then
-    log "**** SMR BESD: task ${TASK} ****"
-    python -m isograph_benchmark.real_data.smr_heidi --stage besd --task "${TASK}"
+    log "**** SMR BESD: ${SRC} task ${TASK} ****"
+    python -m isograph_benchmark.real_data.smr_heidi --stage besd --task "${TASK}" "${SRC_ARGS[@]}"
 fi
-log "**** SMR: task ${TASK}, --peqtl-smr ${PEQTL} ****"
+log "**** SMR: ${SRC} task ${TASK}, --peqtl-smr ${PEQTL} ****"
 python -m isograph_benchmark.real_data.smr_heidi --stage smr --task "${TASK}" \
-    --peqtl-smr "${PEQTL}" --threads "${THREADS}"
+    --peqtl-smr "${PEQTL}" --threads "${THREADS}" "${SRC_ARGS[@]}"
 conda deactivate
 log "**** Complete: task ${TASK} ****"
