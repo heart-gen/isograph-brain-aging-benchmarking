@@ -1,0 +1,4 @@
+region	n_donors	donors_file	gtex_tissue
+caudate	229	donors_caudate.txt	Brain_Caudate_basal_ganglia
+dlpfc	169	donors_dlpfc.txt	Brain_Frontal_Cortex_BA9
+hippocampus	175	donors_hippocampus.txt	Brain_Hippocampus
