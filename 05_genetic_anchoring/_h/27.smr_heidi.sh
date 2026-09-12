@@ -21,27 +21,34 @@
 # one tissue's GTEx all-pairs by predicate pushdown for a handful of genes, and SMR holds one
 # 2 Mb cis window of 1000G EUR genotypes at a time.
 #
-# Order (prep and meta are login-node safe):
+# Order (prep is login-node safe; meta is a separate wrapper, 30.smr_heidi_meta.sh):
 #   python -m isograph_benchmark.real_data.smr_heidi --stage prep
 #   N=$(( $(wc -l < 05_genetic_anchoring/_m/smr_heidi/gtex/work_list.tsv) - 2 ))
 #   sbatch --array=0-${N} 05_genetic_anchoring/_h/27.smr_heidi.sh
-#   python -m isograph_benchmark.real_data.smr_heidi --stage meta
+#   sbatch 05_genetic_anchoring/_h/30.smr_heidi_meta.sh
 #
 # Depends on: coloc_signal_susie --stage meta --sqtl all (the nominations) and the per-locus
 # GWAS from 08.coloc_prep.sh. Run prep again whenever the nominations change: targets, the
 # work list and the .ma files are all derived from them.
 #
-# Instrument-threshold sensitivity arm (writes under sensitivity/peqtl_smr_<x>/; the BESD is
-# shared, so run it after a primary array and skip the besd stage):
-#   sbatch --array=0-${N} --export=ALL,SMR_PEQTL=1e-5,SMR_SKIP_BESD=1 05_genetic_anchoring/_h/27.smr_heidi.sh
-#   python -m isograph_benchmark.real_data.smr_heidi --stage meta --peqtl-smr 1e-5
+# Sensitivity arms. Both write under sensitivity/ and depend on no BESD of their own, so run
+# them after a primary array with SMR_SKIP_BESD=1. They compose: setting both lands in
+# sensitivity/peqtl_smr_<x>__smr_multi/.
+#
+#   Relaxed instrument threshold (-> sensitivity/peqtl_smr_1e-06/):
+#     sbatch --array=0-${N} --export=ALL,SMR_PEQTL=1e-6,SMR_SKIP_BESD=1 05_genetic_anchoring/_h/27.smr_heidi.sh
+#     sbatch 05_genetic_anchoring/_h/30.smr_heidi_meta.sh --peqtl-smr 1e-6
+#
+#   Multi-SNP SMR (-> sensitivity/smr_multi/; SMR writes .msmr, with p_SMR_multi):
+#     sbatch --array=0-${N} --export=ALL,SMR_MULTI=1,SMR_SKIP_BESD=1 05_genetic_anchoring/_h/27.smr_heidi.sh
+#     sbatch 05_genetic_anchoring/_h/30.smr_heidi_meta.sh --smr-multi
 #
 # BrainSEQ QTL source (EA-only; one task per (region, chr); refused unless both BrainSEQ QTL
 # checks passed, and read against BrainSEQ's own coloc, so coloc_brainseq --stage meta first):
 #   python -m isograph_benchmark.real_data.smr_heidi --stage prep --qtl-source brainseq --arm ea_only
 #   N=$(( $(wc -l < 05_genetic_anchoring/_m/smr_heidi/brainseq/ea_only/work_list.tsv) - 2 ))
 #   sbatch --array=0-${N} --export=ALL,SMR_QTL_SOURCE=brainseq,SMR_ARM=ea_only 05_genetic_anchoring/_h/27.smr_heidi.sh
-#   python -m isograph_benchmark.real_data.smr_heidi --stage meta --qtl-source brainseq --arm ea_only
+#   sbatch 05_genetic_anchoring/_h/30.smr_heidi_meta.sh --qtl-source brainseq --arm ea_only
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 
@@ -57,6 +64,10 @@ THREADS="${SLURM_CPUS_PER_TASK:-4}"
 SRC="${SMR_QTL_SOURCE:-gtex}"
 SRC_ARGS=(--qtl-source "${SRC}")
 [[ -n "${SMR_ARM:-}" ]] && SRC_ARGS+=(--arm "${SMR_ARM}")
+# Sensitivity arm: multi-SNP SMR. An array rather than a string so the empty case expands to
+# no argument at all under `set -u`.
+MULTI_ARGS=()
+if [[ -n "${SMR_MULTI:-}" ]]; then MULTI_ARGS=(--smr-multi); fi
 
 # Guard: some Bridges2 batch nodes start array tasks without Lmod initialised.
 if ! command -v module >/dev/null 2>&1; then
@@ -71,8 +82,9 @@ if [[ -z "${SMR_SKIP_BESD:-}" ]]; then
     log "**** SMR BESD: ${SRC} task ${TASK} ****"
     python -m isograph_benchmark.real_data.smr_heidi --stage besd --task "${TASK}" "${SRC_ARGS[@]}"
 fi
-log "**** SMR: ${SRC} task ${TASK}, --peqtl-smr ${PEQTL} ****"
+log "**** SMR: ${SRC} task ${TASK}, --peqtl-smr ${PEQTL}${SMR_MULTI:+ --smr-multi} ****"
 python -m isograph_benchmark.real_data.smr_heidi --stage smr --task "${TASK}" \
-    --peqtl-smr "${PEQTL}" --threads "${THREADS}" "${SRC_ARGS[@]}"
+    --peqtl-smr "${PEQTL}" --threads "${THREADS}" "${SRC_ARGS[@]}" \
+    ${MULTI_ARGS[@]+"${MULTI_ARGS[@]}"}
 conda deactivate
 log "**** Complete: task ${TASK} ****"
