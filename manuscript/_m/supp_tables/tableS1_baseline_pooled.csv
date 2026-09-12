@@ -1,5 +1,5 @@
 method,features,n_regions,median_n_modules,median_module_size,mean_frac_pheno_sig,mean_frac_both,mean_frac_go_enriched,total_pheno_sig,total_both
 isograph,switch+abundance,17,39.0,70.0,0.274,0.082,0.235,180,53
 wgcna_gene,abundance,17,8.0,387.0,0.18,0.171,0.885,34,31
-wgcna_switch_only,switch-only,16,13.5,127.0,0.336,0.196,0.381,75,44
-wgcna_multiplex,switch+abundance,16,18.5,271.0,0.189,0.136,0.758,53,38
+wgcna_switch_only,switch-only,16,13.0,143.0,0.384,0.198,0.403,72,39
+wgcna_multiplex,switch+abundance,16,19.5,284.0,0.189,0.136,0.755,57,41

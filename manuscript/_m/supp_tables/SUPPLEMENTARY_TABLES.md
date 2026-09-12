@@ -71,8 +71,9 @@ analysis, by module set and graph method. The ratio cancels the shared cis-QTL d
 constrained network genes (Table S5), isolating whether *splicing* genetics is spared. For
 `isograph`, the ratio is > 1 and significant in all-modules (1.07, p=8e-6), phenotype-sig
 (1.13, p=1.5e-4) and GO-invisible (1.13, p=2.6e-3) sets, and null for GO-visible (1.04, ns) —
-an internal control. The matched WGCNA baselines (`wgcna_switch_only`, `wgcna_multiplex`) are
-null in every set (ratios 0.97–1.02). Columns: method, module set, n analyses, fixed-effects
+an internal control. The matched WGCNA baselines (`wgcna_switch_only`, `wgcna_multiplex`) reach
+significance in no set (ratios 1.02–1.07; closest `wgcna_multiplex` phenotype-associated
+1.044, p = 0.070, I² = 0.80 — updated 2026-09-12 to the matched-baseline re-fit). Columns: method, module set, n analyses, fixed-effects
 ratio + 95% CI, p, and heterogeneity I². Supports: splicing genetics is spared exactly in the
 disease/GO-invisible IsoGraph modules, and only for IsoGraph.
 
