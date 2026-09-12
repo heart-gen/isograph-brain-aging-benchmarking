@@ -68,8 +68,6 @@ STAGES
                       phenotypes + covariates, keyed by BrNum. Login-node safe-ish
                       (minutes, a few GB).
   --stage map         cis nominal + permutation + SuSiE, both modalities, via tensorQTL.
-  --stage junctions   Junction-level phenotypes for swQTL-positive genes (see
-                      `build_brainseq_junction_usage` / `build_brainseq_cluster_usage`).
   --stage meta        The paired swQTL-vs-eQTL contrast and the report.
 
 Outputs under 05_genetic_anchoring/_m/brainseq_switch_qtl/<arm>/<region>/.
@@ -831,8 +829,7 @@ def _write_meta_report(dest: Path, s: pd.DataFrame, fdr: float) -> None:
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--stage", choices=("phenotypes", "map", "junctions", "meta"),
-                    required=True)
+    ap.add_argument("--stage", choices=("phenotypes", "map", "meta"), required=True)
     ap.add_argument("--region", choices=REGIONS, action="append", default=None)
     ap.add_argument("--arm", choices=ARMS, default="all_samples")
     ap.add_argument("--n-factors", type=int, default=N_HIDDEN_FACTORS,
@@ -848,12 +845,10 @@ def main(argv=None) -> None:
             build_phenotypes(r, arm=args.arm)
     elif args.stage == "meta":
         run_meta(arm=args.arm, regions=regions)
-    elif args.stage == "map":
+    else:
         for r in regions:
             print(f"\n== map {r} / {args.arm} ==")
             run_map(r, arm=args.arm, n_factors=args.n_factors, chroms=args.chrom)
-    else:
-        raise SystemExit(f"stage {args.stage!r} not yet implemented")
 
 
 if __name__ == "__main__":
