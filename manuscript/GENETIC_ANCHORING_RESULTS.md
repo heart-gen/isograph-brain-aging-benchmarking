@@ -10,6 +10,15 @@ citekey still needs pinning (never fabricated). North-star: IsoGraph is a **comp
 DTU-without-DGE layer**, and this section is the orthogonal-evidence payoff that the layer is
 genetically real and disease-relevant.
 
+> **Framing changed 2026-09-12.** The paper no longer leads with splicing-QTL specificity
+> (`MANUSCRIPT_PLAN.md` §10); Fig 3's set-level contrast stays as supporting evidence. BrainSEQ
+> in-sample colocalization — the discovery cohort, correctly mapped — favours abundance 33 to 5
+> (P = 4.3e-6), so the statement below that the per-gene expression skew is "GTEx eQTL discovery
+> power, not biology" is no longer demonstrated: power is an available explanation, not an
+> established one. SNCA is the worked example of what the layer resolves; it colocalizes
+> identically in the all-genes background pool, so it is not evidence the method was needed to
+> find the locus.
+
 ---
 
 ## Signal-level colocalization nominates candidate loci, and an event audit bounds them
