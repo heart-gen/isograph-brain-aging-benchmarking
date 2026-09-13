@@ -1,7 +1,9 @@
 # 05 — Genetic anchoring
 
 **Question:** are the co-switch modules genetically real, and does disease risk resolve
-onto specific isoform switches? This stage carries the paper's headline.
+onto specific isoform switches? This stage carried the paper's headline until 2026-09-12; it now
+supplies **supporting, set-level** genetic evidence — the headline is the reproducible,
+abundance-independent switch layer (`manuscript/MANUSCRIPT_PLAN.md` §10).
 
 ## Order
 
@@ -25,7 +27,12 @@ onto specific isoform switches? This stage carries the paper's headline.
 | 15 | `build_deep_dive` | Per-gene deep dive: anchor → switch → consequence |
 | 16 | `scz_age_projection` | Are age-sensitive switch programs disrupted in SCZ? (the *convergence* sub-test is RETRACTED 2026-08-30 — wrong background; see `module_coloc_convergence`) |
 
-## The headline, stated honestly
+## The set-level contrast, stated honestly
+
+> **Not the headline (2026-09-12).** Every per-gene view runs the other way — GTEx signal-level
+> 22 splicing-only vs 45 expression-only genes (P = 0.007), BrainSEQ in-sample coloc 5 switch-only
+> vs 33 abundance-only (P = 4.3e-6) — and the matched-baseline control narrowed to p = 0.053.
+> Quote the contrast as set-level support, always with those results beside it.
 
 Co-switch genes are cis-QTL **depleted for both** sQTL and eQTL — coordinated network
 genes are constrained. That shared baseline is not the result. The result is the paired
@@ -52,7 +59,8 @@ Two things not to overclaim:
   p=0.30–0.86) is stale.
 - **Per-gene CLPP posteriors are individually modest** (inclusion at ≥0.01; only 4/12
   reach 0.05; only CTSH at 0.39). The genetic-anchoring significance rests on the
-  set-level contrast and S-LDSC, not on per-locus colocalization. The 12 splicing-led genes
+  set-level contrast, not on per-locus colocalization. S-LDSC is not independent support for
+  splicing: on `coef_p` the splicing annotation does not survive correction. The 12 splicing-led genes
   are the **eCAVIAR layer**: locus nominations now come from the signal-level hierarchy below
   (42 nominations, of which 6 are among the 12), so never quote the 12 as signal-level.
 - Scope: cis-sQTL anchors member-gene *splicing* to genetics, not the co-switching
