@@ -1,0 +1,13 @@
+{
+  "region": "caudate",
+  "arm": "abundance",
+  "seed": 15,
+  "analysis": "aging",
+  "is_production_setting": true,
+  "n_transcripts_before": 232176,
+  "n_genes_before": 20365,
+  "n_transcripts": 59104,
+  "n_genes": 17976,
+  "n_multi_isoform_genes": 11648,
+  "wall_seconds": 519.7
+}

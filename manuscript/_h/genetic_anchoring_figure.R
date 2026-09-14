@@ -15,12 +15,13 @@
 #     anchored-rich. Against ALL module genes SCZ/GTEx gives P = 0.0095; against the
 #     tested pool the same counts give P = 0.30. This panel now shows the honest
 #     all-trait test instead, which is null in all 10 (trait, cohort) cells.
-# NOTE on panel A: SNCA is an ILLUSTRATIVE mechanism panel, not evidence. Its anchored
-# isoform sits at 0.29% of the gene's long-read output
-# (06_switch_mechanism/_m/switch_orthogonal_confirm: max_anchored_if = 0.0029,
-# confirmed_at_usable_abundance = FALSE), and ORTHOGONAL_CONFIRMATION.md states that no
-# single locus should carry a main figure on its own. The set-level evidence is panels
-# B-D plus figOrthogonalConfirm; the legend must say so.
+# NOTE on panel A: SNCA is the WORKED EXAMPLE, not proof the method was needed -- it
+# colocalizes identically in the all-genes background pool (PP4_sQTL 0.975). Its switch is
+# confirmed on the exact contrast drawn here by BrainSEQ short-read junctions (minor-form
+# usage 0.189 DLPFC / 0.234 caudate; 06_switch_mechanism/_m/junction_coloc_confirm). The
+# ONT long-read 0.29% (max_anchored_if = 0.0029) measured a whole-transcript proxy and is an
+# assay limitation; never cite it against SNCA. The set-level evidence is panels B-D plus
+# figOrthogonalConfirm; the legend must say so.
 # Reads 05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet,
 #       05_genetic_anchoring/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
 #       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet,

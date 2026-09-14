@@ -135,9 +135,12 @@ not fine-map, which weakens any colocalization claimed there.
 
 **SMR + HEIDI (27) agrees with most nominations, as expected, and flags one disagreement.** It
 uses the same GWAS and GTEx summary statistics as coloc, so agreement is a consistency check, not
-independent evidence. 29/42 nominations have at least one tissue where the colocalizing intron is
-SMR-significant with HEIDI not rejected (SNCA/LBD 11/11, UNC13A 2/2, PICALM 1/1); 9 have no
-instrument at 5e-8. **SNCA/PD disagrees, and the disagreement is a HEIDI rejection rather than an
+independent evidence. **30/42** nominations have at least one tissue where the gene's
+pre-designated primary sQTL probe is SMR-significant with HEIDI not rejected (SNCA/LBD 11/11,
+UNC13A 2/2, PICALM 1/1); 31/42 counting either modality, and 17/42 if the probe must be the exact
+intron coloc headlined in that tissue. Of the other 12, 9 have no instrument at 5e-8, 2 are
+HEIDI-rejected and 1 is instrumented but null. *(An earlier "29/42" here matched none of these
+definitions; recounted 2026-09-12 from `smr_heidi/gtex/smr_results.parquet`, keyed on gene × trait.)* **SNCA/PD disagrees, and the disagreement is a HEIDI rejection rather than an
 absence of SMR signal.** All 8 sQTL tissues are instrumented; 6 clear the family Bonferroni
 threshold (0.05/20 = 2.5e-3) at p_SMR 1.1e-3 to 2.2e-3, and HEIDI rejects in every one of them.
 The other 2 fall just short of the threshold (p_SMR 2.5e-3 and 4.2e-3) and HEIDI rejects there

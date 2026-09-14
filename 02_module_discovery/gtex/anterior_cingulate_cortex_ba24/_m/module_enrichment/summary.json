@@ -3,6 +3,24 @@
   "region": "anterior_cingulate_cortex_ba24",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 42,
+      "n_go_enriched": 10,
+      "frac_go_enriched": 0.238,
+      "n_pheno_sig_fdr10": 26
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 2
+    },
+    "wgcna_switch": {
+      "n_modules": 13,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.385,
+      "n_pheno_sig_fdr10": 11
+    },
     "wgcna_multiplex": {
       "n_modules": 15,
       "n_go_enriched": 13,

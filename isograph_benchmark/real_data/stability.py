@@ -71,7 +71,7 @@ COHORTS = {
         "covariates": ["RIN", "mapping_rate", "mito_rate",
                        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"],
         "age_col": "Age",
-        "filter_transcripts": True,   # run_brainseq_region filters; GTEx bundles are pre-filtered
+        "filter_transcripts": True,   # both production fits filter (GTEx since 2026-09-13)
         "lr": None,                   # default (1e-3)
     },
     "gtex": {
@@ -79,7 +79,7 @@ COHORTS = {
         "regions": ["caudate_basal_ganglia", "hippocampus", "frontal_cortex_ba9"],
         "covariates": ["SMRIN", "SMTSISCH", "SMMAPRT"],
         "age_col": "AGE",
-        "filter_transcripts": False,
+        "filter_transcripts": True,
         "lr": None,                   # promoted single LR: default 1e-3 + grad_clip_norm=1.0
                                       # (gate B.2) replaces the old hand-tuned GTEx lr=3e-4.
     },

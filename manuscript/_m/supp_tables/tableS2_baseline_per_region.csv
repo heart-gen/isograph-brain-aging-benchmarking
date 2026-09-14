@@ -5,6 +5,8 @@ brainseq,caudate,wgcna_multiplex,switch+abundance,27,378.0,22,0.815,3,3,0.111,0.
 brainseq,caudate,wgcna_switch_only,switch-only,10,182.0,3,0.3,3,1,0.3,0.1
 brainseq,caudate_sczd,isograph,switch+abundance,30,40.5,5,0.167,8,2,0.267,0.067
 brainseq,caudate_sczd,wgcna_gene,abundance,23,269.0,17,0.739,6,5,0.261,0.217
+brainseq,caudate_sczd,wgcna_multiplex,switch+abundance,26,399.5,20,0.769,4,4,0.154,0.154
+brainseq,caudate_sczd,wgcna_switch_only,switch-only,11,341.0,4,0.364,5,2,0.455,0.182
 brainseq,dlpfc,isograph,switch+abundance,39,68.0,1,0.026,0,0,0.0,0.0
 brainseq,dlpfc,wgcna_gene,abundance,25,500.0,19,0.76,5,4,0.2,0.16
 brainseq,dlpfc,wgcna_multiplex,switch+abundance,27,696.0,18,0.667,0,0,0.0,0.0

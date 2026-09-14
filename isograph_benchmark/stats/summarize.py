@@ -77,6 +77,49 @@ METRIC_FAMILY = {
     **{m: "partition" for m in PARTITION_METRICS},
 }
 
+# Metric polarity: +1 = higher is better, -1 = lower is better, 0 = descriptive (a count or
+# a size, where "better" is undefined). Without it the pairwise `direction` column was the
+# raw sign of mean_diff, so on a lower-is-better metric `method_better` meant the method did
+# WORSE -- which is how an unreproducible "219/240 favour IsoGraph" tally reached the root
+# README, and why eight different polarity guesses could not be told apart afterwards.
+# Every entry of METRICS must be listed; the check below fails at import otherwise, so a new
+# metric cannot silently inherit a polarity.
+METRIC_POLARITY = {
+    "metrics_module_recovery": 1,
+    "metrics_switch_gene_detection_rate": 1,
+    "metrics_nonswitch_gene_module_rate": -1,   # background genes pulled into modules
+    "metrics_n_predicted_modules": 0,
+    "metrics_n_edges": 0,
+    "measurement_elapsed_sec": -1,
+    "metrics_abundance_gene_detection_rate": 1,
+    "metrics_role_switch_recall": 1,
+    "metrics_role_abundance_recall": 1,
+    "metrics_role_switch_only_n": 0,
+    "metrics_role_abundance_only_n": 0,
+    "metrics_role_coupled_n": 0,
+    "metrics_role_discordant_n": 0,
+    "metrics_genetic_anchor_recall": 1,
+    "metrics_genetic_anchor_fpr": -1,
+    "metrics_genetic_anchor_best_r2_mean": 1,
+    "metrics_ari_planted": 1,
+    "metrics_ami_planted": 1,
+    "metrics_ari_planted_blob": 1,
+    "metrics_v_measure_planted": 1,
+    "metrics_homogeneity_planted": 1,
+    "metrics_completeness_planted": 1,
+    "metrics_ari_assigned": 1,
+    "metrics_ami_assigned": 1,
+    "metrics_ari_universe": 1,
+    "metrics_ami_universe": 1,
+    "metrics_module_recovery_excess": 1,
+    "metrics_module_recovery_z": 1,
+    "metrics_module_recovery_null_mean": 0,     # the null's own level, not a performance
+    "metrics_frac_planted_assigned": 1,
+}
+_missing_polarity = sorted(set(METRICS) - set(METRIC_POLARITY))
+if _missing_polarity:
+    raise RuntimeError(f"METRIC_POLARITY has no entry for: {_missing_polarity}")
+
 
 def bootstrap_ci(values: np.ndarray, n_iter: int, alpha: float, seed: int = 0) -> tuple[float, float]:
     rng = np.random.default_rng(seed)
@@ -201,6 +244,23 @@ def main() -> None:
     out_long = stage_dir("synthetic", "03_metrics", "_m", "synthetic_metric_long.parquet")
     long.to_parquet(out_long, index=False, compression="zstd")
     print(f"Wrote {len(long):,} rows to {out_long.name}")
+
+    # Completed runs per method x scenario. The ablation arms were added to a subset of
+    # scenarios (isograph_vae_reliability has 80 runs against isograph_vae_multiplex's 1,820),
+    # so a cross-method win-rate pools very different amounts of evidence. Pairwise tests are
+    # paired within scenario and unaffected; this table is the supplement's statement of it.
+    scenario_col = "run_scenario" if "run_scenario" in df.columns else "scenario"
+    method_col = "run_method" if "run_method" in df.columns else "method"
+    counts = (
+        df.groupby([method_col, scenario_col]).size().unstack(fill_value=0)
+        .rename_axis(index="method", columns=None)
+    )
+    counts.insert(0, "n_scenarios", (counts > 0).sum(axis=1))
+    counts.insert(0, "n_runs", counts.drop(columns="n_scenarios").sum(axis=1))
+    counts = counts.sort_values("n_runs", ascending=False)
+    out_counts = stage_dir("synthetic", "03_metrics", "_m", "tableS_method_run_counts.csv")
+    counts.to_csv(out_counts)
+    print(f"Wrote run counts for {len(counts)} methods to {out_counts.name}")
 
     # Paired statistical tests (Wilcoxon + effect sizes + BH FDR) vs. WGCNA
     from isograph_benchmark.stats.hypothesis_tests import paired_tests

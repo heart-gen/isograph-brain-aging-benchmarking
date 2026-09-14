@@ -3,6 +3,24 @@
   "region": "dlpfc",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 39,
+      "n_go_enriched": 1,
+      "frac_go_enriched": 0.026,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 25,
+      "n_go_enriched": 19,
+      "frac_go_enriched": 0.76,
+      "n_pheno_sig_fdr10": 5
+    },
+    "wgcna_switch": {
+      "n_modules": 16,
+      "n_go_enriched": 3,
+      "frac_go_enriched": 0.188,
+      "n_pheno_sig_fdr10": 0
+    },
     "wgcna_multiplex": {
       "n_modules": 27,
       "n_go_enriched": 18,

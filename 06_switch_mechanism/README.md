@@ -13,8 +13,10 @@ they do to the protein, and do the results survive sensitivity analysis?
 | 06 | `isa_concordance` | Concordance with satuRn / ISA differential transcript usage |
 | 07 | `longread_switch_confirm` | ONT DLPFC long-read confirmation (Aguzzoli-Heberle 2024) |
 | 08–09 | `download_clinical`, `clinical_consequence` | gnomAD LOEUF constraint + ClinVar pathogenic density |
-| 10–11 | `scz_confound_sensitivity`, `switch_feature_sensitivity` | Medication/toxicology/smoking availability audit; five feature-construction axes |
+| 10–11 | `scz_confound_sensitivity`, `switch_feature_sensitivity` | Medication/toxicology/smoking availability audit; five feature-construction axes (one region per call; `--aggregate` writes the cross-region report and runs the quantification axis once, beside a same-quantifier reference) |
 | 12 | `junction_coloc_confirm` | Short-read BrainSEQ junction confirmation of the anchored SNCA/CTSH switches |
+| 13 | `switch_feature_sensitivity_gtex` | Step 11 over all 13 GTEx regions (array). GTEx's published setting is the **unfiltered** transcript matrix, so its expression axis runs from no filter upward |
+| 14 | `switch_feature_refit` | Full production refit per preprocessing setting (BrainSEQ caudate, 12 fits incl. the published-setting noise floor) — lets the network change, which step 11 holds fixed |
 
 ## Key results
 
@@ -67,15 +69,39 @@ they do to the protein, and do the results survive sensitivity analysis?
   modules *most* correlated with it survive and the least correlated fall — the opposite
   of technical-artifact removal. Do not add it to the inference model on confounding
   grounds. Report as a sensitivity.
-- **Quantification is the striking axis.** Per-gene switch-age effects are essentially
-  uncorrelated between Salmon and RSEM on matched regions (Pearson 0.007 caudate,
-  −0.002 hippocampus, sign concordance 0.499). This confounds quantifier with cohort, so
-  it is an upper bound, not an isolated estimate.
-- The feature-sensitivity harness holds the **module partition fixed**, so it measures
-  the stability of the representation and its trait signal, not of an independently
-  refit network.
+- **Per-gene switch-age effects do not transfer across cohorts at all, but do across tissues
+  within a cohort** (steps 11/13 `--aggregate`, 2026-09-12). Matched regions across cohorts
+  (Salmon vs RSEM) give Pearson 0.007 caudate, −0.002 hippocampus, 0.0004 DLPFC/BA9 (sign
+  concordance 0.50–0.51). The new same-quantifier reference — different tissues within one
+  cohort — gives 0.31–0.51 in GTEx and 0.18–0.23 in BrainSEQ (sign 0.56–0.66). Those pairs share
+  most donors, which inflates them, and no same-quantifier cross-cohort pair exists, so quantifier
+  and cohort remain confounded; but the cross-cohort figure is not merely low, it is zero, far below
+  what tissue differences alone produce. Module-level replication (stage 03) survives this only as
+  a count against a matching null, never as correlated per-gene effects.
+- **The switch representation is robust to the pseudocount everywhere, and to transcript
+  filtering only where the published matrix is already filtered.** The harness holds the module
+  partition fixed and ran on BrainSEQ caudate plus all 13 GTEx regions. Pseudocount 0.1–2.0:
+  minimum module age-effect correlation with the published effects 0.99 (BrainSEQ) and 0.81–0.98
+  (GTEx), at most one sign flip among published-significant modules. Expression filter and
+  minor-isoform threshold: 0.89–0.90 with no flips in BrainSEQ, whose fit already applies a count
+  filter, but 0.07–0.69 in GTEx at the strictest setting, with up to 12 flips (BA9). GTEx is fit on
+  the **unfiltered** transcript matrix, so its filter axis removes up to ~47% of switch genes and
+  rewrites the coordinates of those left (median per-gene |r| 0.25 at count > 10 in ≥ 90%).
+  The choice of expression filter is therefore a real analytic degree of freedom for GTEx and must
+  be stated as fixed a priori.
+- **Letting the network refit changes the picture: module identity is preprocessing-sensitive,
+  the age signal less so** (step 14, BrainSEQ caudate, 12 production fits). Refitting the
+  published setting reproduces the committed partition (ARI 0.97, 19/20 age associations), so
+  refit noise is small. Every perturbed setting moves the partition far more: ARI 0.66–0.77 for
+  pseudocount, 0.44–0.60 for the expression filter, 0.65 / 0.43 / 0.29 for minor-isoform usage
+  ≥ 0.01 / 0.05 / 0.10. Of the 20 published FDR-significant module–age associations, 15–20 recur
+  with the same sign in the best-matching refit module, but that match is loose — median best
+  Jaccard 0.02–0.27 — so the aging signal reappears in substantially redrawn modules rather than in
+  the same modules. The fixed-partition harness above therefore overstates stability for anything
+  that names a specific module; the defensible statement is at the level of the switch layer's age
+  association, not module membership. `_m/switch_feature_sensitivity/refit/brainseq/caudate/REFIT_SENSITIVITY.md`.
 
-**CLIs:** `isograph_benchmark/real_data/{switch_consequence,switch_consequence_meta,validate_switch_splicing,switch_orthogonal_confirm,isa_concordance,longread_switch_confirm,clinical_consequence,clinical_consequence_meta,scz_confound_sensitivity,switch_feature_sensitivity,junction_coloc_confirm}.py`.
+**CLIs:** `isograph_benchmark/real_data/{switch_consequence,switch_consequence_meta,validate_switch_splicing,switch_orthogonal_confirm,isa_concordance,longread_switch_confirm,clinical_consequence,clinical_consequence_meta,scz_confound_sensitivity,switch_feature_sensitivity,switch_feature_refit,junction_coloc_confirm}.py`.
 
 ## Display items
 

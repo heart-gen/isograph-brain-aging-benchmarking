@@ -1,0 +1,13 @@
+{
+  "region": "caudate_sczd",
+  "arm": "abundance",
+  "seed": 15,
+  "analysis": "sczd",
+  "is_production_setting": false,
+  "n_transcripts_before": 233110,
+  "n_genes_before": 20559,
+  "n_transcripts": 58551,
+  "n_genes": 17946,
+  "n_multi_isoform_genes": 11563,
+  "wall_seconds": 704.3
+}

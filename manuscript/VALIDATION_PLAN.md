@@ -118,7 +118,18 @@ paired within-gene comparison, and it shows no splicing preference at signal lev
 P = 0.008 in the *expression* direction; conditional-posterior Wilcoxon P = 0.33). These 14 are
 *locus nominations*, which is a different and legitimate job.
 
-### 0.4.2 BrainSEQ junction QTLs — the highest-value item on this page
+### 0.4.2 BrainSEQ junction QTLs — ~~the highest-value item on this page~~ run; switch-QTL arm complete, junction layer dropped
+
+> **Outcome (2026-09-11/12).** The switch-QTL arm was mapped (`S_g` vs `A_g`; 420/360/362
+> all-samples and 229/169/175 EA-only donors), both pre-specified checks passed, and in-sample-LD
+> coloc followed. It runs *against* splicing: switch-QTL signal is largely shared with abundance
+> (π₁(A | S) 0.77–0.89 vs π₁(S | A) 0.29–0.41) and per-gene coloc favours abundance, 5
+> switch-only vs 33 abundance-only (P = 4.3e-6). The discovery cohort does not rescue
+> counter-lines 1 and 3. The junction-level layer was run and shelved, then **dropped on
+> 2026-09-12** (PI decision): it is an event-naming interpretability layer on swQTL-positive genes
+> only, its within-gene STAR arm found zero QTLs, and restoring it with a local denominator would
+> not change the genetic claim now that splicing specificity is supporting evidence only. The text
+> below is the original rationale, kept as the record. See `reports/pi/08_signal_level_genetics.md`.
 
 Counter-line 3 was described in the first draft as unrescuable because it is a GTEx bulk sQTL
 power problem. That is true of GTEx and **false of the project as a whole**: BrainSEQ genotypes
@@ -152,22 +163,27 @@ it may not be read as:
 - **A HEIDI rejection does not overrule a strong multi-signal colocalization**, and SMR
   significance does not promote a locus coloc did not support. Disagreements are reported as
   disagreements (`agreement` categories in `SMR_HEIDI.md`).
-- **BrainSEQ QTL are not used** until an EA-only mapping exists: the cohort is roughly half
-  African-ancestry, and its LD does not match the EUR GWAS or the 1000G EUR panel.
+- **BrainSEQ QTL are used only from the EA-only mapping**: the cohort is roughly half
+  African-ancestry, and its LD does not match the EUR GWAS or the 1000G EUR panel. That arm
+  exists since 2026-09-11 (`05_genetic_anchoring/_m/brainseq_switch_qtl/ea_only/`), and SMR +
+  HEIDI has been run on it (`_m/smr_heidi/brainseq/ea_only/`).
 
 ### 0.4.4 Revised order
 
 1. ~~Re-anchor the locus list on `coloc.abf` PP4 rather than CLPP.~~ **Done 2026-09-11 at signal
    level** (§0.4.1), with the event audit and the long-read check re-run on the new nominations
    (§0.1).
-2. Map BrainSEQ switch and junction QTLs; repeat the anchoring and the per-gene modality contrast
-   there. Same-tissue genetic anchoring, not replication; the EA-only arm is required for anything
-   colocalized against the EUR GWAS.
-3. ~~SMR + HEIDI on both QTL sources.~~ **GTEx done 2026-09-11** (§0.4.3): 29/42 nominations have a
-   tissue where the colocalizing intron is SMR-significant with HEIDI not rejected; SNCA/PD
-   disagrees, and the disagreement is a HEIDI rejection rather than an absence of SMR signal
-   (HEIDI rejects in all 8 instrumented sQTL tissues, 6 of which clear the family threshold).
-   BrainSEQ waits for EA-only QTL.
+2. ~~Map BrainSEQ switch and junction QTLs; repeat the anchoring and the per-gene modality contrast
+   there.~~ **Done 2026-09-11/12** (§0.4.2): per-gene coloc favours abundance (5 vs 33,
+   P = 4.3e-6); the junction layer was run, shelved, and dropped on 2026-09-12.
+3. ~~SMR + HEIDI on both QTL sources.~~ **Done on GTEx and BrainSEQ EA-only, 2026-09-11/12**
+   (§0.4.3). GTEx: **30/42** nominations have at least one tissue where the gene's pre-designated
+   primary sQTL probe is SMR-significant with HEIDI not rejected (31/42 counting either modality;
+   17/42 if the probe must be the exact intron that coloc headlined in that tissue); 9 have no
+   instrument at 5e-8, 2 are HEIDI-rejected and 1 is instrumented but null. *(An earlier 29/42 in
+   this plan matched none of these definitions and is superseded.)* SNCA/PD disagrees, and the
+   disagreement is a HEIDI rejection rather than an absence of SMR signal (HEIDI rejects in all 8
+   instrumented sQTL tissues, 6 of which clear the family threshold).
 4. **Only then** decide how much wet-lab is still needed. Steps 1–3 may reduce Experiment A to
    a single confirmatory reporter assay on SNCA, or make it unnecessary for the resource claim.
 
@@ -480,7 +496,7 @@ BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work
 | *(superseded)* coloc.abf PP4 (40 strong hits, 13 sQTL-preferential) | `05_genetic_anchoring/_m/coloc_modality_contrast/genes.parquet`, switch arm — 1,647 cells / 1,156 genes over GTEx v11 all-pairs |
 | Signal-level nominations (42, 14 sQTL-preferential), descriptors, paired contrast | `05_genetic_anchoring/_m/coloc_signal_susie/all_introns/{genes,cells_hierarchy}.parquet`; contrast in `05_genetic_anchoring/_m/coloc_signal_susie/contrast.parquet` (representative arm) — regenerated 2026-09-11 |
 | Event-audit tiers, curated-event testability | `05_genetic_anchoring/_m/locus_event_audit/susie_all_introns/`; PICALM sensitivity tier in `susie_all_introns__max_snps_30000/` |
-| SMR + HEIDI agreement (29/42; SNCA/PD disagreement) | `05_genetic_anchoring/_m/smr_heidi/gtex/{smr_results.parquet,SMR_HEIDI.md}` |
+| SMR + HEIDI agreement (30/42 primary sQTL probe; 31/42 either modality; 17/42 exact coloc intron; SNCA/PD disagreement) | `05_genetic_anchoring/_m/smr_heidi/gtex/{smr_results.parquet,SMR_HEIDI.md}` |
 | Signal-level long-read 0.565 / 0.238, 0.672 / 0.298 | `06_switch_mechanism/_m/switch_orthogonal_confirm/signal_coloc/anchored_summary.json` |
 | SNCA minor-form usage 0.188, 99.5% of 222 donors | `06_switch_mechanism/_m/junction_coloc_confirm/junction_confirm.parquet` |
 | BrainSEQ genotypes | `inputs/raw/brainseq/genotypes/TOPMed_LIBD.{pgen,pvar,psam}` (TOPMed-imputed, PLINK2) |

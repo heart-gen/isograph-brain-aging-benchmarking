@@ -24,7 +24,7 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S14 | `tableS14_longread_orthogonal_confirmation.csv` | `switch_orthogonal_confirm/anchored_gene_confirmation.parquet` | per-gene long-read confirmation of the anchored switch pairs (backs S-real-8) |
 | S15 | `tableS15_isa_concordance.csv` | `isa_concordance/*/summary.json` | independent-caller (satuRn) DTU concordance across all 17 analyses (backs S-real-9) |
 | S16 | `tableS16_module_genetic_anchoring.csv` | `module_genetic_anchoring_meta/` | per-module splicing anchoring vs a size-matched permutation null — **a table on purpose, not a figure** |
-| S17 | `tableS17_rbp_eclip_binding_support.csv` | `rbp/rbp_binding_support.parquet` | per-RBP eCLIP binding capacity, switched vs constitutive exons (backs S-real-6B) |
+| S17 | `tableS17_rbp_eclip_binding_support.csv` | `rbp/rbp_binding_support.parquet` | per-RBP eCLIP binding capacity, switched vs constitutive exons (backs S-real-6B). **ENCODE eCLIP is HepG2/K562, not brain:** this is binding capacity at alternative-exon sequence, not neuronal occupancy of these regulons |
 | S18 | `tableS18_scz_convergence.csv` | `scz_age_projection/convergence.parquet` | SCZ-risk convergence per module with candidate RBP regulators (backs Fig 4E) |
 | S19 | `tableS19_qtl_anchoring_sensitivity.csv` | `qtl_anchoring_meta/` + `qtl_anchoring_meta/sensitivity/<arm>/` | splicing-specificity contrast under the primary arm and the three pre-specified sensitivities — constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose (backs Fig 3) |
 | S20a | `tableS20a_coloc_convergence_global.csv` | `module_coloc_convergence/global.parquet` | per (trait, source) coloc concentration vs a size-matched null, and anchored-module enrichment under BOTH denominators (all module genes vs the CLPP-tested pool) — backs S-real-10A/C |
@@ -48,14 +48,17 @@ the four module sets fit on the same samples: `isograph` (VAE+Leiden on switch+a
 switch+abundance features), and `wgcna_gene` (classical WGCNA on abundance only).
 Columns: median module count and size, per-module phenotype-significant rate (`pheno_fdr ≤
 0.1`), "both" rate (phenotype-sig AND GO-enriched), GO-enriched rate (`n_go_terms > 0`), and
-raw totals. **Read rates, not totals** — totals scale with module count (IsoGraph runs finer:
-median 35 vs 8–18.5 modules). The phenotype-sig rate is highest for the two switch-fed
-methods (`wgcna_switch_only` 0.336, `isograph` 0.268) over the abundance-fed ones
-(`wgcna_multiplex` 0.189, `wgcna_gene` 0.180): phenotype sensitivity comes from the switch
-features, not the inference method. GO enrichment is abundance-dominated (`wgcna_gene` 0.885 ≫
-`isograph` 0.217). The one clean method effect: on identical multiplex features `isograph`
-(0.268) > `wgcna_multiplex` (0.189). Supports: IsoGraph's value is DTU-without-DGE content,
-not better module-level enrichment.
+raw totals. **Read rates, not totals** — totals scale with module count, and IsoGraph runs
+several-fold finer (per-region counts in S2). *(Requoted 2026-09-12 to the 2026-09-09
+matched-baseline re-fit; the earlier 0.336 / 0.268 / 0.217 are stale.)* The phenotype-sig rate
+is highest for the switch-only baseline (`wgcna_switch_only` **0.389**) and then `isograph`
+(**0.274**), over the multiplex and abundance-fed ones (`wgcna_multiplex` 0.187, `wgcna_gene`
+0.180): phenotype sensitivity comes from the switch features, not the inference method. GO
+enrichment is abundance-dominated (`wgcna_gene` 0.885 ≫ `isograph` 0.235). On identical
+multiplex features `isograph` (0.274) > `wgcna_multiplex` (0.187), but that gap is
+granularity-confounded. **The comparison is feature-matched, not pipeline-matched:** IsoGraph
+residualizes its discovery covariates inside the fit, the WGCNA baselines regress RIN only.
+Supports: IsoGraph is not a better module-level enricher; its value is the switch layer.
 
 ## Table S2 — Three-baseline comparison, per cohort × region
 
@@ -68,24 +71,32 @@ disparity that makes raw totals non-comparable.
 
 Random-/fixed-effects meta-analysis of the **paired sQTL-OR / eQTL-OR ratio** within each
 analysis, by module set and graph method. The ratio cancels the shared cis-QTL depletion of
-constrained network genes (Table S5), isolating whether *splicing* genetics is spared. For
-`isograph`, the ratio is > 1 and significant in all-modules (1.07, p=8e-6), phenotype-sig
-(1.13, p=1.5e-4) and GO-invisible (1.13, p=2.6e-3) sets, and null for GO-visible (1.04, ns) —
-an internal control. The matched WGCNA baselines (`wgcna_switch_only`, `wgcna_multiplex`) reach
-significance in no set (ratios 1.02–1.07; closest `wgcna_multiplex` phenotype-associated
-1.044, p = 0.070, I² = 0.80 — updated 2026-09-12 to the matched-baseline re-fit). Columns: method, module set, n analyses, fixed-effects
-ratio + 95% CI, p, and heterogeneity I². Supports: splicing genetics is spared exactly in the
-disease/GO-invisible IsoGraph modules, and only for IsoGraph.
+constrained network genes (Table S5), isolating whether *splicing* genetics is spared.
+*(Requoted 2026-09-12 from `qtl_anchoring_meta_contrast.parquet`; the earlier GO-invisible
+1.13 and GO-visible "internal control" readings predate the 2026-08-29 refresh and are wrong.)*
+For `isograph`, the fixed-effects ratio is > 1 in all-modules (**1.068**, p = 1.3e-5, k = 17)
+and phenotype-significant modules (**1.111**, 95% CI 1.048–1.177, p = 3.6e-4, I² = 0.23,
+k = 12). It does **not** localize to GO-invisible modules (1.068, p = 0.077), and GO-visible
+modules are no longer a null (1.084, p = 0.050). Across the matched WGCNA baselines no set clears
+0.05: `wgcna_switch_only` phenotype-significant 1.025 (p = 0.58), `wgcna_multiplex`
+phenotype-significant **1.046 (p = 0.053, I² = 0.75)**, the closest. Columns: method, module
+set, k analyses, fixed- and random-effects ratio + 95% CI, p, Q and I². Supports, **at set level
+only**: splicing QTL are relatively spared in phenotype-associated IsoGraph modules. This is
+supporting evidence, not the paper's headline; the per-gene tests (GTEx signal-level,
+BrainSEQ in-sample coloc) lean toward expression.
 
 ## Table S4 — Matched-baseline QTL specificity contrast (8-tissue common set)
 
-The same contrast restricted to the 8 tissues where all three graph methods have a result, so
-`isograph` vs `wgcna_switch_only` vs `wgcna_multiplex` is a like-for-like method comparison on
-identical tissues. `isograph` stays positive (pheno-sig 1.11, p=2.1e-3; GO-invisible 1.11,
-p=0.011); both WGCNA baselines stay null (0.97–1.02). This is the clean method effect — the
-single-tissue `wgcna_switch_only` frontal-cortex blip (1.29) does not survive pooling.
-Supports: the splicing-specificity signal is a property of IsoGraph's inference, not the
-switch features alone.
+The same contrast restricted to the tissues where all three graph methods have a result, so
+`isograph` vs `wgcna_switch_only` vs `wgcna_multiplex` is a like-for-like comparison on
+identical tissues. `isograph` stays positive in phenotype-significant modules (**1.112**,
+p = 6.5e-4, k = 7, I² = 0) and all modules (1.110, p = 2e-6, k = 8); GO-invisible does not
+clear (1.066, p = 0.11). The baselines do not clear 0.05 in any set: `wgcna_switch_only`
+phenotype-significant 1.015 (p = 0.74); `wgcna_multiplex` phenotype-significant **1.044
+(p = 0.070, I² = 0.80)**. Since the 2026-09-09 baseline re-fit the multiplex baseline sits near
+the threshold rather than at a flat null, so read the matched-baseline control as
+"IsoGraph-only at 0.05, narrowly", not as a clean method effect. Supports: the set-level contrast
+is not reproduced by WGCNA on the identical switch features.
 
 ## Table S5 — Raw cis-QTL enrichment ORs (eQTL & sQTL meta)
 
@@ -99,11 +110,13 @@ mis-reading the specificity ratio as enrichment.
 
 ## Table S6 — GO-invisible SCZD disease switch modules (BrainSEQ caudate)
 
-Per-module ledger for the four SCZD-associated IsoGraph switch modules (`pheno_fdr ≤ 0.1`),
-plus a pooled `_background` row over all switch transcripts. All four return zero GO terms
-(`go_invisible = True`), yet nearly every member carries a real anticorrelated transcript
-pair (e.g. M010 73/83, M026 21/23), with max switch strength 1.10–1.39 and 93–459 significant
-switch transcripts. Driver functional-consequence fractions (CDS / coding-status / biotype /
+Per-module ledger for the **eight** SCZD-associated IsoGraph switch modules (`pheno_fdr ≤ 0.1`),
+plus a pooled `_background` row over all switch transcripts. Six return zero GO terms
+(`go_invisible = True`) and two are GO-visible (M012, M011). Four of the six carry a real
+anticorrelated transcript pair in nearly every member (M026 23/23, M022 29/29, M023 27/27, M010
+65/83); M025 is partial (11/24) and M020 weak (4/30), with max switch strength 1.02–1.72 and
+7–509 significant switch transcripts across the six. *(Corrected 2026-09-12: an earlier
+version of this table listed four modules from a stale gate run.)* Driver functional-consequence fractions (CDS / coding-status / biotype /
 UTR change) sit at or above the pooled background (0.84 / 0.67 / 0.74 / 0.61), so
 GO-invisibility reflects GO's gene-level/abundance bias, not low module quality. Supports: the
 disease switch signal is genuine, functionally consequential isoform regulation invisible to
@@ -119,8 +132,10 @@ BrainSEQ↔GTEx, sign-concordant and jointly significant in both cohorts; BrainS
 only; counted on the linear covariate-free arm — see REPLICATION_PERMUTATION.md for the
 permutation null and the linear-vs-spline asymmetry), and Q4
 complementarity (`median_frac_dtu_without_dge`, `median_frac_in_wgcna_age`). Across six
-regions: 236/266 modules trusted; driver ρ medians 0.77–0.82 with 96–100% positive; 25/130
-BrainSEQ modules replicate cross-cohort (caudate 3/45, DLPFC 9/35, hippocampus 13/50).
+regions: 250/266 modules trusted; driver ρ medians 0.66–0.88 with 94–100% positive; 23/130
+BrainSEQ modules replicate cross-cohort (caudate 2/44, DLPFC 8/36, hippocampus 13/50). *(Requoted
+2026-09-12 after the split-half re-fit and the `modules_meta` rebuild; the earlier 236/266, 0.77–0.82
+and 25/130 are stale.)*
 Supports: the per-module trust scaffold the biological claims rest on.
 
 ## Table S8 — Per-gene deep-dive panel (all colocalized genes)

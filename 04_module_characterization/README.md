@@ -30,9 +30,12 @@ network, and trait inference happens downstream on raw `feature_scores`
 
 ## Key results
 
-- 4/4 phenotype-significant SCZD switch modules are **GO-invisible**, and they carry real
-  anticorrelated transcript pairs with functional consequence at or above background.
-  GO-invisibility is GO's gene-level bias, not low module quality.
+- **6 of 8** phenotype-significant SCZD switch modules (FDR ≤ 0.10) are **GO-invisible**. Four
+  carry real anticorrelated transcript pairs in nearly every member (M026 23/23, M022 29/29,
+  M023 27/27, M010 65/83) with functional consequence at or above background; M025 (11/24) is
+  partial and M020 (4/30) weak. The two GO-visible disease modules switch comparably (M012
+  40/58, M011 59/65), so GO-invisibility reflects GO's gene-level bias, not low module quality.
+  *(Corrected 2026-09-12 from a stale "4/4"; see `GO_INVISIBLE_GATE_SUMMARY.md`.)*
 - Abundance and switch axes are near-orthogonal (median |r| ≈ 0.13); 34 SCZD / 43
   aging-caudate composition-unique genes carry phenotype signal total abundance misses.
 

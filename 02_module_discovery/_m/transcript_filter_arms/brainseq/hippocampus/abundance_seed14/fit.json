@@ -1,0 +1,13 @@
+{
+  "region": "hippocampus",
+  "arm": "abundance",
+  "seed": 14,
+  "analysis": "aging",
+  "is_production_setting": true,
+  "n_transcripts_before": 231349,
+  "n_genes_before": 19920,
+  "n_transcripts": 55633,
+  "n_genes": 17515,
+  "n_multi_isoform_genes": 11114,
+  "wall_seconds": 249.0
+}

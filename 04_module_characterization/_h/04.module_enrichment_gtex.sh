@@ -9,13 +9,20 @@
 #SBATCH --time=03:00:00
 #SBATCH --output=04_module_characterization/_m/logs/module-enrichment-%A_%a.log
 
-# Per-module GO:BP enrichment + IsoGraph network metrics for both methods
-# (IsoGraph and WGCNA gene-level) on the 13 GTEx v11 brain regions, joined with
-# each module's AGE-spline phenotype FDR. Writes to
-# 02_module_discovery/gtex/<region>/_m/module_enrichment/{all,isograph,wgcna}_modules.parquet.
+# Per-module GO:BP enrichment + IsoGraph network metrics for every partition in the store
+# (IsoGraph, classical WGCNA, matched-feature WGCNA baselines) on the 13 GTEx v11 brain
+# regions, joined with each module's AGE-spline phenotype FDR. Writes to
+# 02_module_discovery/gtex/<region>/_m/module_enrichment/.
 #
-# Requires: IsoGraph modules + edges + age_spline (01.run_isograph.sh),
-#           WGCNA modules + age_spline (02.wgcna_gene.sh), and GO annotations.
+# Defaults to --method all: all_modules.parquet and summary.json are rewritten from the
+# methods passed on THIS run, so the CLI default (isograph + wgcna) would silently drop the
+# matched-baseline rows that stage 04's baseline comparison reads.
+#
+# Requires: IsoGraph modules + edges + age_spline (02_module_discovery/_h/03),
+#           WGCNA modules + age_spline (_h/09, _h/11), and GO annotations.
+#
+# Calls the env interpreter directly rather than `module load` + `conda activate`, so an
+# array task cannot die on "module: command not found".
 
 set -euo pipefail
 
@@ -35,9 +42,7 @@ export ISOGRAPH_BENCHMARK_ROOT="${PROJECT_ROOT}"
 export PYTHONPATH="${PROJECT_ROOT}${PYTHONPATH:+:${PYTHONPATH}}"
 mkdir -p 04_module_characterization/_m/logs
 
-module purge
-module load anaconda3/2024.10-1
-conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
+PY=/ocean/projects/bio260021p/shared/opt/envs/isograph/bin/python
 
 export OMP_NUM_THREADS=8
 export OPENBLAS_NUM_THREADS=8
@@ -52,7 +57,9 @@ REGIONS=(
 REGION="${REGIONS[$((${SLURM_ARRAY_TASK_ID:-1} - 1))]}"
 log_message "**** GTEx module enrichment: ${REGION} ****"
 
-python -m isograph_benchmark.real_data.module_enrichment gtex-aging --region "${REGION}" "$@"
+ARGS=("$@")
+[[ " $* " == *" --method "* ]] || ARGS+=(--method all)
 
-conda deactivate
+"${PY}" -m isograph_benchmark.real_data.module_enrichment gtex-aging --region "${REGION}" "${ARGS[@]}"
+
 log_message "**** Complete ****"
