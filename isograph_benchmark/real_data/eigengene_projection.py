@@ -71,12 +71,12 @@ def switch_loadings(cohort: str, region: str) -> pd.DataFrame:
     """Per-transcript switch loadings on the production feature construction."""
     from isograph.features.switch import gene_switch_loadings
     from isograph.io.artifacts import load_dataset_bundle
-    from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+    from isograph_benchmark.real_data.run_models import filter_production_transcripts
 
     bundle = load_dataset_bundle(rel(*BUNDLES[cohort], region))
     tc = np.asarray(bundle.matrices["transcript_counts"])
     tt = bundle.feature_tables["transcript"]
-    tc, tt = _filter_expressed_transcripts(tc, tt)  # both production fits filter
+    tc, tt = filter_production_transcripts(tc, tt)  # both production fits filter
     load = gene_switch_loadings(tc, tt)
     load["gene"] = _bare(load["gene_id"])
     load["transcript"] = _bare(load["transcript_id"])

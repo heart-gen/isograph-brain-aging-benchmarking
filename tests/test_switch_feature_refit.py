@@ -6,7 +6,8 @@ from isograph_benchmark.real_data import switch_feature_refit as sfr
 
 
 def test_grid_has_the_published_setting_once_and_first():
-    for cohort, n in (("brainseq", 12), ("gtex", 12)):
+    # published + 4 pseudocounts + 6 transcript-filter alternatives + 3 minor-isoform thresholds
+    for cohort, n in (("brainseq", 14), ("gtex", 14)):
         grid = sfr.setting_grid(cohort)
         assert grid[0]["axis"] == "published"
         assert len(grid) == n
@@ -16,7 +17,8 @@ def test_grid_has_the_published_setting_once_and_first():
 def test_counts_for_setting_shifts_the_pseudocount_and_skips_an_absent_filter():
     counts = np.array([[0.0, 10.0], [5.0, 0.0]])
     table = pd.DataFrame({"gene_id": ["g", "g"], "transcript_id": ["t1", "t2"]})
-    setting = {"pseudocount": 1.0, "min_count": 0.0, "min_fraction": 0.0, "min_usage": 0.0}
+    setting = {"pseudocount": 1.0, "transcript_filter": "none", "min_tx_prop": 0.0,
+               "min_tx_fraction": 0.0, "min_usage": 0.0}
     tc, tt = sfr.counts_for_setting(counts, table, setting)
     assert tc.shape == counts.shape
     assert np.allclose(tc, counts + 0.5)

@@ -54,7 +54,7 @@ from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.vae import VaeNetworkModel
 from isograph.workflow.config import VaeModelConfig
 from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
-from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+from isograph_benchmark.real_data.run_models import filter_production_transcripts
 from isograph_benchmark.real_data.replication import REGION_PAIRS
 
 SEED_BASE = 1000  # split seeds are SEED_BASE + k; VAE init seed is fixed (below)
@@ -71,7 +71,7 @@ COHORTS = {
         "covariates": ["RIN", "mapping_rate", "mito_rate",
                        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"],
         "age_col": "Age",
-        "filter_transcripts": True,   # both production fits filter (GTEx since 2026-09-13)
+        "filter_transcripts": True,   # run_models.filter_production_transcripts (switching, 2026-09-14)
         "lr": None,                   # default (1e-3)
     },
     "gtex": {
@@ -247,7 +247,7 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         # ensure a standalone (non-view) array we can column-slice cheaply
         tc = np.asarray(tc)
@@ -492,7 +492,7 @@ def fit_rmse(cohort: str, region: str, lr: float = 1e-3,
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         tc = np.asarray(tc)
     del bundle

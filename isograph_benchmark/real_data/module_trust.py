@@ -30,7 +30,7 @@ from scipy.stats import chi2, hypergeom, norm, spearmanr
 
 from isograph_benchmark.paths import OUTPUT_DIRS, ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.stability import (
-    COHORTS, SEED_BASE, _filter_expressed_transcripts, _split_indices,
+    COHORTS, SEED_BASE, filter_production_transcripts, _split_indices,
 )
 
 # production output dir name <- split-half partition method tag
@@ -580,7 +580,7 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         tc = np.asarray(tc)
     del bundle

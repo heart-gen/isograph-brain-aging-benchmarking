@@ -47,7 +47,7 @@ from isograph.workflow.config import VaeModelConfig
 from isograph_benchmark.paths import analysis_store, ensure_dir, rel
 from isograph_benchmark.real_data.run_models import (
     _PROMOTED_VAE,
-    _filter_expressed_transcripts,
+    filter_production_transcripts,
     _gtex_qc_covariate_table,
     _rnaseqc_covariate_table,
     diagnosis_association,
@@ -203,7 +203,7 @@ def project_region(analysis: str, region: str | None, source_subdir: str = "isog
 
     # Per-gene estimability reliability (promoted production lever), recomputed from
     # the bundle so switch-edge downweighting matches the production fit.
-    tc, tt = _filter_expressed_transcripts(
+    tc, tt = filter_production_transcripts(
         bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
     )
     gene_reliability = gene_switch_estimability(

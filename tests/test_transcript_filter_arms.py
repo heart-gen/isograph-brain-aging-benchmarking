@@ -29,16 +29,20 @@ def test_switching_filter_keeps_minority_used_isoforms_and_drops_trivial_shares(
     c, t = tfa.switching_filter(counts, table)
     assert set(t["transcript_id"]) == {"t1", "t2", "t4"}
     assert c.shape == (3, 10)
-    _, prod = run_models._filter_expressed_transcripts(counts, table)
-    assert set(prod["transcript_id"]) == {"t1", "t4", "t5"}
+    _, legacy = run_models._filter_expressed_transcripts(counts, table)
+    assert set(legacy["transcript_id"]) == {"t1", "t4", "t5"}
+    _, prod = run_models.filter_production_transcripts(counts, table)
+    assert set(prod["transcript_id"]) == set(t["transcript_id"])
 
 
-def test_production_defaults_are_unchanged():
+def test_production_fits_default_to_the_switching_filter():
+    assert run_models.filter_production_transcripts is run_models.filter_switching_transcripts
     region = inspect.signature(run_models.run_brainseq_region).parameters
-    assert region["transcript_filter"].default is run_models._filter_expressed_transcripts
+    assert region["transcript_filter"].default is run_models.filter_production_transcripts
     assert region["out"].default is None
     sczd = inspect.signature(run_models.run_brainseq_caudate_sczd).parameters
-    assert sczd["transcript_filter"].default is None and sczd["out"].default is None
+    assert sczd["transcript_filter"].default is run_models.filter_production_transcripts
+    assert sczd["out"].default is None
     assert region["random_state"].default == 13 == sczd["random_state"].default == tfa.PRODUCTION_SEED
 
 
