@@ -1,6 +1,6 @@
 # Three-baseline comparison — IsoGraph vs matched WGCNA baselines
 
-Per-region module_enrichment across 17 analyses (16 with all four methods). Phenotype-significant = `pheno_fdr <= 0.1`; GO-enriched = `n_go_terms > 0`; BOTH = phenotype-significant AND GO-enriched. Rates are per-module fractions averaged across regions; raw totals scale with module count (IsoGraph runs at finer resolution) and are NOT directly comparable.
+Per-region module_enrichment across 17 analyses (17 with all four methods). Phenotype-significant = `pheno_fdr <= 0.1`; GO-enriched = `n_go_terms > 0`; BOTH = phenotype-significant AND GO-enriched. Rates are per-module fractions averaged across regions; raw totals scale with module count (IsoGraph runs at finer resolution) and are NOT directly comparable.
 
 Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
@@ -10,8 +10,8 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | isograph | switch+abundance | 17 | 39.0 | 70.0 | 0.274 | 0.082 | 0.235 | 180 |
 | wgcna_gene | abundance | 17 | 8.0 | 387.0 | 0.18 | 0.171 | 0.885 | 34 |
-| wgcna_switch_only | switch-only | 16 | 13.0 | 143.0 | 0.384 | 0.198 | 0.403 | 72 |
-| wgcna_multiplex | switch+abundance | 16 | 19.5 | 284.0 | 0.189 | 0.136 | 0.755 | 57 |
+| wgcna_switch_only | switch-only | 17 | 13.0 | 144.0 | 0.389 | 0.197 | 0.401 | 77 |
+| wgcna_multiplex | switch+abundance | 17 | 20.0 | 293.0 | 0.187 | 0.137 | 0.755 | 61 |
 
 ## Caudate (representative single region)
 

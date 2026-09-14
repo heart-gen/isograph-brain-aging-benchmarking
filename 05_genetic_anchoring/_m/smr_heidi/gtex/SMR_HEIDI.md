@@ -11,25 +11,25 @@ QTL source: `gtex`. Instrument threshold `--peqtl-smr 5e-08`. HEIDI SNPs at p < 
 
 ## What was testable, by family
 
-Two families, corrected apart. The **primary confirmatory family** holds one pre-designated probe per gene; a gene's other introns form a **secondary event-localization family** with its own Bonferroni correction, so the primary threshold is not inflated by introns and the introns do not escape correction when they are discussed. `F` is the instrument strength `(b_eQTL/se_eQTL)^2` of the top cis-QTL SNP, reported on every row and never used to exclude one.
+Two families, corrected apart. The **primary confirmatory family** holds one pre-designated probe per gene; a gene's other introns form a **secondary event-localization family** with its own Bonferroni correction, so the primary threshold is not inflated by introns and the introns do not escape correction when they are discussed. `F` is the instrument strength `(b_eQTL/se_eQTL)^2` of the top cis-QTL SNP, reported on every row and never used to exclude one. It is summarized by its 5th percentile rather than a count below the conventional F < 10: an instrument that clears p < 5e-8 has |z| ≳ 5.4 and so F ≳ 30 (≈ 24 at the relaxed 1e-6 arm), so a weak-instrument count is zero by construction and carries no information; the per-row `weak_instrument` flag stays in `smr_results.parquet` for any run at a looser threshold.
 
-| analysis | modality | family | probes | instrumented | threshold | F median [min-max] | weak F | `no_instrument` | `instrumented_tested_null` | `smr_signal_heidi_unavailable` | `smr_signal_heidi_rejects` | `smr_heidi_supported` |
+| analysis | modality | family | probes | instrumented | threshold | F median [min-max] | F p5 | `no_instrument` | `instrumented_tested_null` | `smr_signal_heidi_unavailable` | `smr_signal_heidi_rejects` | `smr_heidi_supported` |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| aging__ad | eQTL | primary | 34 | 11 | 0.005 | 42 [31-59] | 0 | 23 | 6 | 0 | 0 | 5 |
-| aging__ad | sQTL | primary | 34 | 31 | 0.002 | 114 [34-531] | 0 | 3 | 0 | 0 | 0 | 31 |
-| aging__ad | sQTL | secondary | 417 | 46 | 0.001 | 107 [30-524] | 0 | 371 | 6 | 0 | 0 | 40 |
-| aging__als | eQTL | primary | 26 | 14 | 0.004 | 54 [32-139] | 0 | 12 | 10 | 0 | 1 | 3 |
-| aging__als | sQTL | primary | 26 | 24 | 0.002 | 63 [30-192] | 0 | 2 | 0 | 0 | 0 | 24 |
-| aging__als | sQTL | secondary | 376 | 9 | 0.006 | 44 [31-143] | 0 | 367 | 1 | 0 | 0 | 8 |
-| aging__lbd | eQTL | primary | 11 | 0 | — | — | 0 | 11 | 0 | 0 | 0 | 0 |
-| aging__lbd | sQTL | primary | 11 | 11 | 0.005 | 105 [39-221] | 0 | 0 | 0 | 0 | 0 | 11 |
-| aging__lbd | sQTL | secondary | 81 | 21 | 0.002 | 66 [32-203] | 0 | 60 | 9 | 0 | 11 | 1 |
-| aging__pd | eQTL | primary | 23 | 7 | 0.007 | 53 [33-72] | 0 | 16 | 1 | 0 | 0 | 6 |
-| aging__pd | sQTL | primary | 23 | 20 | 0.003 | 104 [33-309] | 0 | 3 | 2 | 0 | 6 | 12 |
-| aging__pd | sQTL | secondary | 200 | 19 | 0.003 | 62 [30-135] | 0 | 181 | 1 | 0 | 9 | 9 |
-| aging__scz | eQTL | primary | 67 | 25 | 0.002 | 55 [30-124] | 0 | 42 | 10 | 0 | 1 | 14 |
-| aging__scz | sQTL | primary | 67 | 50 | 0.001 | 44 [30-291] | 0 | 17 | 3 | 0 | 7 | 40 |
-| aging__scz | sQTL | secondary | 745 | 50 | 0.001 | 53 [30-440] | 0 | 695 | 18 | 0 | 7 | 25 |
+| aging__ad | eQTL | primary | 34 | 11 | 0.005 | 42 [31-59] | 31 | 23 | 6 | 0 | 0 | 5 |
+| aging__ad | sQTL | primary | 34 | 31 | 0.002 | 114 [34-531] | 35 | 3 | 0 | 0 | 0 | 31 |
+| aging__ad | sQTL | secondary | 417 | 46 | 0.001 | 107 [30-524] | 30 | 371 | 6 | 0 | 0 | 40 |
+| aging__als | eQTL | primary | 26 | 14 | 0.004 | 54 [32-139] | 34 | 12 | 10 | 0 | 1 | 3 |
+| aging__als | sQTL | primary | 26 | 24 | 0.002 | 63 [30-192] | 31 | 2 | 0 | 0 | 0 | 24 |
+| aging__als | sQTL | secondary | 376 | 9 | 0.006 | 44 [31-143] | 32 | 367 | 1 | 0 | 0 | 8 |
+| aging__lbd | eQTL | primary | 11 | 0 | — | — | — | 11 | 0 | 0 | 0 | 0 |
+| aging__lbd | sQTL | primary | 11 | 11 | 0.005 | 105 [39-221] | 57 | 0 | 0 | 0 | 0 | 11 |
+| aging__lbd | sQTL | secondary | 81 | 21 | 0.002 | 66 [32-203] | 33 | 60 | 9 | 0 | 11 | 1 |
+| aging__pd | eQTL | primary | 23 | 7 | 0.007 | 53 [33-72] | 34 | 16 | 1 | 0 | 0 | 6 |
+| aging__pd | sQTL | primary | 23 | 20 | 0.003 | 104 [33-309] | 39 | 3 | 2 | 0 | 6 | 12 |
+| aging__pd | sQTL | secondary | 200 | 19 | 0.003 | 62 [30-135] | 32 | 181 | 1 | 0 | 9 | 9 |
+| aging__scz | eQTL | primary | 67 | 25 | 0.002 | 55 [30-124] | 33 | 42 | 10 | 0 | 1 | 14 |
+| aging__scz | sQTL | primary | 67 | 50 | 0.001 | 44 [30-291] | 31 | 17 | 3 | 0 | 7 | 40 |
+| aging__scz | sQTL | secondary | 745 | 50 | 0.001 | 53 [30-440] | 34 | 695 | 18 | 0 | 7 | 25 |
 
 **`no_instrument` is not a negative result** — the probe was never tested, because no cis-QTL reached the instrument threshold. It is the largest cell in every arm here and must never be read as evidence against a locus.
 

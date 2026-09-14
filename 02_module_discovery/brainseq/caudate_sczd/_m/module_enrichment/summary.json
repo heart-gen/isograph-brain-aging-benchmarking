@@ -14,6 +14,18 @@
       "n_go_enriched": 17,
       "frac_go_enriched": 0.739,
       "n_pheno_sig_fdr10": 6
+    },
+    "wgcna_switch": {
+      "n_modules": 11,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.364,
+      "n_pheno_sig_fdr10": 5
+    },
+    "wgcna_multiplex": {
+      "n_modules": 26,
+      "n_go_enriched": 20,
+      "frac_go_enriched": 0.769,
+      "n_pheno_sig_fdr10": 4
     }
   }
 }

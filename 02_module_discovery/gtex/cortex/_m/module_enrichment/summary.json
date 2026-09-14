@@ -3,6 +3,24 @@
   "region": "cortex",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 37,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 0.189,
+      "n_pheno_sig_fdr10": 21
+    },
+    "wgcna": {
+      "n_modules": 11,
+      "n_go_enriched": 10,
+      "frac_go_enriched": 0.909,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_switch": {
+      "n_modules": 13,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.308,
+      "n_pheno_sig_fdr10": 4
+    },
     "wgcna_multiplex": {
       "n_modules": 19,
       "n_go_enriched": 12,

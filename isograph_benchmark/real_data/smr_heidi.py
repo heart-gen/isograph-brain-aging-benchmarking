@@ -1175,10 +1175,14 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
       "event-localization family** with its own Bonferroni correction, so the primary "
       "threshold is not inflated by introns and the introns do not escape correction when they "
       "are discussed. `F` is the instrument strength `(b_eQTL/se_eQTL)^2` of the top cis-QTL "
-      "SNP, reported on every row and never used to exclude one.")
+      "SNP, reported on every row and never used to exclude one. It is summarized by its 5th "
+      "percentile rather than a count below the conventional F < 10: an instrument that clears "
+      "p < 5e-8 has |z| ≳ 5.4 and so F ≳ 30 (≈ 24 at the relaxed 1e-6 arm), so a weak-instrument "
+      "count is zero by construction and carries no information; the per-row `weak_instrument` "
+      "flag stays in `smr_results.parquet` for any run at a looser threshold.")
     A("")
     A("| analysis | modality | family | probes | instrumented | threshold | "
-      "F median [min-max] | weak F | "
+      "F median [min-max] | F p5 | "
       + " | ".join(f"`{s}`" for s in SMR_STATUS) + " |")
     A("|---|---|---|---|---|---|---|---|" + "---|" * len(SMR_STATUS))
     for (an, mod, fam), sub in d.groupby(["analysis", "modality", "probe_family"]):
@@ -1187,9 +1191,9 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
         f = ins["F_instrument"].dropna()
         frange = ("—" if f.empty else
                   f"{f.median():.0f} [{f.min():.0f}-{f.max():.0f}]")
+        fp5 = "—" if f.empty else f"{f.quantile(0.05):.0f}"
         A(f"| {an} | {mod} | {fam} | {len(sub)} | {len(ins)} | "
-          f"{_fmt(sub['smr_threshold'].iloc[0])} | {frange} | "
-          f"{int(ins['weak_instrument'].sum())} | "
+          f"{_fmt(sub['smr_threshold'].iloc[0])} | {frange} | {fp5} | "
           + " | ".join(str(int(cnt.get(s, 0))) for s in SMR_STATUS) + " |")
     A("")
     A("**`no_instrument` is not a negative result** — the probe was never tested, because no "

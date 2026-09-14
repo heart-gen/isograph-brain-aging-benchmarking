@@ -3,6 +3,24 @@
   "region": "hypothalamus",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 27,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.333,
+      "n_pheno_sig_fdr10": 7
+    },
+    "wgcna": {
+      "n_modules": 6,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 3
+    },
+    "wgcna_switch": {
+      "n_modules": 14,
+      "n_go_enriched": 8,
+      "frac_go_enriched": 0.571,
+      "n_pheno_sig_fdr10": 7
+    },
     "wgcna_multiplex": {
       "n_modules": 14,
       "n_go_enriched": 10,

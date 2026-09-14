@@ -289,7 +289,12 @@ def sweep_one(
         n_sig_spline = 0
         if not module_table.empty:
             try:
-                trait_col = "Dx" if analysis == "brainseq-sczd" else "Age"
+                if analysis == "brainseq-sczd":
+                    trait_col = "Dx"
+                elif analysis == "gtex-aging":
+                    trait_col = GTEX_AGE_COL
+                else:
+                    trait_col = "Age"
                 _, eigengene_table = compute_trait_associations(
                     module_table, feature_scores, sample_table,
                     trait_columns=[trait_col],
@@ -303,10 +308,12 @@ def sweep_one(
                     if not assoc.empty and "fdr" in assoc.columns:
                         n_sig_linear = int((assoc["fdr"] <= 0.10).sum())
                 else:
-                    linear = linear_age_association(eg_pivot, sample_table, age_col="Age")
+                    covariates = (GTEX_COVARIATE_COLS if analysis == "gtex-aging"
+                                  else AGING_COVARIATE_COLS)
+                    linear = linear_age_association(eg_pivot, sample_table, age_col=trait_col)
                     spline = spline_age_association(
                         eg_pivot, sample_table,
-                        covariate_cols=AGING_COVARIATE_COLS, age_col="Age",
+                        covariate_cols=covariates, age_col=trait_col,
                     )
                     if not linear.empty and "fdr" in linear.columns:
                         n_sig_linear = int((linear["fdr"] <= 0.10).sum())
@@ -456,12 +463,13 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Sweep Leiden resolution on saved IsoGraph artifacts.")
     parser.add_argument(
         "analysis", nargs="?", default="brainseq-sczd",
-        choices=["brainseq-sczd", "brainseq-aging"],
+        choices=["brainseq-sczd", "brainseq-aging", "gtex-aging"],
         help="Which analysis to sweep (default: brainseq-sczd)",
     )
     parser.add_argument(
         "--region", action="append", dest="regions",
-        help="For brainseq-aging: which region(s) to sweep. Repeatable. Default: all 3.",
+        help="For brainseq-aging / gtex-aging: which region(s) to sweep. Repeatable. "
+             "Default: all regions of the cohort.",
     )
     parser.add_argument(
         "--resolutions", type=float, nargs="+",
@@ -514,12 +522,20 @@ def main() -> None:
             variant=args.variant,
             **go_kws,
         )
-    elif args.analysis == "brainseq-aging":
+    else:
+        if args.analysis == "gtex-aging" and args.write_best:
+            # GTEx production partitions are the canonical resolution-5.0 fits that stages
+            # 03-07 are built on; the sweep is a disclosed sensitivity, never a re-selection.
+            parser.error("--write-best is not supported for gtex-aging")
         resolutions = args.resolutions or AGING_RESOLUTIONS
-        regions = args.regions or ["caudate", "hippocampus", "dlpfc"]
+        if args.analysis == "gtex-aging":
+            from isograph_benchmark.real_data.run_models import GTEX_REGIONS
+            regions = args.regions or list(GTEX_REGIONS)
+        else:
+            regions = args.regions or ["caudate", "hippocampus", "dlpfc"]
         for region in regions:
             sweep_one(
-                "brainseq-aging", region, resolutions,
+                args.analysis, region, resolutions,
                 seed=args.seed, min_module_size=args.min_module_size,
                 dry_run=args.dry_run, write_best=args.write_best,
                 variant=args.variant,

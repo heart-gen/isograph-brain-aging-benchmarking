@@ -82,7 +82,8 @@ pB <- ggplot(perreg, aes(n, region, fill = cls)) +
 # transcriptome, so an unpaired "supported" rate saturates at ~100% and means nothing.
 #
 # What it does NOT show: factor-specific occupancy of these regulons in brain. ENCODE
-# eCLIP is HepG2/K562, the median switched-constitutive gap is only 0.013, and the
+# eCLIP is HepG2/K562, the median switched-constitutive gap is only 0.024 (GC-matched
+# arm; the deprecated flat-background arm gave 0.013), and the
 # neuronal-CLIP program that would have shown brain occupancy is an honest null. This is
 # binding CAPACITY at alternative-exon sequence, and the legend must say so.
 #

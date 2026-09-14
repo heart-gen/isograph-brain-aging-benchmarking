@@ -1,0 +1,11 @@
+method,n_runs,n_scenarios,abundance_switch_mixed,batch_effects,cell_composition,feature_space_interactions,genetic_anchoring,idealized_switching,library_depth,multi_isoform_switch,negative_control_noise,noise_stress,non_switching_background,rna_degradation,rna_degradation_coupled,scale,scale_realistic,unequal_isoform_abundance
+isograph_vae,2290,16,400,80,80,300,120,360,80,40,40,320,80,80,80,120,30,80
+wgcna_gene,2250,15,400,80,80,300,120,360,80,0,40,320,80,80,80,120,30,80
+isograph_vae_multiplex,1820,10,400,0,0,300,120,360,0,40,40,320,80,0,80,0,0,80
+isograph_vae_gpu,1330,8,0,0,0,300,0,360,0,0,40,320,80,0,0,120,30,80
+isograph_spearman_leiden,1300,7,0,0,0,300,120,360,0,0,40,320,80,0,0,0,0,80
+isograph_baseline,1180,6,0,0,0,300,0,360,0,0,40,320,80,0,0,0,0,80
+isograph_graph,1180,6,0,0,0,300,0,360,0,0,40,320,80,0,0,0,0,80
+isograph_latent,1180,6,0,0,0,300,0,360,0,0,40,320,80,0,0,0,0,80
+isograph_vae_residual,800,6,400,80,80,0,0,0,80,0,0,0,0,80,80,0,0,0
+isograph_vae_reliability,80,1,0,0,0,0,0,0,0,0,0,0,0,0,80,0,0,0

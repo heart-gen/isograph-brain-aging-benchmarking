@@ -187,12 +187,10 @@ def run_brainseq_aging(regions: list[str], variants: list[str], seed: int, timeo
 def run_gtex_aging(regions: list[str], variants: list[str], seed: int, timeout_seconds: int) -> None:
     for region in regions:
         bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region))
+        tc, tt = _filter_expressed_transcripts(bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
         for variant in variants:
             print(f"[gtex-aging/{region}/{variant}] matched-feature WGCNA", flush=True)
-            art = _fit_artifacts(
-                bundle, bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
-                GTEX_COVARIATES, variant, _cfg(seed, timeout_seconds),
-            )
+            art = _fit_artifacts(bundle, tc, tt, GTEX_COVARIATES, variant, _cfg(seed, timeout_seconds))
             out = ensure_dir(region_store("gtex", region, VARIANT_DIRS[variant]))
             _save_age_artifacts(
                 art, out, bundle.sample_table, GTEX_COVARIATES, age_col="AGE",

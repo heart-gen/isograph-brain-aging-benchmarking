@@ -1,0 +1,19 @@
+{
+  "region": "caudate",
+  "arm": "switching",
+  "analysis": "aging",
+  "is_production_setting": false,
+  "n_transcripts_before": 232176,
+  "n_genes_before": 20365,
+  "n_transcripts": 50429,
+  "n_genes": 19309,
+  "n_multi_isoform_genes": 13177,
+  "wall_seconds": 570.5,
+  "switching_params": {
+    "min_gene_count": 10.0,
+    "min_gene_fraction": 0.7,
+    "min_tx_count": 10.0,
+    "min_tx_prop": 0.1,
+    "min_tx_fraction": 0.1
+  }
+}

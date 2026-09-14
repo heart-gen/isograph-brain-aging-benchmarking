@@ -58,7 +58,8 @@ fixed random seed of 13.
 ## Results text
 
 **Q1 — stability.** Across the six analysed regions IsoGraph yielded 266 production modules,
-of which **236 (89%)** were trusted above the permutation null at FDR < 0.05; the matched
+of which **250 (94%)** were trusted above the permutation null at FDR < 0.05 *(236, 89%, before the
+2026-09-09 split-half re-fit)*; the matched
 WGCNA baseline yielded 73 modules, of which **64 (88%)** were trusted. IsoGraph therefore
 delivers ~3.6× as many chance-calibrated trustworthy modules at a comparable trusted
 *fraction*. Per-module best-match Jaccard is far lower for IsoGraph (median ≈ 0.02–0.04) than
@@ -67,22 +68,32 @@ switch signal; the chance-calibrated co-assignment test — not raw Jaccard — 
 criterion, precisely because Jaccard is granularity-confounded
 (`module_stability__*__{isograph,wgcna}.parquet`).
 
-**Q2 — driver reproducibility.** Among trusted modules the switch-axis driver loadings are
-highly reproducible across split halves: the median shared-gene driver-loading Spearman ρ is
-**0.77–0.82** in every region (caudate 0.78, DLPFC 0.77, hippocampus 0.79; GTEx
-caudate_basal_ganglia 0.82, frontal_cortex_ba9 0.81, hippocampus 0.79), with 96–100% of
-module pairs showing positive ρ. The *mechanistic identity* of a module (which isoforms
-switch) is stable even where hard gene-membership Jaccard is low
-(`within_cohort__*__isograph.parquet`).
+**Q2 — driver reproducibility** *(recomputed 2026-09-12)*. Across split-half module pairs the
+switch-axis driver loadings agree: over every matched pair with a shared-gene driver-loading
+Spearman ρ (the definition Table S7 and Fig 2B use), the median ρ is **0.66–0.88** with 94–100% of
+pairs positive — BrainSEQ caudate 0.76, DLPFC 0.66, hippocampus 0.75; GTEx caudate_basal_ganglia
+0.88, frontal_cortex_ba9 0.86, hippocampus 0.86. Restricted to reproducible pairs (gene Jaccard
+≥ 0.25) it is 0.72–0.89 and positive in every pair, but on few pairs in BrainSEQ DLPFC (5) and
+hippocampus (3). The *mechanistic identity* of a module (which isoforms switch) is stable even where
+hard gene-membership Jaccard is low (`within_cohort__*__isograph.parquet`).
+
+> **Correction, 2026-09-12.** The earlier "0.77–0.82 in every region" was computed on a
+> `modules_meta` built from the resolution-~2.0 split halves and never rebuilt after the 2026-09-09
+> re-fit at 5.0, so the driver loadings were joined to a different partition (0.3–3.4% gene→module
+> agreement). The rebuilt tables (`_h/04`, then `_h/17`) give the values above; the WGCNA rows are
+> unchanged because its halves were never re-fit.
 
 **Q3 — cross-cohort aging replication.** Matching trusted BrainSEQ modules to GTEx modules in
 the paired region and testing the aging effect on independent quantifiers, IsoGraph modules
 replicate (sign-concordant **and** jointly significant) at **2/44 caudate, 8/36 DLPFC, and
 13/50 hippocampus = 23 replicating modules**; sign concordance alone holds for 68/130. The
-matched WGCNA baseline replicates at **1/21, 5/25, 0/7 = 6 modules**. Surviving the
-Salmon↔RSEM quantifier gap is genuine biological replication, and IsoGraph carries ~4× as
-many cross-cohort-replicating aging modules as the abundance baseline
-(`module_aging_replication__*__{isograph,wgcna}.parquet`).
+matched WGCNA baseline replicates at **0/21, 3/25, 0/7 = 3 modules** *(corrected 2026-09-12: this
+line read 1/21, 5/25, 0/7 = 6, which the committed `module_aging_replication__*__wgcna.parquet`
+files do not contain)*. Surviving the Salmon↔RSEM quantifier gap is genuine biological
+replication. IsoGraph carries more cross-cohort-replicating aging modules than the abundance
+baseline (23 vs 3), but on a partition ~3.6× finer — 130 against 53 matched pairs — so the count
+ratio is granularity-inflated and must not be quoted as a fold advantage; both clear their own
+matching null (`module_aging_replication__*__{isograph,wgcna}.parquet`).
 
 **Q3 pooled — the pooled arm is null, and that is reported, not hidden (2026-09-09).** The
 pooled table was previously empty and this document called it "empty by design (n = 3
@@ -91,7 +102,7 @@ the floor argument does not apply, and it was empty because the gate demanded cr
 gene Jaccard ≥ 0.25 — the granularity-confounded metric this project retired, on which
 IsoGraph's fine partition tops out at 0.12 while WGCNA's giant modules reach 0.65. The gate
 was selecting on module size. Re-gated and re-run over exactly the 130 pairs behind the
-25-module count (it reproduces all 25):
+23-module count (post-re-fit values):
 
 | Arm | IsoGraph | WGCNA |
 |---|---|---|
@@ -111,9 +122,19 @@ estimands, and the quantifier gap separates them. Stage 06 measures per-gene swi
 effects as essentially *uncorrelated* between Salmon and RSEM (Pearson 0.007 caudate, −0.002
 hippocampus), so a meta-analysis that combines effect directions and magnitudes across
 cohorts has almost nothing to combine, while a count of sign-concordant *and* jointly
-significant matches tested against a matching permutation null can still clear. The 23 vs 6
+significant matches tested against a matching permutation null can still clear. The 23 vs 3
 per-region comparison is unaffected — the pooled arm reads the same rows — but pooling must
 not be quoted as corroborating it.
+
+**Q3 projection — frozen eigengenes across cohorts (2026-09-12).** Overlap-based matching asks whether
+two cohorts put the same genes together; projection asks whether a module's frozen signature exists in
+the other cohort and ages the same way. Weights frozen in one cohort, applied unchanged to the other
+(IsoGraph switch axes oriented by shared-transcript loadings), both directions, three region pairs:
+IsoGraph modules are preserved beyond a type-matched null in **211/250** projections, and their
+module-specific age effect — each cohort's age correlation expressed against same-weight random
+projections — keeps its sign in **191/250 (76%, binomial p = 1e-17)**; WGCNA 27/61 (44%, p = 0.85).
+The null-centring is essential: raw projected age correlations inherit each cohort's age-correlated
+shared structure and give 123/250 (`../eigengene_projection/EIGENGENE_PROJECTION.md`).
 
 **Q4 — complementarity.** For age-significant trusted modules the structural annotation of
 the top driver switches is near-universal — CDS-change, biotype-switch, and
@@ -126,9 +147,10 @@ signal and IsoGraph contributes a complementary, mechanistically-resolved switch
 than a globally-superior partition (`module_complementarity__*__isograph.parquet`).
 
 **Headline:** *Of IsoGraph's 250 chance-trusted aging modules across six brain regions, the
-switch drivers reproduce across resamples (ρ ≈ 0.77–0.82) and 25 modules replicate their
-aging association across independent cohorts and quantifiers — ~4× the matched
-gene-abundance baseline — with driver switches that are genuine structural isoform changes.*
+switch drivers reproduce across resamples (median ρ 0.66–0.88), 23 modules replicate their
+aging association across independent cohorts and quantifiers (WGCNA 3/53, on a partition ~3.6×
+coarser), and frozen module signatures carry the same module-specific aging direction into the other
+cohort in 76% of projections — with driver switches that are genuine structural isoform changes.*
 
 ## Figure and table notes
 
@@ -136,12 +158,12 @@ gene-abundance baseline — with driver switches that are genuine structural iso
   built by `manuscript/_h/trust_funnel_figure.R`).** Single full-width figure,
   four panels left→right mirroring the funnel, no in-panel titles (interpretation in caption):
   - **(A) Q1 stability:** per-module co-assignment density vs the size-matched null, IsoGraph
-    vs WGCNA, with the trusted count annotated (236/266 vs 64/73). Dot/strip over a null band;
+    vs WGCNA, with the trusted count annotated (250/266 vs 64/73). Dot/strip over a null band;
     do **not** plot raw Jaccard as the headline (granularity-confounded).
   - **(B) Q2 drivers:** distribution of shared-gene driver-loading ρ per region (violin/box
-    hybrid), reference line at ρ = 0, showing the 0.77–0.82 medians.
+    hybrid), reference line at ρ = 0, showing the 0.66–0.88 medians.
   - **(C) Q3 replication:** paired BrainSEQ vs GTEx age-effect scatter for matched modules,
-    colour by replicates/sign-match; annotate 25 (IsoGraph) vs 6 (WGCNA) replicating.
+    colour by replicates/sign-match; annotate 23 (IsoGraph) vs 3 (WGCNA) replicating.
   - **(D) Q4 complementarity:** stacked structural-switch driver fractions
     (CDS/UTR/biotype/coding-status) for the replicating modules.
   - Rationale / key message: IsoGraph produces many trustworthy aging modules whose

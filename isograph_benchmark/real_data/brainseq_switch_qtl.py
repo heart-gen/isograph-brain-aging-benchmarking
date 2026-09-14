@@ -827,9 +827,223 @@ def _write_meta_report(dest: Path, s: pd.DataFrame, fdr: float) -> None:
     (dest / "BRAINSEQ_SWITCH_QTL.md").write_text("\n".join(L) + "\n")
 
 
+# --------------------------------------------------------------------------- #
+# Stage: effect_size -- switch vs abundance effects without selection asymmetry
+# --------------------------------------------------------------------------- #
+# WHY THE META EFFECT-SIZE COMPARISON IS NOT ENOUGH
+# ------------------------------------------------
+# `run_meta` compares |slope| only on genes significant on BOTH axes. Conditioning on
+# significance selects differently on the two axes: A_g is the high-precision phenotype, so it
+# clears the bar at modest effects, while S_g clears it only when the effect is large. Among
+# doubly significant genes the S_g slopes are therefore inflated by selection -- a winner's
+# curse that is asymmetric by construction -- and "median |slope| S > A" says nothing about
+# biology. Each lead variant is also chosen to maximise its own axis, which favours that axis
+# again at its own lead.
+#
+# This stage removes both asymmetries, on EVERY gene tested on both axes:
+#   own-lead    |z| and |slope| at each axis's own permutation lead, no significance filter,
+#               compared within deciles of the number of cis variants tested (the power proxy
+#               the meta stage already bins on). Each axis still picks its best variant, but
+#               both do, so the selection is symmetric.
+#   cross-lead  |z_S| at the ABUNDANCE lead against |z_A| at the SWITCH lead: each axis is
+#               measured at a variant chosen by the other, so neither benefits from choosing.
+#   common      both axes at the same variant -- the abundance lead and, separately, the
+#               switch lead. Each favours the axis that picked the variant; together they
+#               bracket the unselected comparison.
+# Both phenotypes are rank-INT transformed before mapping, so slopes are in SD units of the
+# transformed phenotype and |z| is comparable across axes; the report states that scope.
+def _lead_pairs(arm: str, region: str, leads: pd.DataFrame, ftype: str) -> pd.DataFrame:
+    """Nominal (slope, slope_se) for `ftype` at each requested (phenotype, variant)."""
+    qdir = out_dir(arm, region) / "qtl"
+    want = leads[["phenotype_id", "variant_id"]].drop_duplicates()
+    parts = []
+    for f in sorted(qdir.glob(f"{ftype}.chr*.cis_qtl_pairs.*.parquet")):
+        d = pd.read_parquet(f, columns=["phenotype_id", "variant_id", "slope", "slope_se",
+                                        "pval_nominal"])
+        parts.append(d.merge(want, on=["phenotype_id", "variant_id"], how="inner"))
+    if not parts:
+        raise SystemExit(f"{arm}/{region}: no {ftype} nominal pair files under {qdir}")
+    return pd.concat(parts, ignore_index=True).drop_duplicates(["phenotype_id", "variant_id"])
+
+
+def symmetric_effects(m: pd.DataFrame, sw_pairs: pd.DataFrame,
+                      ab_pairs: pd.DataFrame) -> pd.DataFrame:
+    """Per gene: |z| and |slope| for both axes at own, cross and common leads."""
+    g = m[["phenotype_id", "num_var_ab", "variant_id_sw", "variant_id_ab",
+           "slope_sw", "slope_se_sw", "slope_ab", "slope_se_ab", "qval_sw", "qval_ab"]].copy()
+    g["z_sw_own"] = (g["slope_sw"] / g["slope_se_sw"]).abs()
+    g["z_ab_own"] = (g["slope_ab"] / g["slope_se_ab"]).abs()
+    g["abs_slope_sw_own"] = g["slope_sw"].abs()
+    g["abs_slope_ab_own"] = g["slope_ab"].abs()
+
+    def at(pairs: pd.DataFrame, lead_col: str, tag: str) -> pd.DataFrame:
+        p = pairs.rename(columns={"variant_id": lead_col})
+        p[f"z_{tag}"] = (p["slope"] / p["slope_se"]).abs()
+        p[f"abs_slope_{tag}"] = p["slope"].abs()
+        return p[["phenotype_id", lead_col, f"z_{tag}", f"abs_slope_{tag}"]]
+
+    g = g.merge(at(sw_pairs, "variant_id_ab", "sw_at_ablead"),
+                on=["phenotype_id", "variant_id_ab"], how="left")
+    g = g.merge(at(ab_pairs, "variant_id_sw", "ab_at_swlead"),
+                on=["phenotype_id", "variant_id_sw"], how="left")
+    g["power_decile"] = pd.qcut(g["num_var_ab"], 10, labels=False, duplicates="drop")
+    return g
+
+
+def _paired(a: pd.Series, b: pd.Series) -> dict:
+    ok = a.notna() & b.notna()
+    x, y = a[ok].to_numpy(float), b[ok].to_numpy(float)
+    out = {"n": int(ok.sum()), "median_switch": float(np.median(x)) if len(x) else np.nan,
+           "median_abundance": float(np.median(y)) if len(y) else np.nan,
+           "frac_switch_larger": float(np.mean(x > y)) if len(x) else np.nan,
+           "wilcoxon_p": np.nan}
+    if len(x) >= 10 and np.any(x != y):
+        from scipy import stats as _st
+        out["wilcoxon_p"] = float(_st.wilcoxon(x, y)[1])
+    return out
+
+
+# (label, switch column, abundance column, what the comparison is)
+EFFECT_CONTRASTS = (
+    ("own_lead_z", "z_sw_own", "z_ab_own", "each axis at its own lead, all tested genes"),
+    ("own_lead_slope", "abs_slope_sw_own", "abs_slope_ab_own", "own lead, |slope|"),
+    ("cross_lead_z", "z_sw_at_ablead", "z_ab_at_swlead", "each axis at the OTHER axis's lead"),
+    ("cross_lead_slope", "abs_slope_sw_at_ablead", "abs_slope_ab_at_swlead", "cross lead, |slope|"),
+    ("common_ablead_z", "z_sw_at_ablead", "z_ab_own", "both at the abundance lead (favours A)"),
+    ("common_swlead_z", "z_sw_own", "z_ab_at_swlead", "both at the switch lead (favours S)"),
+)
+
+
+def summarize_effects(g: pd.DataFrame, region: str, arm: str, fdr: float) -> pd.DataFrame:
+    rows = []
+    both = (g["qval_sw"] < fdr) & (g["qval_ab"] < fdr)
+    for label, s_col, a_col, what in EFFECT_CONTRASTS:
+        for subset, mask in (("all_tested", pd.Series(True, index=g.index)),
+                             ("both_significant", both)):
+            rows.append({"arm": arm, "region": region, "contrast": label, "description": what,
+                         "subset": subset, "power_decile": "all",
+                         **_paired(g.loc[mask, s_col], g.loc[mask, a_col])})
+        for dec, sub in g.groupby("power_decile"):
+            rows.append({"arm": arm, "region": region, "contrast": label, "description": what,
+                         "subset": "all_tested", "power_decile": str(int(dec)),
+                         **_paired(sub[s_col], sub[a_col])})
+    return pd.DataFrame(rows)
+
+
+def lead_variant_frequency(m: pd.DataFrame, region: str, arm: str) -> dict:
+    """Why |slope| and |z| disagree: allele frequency of each axis's lead variant.
+
+    A slope's standard error scales with 1/sqrt(2pq), so an axis whose lead variants are rarer
+    carries more noise in |slope| at the same |z|. Reported beside the slope and |z| comparisons so
+    both can be read with the allele-frequency context; whether the switch axis's rarer leads are
+    biological or a property of its noise is left to interpretation.
+    """
+    maf_sw = np.minimum(m["af_sw"], 1 - m["af_sw"])
+    maf_ab = np.minimum(m["af_ab"], 1 - m["af_ab"])
+    inv_sd_sw = 1 / np.sqrt(2 * maf_sw * (1 - maf_sw))
+    ok = np.isfinite(inv_sd_sw) & m["slope_sw"].notna()
+    return {
+        "arm": arm, "region": region, "n": int(len(m)),
+        "median_lead_maf_switch": float(maf_sw.median()),
+        "median_lead_maf_abundance": float(maf_ab.median()),
+        "frac_lead_maf_below_005_switch": float(np.mean(maf_sw < 0.05)),
+        "frac_lead_maf_below_005_abundance": float(np.mean(maf_ab < 0.05)),
+        "median_se_ratio_switch_over_abundance": float((m["slope_se_sw"] / m["slope_se_ab"]).median()),
+        "corr_abs_slope_switch_vs_inv_genotype_sd": float(
+            np.corrcoef(m.loc[ok, "slope_sw"].abs(), inv_sd_sw[ok])[0, 1]) if ok.sum() > 2 else np.nan,
+    }
+
+
+def run_effect_size(arm: str = "all_samples", regions: list[str] | None = None,
+                    fdr: float = 0.05) -> Path:
+    dest = ensure_dir(stage_out("anchoring.brainseq_qtl", arm))
+    summaries, freq_rows = [], []
+    for region in regions or list(REGIONS):
+        pf = dest / f"paired_{region}.parquet"
+        if not pf.exists():
+            print(f"  {region}: no paired table (run --stage meta); skipped")
+            continue
+        m = pd.read_parquet(pf)
+        leads_sw = m[["phenotype_id", "variant_id_sw"]].rename(columns={"variant_id_sw": "variant_id"})
+        leads_ab = m[["phenotype_id", "variant_id_ab"]].rename(columns={"variant_id_ab": "variant_id"})
+        leads = pd.concat([leads_sw, leads_ab], ignore_index=True)
+        sw_pairs = _lead_pairs(arm, region, leads, "switch")
+        ab_pairs = _lead_pairs(arm, region, leads, "abundance")
+        g = symmetric_effects(m, sw_pairs, ab_pairs)
+        g.assign(region=region).to_parquet(dest / f"effect_size_symmetric_{region}.parquet",
+                                           index=False)
+        s = summarize_effects(g, region, arm, fdr)
+        summaries.append(s)
+        freq_rows.append(lead_variant_frequency(m, region, arm))
+        head = s[(s["power_decile"] == "all")]
+        print(f"\n== {arm}/{region}: {len(g):,} genes ==")
+        print(head[["contrast", "subset", "n", "median_switch", "median_abundance",
+                    "frac_switch_larger", "wilcoxon_p"]].to_string(index=False))
+    if not summaries:
+        raise SystemExit("no region has a paired table")
+    summary = pd.concat(summaries, ignore_index=True)
+    summary.to_parquet(dest / "effect_size_symmetric.parquet", index=False)
+    freq = pd.DataFrame(freq_rows)
+    freq.to_parquet(dest / "lead_variant_frequency.parquet", index=False)
+    print(freq.to_string(index=False))
+    _write_effect_report(dest, summary, fdr, freq)
+    return dest
+
+
+def _write_effect_report(dest: Path, s: pd.DataFrame, fdr: float,
+                         freq: pd.DataFrame | None = None) -> None:
+    L: list[str] = []
+    A = L.append
+    if freq is not None and not freq.empty:
+        tail = ["", "## Why |slope| and |z| disagree: lead-variant allele frequency", "",
+                "A slope's standard error scales with 1/√(2pq), so an axis whose lead variants are "
+                "rarer carries more noise in |slope|. Read |slope| as the effect estimate and |z| as "
+                "the conservative statistic; this table gives the allele-frequency context for both.", "",
+                "| arm | region | median lead MAF S | median lead MAF A | lead MAF < 0.05 S | "
+                "lead MAF < 0.05 A | median SE ratio S/A | r(|slope S|, 1/√(2pq)) |",
+                "|---|---|---|---|---|---|---|---|"]
+        for r in freq.itertuples(index=False):
+            tail.append(
+                f"| {r.arm} | {r.region} | {r.median_lead_maf_switch:.3f} | "
+                f"{r.median_lead_maf_abundance:.3f} | {r.frac_lead_maf_below_005_switch:.2f} | {r.frac_lead_maf_below_005_abundance:.2f} | "
+                f"{r.median_se_ratio_switch_over_abundance:.2f} | "
+                f"{r.corr_abs_slope_switch_vs_inv_genotype_sd:.2f} |")
+    else:
+        tail = []
+    A("# Switch vs abundance QTL effect sizes, without selection asymmetry")
+    A("")
+    A("The meta stage compares |slope| on genes significant on **both** axes. That subset is "
+      "selected asymmetrically: the precise abundance phenotype clears the bar at modest "
+      "effects, the noisier switch phenotype only at large ones, so the switch slopes there "
+      "are inflated by a winner's curse that the abundance slopes do not share. This table "
+      "uses every gene tested on both axes and measures each axis at its own lead, at the "
+      "other axis's lead, and both at a common variant.")
+    A("")
+    A("Both phenotypes are rank-INT transformed before mapping, so slopes are in SD units of "
+      "the transformed phenotype and |z| is comparable across axes. `frac_switch_larger` is "
+      "the fraction of genes where the switch axis is larger; Wilcoxon is paired.")
+    A("")
+    A("| arm | region | contrast | subset | n | median S | median A | frac S > A | Wilcoxon P |")
+    A("|---|---|---|---|---|---|---|---|---|")
+    for r in s[s["power_decile"] == "all"].itertuples(index=False):
+        A(f"| {r.arm} | {r.region} | {r.contrast} | {r.subset} | {r.n:,} | "
+          f"{r.median_switch:.3f} | {r.median_abundance:.3f} | {r.frac_switch_larger:.3f} | "
+          f"{r.wilcoxon_p:.3g} |")
+    A("")
+    A("**How to read it.** `both_significant` reproduces the meta-stage estimand and carries its "
+      "selection. The unselected statistics are `own_lead_*` and `cross_lead_*` on "
+      "`all_tested`; `common_ablead_z` favours abundance and `common_swlead_z` favours switch, "
+      "so a real difference must survive both. Per-decile rows (`power_decile` 0–9, deciles "
+      "of variants tested) are in `effect_size_symmetric.parquet`.")
+    A("")
+    A(f"FDR for the `both_significant` subset: BH q < {fdr} on the permutation p-values.")
+    L.extend(tail)
+    (dest / "EFFECT_SIZE_SYMMETRIC.md").write_text("\n".join(L) + "\n")
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--stage", choices=("phenotypes", "map", "meta"), required=True)
+    ap.add_argument("--stage", choices=("phenotypes", "map", "meta", "effect_size"), required=True)
     ap.add_argument("--region", choices=REGIONS, action="append", default=None)
     ap.add_argument("--arm", choices=ARMS, default="all_samples")
     ap.add_argument("--n-factors", type=int, default=N_HIDDEN_FACTORS,
@@ -845,6 +1059,8 @@ def main(argv=None) -> None:
             build_phenotypes(r, arm=args.arm)
     elif args.stage == "meta":
         run_meta(arm=args.arm, regions=regions)
+    elif args.stage == "effect_size":
+        run_effect_size(arm=args.arm, regions=regions)
     else:
         for r in regions:
             print(f"\n== map {r} / {args.arm} ==")

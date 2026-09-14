@@ -13,15 +13,16 @@ pipeline, which is what makes the second arm a real replication.
 | Step | Wrapper | Produces |
 |---|---|---|
 | 01–03 | `stability_isograph`, `stability_wgcna`, `stability_aggregate` | Split-half partitions + `stability_summary` |
-| 04 | `module_meta` | Per-module meta tables, driver loadings |
+| 04 | `module_meta` | Per-module meta tables, driver loadings (per split half — re-run after any split-half re-fit, then step 17) |
 | 05–07 | `lr_validation`, `lr_validation_launch`, `lr_aggregate` | Learning-rate / software-robustness validation |
-| 08 | `gcap_ab` | Giant-cap ablation (`_m/stability_gcap_ab/`) |
+| 08 | `gcap_ab` | Giant-cap ablation (`_m/stability_gcap_ab/`) — **retired 2026-09-12**: a resolution-2.0 A/B of a cap never promoted, superseded by resolution 5.0 and cited nowhere |
 | 09 | `module_trust_replication` | Q3 cross-cohort aging replication of trusted modules |
 | 10–11 | `replication`, `replication_go` | Cross-cohort module matching + GO consistency |
 | 12–13 | `replication_permutation`, `replication_functional` | Permutation null + functional preservation |
 | 14 | `age_model_curvature` | Curvature test licensing the linear age model |
 | 15 | `replication_pooled` | Q3 pooled over all region pairs (Stouffer meta-Z + permutation arms) |
-| 16 | `stability_resolution_sweep` | Phenotype-blind Leiden resolution curve (re-clusters saved split-half graphs) |
+| 16 | `stability_resolution_sweep` | Phenotype-blind Leiden resolution curve (re-clusters saved split-half graphs) — a disclosed sensitivity; 5.0 stays on the ≥ 900-gene criterion (PI decision 2026-09-12) |
+| 17 | `within_cohort` | Within-cohort Q2 driver reproducibility + Q3 sign concordance (`module_trust within`); run after step 04. It had no launcher, which is how a stale `modules_meta` went unnoticed after the 2026-09-09 re-fit |
 
 `_m/` holds `stability/` and `replication/`, plus the resolution-2.0 and giant-cap
 variants as named siblings (`stability_res2`, `stability_gcap_ab`, `replication_res2`).
@@ -42,9 +43,11 @@ default is now 0.0 and a zero result writes no parquet at all, only a stats json
 the gate. If you add a Jaccard threshold anywhere, check first whether it is measuring
 replication or measuring module size.
 
-**The pooled arm is null for both methods** (IsoGraph Stouffer Z = −0.68, perm p = 0.113;
-WGCNA Z = −1.16, p = 0.079). It does not corroborate the per-region 25-vs-6 count, which
-is a different estimand — see the Q3-pooled section of
+**The pooled arm is null for both methods** (IsoGraph Stouffer Z = −1.15, perm p = 0.122,
+sign concordance 68/130 p = 0.066, Spearman ρ = 0.108 p = 0.110; WGCNA Z = −1.16,
+p = 0.079, 27/53 p = 0.086). These are the post-2026-09-09 split-half re-fit values; the
+earlier Z = −0.68 / p = 0.113 and its nominal 69/130 sign test are superseded. It does not
+corroborate the per-region 23-vs-3 count, which is a different estimand — see the Q3-pooled section of
 `_m/stability/module_trust/MODULE_TRUST_SUMMARY.md` for why the quantifier gap separates
 them.
 

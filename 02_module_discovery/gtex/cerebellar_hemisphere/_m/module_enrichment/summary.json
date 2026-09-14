@@ -3,10 +3,28 @@
   "region": "cerebellar_hemisphere",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 30,
+      "n_go_enriched": 7,
+      "frac_go_enriched": 0.233,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 12,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.75,
+      "n_pheno_sig_fdr10": 1
+    },
     "wgcna_switch": {
       "n_modules": 15,
       "n_go_enriched": 5,
       "frac_go_enriched": 0.333,
+      "n_pheno_sig_fdr10": 1
+    },
+    "wgcna_multiplex": {
+      "n_modules": 22,
+      "n_go_enriched": 18,
+      "frac_go_enriched": 0.818,
       "n_pheno_sig_fdr10": 1
     }
   }
