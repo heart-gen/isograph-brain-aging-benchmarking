@@ -96,25 +96,14 @@ GRIDS: dict[str, list[tuple[str, str, int]]] = {
 def switching_filter(counts, table: pd.DataFrame, min_gene_count: float = 10.0,
                      min_gene_fraction: float = 0.70, min_tx_count: float = 10.0,
                      min_tx_prop: float = 0.10, min_tx_fraction: float = 0.10):
-    """Usage-oriented transcript filter (see module docstring). Returns (counts, table)."""
-    c = np.asarray(counts)
-    n = c.shape[1]
-    gidx = pd.factorize(table["gene_id"].astype(str))[0]
-    gene_tot = pd.DataFrame(c, copy=False).groupby(gidx).sum().sort_index().to_numpy(np.float64)
-    gene_ok = (gene_tot >= min_gene_count).sum(axis=1) >= np.ceil(min_gene_fraction * n)
-    need = np.ceil(min_tx_fraction * n)
-    tx_expr = (c >= min_tx_count).sum(axis=1) >= need
-    gt = gene_tot[gidx]
-    with np.errstate(divide="ignore", invalid="ignore"):
-        share_ok = np.where(gt > 0, c / gt, 0.0) >= min_tx_prop
-    del gt
-    keep = gene_ok[gidx] & tx_expr & (share_ok.sum(axis=1) >= need)
-    kept = table.loc[keep].reset_index(drop=True)
-    print(f"  switching filter (gene>={min_gene_count:g} in >={min_gene_fraction:.0%}; tx>="
-          f"{min_tx_count:g} and share>={min_tx_prop:g} in >={min_tx_fraction:.0%} of {n}): "
-          f"{int(keep.sum())}/{len(table)} transcripts, {kept['gene_id'].nunique()}/"
-          f"{table['gene_id'].nunique()} genes retained", flush=True)
-    return c[keep], kept
+    """Usage-oriented transcript filter (see module docstring). Returns (counts, table).
+
+    Since 2026-09-14 this IS the production filter; the implementation lives in
+    `run_models.filter_switching_transcripts` so the arms and production cannot drift."""
+    from isograph_benchmark.real_data.run_models import filter_switching_transcripts
+    return filter_switching_transcripts(
+        counts, table, min_gene_count=min_gene_count, min_gene_fraction=min_gene_fraction,
+        min_tx_count=min_tx_count, min_tx_prop=min_tx_prop, min_tx_fraction=min_tx_fraction)
 
 
 def _filters() -> dict:

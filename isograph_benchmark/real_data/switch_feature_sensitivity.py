@@ -22,15 +22,17 @@ independently refit network would recover the same modules.
 switch channel at the region's published settings and requires it to reproduce
 ``feature_scores.parquet`` (max |diff| <= ``--tol``). If that gate fails the run aborts,
 because every downstream comparison would otherwise be against a lookalike. The published
-settings are kept per cohort, and since 2026-09-13 they are the same: both cohorts are fit on
-transcripts passing count > 10 in >= 70% of samples. GTEx was fit unfiltered before then (a
-methods defect); against those fits the gate needs the unfiltered setting, which is why the
-table stays keyed by cohort.
+settings are kept per cohort, and since 2026-09-14 they are the same: both cohorts are fit on
+the switching (usage) transcript filter, `run_models.filter_switching_transcripts`. The legacy
+fits (tag `legacy_expression_filter`) used count > 10 in >= 70% of samples for BrainSEQ and no
+filter for GTEx; the table stays keyed by cohort so a cohort can be gated against its own fits.
 
 Axes
 ----
 ``pseudocount``      the constant added to transcript counts before the composition is taken
-``expression``       the (min_count, min_fraction) transcript filter
+``expression``       the transcript filter: the switching filter's share (min_tx_prop) and
+                     prevalence (min_tx_fraction) thresholds, plus the legacy expression filter
+                     and no filter as fixed alternatives
 ``minor_isoform``    drop transcripts below a mean within-gene usage before the CLR
 ``identifiability``  no perturbation -- stratifies genes by transcript number and asks
                      whether the age signal concentrates where isoforms are hardest to
@@ -65,14 +67,19 @@ from isograph_benchmark.paths import (
 )
 from isograph_benchmark.real_data.run_models import (
     _filter_expressed_transcripts,
+    filter_switching_transcripts,
     linear_age_association,
 )
 
 # Published preprocessing, per cohort (run_models.run_brainseq_region / run_gtex_region).
-# min_fraction == 0 means no transcript filter at all (the pre-2026-09-13 GTEx fits).
+# `transcript_filter` is "switching" (production since 2026-09-14; its share and prevalence
+# thresholds are min_tx_prop / min_tx_fraction), "expression" (the legacy count > 10 in >= 70%
+# filter) or "none". The gene criterion and transcript count of the switching filter are fixed.
 PUBLISHED_BY_COHORT = {
-    "brainseq": {"pseudocount": 0.5, "min_count": 10.0, "min_fraction": 0.70, "min_usage": 0.0},
-    "gtex": {"pseudocount": 0.5, "min_count": 10.0, "min_fraction": 0.70, "min_usage": 0.0},
+    "brainseq": {"pseudocount": 0.5, "transcript_filter": "switching",
+                 "min_tx_prop": 0.10, "min_tx_fraction": 0.10, "min_usage": 0.0},
+    "gtex": {"pseudocount": 0.5, "transcript_filter": "switching",
+             "min_tx_prop": 0.10, "min_tx_fraction": 0.10, "min_usage": 0.0},
 }
 PUBLISHED = PUBLISHED_BY_COHORT["brainseq"]
 
@@ -109,7 +116,14 @@ SAME_QUANTIFIER_PAIRS = [
 ]
 
 _META = {"feature_id", "gene_id", "feature_type", "n_transcripts"}
-_EXPRESSION_GRID = ((5.0, 0.50), (10.0, 0.50), (10.0, 0.70), (20.0, 0.70), (10.0, 0.90))
+# (transcript_filter, min_tx_prop, min_tx_fraction): the switching filter's share and prevalence
+# thresholds varied one at a time around the published 0.10 / 0.10, then the legacy expression
+# filter and no filter as fixed alternatives (their thresholds are not used, so they are 0).
+_EXPRESSION_GRID = (
+    ("switching", 0.10, 0.10), ("switching", 0.05, 0.10), ("switching", 0.20, 0.10),
+    ("switching", 0.10, 0.05), ("switching", 0.10, 0.25),
+    ("expression", 0.0, 0.0), ("none", 0.0, 0.0),
+)
 
 
 def _root_out() -> Path:
@@ -147,12 +161,33 @@ def _drop_minor_isoforms(
     return counts[keep], table.loc[keep].reset_index(drop=True)
 
 
+def apply_transcript_filter(
+    counts: np.ndarray, table: pd.DataFrame, setting: dict
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """The transcript filter named by ``setting['transcript_filter']``.
+
+    ``switching`` at the published thresholds is exactly `run_models.filter_production_transcripts`.
+    """
+    kind = setting["transcript_filter"]
+    if kind == "switching":
+        return filter_switching_transcripts(
+            counts, table, min_tx_prop=setting["min_tx_prop"],
+            min_tx_fraction=setting["min_tx_fraction"],
+        )
+    if kind == "expression":
+        return _filter_expressed_transcripts(counts, table)
+    if kind == "none":
+        return counts, table
+    raise ValueError(f"unknown transcript_filter {kind!r}")
+
+
 def build_features(
     counts: np.ndarray,
     table: pd.DataFrame,
     pseudocount: float,
-    min_count: float,
-    min_fraction: float,
+    transcript_filter: str,
+    min_tx_prop: float,
+    min_tx_fraction: float,
     min_usage: float,
 ) -> tuple[np.ndarray, pd.DataFrame]:
     """Rebuild the multiplex feature matrix under one preprocessing setting.
@@ -160,13 +195,12 @@ def build_features(
     ``gene_feature_channels`` is called with no ``switch_design`` because the production fit
     leaves the composition unresidualized (``residualize_composition`` is False) and
     persists the raw channels; matching that is what makes the baseline reproduce.
-    ``min_fraction <= 0`` skips the expression filter, which is how GTEx is fit.
     """
-    tc, tt = np.asarray(counts), table
-    if min_fraction > 0:
-        tc, tt = _filter_expressed_transcripts(
-            tc, tt, min_count=min_count, min_fraction=min_fraction
-        )
+    tc, tt = apply_transcript_filter(
+        np.asarray(counts), table,
+        {"transcript_filter": transcript_filter, "min_tx_prop": min_tx_prop,
+         "min_tx_fraction": min_tx_fraction},
+    )
     tc, tt = _drop_minor_isoforms(tc, tt, min_usage)
     if pseudocount != PUBLISHED["pseudocount"]:
         # transcript_usage adds 0.5 internally, so shifting by the difference yields
@@ -235,10 +269,12 @@ def _settings(axis: str, published: dict | None = None) -> list[dict]:
         return [dict(base, pseudocount=v) for v in (0.1, 0.25, 0.5, 1.0, 2.0)]
     if axis == "expression":
         grid = list(_EXPRESSION_GRID)
-        pub = (base["min_count"], base["min_fraction"])
-        if pub not in grid:
-            grid.insert(0, pub)  # an off-grid published setting leads the axis
-        return [dict(base, min_count=c, min_fraction=f) for c, f in grid]
+        pub = (base["transcript_filter"], base["min_tx_prop"], base["min_tx_fraction"])
+        if pub in grid:
+            grid.remove(pub)
+        grid.insert(0, pub)  # the published filter always leads the axis
+        return [dict(base, transcript_filter=k, min_tx_prop=p, min_tx_fraction=f)
+                for k, p, f in grid]
     if axis == "minor_isoform":
         return [dict(base, min_usage=v) for v in (0.0, 0.01, 0.05, 0.10)]
     raise ValueError(axis)
@@ -248,9 +284,12 @@ def _label(setting: dict, axis: str) -> str:
     if axis == "pseudocount":
         return f"pseudocount={setting['pseudocount']:g}"
     if axis == "expression":
-        if setting["min_fraction"] <= 0:
+        kind = setting["transcript_filter"]
+        if kind == "none":
             return "no filter"
-        return f"count>{setting['min_count']:g},frac>={setting['min_fraction']:g}"
+        if kind == "expression":
+            return "legacy count>10,frac>=0.7"
+        return f"switching share>={setting['min_tx_prop']:g},frac>={setting['min_tx_fraction']:g}"
     return f"min_usage={setting['min_usage']:g}"
 
 
@@ -645,8 +684,8 @@ def _write_aggregate_report(root, worst, by_axis, ident, quant, metas) -> None:
         "the features, eigengenes and age association are recomputed. It measures the stability "
         "of the representation and its trait signal, not of an independently refit network. "
         f"Every region passed the exact-rebuild gate (largest max |diff| = {gate:.3g}). "
-        "Both cohorts are fit on transcripts with count > 10 in ≥ 70% of samples, so the "
-        "expression axis is the same grid in every region.",
+        "Both cohorts are fit on the switching transcript filter, so the transcript-filter "
+        "(`expression`) axis is the same grid in every region.",
         "",
         "## 1-3. Worst case over every non-published setting, per region",
         "",

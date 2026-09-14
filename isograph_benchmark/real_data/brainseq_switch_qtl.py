@@ -295,15 +295,17 @@ def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
                                      gene_keep)
 
     # The SAME transcript filter the discovery fits apply before the switch coordinate
-    # (`run_models._filter_expressed_transcripts`: count > 10 in >= 70% of samples), computed
-    # here over the QTL sample set. Omitting it is not a detail: CLR PC1 over every annotated
-    # transcript of an expressed gene is dominated by near-zero isoforms. On the discovery
-    # libraries the unfiltered coordinate matched the discovery S_g at median |r| 0.36, the
-    # filtered one at 1.000 (2026-09-11, `brainseq_qtl_checks --stage signpin`). It changes only
-    # the switch channel; A_g is read from the gene counts below.
-    from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+    # (`run_models.filter_production_transcripts`, the switching filter since 2026-09-14),
+    # computed here over the QTL sample set. Omitting it is not a detail: CLR PC1 over every
+    # annotated transcript of an expressed gene is dominated by near-zero isoforms. On the
+    # discovery libraries the unfiltered coordinate matched the discovery S_g at median |r| 0.36,
+    # the filtered one at 1.000 (2026-09-11, legacy expression filter, `brainseq_qtl_checks
+    # --stage signpin`). It changes only the switch channel; A_g is read from the gene counts below.
+    from isograph_benchmark.real_data.run_models import (
+        PRODUCTION_TRANSCRIPT_FILTER_LABEL, filter_production_transcripts,
+    )
     n_tx_expressed_genes = int(tx_matrix.shape[0])
-    tx_matrix, tx_feature = _filter_expressed_transcripts(tx_matrix, tx_feature)
+    tx_matrix, tx_feature = filter_production_transcripts(tx_matrix, tx_feature)
 
     # Deterministic per-gene transforms; `design=None` because covariates enter the QTL
     # model, not the phenotype (the 2026-06-28 covariate-adjustment policy).
@@ -339,8 +341,7 @@ def build_phenotypes(region: str, arm: str = "all_samples") -> Path:
         "filters": f"Dataset={_region_dataset(region)}, dropped!='t', "
                    f"Age {'>=' if AGE_INCLUSIVE else '>'} {AGE_MIN:g}, all diagnoses",
         "expression_filter": expr_note,
-        "transcript_filter": ("count > 10 in >= 70% of samples "
-                              "(run_models._filter_expressed_transcripts, as in discovery)"),
+        "transcript_filter": f"{PRODUCTION_TRANSCRIPT_FILTER_LABEL}, as in discovery",
         "n_transcripts_expressed_genes": n_tx_expressed_genes,
         "n_transcripts_after_tx_filter": int(tx_matrix.shape[0]),
         "dx": samples["Dx"].value_counts().to_dict(),

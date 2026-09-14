@@ -36,7 +36,6 @@ from isograph_benchmark.real_data.run_models import (
     GTEX_DISCOVERY_COVARIATES,
     _PROMOTED_VAE,
     _eigengenes_to_sample_table,
-    _filter_expressed_transcripts,
     linear_age_association,
 )
 from isograph_benchmark.real_data.switch_feature_sensitivity import (
@@ -45,6 +44,7 @@ from isograph_benchmark.real_data.switch_feature_sensitivity import (
     PUBLISHED_BY_COHORT,
     _artifact_dir,
     _drop_minor_isoforms,
+    apply_transcript_filter,
     _label,
     _root_out,
     _settings,
@@ -76,11 +76,7 @@ def _out_dir(cohort: str, region: str) -> Path:
 
 def counts_for_setting(counts: np.ndarray, table: pd.DataFrame, setting: dict):
     """Transcript counts under one setting, exactly as ``build_features`` prepares them."""
-    tc, tt = np.asarray(counts), table
-    if setting["min_fraction"] > 0:
-        tc, tt = _filter_expressed_transcripts(
-            tc, tt, min_count=setting["min_count"], min_fraction=setting["min_fraction"]
-        )
+    tc, tt = apply_transcript_filter(np.asarray(counts), table, setting)
     tc, tt = _drop_minor_isoforms(tc, tt, setting["min_usage"])
     if setting["pseudocount"] != PUBLISHED["pseudocount"]:
         tc = tc.astype(np.float64) + (setting["pseudocount"] - PUBLISHED["pseudocount"])
