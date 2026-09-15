@@ -6,9 +6,9 @@
   "n_donors": 362,
   "filters": "Dataset=BrainSeq_Phase2_HIPPO, dropped!='t', Age > 13, all diagnoses",
   "expression_filter": "gene CPM>=1 in >=37 samples",
-  "transcript_filter": "count > 10 in >= 70% of samples (run_models._filter_expressed_transcripts, as in discovery)",
+  "transcript_filter": "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts), as in discovery",
   "n_transcripts_expressed_genes": 230103,
-  "n_transcripts_after_tx_filter": 54597,
+  "n_transcripts_after_tx_filter": 50521,
   "dx": {
     "Control": 236,
     "SCZD": 125,
@@ -31,7 +31,7 @@
     "mapping_rate"
   ],
   "cis_window": 1000000,
-  "n_switch_genes": 11000,
+  "n_switch_genes": 13034,
   "n_abundance_genes": 19627,
   "expr_n_genes_before": 78932,
   "expr_n_genes_after": 19675,
