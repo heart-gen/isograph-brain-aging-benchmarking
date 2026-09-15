@@ -1,17 +1,73 @@
 {
   "gene_level": {
-    "n_tested": 16529,
-    "composition_unique": 4,
-    "abundance_unique": 465,
+    "n_tested": 12492,
+    "composition_unique": 2,
+    "abundance_unique": 516,
     "both": 0,
-    "neither": 16060
+    "neither": 11974
   },
   "module_level": {
-    "n_tested": 32,
-    "composition_unique": 2,
+    "n_tested": 21,
+    "composition_unique": 0,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 30
+    "neither": 21
+  },
+  "gene_level_effect_sizes": {
+    "partial_r2_switch_given_abund": {
+      "n": 12492,
+      "quantiles": {
+        "0.1": 0.0008778523159872545,
+        "0.25": 0.002406646860795958,
+        "0.5": 0.005712159747484602,
+        "0.75": 0.011556683883020178,
+        "0.9": 0.019207859545921774
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 516,
+          "median": 0.007506828499528605,
+          "q90": 0.021516532742042477
+        },
+        "composition_unique": {
+          "n": 2,
+          "median": 0.09048362182406669,
+          "q90": 0.09204325893831093
+        },
+        "neither": {
+          "n": 11974,
+          "median": 0.005667527286745317,
+          "q90": 0.019122944517679312
+        }
+      }
+    },
+    "partial_r2_abund_given_switch": {
+      "n": 12492,
+      "quantiles": {
+        "0.1": 0.0012462882084124161,
+        "0.25": 0.003402457968409172,
+        "0.5": 0.008386208641340168,
+        "0.75": 0.017041749941317148,
+        "0.9": 0.028330827455653202
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 516,
+          "median": 0.04883468360374481,
+          "q90": 0.0763878362780521
+        },
+        "composition_unique": {
+          "n": 2,
+          "median": 0.008048778013327111,
+          "q90": 0.009714108583274898
+        },
+        "neither": {
+          "n": 11974,
+          "median": 0.00790359587018622,
+          "q90": 0.02422796437524949
+        }
+      }
+    }
   },
   "analysis": "gtex-aging",
   "region": "nucleus_accumbens_basal_ganglia",
@@ -26,5 +82,27 @@
     "Inhib",
     "Micro",
     "OPC"
-  ]
+  ],
+  "gene_level_ladder": {
+    "n_tested": 12513,
+    "model": "ols",
+    "delta_r2_switch_given_abund": {
+      "quantiles": {
+        "0.1": 6.57476588624681e-05,
+        "0.25": 0.0004174655298509697,
+        "0.5": 0.001967179559172758,
+        "0.75": 0.005794218970367136,
+        "0.9": 0.01162023264547749
+      }
+    },
+    "delta_r2_abund_given_switch": {
+      "quantiles": {
+        "0.1": 0.00018635879860776444,
+        "0.25": 0.0011769041806643493,
+        "0.5": 0.00482068715996131,
+        "0.75": 0.01202426583071309,
+        "0.9": 0.021962771568231648
+      }
+    }
+  }
 }

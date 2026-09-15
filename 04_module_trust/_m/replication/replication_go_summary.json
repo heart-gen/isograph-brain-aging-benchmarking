@@ -1,20 +1,20 @@
 [
   {
     "method": "isograph_vae",
-    "n_preserved_aging_pairs": 32,
-    "n_pairs_with_go": 19,
-    "mean_go_jaccard": 0.052926642887596125,
+    "n_preserved_aging_pairs": 23,
+    "n_pairs_with_go": 18,
+    "mean_go_jaccard": 0.09344600333711042,
     "median_go_jaccard": 0.0,
-    "perm_p": 0.001998001998001998,
-    "null_mean_go_jaccard": 0.002950215921366049
+    "perm_p": 0.000999000999000999,
+    "null_mean_go_jaccard": 0.004879716196783042
   },
   {
     "method": "wgcna_gene",
     "n_preserved_aging_pairs": 26,
     "n_pairs_with_go": 26,
-    "mean_go_jaccard": 0.20053856608469822,
-    "median_go_jaccard": 0.07672413793103448,
+    "mean_go_jaccard": 0.20683476446953944,
+    "median_go_jaccard": 0.10068735981477463,
     "perm_p": 0.000999000999000999,
-    "null_mean_go_jaccard": 0.03952659693853451
+    "null_mean_go_jaccard": 0.04042973949519367
   }
 ]

@@ -1,17 +1,17 @@
 {
   "method": "isograph",
-  "n_pairs_reproducible": 130,
+  "n_pairs_reproducible": 94,
   "min_jaccard": 0.0,
   "n_perm": 10000,
   "sig": 0.05,
-  "stouffer_K": 82,
-  "stouffer_Z": -1.1462721510164402,
-  "stouffer_p_normal": 0.8741587189090086,
-  "stouffer_p_perm": 0.1217878212178782,
-  "sign_concordant": 68,
-  "sign_frac": 0.5230769230769231,
-  "sign_p_perm": 0.0658934106589341,
-  "sign_p_binom_vs_0.5": 0.330584841569408,
-  "spearman_rho": 0.10771069519755408,
-  "spearman_p_perm": 0.11038896110388961
+  "stouffer_K": 49,
+  "stouffer_Z": -5.8979710833483106,
+  "stouffer_p_normal": 0.9999999981600077,
+  "stouffer_p_perm": 0.6040395960403959,
+  "sign_concordant": 43,
+  "sign_frac": 0.4574468085106383,
+  "sign_p_perm": 0.1598840115988401,
+  "sign_p_binom_vs_0.5": 0.8233359837642088,
+  "spearman_rho": -0.042322196431148824,
+  "spearman_p_perm": 0.6604339566043396
 }

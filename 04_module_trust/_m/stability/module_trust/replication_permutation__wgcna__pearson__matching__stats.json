@@ -2,6 +2,7 @@
   "method": "wgcna",
   "statistic": "pearson",
   "null": "matching",
+  "covariates": "full",
   "n_matched_rows": 53,
   "min_jaccard": 0.0,
   "T_obs": 3,

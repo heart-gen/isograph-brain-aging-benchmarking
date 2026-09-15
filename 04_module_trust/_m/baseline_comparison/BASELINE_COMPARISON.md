@@ -8,19 +8,19 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
 | method | features | n_regions | med_n_mod | med_size | pheno_sig_rate | both_rate | go_rate | tot_pheno_sig |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | switch+abundance | 17 | 39.0 | 70.0 | 0.274 | 0.082 | 0.235 | 180 |
+| isograph | switch+abundance | 17 | 25.0 | 71.0 | 0.17 | 0.048 | 0.186 | 72 |
 | wgcna_gene | abundance | 17 | 8.0 | 387.0 | 0.18 | 0.171 | 0.885 | 34 |
-| wgcna_switch_only | switch-only | 17 | 13.0 | 144.0 | 0.389 | 0.197 | 0.401 | 77 |
-| wgcna_multiplex | switch+abundance | 17 | 20.0 | 293.0 | 0.187 | 0.137 | 0.755 | 61 |
+| wgcna_switch_only | switch-only | 17 | 18.0 | 159.0 | 0.214 | 0.025 | 0.184 | 64 |
+| wgcna_multiplex | switch+abundance | 17 | 25.0 | 242.0 | 0.189 | 0.117 | 0.649 | 75 |
 
 ## Caudate (representative single region)
 
 | method | features | n_modules | frac_pheno_sig | frac_both | frac_go_enriched |
 | --- | --- | --- | --- | --- | --- |
-| isograph | switch+abundance | 46 | 0.304 | 0.0 | 0.109 |
+| isograph | switch+abundance | 28 | 0.107 | 0.071 | 0.286 |
 | wgcna_gene | abundance | 21 | 0.048 | 0.048 | 0.81 |
-| wgcna_switch_only | switch-only | 10 | 0.3 | 0.1 | 0.3 |
-| wgcna_multiplex | switch+abundance | 27 | 0.111 | 0.111 | 0.815 |
+| wgcna_switch_only | switch-only | 9 | 0.0 | 0.0 | 0.222 |
+| wgcna_multiplex | switch+abundance | 30 | 0.233 | 0.167 | 0.7 |
 
 ## The features-vs-method question
 
@@ -38,7 +38,7 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
 | method | n_preserved_aging_pairs | n_pairs_with_go | mean_go_jaccard | median_go_jaccard | perm_p | null_mean_go_jaccard |
 | --- | --- | --- | --- | --- | --- | --- |
-| isograph | 32 | 19 | 0.0529 | 0.0 | 2.00e-03 | 0.003 |
-| wgcna_gene | 26 | 26 | 0.2005 | 0.0767 | 9.99e-04 | 0.0395 |
+| isograph | 23 | 18 | 0.0934 | 0.0 | 9.99e-04 | 0.0049 |
+| wgcna_gene | 26 | 26 | 0.2068 | 0.1007 | 9.99e-04 | 0.0404 |
 
 Replication covers isograph vs classical `wgcna_gene` only (the matched baselines were not run through replication_go). Classical WGCNA's preserved aging modules carry more cross-cohort GO overlap — again the abundance/GO advantage — while both beat their permutation null.

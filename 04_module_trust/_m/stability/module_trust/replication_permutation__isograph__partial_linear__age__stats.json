@@ -2,21 +2,22 @@
   "method": "isograph",
   "statistic": "partial_linear",
   "null": "age",
-  "n_matched_rows": 130,
+  "covariates": "full",
+  "n_matched_rows": 94,
   "min_jaccard": 0.0,
-  "T_obs": 2,
+  "T_obs": 0,
   "per_pair_obs": {
-    "caudate": 2,
+    "caudate": 0,
     "hippocampus": 0,
     "dlpfc_ba9": 0
   },
   "B": 10000,
   "seed": 13,
   "sig": 0.05,
-  "p_emp": 0.13438656134386562,
-  "null_mean": 0.5925,
-  "null_sd": 1.2736584984198314,
-  "z": 1.1050842920187942,
-  "null_max": 14,
-  "null_q95": 3.0
+  "p_emp": 1.0,
+  "null_mean": 0.2545,
+  "null_sd": 0.6347992178671146,
+  "z": -0.40091416756168036,
+  "null_max": 7,
+  "null_q95": 2.0
 }
