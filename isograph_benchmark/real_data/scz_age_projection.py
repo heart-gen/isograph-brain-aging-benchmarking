@@ -34,7 +34,7 @@ Five layers (A is the headline):
      this for all five traits against a size-matched permutation null and finds no concentration
      anywhere. Layers B/C/D (disruption of the age-sensitive modules in disease) are unaffected.
 
-Outputs under 05_genetic_anchoring/_m/scz_age_projection/ (parquet + Manubot SCZ_AGE_PROJECTION.md).
+Outputs under 08_integration/_m/scz_age_projection/ (parquet + Manubot SCZ_AGE_PROJECTION.md).
 Genotype dosages are produced upstream by plink2 (eqtl env) in the SLURM wrapper.
 """
 from __future__ import annotations
@@ -58,7 +58,7 @@ DX_COVS = ["Age", "Sex", "MoD", "RIN", "mapping_rate", "mito_rate",
 AGE_COVS = ["Sex", "RIN", "mapping_rate", "mito_rate",
             "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"]
 _MIN_MODULE = 3
-_OUT = stage_out("anchoring", "scz_age_projection")
+_OUT = stage_out("integration", "scz_age_projection")
 
 # aging module sources (independent of the disease cohort's discovery), caudate-matched
 _AGING_SOURCES = {

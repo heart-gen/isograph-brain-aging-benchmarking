@@ -3,7 +3,7 @@
 #
 # "Is this just shifting cell-type proportions?" is the first objection put to any bulk
 # brain DTU result, and the repository answers it -- but until now only in prose
-# (04_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md). The answer also moves
+# (03_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md). The answer also moves
 # a headline number: the SCZD composition-unique count falls 34 -> 2 under adjustment,
 # while the aging layer largely survives and GTEx replicates it only partially.
 #
@@ -17,7 +17,7 @@
 # (C) the marker cut -- module member genes are not over-represented for cell-type
 #     markers, so the modules are not simply bags of marker genes.
 #
-# Reads 04_module_characterization/_m/composition_adjustment.parquet,
+# Reads 03_module_characterization/_m/composition_adjustment.parquet,
 #       02_module_discovery/gtex/_m/composition/composition_adjustment_gtex.parquet,
 #       02_module_discovery/*/*/_m/isograph_vae/celltype_composition/marker_enrichment.parquet
 # Writes manuscript/_m/figures/figCompositionRobustness.{pdf,png}.
@@ -74,7 +74,7 @@ save_fig <- function(p, name, width, height) {
 # Load: BrainSEQ (disease + aging) and the GTEx aging replication arm
 # ---------------------------------------------------------------------------
 bs <- as.data.frame(read_parquet(
-  rel("04_module_characterization", "_m", "composition_adjustment.parquet"))) |>
+  rel("03_module_characterization", "_m", "composition_adjustment.parquet"))) |>
   mutate(cohort = "BrainSEQ")
 gt <- as.data.frame(read_parquet(
   rel("02_module_discovery", "gtex", "_m", "composition",

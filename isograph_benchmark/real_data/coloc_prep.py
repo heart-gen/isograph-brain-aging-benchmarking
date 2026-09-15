@@ -16,7 +16,7 @@ Only credible-set-based colocalization is possible: GTEx v11 ships SuSiE fine-ma
 (SuSiE_summary parquet: per phenotype, the 95% credible-set variants with PIP), not
 full cis allpairs, so downstream (coloc_clpp.R) uses eCAVIAR CLPP = sum PIP_gwas *
 PIP_qtl over shared variants. coloc.susie is NOT run: GTEx ships
-credible-set summaries, not full SuSiE objects (see 10.coloc_clpp.R). This restricts the
+credible-set summaries, not full SuSiE objects (see 03b.coloc_clpp.R). This restricts the
 test to genome-wide-significant loci; disclosed as scope.
 
 Matching: IsoGraph modules and GTEx SuSiE both carry Ensembl gene_id, matched bare

@@ -30,7 +30,7 @@ from isograph_benchmark.real_data.qtl_anchoring import variant_suffix
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 from isograph_benchmark.stats.meta_analysis import meta, meta_keys
 
-# (analysis, region) for the 17 anchoring runs; mirrors 13.qtl_anchoring.sh.
+# (analysis, region) for the 17 anchoring runs; mirrors 05_genetic_anchoring/_h/01a.qtl_anchoring.sh.
 ANALYSES: list[tuple[str, str | None]] = [
     ("brainseq-sczd", None),
     ("brainseq-aging", "caudate"),

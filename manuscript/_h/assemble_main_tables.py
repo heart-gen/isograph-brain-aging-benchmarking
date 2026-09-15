@@ -2,7 +2,7 @@
 
 Mirror of assemble_supp_tables.py for the main display items. Presentation only:
 every number is copied verbatim from the committed source ledgers under
-04_module_characterization/_m -- regenerate, do not hand-edit.
+03_module_characterization/_m -- regenerate, do not hand-edit.
 
 Table 2 (Colocalized splicing-led genes) is the promoted main biology table: the
 12 genes where a disease-GWAS-colocalizing sQTL resolves onto an IsoGraph switch
@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from isograph_benchmark.paths import ensure_dir, stage_out  # noqa: E402
 
 OUT = ensure_dir(stage_out("manuscript", "main_tables"))
-DEEP = stage_out("anchoring", "deep_dive")
+DEEP = stage_out("integration", "deep_dive")
 QTL = stage_out("anchoring", "qtl_anchoring_meta")
 
 # eCAVIAR CLPP thresholds used by the coloc pipeline (coloc_summary.py):
@@ -233,7 +233,7 @@ def main() -> None:
         "coefficient clears nominal p<0.05 in 1 of 6 trait-contexts (AD, p=0.0355) with "
         "no multiple-testing correction, while eQTL clears 4 of 6. Risk allele aligned to "
         "the GWAS trait; LOEUF is gnomAD constraint; Status = established disease "
-        "isoform biology vs novel candidate. Verbatim from 05_genetic_anchoring/_m/deep_dive/ "
+        "isoform biology vs novel candidate. Verbatim from 08_integration/_m/deep_dive/ "
         "(deep_dive_panel.parquet, deep_dive_literature.parquet); see Tables S8-S12 "
         "for per-event/RBP/clinical/literature layers."
     )

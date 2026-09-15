@@ -7,25 +7,74 @@ abundance-independent switch layer (`manuscript/MANUSCRIPT_PLAN.md` §10).
 
 ## Order
 
-| Step | Wrapper | Produces |
-|---|---|---|
-| 01–02 | `qtl_anchoring`, `qtl_anchoring_matched` | Power-matched logistic sQTL/eQTL enrichment per analysis (17 analyses) |
-| 18 | `module_coloc_convergence` | Module-level coloc convergence for AD/PD/LBD/ALS/SCZ: size-matched permutation null + anchored-module enrichment against the CLPP-tested pool. Generalises the SCZ-only layer in `scz_age_projection.py` |
-| 17 | `qtl_anchoring_sensitivity` | Pre-specified sensitivity arms: constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose. Writes to its own files; the primary arm from 01 is untouched |
-| 03 | `sqtl_concordance` | Switch-transcript → LeafCutter-intron direction concordance |
-| 04 | `module_anchoring` | Module-level genetic anchoring |
-| 05–07 | `prep_module_gene_sets`, `run_magma`, `plot_magma` | MAGMA module-GWAS enrichment (`configs/gwas_magma.yaml`) |
-| 08–11 | `coloc_prep`, `locus_ld`, `coloc_clpp`, `coloc_direction` | GTEx v11 SuSiE × 5 GWAS colocalization (eCAVIAR CLPP) |
-| 12–14 | `ldsc_annot_prep`, `ldsc_make_annot_ldscores`, `ldsc_munge_h2` | S-LDSC partitioned heritability (baselineLD v2.2) |
-| 22–23 | `coloc_gwas_susie`, `coloc_signal_susie` | **Signal-level colocalization.** Caches the per-locus GWAS SuSiE once (22), then re-fits each gene's cis QTL with `susie_rss` and runs `coloc::coloc.susie` signal-against-signal (23). Estimator hierarchy is **susie > abf > CLPP**; cells SuSiE cannot speak to fall back to `coloc.abf` and are flagged, never dropped |
-| 24 | `locus_event_audit` | **Does a colocalizing locus name the event it claims to?** GWAS signal → sQTL signal → intron phenotype → driver transcript, matched against `configs/known_splice_events.yaml` |
-| 25 | `brainseq_switch_qtl` | BrainSEQ cis-swQTL on `S_g` and matched cis-eQTL on `A_g`, same donors/variants/covariates (GPU). **The first all_samples swQTL results (2026-09-10) are superseded:** `build_phenotypes` omitted the discovery transcript filter, so `S_g` was not the discovery switch coordinate (median \|r\| 0.31-0.35 on shared libraries; 1.000 with the filter). Re-mapped 2026-09-11; `A_g` was unaffected. `ea_only` uses within-EA genotype PCs |
-| 28 | `brainseq_qtl_checks` | Gates before any BrainSEQ QTL result is read: `S_g` must reproduce the discovery coordinate (median \|r\| >= 0.99) and is sign-pinned to it; `A_g` eQTL positive control against tissue-matched GTEx v11 eGenes (pi1 >= 0.5 and direction concordance >= 0.90 at GTEx lead variants, both pre-specified). all_samples control PASS in all three regions (pi1 0.83-0.88, concordance 0.987-0.991) |
-| 26 | `locus_ld_robustness` | Locus LD audit for any locus carrying a biological claim: convergence, credible-set purity, boundary trims, `coloc.susie` across the p12 sweep, and LD-mismatch diagnostics (`kriging_rss` outlier drop, residual-variance refit) |
-| 27 | `smr_heidi` | **SMR + HEIDI** on the signal-level nominations (GTEx v11 QTL, 1000G EUR LD). Orthogonal corroboration beneath coloc: `b_SMR` is not causal direction, a non-rejected HEIDI is not proof of sharing, and a HEIDI rejection does not overrule coloc. BrainSEQ source (`--qtl-source brainseq --arm ea_only`): gated on both `_h/28` checks; GTEx nominations plus BrainSEQ's own `S_g` nominations in all three regions, `S_g` slopes sign-pinned to the discovery axis, read against BrainSEQ's coloc for the same region and axis. **Two testing families, corrected apart** (primary confirmatory probe per gene; the gene's other introns as a secondary event-localization family), an `smr_status` axis that separates a probe never instrumented from one tested and null, `F = (b/se)²` reported per family and never used to exclude, TSS-fallback probes flagged as QC, and a SNP-attrition trace whose dominant filter is **GWAS locus coverage, not allele QC** — panel rsID overlap and allele agreement are both 100%, and BESD-SNP retention must never be compared across QTL sources because its denominator is imputation density |
-| 29 | `coloc_brainseq` | **BrainSEQ signal-level coloc, `S_g` and `A_g`, EA-only.** Same-tissue genetic anchoring, not replication. GWAS side is the stage-A SuSiE cache; the QTL side is fine-mapped on **in-sample** LD (plink2, the donors each region was mapped in), so no reference-LD agreement filter applies. `coloc.abf` fallback, p12 sweep and paired `S_g` vs `A_g` test reuse the GTEx layer's functions. Refuses `all_samples` and any arm whose `_h/28` checks did not pass |
-| 15 | `build_deep_dive` | Per-gene deep dive: anchor → switch → consequence |
-| 16 | `scz_age_projection` | Are age-sensitive switch programs disrupted in SCZ? (the *convergence* sub-test is RETRACTED 2026-08-30 — wrong background; see `module_coloc_convergence`) |
+Run the whole stage with `bash 05_genetic_anchoring/_h/run_stage.sh` (add `--dry-run` to print
+the plan). The leading number of a wrapper is its tier; steps in one tier run in parallel, except
+the few `run_stage.sh` serializes because they write one shared file.
+
+| Step | Wrapper | Waits on | Produces |
+|---|---|---|---|
+| 01a–01b | `qtl_anchoring`, `qtl_anchoring_matched` | stages 02–03 | Power-matched logistic sQTL/eQTL enrichment per analysis (17 analyses), IsoGraph and the matched WGCNA baselines |
+| 01c | `qtl_anchoring_sensitivity` | stages 02–03 | Pre-specified sensitivity arms: constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose. Writes to its own files; the primary arm is untouched. The matched baselines' arms are 01b with `--outcome` / `--covariate-set` |
+| 01d | `sqtl_concordance` | stage 02 | Switch-transcript → LeafCutter-intron direction concordance |
+| 01e | `module_anchoring` | stage 03 enrichment | Module-level genetic anchoring |
+| 01f | `prep_module_gene_sets` | stage 02 | MAGMA module gene sets (`configs/gwas_magma.yaml`); also with `MAGMA_ISOGRAPH_BACKEND=isograph_vae_res2` |
+| 01g | `coloc_prep` | stage 02 | Switch genes under each trait's GWAS peaks + their GTEx v11 brain QTL credible sets; per-locus GWAS z (6 analyses) |
+| 01h | `ldsc_annot_prep` | stage 02 | S-LDSC sQTL/eQTL/cis switch-gene annotations (`brainseq-sczd`; the `aging` bundle) |
+| 01i | `brainseq_switch_qtl` | stage 02 | BrainSEQ cis-swQTL on `S_g` and matched cis-eQTL on `A_g`, same donors/variants/covariates (GPU). **The first all_samples swQTL results (2026-09-10) are superseded:** `build_phenotypes` omitted the discovery transcript filter, so `S_g` was not the discovery switch coordinate (median \|r\| 0.31-0.35 on shared libraries; 1.000 with the filter). Re-mapped 2026-09-11; `A_g` was unaffected. `ea_only` uses within-EA genotype PCs |
+| 02a | `qtl_anchoring_meta` | 01a–01c | Random-effects pooling + the paired splicing-specificity contrast; sensitivity arms under `sensitivity/<outcome>_<covariates>/` |
+| 02b | `sqtl_concordance_meta` | 01d | Concordance rollup |
+| 02c | `module_anchoring_meta` | 01e | Module-level anchoring rollup (Table S16) |
+| 02d | `run_magma` | 01f | MAGMA gene and gene-set analyses, 8 traits |
+| 02e | `locus_ld` | 01g | Per-locus 1000G EUR LD matrices + QTL variant → rsID bridge |
+| 02f | `ldsc_make_annot_ldscores` | 01h | Per-chromosome annotations and LD scores |
+| 02g | `brainseq_qtl_checks` | 01i | Gates before any BrainSEQ QTL result is read: `S_g` must reproduce the discovery coordinate (median \|r\| >= 0.99) and is sign-pinned to it; `A_g` eQTL positive control against tissue-matched GTEx v11 eGenes (pi1 >= 0.5 and direction concordance >= 0.90 at GTEx lead variants, both pre-specified). all_samples control PASS in all three regions (pi1 0.83-0.88, concordance 0.987-0.991) |
+| 02h | `brainseq_switch_qtl_meta` | 01i | swQTL-vs-eQTL paired tables and modality contrast, both arms |
+| 03a | `plot_magma` | 02d | `magma_results_combined[_res2].parquet` + figures |
+| 03b | `coloc_clpp` | 02e | GWAS SuSiE + eCAVIAR CLPP against sQTL/eQTL, per analysis |
+| 03c | `coloc_gwas_susie` | 02e | **Signal-level coloc, stage A:** the per-locus GWAS SuSiE cache (primary grid at 12,000 SNPs; the scoped `aging__ad` sensitivity at 30,000) |
+| 03d | `ldsc_munge_h2` | 02f | Partitioned heritability per trait on baselineLD v2.2 |
+| 03e | `brainseq_effect_size` | 02h | Switch vs abundance QTL effect sizes without selection asymmetry |
+| 04a | `coloc_meta` | 03b | Cross-trait CLPP rollup |
+| 04b | `coloc_direction` | 03b | Signed risk-allele direction + resolved isoform events (CLPP layer) |
+| 04c | `module_coloc_convergence` | 03a, 03b | Module-level coloc convergence for AD/PD/LBD/ALS/SCZ: size-matched permutation null + anchored-module enrichment against the CLPP-tested pool. Generalises the SCZ-only layer in `scz_age_projection.py` |
+| 04d | `coloc_modality_prep` | 03b | Per-gene sQTL-vs-eQTL coloc targets + GTEx variant bridge, per gene-pool arm |
+| 04e | `ldsc_summary` | 03d | `ldsc_partitioned.parquet` |
+| 05a | `coloc_modality_abf` | 04d | `coloc.abf` per brain tissue, per arm |
+| 05b | `coloc_signal_susie_prep` | 04d (switch arm) | Signal-level target grid, GTEx credible sets, `work_list.tsv` |
+| 05c | `deep_dive_events` | 04b | `deep_dive_events`, the per-event table stage 06 reads; the per-gene panel is `08_integration/_h/01a` |
+| 06a | `coloc_modality_meta` | 05a | Paired McNemar / Wilcoxon contrast, per arm |
+| 06b | `coloc_signal_susie` | 03c, 05b | **Signal-level coloc, stage B:** each gene's cis QTL re-fit with `susie_rss`, `coloc::coloc.susie` signal against signal, per (analysis, tissue); representative and all-introns sQTL arms. Estimator hierarchy is **susie > abf > CLPP**; cells SuSiE cannot speak to fall back to `coloc.abf` and are flagged, never dropped |
+| 06c | `coloc_brainseq_prep` | 03c, 05b, 02g | BrainSEQ signal-level coloc targets |
+| 07a | `coloc_modality_compare` | 06a | The four gene-pool arms side by side |
+| 07b | `coloc_signal_susie_meta` | 06b | Cell tables and the estimator hierarchy; `--sqtl all` gives the primary nominations, `--max-snps 30000` the sensitivity arm |
+| 07c | `coloc_brainseq_susie` | 06c | Array over (analysis, region); see 08c |
+| 08a | `coloc_isoform_events_signal` | 07b, 04b | Isoform events for the signal-level nominations (read by stage 06) |
+| 08b | `locus_event_audit` | 07b, 06a, 05b | **Does a colocalizing locus name the event it claims to?** GWAS signal → sQTL signal → intron phenotype → driver transcript, matched against `configs/known_splice_events.yaml`; abf, susie, all-introns and SNP-guard audits in turn |
+| 08c | `coloc_brainseq_meta` | 07c, 07b | BrainSEQ signal-level coloc report |
+| 08d | `locus_ld_robustness` | 07b | Locus LD audit for any locus carrying a biological claim: convergence, credible-set purity, boundary trims, `coloc.susie` across the p12 sweep, and LD-mismatch diagnostics (`kriging_rss` outlier drop, residual-variance refit). **Manual:** one run per locus, arguments chosen from the nominations |
+| 09a | `smr_heidi_submit` | 07b (GTEx); 08c, 02g (BrainSEQ) | Runs SMR prep, then submits 10a and 11a with the array sized from `work_list.tsv` |
+| 10a | `smr_heidi` | 09a | **SMR + HEIDI** on the signal-level nominations (GTEx v11 QTL, 1000G EUR LD). Orthogonal corroboration beneath coloc: `b_SMR` is not causal direction, a non-rejected HEIDI is not proof of sharing, and a HEIDI rejection does not overrule coloc. BrainSEQ source (`--qtl-source brainseq --arm ea_only`): gated on both `02g` checks; GTEx nominations plus BrainSEQ's own `S_g` nominations in all three regions, `S_g` slopes sign-pinned to the discovery axis, read against BrainSEQ's coloc for the same region and axis. **Two testing families, corrected apart** (primary confirmatory probe per gene; the gene's other introns as a secondary event-localization family), an `smr_status` axis that separates a probe never instrumented from one tested and null, `F = (b/se)²` reported per family and never used to exclude, TSS-fallback probes flagged as QC, and a SNP-attrition trace whose dominant filter is **GWAS locus coverage, not allele QC** — panel rsID overlap and allele agreement are both 100%, and BESD-SNP retention must never be compared across QTL sources because its denominator is imputation density |
+| 11a | `smr_heidi_meta` | 10a | SMR assembly per arm and source: primary, `--peqtl-smr 1e-6`, `--smr-multi` (submitted by 09a) |
+
+The per-gene deep dive (`build_deep_dive`) and the SCZ age projection read stages 06 and 07, so on
+2026-09-15 they moved to `08_integration/_h/01a` and `01b`; only the per-event table (05c) stays here.
+
+## Re-running over an existing tree
+
+Several steps keep what is already on disk, so a re-run after an upstream change (a re-fit, a new
+transcript filter) must clear these first, or it silently mixes generations:
+
+- `_m/coloc/<analysis>/susie/` — 02e skips any `<LOCUS_ID>.unphased.vcor1.bin` present, and 01g
+  re-derives the loci from the switch genes, so a reused id can pair an old LD matrix with a new SNP list.
+- `_m/coloc_signal_susie/gwas_susie/` and `_m/coloc_signal_susie/sensitivity/max_snps_30000/gwas_susie/` —
+  03c writes `<LOCUS_ID>.rds` only for loci with a credible set and never removes old ones; 06b and 07c
+  read whatever is there.
+- `_m/ldsc/<annotation>/{beds,ldscores,results}` — 02f skips existing annotation and LD-score files.
+- `_m/smr_heidi/<source>/{besd,smr,sensitivity}` — 11a collects every task under `smr/`, including tasks
+  from a longer earlier work list.
+
+The GWAS-only caches (MAGMA gene analysis, munged sumstats, `coloc/_tmp`, the GTEx variant bridge) do
+not depend on the modules and can stay.
 
 ## The set-level contrast, stated honestly
 
@@ -118,7 +167,7 @@ primary grid; a run at any other `COLOC_GWAS_MAX_SNPS` writes under
 `--stage meta --max-snps N`, and is audited with `locus_event_audit --max-snps N`. The only
 such arm is the scoped `aging__ad` recovery at 30,000, run to fit PICALM's locus. Loci
 recovered there were empirically enriched for GWAS-reference-LD inconsistency, so a
-recovered locus enters the narrative only after `26.locus_ld_robustness.sh`. For PICALM
+recovered locus enters the narrative only after `08d.locus_ld_robustness.sh`. For PICALM
 that audit is LD-robust — one 2-variant credible set (rs10792832/rs3851179, purity 0.994),
 unchanged under 100–500 kb boundary trims, kriging outlier removal and
 `estimate_residual_variance` — but **prior-sensitive**: cortex PP4 0.813 at p12 = 1e-5,
@@ -133,7 +182,7 @@ scored by `coloc.susie`, at the first place it left the pipeline: a locus over t
 was never tested at signal level, while `gwas_no_credible_set` was tested and the GWAS did
 not fine-map, which weakens any colocalization claimed there.
 
-**SMR + HEIDI (27) agrees with most nominations, as expected, and flags one disagreement.** It
+**SMR + HEIDI (10a) agrees with most nominations, as expected, and flags one disagreement.** It
 uses the same GWAS and GTEx summary statistics as coloc, so agreement is a consistency check, not
 independent evidence. **30/42** nominations have at least one tissue where the gene's
 pre-designated primary sQTL probe is SMR-significant with HEIDI not rejected (SNCA/LBD 11/11,
@@ -169,10 +218,11 @@ specificity rather than a near miss.
 `_m/{coloc,ldsc,gwas}/` per-trait subdirectories are gitignored (235 GB / 1.5 GB of LD
 and SuSiE intermediates); only the lean summaries and result tables are tracked.
 
-**CLIs:** `isograph_benchmark/real_data/{qtl_anchoring,qtl_anchoring_meta,sqtl_concordance,sqtl_concordance_meta,module_genetic_anchoring,coloc_*,ldsc_*,gene_deep_dive,scz_age_projection}.py`, `isograph_benchmark/gwas/`.
+**CLIs:** `isograph_benchmark/real_data/{qtl_anchoring,qtl_anchoring_meta,sqtl_concordance,sqtl_concordance_meta,module_genetic_anchoring,module_coloc_convergence,coloc_*,ldsc_*,locus_event_audit,brainseq_switch_qtl,brainseq_qtl_checks,smr_heidi}.py`, `gene_deep_dive.py --part events`, `isograph_benchmark/gwas/`.
 
 ## Display items
 
-Main **Fig 3** `figQtlSpecificity`, **Fig 4** `figGeneticAnchoring`, **Table 1**
-(`table2_qtl_specificity_contrast`), **Table 2** (`table3_splicing_led_genes`);
-S-real-2 `figGwasResolution`, `figSczConvergence`; supplementary tables S3–S5, S8–S12.
+Main **Fig 3** `figQtlSpecificity`, **Fig 4** `figGeneticAnchoring` (rendered by
+`08_integration/_h/01a`), **Table 1** (`table2_qtl_specificity_contrast`); S-real-2
+`figGwasResolution`; supplementary tables S3–S5. **Table 2** (`table3_splicing_led_genes`),
+`figSczConvergence` / Fig 4E and S8–S12 come from `08_integration/`.

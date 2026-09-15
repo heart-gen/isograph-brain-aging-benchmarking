@@ -25,7 +25,7 @@ demonstrates, **[REQUIREMENT]** = what an external authority requires, **[RECOMM
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Synthetic benchmark | Does IsoGraph recover switch modules where truth is known? | Simulated paired grid | Module recovery favours IsoGraph in 7/15 scenarios (13,410 runs, 16 scenarios) — wins where switching dominates, loses when abundance-dominated or degraded; complete switch-gene detection | Strong (ground truth) | Internal (synthetic truth) | CLI + SLURM, seeds | `01_synthetic_benchmark/03_metrics/`, `fig1`, `tableS_benchmark_summary.csv` (supp) |
 | Confound ablation | Does residualization buy robustness? | Synthetic confounds | `isograph_vae_residual` holds under composition/batch/depth; degradation is the honest limit; abundance fallback recovers it | Strong (synthetic) | Internal | `figS8/figS9` | AGENTS.md §3, `01_synthetic_benchmark/03_metrics/figures/` |
-| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 250/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 23 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `03_module_trust/`, `figTrustFunnel`, `tableS7` | 
+| Module trust funnel | Are real-data modules reproducible? | BrainSEQ + GTEx fits | 250/266 modules chance-trusted (6 regions); driver ρ 0.77–0.82; 23 aging replications vs ~6 abundance baseline | Strong | Split-half + perm null + cross-cohort | `04_module_trust/`, `figTrustFunnel`, `tableS7` | 
 | GO-invisible gate | Are disease switch modules real DTU, not abundance/low-quality? | BrainSEQ caudate SCZD | 6/8 pheno-sig SCZD modules GO-invisible (corrected 2026-09-12 from a stale 4/4); 4 carry real anticorrelated switch pairs in nearly every member (M026 23/23, M022 29/29, M023 27/27, M010 65/83), M025 partial (11/24), M020 weak (4/30); the 2 GO-visible disease modules switch comparably, consequence ≥ background | Strong (within cohort) | Within-gene perm null; internal control vs background | CLI + SLURM, seeds, post-refit 2026-06-29 | `GO_INVISIBLE_GATE_SUMMARY.md`, `go_invisible_gate.parquet` |
 | QTL splicing-specificity | Are co-switch modules anchored to *splicing* genetics, method-specifically? | GTEx v11 sQTL/eQTL | sQTL/eQTL ratio **1.111 pheno-sig (p=3.6e-4)**, all 1.068 (p=1.3e-5); GO-invisible 1.068 (p=0.077) and GO-visible 1.084 (p=0.050) indistinguishable — **no GO-invisible localisation**; IsoGraph-only vs matched WGCNA baselines | Moderate — set-level only; **not supported per gene** (GTEx signal-level 22 vs 45 expression-leaning, P = 0.007; BrainSEQ in-sample 5 vs 33, P = 4.3e-6); **demoted from headline 2026-09-12** | Matched-baseline null (primary control; closest baseline now p = 0.053); IVW+DL meta; 2026-08-29 refresh — never quote earlier numbers | CLI + SLURM, 17 analyses | `QTL_ANCHORING_SUMMARY.md`, `qtl_anchoring_meta_contrast*.parquet` |
 | Colocalization / deep-dive (**eCAVIAR CLPP layer**, retained as orthogonal sensitivity evidence) | Do disease variants resolve to specific isoform switches? | GTEx v11 SuSiE × 5 GWAS (SCZ/AD/PD/LBD/ALS), eCAVIAR | 141 events / 68 genes; 12 splicing-led, **all GO-invisible**; 9 GTEx-concordant; SNCA cross-disease (LBD+PD) same alt-first-exon | Moderate (modest posteriors; set-level coherence) | Set-level pattern; cross-disease concordance; literature layer | Deterministic per-gene join CLI | `GENETIC_ANCHORING_RESULTS.md`, `deep_dive/*.md` |
@@ -64,7 +64,7 @@ PSI on the exact Fig 4A contrast gives minor-form usage 0.189 (DLPFC, n=222) and
 (caudate, n=238) against a pre-registered 0.05 threshold, versus 0.29% in ONT long-read —
 so the long-read failure was an assay limitation and SNCA may carry a main figure. CTSH
 reaches only 0.016–0.020 in hippocampus and stays off any main figure, per the same
-pre-registered rule. CLI `junction_coloc_confirm.py`, wrapper `06_switch_mechanism/_h/12`.
+pre-registered rule. CLI `junction_coloc_confirm.py`, wrapper `06_switch_mechanism/_h/01k.junction_coloc_confirm.sh`.
 
 **Both negative controls are now written into `GENETIC_ANCHORING_RESULTS.md`** (section
 "Two negative controls bound the genetic claim", added 2026-09-03): the per-gene modality
@@ -300,8 +300,8 @@ Order is dependency-driven: method works → modules trustworthy → modules are
   not support — Supp. Table X"). Do **not** present it as a co-equal arm; that would imply
   a model choice the data reject.
 - Evidence CLI: `isograph_benchmark/real_data/age_model_curvature.py` (+
-  `03_module_trust/_h/14.age_model_curvature.sh`) →
-  `03_module_trust/_m/stability/module_trust/age_model_curvature__isograph.{parquet,json}`.
+  `04_module_trust/_h/01d.age_model_curvature.sh`) →
+  `04_module_trust/_m/stability/module_trust/age_model_curvature__isograph.{parquet,json}`.
   Refits nothing; reads the committed `age_spline`/`age_linear` tables.
 - Role: answers "fine partition = noise?". Transition: "what *are* the disease-associated ones?"
 - Confidence: High.
@@ -391,7 +391,7 @@ disruption in disease, which does not depend on it.)_
 - Requirement: state the discovery-vs-inference split explicitly.
 
 ### Methods: Trust funnel / stability
-- Evidence: 03_module_trust/; split-half + perm null.
+- Evidence: 04_module_trust/; split-half + perm null.
 
 ### Methods: QTL anchoring + contrast meta
 - Evidence: qtl_anchoring.py (+--method), qtl_anchoring_meta.py; power-matched logistic; IVW+DL.

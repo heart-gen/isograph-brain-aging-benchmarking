@@ -127,7 +127,7 @@ def test_registered_analyses_match_the_coloc_layer():
 def test_coloc_abf_posteriors_do_not_depend_on_gwas_n_or_s():
     """Pins the docstring claim that N and s are provenance-only.
 
-    Both the module docstring and 20.coloc_modality_abf.R assert that supplying
+    Both the module docstring and 05a.coloc_modality_abf.R assert that supplying
     beta+varbeta for a case-control dataset makes coloc.abf's posteriors independent of
     N and s. If a future coloc release changes that, the LBD/ALS case fractions -- which
     come from publications rather than the sumstats -- would start to matter silently.

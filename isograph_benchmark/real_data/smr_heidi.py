@@ -247,7 +247,7 @@ def check_qtl_source(qtl_source: str, arm: str | None = None,
     if failures:
         raise SystemExit(
             f"BrainSEQ `{arm}` has not passed its QTL checks, so no SMR estimate is built on it: "
-            + "; ".join(failures) + " (run 28.brainseq_qtl_checks.sh)")
+            + "; ".join(failures) + " (run 02g.brainseq_qtl_checks.sh)")
 
 
 def modalities(qtl_source: str) -> tuple[str, ...]:
@@ -588,7 +588,7 @@ def read_brainseq_qtl(arm: str, region: str, chrom: int, genes: set[str],
 def load_sign_pin(arm: str, region: str) -> pd.DataFrame:
     f = stage_out("anchoring.brainseq_qtl", arm) / "checks" / f"sign_pin_{region}.parquet"
     if not f.exists():
-        raise SystemExit(f"missing {f}; run 28.brainseq_qtl_checks.sh for {arm}")
+        raise SystemExit(f"missing {f}; run 02g.brainseq_qtl_checks.sh for {arm}")
     return pd.read_parquet(f)[["gene", "r", "sign", "flipped", "axis_unstable", "pinnable"]]
 
 

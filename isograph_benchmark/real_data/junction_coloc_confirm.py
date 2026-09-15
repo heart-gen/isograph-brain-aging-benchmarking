@@ -111,7 +111,7 @@ _TISSUE_TO_REGION: dict[str, tuple[str, ...]] = {
     "Brain_Frontal_Cortex_BA9": ("dlpfc", "caudate"),
 }
 
-_DEEP_DIVE = ("05_genetic_anchoring", "_m", "deep_dive", "deep_dive_events.parquet")
+_DEEP_DIVE = stage_out("anchoring", "deep_dive", "deep_dive_events.parquet")
 
 # The competing arm each gene's DISPLAY ITEM actually claims, as a coordinate that must
 # appear in the event's competing arm. The anchored junction usually takes part in several
@@ -142,9 +142,7 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
     locus untestable, because a PSI event contrasting the anchored junction with an
     alternative form supplies the competitor by construction (``direct`` mode).
     """
-    from isograph_benchmark.paths import root
-
-    ev = pd.read_parquet(root().joinpath(*_DEEP_DIVE))
+    ev = pd.read_parquet(_DEEP_DIVE)
     ev = ev[ev["gene_name"].isin(genes) & ev["junction"].astype(str).str.len().gt(0)]
 
     rows: list[dict] = []

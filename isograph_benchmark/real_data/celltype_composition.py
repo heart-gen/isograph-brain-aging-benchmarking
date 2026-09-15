@@ -44,7 +44,7 @@ DEFAULT_MUSIC_DIR = Path(
     "/cell_proportion_estimate/_m"
 )
 # GTEx MuSiC run lives in THIS repo (sample_id-keyed; produced by the R deconvolution in
-# 04_module_characterization/_h/gtex_music_deconv.R, seeded from the same Tran/LIBD snRNA references).
+# 03_module_characterization/_h/gtex_music_deconv.R, seeded from the same Tran/LIBD snRNA references).
 GTEX_MUSIC_DIR = cohort_dir("gtex", "_m", "composition")
 
 # GTEx brain region -> Tran/LIBD snRNA reference key. Only regions with a defensibly matched

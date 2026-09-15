@@ -42,11 +42,13 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     "modules.filter_arms": ("02_module_discovery", "_m", "transcript_filter_arms"),
     # per-module size table across every method and store (IsoGraph + the three WGCNA baselines)
     "modules.sizes": ("02_module_discovery", "_m", "module_sizes"),
-    # 03 — module trust
-    "trust.stability": ("03_module_trust", "_m", "stability"),
-    "trust.replication": ("03_module_trust", "_m", "replication"),
-    # 04 — module characterization
-    "characterize": ("04_module_characterization", "_m"),
+    # 03 — module characterization
+    "characterize": ("03_module_characterization", "_m"),
+    # 04 — module trust (reads 03; the three-baseline comparison lives here because it reads
+    # the cross-cohort replication tables)
+    "trust": ("04_module_trust", "_m"),
+    "trust.stability": ("04_module_trust", "_m", "stability"),
+    "trust.replication": ("04_module_trust", "_m", "replication"),
     # 05 — genetic anchoring
     "anchoring": ("05_genetic_anchoring", "_m"),
     "anchoring.coloc": ("05_genetic_anchoring", "_m", "coloc"),
@@ -66,13 +68,16 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     "mechanism": ("06_switch_mechanism", "_m"),
     # 07 — RBP regulation
     "regulation": ("07_rbp_regulation", "_m"),
+    # 08 — integration: analyses that read several of 04-07 (per-gene deep dive, SCZ age
+    # projection, functional preservation of replicated modules, RBP target panel)
+    "integration": ("08_integration", "_m"),
     # manuscript display items
     "manuscript": ("manuscript", "_m"),
     # PI-facing review reports and their frozen evidence inventory
     "reports": ("reports", "pi"),
     "reports.evidence": ("reports", "pi", "_evidence"),
     # shared gitignored scratch (GTF parse cache, id maps)
-    "tmp": ("04_module_characterization", "_m", "tmp"),
+    "tmp": ("03_module_characterization", "_m", "tmp"),
 }
 
 COHORTS: tuple[str, ...] = ("brainseq", "gtex")

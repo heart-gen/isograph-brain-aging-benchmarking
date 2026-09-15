@@ -38,12 +38,12 @@ Age is the only perturbation we can observe in human tissue; it is a proxy for "
 regulatable", not evidence that the RBP is what regulates it. That is the experiment's job.
 
 Inputs
-  07_rbp_regulation/_m/rbp_target_panel/<RBP>/rbp_target_switch_pairs.parquet   (the frozen pairs)
+  08_integration/_m/rbp_target_panel/<RBP>/rbp_target_switch_pairs.parquet   (the frozen pairs)
   inputs/processed/gtex_v11/<region>/transcript_tpm.parquet             (RSEM TPM)
   inputs/bundles/gtex_v11_brain/<region>/samples.parquet                (AGE + covariates)
   GENCODE GTF (cached parquet)                                          (exon structure)
 
-Outputs (07_rbp_regulation/_m/rbp_target_panel/<RBP>/)
+Outputs (08_integration/_m/rbp_target_panel/<RBP>/)
   rbp_pair_assayability.parquet/tsv         one row per pair, summarised across regions
   rbp_pair_assayability_by_region.parquet/tsv   one row per pair x region (the fitted detail)
 
@@ -77,7 +77,7 @@ _GTEX_REGIONS = ("amygdala", "anterior_cingulate_cortex_ba24", "caudate_basal_ga
 # GTEx technical covariates carried alongside age, matching configs/real_data.yaml.
 _COVARIATES = ("SEX", "SMRIN", "SMTSISCH")
 
-_PANEL_DIR = stage_out("regulation", "rbp_target_panel")
+_PANEL_DIR = stage_out("integration", "rbp_target_panel")
 
 
 # --------------------------------------------------------------------------- structure

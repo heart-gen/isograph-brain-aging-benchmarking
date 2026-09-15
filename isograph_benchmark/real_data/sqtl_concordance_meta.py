@@ -30,7 +30,7 @@ from isograph_benchmark.paths import ensure_dir, stage_out
 from isograph_benchmark.real_data.sqtl_concordance import _N_PERM, _SEED, _perm_null
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 
-# (analysis, region) for the 17 concordance runs; mirrors 14.sqtl_concordance.sh.
+# (analysis, region) for the 17 concordance runs; mirrors 05_genetic_anchoring/_h/01d.sqtl_concordance.sh.
 ANALYSES: list[tuple[str, str | None]] = [
     ("brainseq-sczd", None),
     ("brainseq-aging", "caudate"),
@@ -57,7 +57,7 @@ def collect(variant: str) -> pd.DataFrame:
         d["cohort"] = f"{analysis}:{region}" if region else analysis
         parts.append(d)
     if not parts:
-        raise SystemExit("No per-cohort sqtl_concordance_pergene.parquet found; run 14.sqtl_concordance.sh first.")
+        raise SystemExit("No per-cohort sqtl_concordance_pergene.parquet found; run 05_genetic_anchoring/_h/01d.sqtl_concordance.sh first.")
     return pd.concat(parts, ignore_index=True)
 
 
@@ -116,7 +116,7 @@ def _write_report(out_dir: Path, summary: pd.DataFrame, pooled: pd.DataFrame) ->
         "the sQTL allele reference and the switch-axis orientation are arbitrary.",
         "",
         "Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` "
-        "(after the per-cohort array in `05_genetic_anchoring/_h/03.sqtl_concordance.sh`).",
+        "(after the per-cohort array in `05_genetic_anchoring/_h/01d.sqtl_concordance.sh`).",
         "",
         "## Pooled concordance by module set",
         "",

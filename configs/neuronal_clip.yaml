@@ -18,7 +18,7 @@ candidate_source:
   rbps: [TARDBP, NOVA1, NOVA2, RBFOX2, PTBP2]
 
 window_stage:
-  gtf_cache: 04_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  gtf_cache: 03_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
   genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
   genome_build: GRCh38.primary_assembly
   gencode_release: 47
@@ -56,7 +56,7 @@ motif_opportunity_stage:
 nova_family_renomination:
   output_dir: 07_rbp_regulation/_m/neuronal_clip/nova_family_renomination
   candidate_manifest: 07_rbp_regulation/_m/neuronal_clip_manifests/nova_family_candidate_manifest.parquet
-  gtf_cache: 04_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  gtf_cache: 03_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
   genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
   primary_width: 100
   motifs_dna_sense: [CCAC, CCAT, TCAC, TCAT]

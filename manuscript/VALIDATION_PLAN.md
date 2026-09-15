@@ -150,7 +150,7 @@ new samples, and it is compute-only.
 
 ### 0.4.3 SMR + HEIDI — corroboration beneath coloc, not a co-equal test
 
-*(Revised 2026-09-11 per co-author review; built as `05_genetic_anchoring/_h/27.smr_heidi.sh`.)*
+*(Revised 2026-09-11 per co-author review; built as `05_genetic_anchoring/_h/10a.smr_heidi.sh`.)*
 Scoped to the signal-level nominations, on GTEx v11 QTL with 1000G EUR LD. What it adds, and what
 it may not be read as:
 
@@ -486,9 +486,9 @@ BrainSEQ junction QTLs, SMR — were not exhausted before proposing wet-lab work
 | 0.453 / 0.252, 0.600 / 0.304 | `06_switch_mechanism/_m/switch_orthogonal_confirm/anchored_summary.json` |
 | 12-gene anchored table, CLPP, IF | `06_switch_mechanism/_m/switch_orthogonal_confirm/anchored_gene_confirmation.parquet` |
 | UTR 1.279 / CDS 1.044 / NMD depleted | `06_switch_mechanism/_m/switch_consequence_meta.parquet`, `analysis_class = aging, stratum = all` |
-| 250/266, 23/130 p = 0.034 | `03_module_trust/_m/stability/module_trust/`, re-run 2026-09-09 on corrected split halves |
+| 250/266, 23/130 p = 0.034 | `04_module_trust/_m/stability/module_trust/`, re-run 2026-09-09 on corrected split halves |
 | SNCA 0.189 / 0.234 | `06_switch_mechanism/_m/junction_coloc_confirm/` |
-| Composition table | `04_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md` |
+| Composition table | `03_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md` |
 | Per-gene coloc Fisher p = 0.88 | `05_genetic_anchoring/_m/coloc_modality_contrast/` |
 | S-LDSC tau p-values | `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` |
 | BrainSEQ phASER ASE (transcript-level `gene_ae`, haplotypic counts, phasing) | `/ocean/projects/bio260021p/shared/resources/processed-data/ase-files/{caudate,dlpfc,hippocampus}/` — 578 GB; see `ASE_GENERATION.md` |

@@ -18,7 +18,7 @@ mapping rate, mito rate and SNP PC1–PC5; GTEx for SEX, SMRIN, SMTSISCH, SMMAPR
 modelled linearly (eigengene–age correlation) and with a natural spline (df = 4), the
 spline compared against the linear fit. Canonical Leiden resolution **5.0**, giant-cap
 **off**, seed 13. Residualization is discovery-only — see
-`04_module_characterization/README.md`.
+`03_module_characterization/README.md`.
 
 ## The artifact store
 
@@ -34,24 +34,31 @@ from `isograph_benchmark.paths` — never by literal path.
 filter (`run_models.filter_production_transcripts`): gene count ≥ 10 in ≥ 70% of samples;
 transcript count ≥ 10 and share of its gene ≥ 0.10, each in ≥ 10% of samples. The pipeline and
 results before the switch — BrainSEQ aging on count > 10 in ≥ 70%, SCZD and GTEx unfiltered — are
-frozen at tag `legacy_expression_filter`. Retired with that switch and absent from the live tree:
-the with-abundance arm (steps 04, 06), refit/reprojection QC and tier projection (steps 12–14,
-stage 04 steps 12–13), and the transcript-filter arms (step 17), which chose this filter.
+frozen at tag `legacy_expression_filter`. Retired with that switch, absent from the live tree and
+now under `_h/retired/`: the with-abundance arm, refit/reprojection QC, the transcript-filter arms
+that chose this filter, and (in stage 03) tier projection.
 
 Four heavy artifacts per fit (`feature_scores`, `feature_reconstruction`,
 `high_vs_low_table`, `edges`) are gitignored and distributed via Zenodo; see `zenodo/`.
 
 ## Order
 
-| Step | Wrapper | Produces |
-|---|---|---|
-| 01–03 | `run_isograph_{brainseq_aging,brainseq_sczd,gtex}` | IsoGraph fits: `modules`, `edges`, `traits`, `age_{linear,spline}`, `feature_scores`, `module_gene_roles`, `calibration` |
-| 04 | `run_isograph_brainseq_with_abundance` | *Retired 2026-09-14* — abundance-channel variant at the pre-5.0 resolutions |
-| 05–06 | `sweep_leiden_brainseq[_with_abundance]` | Resolution sweep (re-clusters saved edges, no refit); step 06 retired with step 04 |
-| 07–09 | `wgcna_gene_{brainseq_aging,brainseq_sczd,gtex}` | Classical gene-level WGCNA baseline |
-| 10–11 | `wgcna_matched_features_{brainseq,gtex}` | `wgcna_switch_only` + `wgcna_multiplex` baselines on **identical** features — the primary internal control |
-| 12–14 | `refit_qc_{brainseq,gtex}`, `reproject_qc_gtex` | *Retired 2026-09-14* — refit QC and reprojection checks |
-| 15 | `sweep_leiden_gtex` | Resolution sweep on the 13 GTEx fits — a disclosed sensitivity; the CLI refuses `--write-best` for GTEx |
+Run the whole stage with `bash 02_module_discovery/_h/run_stage.sh` (add `--dry-run` to print
+the plan). The leading number of a wrapper is its tier; steps in one tier run in parallel.
+
+| Step | Wrapper | Waits on | Produces |
+|---|---|---|---|
+| 01a–01c | `run_isograph_{brainseq_aging,brainseq_sczd,gtex}` | bundles | IsoGraph fits: `modules`, `edges`, `traits`, `age_{linear,spline}`, `feature_scores`, `module_gene_roles`, `calibration`. The same wrappers with `--leiden-resolution 2.0` write `isograph_vae_res2`, the disclosed resolution comparison |
+| 01d–01f | `wgcna_gene_{brainseq_aging,brainseq_sczd,gtex}` | bundles | Classical gene-level WGCNA baseline |
+| 01g–01i | `wgcna_matched_features_{brainseq,sczd,gtex}` | bundles | `wgcna_switch_only` + `wgcna_multiplex` baselines on **identical** features — the primary internal control |
+| 02a–02b | `sweep_leiden_{brainseq,gtex}` | 01a–01c | Resolution sweep (re-clusters saved edges, no refit); GTEx is a disclosed sensitivity — the CLI refuses `--write-best` for GTEx |
+| 02c | `module_sizes` | 01a–01i | Module-size tables for every method in every store (`_m/module_sizes/`) |
+
+Retired (`_h/retired/`; outputs only at tag `legacy_expression_filter`):
+`run_isograph_brainseq_with_abundance` and `sweep_leiden_brainseq_with_abundance` (the
+abundance-channel variant at the pre-5.0 resolutions), `refit_qc_{brainseq,gtex}` and
+`reproject_qc_gtex` (refit and reprojection checks), `transcript_filter_arms`, and the
+unreferenced `aging_models.R`.
 
 Three WGCNA baselines exist on purpose: `wgcna_gene` (classical abundance),
 `wgcna_switch_only` and `wgcna_multiplex` hold the switch features fixed and vary only
@@ -63,10 +70,10 @@ the network inference, which is what isolates a method effect from a feature eff
 criterion: at 2.0, 17 of 28 significant module–GWAS hits were modules of ≥ 900 genes; at 5.0
 none are (`05_genetic_anchoring/_m/gwas/GWAS_RESOLUTION_SUMMARY.md`). The size criterion is
 phenotype-blind; the GWAS result is its confirmation. **Decided 2026-09-12 (PI): keep this as
-the stated basis.** The phenotype-blind split-half sweep (`03_module_trust/_h/16`) was run and
+the stated basis.** The phenotype-blind split-half sweep (`04_module_trust/_h/02a`) was run and
 cannot select a resolution — ARI is U-shaped and NMI monotone, both tracking granularity — so
-it is reported as a disclosed sensitivity with that reason, alongside the BrainSEQ (`_h/05`)
-and GTEx (`_h/15`) module-count sweeps.
+it is reported as a disclosed sensitivity with that reason, alongside the BrainSEQ (`_h/02a`)
+and GTEx (`_h/02b`) module-count sweeps.
 
 **Edge thresholds.** The gene graph Leiden clusters is built from VAE feature similarity with
 two thresholds, and neither was tuned against a trait:
@@ -83,7 +90,7 @@ connect genes but may not fuse switch modules — recorded per fit as
 assigned genes in every fit, so it is not producing degenerate partitions, but that is a
 sanity bound, not an insensitivity result.
 
-**CLIs:** `isograph_benchmark/real_data/{run_models,run_matched_wgcna,sweep_leiden}.py`.
+**CLIs:** `isograph_benchmark/real_data/{run_models,run_matched_wgcna,sweep_leiden,module_sizes}.py`.
 
 ## Display items
 
