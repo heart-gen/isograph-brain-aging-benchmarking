@@ -1,8 +1,8 @@
 {
-  "gene_id": "ENSG00000134986.14",
+  "gene_id": "ENSG00000162591.17",
   "group_col": "Dx",
-  "p_switch_given_abund": 7.180319687267835e-05,
-  "p_abund_given_switch": 0.9312905161760374,
-  "fdr_switch_given_abund": 0.04748124476276764,
-  "fdr_abund_given_switch": 0.9659554684251092
+  "p_switch_given_abund": 2.192612312958652e-05,
+  "p_abund_given_switch": 0.957660064616267,
+  "fdr_switch_given_abund": 0.01525827368523121,
+  "fdr_abund_given_switch": 0.9803485114862405
 }

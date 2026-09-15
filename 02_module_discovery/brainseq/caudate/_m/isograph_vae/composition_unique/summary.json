@@ -2,16 +2,16 @@
   "analysis": "brainseq-aging",
   "region": "caudate",
   "variant": "standard",
-  "n_composition_unique": 43,
-  "n_tested": 11648,
+  "n_composition_unique": 45,
+  "n_tested": 13177,
   "n_modules_enriched_fdr10": 1,
   "n_go_terms": 0,
   "top_go_terms": [],
   "top_concentrated_modules": [
-    "M014",
-    "M007",
-    "M002",
-    "M044",
-    "M043"
+    "M000",
+    "M003",
+    "M008",
+    "M005",
+    "M014"
   ]
 }

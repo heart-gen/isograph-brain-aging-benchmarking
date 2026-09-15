@@ -2,6 +2,7 @@
   "method": "wgcna",
   "statistic": "spline_f",
   "null": "age",
+  "covariates": "full",
   "n_matched_rows": 53,
   "min_jaccard": 0.0,
   "T_obs": 2,

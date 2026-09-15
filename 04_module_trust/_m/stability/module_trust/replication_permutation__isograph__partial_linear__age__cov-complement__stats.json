@@ -3,21 +3,21 @@
   "statistic": "partial_linear",
   "null": "age",
   "covariates": "complement",
-  "n_matched_rows": 130,
+  "n_matched_rows": 94,
   "min_jaccard": 0.0,
-  "T_obs": 24,
+  "T_obs": 2,
   "per_pair_obs": {
-    "caudate": 2,
-    "hippocampus": 14,
-    "dlpfc_ba9": 8
+    "caudate": 0,
+    "hippocampus": 0,
+    "dlpfc_ba9": 2
   },
   "B": 10000,
   "seed": 13,
   "sig": 0.05,
-  "p_emp": 0.0012998700129987,
-  "null_mean": 2.0119,
-  "null_sd": 3.2836620766551734,
-  "z": 6.696212791298449,
-  "null_max": 31,
-  "null_q95": 9.0
+  "p_emp": 0.21527847215278473,
+  "null_mean": 1.1007,
+  "null_sd": 2.481929795048755,
+  "z": 0.3623390161131992,
+  "null_max": 25,
+  "null_q95": 6.0
 }

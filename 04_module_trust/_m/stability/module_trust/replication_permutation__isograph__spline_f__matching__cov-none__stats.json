@@ -3,21 +3,21 @@
   "statistic": "spline_f",
   "null": "matching",
   "covariates": "none",
-  "n_matched_rows": 130,
+  "n_matched_rows": 94,
   "min_jaccard": 0.0,
-  "T_obs": 16,
+  "T_obs": 1,
   "per_pair_obs": {
     "caudate": 0,
-    "hippocampus": 10,
-    "dlpfc_ba9": 6
+    "hippocampus": 0,
+    "dlpfc_ba9": 1
   },
   "B": 10000,
   "seed": 13,
   "sig": 0.05,
-  "p_emp": 0.18248175182481752,
-  "null_mean": 12.6504,
-  "null_sd": 3.1476611344078487,
-  "z": 1.0641552114313415,
-  "null_max": 26,
-  "null_q95": 18.0
+  "p_emp": 0.9993000699930007,
+  "null_mean": 6.3786,
+  "null_sd": 2.297953458843303,
+  "z": -2.3406044101116694,
+  "null_max": 16,
+  "null_q95": 10.0
 }

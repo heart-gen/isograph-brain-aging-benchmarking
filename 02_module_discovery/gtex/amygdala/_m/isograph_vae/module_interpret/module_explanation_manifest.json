@@ -17,20 +17,18 @@
   "module_ids": [
     "M000",
     "M001",
-    "M002",
-    "M004",
-    "M006",
+    "M003",
+    "M007",
+    "M008",
     "M009",
-    "M012",
-    "M014",
+    "M010",
     "M015",
-    "M017",
-    "M020",
+    "M016",
+    "M018",
     "M022",
-    "M025",
-    "M019"
+    "M012"
   ],
-  "n_modules": 14,
+  "n_modules": 12,
   "plot_files": [],
   "tables_per_module": [
     "gene_driver_table.parquet",
