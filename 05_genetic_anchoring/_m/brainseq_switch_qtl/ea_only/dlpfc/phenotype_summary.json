@@ -6,9 +6,9 @@
   "n_donors": 169,
   "filters": "Dataset=BrainSeq_Phase2_DLPFC, dropped!='t', Age > 13, all diagnoses",
   "expression_filter": "gene CPM>=1 in >=17 samples",
-  "transcript_filter": "count > 10 in >= 70% of samples (run_models._filter_expressed_transcripts, as in discovery)",
+  "transcript_filter": "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts), as in discovery",
   "n_transcripts_expressed_genes": 235167,
-  "n_transcripts_after_tx_filter": 59981,
+  "n_transcripts_after_tx_filter": 49922,
   "dx": {
     "Control": 100,
     "SCZD": 68,
@@ -30,7 +30,7 @@
     "mapping_rate"
   ],
   "cis_window": 1000000,
-  "n_switch_genes": 11518,
+  "n_switch_genes": 13015,
   "n_abundance_genes": 20734,
   "expr_n_genes_before": 78932,
   "expr_n_genes_after": 20783,
