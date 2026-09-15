@@ -103,7 +103,7 @@ causal direction.
 ## Disease variants colocalize onto GO-invisible isoform switches (eCAVIAR CLPP layer)
 
 Source: `05_genetic_anchoring/_m/coloc/SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md`,
-`05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
+`08_integration/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
 
 To ask whether the switch layer carries genuine disease genetics rather than technical
 structure, we colocalized brain splicing- and expression-QTL credible sets (GTEx v11 sQTL/eQTL,
@@ -216,7 +216,7 @@ synucleinopathy.
 
 ## Per-gene deep-dive and literature (Fig 4C–D; Tables S8–S12)
 
-Source: `05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_PANEL.md`, `deep_dive_literature.parquet`.
+Source: `08_integration/_m/deep_dive/DEEP_DIVE_PANEL.md`, `deep_dive_literature.parquet`.
 
 A deterministic per-gene join (`gene_deep_dive.py`) assembles all six layers into one vignette
 per colocalized gene, classifies the verdict (12 splicing-led / 23 splicing-unresolved /

@@ -31,7 +31,7 @@ so ``structure_r`` has no data on either side of some pairs.  A missing input yi
 rather than an error, so the report carries an explicit **Data coverage** section naming
 which inputs were absent; an "n/a" row must never be read as a null result.
 
-Outputs (under ``03_module_trust/_m/replication/``):
+Outputs (under ``08_integration/_m/functional_preservation/``):
     functional_preservation__{method}__{model}.parquet    one row per matched pair
     functional_preservation__{method}__{model}__stats.json
     FUNCTIONAL_PRESERVATION__{method}__{model}.md
@@ -227,7 +227,7 @@ def _matched_table(method: str, model: str) -> pd.DataFrame:
         path = _out_dir() / f"{stem}__{pair}__{method}.parquet"
         if not path.exists():
             raise SystemExit(
-                f"missing {path}; run 03_module_trust/_h/09.module_trust_replication.sh"
+                f"missing {path}; run 04_module_trust/_h/03c.module_trust_replication.sh"
                 + (f" --model {model}" if model != "linear" else ""))
         frames.append(pd.read_parquet(path))
     return pd.concat(frames, ignore_index=True)
@@ -297,7 +297,7 @@ def run(method: str, model: str, n_perm: int, seed: int, n_boot: int) -> None:
         null_by_pair[pair] = draws
 
     out = pd.DataFrame(rows)
-    outdir = ensure_dir(stage_out("trust.replication"))
+    outdir = ensure_dir(stage_out("integration", "functional_preservation"))
     # method AND model in every filename: the array runs both methods concurrently and the
     # linear/spline runs are separate results, so a fixed name silently loses one of them.
     stem = f"{method}__{model}"

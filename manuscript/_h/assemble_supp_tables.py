@@ -1,6 +1,6 @@
 """Assemble real-data supplementary tables from the analysis parquet ledgers.
 
-Reads the committed result parquets under 04_module_characterization/_m and 03_module_trust/_m/stability,
+Reads the committed result parquets under 03_module_characterization/_m and 04_module_trust/_m/stability,
 emits one clean CSV per supplementary table under manuscript/_m/supp_tables/, and a
 machine-checkable manifest. Presentation only; every number is copied verbatim from
 the source ledgers -- regenerate, do not hand-edit.
@@ -20,7 +20,7 @@ from isograph_benchmark.paths import ensure_dir, region_store, stage_out  # noqa
 
 OUT = ensure_dir(stage_out("manuscript", "supp_tables"))
 QTL = stage_out("anchoring", "qtl_anchoring_meta")
-BASE = stage_out("characterize", "baseline_comparison")
+BASE = stage_out("trust", "baseline_comparison")
 TRUST = stage_out("trust.stability", "module_trust")
 GATE = region_store("brainseq", "caudate_sczd")
 COMP = stage_out("characterize")                      # composition adjustment (BrainSEQ)
@@ -28,7 +28,7 @@ COMP_GTEX = stage_out("modules", "gtex", "_m", "composition")
 MECH = stage_out("mechanism")                         # switch-mechanism stage
 RBP = stage_out("regulation", "rbp")
 ANCHOR = stage_out("anchoring", "module_genetic_anchoring_meta")
-SCZ = stage_out("anchoring", "scz_age_projection")
+SCZ = stage_out("integration", "scz_age_projection")
 
 
 def write(df: pd.DataFrame, name: str) -> None:

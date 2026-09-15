@@ -1,6 +1,6 @@
 """Cross-cohort eigengene projection: does a module's frozen signature exist in the other cohort?
 
-Stage 03's cross-cohort arm matches modules by gene-set overlap and compares each cohort's own
+Stage 04's cross-cohort arm matches modules by gene-set overlap and compares each cohort's own
 eigengene. Overlap is not the same test as projection: two cohorts can share genes while
 weighting them differently, and a best-Jaccard match is granularity-confounded. This CLI asks
 the WGCNA module-preservation question directly. For each trusted module in the **source**

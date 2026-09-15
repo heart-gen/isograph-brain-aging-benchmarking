@@ -25,7 +25,7 @@ Subcommands:
   fit-isograph  fit IsoGraph on both halves for each seed; write per-half partitions
   aggregate     read all per-half partitions (both methods) -> ARI/NMI -> summary
 
-WGCNA partitions are produced by ``03_module_trust/_h/stability_wgcna.R`` (R/WGCNA)
+WGCNA partitions are produced by ``04_module_trust/_h/stability_wgcna.R`` (R/WGCNA)
 and written to the same ``partitions/`` dir, so ``aggregate`` treats both methods
 uniformly. Splits are drawn independently per method with seed = k (k = 0..seeds-1);
 we compare the mean +/- SD over seeds, not a paired per-split test, so identical

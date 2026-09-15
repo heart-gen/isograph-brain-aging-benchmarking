@@ -23,7 +23,7 @@ Usage::
     python -m isograph_benchmark.real_data.replication_go            # both methods
     python -m isograph_benchmark.real_data.replication_go --methods isograph_vae
 
-Outputs (under ``03_module_trust/_m/replication/``):
+Outputs (under ``04_module_trust/_m/replication/``):
     <method>_go_overlap.parquet   per preserved+aging pair: GO overlap + shared terms
     replication_go_summary.parquet / .json   per-method pooled test
 """

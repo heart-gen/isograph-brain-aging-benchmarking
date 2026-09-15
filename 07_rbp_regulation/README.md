@@ -8,14 +8,30 @@ data, and the language in the paper should say so: these are candidate regulator
 
 ## Order
 
-| Step | Wrapper | Produces |
-|---|---|---|
-| 01 | `rbp_motif_families` | ATtRACT PWM family collapse |
-| 02–03 | `rbp_regulon`, `rbp_regulon_intronic` | Per-module × RBP over-representation in switched exons (mature / intronic / combined), GC-binned background |
-| 04–05 | `rbp_binding_fetch`, `rbp_binding` | Public CLIP binding evidence |
-| 06–07 | `rbp_pair_assayability`, `build_rbp_target_panel` | Assayability of switch pairs; wet-lab target panel |
-| 08–11 | `neuronal_clip_{freeze,windows,motif_qc,overlap}` | Neuronal CLIP freeze, windows, motif QC, overlap |
-| 12–14 | `nova_family_renomination`, `nova2_ctag_clip`, `nova2_perturbation` | NOVA family arm |
+Run the whole stage with `bash 07_rbp_regulation/_h/run_stage.sh` (add `--dry-run` to print the
+plan). The leading number of a wrapper is its tier; steps in one tier run in parallel.
+
+| Step | Wrapper | Waits on | Produces |
+|---|---|---|---|
+| 01a | `rbp_motif_families` | — | ATtRACT PWM family collapse |
+| 02a | `rbp_regulon` | 01a, stage 03 | Motif scan + per-module × RBP over-representation in switched exons (mature scope), GC-binned background |
+| 03a | `rbp_regulon_intronic` | 02a | Intronic and combined scopes |
+| 03b | `rbp_binding_fetch` | 02a (**login node**) | ENCODE eCLIP peaks for every nominated RBP; the runner holds 04a until it has run |
+| 04a | `rbp_binding` | 01a, 02a, 03b | Public CLIP binding evidence joined to the regulon calls |
+| 04b | `neuronal_clip_freeze` | 03a; `inputs/_h/download_neuronal_clip.sh` | Frozen module-RBP candidate set + dataset/context QC manifests |
+| 05a | `neuronal_clip_windows` | 04b | Pair-specific splice-flank windows + matched within-gene controls |
+| 06a | `neuronal_clip_motif_qc` | 05a | Intronic-opportunity audit; NOVA-family coordinates |
+| 07a | `neuronal_clip_overlap` | 06a | Assay-callable window calls in human TDP-43 / PTBP2 contexts |
+| 07b | `nova_family_renomination` | 06a | NOVA-family nominations with opportunity-adjusted module enrichment |
+| 08a | `nova2_ctag_clip` | 07b | NOVA2 cTag-CLIP overlap |
+| 09a | `nova2_perturbation` | 08a | Nova2-cKO splice events localized within the frozen windows |
+
+The freeze (04b) guards the candidate count and identity hash recorded in
+`configs/neuronal_clip.yaml`, as do the NOVA steps. A re-fit that changes the nominations fails
+those guards by design; update the expected values deliberately, never to get past them.
+
+The wet-lab target panel and the pair assayability read the per-gene deep dive, so they moved to
+`08_integration/_h/02a` and `03a` on 2026-09-15.
 
 ## Key results
 

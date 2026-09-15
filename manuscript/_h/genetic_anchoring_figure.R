@@ -23,7 +23,7 @@
 # assay limitation; never cite it against SNCA. The set-level evidence is panels B-D plus
 # figOrthogonalConfirm; the legend must say so.
 # Reads 05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet,
-#       05_genetic_anchoring/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
+#       08_integration/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
 #       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet,
 #       05_genetic_anchoring/_m/module_coloc_convergence/global.parquet;
 #       writes figGeneticAnchoring.{pdf,png}.
@@ -44,7 +44,7 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-DD_DIR  <- rel("05_genetic_anchoring", "_m", "deep_dive")
+DD_DIR  <- rel("08_integration", "_m", "deep_dive")
 FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 

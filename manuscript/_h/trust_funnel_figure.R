@@ -1,7 +1,7 @@
 # Publication figure for the IsoGraph module trust funnel (real data).
 # Q1 stability -> Q2 driver reproducibility -> Q3 cross-cohort aging replication ->
-# Q4 structural-switch drivers. Reads 03_module_trust/_m/stability/module_trust/*.parquet and
-# writes figTrustFunnel.{pdf,png} to 03_module_trust/_m/stability/figures/.
+# Q4 structural-switch drivers. Reads 04_module_trust/_m/stability/module_trust/*.parquet and
+# writes figTrustFunnel.{pdf,png} to 04_module_trust/_m/stability/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/trust_funnel_figure.R
 suppressPackageStartupMessages({
@@ -20,7 +20,7 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-MT_DIR  <- rel("03_module_trust", "_m", "stability", "module_trust")
+MT_DIR  <- rel("04_module_trust", "_m", "stability", "module_trust")
 FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 

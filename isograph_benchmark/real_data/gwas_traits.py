@@ -3,7 +3,7 @@
 Single source of truth for the summary statistics used beyond MAGMA: one `TraitSpec`
 per trait carrying the file path, column names, effect encoding, sample size, genome
 build, and the LD-confounded regions to drop in fine-mapping. Both the S-LDSC munge
-step (`03.munge_h2.sh`) and the coloc pipeline read this, so a trait is described once.
+step (`05_genetic_anchoring/_h/03d.ldsc_munge_h2.sh`) and the coloc pipeline read this, so a trait is described once.
 
 Two disease "cases" share the machinery:
   * disease   — schizophrenia (PGC3 wave 3, European), anchored in the SCZD switch layer.

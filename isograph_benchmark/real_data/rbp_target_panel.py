@@ -57,7 +57,7 @@ The panel is tiered:
                                  anchor: the program-level control, so the experiment is not
                                  reduced to validating GWAS loci.
 
-Outputs (07_rbp_regulation/_m/rbp_target_panel/<RBP>/):
+Outputs (08_integration/_m/rbp_target_panel/<RBP>/):
   rbp_target_evidence.parquet/tsv     one row per eligible (gene, region)
   rbp_target_candidates.parquet/tsv   one row per eligible gene, ranked (the full universe)
   rbp_target_panel.parquet/tsv        the tiered panel
@@ -87,8 +87,8 @@ from isograph_benchmark.real_data.rbp_regulon import (
 )
 
 _RBP_DIR = stage_out("regulation", "rbp")
-_OUT_ROOT = stage_out("regulation", "rbp_target_panel")
-_DEEP_DIVE = stage_out("anchoring", "deep_dive")
+_OUT_ROOT = stage_out("integration", "rbp_target_panel")
+_DEEP_DIVE = stage_out("integration", "deep_dive")
 _TREE_OF = {region: tree for tree, region in _REGIONS}
 
 

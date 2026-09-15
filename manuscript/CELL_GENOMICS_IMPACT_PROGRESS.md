@@ -15,11 +15,11 @@ on-disk artifacts. No `git add` done yet. Interpreters/SLURM conventions per `AG
 - `isograph_benchmark/real_data/celltype_composition.py` — subcommands `fractions` (BrNum→
   sample_id join of the committed MuSiC proportions from
   `../sex_context_brain/cell_proportion_estimate/_m/`; marker-depletion cut) and `meta`
-  (with-vs-without rollup → `04_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md`).
+  (with-vs-without rollup → `03_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md`).
 - `incremental_association.py` — added `--composition` flag: adds cell-type fractions as
   inference covariates (reference type dropped for the simplex), writes to
   `incremental_association_composition/` so the canonical baseline is preserved.
-- SLURM wrapper `04_module_characterization/_h/10.celltype_composition_brainseq.sh` (array 1–4). **Ran clean
+- SLURM wrapper `03_module_characterization/_h/01g.celltype_composition_brainseq.sh` (array 1–4). **Ran clean
   as job 42833041.**
 
 **Result (gene-level composition-unique = DTU-without-DGE signal, base → composition-adjusted)**
@@ -116,7 +116,7 @@ ELAVL1, QKI, MBNL1, PUM1/2, IGF2BP1/2/3. Honest partial coverage.
 
 **To resume**
 1. `python -m isograph_benchmark.real_data.rbp_binding run` (moderate compute — SLURM: add a
-   wrapper `07_rbp_regulation/_h/05.rbp_binding.sh`; interval overlap over 17 regions).
+   wrapper `07_rbp_regulation/_h/04a.rbp_binding.sh`; interval overlap over 17 regions).
 3. Read `07_rbp_regulation/_m/rbp/RBP_BINDING_SUMMARY.md`: the per-RBP binding-supported count
    (25/38, GC-matched background) and the small median switched−constitutive gap (0.024).
    Do **not** read `RBP_BINDING_SUMMARY_flatbg.md` for the headline. Supports the Fig 4 RBP
@@ -159,7 +159,7 @@ result doesn't show any individual module is anchored; this tests each module as
 **To resume**
 1. `python -m isograph_benchmark.real_data.module_genetic_anchoring --analysis brainseq-sczd`
    (then `brainseq-aging`, `gtex-aging`). Permutation loop (default n_perm=1000 × 2 logits/
-   module) is the heavy part → SLURM wrapper `05_genetic_anchoring/_h/04.module_anchoring.sh`.
+   module) is the heavy part → SLURM wrapper `05_genetic_anchoring/_h/01e.module_anchoring.sh`.
 2. Add a cross-analysis meta rollup (mirror `qtl_anchoring_meta`) if ≥1 module is anchored.
 3. **Deeper follow-ons (need new controlled-genotype extraction, not built):** eigenswitch ×
    TOPMed genotype eigen-QTL (reuse `scz_age_projection.load_genotypes` + plink2 in eqtl env);
@@ -180,10 +180,10 @@ runs MuSiC in-repo against the **same Tran/LIBD snRNA references** (seed 13) use
   branch, `gtex-aging` in `fractions`, and a GTEx replication section in `meta`
   (`02_module_discovery/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md` + a section appended to the
   shared `COMPOSITION_ADJUSTMENT_SUMMARY.md`).
-- `04_module_characterization/_h/gtex_music_deconv.R` — self-contained MuSiC deconvolution (inlines the
+- `03_module_characterization/_h/gtex_music_deconv.R` — self-contained MuSiC deconvolution (inlines the
   board-level cell-type mapping incl. striatal MSN D1/D2; reads the exported bulk parquet via
   arrow; writes `music-proportions-gtex-<region>.tsv` + `marker_stats_genes.gtex-<region>.csv`).
-- `04_module_characterization/_h/11.gtex_composition.sh` — array 1–8: export → R MuSiC → fractions →
+- `03_module_characterization/_h/01h.celltype_composition_gtex.sh` — array 1–8: export → R MuSiC → fractions →
   `incremental_association --composition`, per region.
 
 **Region coverage (honest):** only the **8 GTEx regions with a defensibly matched Tran

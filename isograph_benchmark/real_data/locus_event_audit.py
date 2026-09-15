@@ -61,7 +61,7 @@ distinguishing fact is unavailable by construction. The `coloc.abf` fallback has
 problem for the same reason -- it scores the representative intron alone -- and it fills
 in wherever SuSiE found nothing, so it is the quiet path by which a locus that was never
 fitted at all can arrive carrying a posterior. PICALM is exactly that case: its AD locus
-exceeded the MAX_SNPS guard in 22.coloc_gwas_susie.R and was dropped before any GWAS
+exceeded the MAX_SNPS guard in 03c.coloc_gwas_susie.R and was dropped before any GWAS
 SuSiE fit, so its PP4 is an abf number and no signal-level test has ever run there.
 
 AMENDMENT, 2026-09-10
@@ -675,7 +675,7 @@ def _write_report(dest: Path, audit: pd.DataFrame, curated: pd.DataFrame,
         A(f"**SENSITIVITY ARM: GWAS SuSiE SNP guard {int(max_snps):,}** (primary "
           f"{MAX_SNPS_PRIMARY:,}). A tier assigned here to a locus the primary grid could "
           "not fit is a sensitivity result, and may not enter the biological narrative "
-          "without a locus-specific LD audit (`26.locus_ld_robustness.sh`).")
+          "without a locus-specific LD audit (`08d.locus_ld_robustness.sh`).")
         A("")
     A(f"Nomination source: `{nominations}` at `PP4_sQTL >= {call}`.")
     A("")

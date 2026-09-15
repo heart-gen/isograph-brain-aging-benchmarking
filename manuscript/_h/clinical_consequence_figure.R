@@ -4,7 +4,7 @@
 #     than the gene's constitutive exons - expected alternative-exon biology, robust to a
 #     coding-only (CDS) scope; (C) the colocalized splicing-led genes are themselves constrained.
 # Reads 06_switch_mechanism/_m/clinical_consequence_meta.parquet, the per-region constraint_summary.parquet,
-# and 05_genetic_anchoring/_m/deep_dive/deep_dive_panel.parquet; writes figClinicalConsequence.{pdf,png}.
+# and 08_integration/_m/deep_dive/deep_dive_panel.parquet; writes figClinicalConsequence.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/clinical_consequence_figure.R
 suppressPackageStartupMessages({
@@ -70,7 +70,7 @@ pB <- ggplot(b, aes(exon_set, per_kb, fill = exon_set)) +
                       axis.text.x = element_text(angle = 15, hjust = 1))
 
 # ---- Panel C: LOEUF of colocalized genes by verdict ----
-panel <- as.data.frame(read_parquet(rel("05_genetic_anchoring", "_m", "deep_dive", "deep_dive_panel.parquet")))
+panel <- as.data.frame(read_parquet(rel("08_integration", "_m", "deep_dive", "deep_dive_panel.parquet")))
 pc <- panel |> filter(!is.na(loeuf)) |>
   mutate(v = case_when(grepl("splicing-led", verdict) ~ "splicing-led",
                        grepl("not resolved", verdict) ~ "splicing\n(unresolved)",

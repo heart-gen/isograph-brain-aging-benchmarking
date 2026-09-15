@@ -11,7 +11,7 @@ PICALM, and anything in a gene-dense or long-range-LD region -- that assumption 
 technicality: two independent QTL signals, only one of which is shared with the GWAS,
 push posterior mass into H3 and the locus reads as "distinct causal variants" when it is
 really "one shared signal plus one private one". eCAVIAR CLPP
-(``05_genetic_anchoring/_h/10.coloc_clpp.R``) is signal-aware on the QTL side but
+(``05_genetic_anchoring/_h/03b.coloc_clpp.R``) is signal-aware on the QTL side but
 consumes GTEx's shipped credible sets, so its yield is small and its posteriors are
 individually modest.
 
@@ -71,10 +71,10 @@ STAGES
                  ran on, so the two estimators are compared on identical cells rather
                  than on two independently rebuilt gene lists. Also writes the GTEx
                  credible sets that back the agreement filter. Login-node safe.
-  [R stage A]    05_genetic_anchoring/_h/22.coloc_gwas_susie.R <analysis>
+  [R stage A]    05_genetic_anchoring/_h/03c.coloc_gwas_susie.R <analysis>
                  -- fits and caches the per-locus GWAS SuSiE, once, for every tissue task
                  downstream to reuse.
-  [R stage B]    05_genetic_anchoring/_h/23.coloc_signal_susie.R <analysis> <tissue>
+  [R stage B]    05_genetic_anchoring/_h/06b.coloc_signal_susie.R <analysis> <tissue>
                  -- QTL SuSiE + coloc.susie (+ abf fallback + p12 sweep) per cell.
   --stage meta   Assemble, apply the estimator hierarchy, run the paired modality tests,
                  write the report.
@@ -231,7 +231,7 @@ def fallback_reasons(cells: pd.DataFrame, status: pd.DataFrame, pairs: pd.DataFr
     return out
 
 
-# The GWAS SuSiE SNP guard of the uniform primary grid (22.coloc_gwas_susie.R). A run at
+# The GWAS SuSiE SNP guard of the uniform primary grid (03c.coloc_gwas_susie.R). A run at
 # any other value is a scoped SENSITIVITY arm with its own root, so it can never replace
 # primary shards -- which is what the 2026-09-10 aging__ad recovery at 30,000 did before
 # this split existed, overwriting the 12,000 AD cache and shards in place.
@@ -339,7 +339,7 @@ def results_dir(src: Path, sqtl: str = "representative") -> Path:
 def _load_susie(src: Path) -> pd.DataFrame:
     d = src / "susie"
     if not d.exists():
-        raise SystemExit(f"no susie/ results in {src}; run 23.coloc_signal_susie.sh first")
+        raise SystemExit(f"no susie/ results in {src}; run 06b.coloc_signal_susie.sh first")
     parts = [pd.read_parquet(p) for p in sorted(d.iterdir()) if p.suffix == ".parquet"]
     if not parts:
         raise SystemExit(f"no parquet files under {d}")
@@ -583,7 +583,7 @@ def _write_report(src: Path, arm: str, pairs: pd.DataFrame, cells: dict,
           f"primary {MAX_SNPS_PRIMARY:,} for the analyses in this directory only. Loci "
           "recovered this way were empirically enriched for GWAS-reference-LD "
           "inconsistency, and none may enter the biological narrative without a "
-          "locus-specific LD audit (`26.locus_ld_robustness.sh`). This is not the "
+          "locus-specific LD audit (`08d.locus_ld_robustness.sh`). This is not the "
           "primary grid.")
         A("")
     A(f"Gene pool arm: `{arm}`. Primary signal filter: `{primary_label}`. "
