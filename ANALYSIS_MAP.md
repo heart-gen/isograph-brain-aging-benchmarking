@@ -23,11 +23,12 @@ that reaches the paper.
 
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
-| IsoGraph fits | `real_data/run_models.py` | `02_module_discovery/_h/01–04` | `<cohort>/<region>/_m/isograph_vae[_with_abundance]/` | all |
+| IsoGraph fits | `real_data/run_models.py` | `02_module_discovery/_h/01–03` | `<cohort>/<region>/_m/isograph_vae/` | all *(switching transcript filter since 2026-09-14; the with-abundance arm `_h/04`/`_h/06` is retired — outputs only at tag `legacy_expression_filter`)* |
 | Leiden resolution sweep | `real_data/sweep_leiden.py` | `_h/05–06` (BrainSEQ), `_h/15` (GTEx) | `<store>/isograph_vae/leiden_sweep_results.parquet` | S-real-2 *(disclosed sensitivity; 5.0 stays canonical on the ≥ 900-gene criterion, PI decision 2026-09-12)* |
 | Classical WGCNA baseline | `_h/07–09.wgcna_gene_*.R` | `_h/07–09` | `<store>/wgcna_gene/` | S-real-1 |
 | Matched-feature WGCNA baselines | `real_data/run_matched_wgcna.py` | `_h/10–11` (aging), `_h/16` (`caudate_sczd`, added 2026-09-12) | `<store>/wgcna_{switch_only,multiplex}/` | Fig 3 (internal control); S-real-1 / Table S1 |
-| Refit / reprojection QC | `real_data/qc_covariate_test.py`, `tier_checks.py` | `_h/12–14` | `<store>/{qc_covariate_test,tier_checks}/` | — |
+| Refit / reprojection QC | `real_data/qc_covariate_test.py`, `tier_checks.py` | `_h/12–14` | — | — *(**retired 2026-09-14**: model-design QC, cited nowhere and never full-coverage; not re-run on the switching filter, outputs only at tag `legacy_expression_filter`)* |
+| **Module sizes, all methods** | `real_data/module_sizes.py` | *(login; after the fits)* | `_m/module_sizes/{module_sizes.tsv,module_size_summary.tsv}` | *(giant modules occur in both IsoGraph GTEx and WGCNA; reported and compared, not engineered away — PI 2026-09-14)* |
 | **Partition provenance guard** | `real_data/partition_provenance.py` (library: `partition_fingerprint`, `check_partition`, `load_enrichment`) | *(called by `module_enrichment` and ten consumers)* | sha256 fingerprint in each `<store>/module_enrichment/*_modules.parquet` file metadata | *(gate: a module-id join is only valid against the fit that wrote it)* |
 
 ## 03 — Module trust
@@ -41,7 +42,7 @@ that reaches the paper.
 | **Cross-cohort eigengene projection** | `real_data/eigengene_projection.py` (`run`, `aggregate`) | `_h/18` (array: {isograph, wgcna} × 3 pairs; `PROJECTION_AGGREGATE=1`) | `_m/stability/eigengene_projection/{eigengene_projection__<pair>__<method>__<direction>.parquet,switch_axis_alignment__<pair>.parquet,EIGENGENE_PROJECTION.md}` | *(frozen-weight preservation vs a type-matched null; module-specific age z against same-weight random projections — raw projected age r is cohort-confounded)* |
 | **Pooled cross-cohort replication** | `real_data/module_trust.py replication-pooled` | `_h/15` | `_m/stability/module_trust/module_aging_replication_pooled__<method>{.parquet,__stats.json}` | *(null for both methods; reported, not a figure)* |
 | **Phenotype-blind resolution sweep** | `real_data/stability.py sweep` | `_h/16` (after `_h/01` with `STABILITY_SAVE_EDGES=1`), then `_h/03` | `_m/stability/stability_summary.parquet` (rows with method isograph_resXpY) | *(disclosed sensitivity; cannot select a resolution)* |
-| LR / software robustness | `real_data/stability.py` | `_h/05–07` | `_m/stability/lr_validation/` | — |
+| LR / software robustness | `real_data/stability.py` | `_h/05–07` | — | — *(**retired 2026-09-14**: settled the single-LR promotion; not re-run on the switching filter, outputs only at tag `legacy_expression_filter`)* |
 | Giant-cap ablation | `real_data/stability.py` | `_h/08` | `_m/stability_gcap_ab/` | — *(**retired 2026-09-12**: a resolution-2.0 A/B of a cap never promoted; superseded by resolution 5.0, not cited)* |
 | Cross-cohort replication | `real_data/replication.py`, `replication_go.py` | `_h/10–11` | `_m/replication/` | Fig 2 |
 | Replication null + function | `real_data/replication_permutation.py`, `replication_functional.py` | `_h/12–13` | `_m/replication/FUNCTIONAL_PRESERVATION*` | Fig 2 |
@@ -57,7 +58,7 @@ that reaches the paper.
 | Abundance/switch separation | `real_data/abundance_structure_separation.py` | `_h/08` | `_m/incremental_effect_sizes.parquet` | S-real-4 |
 | Composition-unique genes | `real_data/characterize_composition_unique.py` | `_h/09` | `_m/composition_adjustment.parquet` | S-real-4 |
 | Cell-type composition | `real_data/celltype_composition.py` + MuSiC R | `_h/10–11` | `_m/composition_adjustment.parquet`, `02_module_discovery/gtex/_m/composition/` | **Fig 5** `figCompositionRobustness`, Table S13 |
-| Tier projection | `real_data/project_tiers.py` | `_h/12–13` | `<store>/tier_checks/` | — |
+| Tier projection | `real_data/project_tiers.py` | `_h/12–13` | — | — *(**retired 2026-09-14**: channel-tier ablation, cited nowhere, 6/17 coverage; not re-run on the switching filter, outputs only at tag `legacy_expression_filter`)* |
 | Three-baseline comparison | `real_data/baseline_comparison.py` | `_h/14` | `_m/baseline_comparison/` | S-real-1, S1/S2 |
 
 ## 05 — Genetic anchoring

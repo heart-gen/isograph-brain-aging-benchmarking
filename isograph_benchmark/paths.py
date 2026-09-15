@@ -40,6 +40,8 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     "modules": ("02_module_discovery",),
     # transcript-filter sensitivity refits; deliberately OUTSIDE the cohort x region stores
     "modules.filter_arms": ("02_module_discovery", "_m", "transcript_filter_arms"),
+    # per-module size table across every method and store (IsoGraph + the three WGCNA baselines)
+    "modules.sizes": ("02_module_discovery", "_m", "module_sizes"),
     # 03 — module trust
     "trust.stability": ("03_module_trust", "_m", "stability"),
     "trust.replication": ("03_module_trust", "_m", "replication"),

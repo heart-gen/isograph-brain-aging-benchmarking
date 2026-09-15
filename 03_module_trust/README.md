@@ -14,7 +14,7 @@ pipeline, which is what makes the second arm a real replication.
 |---|---|---|
 | 01–03 | `stability_isograph`, `stability_wgcna`, `stability_aggregate` | Split-half partitions + `stability_summary` |
 | 04 | `module_meta` | Per-module meta tables, driver loadings (per split half — re-run after any split-half re-fit, then step 17) |
-| 05–07 | `lr_validation`, `lr_validation_launch`, `lr_aggregate` | Learning-rate / software-robustness validation |
+| 05–07 | `lr_validation`, `lr_validation_launch`, `lr_aggregate` | Learning-rate / software-robustness validation — **retired 2026-09-14**: settled the single-LR promotion; not re-run on the switching filter, outputs only at tag `legacy_expression_filter` |
 | 08 | `gcap_ab` | Giant-cap ablation (`_m/stability_gcap_ab/`) — **retired 2026-09-12**: a resolution-2.0 A/B of a cap never promoted, superseded by resolution 5.0 and cited nowhere |
 | 09 | `module_trust_replication` | Q3 cross-cohort aging replication of trusted modules |
 | 10–11 | `replication`, `replication_go` | Cross-cohort module matching + GO consistency |
@@ -24,8 +24,10 @@ pipeline, which is what makes the second arm a real replication.
 | 16 | `stability_resolution_sweep` | Phenotype-blind Leiden resolution curve (re-clusters saved split-half graphs) — a disclosed sensitivity; 5.0 stays on the ≥ 900-gene criterion (PI decision 2026-09-12) |
 | 17 | `within_cohort` | Within-cohort Q2 driver reproducibility + Q3 sign concordance (`module_trust within`); run after step 04. It had no launcher, which is how a stale `modules_meta` went unnoticed after the 2026-09-09 re-fit |
 
-`_m/` holds `stability/` and `replication/`, plus the resolution-2.0 and giant-cap
-variants as named siblings (`stability_res2`, `stability_gcap_ab`, `replication_res2`).
+`_m/` holds `stability/` and `replication/`. The resolution-2.0 siblings (`stability_res2`,
+`replication_res2`, which nothing read or wrote), the giant-cap ablation and the LR validation
+outputs were removed from the live tree on 2026-09-14 and survive only at tag
+`legacy_expression_filter`.
 
 **CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,replication_functional,age_model_curvature}.py`.
 
