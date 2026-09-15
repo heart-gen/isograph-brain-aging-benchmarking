@@ -25,10 +25,18 @@ spline compared against the linear fit. Canonical Leiden resolution **5.0**, gia
 `{brainseq,gtex}/<region>/_m/` is the cohort × region artifact store and is shared by
 every later stage. It is keyed by cohort × region rather than by stage, so it holds both
 the fits written here (`isograph_vae/`, `wgcna_gene/`, `wgcna_switch_only/`,
-`wgcna_multiplex/`, `isograph_vae_with_abundance/`) and the per-region tables the
-downstream stages write into it (`module_enrichment/`, `qtl_anchoring.parquet`,
-`tier_checks/`, …). Address it in code with `region_store()` / `region_artifact_dir()`
+`wgcna_multiplex/`, `isograph_vae_res2/`) and the per-region tables the
+downstream stages write into it (`module_enrichment/`, `qtl_anchoring.parquet`, …).
+Address it in code with `region_store()` / `region_artifact_dir()`
 from `isograph_benchmark.paths` — never by literal path.
+
+**Transcript filter (2026-09-14).** Every IsoGraph fit and matched baseline uses the switching
+filter (`run_models.filter_production_transcripts`): gene count ≥ 10 in ≥ 70% of samples;
+transcript count ≥ 10 and share of its gene ≥ 0.10, each in ≥ 10% of samples. The pipeline and
+results before the switch — BrainSEQ aging on count > 10 in ≥ 70%, SCZD and GTEx unfiltered — are
+frozen at tag `legacy_expression_filter`. Retired with that switch and absent from the live tree:
+the with-abundance arm (steps 04, 06), refit/reprojection QC and tier projection (steps 12–14,
+stage 04 steps 12–13), and the transcript-filter arms (step 17), which chose this filter.
 
 Four heavy artifacts per fit (`feature_scores`, `feature_reconstruction`,
 `high_vs_low_table`, `edges`) are gitignored and distributed via Zenodo; see `zenodo/`.
@@ -38,11 +46,11 @@ Four heavy artifacts per fit (`feature_scores`, `feature_reconstruction`,
 | Step | Wrapper | Produces |
 |---|---|---|
 | 01–03 | `run_isograph_{brainseq_aging,brainseq_sczd,gtex}` | IsoGraph fits: `modules`, `edges`, `traits`, `age_{linear,spline}`, `feature_scores`, `module_gene_roles`, `calibration` |
-| 04 | `run_isograph_brainseq_with_abundance` | Abundance-channel variant fit |
-| 05–06 | `sweep_leiden_brainseq[_with_abundance]` | Resolution sweep (re-clusters saved edges, no refit) |
+| 04 | `run_isograph_brainseq_with_abundance` | *Retired 2026-09-14* — abundance-channel variant at the pre-5.0 resolutions |
+| 05–06 | `sweep_leiden_brainseq[_with_abundance]` | Resolution sweep (re-clusters saved edges, no refit); step 06 retired with step 04 |
 | 07–09 | `wgcna_gene_{brainseq_aging,brainseq_sczd,gtex}` | Classical gene-level WGCNA baseline |
 | 10–11 | `wgcna_matched_features_{brainseq,gtex}` | `wgcna_switch_only` + `wgcna_multiplex` baselines on **identical** features — the primary internal control |
-| 12–14 | `refit_qc_{brainseq,gtex}`, `reproject_qc_gtex` | Refit QC and reprojection checks |
+| 12–14 | `refit_qc_{brainseq,gtex}`, `reproject_qc_gtex` | *Retired 2026-09-14* — refit QC and reprojection checks |
 | 15 | `sweep_leiden_gtex` | Resolution sweep on the 13 GTEx fits — a disclosed sensitivity; the CLI refuses `--write-best` for GTEx |
 
 Three WGCNA baselines exist on purpose: `wgcna_gene` (classical abundance),

@@ -19,7 +19,7 @@ result here against the three matched baselines from stage 02.
 | 06–07 | `incremental_association_{brainseq,gtex}` | De-confounded test: does the switch channel add signal *beyond* gene-level abundance? |
 | 08–09 | `abundance_structure`, `characterize_composition_unique` | Abundance/switch orthogonality; composition-unique gene sets |
 | 10–11 | `celltype_composition_brainseq`, `gtex_composition` | Cell-type composition (MuSiC deconvolution) |
-| 12–13 | `project_tiers_pilot`, `tiers_fanout` | Tier projection |
+| 12–13 | `project_tiers_pilot`, `tiers_fanout` | Tier projection — **retired 2026-09-14**: cited nowhere; not re-run on the switching filter, outputs only at tag `legacy_expression_filter` |
 | 14 | `baseline_comparison` | Three-baseline per-module rate comparison (the scope bound) |
 
 ## Covariate policy
