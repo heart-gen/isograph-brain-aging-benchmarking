@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=2
-#SBATCH --time=00:20:00
+#SBATCH --time=04:00:00
 #SBATCH --output=04_module_trust/_m/logs/%x-%j.log
 
 ## Three-baseline synthesis: per-module phenotype and GO rates for isograph vs

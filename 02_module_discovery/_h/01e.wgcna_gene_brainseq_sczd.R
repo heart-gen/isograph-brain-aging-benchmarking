@@ -184,9 +184,21 @@ gene_df <- read_gene_counts(gene_counts_path, gene_counts_raw_path)
 
 # Load sample metadata from bundle
 sample_tbl <- read_parquet_table(file.path(bundle_dir, "samples.parquet"))
-gene_tbl <- read_parquet_table(file.path(bundle_dir, "genes.parquet"))
 keep_ids <- sample_tbl$sample_id
-keep_gene_ids <- gene_tbl$gene_id
+
+# Genes come from the production gene universe (the genes surviving the production
+# transcript filter), written by 02_module_discovery/_h/00a.production_gene_universe.sh,
+# so WGCNA is fit on exactly the genes IsoGraph models. Before 2026-09-15 this took the
+# bundle's full gene list, which is wider than IsoGraph's and made the two module sets
+# non-comparable downstream (MAGMA GSA, module trust, replication).
+universe_path <- file.path(dirname(out_dir), "production_gene_universe.parquet")
+if (!file.exists(universe_path)) {
+    stop("missing gene universe for brainseq/caudate_sczd: ", universe_path,
+         "\n  run 02_module_discovery/_h/00a.production_gene_universe.sh first.")
+}
+gene_universe <- read_parquet_table(universe_path)
+if (nrow(gene_universe) == 0) stop("empty gene universe: ", universe_path)
+keep_gene_ids <- as.character(gene_universe$gene_id)
 
 # Subset to bundle samples (same filter as IsoGraph run)
 id_cols <- c("Geneid", "Chr", "Start", "End", "Strand", "Length")
@@ -194,7 +206,7 @@ id_cols_present <- intersect(id_cols, names(gene_df))
 sample_cols_avail <- intersect(keep_ids, names(gene_df))
 if (length(sample_cols_avail) < 30) stop("Too few samples found in gene counts matrix.")
 gene_ids_avail <- intersect(keep_gene_ids, gene_df$Geneid)
-if (length(gene_ids_avail) < MIN_MODULE_SIZE) stop("Too few bundle-filtered genes found in gene counts matrix.")
+if (length(gene_ids_avail) < MIN_MODULE_SIZE) stop("Too few production-universe genes found in gene counts matrix.")
 gene_df <- gene_df[match(gene_ids_avail, gene_df$Geneid), ]
 
 gene_ids <- gene_df$Geneid
@@ -206,7 +218,7 @@ rownames(expr_mat) <- gene_ids
 lib_sizes <- colSums(expr_mat)
 cpm_mat <- sweep(expr_mat, 2, lib_sizes / 1e6, "/")
 expr_mat <- log2(cpm_mat + 1)
-cat(sprintf("Bundle expression filter retained %d genes for WGCNA\n", nrow(expr_mat)))
+cat(sprintf("Production gene universe retained %d genes for WGCNA\n", nrow(expr_mat)))
 
 datExpr <- t(expr_mat)
 good <- goodSamplesGenes(datExpr, verbose = 0)

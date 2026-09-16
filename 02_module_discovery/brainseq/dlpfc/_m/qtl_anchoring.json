@@ -4,13 +4,16 @@
   "tissue": "Brain_Frontal_Cortex_BA9",
   "variant": "standard",
   "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 18105,
+  "n_universe_genes": 19532,
   "universe_sizes": {
-    "sQTL": 13028,
-    "eQTL": 17249
+    "sQTL": 13548,
+    "eQTL": 18529
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 4458
+    "all_modules": 5349
   }
 }

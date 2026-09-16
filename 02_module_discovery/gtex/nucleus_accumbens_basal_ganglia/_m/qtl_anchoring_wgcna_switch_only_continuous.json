@@ -7,15 +7,13 @@
   "outcome": "continuous",
   "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 8485,
+  "n_universe_genes": 7099,
   "universe_sizes": {
-    "sQTL": 7122,
-    "eQTL": 8465
+    "sQTL": 6444,
+    "eQTL": 7095
   },
   "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 8485,
-    "pheno_sig_modules": 359,
-    "go_visible_modules": 359
+    "all_modules": 7099
   }
 }

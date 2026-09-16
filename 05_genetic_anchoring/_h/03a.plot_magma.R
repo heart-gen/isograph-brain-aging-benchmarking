@@ -16,7 +16,14 @@ suppressPackageStartupMessages({
 .args <- commandArgs(trailingOnly = FALSE)
 .script_path <- sub("^--file=", "", .args[grep("^--file=", .args)])
 script_dir <- dirname(normalizePath(if (interactive()) getwd() else .script_path, mustWork = FALSE))
-project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
+# The wrappers export ISOGRAPH_BENCHMARK_ROOT; fall back to the repo root two
+# levels above <stage>/_h/ so a direct Rscript call still resolves correctly.
+project_root <- Sys.getenv("ISOGRAPH_BENCHMARK_ROOT", unset = "")
+if (!nzchar(project_root)) project_root <- file.path(script_dir, "..", "..")
+project_root <- normalizePath(project_root, mustWork = TRUE)
+if (!dir.exists(file.path(project_root, "isograph_benchmark"))) {
+    stop("project_root is not the repo root: ", project_root)
+}
 gwas_dir <- file.path(project_root, "05_genetic_anchoring", "_m", "gwas")
 res_dir <- file.path(gwas_dir, "results")
 out_dir <- file.path(gwas_dir, "figures")

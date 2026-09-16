@@ -13,7 +13,7 @@
 # the switch-pair transcripts, GENCODE v47) with downloaded eCLIP peaks, then joins binding
 # support into the significant rbp_regulon calls. Single task over all 17 region sets.
 #
-# Prereq: peaks fetched to inputs/raw/rbp_binding/ (run once, login node w/ network):
+# Prereq: peaks fetched to inputs/raw/rbp_binding/ by 03b (an ordinary batch step):
 #   python -m isograph_benchmark.real_data.rbp_binding fetch
 #
 # Outputs (07_rbp_regulation/_m/rbp/): rbp_binding_calls.parquet, rbp_binding_regulon.parquet,

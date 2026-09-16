@@ -8,173 +8,176 @@ Three differences from the CLPP layer, each limiting what a row can say:
 - **`estimator = abf` rows name GTEx's representative intron**, the only one the fallback scored. They resolve an event but never tested the gene's other introns.
 - **One intron per tissue:** the intron behind that tissue's call. Other introns of the gene that also colocalize are in `signal_pairs.parquet`, not here.
 
-- events (nomination x tissue): **161** over **42** gene x trait nominations
-- signal-level (`susie`): **67**; abf fallback: **94**
-- junction mapped to a GENCODE v47 transcript: **147/161**
-- junction on an IsoGraph switch-pair isoform in the same tissue: **64** events, **26** gene x trait
-- also a switch-pair isoform in the matching BrainSeq region: **17**
+- events (nomination x tissue): **164** over **41** gene x trait nominations
+- signal-level (`susie`): **30**; abf fallback: **134**
+- junction mapped to a GENCODE v47 transcript: **156/164**
+- junction on an IsoGraph switch-pair isoform in the same tissue: **61** events, **21** gene x trait
+- also a switch-pair isoform in the matching BrainSeq region: **9**
 - cross-tissue exceptions (switch pair taken from another region; flagged, never counted as tissue-concordant, scored apart in the long-read arm): **2** events (UNC13A)
 
 | gene | trait | tissue | junction | PP4 | estimator | prior | transcripts | switch pair | BrainSeq | structural event |
 |---|---|---|---|---|---|---|---|---|---|---|
-| CTSH | AD | hippocampus | chr15:78937423-78939140(-) | 0.989 | abf | robust | ENST00000220166.10,ENST00000525807.6,ENST00000527715.6,ENST00000528741.6,ENST00000529612.6,ENST00000529861.6,ENST00000530010.6,ENST00000530929.5,ENST00000534038.6,ENST00000534268.6,ENST00000615999.5,ENST00000649928.2,ENST00000676510.1,ENST00000676596.1,ENST00000676639.1,ENST00000676671.1,ENST00000676850.1,ENST00000676865.1,ENST00000676880.1,ENST00000677238.1,ENST00000677254.1,ENST00000677316.1,ENST00000677320.1,ENST00000677367.1,ENST00000677448.1,ENST00000677534.1,ENST00000677789.1,ENST00000677810.1,ENST00000677874.1,ENST00000677936.1,ENST00000678031.1,ENST00000678281.1,ENST00000678283.1,ENST00000678415.1,ENST00000678727.1,ENST00000678799.1,ENST00000678841.1,ENST00000678886.1,ENST00000678940.1,ENST00000679017.1,ENST00000679047.1,ENST00000679211.1,ENST00000679334.1 | yes | — | no annotated structural change |
-| CTSH | AD | nucleus_accumbens_basal_ganglia | chr15:78939171-78944778(-) | 0.988 | abf | robust | ENST00000529861.6,ENST00000677320.1,ENST00000677921.1,ENST00000678799.1,ENST00000678886.1,ENST00000679211.1 | no | — | — |
-| CTSH | AD | substantia_nigra | chr15:78937423-78939140(-) | 0.985 | abf | robust | ENST00000220166.10,ENST00000525807.6,ENST00000527715.6,ENST00000528741.6,ENST00000529612.6,ENST00000529861.6,ENST00000530010.6,ENST00000530929.5,ENST00000534038.6,ENST00000534268.6,ENST00000615999.5,ENST00000649928.2,ENST00000676510.1,ENST00000676596.1,ENST00000676639.1,ENST00000676671.1,ENST00000676850.1,ENST00000676865.1,ENST00000676880.1,ENST00000677238.1,ENST00000677254.1,ENST00000677316.1,ENST00000677320.1,ENST00000677367.1,ENST00000677448.1,ENST00000677534.1,ENST00000677789.1,ENST00000677810.1,ENST00000677874.1,ENST00000677936.1,ENST00000678031.1,ENST00000678281.1,ENST00000678283.1,ENST00000678415.1,ENST00000678727.1,ENST00000678799.1,ENST00000678841.1,ENST00000678886.1,ENST00000678940.1,ENST00000679017.1,ENST00000679047.1,ENST00000679211.1,ENST00000679334.1 | no | — | — |
-| CTSH | AD | hypothalamus | chr15:78939171-78944778(-) | 0.985 | abf | robust | ENST00000529861.6,ENST00000677320.1,ENST00000677921.1,ENST00000678799.1,ENST00000678886.1,ENST00000679211.1 | no | — | — |
-| CTSH | AD | putamen_basal_ganglia | chr15:78939171-78944778(-) | 0.977 | abf | robust | ENST00000529861.6,ENST00000677320.1,ENST00000677921.1,ENST00000678799.1,ENST00000678886.1,ENST00000679211.1 | no | — | — |
-| CTSH | AD | spinal_cord_cervical_c_1 | chr15:78939171-78944778(-) | 0.899 | abf | intermediate | ENST00000529861.6,ENST00000677320.1,ENST00000677921.1,ENST00000678799.1,ENST00000678886.1,ENST00000679211.1 | no | — | — |
-| DOC2A | AD | amygdala | chr16:30007090-30007173(-) | 0.881 | abf | primary_prior | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | yes | — | no annotated structural change |
 | NDUFS3 | AD | cerebellar_hemisphere | chr11:47565986-47571471(+) | 0.864 | abf | primary_prior | ENST00000533507.5 | no | — | — |
-| PICALM | AD | cortex | chr11:85974812-85981129(-) | 0.818 | abf | primary_prior | ENST00000356360.9,ENST00000532603.5 | no | — | — |
-| SIRPA | AD | cerebellar_hemisphere | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
-| SIRPA | AD | cerebellum | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
+| SIRPA | AD | cerebellar_hemisphere | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
+| SIRPA | AD | cerebellum | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
 | SIRPA | AD | anterior_cingulate_cortex_ba24 | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
 | SIRPA | AD | putamen_basal_ganglia | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
 | SIRPA | AD | spinal_cord_cervical_c_1 | chr20:1915455-1921395(+) | 0.965 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
 | SIRPA | AD | frontal_cortex_ba9 | chr20:1915455-1921395(+) | 0.964 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
-| SIRPA | AD | caudate_basal_ganglia | chr20:1915455-1921395(+) | 0.963 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | yes | — |
+| SIRPA | AD | caudate_basal_ganglia | chr20:1915455-1921395(+) | 0.963 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
 | SIRPA | AD | hypothalamus | chr20:1924877-1927875(+) | 0.961 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
 | SIRPA | AD | amygdala | chr20:1915455-1921395(+) | 0.960 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
 | SIRPA | AD | cortex | chr20:1915455-1921395(+) | 0.957 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
-| SIRPA | AD | substantia_nigra | chr20:1915455-1921395(+) | 0.955 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
-| SIRPA | AD | hippocampus | chr20:1915455-1921395(+) | 0.950 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | yes | no annotated structural change |
-| SIRPA | AD | nucleus_accumbens_basal_ganglia | chr20:1915455-1921395(+) | 0.936 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | no | — | — |
-| SPAG9 | AD | hypothalamus | chr17:50974538-50974771(-) | 0.839 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | putamen_basal_ganglia | chr17:50974538-50974771(-) | 0.827 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | hippocampus | chr17:50974538-50974771(-) | 0.823 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | anterior_cingulate_cortex_ba24 | chr17:50974538-50974771(-) | 0.823 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | substantia_nigra | chr17:50974538-50974771(-) | 0.821 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | amygdala | chr17:50974538-50974771(-) | 0.811 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | caudate_basal_ganglia | chr17:50974538-50974771(-) | 0.809 | abf | primary_prior | — | — | — | — |
-| SPAG9 | AD | cortex | chr17:50970856-50974771(-) | 0.802 | abf | primary_prior | ENST00000262013.12,ENST00000357122.8,ENST00000505279.5,ENST00000506500.1,ENST00000510283.5 | no | yes | — |
-| SPI1 | AD | cerebellar_hemisphere | chr11:47383832-47408952(-) | 0.926 | abf | intermediate | ENST00000713543.1 | no | — | — |
+| SIRPA | AD | substantia_nigra | chr20:1915455-1921395(+) | 0.955 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
+| SIRPA | AD | hippocampus | chr20:1915455-1921395(+) | 0.950 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
+| SIRPA | AD | nucleus_accumbens_basal_ganglia | chr20:1915455-1921395(+) | 0.936 | abf | intermediate | ENST00000356025.7,ENST00000358771.5,ENST00000400068.7,ENST00000622179.4 | yes | — | no annotated structural change |
 | TPCN1 | AD | cerebellar_hemisphere | chr12:113280195-113283693(+) | 0.861 | susie | primary_prior | — | — | — | — |
 | TPCN1 | AD | cerebellum | chr12:113280195-113284581(+) | 0.835 | susie | primary_prior | ENST00000335509.11,ENST00000392569.8,ENST00000428632.7,ENST00000541517.5,ENST00000546781.5,ENST00000550785.5,ENST00000551127.5,ENST00000552077.5 | yes | — | no annotated structural change |
 | ZNF232 | AD | spinal_cord_cervical_c_1 | chr17:5111219-5111800(-) | 0.899 | abf | intermediate | ENST00000570486.5,ENST00000571076.1,ENST00000573015.6,ENST00000575538.1,ENST00000696408.1,ENST00000696538.1 | no | — | — |
-| G2E3 | ALS | nucleus_accumbens_basal_ganglia | chr14:30581116-30586718(+) | 0.839 | abf | primary_prior | ENST00000206595.11,ENST00000547532.5,ENST00000550944.5,ENST00000552488.1,ENST00000553504.5,ENST00000554714.5,ENST00000555429.1,ENST00000648008.1 | yes | — | no annotated structural change |
-| GGNBP2 | ALS | cerebellum | chr17:36560871-36567663(+) | 0.911 | susie | intermediate | ENST00000613102.5,ENST00000617860.4,ENST00000618837.4 | yes | — | no annotated structural change |
-| PGS1 | ALS | cortex | chr17:78378808-78392476(+) | 0.976 | abf | robust | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | yes | — | no annotated structural change |
-| PGS1 | ALS | hippocampus | chr17:78378808-78392476(+) | 0.974 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | amygdala | chr17:78378808-78392476(+) | 0.973 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | cerebellar_hemisphere | chr17:78378808-78392476(+) | 0.972 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | yes | — | no annotated structural change |
-| PGS1 | ALS | substantia_nigra | chr17:78378808-78392476(+) | 0.970 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | putamen_basal_ganglia | chr17:78378808-78392476(+) | 0.970 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | cerebellum | chr17:78378808-78392476(+) | 0.969 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | yes | — | no annotated structural change |
-| PGS1 | ALS | spinal_cord_cervical_c_1 | chr17:78378808-78392476(+) | 0.968 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | caudate_basal_ganglia | chr17:78378808-78392476(+) | 0.967 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | hypothalamus | chr17:78378808-78392476(+) | 0.954 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
-| PGS1 | ALS | nucleus_accumbens_basal_ganglia | chr17:78378808-78392476(+) | 0.945 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | yes | — | no annotated structural change |
-| PGS1 | ALS | frontal_cortex_ba9 | chr17:78378808-78392476(+) | 0.942 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | yes | — | no annotated structural change |
-| PGS1 | ALS | anterior_cingulate_cortex_ba24 | chr17:78378808-78392476(+) | 0.906 | abf | intermediate | ENST00000262764.11,ENST00000585521.2,ENST00000589426.5,ENST00000589689.5,ENST00000592043.5 | no | — | — |
+| GGNBP2 | ALS | cerebellum | chr17:36560871-36567663(+) | 0.912 | susie | intermediate | ENST00000613102.5,ENST00000617860.4,ENST00000618837.4 | no | — | — |
+| PRDM2 | ALS | cortex | chr1:13816570-13823159(+) | 0.964 | abf | intermediate | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | yes | — | no annotated structural change |
+| PRDM2 | ALS | substantia_nigra | chr1:13816570-13823159(+) | 0.947 | abf | intermediate | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | no | — | — |
+| PRDM2 | ALS | nucleus_accumbens_basal_ganglia | chr1:13816570-13823159(+) | 0.945 | abf | intermediate | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | yes | — | no annotated structural change |
+| PRDM2 | ALS | hippocampus | chr1:13816570-13823159(+) | 0.901 | abf | intermediate | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | no | — | — |
+| PRDM2 | ALS | putamen_basal_ganglia | chr1:13816570-13823159(+) | 0.857 | abf | primary_prior | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | no | — | — |
+| PRDM2 | ALS | anterior_cingulate_cortex_ba24 | chr1:13816570-13823159(+) | 0.826 | abf | primary_prior | ENST00000235372.11,ENST00000311066.10,ENST00000376048.9,ENST00000503842.5,ENST00000505823.5 | yes | — | no annotated structural change |
 | PTPRN | ALS | nucleus_accumbens_basal_ganglia | chr2:219295141-219295897(-) | 0.918 | abf | intermediate | — | — | — | — |
-| PTPRN | ALS | cerebellar_hemisphere | chr2:219295966-219296226(-) | 0.876 | susie | primary_prior | — | — | — | — |
-| PTPRN | ALS | cerebellum | chr2:219295141-219296226(-) | 0.875 | susie | primary_prior | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | no | — | — |
-| PTPRN | ALS | cortex | chr2:219295141-219296226(-) | 0.874 | susie | primary_prior | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | no | yes | — |
-| PTPRN | ALS | frontal_cortex_ba9 | chr2:219295141-219296226(-) | 0.832 | abf | primary_prior | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | yes | yes | no annotated structural change |
-| SCFD1 | ALS | hypothalamus | chr14:30622399-30630477(+) | 0.856 | abf | primary_prior | ENST00000484733.6,ENST00000544052.6,ENST00000553693.6,ENST00000554437.6,ENST00000676465.1,ENST00000676473.1,ENST00000676520.1,ENST00000676674.1,ENST00000676834.1,ENST00000676914.1,ENST00000676954.1,ENST00000677413.1,ENST00000677456.1,ENST00000677690.1,ENST00000678579.1,ENST00000678637.1,ENST00000678858.1,ENST00000679342.1 | yes | — | no annotated structural change |
-| TPP1 | ALS | cerebellum | chr11:6611818-6611958(-) | 0.996 | abf | robust | — | — | — | — |
+| PTPRN | ALS | cerebellum | chr2:219295141-219296226(-) | 0.890 | susie | intermediate | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | yes | — | no annotated structural change |
+| PTPRN | ALS | cerebellar_hemisphere | chr2:219295141-219296226(-) | 0.890 | susie | intermediate | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | no | — | — |
+| PTPRN | ALS | cortex | chr2:219295141-219296226(-) | 0.889 | susie | intermediate | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | no | — | — |
+| PTPRN | ALS | frontal_cortex_ba9 | chr2:219295141-219296226(-) | 0.832 | abf | primary_prior | ENST00000295718.7,ENST00000409251.7,ENST00000423636.6,ENST00000443981.5 | no | — | — |
 | TXNDC15 | ALS | caudate_basal_ganglia | chr5:134874530-134893492(+) | 0.969 | abf | intermediate | ENST00000511070.5 | no | — | — |
-| UNC13A | ALS | cerebellum | chr19:17630750-17632782(-) | 0.961 | susie | intermediate | ENST00000519716.7,ENST00000550896.1,ENST00000551649.5,ENST00000552293.5 | cross-tissue exception (anterior_cingulate_cortex_ba24;caudate_basal_ganglia;frontal_cortex_ba9;hippocampus;nucleus_accumbens_basal_ganglia) | — | — |
-| UNC13A | ALS | cerebellar_hemisphere | chr19:17630750-17632782(-) | 0.939 | susie | intermediate | ENST00000519716.7,ENST00000550896.1,ENST00000551649.5,ENST00000552293.5 | cross-tissue exception (anterior_cingulate_cortex_ba24;caudate_basal_ganglia;frontal_cortex_ba9;hippocampus;nucleus_accumbens_basal_ganglia) | — | — |
-| WIPI2 | ALS | nucleus_accumbens_basal_ganglia | chr7:5229705-5230835(+) | 0.893 | abf | intermediate | ENST00000382384.6,ENST00000404704.7,ENST00000484262.1 | no | — | — |
-| SNCA | LBD | cortex | chr4:89835692-89836127(-) | 0.974 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | LBD | substantia_nigra | chr4:89835692-89836127(-) | 0.971 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | hypothalamus | chr4:89835692-89836127(-) | 0.971 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | spinal_cord_cervical_c_1 | chr4:89835692-89836127(-) | 0.962 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | frontal_cortex_ba9 | chr4:89835692-89836127(-) | 0.956 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | LBD | nucleus_accumbens_basal_ganglia | chr4:89835692-89836127(-) | 0.956 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | amygdala | chr4:89835692-89836127(-) | 0.955 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | LBD | hippocampus | chr4:89835692-89836127(-) | 0.954 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | yes | no annotated structural change |
-| SNCA | LBD | cerebellar_hemisphere | chr4:89835692-89836127(-) | 0.952 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | anterior_cingulate_cortex_ba24 | chr4:89835692-89836127(-) | 0.952 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | LBD | cerebellum | chr4:89835692-89836127(-) | 0.941 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| AZI2 | PD | cerebellar_hemisphere | chr3:28331954-28332369(-) | 0.803 | abf | primary_prior | ENST00000420543.6,ENST00000457172.5,ENST00000488978.1 | yes | — | no annotated structural change |
-| NCOR1 | PD | cerebellar_hemisphere | chr17:16171995-16186554(-) | 0.895 | susie | intermediate | ENST00000268712.8,ENST00000395851.5,ENST00000411510.5,ENST00000430577.2,ENST00000436068.2,ENST00000436828.5,ENST00000582357.5,ENST00000585296.1,ENST00000704744.1,ENST00000704745.1 | no | — | — |
+| UNC13A | ALS | cerebellum | chr19:17630750-17632782(-) | 0.959 | susie | intermediate | ENST00000519716.7,ENST00000550896.1,ENST00000551649.5,ENST00000552293.5 | cross-tissue exception (amygdala;anterior_cingulate_cortex_ba24;cortex;frontal_cortex_ba9;hippocampus;nucleus_accumbens_basal_ganglia;substantia_nigra) | — | — |
+| UNC13A | ALS | cerebellar_hemisphere | chr19:17630750-17632782(-) | 0.936 | susie | intermediate | ENST00000519716.7,ENST00000550896.1,ENST00000551649.5,ENST00000552293.5 | cross-tissue exception (amygdala;anterior_cingulate_cortex_ba24;cortex;frontal_cortex_ba9;hippocampus;nucleus_accumbens_basal_ganglia;substantia_nigra) | — | — |
+| WIPI2 | ALS | nucleus_accumbens_basal_ganglia | chr7:5229705-5230835(+) | 0.893 | abf | intermediate | ENST00000382384.6,ENST00000404704.7,ENST00000484262.1 | yes | — | no annotated structural change |
+| CTSB | PD | amygdala | chr8:11844241-11845082(-) | 0.868 | susie | primary_prior | ENST00000530640.7,ENST00000531089.6 | no | — | — |
+| DDRGK1 | PD | anterior_cingulate_cortex_ba24 | chr20:3195353-3200001(-) | 0.884 | abf | primary_prior | ENST00000354488.8,ENST00000380201.2 | yes | — | no annotated structural change |
+| NCOR1 | PD | cerebellar_hemisphere | chr17:16171995-16186554(-) | 0.895 | susie | intermediate | ENST00000268712.8,ENST00000395851.5,ENST00000411510.5,ENST00000430577.2,ENST00000436068.2,ENST00000436828.5,ENST00000582357.5,ENST00000585296.1,ENST00000704744.1,ENST00000704745.1 | yes | — | no annotated structural change |
 | NCOR1 | PD | nucleus_accumbens_basal_ganglia | chr17:16171995-16186554(-) | 0.805 | abf | primary_prior | ENST00000268712.8,ENST00000395851.5,ENST00000411510.5,ENST00000430577.2,ENST00000436068.2,ENST00000436828.5,ENST00000582357.5,ENST00000585296.1,ENST00000704744.1,ENST00000704745.1 | yes | — | no annotated structural change |
-| PITPNM2 | PD | cerebellar_hemisphere | chr12:122996910-122997325(-) | 0.989 | abf | robust | ENST00000280562.9,ENST00000320201.10 | no | — | — |
-| SH3GL2 | PD | substantia_nigra | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
-| SH3GL2 | PD | cortex | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | yes | — |
-| SH3GL2 | PD | frontal_cortex_ba9 | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | yes | no annotated structural change |
+| SH3GL2 | PD | substantia_nigra | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
+| SH3GL2 | PD | cortex | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
+| SH3GL2 | PD | frontal_cortex_ba9 | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
 | SH3GL2 | PD | anterior_cingulate_cortex_ba24 | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
-| SH3GL2 | PD | caudate_basal_ganglia | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
-| SH3GL2 | PD | nucleus_accumbens_basal_ganglia | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
+| SH3GL2 | PD | caudate_basal_ganglia | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
+| SH3GL2 | PD | nucleus_accumbens_basal_ganglia | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
 | SH3GL2 | PD | hypothalamus | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
 | SH3GL2 | PD | spinal_cord_cervical_c_1 | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
-| SH3GL2 | PD | amygdala | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | no | — | — |
-| SNCA | PD | cerebellum | chr4:89835692-89836127(-) | 0.974 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | PD | substantia_nigra | chr4:89835692-89836127(-) | 0.970 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | PD | frontal_cortex_ba9 | chr4:89835692-89836127(-) | 0.968 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | PD | cortex | chr4:89835692-89836127(-) | 0.959 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | — | no annotated structural change |
-| SNCA | PD | nucleus_accumbens_basal_ganglia | chr4:89835692-89836127(-) | 0.950 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | PD | hypothalamus | chr4:89835692-89836127(-) | 0.903 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
-| SNCA | PD | hippocampus | chr4:89835692-89836127(-) | 0.894 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | yes | yes | no annotated structural change |
-| SNCA | PD | spinal_cord_cervical_c_1 | chr4:89835692-89836127(-) | 0.894 | susie | intermediate | ENST00000508895.5,ENST00000618500.4 | no | — | — |
+| SH3GL2 | PD | amygdala | chr9:17579287-17747066(+) | 0.834 | abf | primary_prior | ENST00000380607.5 | yes | — | no annotated structural change |
 | TTC19 | PD | putamen_basal_ganglia | chr17:16000245-16001915(+) | 0.898 | susie | intermediate | ENST00000261647.10,ENST00000470399.1,ENST00000497842.6 | no | — | — |
 | TTC19 | PD | caudate_basal_ganglia | chr17:16006568-16025017(+) | 0.805 | susie | primary_prior | ENST00000261647.10,ENST00000475723.5 | no | — | — |
-| ASB3 | SCZ | cerebellar_hemisphere | chr2:53729570-53750783(-) | 0.859 | abf | primary_prior | ENST00000263634.8,ENST00000394717.3,ENST00000406053.5,ENST00000406625.6,ENST00000406687.5,ENST00000482829.5,ENST00000489508.5 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | caudate_basal_ganglia | chr16:4514664-4538325(-) | 0.949 | susie | intermediate | ENST00000563332.6,ENST00000588381.1 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | hypothalamus | chr16:4514664-4538325(-) | 0.934 | susie | intermediate | ENST00000563332.6,ENST00000588381.1 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | substantia_nigra | chr16:4514664-4538702(-) | 0.928 | abf | intermediate | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | amygdala | chr16:4514664-4538702(-) | 0.928 | susie | intermediate | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | cortex | chr16:4514664-4538702(-) | 0.842 | susie | primary_prior | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
-| CDIP1 | SCZ | hippocampus | chr16:4514664-4538702(-) | 0.804 | susie | primary_prior | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | caudate_basal_ganglia | chr2:97658316-97658427(-) | 0.997 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | yes | — |
+| ACTR1B | SCZ | caudate_basal_ganglia | chr2:97658316-97658427(-) | 0.997 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | yes | — |
+| ACTR1B | SCZ | hypothalamus | chr2:97658316-97658427(-) | 0.996 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | hypothalamus | chr2:97658316-97658427(-) | 0.996 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | frontal_cortex_ba9 | chr2:97658316-97658427(-) | 0.996 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | frontal_cortex_ba9 | chr2:97658316-97658427(-) | 0.996 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | nucleus_accumbens_basal_ganglia | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | nucleus_accumbens_basal_ganglia | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | cortex | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | cortex | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | cerebellar_hemisphere | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | cerebellar_hemisphere | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | cerebellum | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | cerebellum | chr2:97658316-97658427(-) | 0.995 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | spinal_cord_cervical_c_1 | chr2:97658316-97658427(-) | 0.989 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | spinal_cord_cervical_c_1 | chr2:97658316-97658427(-) | 0.989 | abf | robust | ENST00000289228.7,ENST00000451664.1 | no | — | — |
+| ACTR1B | SCZ | hippocampus | chr2:97658316-97658427(-) | 0.978 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | hippocampus | chr2:97658316-97658427(-) | 0.978 | abf | robust | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | anterior_cingulate_cortex_ba24 | chr2:97658316-97658427(-) | 0.848 | abf | primary_prior | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | anterior_cingulate_cortex_ba24 | chr2:97658316-97658427(-) | 0.848 | abf | primary_prior | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | amygdala | chr2:97658316-97658427(-) | 0.811 | abf | primary_prior | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| ACTR1B | SCZ | amygdala | chr2:97658316-97658427(-) | 0.811 | abf | primary_prior | ENST00000289228.7,ENST00000451664.1 | yes | — | no annotated structural change |
+| CDIP1 | SCZ | caudate_basal_ganglia | chr16:4514664-4538325(-) | 0.951 | susie | intermediate | ENST00000563332.6,ENST00000588381.1 | no | yes | — |
+| CDIP1 | SCZ | hypothalamus | chr16:4514664-4538325(-) | 0.936 | susie | intermediate | ENST00000563332.6,ENST00000588381.1 | no | — | — |
+| CDIP1 | SCZ | amygdala | chr16:4514664-4538702(-) | 0.929 | susie | intermediate | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
+| CDIP1 | SCZ | substantia_nigra | chr16:4514664-4538702(-) | 0.928 | abf | intermediate | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | no | — | — |
+| CDIP1 | SCZ | cortex | chr16:4514664-4538702(-) | 0.831 | susie | primary_prior | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
+| CDIP1 | SCZ | hippocampus | chr16:4514664-4538702(-) | 0.802 | susie | primary_prior | ENST00000562334.5,ENST00000562579.5,ENST00000563507.5,ENST00000564828.5,ENST00000567695.6 | yes | — | no annotated structural change |
 | COPA | SCZ | cerebellum | chr1:160332557-160335242(-) | 0.830 | abf | primary_prior | ENST00000647799.1,ENST00000696207.1 | no | — | — |
-| DOC2A | SCZ | frontal_cortex_ba9 | chr16:30007090-30007179(-) | 0.970 | susie | intermediate | — | — | — | — |
-| DOC2A | SCZ | cerebellar_hemisphere | chr16:30007299-30008996(-) | 0.969 | susie | intermediate | ENST00000350119.9,ENST00000563378.5,ENST00000564944.5,ENST00000564979.5,ENST00000565273.5,ENST00000566310.5,ENST00000567332.6,ENST00000616445.4 | yes | — | no annotated structural change |
-| DOC2A | SCZ | cortex | chr16:30007090-30007179(-) | 0.967 | susie | intermediate | — | — | — | — |
-| DOC2A | SCZ | hippocampus | chr16:30007090-30007173(-) | 0.964 | abf | intermediate | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | yes | yes | no annotated structural change |
-| DOC2A | SCZ | anterior_cingulate_cortex_ba24 | chr16:30007090-30007173(-) | 0.959 | abf | intermediate | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | no | — | — |
-| DOC2A | SCZ | hypothalamus | chr16:30007090-30007173(-) | 0.949 | abf | intermediate | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | yes | — | no annotated structural change |
-| DOC2A | SCZ | amygdala | chr16:30007090-30007173(-) | 0.947 | abf | intermediate | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | yes | — | no annotated structural change |
-| DOC2A | SCZ | nucleus_accumbens_basal_ganglia | chr16:30007090-30007173(-) | 0.901 | abf | intermediate | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | no | — | — |
-| DOC2A | SCZ | caudate_basal_ganglia | chr16:30007090-30007173(-) | 0.871 | abf | primary_prior | ENST00000350119.9,ENST00000561671.5,ENST00000564944.5,ENST00000564979.5,ENST00000566310.5,ENST00000616445.4 | yes | — | no annotated structural change |
-| FAM221A | SCZ | anterior_cingulate_cortex_ba24 | chr7:23691596-23698192(+) | 0.817 | susie | primary_prior | ENST00000344962.9,ENST00000409653.5 | yes | — | no annotated structural change |
-| FAM221A | SCZ | nucleus_accumbens_basal_ganglia | chr7:23698299-23700789(+) | 0.812 | susie | primary_prior | — | — | — | — |
-| FAM221A | SCZ | cortex | chr7:23691596-23700786(+) | 0.803 | susie | primary_prior | ENST00000409192.7,ENST00000409994.3 | yes | — | no annotated structural change |
+| DGKZ | SCZ | frontal_cortex_ba9 | chr11:46369550-46371313(+) | 0.953 | susie | intermediate | ENST00000318201.12,ENST00000531879.5 | no | yes | — |
+| DGKZ | SCZ | cortex | chr11:46369550-46371313(+) | 0.951 | susie | intermediate | ENST00000318201.12,ENST00000531879.5 | no | yes | — |
+| DGKZ | SCZ | caudate_basal_ganglia | chr11:46369550-46371313(+) | 0.935 | susie | intermediate | ENST00000318201.12,ENST00000531879.5 | no | yes | — |
+| DGKZ | SCZ | nucleus_accumbens_basal_ganglia | chr11:46369550-46371313(+) | 0.928 | abf | intermediate | ENST00000318201.12,ENST00000531879.5 | no | — | — |
+| DGKZ | SCZ | cerebellar_hemisphere | chr11:46369550-46371313(+) | 0.924 | abf | intermediate | ENST00000318201.12,ENST00000531879.5 | no | — | — |
+| DGKZ | SCZ | spinal_cord_cervical_c_1 | chr11:46369550-46371313(+) | 0.892 | abf | intermediate | ENST00000318201.12,ENST00000531879.5 | no | — | — |
+| DGKZ | SCZ | anterior_cingulate_cortex_ba24 | chr11:46369550-46371313(+) | 0.882 | susie | primary_prior | ENST00000318201.12,ENST00000531879.5 | yes | — | no annotated structural change |
+| DGKZ | SCZ | amygdala | chr11:46369550-46371313(+) | 0.878 | abf | primary_prior | ENST00000318201.12,ENST00000531879.5 | yes | — | no annotated structural change |
+| DGKZ | SCZ | hippocampus | chr11:46369550-46371313(+) | 0.838 | abf | primary_prior | ENST00000318201.12,ENST00000531879.5 | yes | yes | no annotated structural change |
+| FGFR1 | SCZ | cerebellar_hemisphere | chr8:38400788-38410894(-) | 0.957 | susie | intermediate | — | — | — | — |
+| FGFR1 | SCZ | cerebellum | chr8:38400788-38402894(-) | 0.937 | susie | intermediate | — | — | — | — |
+| FGFR1 | SCZ | caudate_basal_ganglia | chr8:38429390-38429682(-) | 0.908 | susie | intermediate | ENST00000484370.5 | no | — | — |
 | GABBR2 | SCZ | cerebellum | chr9:98299353-98303241(-) | 0.976 | susie | robust | ENST00000259455.4,ENST00000637410.1 | no | — | — |
-| GPM6A | SCZ | caudate_basal_ganglia | chr4:175701767-176002309(-) | 0.991 | susie | robust | ENST00000506894.5 | no | — | — |
-| GPM6A | SCZ | anterior_cingulate_cortex_ba24 | chr4:175701767-176002309(-) | 0.990 | susie | robust | ENST00000506894.5 | yes | — | no annotated structural change |
-| GPM6A | SCZ | putamen_basal_ganglia | chr4:175701767-175812191(-) | 0.908 | abf | intermediate | ENST00000280187.11,ENST00000393658.7,ENST00000513365.1 | no | — | — |
-| GPM6A | SCZ | amygdala | chr4:175701767-175812191(-) | 0.841 | abf | primary_prior | ENST00000280187.11,ENST00000393658.7,ENST00000513365.1 | yes | — | no annotated structural change |
-| HMOX2 | SCZ | frontal_cortex_ba9 | chr16:4483754-4505484(+) | 0.831 | susie | primary_prior | ENST00000458134.7,ENST00000570445.5 | yes | — | no annotated structural change |
-| KLC1 | SCZ | cortex | chr14:103679518-103684986(+) | 0.882 | susie | primary_prior | ENST00000380038.7,ENST00000445352.8,ENST00000553325.5,ENST00000555856.1 | no | — | — |
-| NEK4 | SCZ | frontal_cortex_ba9 | chr3:52711869-52737586(-) | 0.820 | abf | primary_prior | ENST00000233027.10,ENST00000535191.5 | yes | yes | no annotated structural change |
-| NT5C2 | SCZ | cerebellum | chr10:103174982-103181185(-) | 0.958 | susie | intermediate | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | no | — | — |
-| NT5C2 | SCZ | cerebellar_hemisphere | chr10:103174982-103181185(-) | 0.943 | susie | intermediate | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | yes | — | no annotated structural change |
-| NT5C2 | SCZ | putamen_basal_ganglia | chr10:103174982-103181185(-) | 0.907 | abf | intermediate | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | no | — | — |
-| NT5C2 | SCZ | cortex | chr10:103174982-103181185(-) | 0.906 | susie | intermediate | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | yes | yes | no annotated structural change |
-| NT5C2 | SCZ | caudate_basal_ganglia | chr10:103174982-103181185(-) | 0.901 | susie | intermediate | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | no | — | — |
-| NT5C2 | SCZ | amygdala | chr10:103174982-103181185(-) | 0.823 | abf | primary_prior | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | no | — | — |
-| NT5C2 | SCZ | frontal_cortex_ba9 | chr10:103174982-103181185(-) | 0.822 | abf | primary_prior | ENST00000404739.8,ENST00000467380.1,ENST00000674860.1,ENST00000675020.1,ENST00000675326.1,ENST00000675436.1 | yes | yes | no annotated structural change |
-| PLCB2 | SCZ | hypothalamus | chr15:40288642-40289272(-) | 0.975 | abf | intermediate | ENST00000558505.5 | yes | — | no annotated structural change |
-| PLCB2 | SCZ | nucleus_accumbens_basal_ganglia | chr15:40288642-40289272(-) | 0.826 | susie | primary_prior | ENST00000558505.5 | no | — | — |
+| GLYCTK | SCZ | anterior_cingulate_cortex_ba24 | chr3:52293192-52293307(+) | 0.812 | abf | primary_prior | ENST00000471180.5,ENST00000473032.5 | no | — | — |
+| IRF3 | SCZ | cortex | chr19:49664846-49665672(-) | 0.994 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | anterior_cingulate_cortex_ba24 | chr19:49664846-49665672(-) | 0.992 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | spinal_cord_cervical_c_1 | chr19:49664846-49665672(-) | 0.991 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | putamen_basal_ganglia | chr19:49664846-49665672(-) | 0.991 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | hypothalamus | chr19:49664846-49665672(-) | 0.990 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | substantia_nigra | chr19:49664846-49665672(-) | 0.990 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | nucleus_accumbens_basal_ganglia | chr19:49664846-49665672(-) | 0.990 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | caudate_basal_ganglia | chr19:49664846-49665672(-) | 0.988 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | no | — |
+| IRF3 | SCZ | frontal_cortex_ba9 | chr19:49664846-49665672(-) | 0.983 | abf | robust | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | hippocampus | chr19:49664846-49665672(-) | 0.976 | abf | intermediate | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| IRF3 | SCZ | amygdala | chr19:49664846-49665672(-) | 0.971 | abf | intermediate | ENST00000593337.5,ENST00000594387.1,ENST00000601809.5 | no | — | — |
+| KLC1 | SCZ | cortex | chr14:103679518-103684986(+) | 0.890 | susie | intermediate | ENST00000380038.7,ENST00000445352.8,ENST00000553325.5,ENST00000555856.1 | yes | — | no annotated structural change |
+| LPCAT4 | SCZ | putamen_basal_ganglia | chr15:34360209-34362196(-) | 0.884 | abf | primary_prior | ENST00000567507.1 | no | — | — |
+| MED19 | SCZ | hippocampus | chr11:57704396-57704719(-) | 0.810 | abf | primary_prior | ENST00000431606.5 | yes | — | no annotated structural change |
+| MRPS33 | SCZ | hypothalamus | chr7:141006535-141014551(-) | 0.994 | abf | robust | ENST00000484502.1 | no | — | — |
+| MRPS33 | SCZ | cerebellum | chr7:141006535-141014551(-) | 0.859 | abf | primary_prior | ENST00000484502.1 | no | — | — |
+| MRPS33 | SCZ | nucleus_accumbens_basal_ganglia | chr7:141006535-141014551(-) | 0.848 | abf | primary_prior | ENST00000484502.1 | no | — | — |
+| NDUFAF7 | SCZ | putamen_basal_ganglia | chr2:37248426-37253086(+) | 0.909 | susie | intermediate | ENST00000441905.1 | no | — | — |
+| NDUFAF7 | SCZ | amygdala | chr2:37248426-37253086(+) | 0.859 | abf | primary_prior | ENST00000441905.1 | yes | — | no annotated structural change |
+| NEK4 | SCZ | frontal_cortex_ba9 | chr3:52711869-52737586(-) | 0.820 | abf | primary_prior | ENST00000233027.10,ENST00000535191.5 | yes | — | no annotated structural change |
+| NUP50 | SCZ | caudate_basal_ganglia | chr22:45183520-45184453(+) | 0.960 | abf | intermediate | ENST00000347635.9,ENST00000396096.6,ENST00000407019.6,ENST00000493456.5 | no | — | — |
+| NUP50 | SCZ | nucleus_accumbens_basal_ganglia | chr22:45183520-45184453(+) | 0.956 | abf | intermediate | ENST00000347635.9,ENST00000396096.6,ENST00000407019.6,ENST00000493456.5 | yes | — | no annotated structural change |
+| NUP50 | SCZ | cerebellum | chr22:45183520-45184453(+) | 0.953 | abf | intermediate | ENST00000347635.9,ENST00000396096.6,ENST00000407019.6,ENST00000493456.5 | no | — | — |
+| NUP50 | SCZ | cerebellar_hemisphere | chr22:45183520-45184453(+) | 0.945 | abf | intermediate | ENST00000347635.9,ENST00000396096.6,ENST00000407019.6,ENST00000493456.5 | no | — | — |
+| NUP50 | SCZ | cortex | chr22:45164296-45168168(+) | 0.935 | abf | intermediate | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | no | — | — |
+| NUP50 | SCZ | frontal_cortex_ba9 | chr22:45164296-45168168(+) | 0.927 | abf | intermediate | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | yes | — | no annotated structural change |
+| NUP50 | SCZ | hypothalamus | chr22:45164296-45168168(+) | 0.918 | abf | intermediate | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | no | — | — |
+| NUP50 | SCZ | anterior_cingulate_cortex_ba24 | chr22:45164296-45168168(+) | 0.918 | abf | intermediate | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | yes | — | no annotated structural change |
+| NUP50 | SCZ | hippocampus | chr22:45164296-45168168(+) | 0.910 | abf | intermediate | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | no | — | — |
+| NUP50 | SCZ | amygdala | chr22:45183520-45184453(+) | 0.835 | abf | primary_prior | ENST00000347635.9,ENST00000396096.6,ENST00000407019.6,ENST00000493456.5 | yes | — | no annotated structural change |
+| NUP50 | SCZ | putamen_basal_ganglia | chr22:45164296-45168168(+) | 0.805 | abf | primary_prior | ENST00000347635.9,ENST00000407019.6,ENST00000417702.5,ENST00000430547.5,ENST00000434760.5,ENST00000484186.5,ENST00000497960.5 | no | — | — |
+| POLG | SCZ | cerebellar_hemisphere | chr15:89321012-89321736(-) | 0.982 | abf | robust | — | — | — | — |
+| POLG | SCZ | cerebellum | chr15:89321012-89321736(-) | 0.972 | abf | intermediate | — | — | — | — |
 | PPIL2 | SCZ | amygdala | chr22:21695496-21696747(+) | 0.943 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
 | PPIL2 | SCZ | cerebellum | chr22:21695496-21696747(+) | 0.941 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | yes | — | no annotated structural change |
-| PPIL2 | SCZ | frontal_cortex_ba9 | chr22:21695496-21696747(+) | 0.939 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | yes | — | no annotated structural change |
-| PPIL2 | SCZ | cerebellar_hemisphere | chr22:21695496-21696747(+) | 0.938 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | yes | — | no annotated structural change |
-| PPIL2 | SCZ | substantia_nigra | chr22:21695496-21696747(+) | 0.936 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | yes | — | no annotated structural change |
+| PPIL2 | SCZ | frontal_cortex_ba9 | chr22:21695496-21696747(+) | 0.939 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
+| PPIL2 | SCZ | cerebellar_hemisphere | chr22:21695496-21696747(+) | 0.938 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
+| PPIL2 | SCZ | substantia_nigra | chr22:21695496-21696747(+) | 0.936 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
 | PPIL2 | SCZ | hypothalamus | chr22:21695496-21696747(+) | 0.935 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
 | PPIL2 | SCZ | caudate_basal_ganglia | chr22:21695496-21696747(+) | 0.933 | abf | intermediate | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | no | — | — |
 | PPIL2 | SCZ | putamen_basal_ganglia | chr22:21695496-21696747(+) | 0.855 | abf | primary_prior | ENST00000335025.12,ENST00000498109.2,ENST00000679477.1,ENST00000679479.1,ENST00000679564.1,ENST00000679580.1,ENST00000679692.1,ENST00000679827.1,ENST00000680109.1,ENST00000680183.1,ENST00000680434.1,ENST00000680860.1,ENST00000681137.1,ENST00000681286.1,ENST00000681338.1,ENST00000681791.1 | yes | — | no annotated structural change |
-| PPIP5K1 | SCZ | cerebellar_hemisphere | chr15:43558932-43560413(-) | 0.926 | abf | intermediate | ENST00000420765.6,ENST00000439195.5,ENST00000644537.1 | no | — | — |
-| PPIP5K1 | SCZ | cerebellum | chr15:43558932-43564103(-) | 0.869 | abf | primary_prior | ENST00000381879.8,ENST00000381885.5,ENST00000396923.7 | no | — | — |
-| RNASEH2C | SCZ | anterior_cingulate_cortex_ba24 | chr11:65715317-65719681(-) | 0.981 | susie | robust | ENST00000644198.1 | no | — | — |
-| RNASEH2C | SCZ | caudate_basal_ganglia | chr11:65715317-65719681(-) | 0.967 | susie | intermediate | ENST00000644198.1 | no | — | — |
-| RNASEH2C | SCZ | putamen_basal_ganglia | chr11:65715317-65719681(-) | 0.961 | susie | intermediate | ENST00000644198.1 | no | — | — |
-| RNASEH2C | SCZ | cerebellum | chr11:65719809-65720045(-) | 0.946 | susie | intermediate | ENST00000308418.10,ENST00000528220.2,ENST00000531596.6,ENST00000533698.5,ENST00000534482.6,ENST00000642430.1,ENST00000643214.1,ENST00000644142.1,ENST00000644198.1,ENST00000646597.1 | yes | — | no annotated structural change |
-| RNASEH2C | SCZ | cerebellar_hemisphere | chr11:65719809-65720045(-) | 0.895 | susie | intermediate | ENST00000308418.10,ENST00000528220.2,ENST00000531596.6,ENST00000533698.5,ENST00000534482.6,ENST00000642430.1,ENST00000643214.1,ENST00000644142.1,ENST00000644198.1,ENST00000646597.1 | no | — | — |
-| RNASEH2C | SCZ | nucleus_accumbens_basal_ganglia | chr11:65715317-65719681(-) | 0.866 | abf | primary_prior | ENST00000644198.1 | no | — | — |
+| PSMD6 | SCZ | hippocampus | chr3:64010955-64018599(-) | 0.976 | abf | robust | ENST00000480205.5 | no | no | — |
+| RAI1 | SCZ | cerebellum | chr17:17793288-17803756(+) | 0.971 | abf | intermediate | — | — | — | — |
+| RAI1 | SCZ | cerebellar_hemisphere | chr17:17798513-17803756(+) | 0.945 | susie | intermediate | ENST00000353383.6,ENST00000583166.1 | no | — | — |
+| RASA1 | SCZ | cerebellum | chr5:87372195-87374840(+) | 0.946 | abf | intermediate | — | — | — | — |
+| RERE | SCZ | nucleus_accumbens_basal_ganglia | chr1:8438300-8465925(-) | 0.856 | abf | primary_prior | ENST00000659924.1 | yes | — | no annotated structural change |
+| RERE | SCZ | cerebellar_hemisphere | chr1:8438300-8465925(-) | 0.818 | abf | primary_prior | ENST00000659924.1 | no | — | — |
+| SNAP91 | SCZ | cerebellum | chr6:83607808-83610650(-) | 0.974 | susie | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | yes | — | no annotated structural change |
+| SNAP91 | SCZ | nucleus_accumbens_basal_ganglia | chr6:83607808-83610650(-) | 0.964 | abf | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | no | — | — |
+| SNAP91 | SCZ | spinal_cord_cervical_c_1 | chr6:83607808-83610650(-) | 0.962 | abf | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | no | — | — |
+| SNAP91 | SCZ | hypothalamus | chr6:83607808-83610650(-) | 0.961 | abf | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | yes | — | no annotated structural change |
+| SNAP91 | SCZ | cortex | chr6:83607808-83610650(-) | 0.958 | abf | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | no | — | — |
+| SNAP91 | SCZ | cerebellar_hemisphere | chr6:83593017-83593478(-) | 0.955 | susie | intermediate | ENST00000518312.5 | no | — | — |
+| SNAP91 | SCZ | caudate_basal_ganglia | chr6:83607808-83610650(-) | 0.954 | abf | intermediate | ENST00000195649.10,ENST00000369694.7,ENST00000439399.6,ENST00000518312.5,ENST00000520213.5,ENST00000520302.5,ENST00000521485.5,ENST00000521616.5,ENST00000521743.5,ENST00000521931.5 | no | yes | — |
 | SYT5 | SCZ | frontal_cortex_ba9 | chr19:55179086-55179964(-) | 0.904 | abf | intermediate | ENST00000589172.5 | no | — | — |
-| TMED4 | SCZ | hypothalamus | chr7:44579628-44581449(-) | 0.965 | susie | intermediate | ENST00000289577.10 | no | — | — |
-| TMED4 | SCZ | cerebellar_hemisphere | chr7:44579628-44581093(-) | 0.963 | susie | intermediate | ENST00000457408.7 | no | — | — |
-| TMED4 | SCZ | cerebellum | chr7:44579628-44581449(-) | 0.961 | susie | intermediate | ENST00000289577.10 | yes | — | no annotated structural change |
-| TMED4 | SCZ | putamen_basal_ganglia | chr7:44579628-44581093(-) | 0.956 | susie | intermediate | ENST00000457408.7 | no | — | — |
-| TMED4 | SCZ | nucleus_accumbens_basal_ganglia | chr7:44579628-44581449(-) | 0.955 | susie | intermediate | ENST00000289577.10 | no | — | — |
-| TMED4 | SCZ | caudate_basal_ganglia | chr7:44579628-44581093(-) | 0.955 | susie | intermediate | ENST00000457408.7 | no | yes | — |
-| TMED4 | SCZ | hippocampus | chr7:44579628-44581093(-) | 0.954 | susie | intermediate | ENST00000457408.7 | yes | yes | no annotated structural change |
-| TMED4 | SCZ | amygdala | chr7:44579628-44581449(-) | 0.954 | susie | intermediate | ENST00000289577.10 | yes | — | no annotated structural change |
-| TMED4 | SCZ | frontal_cortex_ba9 | chr7:44579628-44581449(-) | 0.954 | susie | intermediate | ENST00000289577.10 | yes | yes | no annotated structural change |
-| TMED4 | SCZ | cortex | chr7:44579628-44581449(-) | 0.952 | susie | intermediate | ENST00000289577.10 | no | yes | — |
-| TMED4 | SCZ | spinal_cord_cervical_c_1 | chr7:44579628-44581093(-) | 0.922 | abf | intermediate | ENST00000457408.7 | no | — | — |
-| TMED4 | SCZ | anterior_cingulate_cortex_ba24 | chr7:44579628-44581093(-) | 0.914 | susie | intermediate | ENST00000457408.7 | no | — | — |
-| TMED4 | SCZ | substantia_nigra | chr7:44579628-44581449(-) | 0.914 | abf | intermediate | ENST00000289577.10 | no | — | — |
+| TAOK2 | SCZ | cerebellum | chr16:29986504-29986844(+) | 0.829 | abf | primary_prior | ENST00000543033.5 | no | — | — |
+| YPEL1 | SCZ | cerebellar_hemisphere | chr22:21701218-21703370(-) | 0.985 | abf | robust | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | no | — | — |
+| YPEL1 | SCZ | cerebellum | chr22:21701218-21703370(-) | 0.985 | abf | robust | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | no | — | — |
+| YPEL1 | SCZ | caudate_basal_ganglia | chr22:21701218-21703370(-) | 0.984 | abf | robust | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | no | — | — |
+| YPEL1 | SCZ | putamen_basal_ganglia | chr22:21701218-21703370(-) | 0.982 | abf | robust | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | no | — | — |
+| YPEL1 | SCZ | frontal_cortex_ba9 | chr22:21701218-21703370(-) | 0.982 | abf | robust | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | yes | — | no annotated structural change |
+| YPEL1 | SCZ | nucleus_accumbens_basal_ganglia | chr22:21701218-21703370(-) | 0.904 | abf | intermediate | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | yes | — | no annotated structural change |
+| YPEL1 | SCZ | anterior_cingulate_cortex_ba24 | chr22:21701218-21703370(-) | 0.899 | abf | intermediate | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | yes | — | no annotated structural change |
+| YPEL1 | SCZ | cortex | chr22:21701218-21703370(-) | 0.866 | abf | primary_prior | ENST00000339468.8,ENST00000477675.1,ENST00000672036.2 | no | — | — |
+| YWHAB | SCZ | frontal_cortex_ba9 | chr20:44885886-44901531(+) | 0.891 | abf | intermediate | ENST00000353703.9,ENST00000479421.5 | yes | — | no annotated structural change |
+| YWHAB | SCZ | nucleus_accumbens_basal_ganglia | chr20:44885886-44901531(+) | 0.881 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | yes | — | no annotated structural change |
+| YWHAB | SCZ | spinal_cord_cervical_c_1 | chr20:44885886-44901531(+) | 0.861 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | no | — | — |
+| YWHAB | SCZ | cerebellar_hemisphere | chr20:44885886-44901531(+) | 0.860 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | no | — | — |
+| YWHAB | SCZ | cortex | chr20:44885886-44901531(+) | 0.856 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | yes | — | no annotated structural change |
+| YWHAB | SCZ | cerebellum | chr20:44885886-44901531(+) | 0.834 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | no | — | — |
+| YWHAB | SCZ | caudate_basal_ganglia | chr20:44885886-44901531(+) | 0.832 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | no | — | — |
+| YWHAB | SCZ | hippocampus | chr20:44885886-44901531(+) | 0.803 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | yes | yes | no annotated structural change |
+| YWHAB | SCZ | hypothalamus | chr20:44885886-44901531(+) | 0.802 | abf | primary_prior | ENST00000353703.9,ENST00000479421.5 | no | — | — |

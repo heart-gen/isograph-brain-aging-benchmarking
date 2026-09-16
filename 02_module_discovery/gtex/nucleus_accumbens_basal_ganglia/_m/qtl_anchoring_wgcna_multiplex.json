@@ -7,15 +7,13 @@
   "outcome": "binary",
   "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17147,
+  "n_universe_genes": 17306,
   "universe_sizes": {
-    "sQTL": 13013,
-    "eQTL": 17118
+    "sQTL": 13165,
+    "eQTL": 17272
   },
   "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 17147,
-    "pheno_sig_modules": 425,
-    "go_visible_modules": 425
+    "all_modules": 17306
   }
 }

@@ -150,6 +150,22 @@ select_soft_power <- function(datExpr) {
     as.integer(power)
 }
 
+# The gene universe is the genes surviving the production transcript filter, written by
+# 02_module_discovery/_h/00a.production_gene_universe.sh. WGCNA must be fit on the same
+# universe IsoGraph models, or the two module sets are not comparable downstream (MAGMA
+# GSA, module trust, replication). Before 2026-09-15 this took the bundle's full gene
+# list, which is wider than IsoGraph's.
+read_gene_universe <- function(region_m_dir, label) {
+    p <- file.path(region_m_dir, "production_gene_universe.parquet")
+    if (!file.exists(p)) {
+        stop("missing gene universe for ", label, ": ", p,
+             "\n  run 02_module_discovery/_h/00a.production_gene_universe.sh first.")
+    }
+    u <- read_parquet(p)
+    if (nrow(u) == 0) stop("empty gene universe for ", label, ": ", p)
+    as.character(u$gene_id)
+}
+
 # ── Per-region runner ──────────────────────────────────────────────────────────
 run_brainseq_wgcna <- function(region) {
     cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), region))
@@ -159,17 +175,17 @@ run_brainseq_wgcna <- function(region) {
     out_dir <- file.path(project_root, "02_module_discovery", "brainseq", region, "_m", "wgcna_gene")
     dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
-    # Sample + gene lists from the bundle so WGCNA matches IsoGraph exactly.
+    # Samples from the bundle; genes from the production gene universe so WGCNA is fit on
+    # exactly the genes IsoGraph models.
     bundle_samples <- read_parquet(file.path(bundle_dir, "samples.parquet"))
-    bundle_genes <- read_parquet(file.path(bundle_dir, "genes.parquet"))
     keep_ids <- bundle_samples$sample_id
-    keep_gene_ids <- bundle_genes$gene_id
+    keep_gene_ids <- read_gene_universe(dirname(out_dir), sprintf("brainseq/%s", region))
 
     # Gene counts -> bundle-filtered genes -> log2(CPM + 1).
     gene_counts <- read_parquet(file.path(proc_dir, "gene_counts.parquet"))
     gene_ids_avail <- intersect(keep_gene_ids, gene_counts$Geneid)
     if (length(gene_ids_avail) < MIN_MODULE_SIZE) {
-        warning(sprintf("  %s: only %d matching bundle-filtered genes; skipping.", region, length(gene_ids_avail)))
+        warning(sprintf("  %s: only %d genes from the production universe; skipping.", region, length(gene_ids_avail)))
         return(invisible(NULL))
     }
     gene_counts <- gene_counts[match(gene_ids_avail, gene_counts$Geneid), ]
@@ -185,7 +201,7 @@ run_brainseq_wgcna <- function(region) {
     lib_sizes <- colSums(counts)
     cpm <- sweep(counts, 2, lib_sizes / 1e6, FUN = "/")
     expr_mat <- log2(cpm + 1)
-    cat(sprintf("  Bundle expression filter retained %d genes for WGCNA\n", nrow(expr_mat)))
+    cat(sprintf("  Production gene universe retained %d genes for WGCNA\n", nrow(expr_mat)))
 
     # Samples × genes for WGCNA
     datExpr <- t(expr_mat)

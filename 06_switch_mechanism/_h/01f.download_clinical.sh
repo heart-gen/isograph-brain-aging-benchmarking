@@ -12,8 +12,8 @@
 ## (gitignored; regenerable from this script):
 ##   - ClinVar GRCh38 VCF (Pathogenic/Likely_pathogenic density over switched exons)
 ##   - gnomAD v4.1 constraint metrics TSV (LOEUF gene-level anchor)
-## Small enough for a login/transfer node too; run as `bash 06_switch_mechanism/_h/01f.download_clinical.sh`
-## or submit with sbatch. Safe to re-run (skips files already present).
+## Runs as an ordinary batch step in the stage DAG (compute nodes reach the network); small
+## enough for a login/transfer node too. Safe to re-run (skips files already present).
 set -euo pipefail
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') - $1"; }
 

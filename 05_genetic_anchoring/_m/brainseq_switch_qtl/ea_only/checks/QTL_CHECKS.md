@@ -10,9 +10,9 @@ Two checks required before any BrainSEQ QTL result is read. Neither modifies the
 
 | region | shared libraries | genes compared | median abs r | reproduces discovery | sign flipped | axis-unstable | swQTL genes | swQTL flipped | swQTL axis-unstable |
 |---|---|---|---|---|---|---|---|---|---|
-| caudate | 116 | 11,481 | 1.000 | **yes** | 1,211 (0.105) | 680 | 966 | 124 | 81 |
-| dlpfc | 85 | 11,422 | 1.000 | **yes** | 1,228 (0.108) | 696 | 653 | 85 | 47 |
-| hippocampus | 104 | 10,931 | 1.000 | **yes** | 1,139 (0.104) | 723 | 523 | 62 | 42 |
+| caudate | 116 | 12,993 | 1.000 | **yes** | 1,174 (0.090) | 414 | 1,155 | 96 | 35 |
+| dlpfc | 85 | 12,787 | 1.000 | **yes** | 1,222 (0.096) | 468 | 815 | 76 | 24 |
+| hippocampus | 104 | 12,877 | 1.000 | **yes** | 1,196 (0.093) | 441 | 567 | 48 | 27 |
 
 ## Positive control: the `A_g` eQTL arm against GTEx v11 brain eGenes
 

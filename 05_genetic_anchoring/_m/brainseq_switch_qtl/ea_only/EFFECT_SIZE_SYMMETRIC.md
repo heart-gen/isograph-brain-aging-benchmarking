@@ -6,42 +6,42 @@ Both phenotypes are rank-INT transformed before mapping, so slopes are in SD uni
 
 | arm | region | contrast | subset | n | median S | median A | frac S > A | Wilcoxon P |
 |---|---|---|---|---|---|---|---|---|
-| ea_only | caudate | own_lead_z | all_tested | 11,133 | 3.526 | 4.028 | 0.297 | 0 |
-| ea_only | caudate | own_lead_z | both_significant | 640 | 6.513 | 7.712 | 0.434 | 2.42e-07 |
-| ea_only | caudate | own_lead_slope | all_tested | 11,133 | 0.536 | 0.288 | 0.779 | 0 |
-| ea_only | caudate | own_lead_slope | both_significant | 640 | 0.631 | 0.411 | 0.733 | 7.18e-35 |
-| ea_only | caudate | cross_lead_z | all_tested | 11,133 | 0.851 | 0.836 | 0.497 | 5.02e-05 |
-| ea_only | caudate | cross_lead_z | both_significant | 640 | 4.583 | 4.956 | 0.405 | 1.06e-09 |
-| ea_only | caudate | cross_lead_slope | all_tested | 11,133 | 0.112 | 0.065 | 0.635 | 1.31e-234 |
-| ea_only | caudate | cross_lead_slope | both_significant | 640 | 0.404 | 0.258 | 0.673 | 4.07e-22 |
-| ea_only | caudate | common_ablead_z | all_tested | 11,133 | 0.851 | 4.028 | 0.015 | 0 |
-| ea_only | caudate | common_ablead_z | both_significant | 640 | 4.583 | 7.712 | 0.156 | 3.39e-65 |
-| ea_only | caudate | common_swlead_z | all_tested | 11,133 | 3.526 | 0.836 | 0.953 | 0 |
-| ea_only | caudate | common_swlead_z | both_significant | 640 | 6.513 | 4.956 | 0.703 | 4.39e-20 |
-| ea_only | dlpfc | own_lead_z | all_tested | 11,099 | 3.528 | 3.934 | 0.317 | 0 |
-| ea_only | dlpfc | own_lead_z | both_significant | 381 | 6.795 | 8.376 | 0.428 | 2.87e-06 |
-| ea_only | dlpfc | own_lead_slope | all_tested | 11,099 | 0.644 | 0.350 | 0.781 | 0 |
-| ea_only | dlpfc | own_lead_slope | both_significant | 381 | 0.747 | 0.542 | 0.709 | 1.36e-21 |
-| ea_only | dlpfc | cross_lead_z | all_tested | 11,099 | 0.822 | 0.815 | 0.495 | 0.00242 |
-| ea_only | dlpfc | cross_lead_z | both_significant | 381 | 4.964 | 5.517 | 0.420 | 1.9e-06 |
-| ea_only | dlpfc | cross_lead_slope | all_tested | 11,099 | 0.131 | 0.081 | 0.625 | 2.37e-218 |
-| ea_only | dlpfc | cross_lead_slope | both_significant | 381 | 0.535 | 0.375 | 0.654 | 1.98e-12 |
-| ea_only | dlpfc | common_ablead_z | all_tested | 11,099 | 0.822 | 3.934 | 0.012 | 0 |
-| ea_only | dlpfc | common_ablead_z | both_significant | 381 | 4.964 | 8.376 | 0.160 | 1.45e-39 |
-| ea_only | dlpfc | common_swlead_z | all_tested | 11,099 | 3.528 | 0.815 | 0.964 | 0 |
-| ea_only | dlpfc | common_swlead_z | both_significant | 381 | 6.795 | 5.517 | 0.661 | 2.62e-10 |
-| ea_only | hippocampus | own_lead_z | all_tested | 10,605 | 3.512 | 3.763 | 0.357 | 2.65e-300 |
-| ea_only | hippocampus | own_lead_z | both_significant | 297 | 6.557 | 7.800 | 0.411 | 6.08e-05 |
-| ea_only | hippocampus | own_lead_slope | all_tested | 10,605 | 0.628 | 0.254 | 0.871 | 0 |
-| ea_only | hippocampus | own_lead_slope | both_significant | 297 | 0.685 | 0.423 | 0.795 | 7.06e-31 |
-| ea_only | hippocampus | cross_lead_z | all_tested | 10,605 | 0.797 | 0.763 | 0.500 | 0.783 |
-| ea_only | hippocampus | cross_lead_z | both_significant | 297 | 5.132 | 5.497 | 0.377 | 2.41e-07 |
-| ea_only | hippocampus | cross_lead_slope | all_tested | 10,605 | 0.129 | 0.056 | 0.706 | 0 |
-| ea_only | hippocampus | cross_lead_slope | both_significant | 297 | 0.523 | 0.278 | 0.731 | 1.11e-22 |
-| ea_only | hippocampus | common_ablead_z | all_tested | 10,605 | 0.797 | 3.763 | 0.010 | 0 |
-| ea_only | hippocampus | common_ablead_z | both_significant | 297 | 5.132 | 7.800 | 0.172 | 2.09e-31 |
-| ea_only | hippocampus | common_swlead_z | all_tested | 10,605 | 3.512 | 0.763 | 0.971 | 0 |
-| ea_only | hippocampus | common_swlead_z | both_significant | 297 | 6.557 | 5.497 | 0.630 | 2.04e-06 |
+| ea_only | caudate | own_lead_z | all_tested | 12,688 | 3.531 | 4.025 | 0.299 | 0 |
+| ea_only | caudate | own_lead_z | both_significant | 728 | 6.614 | 8.131 | 0.397 | 1.7e-12 |
+| ea_only | caudate | own_lead_slope | all_tested | 12,688 | 0.543 | 0.319 | 0.753 | 0 |
+| ea_only | caudate | own_lead_slope | both_significant | 728 | 0.619 | 0.441 | 0.677 | 1.45e-25 |
+| ea_only | caudate | cross_lead_z | all_tested | 12,688 | 0.864 | 0.875 | 0.481 | 1.08e-12 |
+| ea_only | caudate | cross_lead_z | both_significant | 728 | 4.909 | 5.475 | 0.374 | 2.26e-15 |
+| ea_only | caudate | cross_lead_slope | all_tested | 12,688 | 0.117 | 0.076 | 0.601 | 2.36e-173 |
+| ea_only | caudate | cross_lead_slope | both_significant | 728 | 0.437 | 0.287 | 0.609 | 1.12e-13 |
+| ea_only | caudate | common_ablead_z | all_tested | 12,688 | 0.864 | 4.025 | 0.016 | 0 |
+| ea_only | caudate | common_ablead_z | both_significant | 728 | 4.909 | 8.131 | 0.157 | 5.18e-75 |
+| ea_only | caudate | common_swlead_z | all_tested | 12,688 | 3.531 | 0.875 | 0.949 | 0 |
+| ea_only | caudate | common_swlead_z | both_significant | 728 | 6.614 | 5.475 | 0.670 | 2.24e-16 |
+| ea_only | dlpfc | own_lead_z | all_tested | 12,533 | 3.526 | 3.935 | 0.317 | 0 |
+| ea_only | dlpfc | own_lead_z | both_significant | 502 | 6.677 | 7.944 | 0.434 | 9.42e-07 |
+| ea_only | dlpfc | own_lead_slope | all_tested | 12,533 | 0.634 | 0.384 | 0.741 | 0 |
+| ea_only | dlpfc | own_lead_slope | both_significant | 502 | 0.721 | 0.560 | 0.673 | 1.35e-21 |
+| ea_only | dlpfc | cross_lead_z | all_tested | 12,533 | 0.819 | 0.815 | 0.494 | 0.00174 |
+| ea_only | dlpfc | cross_lead_z | both_significant | 502 | 4.782 | 5.202 | 0.420 | 4.82e-07 |
+| ea_only | dlpfc | cross_lead_slope | all_tested | 12,533 | 0.132 | 0.088 | 0.605 | 4.96e-168 |
+| ea_only | dlpfc | cross_lead_slope | both_significant | 502 | 0.478 | 0.347 | 0.610 | 1.28e-10 |
+| ea_only | dlpfc | common_ablead_z | all_tested | 12,533 | 0.819 | 3.935 | 0.012 | 0 |
+| ea_only | dlpfc | common_ablead_z | both_significant | 502 | 4.782 | 7.944 | 0.155 | 2.55e-52 |
+| ea_only | dlpfc | common_swlead_z | all_tested | 12,533 | 3.526 | 0.815 | 0.964 | 0 |
+| ea_only | dlpfc | common_swlead_z | both_significant | 502 | 6.677 | 5.202 | 0.683 | 7.13e-18 |
+| ea_only | hippocampus | own_lead_z | all_tested | 12,488 | 3.502 | 3.769 | 0.351 | 0 |
+| ea_only | hippocampus | own_lead_z | both_significant | 325 | 6.952 | 7.386 | 0.505 | 0.274 |
+| ea_only | hippocampus | own_lead_slope | all_tested | 12,488 | 0.631 | 0.290 | 0.839 | 0 |
+| ea_only | hippocampus | own_lead_slope | both_significant | 325 | 0.704 | 0.395 | 0.843 | 3.11e-36 |
+| ea_only | hippocampus | cross_lead_z | all_tested | 12,488 | 0.786 | 0.783 | 0.498 | 0.298 |
+| ea_only | hippocampus | cross_lead_z | both_significant | 325 | 5.163 | 5.420 | 0.443 | 0.00641 |
+| ea_only | hippocampus | cross_lead_slope | all_tested | 12,488 | 0.131 | 0.063 | 0.678 | 0 |
+| ea_only | hippocampus | cross_lead_slope | both_significant | 325 | 0.526 | 0.269 | 0.766 | 2.01e-29 |
+| ea_only | hippocampus | common_ablead_z | all_tested | 12,488 | 0.786 | 3.769 | 0.011 | 0 |
+| ea_only | hippocampus | common_ablead_z | both_significant | 325 | 5.163 | 7.386 | 0.212 | 3.87e-27 |
+| ea_only | hippocampus | common_swlead_z | all_tested | 12,488 | 3.502 | 0.783 | 0.975 | 0 |
+| ea_only | hippocampus | common_swlead_z | both_significant | 325 | 6.952 | 5.420 | 0.714 | 4.87e-16 |
 
 **How to read it.** `both_significant` reproduces the meta-stage estimand and carries its selection. The unselected statistics are `own_lead_*` and `cross_lead_*` on `all_tested`; `common_ablead_z` favours abundance and `common_swlead_z` favours switch, so a real difference must survive both. Per-decile rows (`power_decile` 0–9, deciles of variants tested) are in `effect_size_symmetric.parquet`.
 
@@ -53,6 +53,6 @@ A slope's standard error scales with 1/√(2pq), so an axis whose lead variants 
 
 | arm | region | median lead MAF S | median lead MAF A | lead MAF < 0.05 S | lead MAF < 0.05 A | median SE ratio S/A | r(|slope S|, 1/√(2pq)) |
 |---|---|---|---|---|---|---|---|
-| ea_only | caudate | 0.088 | 0.162 | 0.39 | 0.26 | 2.27 | 0.84 |
-| ea_only | dlpfc | 0.084 | 0.160 | 0.39 | 0.27 | 2.20 | 0.88 |
-| ea_only | hippocampus | 0.080 | 0.133 | 0.40 | 0.32 | 2.79 | 0.89 |
+| ea_only | caudate | 0.090 | 0.164 | 0.38 | 0.26 | 2.11 | 0.84 |
+| ea_only | dlpfc | 0.092 | 0.163 | 0.38 | 0.27 | 1.99 | 0.87 |
+| ea_only | hippocampus | 0.081 | 0.132 | 0.40 | 0.31 | 2.50 | 0.87 |

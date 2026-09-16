@@ -1,0 +1,10 @@
+{
+  "cohort": "gtex",
+  "region": "frontal_cortex_ba9",
+  "bundle": "gtex_v11_brain/frontal_cortex_ba9",
+  "filter": "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts)",
+  "n_genes_bundle": 18291,
+  "n_genes_kept": 18024,
+  "n_transcripts_kept": 46134,
+  "n_multi_transcript_genes": 12345
+}

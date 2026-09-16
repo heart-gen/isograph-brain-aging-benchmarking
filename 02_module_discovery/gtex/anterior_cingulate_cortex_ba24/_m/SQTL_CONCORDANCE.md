@@ -8,13 +8,13 @@ Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance --analysis g
 
 | module_set | n_genes | mean_abs_rho | perm_mean_abs_rho | frac_strong | mean_signed_rho | pvalue |
 | --- | --- | --- | --- | --- | --- | --- |
-| all_modules | 178 | 0.2976 | 0.3077 | 0.1629 | -0.0507 | 0.75 |
-| pheno_sig_modules | 139 | 0.3143 | 0.3219 | 0.1871 | -0.0723 | 0.664 |
-| go_invisible_modules | 75 | 0.2697 | 0.3103 | 0.1467 | -0.065 | 0.963 |
-| go_visible_modules | 64 | 0.3666 | 0.3373 | 0.2344 | -0.0808 | 0.142 |
+| all_modules | 166 | 0.3031 | 0.3395 | 0.1807 | 0.0154 | 0.988 |
+| pheno_sig_modules | 108 | 0.2938 | 0.352 | 0.1759 | 0.0217 | 0.998 |
+| go_invisible_modules | 24 | 0.2923 | 0.3968 | 0.1667 | 0.0824 | 0.989 |
+| go_visible_modules | 84 | 0.2942 | 0.3387 | 0.1786 | 0.0043 | 0.974 |
 
 ## Reading
 
-- On-thesis: phenotype-associated / GO-invisible module sets show **mean |rho| above the permutation null (small p)** => the sQTL and the isoform switch move the *same* transcripts in a coupled direction, not merely in the same genes.
-- The statistic is flip-invariant by construction: the sQTL allele reference and the module switch-axis orientation are both arbitrary, so only the *relative* within-gene direction structure is testable, and its magnitude is what the null calibrates.
-- Scope: concordance is evaluated on genes whose introns map to the GENCODE cache (~80% of GTEx brain sQTL introns) and that carry >= 3 interpretable switch transcripts; it is supporting evidence for genetic anchoring of the switch direction, not proof that the *co-switching* across genes is genetically coordinated.
+- mean |rho| above the permutation null would indicate the sQTL and the isoform switch move the *same* transcripts in a coupled direction. Note this within-gene test is underpowered: a single lead sQTL variant often tags introns with near-constant per-transcript direction, so per-cohort |rho| hugs the null; the pooled meta and the diagnosis live in `05_genetic_anchoring/_m/sqtl_concordance_meta/`.
+- The statistic is flip-invariant by construction: the sQTL allele reference and the module switch-axis orientation are both arbitrary, so only the *relative* within-gene direction structure is testable. The disease-anchored directional test is colocalization (`sqtl_coloc`), not this one.
+- Scope: concordance is evaluated on genes whose introns map to the GENCODE cache (~80% of GTEx brain sQTL introns) and that carry >= 3 interpretable switch transcripts.
