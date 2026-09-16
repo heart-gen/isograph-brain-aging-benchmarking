@@ -1,0 +1,10 @@
+{
+  "cohort": "brainseq",
+  "region": "caudate_sczd",
+  "bundle": "brainseq_sczd/caudate",
+  "filter": "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts)",
+  "n_genes_bundle": 20559,
+  "n_genes_kept": 19356,
+  "n_transcripts_kept": 50773,
+  "n_multi_transcript_genes": 13222
+}

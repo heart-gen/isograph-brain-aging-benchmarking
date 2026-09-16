@@ -58,9 +58,12 @@ def _git_state(path: Path) -> tuple[str | None, bool | None]:
     try:
         commit = subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"], check=True,
                                 capture_output=True, text=True, timeout=5).stdout.strip()
+        # `git status` walks the whole working tree; with the committed `_m` result stores
+        # this repo takes ~20 s warm, so a short timeout silently cost every artifact its
+        # commit stamp (the except below turns any failure into a null provenance record).
         status = subprocess.run(["git", "-C", str(path), "status", "--porcelain",
                                  "--untracked-files=no"], check=True,
-                                capture_output=True, text=True, timeout=10).stdout
+                                capture_output=True, text=True, timeout=180).stdout
     except Exception:
         return None, None
     return commit or None, bool(status.strip())

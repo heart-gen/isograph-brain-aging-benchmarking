@@ -8,45 +8,45 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring_meta` (after th
 
 | graph_method | module_set | xqtl_kind | k | n_fg_total | or_fe | or_fe_low | or_fe_high | p_fe | or_re | p_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | eQTL | 17 | 86465.0 | 0.81 | 0.79 | 0.82 | 7.30e-138 | 0.81 | 1.18e-60 | 0.56 |
-| isograph | all_modules | sQTL | 17 | 70399.0 | 0.87 | 0.85 | 0.89 | 9.11e-31 | 0.86 | 8.57e-19 | 0.43 |
-| isograph | pheno_sig_modules | eQTL | 12 | 20631.0 | 0.76 | 0.74 | 0.79 | 1.41e-59 | 0.74 | 2.82e-14 | 0.76 |
-| isograph | pheno_sig_modules | sQTL | 12 | 16433.0 | 0.86 | 0.82 | 0.9 | 1.93e-10 | 0.83 | 2.49e-05 | 0.55 |
-| isograph | go_invisible_modules | eQTL | 11 | 9926.0 | 0.92 | 0.88 | 0.96 | 1.40e-04 | 0.9 | 3.19e-02 | 0.74 |
-| isograph | go_invisible_modules | sQTL | 11 | 8396.0 | 0.99 | 0.93 | 1.05 | 6.62e-01 | 0.97 | 4.50e-01 | 0.23 |
-| isograph | go_visible_modules | eQTL | 11 | 10705.0 | 0.68 | 0.65 | 0.71 | 2.04e-68 | 0.63 | 1.18e-15 | 0.79 |
-| isograph | go_visible_modules | sQTL | 11 | 8037.0 | 0.75 | 0.7 | 0.81 | 2.38e-16 | 0.72 | 2.33e-09 | 0.37 |
+| isograph | all_modules | eQTL | 17 | 87530.0 | 0.8 | 0.79 | 0.82 | 5.91e-151 | 0.8 | 8.43e-34 | 0.78 |
+| isograph | all_modules | sQTL | 17 | 75492.0 | 0.83 | 0.81 | 0.85 | 2.11e-53 | 0.82 | 1.84e-17 | 0.72 |
+| isograph | pheno_sig_modules | eQTL | 8 | 19371.0 | 0.8 | 0.77 | 0.82 | 3.04e-42 | 0.8 | 4.47e-07 | 0.84 |
+| isograph | pheno_sig_modules | sQTL | 8 | 16601.0 | 0.81 | 0.77 | 0.85 | 8.59e-19 | 0.81 | 2.52e-07 | 0.62 |
+| isograph | go_invisible_modules | eQTL | 8 | 5228.0 | 0.87 | 0.82 | 0.92 | 9.35e-07 | 0.87 | 6.58e-04 | 0.36 |
+| isograph | go_invisible_modules | sQTL | 8 | 4736.0 | 0.93 | 0.86 | 1.0 | 4.78e-02 | 0.93 | 1.35e-01 | 0.2 |
+| isograph | go_visible_modules | eQTL | 7 | 14143.0 | 0.79 | 0.76 | 0.82 | 4.06e-35 | 0.78 | 1.62e-06 | 0.84 |
+| isograph | go_visible_modules | sQTL | 7 | 11865.0 | 0.78 | 0.74 | 0.83 | 1.25e-18 | 0.77 | 4.90e-08 | 0.6 |
 | wgcna_switch_only | all_modules | eQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
 | wgcna_switch_only | all_modules | sQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
-| wgcna_switch_only | pheno_sig_modules | eQTL | 9 | 30231.0 | 0.92 | 0.87 | 0.96 | 2.06e-04 | 0.85 | 1.62e-02 | 0.86 |
-| wgcna_switch_only | pheno_sig_modules | sQTL | 9 | 25255.0 | 0.96 | 0.89 | 1.03 | 2.82e-01 | 0.91 | 1.45e-01 | 0.55 |
-| wgcna_switch_only | go_invisible_modules | eQTL | 8 | 9898.0 | 1.02 | 0.97 | 1.08 | 3.65e-01 | 1.0 | 9.62e-01 | 0.8 |
-| wgcna_switch_only | go_invisible_modules | sQTL | 8 | 8873.0 | 1.1 | 1.02 | 1.18 | 9.09e-03 | 1.04 | 6.31e-01 | 0.71 |
-| wgcna_switch_only | go_visible_modules | eQTL | 10 | 20465.0 | 0.92 | 0.88 | 0.96 | 5.61e-05 | 0.84 | 1.59e-03 | 0.82 |
-| wgcna_switch_only | go_visible_modules | sQTL | 10 | 16494.0 | 0.9 | 0.85 | 0.96 | 1.60e-03 | 0.9 | 1.41e-02 | 0.32 |
+| wgcna_switch_only | pheno_sig_modules | eQTL | 6 | 22366.0 | 1.05 | 1.0 | 1.1 | 5.97e-02 | 1.05 | 1.21e-01 | 0.3 |
+| wgcna_switch_only | pheno_sig_modules | sQTL | 6 | 20534.0 | 0.97 | 0.91 | 1.03 | 3.00e-01 | 0.96 | 5.12e-01 | 0.76 |
+| wgcna_switch_only | go_invisible_modules | eQTL | 6 | 20788.0 | 1.05 | 1.0 | 1.1 | 7.36e-02 | 1.05 | 1.20e-01 | 0.23 |
+| wgcna_switch_only | go_invisible_modules | sQTL | 6 | 19102.0 | 0.97 | 0.91 | 1.03 | 3.18e-01 | 0.96 | 5.26e-01 | 0.74 |
+| wgcna_switch_only | go_visible_modules | eQTL | 2 | 1578.0 | 1.02 | 0.9 | 1.15 | 7.52e-01 | 1.02 | 7.52e-01 | 0.0 |
+| wgcna_switch_only | go_visible_modules | sQTL | 2 | 1432.0 | 0.99 | 0.83 | 1.18 | 9.17e-01 | 0.99 | 9.17e-01 | 0.0 |
 | wgcna_multiplex | all_modules | eQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
 | wgcna_multiplex | all_modules | sQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
-| wgcna_multiplex | pheno_sig_modules | eQTL | 10 | 57388.0 | 0.92 | 0.9 | 0.94 | 1.21e-10 | 0.82 | 3.13e-03 | 0.96 |
-| wgcna_multiplex | pheno_sig_modules | sQTL | 10 | 44300.0 | 0.98 | 0.95 | 1.02 | 4.21e-01 | 0.93 | 3.07e-01 | 0.9 |
-| wgcna_multiplex | go_invisible_modules | eQTL | 6 | 5428.0 | 0.97 | 0.91 | 1.02 | 2.41e-01 | 0.93 | 5.50e-01 | 0.92 |
-| wgcna_multiplex | go_invisible_modules | sQTL | 6 | 4590.0 | 1.01 | 0.94 | 1.09 | 7.69e-01 | 0.98 | 8.56e-01 | 0.71 |
-| wgcna_multiplex | go_visible_modules | eQTL | 10 | 54638.0 | 0.92 | 0.9 | 0.95 | 5.69e-10 | 0.82 | 2.11e-03 | 0.95 |
-| wgcna_multiplex | go_visible_modules | sQTL | 10 | 42083.0 | 0.99 | 0.95 | 1.02 | 4.42e-01 | 0.93 | 2.82e-01 | 0.89 |
+| wgcna_multiplex | pheno_sig_modules | eQTL | 8 | 35511.0 | 0.9 | 0.88 | 0.93 | 1.49e-10 | 0.84 | 2.11e-02 | 0.95 |
+| wgcna_multiplex | pheno_sig_modules | sQTL | 8 | 28196.0 | 1.0 | 0.95 | 1.04 | 8.46e-01 | 0.97 | 6.68e-01 | 0.86 |
+| wgcna_multiplex | go_invisible_modules | eQTL | 4 | 5804.0 | 0.89 | 0.84 | 0.94 | 6.00e-05 | 0.82 | 1.25e-02 | 0.75 |
+| wgcna_multiplex | go_invisible_modules | sQTL | 4 | 5162.0 | 0.9 | 0.83 | 0.97 | 6.46e-03 | 0.92 | 2.80e-01 | 0.56 |
+| wgcna_multiplex | go_visible_modules | eQTL | 8 | 32960.0 | 0.92 | 0.89 | 0.95 | 5.27e-08 | 0.84 | 3.82e-02 | 0.96 |
+| wgcna_multiplex | go_visible_modules | sQTL | 8 | 26053.0 | 1.02 | 0.98 | 1.07 | 2.97e-01 | 0.98 | 8.02e-01 | 0.9 |
 
 ## Splicing-specificity contrast (pooled sQTL OR / eQTL OR, paired within analysis)
 
 | graph_method | module_set | k | ratio_fe | ratio_fe_low | ratio_fe_high | p_fe | ratio_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | 17 | 1.068 | 1.037 | 1.1 | 1.35e-05 | 1.066 | 0.291 |
-| isograph | pheno_sig_modules | 12 | 1.111 | 1.048 | 1.177 | 3.57e-04 | 1.107 | 0.229 |
-| isograph | go_invisible_modules | 11 | 1.068 | 0.993 | 1.148 | 7.72e-02 | 1.068 | 0.0 |
-| isograph | go_visible_modules | 11 | 1.084 | 1.0 | 1.174 | 5.02e-02 | 1.082 | 0.284 |
-| wgcna_switch_only | pheno_sig_modules | 9 | 1.025 | 0.94 | 1.118 | 5.77e-01 | 1.013 | 0.228 |
-| wgcna_switch_only | go_invisible_modules | 8 | 1.066 | 0.977 | 1.164 | 1.49e-01 | 1.054 | 0.355 |
-| wgcna_switch_only | go_visible_modules | 10 | 0.968 | 0.897 | 1.045 | 4.08e-01 | 0.968 | 0.0 |
-| wgcna_multiplex | pheno_sig_modules | 10 | 1.046 | 0.999 | 1.095 | 5.31e-02 | 1.079 | 0.748 |
-| wgcna_multiplex | go_invisible_modules | 6 | 1.019 | 0.924 | 1.123 | 7.08e-01 | 1.019 | 0.0 |
-| wgcna_multiplex | go_visible_modules | 10 | 1.044 | 0.997 | 1.093 | 6.50e-02 | 1.074 | 0.751 |
+| isograph | all_modules | 17 | 1.029 | 1.0 | 1.059 | 5.13e-02 | 1.025 | 0.532 |
+| isograph | pheno_sig_modules | 8 | 1.004 | 0.948 | 1.063 | 8.98e-01 | 1.004 | 0.0 |
+| isograph | go_invisible_modules | 8 | 1.062 | 0.965 | 1.168 | 2.18e-01 | 1.062 | 0.0 |
+| isograph | go_visible_modules | 7 | 0.978 | 0.915 | 1.045 | 5.07e-01 | 0.978 | 0.0 |
+| wgcna_switch_only | pheno_sig_modules | 6 | 0.927 | 0.856 | 1.005 | 6.46e-02 | 0.92 | 0.465 |
+| wgcna_switch_only | go_invisible_modules | 6 | 0.929 | 0.857 | 1.008 | 7.62e-02 | 0.922 | 0.459 |
+| wgcna_switch_only | go_visible_modules | 2 | 0.969 | 0.785 | 1.197 | 7.73e-01 | 0.969 | 0.0 |
+| wgcna_multiplex | pheno_sig_modules | 8 | 1.084 | 1.025 | 1.146 | 4.44e-03 | 1.105 | 0.639 |
+| wgcna_multiplex | go_invisible_modules | 4 | 1.006 | 0.912 | 1.11 | 9.05e-01 | 1.085 | 0.611 |
+| wgcna_multiplex | go_visible_modules | 8 | 1.095 | 1.036 | 1.157 | 1.26e-03 | 1.103 | 0.503 |
 
 ## Cross-method contrast on the 13 tissues all methods share
 
@@ -54,16 +54,16 @@ The matched WGCNA baselines (`wgcna_switch_only`, `wgcna_multiplex`) consume the
 
 | graph_method | module_set | k | ratio_fe | ratio_fe_low | ratio_fe_high | p_fe | ratio_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | 8 | 1.11 | 1.063 | 1.159 | 2.37e-06 | 1.11 | 0.0 |
-| isograph | pheno_sig_modules | 7 | 1.112 | 1.046 | 1.182 | 6.53e-04 | 1.112 | 0.0 |
-| wgcna_switch_only | pheno_sig_modules | 7 | 1.015 | 0.927 | 1.113 | 7.41e-01 | 0.994 | 0.39 |
-| wgcna_multiplex | pheno_sig_modules | 8 | 1.044 | 0.996 | 1.093 | 7.02e-02 | 1.071 | 0.798 |
-| isograph | go_invisible_modules | 7 | 1.066 | 0.985 | 1.153 | 1.12e-01 | 1.061 | 0.157 |
-| wgcna_switch_only | go_invisible_modules | 7 | 1.065 | 0.975 | 1.162 | 1.61e-01 | 1.049 | 0.441 |
-| wgcna_multiplex | go_invisible_modules | 6 | 1.019 | 0.924 | 1.123 | 7.08e-01 | 1.019 | 0.0 |
-| isograph | go_visible_modules | 7 | 1.083 | 0.998 | 1.175 | 5.51e-02 | 1.083 | 0.0 |
-| wgcna_switch_only | go_visible_modules | 8 | 0.957 | 0.883 | 1.036 | 2.77e-01 | 0.957 | 0.0 |
-| wgcna_multiplex | go_visible_modules | 8 | 1.041 | 0.994 | 1.091 | 8.52e-02 | 1.065 | 0.8 |
+| isograph | all_modules | 5 | 1.015 | 0.964 | 1.069 | 5.80e-01 | 1.015 | 0.0 |
+| isograph | pheno_sig_modules | 5 | 1.0 | 0.939 | 1.065 | 9.97e-01 | 1.0 | 0.0 |
+| wgcna_switch_only | pheno_sig_modules | 5 | 0.93 | 0.853 | 1.015 | 1.02e-01 | 0.92 | 0.57 |
+| wgcna_multiplex | pheno_sig_modules | 5 | 1.059 | 0.998 | 1.124 | 5.97e-02 | 1.059 | 0.632 |
+| isograph | go_invisible_modules | 5 | 1.061 | 0.95 | 1.185 | 2.94e-01 | 1.061 | 0.0 |
+| wgcna_switch_only | go_invisible_modules | 5 | 0.929 | 0.852 | 1.014 | 9.89e-02 | 0.92 | 0.567 |
+| wgcna_multiplex | go_invisible_modules | 3 | 0.996 | 0.902 | 1.099 | 9.29e-01 | 1.027 | 0.511 |
+| isograph | go_visible_modules | 5 | 0.978 | 0.911 | 1.05 | 5.36e-01 | 0.978 | 0.0 |
+| wgcna_switch_only | go_visible_modules | 1 | 0.999 | 0.668 | 1.494 | 9.96e-01 | 0.999 | 0.0 |
+| wgcna_multiplex | go_visible_modules | 5 | 1.076 | 1.015 | 1.141 | 1.47e-02 | 1.072 | 0.501 |
 
 ## Reading
 

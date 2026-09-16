@@ -15,30 +15,30 @@
   "per_region": [
     {
       "region": "frontal_cortex_ba9",
-      "n_switch_genes": 7004,
-      "n_genes_expressed_longread": 6869,
-      "n_genes_multi_isoform": 4391,
-      "n_genes_confirmed": 4103,
-      "confirmed_rate_of_expressed": 0.5973212985878585,
-      "n_switch_pairs": 61302,
-      "n_pairs_detected": 16394,
-      "pair_detection_rate": 0.2674301001598643,
-      "n_pairs_switch_like": 5173,
-      "pair_switch_like_rate": 0.08438550128870184,
+      "n_switch_genes": 5058,
+      "n_genes_expressed_longread": 4987,
+      "n_genes_multi_isoform": 2988,
+      "n_genes_confirmed": 2815,
+      "confirmed_rate_of_expressed": 0.5644676158010828,
+      "n_switch_pairs": 27529,
+      "n_pairs_detected": 7095,
+      "pair_detection_rate": 0.257728213883541,
+      "n_pairs_switch_like": 2192,
+      "pair_switch_like_rate": 0.07962512259798758,
       "coding_pairs_only": true
     },
     {
       "region": "cortex",
-      "n_switch_genes": 1676,
-      "n_genes_expressed_longread": 1654,
-      "n_genes_multi_isoform": 1126,
-      "n_genes_confirmed": 1051,
-      "confirmed_rate_of_expressed": 0.6354292623941958,
-      "n_switch_pairs": 15878,
-      "n_pairs_detected": 4512,
-      "pair_detection_rate": 0.284166771633707,
-      "n_pairs_switch_like": 1341,
-      "pair_switch_like_rate": 0.08445648066507117,
+      "n_switch_genes": 2904,
+      "n_genes_expressed_longread": 2867,
+      "n_genes_multi_isoform": 1876,
+      "n_genes_confirmed": 1771,
+      "confirmed_rate_of_expressed": 0.6177188698988489,
+      "n_switch_pairs": 6522,
+      "n_pairs_detected": 1933,
+      "pair_detection_rate": 0.2963814780742104,
+      "n_pairs_switch_like": 613,
+      "pair_switch_like_rate": 0.09398957375038332,
       "coding_pairs_only": true
     }
   ],
@@ -47,10 +47,10 @@
       "frontal_cortex_ba9",
       "cortex"
     ],
-    "n_genes_confirmed": 5154,
-    "n_genes_expressed_longread": 8523,
-    "confirmed_rate_of_expressed": 0.6047166490672299,
-    "pair_detection_rate": 0.27087328323399845,
-    "pair_switch_like_rate": 0.08440010365379633
+    "n_genes_confirmed": 4586,
+    "n_genes_expressed_longread": 7854,
+    "confirmed_rate_of_expressed": 0.5839062897886428,
+    "pair_detection_rate": 0.26513171419341575,
+    "pair_switch_like_rate": 0.08237643534697953
   }
 }

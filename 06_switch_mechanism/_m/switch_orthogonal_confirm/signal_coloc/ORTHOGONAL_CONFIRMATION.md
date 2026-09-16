@@ -10,20 +10,20 @@ The anchored events here come from the signal-level colocalization layer (`coloc
 
 ## Result
 
-- 354 anchored pairs over 24 anchored genes; 124 detected in long-read.
-- **70 are switch-like** (both isoforms detected, usage negatively rank-correlated).
-- **19 of 24 genes** have at least one orthogonally confirmed anchored pair.
-- Restricting to pairs whose *anchored* isoform reaches 0.05 mean isoform fraction: 41 of 113 pairs, and **15 of 24 genes**.
+- 264 anchored pairs over 21 anchored genes; 108 detected in long-read.
+- **62 are switch-like** (both isoforms detected, usage negatively rank-correlated).
+- **15 of 21 genes** have at least one orthogonally confirmed anchored pair.
+- Restricting to pairs whose *anchored* isoform reaches 0.05 mean isoform fraction: 35 of 90 pairs, and **11 of 21 genes**.
 
-Against an abundance-matched background of 67023 non-anchored IsoGraph switch pairs, the anchored switch-like rate is **0.565** versus a matched-null mean of 0.237 (95% null interval 0.169-0.315, empirical two-sided p = 0.0005, n = 124 testable pairs).
+Against an abundance-matched background of 30881 non-anchored IsoGraph switch pairs, the anchored switch-like rate is **0.574** versus a matched-null mean of 0.243 (95% null interval 0.167-0.324, empirical two-sided p = 0.0005, n = 108 testable pairs).
 
 Matching is on the abundance decile of the better-expressed member, because at n=12 that is what governs whether a usage correlation is estimable at all.
 
-Restricted to the 61 pairs whose anchored isoform is itself usably expressed, the rate is **0.672** against a matched null of 0.299 (p = 0.0005).
+Restricted to the 50 pairs whose anchored isoform is itself usably expressed, the rate is **0.700** against a matched null of 0.301 (p = 0.0005).
 
 ### The set-level result does not transfer to every gene
 
-6 of 24 genes fail the abundance qualification entirely (CTSH, HMOX2, PLCB2, PTPRN, SCFD1, SNCA): their anchored isoform never reaches 0.05 mean isoform fraction in long read, so no usage correlation computed on it is interpretable. Read the confirmation at the level of the anchored *set*, where the matched comparison is made, and not locus by locus.
+6 of 21 genes fail the abundance qualification entirely (DGKZ, KLC1, NDUFAF7, PTPRN, RERE, WIPI2): their anchored isoform never reaches 0.05 mean isoform fraction in long read, so no usage correlation computed on it is interpretable. Read the confirmation at the level of the anchored *set*, where the matched comparison is made, and not locus by locus.
 
 ## Cross-tissue exceptions (reviewed, not pooled)
 
@@ -37,368 +37,246 @@ Per pair: `exception_pair_confirmation.parquet`.
 
 | gene | gene_name | traits | max_PP4_sQTL | n_anchored_pairs | n_pairs_detected | n_switch_like | n_pairs_usable | n_switch_like_usable | best_usage_spearman | max_anchored_if | orthogonally_confirmed | confirmed_at_usable_abundance |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| ENSG00000188732 | FAM221A | scz | 0.8173 | 20 | 20 | 13 | 15 | 11 | -0.662 | 0.4622 | True | True |
-| ENSG00000172922 | RNASEH2C | scz | 0.946 | 25 | 16 | 11 | 10 | 7 | -0.5071 | 0.4776 | True | True |
-| ENSG00000054356 | PTPRN | als | 0.8318 | 15 | 12 | 7 | 0 | 0 | -0.5245 | 0.04108 | True | False |
-| ENSG00000150625 | GPM6A | scz | 0.99 | 15 | 6 | 4 | 5 | 1 | -0.5524 | 0.9582 | True | True |
-| ENSG00000158604 | TMED4 | scz | 0.9613 | 8 | 6 | 4 | 8 | 4 | -0.9441 | 0.4645 | True | True |
-| ENSG00000115239 | ASB3 | scz | 0.8594 | 25 | 6 | 4 | 5 | 2 | -0.8252 | 0.9042 | True | True |
+| ENSG00000065609 | SNAP91 | scz | 0.9745 | 30 | 30 | 20 | 20 | 14 | -0.7133 | 0.2873 | True | True |
+| ENSG00000054356 | PTPRN | als | 0.8903 | 20 | 12 | 7 | 0 | 0 | -0.6574 | 0.04108 | True | False |
+| ENSG00000116731 | PRDM2 | als | 0.9642 | 23 | 9 | 6 | 12 | 5 | -0.7552 | 0.5376 | True | True |
+| ENSG00000141027 | NCOR1 | pd | 0.8946 | 15 | 6 | 4 | 3 | 2 | -0.6573 | 0.5074 | True | True |
+| ENSG00000157954 | WIPI2 | als | 0.8925 | 10 | 8 | 4 | 0 | 0 | -0.3357 | 0.02454 | True | False |
+| ENSG00000198171 | DDRGK1 | pd | 0.8844 | 6 | 4 | 4 | 3 | 2 | -0.5035 | 0.4183 | True | True |
 | ENSG00000186815 | TPCN1 | ad | 0.8353 | 25 | 12 | 4 | 10 | 3 | -0.838 | 0.8941 | True | True |
-| ENSG00000141027 | NCOR1 | pd | 0.8054 | 15 | 6 | 4 | 3 | 2 | -0.6573 | 0.5074 | True | True |
-| ENSG00000087157 | PGS1 | als | 0.9761 | 23 | 6 | 3 | 6 | 2 | -0.8462 | 0.8175 | True | True |
-| ENSG00000278311 | GGNBP2 | als | 0.9111 | 10 | 4 | 3 | 5 | 2 | -0.6972 | 0.9304 | True | True |
-| ENSG00000149927 | DOC2A | ad,scz | 0.9686 | 23 | 4 | 2 | 6 | 1 | -0.5437 | 0.9754 | True | True |
 | ENSG00000198053 | SIRPA | ad | 0.9654 | 12 | 2 | 2 | 3 | 1 | -0.869 | 0.918 | True | True |
-| ENSG00000089486 | CDIP1 | scz | 0.9493 | 25 | 4 | 2 | 5 | 1 | -0.986 | 0.3064 | True | True |
-| ENSG00000100023 | PPIL2 | scz | 0.9406 | 21 | 5 | 2 | 11 | 2 | -0.4805 | 0.532 | True | True |
-| ENSG00000145335 | SNCA | lbd,pd | 0.9743 | 6 | 6 | 1 | 0 | 0 | -0.3626 | 0.002885 | True | False |
-| ENSG00000076685 | NT5C2 | scz | 0.943 | 10 | 2 | 1 | 5 | 1 | -0.8017 | 0.07242 | True | True |
-| ENSG00000092108 | SCFD1 | als | 0.8562 | 5 | 2 | 1 | 0 | 0 | -0.019 | 0.00925 | True | False |
-| ENSG00000092140 | G2E3 | als | 0.8387 | 15 | 1 | 1 | 5 | 1 | -0.6409 | 0.9425 | True | True |
-| ENSG00000103415 | HMOX2 | scz | 0.8305 | 10 | 2 | 1 | 0 | 0 | -0.965 | 0.03595 | True | False |
-| ENSG00000103811 | CTSH | ad | 0.9892 | 25 | 1 | 0 | 0 | 0 | -0.1341 | 0.004023 | False | False |
-| ENSG00000137841 | PLCB2 | scz | 0.9752 | 5 | 0 | 0 | 0 | 0 | -0.01402 | 0.004213 | False | False |
+| ENSG00000100023 | PPIL2 | scz | 0.9406 | 13 | 4 | 2 | 8 | 2 | -0.4805 | 0.532 | True | True |
+| ENSG00000166913 | YWHAB | scz | 0.8914 | 10 | 2 | 2 | 5 | 2 | -0.8951 | 0.859 | True | True |
+| ENSG00000126214 | KLC1 | scz | 0.8904 | 10 | 10 | 2 | 0 | 0 | -0.4615 | 0.03635 | True | False |
+| ENSG00000156603 | MED19 | scz | 0.8101 | 4 | 3 | 2 | 4 | 2 | -0.9301 | 0.549 | True | True |
+| ENSG00000093000 | NUP50 | scz | 0.9564 | 27 | 1 | 1 | 6 | 1 | -0.7622 | 0.9443 | True | True |
+| ENSG00000089486 | CDIP1 | scz | 0.9292 | 20 | 2 | 1 | 5 | 1 | -0.986 | 0.3064 | True | True |
+| ENSG00000142599 | RERE | scz | 0.8565 | 5 | 3 | 1 | 0 | 0 | -0.3427 | 0.04749 | True | False |
+| ENSG00000115073 | ACTR1B | scz | 0.9957 | 4 | 0 | 0 | 2 | 0 | -0.774 | 0.9993 | False | False |
+| ENSG00000100027 | YPEL1 | scz | 0.9818 | 9 | 0 | 0 | 3 | 0 | -1 | 0.9547 | False | False |
+| ENSG00000149091 | DGKZ | scz | 0.8821 | 5 | 0 | 0 | 0 | 0 | -0.5416 | 0.0003075 | False | False |
+| ENSG00000003509 | NDUFAF7 | scz | 0.8585 | 5 | 0 | 0 | 0 | 0 | -0.3451 | 0.01642 | False | False |
 | ENSG00000107295 | SH3GL2 | pd | 0.8344 | 1 | 0 | 0 | 1 | 0 | -1 | 0.9994 | False | False |
 | ENSG00000114904 | NEK4 | scz | 0.82 | 10 | 0 | 0 | 5 | 0 | -0.6346 | 0.9728 | False | False |
-| ENSG00000163512 | AZI2 | pd | 0.8033 | 5 | 1 | 0 | 5 | 0 | -0.07018 | 0.604 | False | False |
 
 ## Per anchored pair
 
 | gene_name | traits | PP4_sQTL | anchored_tx | partner_tx | t1_mean_if | t2_mean_if | pair_detected | usage_spearman | switch_like |
 |---|---|---|---|---|---|---|---|---|---|
-| ASB3 | scz | 0.8594 | ENST00000406625 | ENST00000263634 | 0.04762 | 0.9042 | True | -0.8252 | True |
-| ASB3 | scz | 0.8594 | ENST00000263634 | ENST00000406625 | 0.9042 | 0.04762 | True | -0.8252 | True |
-| ASB3 | scz | 0.8594 | ENST00000263634 | ENST00000470707 | 0.9042 | 0.003967 | False | -0.6127 | False |
-| ASB3 | scz | 0.8594 | ENST00000263634 | ENST00000482829 | 0.9042 | 8.876e-10 | False | -0.2754 | False |
-| ASB3 | scz | 0.8594 | ENST00000482829 | ENST00000263634 | 8.876e-10 | 0.9042 | False | -0.2754 | False |
-| ASB3 | scz | 0.8594 | ENST00000406687 | ENST00000406625 | 0.001186 | 0.04762 | False | -0.1415 | False |
-| ASB3 | scz | 0.8594 | ENST00000406625 | ENST00000406687 | 0.04762 | 0.001186 | False | -0.1415 | False |
-| ASB3 | scz | 0.8594 | ENST00000394717 | ENST00000263634 | 0.0169 | 0.9042 | True | -0.1197 | True |
-| ASB3 | scz | 0.8594 | ENST00000263634 | ENST00000394717 | 0.9042 | 0.0169 | True | -0.1197 | True |
-| ASB3 | scz | 0.8594 | ENST00000482829 | ENST00000470707 | 8.876e-10 | 0.003967 | False | -0.1017 | False |
-| ASB3 | scz | 0.8594 | ENST00000406687 | ENST00000470707 | 0.001186 | 0.003967 | False | -0.09637 | False |
-| ASB3 | scz | 0.8594 | ENST00000406625 | ENST00000394717 | 0.04762 | 0.0169 | True | 0.01408 | False |
-| ASB3 | scz | 0.8594 | ENST00000394717 | ENST00000406625 | 0.0169 | 0.04762 | True | 0.01408 | False |
-| ASB3 | scz | 0.8594 | ENST00000263634 | ENST00000406687 | 0.9042 | 0.001186 | False | 0.03328 | False |
-| ASB3 | scz | 0.8594 | ENST00000406687 | ENST00000263634 | 0.001186 | 0.9042 | False | 0.03328 | False |
-| ASB3 | scz | 0.8594 | ENST00000482829 | ENST00000406625 | 8.876e-10 | 0.04762 | False | 0.2387 | False |
-| ASB3 | scz | 0.8594 | ENST00000406625 | ENST00000482829 | 0.04762 | 8.876e-10 | False | 0.2387 | False |
-| ASB3 | scz | 0.8594 | ENST00000482829 | ENST00000406687 | 8.876e-10 | 0.001186 | False | 0.2512 | False |
-| ASB3 | scz | 0.8594 | ENST00000406687 | ENST00000482829 | 0.001186 | 8.876e-10 | False | 0.2512 | False |
-| ASB3 | scz | 0.8594 | ENST00000394717 | ENST00000470707 | 0.0169 | 0.003967 | False | 0.2766 | False |
-| ASB3 | scz | 0.8594 | ENST00000394717 | ENST00000406687 | 0.0169 | 0.001186 | False | 0.2849 | False |
-| ASB3 | scz | 0.8594 | ENST00000406687 | ENST00000394717 | 0.001186 | 0.0169 | False | 0.2849 | False |
-| ASB3 | scz | 0.8594 | ENST00000482829 | ENST00000394717 | 8.876e-10 | 0.0169 | False | 0.3882 | False |
-| ASB3 | scz | 0.8594 | ENST00000394717 | ENST00000482829 | 0.0169 | 8.876e-10 | False | 0.3882 | False |
-| ASB3 | scz | 0.8594 | ENST00000406625 | ENST00000470707 | 0.04762 | 0.003967 | False | 0.4155 | False |
-| AZI2 | pd | 0.8033 | ENST00000420543 | ENST00000463512 | 0.604 | 0.008416 | False | -0.07018 | False |
-| AZI2 | pd | 0.8033 | ENST00000420543 | ENST00000295748 | 0.604 | 0.005283 | False | -0.05507 | False |
-| AZI2 | pd | 0.8033 | ENST00000420543 | ENST00000476174 | 0.604 | 0.01146 | False | -0.04367 | False |
-| AZI2 | pd | 0.8033 | ENST00000420543 | ENST00000479665 | 0.604 | 0.1902 | True | 0.08757 | False |
-| AZI2 | pd | 0.8033 | ENST00000420543 | ENST00000492044 | 0.604 | 0 | False |  | False |
-| CDIP1 | scz | 0.9284 | ENST00000567695 | ENST00000399599 | 0.3064 | 0.635 | True | -0.986 | True |
-| CDIP1 | scz | 0.9493 | ENST00000563332 | ENST00000399599 | 0.04796 | 0.635 | True | -0.3776 | True |
-| CDIP1 | scz | 0.9284 | ENST00000564828 | ENST00000399599 | 9.866e-05 | 0.635 | False | -0.2634 | False |
-| CDIP1 | scz | 0.9284 | ENST00000562334 | ENST00000563507 | 1.395e-05 | 0.0003141 | False | -0.2435 | False |
-| CDIP1 | scz | 0.9284 | ENST00000563507 | ENST00000562334 | 0.0003141 | 1.395e-05 | False | -0.2435 | False |
-| CDIP1 | scz | 0.9284 | ENST00000562334 | ENST00000399599 | 1.395e-05 | 0.635 | False | -0.2184 | False |
-| CDIP1 | scz | 0.9284 | ENST00000563507 | ENST00000399599 | 0.0003141 | 0.635 | False | -0.2027 | False |
-| CDIP1 | scz | 0.9284 | ENST00000564828 | ENST00000563507 | 9.866e-05 | 0.0003141 | False | -0.02997 | False |
-| CDIP1 | scz | 0.9284 | ENST00000563507 | ENST00000564828 | 0.0003141 | 9.866e-05 | False | -0.02997 | False |
-| CDIP1 | scz | 0.9493 | ENST00000563332 | ENST00000563507 | 0.04796 | 0.0003141 | False | 0.2027 | False |
-| CDIP1 | scz | 0.9284 | ENST00000567695 | ENST00000563507 | 0.3064 | 0.0003141 | False | 0.2027 | False |
-| CDIP1 | scz | 0.9284 | ENST00000563507 | ENST00000563332 | 0.0003141 | 0.04796 | False | 0.2027 | False |
-| CDIP1 | scz | 0.9284 | ENST00000563507 | ENST00000567695 | 0.0003141 | 0.3064 | False | 0.2027 | False |
-| CDIP1 | scz | 0.9284 | ENST00000562334 | ENST00000567695 | 1.395e-05 | 0.3064 | False | 0.2184 | False |
-| CDIP1 | scz | 0.9284 | ENST00000567695 | ENST00000562334 | 0.3064 | 1.395e-05 | False | 0.2184 | False |
-| CDIP1 | scz | 0.9284 | ENST00000567695 | ENST00000564828 | 0.3064 | 9.866e-05 | False | 0.2634 | False |
-| CDIP1 | scz | 0.9284 | ENST00000564828 | ENST00000567695 | 9.866e-05 | 0.3064 | False | 0.2634 | False |
-| CDIP1 | scz | 0.9493 | ENST00000563332 | ENST00000567695 | 0.04796 | 0.3064 | True | 0.2727 | False |
-| CDIP1 | scz | 0.9284 | ENST00000567695 | ENST00000563332 | 0.3064 | 0.04796 | True | 0.2727 | False |
-| CDIP1 | scz | 0.9493 | ENST00000563332 | ENST00000562334 | 0.04796 | 1.395e-05 | False | 0.393 | False |
-| CDIP1 | scz | 0.9284 | ENST00000562334 | ENST00000563332 | 1.395e-05 | 0.04796 | False | 0.393 | False |
-| CDIP1 | scz | 0.9493 | ENST00000563332 | ENST00000564828 | 0.04796 | 9.866e-05 | False | 0.4623 | False |
-| CDIP1 | scz | 0.9284 | ENST00000564828 | ENST00000563332 | 9.866e-05 | 0.04796 | False | 0.4623 | False |
-| CDIP1 | scz | 0.9284 | ENST00000564828 | ENST00000562334 | 9.866e-05 | 1.395e-05 | False | 0.7385 | False |
-| CDIP1 | scz | 0.9284 | ENST00000562334 | ENST00000564828 | 1.395e-05 | 9.866e-05 | False | 0.7385 | False |
-| CTSH | ad | 0.9892 | ENST00000676596 | ENST00000676808 | 4.368e-11 | 0.01729 | False | -0.1341 | False |
-| CTSH | ad | 0.9892 | ENST00000677238 | ENST00000676596 | 0.004023 | 4.368e-11 | False | 0.2117 | False |
-| CTSH | ad | 0.9892 | ENST00000676596 | ENST00000677238 | 4.368e-11 | 0.004023 | False | 0.2117 | False |
-| CTSH | ad | 0.9892 | ENST00000649928 | ENST00000676808 | 1.502e-13 | 0.01729 | False | 0.2223 | False |
-| CTSH | ad | 0.9892 | ENST00000677238 | ENST00000676808 | 0.004023 | 0.01729 | True | 0.5046 | False |
-| CTSH | ad | 0.9892 | ENST00000677238 | ENST00000649928 | 0.004023 | 1.502e-13 | False | 0.5159 | False |
-| CTSH | ad | 0.9892 | ENST00000649928 | ENST00000677238 | 1.502e-13 | 0.004023 | False | 0.5159 | False |
-| CTSH | ad | 0.9892 | ENST00000676596 | ENST00000649928 | 4.368e-11 | 1.502e-13 | False | 0.6043 | False |
-| CTSH | ad | 0.9892 | ENST00000649928 | ENST00000676596 | 1.502e-13 | 4.368e-11 | False | 0.6043 | False |
-| CTSH | ad | 0.9892 | ENST00000677238 | ENST00000528741 | 0.004023 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000677238 | ENST00000525807 | 0.004023 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000676596 | ENST00000528741 | 4.368e-11 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000525807 | ENST00000649928 | 0 | 1.502e-13 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000525807 | ENST00000676596 | 0 | 4.368e-11 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000525807 | ENST00000676808 | 0 | 0.01729 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000525807 | ENST00000677238 | 0 | 0.004023 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000528741 | ENST00000525807 | 0 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000528741 | ENST00000649928 | 0 | 1.502e-13 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000528741 | ENST00000676596 | 0 | 4.368e-11 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000528741 | ENST00000676808 | 0 | 0.01729 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000528741 | ENST00000677238 | 0 | 0.004023 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000649928 | ENST00000525807 | 1.502e-13 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000649928 | ENST00000528741 | 1.502e-13 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000676596 | ENST00000525807 | 4.368e-11 | 0 | False |  | False |
-| CTSH | ad | 0.9892 | ENST00000525807 | ENST00000528741 | 0 | 0 | False |  | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000564944 | ENST00000564233 | 0.00382 | 0.01229 | True | -0.5437 | True |
-| DOC2A | ad,scz | 0.9686 | ENST00000350119 | ENST00000564233 | 0.9754 | 0.01229 | True | -0.3818 | True |
-| DOC2A | ad,scz | 0.9644 | ENST00000350119 | ENST00000567824 | 0.9754 | 0.004112 | False | -0.2963 | False |
-| DOC2A | ad,scz | 0.9494 | ENST00000564944 | ENST00000567824 | 0.00382 | 0.004112 | False | -0.1588 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000616445 | ENST00000564233 | 3.745e-09 | 0.01229 | False | -0.02759 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000616445 | ENST00000350119 | 3.745e-09 | 0.9754 | False | 0.09179 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000350119 | ENST00000616445 | 0.9754 | 3.745e-09 | False | 0.09179 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000564944 | ENST00000616445 | 0.00382 | 3.745e-09 | False | 0.1682 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000616445 | ENST00000564944 | 3.745e-09 | 0.00382 | False | 0.1682 | False |
-| DOC2A | ad,scz | 0.9644 | ENST00000616445 | ENST00000567824 | 3.745e-09 | 0.004112 | False | 0.2252 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000350119 | ENST00000564944 | 0.9754 | 0.00382 | True | 0.6336 | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000564944 | ENST00000350119 | 0.00382 | 0.9754 | True | 0.6336 | False |
-| DOC2A | scz | 0.9686 | ENST00000565273 | ENST00000564944 | 0 | 0.00382 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000565273 | ENST00000564357 | 0 | 0 | False |  | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000616445 | ENST00000564357 | 3.745e-09 | 0 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000565273 | ENST00000350119 | 0 | 0.9754 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000564944 | ENST00000565273 | 0.00382 | 0 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000350119 | ENST00000565273 | 0.9754 | 0 | False |  | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000564944 | ENST00000564357 | 0.00382 | 0 | False |  | False |
-| DOC2A | ad,scz | 0.9686 | ENST00000350119 | ENST00000564357 | 0.9754 | 0 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000565273 | ENST00000564233 | 0 | 0.01229 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000565273 | ENST00000616445 | 0 | 3.745e-09 | False |  | False |
-| DOC2A | scz | 0.9686 | ENST00000616445 | ENST00000565273 | 3.745e-09 | 0 | False |  | False |
-| FAM221A | scz | 0.8025 | ENST00000409192 | ENST00000462546 | 0.098 | 0.1463 | True | -0.662 | True |
-| FAM221A | scz | 0.8025 | ENST00000409994 | ENST00000462546 | 0.4622 | 0.1463 | True | -0.5175 | True |
-| FAM221A | scz | 0.8173 | ENST00000344962 | ENST00000429719 | 0.2089 | 0.05486 | True | -0.5044 | True |
-| FAM221A | scz | 0.8173 | ENST00000409653 | ENST00000462546 | 0.01266 | 0.1463 | True | -0.4913 | True |
-| FAM221A | scz | 0.8173 | ENST00000344962 | ENST00000409994 | 0.2089 | 0.4622 | True | -0.4056 | True |
-| FAM221A | scz | 0.8025 | ENST00000409994 | ENST00000344962 | 0.4622 | 0.2089 | True | -0.4056 | True |
-| FAM221A | scz | 0.8173 | ENST00000344962 | ENST00000462546 | 0.2089 | 0.1463 | True | -0.2378 | True |
-| FAM221A | scz | 0.8025 | ENST00000409994 | ENST00000429719 | 0.4622 | 0.05486 | True | -0.1891 | True |
-| FAM221A | scz | 0.8173 | ENST00000409653 | ENST00000409994 | 0.01266 | 0.4622 | True | -0.1716 | True |
-| FAM221A | scz | 0.8025 | ENST00000409994 | ENST00000409653 | 0.4622 | 0.01266 | True | -0.1716 | True |
-| FAM221A | scz | 0.8025 | ENST00000409192 | ENST00000429719 | 0.098 | 0.05486 | True | -0.1693 | True |
-| FAM221A | scz | 0.8173 | ENST00000344962 | ENST00000409192 | 0.2089 | 0.098 | True | -0.0493 | True |
-| FAM221A | scz | 0.8025 | ENST00000409192 | ENST00000344962 | 0.098 | 0.2089 | True | -0.0493 | True |
-| FAM221A | scz | 0.8173 | ENST00000409653 | ENST00000429719 | 0.01266 | 0.05486 | True | 0.03906 | False |
-| FAM221A | scz | 0.8173 | ENST00000409653 | ENST00000409192 | 0.01266 | 0.098 | True | 0.2434 | False |
-| FAM221A | scz | 0.8025 | ENST00000409192 | ENST00000409653 | 0.098 | 0.01266 | True | 0.2434 | False |
-| FAM221A | scz | 0.8025 | ENST00000409192 | ENST00000409994 | 0.098 | 0.4622 | True | 0.5423 | False |
-| FAM221A | scz | 0.8025 | ENST00000409994 | ENST00000409192 | 0.4622 | 0.098 | True | 0.5423 | False |
-| FAM221A | scz | 0.8173 | ENST00000344962 | ENST00000409653 | 0.2089 | 0.01266 | True | 0.5926 | False |
-| FAM221A | scz | 0.8173 | ENST00000409653 | ENST00000344962 | 0.01266 | 0.2089 | True | 0.5926 | False |
-| G2E3 | als | 0.8387 | ENST00000206595 | ENST00000549159 | 0.9425 | 0.03212 | True | -0.6409 | True |
-| G2E3 | als | 0.8387 | ENST00000553504 | ENST00000206595 | 0.003317 | 0.9425 | False | -0.5324 | False |
-| G2E3 | als | 0.8387 | ENST00000206595 | ENST00000553504 | 0.9425 | 0.003317 | False | -0.5324 | False |
-| G2E3 | als | 0.8387 | ENST00000648008 | ENST00000206595 | 5.592e-14 | 0.9425 | False | -0.393 | False |
-| G2E3 | als | 0.8387 | ENST00000206595 | ENST00000544007 | 0.9425 | 6.576e-16 | False | -0.393 | False |
-| G2E3 | als | 0.8387 | ENST00000206595 | ENST00000648008 | 0.9425 | 5.592e-14 | False | -0.393 | False |
-| G2E3 | als | 0.8387 | ENST00000206595 | ENST00000438909 | 0.9425 | 0.00306 | False | -0.2258 | False |
-| G2E3 | als | 0.8387 | ENST00000648008 | ENST00000549159 | 5.592e-14 | 0.03212 | False | 0.2199 | False |
-| G2E3 | als | 0.8387 | ENST00000648008 | ENST00000553504 | 5.592e-14 | 0.003317 | False | 0.5159 | False |
-| G2E3 | als | 0.8387 | ENST00000553504 | ENST00000648008 | 0.003317 | 5.592e-14 | False | 0.5159 | False |
-| G2E3 | als | 0.8387 | ENST00000553504 | ENST00000544007 | 0.003317 | 6.576e-16 | False | 0.5159 | False |
-| G2E3 | als | 0.8387 | ENST00000553504 | ENST00000549159 | 0.003317 | 0.03212 | False | 0.5177 | False |
-| G2E3 | als | 0.8387 | ENST00000553504 | ENST00000438909 | 0.003317 | 0.00306 | False | 0.6844 | False |
-| G2E3 | als | 0.8387 | ENST00000648008 | ENST00000438909 | 5.592e-14 | 0.00306 | False | 0.7385 | False |
-| G2E3 | als | 0.8387 | ENST00000648008 | ENST00000544007 | 5.592e-14 | 6.576e-16 | False | 1 | False |
-| GGNBP2 | als | 0.9111 | ENST00000617860 | ENST00000613102 | 0.006473 | 0.9304 | True | -0.6972 | True |
-| GGNBP2 | als | 0.9111 | ENST00000613102 | ENST00000617860 | 0.9304 | 0.006473 | True | -0.6972 | True |
-| GGNBP2 | als | 0.9111 | ENST00000613102 | ENST00000620927 | 0.9304 | 0.01316 | False | -0.6504 | False |
-| GGNBP2 | als | 0.9111 | ENST00000613102 | ENST00000611219 | 0.9304 | 0.03687 | True | -0.4196 | True |
-| GGNBP2 | als | 0.9111 | ENST00000613102 | ENST00000612563 | 0.9304 | 0.001815 | False | -0.257 | False |
-| GGNBP2 | als | 0.9111 | ENST00000613102 | ENST00000619573 | 0.9304 | 0.003029 | False | -0.05972 | False |
-| GGNBP2 | als | 0.9111 | ENST00000617860 | ENST00000619573 | 0.006473 | 0.003029 | False | -0.04886 | False |
-| GGNBP2 | als | 0.9111 | ENST00000617860 | ENST00000620927 | 0.006473 | 0.01316 | False | -0.005414 | False |
-| GGNBP2 | als | 0.9111 | ENST00000617860 | ENST00000612563 | 0.006473 | 0.001815 | False | 0.2681 | False |
-| GGNBP2 | als | 0.9111 | ENST00000617860 | ENST00000611219 | 0.006473 | 0.03687 | True | 0.6197 | False |
-| GPM6A | scz | 0.8415 | ENST00000280187 | ENST00000393658 | 0.002427 | 0.9582 | True | -0.5524 | True |
-| GPM6A | scz | 0.8415 | ENST00000393658 | ENST00000280187 | 0.9582 | 0.002427 | True | -0.5524 | True |
-| GPM6A | scz | 0.99 | ENST00000506894 | ENST00000280187 | 0.000806 | 0.002427 | True | -0.3853 | True |
-| GPM6A | scz | 0.8415 | ENST00000280187 | ENST00000506894 | 0.002427 | 0.000806 | True | -0.3853 | True |
-| GPM6A | scz | 0.8415 | ENST00000280187 | ENST00000512610 | 0.002427 | 0.000185 | False | -0.2417 | False |
-| GPM6A | scz | 0.99 | ENST00000506894 | ENST00000507540 | 0.000806 | 4.175e-05 | False | -0.1271 | False |
-| GPM6A | scz | 0.99 | ENST00000506894 | ENST00000393658 | 0.000806 | 0.9582 | True | 0.01401 | False |
-| GPM6A | scz | 0.8415 | ENST00000393658 | ENST00000506894 | 0.9582 | 0.000806 | True | 0.01401 | False |
-| GPM6A | scz | 0.8415 | ENST00000393658 | ENST00000512610 | 0.9582 | 0.000185 | False | 0.1404 | False |
-| GPM6A | scz | 0.99 | ENST00000506894 | ENST00000506219 | 0.000806 | 0 | False |  | False |
-| GPM6A | scz | 0.99 | ENST00000506894 | ENST00000503397 | 0.000806 | 0 | False |  | False |
-| GPM6A | scz | 0.8415 | ENST00000393658 | ENST00000503397 | 0.9582 | 0 | False |  | False |
-| GPM6A | scz | 0.8415 | ENST00000280187 | ENST00000503397 | 0.002427 | 0 | False |  | False |
-| GPM6A | scz | 0.8415 | ENST00000280187 | ENST00000506219 | 0.002427 | 0 | False |  | False |
-| GPM6A | scz | 0.8415 | ENST00000393658 | ENST00000506219 | 0.9582 | 0 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000458134 | ENST00000570646 | 0.03595 | 0.9498 | True | -0.965 | True |
-| HMOX2 | scz | 0.8305 | ENST00000458134 | ENST00000576827 | 0.03595 | 0.0001934 | False | -0.04367 | False |
-| HMOX2 | scz | 0.8305 | ENST00000458134 | ENST00000575120 | 0.03595 | 0.008633 | True | 0.5009 | False |
-| HMOX2 | scz | 0.8305 | ENST00000458134 | ENST00000398595 | 0.03595 | 0.0005877 | False | 0.6091 | False |
-| HMOX2 | scz | 0.8305 | ENST00000570445 | ENST00000575120 | 0 | 0.008633 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000458134 | ENST00000570445 | 0.03595 | 0 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000570445 | ENST00000570646 | 0 | 0.9498 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000570445 | ENST00000458134 | 0 | 0.03595 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000570445 | ENST00000576827 | 0 | 0.0001934 | False |  | False |
-| HMOX2 | scz | 0.8305 | ENST00000570445 | ENST00000398595 | 0 | 0.0005877 | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000268712 | ENST00000464381 | 0.5074 | 0.3877 | True | -0.6573 | True |
-| NCOR1 | pd | 0.8054 | ENST00000268712 | ENST00000395848 | 0.5074 | 0.007491 | True | -0.4755 | True |
-| NCOR1 | pd | 0.8054 | ENST00000395851 | ENST00000395848 | 0.01233 | 0.007491 | True | -0.4126 | True |
-| NCOR1 | pd | 0.8054 | ENST00000395851 | ENST00000464381 | 0.01233 | 0.3877 | True | -0.4126 | True |
-| NCOR1 | pd | 0.8054 | ENST00000395851 | ENST00000268712 | 0.01233 | 0.5074 | True | 0.3357 | False |
-| NCOR1 | pd | 0.8054 | ENST00000268712 | ENST00000395851 | 0.5074 | 0.01233 | True | 0.3357 | False |
-| NCOR1 | pd | 0.8054 | ENST00000704745 | ENST00000704743 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000704745 | ENST00000395851 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000704745 | ENST00000464381 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000395851 | ENST00000704745 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000268712 | ENST00000704745 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000268712 | ENST00000704743 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000704745 | ENST00000395848 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000704745 | ENST00000268712 |  |  | False |  | False |
-| NCOR1 | pd | 0.8054 | ENST00000395851 | ENST00000704743 |  |  | False |  | False |
+| ACTR1B | scz | 0.9957 | ENST00000289228 | ENST00000460427 | 0.9993 | 0.0006014 | False | -0.774 | False |
+| ACTR1B | scz | 0.9957 | ENST00000289228 | ENST00000451664 | 0.9993 | 0.0001302 | False | -0.4669 | False |
+| ACTR1B | scz | 0.9957 | ENST00000451664 | ENST00000289228 | 0.0001302 | 0.9993 | False | -0.4669 | False |
+| ACTR1B | scz | 0.9957 | ENST00000451664 | ENST00000460427 | 0.0001302 | 0.0006014 | False | -0.1983 | False |
+| CDIP1 | scz | 0.9292 | ENST00000567695 | ENST00000399599 | 0.3064 | 0.635 | True | -0.986 | True |
+| CDIP1 | scz | 0.9292 | ENST00000564828 | ENST00000399599 | 9.866e-05 | 0.635 | False | -0.2634 | False |
+| CDIP1 | scz | 0.9292 | ENST00000562334 | ENST00000563507 | 1.395e-05 | 0.0003141 | False | -0.2435 | False |
+| CDIP1 | scz | 0.9292 | ENST00000563507 | ENST00000562334 | 0.0003141 | 1.395e-05 | False | -0.2435 | False |
+| CDIP1 | scz | 0.9292 | ENST00000562334 | ENST00000399599 | 1.395e-05 | 0.635 | False | -0.2184 | False |
+| CDIP1 | scz | 0.9292 | ENST00000563507 | ENST00000399599 | 0.0003141 | 0.635 | False | -0.2027 | False |
+| CDIP1 | scz | 0.9292 | ENST00000564828 | ENST00000563507 | 9.866e-05 | 0.0003141 | False | -0.02997 | False |
+| CDIP1 | scz | 0.9292 | ENST00000563507 | ENST00000564828 | 0.0003141 | 9.866e-05 | False | -0.02997 | False |
+| CDIP1 | scz | 0.9292 | ENST00000563507 | ENST00000567695 | 0.0003141 | 0.3064 | False | 0.2027 | False |
+| CDIP1 | scz | 0.9292 | ENST00000563507 | ENST00000563332 | 0.0003141 | 0.04796 | False | 0.2027 | False |
+| CDIP1 | scz | 0.9292 | ENST00000567695 | ENST00000563507 | 0.3064 | 0.0003141 | False | 0.2027 | False |
+| CDIP1 | scz | 0.9292 | ENST00000562334 | ENST00000567695 | 1.395e-05 | 0.3064 | False | 0.2184 | False |
+| CDIP1 | scz | 0.9292 | ENST00000567695 | ENST00000562334 | 0.3064 | 1.395e-05 | False | 0.2184 | False |
+| CDIP1 | scz | 0.9292 | ENST00000567695 | ENST00000564828 | 0.3064 | 9.866e-05 | False | 0.2634 | False |
+| CDIP1 | scz | 0.9292 | ENST00000564828 | ENST00000567695 | 9.866e-05 | 0.3064 | False | 0.2634 | False |
+| CDIP1 | scz | 0.9292 | ENST00000567695 | ENST00000563332 | 0.3064 | 0.04796 | True | 0.2727 | False |
+| CDIP1 | scz | 0.9292 | ENST00000562334 | ENST00000563332 | 1.395e-05 | 0.04796 | False | 0.393 | False |
+| CDIP1 | scz | 0.9292 | ENST00000564828 | ENST00000563332 | 9.866e-05 | 0.04796 | False | 0.4623 | False |
+| CDIP1 | scz | 0.9292 | ENST00000564828 | ENST00000562334 | 9.866e-05 | 1.395e-05 | False | 0.7385 | False |
+| CDIP1 | scz | 0.9292 | ENST00000562334 | ENST00000564828 | 1.395e-05 | 9.866e-05 | False | 0.7385 | False |
+| DDRGK1 | pd | 0.8844 | ENST00000354488 | ENST00000496781 | 0.4183 | 0.3155 | True | -0.5035 | True |
+| DDRGK1 | pd | 0.8844 | ENST00000380201 | ENST00000496781 | 0.01269 | 0.3155 | True | -0.2028 | True |
+| DDRGK1 | pd | 0.8844 | ENST00000354488 | ENST00000380201 | 0.4183 | 0.01269 | True | -0.1329 | True |
+| DDRGK1 | pd | 0.8844 | ENST00000380201 | ENST00000354488 | 0.01269 | 0.4183 | True | -0.1329 | True |
+| DDRGK1 | pd | 0.8844 | ENST00000380201 | ENST00000470203 | 0.01269 | 0.001629 | False | 0.3336 | False |
+| DDRGK1 | pd | 0.8844 | ENST00000354488 | ENST00000470203 | 0.4183 | 0.001629 | False | 0.3626 | False |
+| DGKZ | scz | 0.8821 | ENST00000318201 | ENST00000527211 | 0.0003075 | 0.3964 | False | -0.5416 | False |
+| DGKZ | scz | 0.8821 | ENST00000318201 | ENST00000421244 | 0.0003075 | 2.325e-05 | False | -0.3932 | False |
+| DGKZ | scz | 0.8821 | ENST00000318201 | ENST00000524984 | 0.0003075 | 0.0005669 | False | -0.1471 | False |
+| DGKZ | scz | 0.8821 | ENST00000318201 | ENST00000456247 | 0.0003075 | 0.01545 | False | -0.03672 | False |
+| DGKZ | scz | 0.8821 | ENST00000318201 | ENST00000534802 | 0.0003075 | 0.5625 | False | 0.4498 | False |
+| KLC1 | scz | 0.8904 | ENST00000445352 | ENST00000389744 | 0.03635 | 0.7589 | True | -0.4615 | True |
+| KLC1 | scz | 0.8904 | ENST00000553325 | ENST00000389744 | 0.01614 | 0.7589 | True | -0.03497 | True |
+| KLC1 | scz | 0.8904 | ENST00000553325 | ENST00000553286 | 0.01614 | 0.01129 | True | 0.006993 | False |
+| KLC1 | scz | 0.8904 | ENST00000553325 | ENST00000557450 | 0.01614 | 0.004152 | True | 0.02797 | False |
+| KLC1 | scz | 0.8904 | ENST00000445352 | ENST00000557450 | 0.03635 | 0.004152 | True | 0.09091 | False |
+| KLC1 | scz | 0.8904 | ENST00000445352 | ENST00000553286 | 0.03635 | 0.01129 | True | 0.2727 | False |
+| KLC1 | scz | 0.8904 | ENST00000553325 | ENST00000445352 | 0.01614 | 0.03635 | True | 0.3916 | False |
+| KLC1 | scz | 0.8904 | ENST00000445352 | ENST00000553325 | 0.03635 | 0.01614 | True | 0.3916 | False |
+| KLC1 | scz | 0.8904 | ENST00000553325 | ENST00000557575 | 0.01614 | 0.01357 | True | 0.4196 | False |
+| KLC1 | scz | 0.8904 | ENST00000445352 | ENST00000557575 | 0.03635 | 0.01357 | True | 0.9441 | False |
+| MED19 | scz | 0.8101 | ENST00000431606 | ENST00000337672 | 0.549 | 0.4147 | True | -0.9301 | True |
+| MED19 | scz | 0.8101 | ENST00000431606 | ENST00000534677 | 0.549 | 0.0256 | True | -0.5934 | True |
+| MED19 | scz | 0.8101 | ENST00000431606 | ENST00000528205 | 0.549 | 0.008305 | False | -0.331 | False |
+| MED19 | scz | 0.8101 | ENST00000431606 | ENST00000645681 | 0.549 | 0.002373 | True | 0.4222 | False |
+| NCOR1 | pd | 0.8946 | ENST00000268712 | ENST00000464381 | 0.5074 | 0.3877 | True | -0.6573 | True |
+| NCOR1 | pd | 0.8946 | ENST00000268712 | ENST00000395848 | 0.5074 | 0.007491 | True | -0.4755 | True |
+| NCOR1 | pd | 0.8946 | ENST00000395851 | ENST00000464381 | 0.01233 | 0.3877 | True | -0.4126 | True |
+| NCOR1 | pd | 0.8946 | ENST00000395851 | ENST00000395848 | 0.01233 | 0.007491 | True | -0.4126 | True |
+| NCOR1 | pd | 0.8946 | ENST00000268712 | ENST00000395851 | 0.5074 | 0.01233 | True | 0.3357 | False |
+| NCOR1 | pd | 0.8946 | ENST00000395851 | ENST00000268712 | 0.01233 | 0.5074 | True | 0.3357 | False |
+| NCOR1 | pd | 0.8946 | ENST00000704745 | ENST00000464381 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000704745 | ENST00000704743 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000268712 | ENST00000704743 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000704745 | ENST00000268712 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000395851 | ENST00000704745 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000395851 | ENST00000704743 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000268712 | ENST00000704745 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000704745 | ENST00000395848 |  |  | False |  | False |
+| NCOR1 | pd | 0.8946 | ENST00000704745 | ENST00000395851 |  |  | False |  | False |
+| NDUFAF7 | scz | 0.8585 | ENST00000441905 | ENST00000002125 | 0.01642 | 0.7277 | False | -0.3451 | False |
+| NDUFAF7 | scz | 0.8585 | ENST00000441905 | ENST00000455230 | 0.01642 | 0.004644 | False | -0.1678 | False |
+| NDUFAF7 | scz | 0.8585 | ENST00000441905 | ENST00000474257 | 0.01642 | 0.001861 | False | -0.1319 | False |
+| NDUFAF7 | scz | 0.8585 | ENST00000441905 | ENST00000474154 | 0.01642 | 0.1169 | False | 0.187 | False |
+| NDUFAF7 | scz | 0.8585 | ENST00000441905 | ENST00000336237 | 0.01642 | 0.1242 | False | 0.3422 | False |
 | NEK4 | scz | 0.82 | ENST00000233027 | ENST00000383721 | 0.9728 | 0.008412 | False | -0.6346 | False |
 | NEK4 | scz | 0.82 | ENST00000233027 | ENST00000493199 | 0.9728 | 0.005682 | False | -0.4383 | False |
-| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000233027 | 0.0009862 | 0.9728 | False | -0.3409 | False |
 | NEK4 | scz | 0.82 | ENST00000233027 | ENST00000535191 | 0.9728 | 0.0009862 | False | -0.3409 | False |
+| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000233027 | 0.0009862 | 0.9728 | False | -0.3409 | False |
 | NEK4 | scz | 0.82 | ENST00000535191 | ENST00000493199 | 0.0009862 | 0.005682 | False | -0.09091 | False |
 | NEK4 | scz | 0.82 | ENST00000535191 | ENST00000383721 | 0.0009862 | 0.008412 | False | 0.6305 | False |
-| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000461689 | 0.0009862 | 0 | False |  | False |
-| NEK4 | scz | 0.82 | ENST00000233027 | ENST00000461689 | 0.9728 | 0 | False |  | False |
-| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000496822 | 0.0009862 | 0 | False |  | False |
 | NEK4 | scz | 0.82 | ENST00000233027 | ENST00000496822 | 0.9728 | 0 | False |  | False |
-| NT5C2 | scz | 0.943 | ENST00000675020 | ENST00000674728 | 1.452e-08 | 0.004506 | False | -0.8017 | False |
-| NT5C2 | scz | 0.943 | ENST00000675020 | ENST00000369857 | 1.452e-08 | 9.485e-05 | False | -0.3556 | False |
-| NT5C2 | scz | 0.943 | ENST00000404739 | ENST00000369857 | 0.07242 | 9.485e-05 | False | -0.3057 | False |
-| NT5C2 | scz | 0.943 | ENST00000404739 | ENST00000674728 | 0.07242 | 0.004506 | True | -0.2426 | True |
-| NT5C2 | scz | 0.943 | ENST00000404739 | ENST00000675020 | 0.07242 | 1.452e-08 | False | 0.2705 | False |
-| NT5C2 | scz | 0.943 | ENST00000675020 | ENST00000404739 | 1.452e-08 | 0.07242 | False | 0.2705 | False |
-| NT5C2 | scz | 0.943 | ENST00000404739 | ENST00000343289 | 0.07242 | 0.03802 | True | 0.3566 | False |
-| NT5C2 | scz | 0.943 | ENST00000675020 | ENST00000343289 | 1.452e-08 | 0.03802 | False | 0.5908 | False |
-| NT5C2 | scz | 0.943 | ENST00000675020 | ENST00000675811 | 1.452e-08 | 0 | False |  | False |
-| NT5C2 | scz | 0.943 | ENST00000404739 | ENST00000675811 | 0.07242 | 0 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000262764 | ENST00000591996 | 0.8175 | 0.09774 | True | -0.8462 | True |
-| PGS1 | als | 0.9761 | ENST00000262764 | ENST00000588281 | 0.8175 | 0.05321 | True | -0.4476 | True |
-| PGS1 | als | 0.9761 | ENST00000589426 | ENST00000591996 | 0.02125 | 0.09774 | True | -0.2347 | True |
-| PGS1 | als | 0.9761 | ENST00000262764 | ENST00000589425 | 0.8175 | 1.975e-19 | False | -0.131 | False |
-| PGS1 | als | 0.9761 | ENST00000589426 | ENST00000589425 | 0.02125 | 1.975e-19 | False | -0.04375 | False |
-| PGS1 | als | 0.9761 | ENST00000589426 | ENST00000588281 | 0.02125 | 0.05321 | True | 0.02802 | False |
-| PGS1 | als | 0.9761 | ENST00000262764 | ENST00000589426 | 0.8175 | 0.02125 | True | 0.1296 | False |
-| PGS1 | als | 0.9761 | ENST00000589426 | ENST00000262764 | 0.02125 | 0.8175 | True | 0.1296 | False |
-| PGS1 | als | 0.9761 | ENST00000262764 | ENST00000592043 | 0.8175 | 0 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000589426 | ENST00000592043 | 0.02125 | 0 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000592043 | ENST00000262764 | 0 | 0.8175 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000592043 | ENST00000588281 | 0 | 0.05321 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000592043 | ENST00000589425 | 0 | 1.975e-19 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000592043 | ENST00000589426 | 0 | 0.02125 | False |  | False |
-| PGS1 | als | 0.9761 | ENST00000592043 | ENST00000591996 | 0 | 0.09774 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589689 | ENST00000588281 | 0 | 0.05321 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589689 | ENST00000589426 | 0 | 0.02125 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589689 | ENST00000262764 | 0 | 0.8175 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589426 | ENST00000589689 | 0.02125 | 0 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000262764 | ENST00000589689 | 0.8175 | 0 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000592043 | ENST00000589689 | 0 | 0 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589689 | ENST00000592043 | 0 | 0 | False |  | False |
-| PGS1 | als | 0.9723 | ENST00000589689 | ENST00000591996 | 0 | 0.09774 | False |  | False |
-| PLCB2 | scz | 0.9752 | ENST00000558505 | ENST00000557821 | 0.004213 | 0.01664 | False | -0.01402 | False |
-| PLCB2 | scz | 0.9752 | ENST00000558505 | ENST00000558588 | 0.004213 | 0.04893 | False | 0.05517 | False |
-| PLCB2 | scz | 0.9752 | ENST00000558505 | ENST00000260402 | 0.004213 | 0.02337 | False | 0.07395 | False |
-| PLCB2 | scz | 0.9752 | ENST00000558505 | ENST00000559381 | 0.004213 | 0.7827 | False | 0.4314 | False |
-| PLCB2 | scz | 0.9752 | ENST00000558505 | ENST00000456256 | 0.004213 | 0 | False |  | False |
+| NEK4 | scz | 0.82 | ENST00000233027 | ENST00000461689 | 0.9728 | 0 | False |  | False |
+| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000461689 | 0.0009862 | 0 | False |  | False |
+| NEK4 | scz | 0.82 | ENST00000535191 | ENST00000496822 | 0.0009862 | 0 | False |  | False |
+| NUP50 | scz | 0.9564 | ENST00000347635 | ENST00000469163 | 0.9443 | 0.0413 | True | -0.7622 | True |
+| NUP50 | scz | 0.9564 | ENST00000347635 | ENST00000497960 | 0.9443 | 0.007465 | False | -0.4032 | False |
+| NUP50 | scz | 0.9275 | ENST00000497960 | ENST00000347635 | 0.007465 | 0.9443 | False | -0.4032 | False |
+| NUP50 | scz | 0.9564 | ENST00000396096 | ENST00000497960 | 9.385e-10 | 0.007465 | False | -0.1983 | False |
+| NUP50 | scz | 0.9275 | ENST00000407019 | ENST00000497960 | 4.248e-10 | 0.007465 | False | -0.1983 | False |
+| NUP50 | scz | 0.9275 | ENST00000497960 | ENST00000407019 | 0.007465 | 4.248e-10 | False | -0.1983 | False |
+| NUP50 | scz | 0.9275 | ENST00000497960 | ENST00000396096 | 0.007465 | 9.385e-10 | False | -0.1983 | False |
+| NUP50 | scz | 0.9564 | ENST00000347635 | ENST00000491860 | 0.9443 | 0.003325 | False | -0.1744 | False |
+| NUP50 | scz | 0.9275 | ENST00000497960 | ENST00000434760 | 0.007465 | 1.115e-10 | False | -0.1343 | False |
+| NUP50 | scz | 0.9275 | ENST00000434760 | ENST00000497960 | 1.115e-10 | 0.007465 | False | -0.1343 | False |
+| NUP50 | scz | 0.9564 | ENST00000396096 | ENST00000469163 | 9.385e-10 | 0.0413 | False | -0.1021 | False |
+| NUP50 | scz | 0.9275 | ENST00000407019 | ENST00000469163 | 4.248e-10 | 0.0413 | False | -0.1021 | False |
+| NUP50 | scz | 0.9564 | ENST00000347635 | ENST00000434760 | 0.9443 | 1.115e-10 | False | -0.04367 | False |
+| NUP50 | scz | 0.9275 | ENST00000434760 | ENST00000347635 | 1.115e-10 | 0.9443 | False | -0.04367 | False |
+| NUP50 | scz | 0.9564 | ENST00000347635 | ENST00000396096 | 0.9443 | 9.385e-10 | False | 0.1129 | False |
+| NUP50 | scz | 0.9564 | ENST00000396096 | ENST00000347635 | 9.385e-10 | 0.9443 | False | 0.1129 | False |
+| NUP50 | scz | 0.9275 | ENST00000347635 | ENST00000407019 | 0.9443 | 4.248e-10 | False | 0.1129 | False |
+| NUP50 | scz | 0.9275 | ENST00000497960 | ENST00000469163 | 0.007465 | 0.0413 | False | 0.1129 | False |
+| NUP50 | scz | 0.9275 | ENST00000407019 | ENST00000347635 | 4.248e-10 | 0.9443 | False | 0.1129 | False |
+| NUP50 | scz | 0.9275 | ENST00000434760 | ENST00000469163 | 1.115e-10 | 0.0413 | False | 0.131 | False |
+| NUP50 | scz | 0.9564 | ENST00000396096 | ENST00000491860 | 9.385e-10 | 0.003325 | False | 0.2893 | False |
+| NUP50 | scz | 0.9564 | ENST00000396096 | ENST00000434760 | 9.385e-10 | 1.115e-10 | False | 0.7385 | False |
+| NUP50 | scz | 0.9275 | ENST00000407019 | ENST00000434760 | 4.248e-10 | 1.115e-10 | False | 0.7385 | False |
+| NUP50 | scz | 0.9275 | ENST00000434760 | ENST00000407019 | 1.115e-10 | 4.248e-10 | False | 0.7385 | False |
+| NUP50 | scz | 0.9275 | ENST00000434760 | ENST00000396096 | 1.115e-10 | 9.385e-10 | False | 0.7385 | False |
+| NUP50 | scz | 0.9275 | ENST00000407019 | ENST00000396096 | 4.248e-10 | 9.385e-10 | False | 1 | False |
+| NUP50 | scz | 0.8354 | ENST00000396096 | ENST00000407019 | 9.385e-10 | 4.248e-10 | False | 1 | False |
 | PPIL2 | scz | 0.9406 | ENST00000335025 | ENST00000680113 | 0.532 | 0.04699 | True | -0.4805 | True |
-| PPIL2 | scz | 0.9385 | ENST00000680860 | ENST00000680113 | 1.738e-13 | 0.04699 | False | -0.3558 | False |
 | PPIL2 | scz | 0.9406 | ENST00000335025 | ENST00000681027 | 0.532 | 0.04704 | True | -0.2587 | True |
-| PPIL2 | scz | 0.9358 | ENST00000680860 | ENST00000680573 | 1.738e-13 | 0.02338 | False | -0.0416 | False |
-| PPIL2 | scz | 0.9385 | ENST00000680860 | ENST00000681027 | 1.738e-13 | 0.04704 | False | 0.03328 | False |
+| PPIL2 | scz | 0.8551 | ENST00000680860 | ENST00000681027 | 1.738e-13 | 0.04704 | False | 0.03328 | False |
 | PPIL2 | scz | 0.9406 | ENST00000335025 | ENST00000398831 | 0.532 | 0.04814 | True | 0.08392 | False |
 | PPIL2 | scz | 0.9406 | ENST00000335025 | ENST00000680573 | 0.532 | 0.02338 | False | 0.09091 | False |
 | PPIL2 | scz | 0.9406 | ENST00000335025 | ENST00000681735 | 0.532 | 9.425e-14 | False | 0.09676 | False |
-| PPIL2 | scz | 0.9385 | ENST00000335025 | ENST00000679795 | 0.532 | 0.004127 | True | 0.1373 | False |
-| PPIL2 | scz | 0.9385 | ENST00000680860 | ENST00000679795 | 1.738e-13 | 0.004127 | False | 0.1485 | False |
 | PPIL2 | scz | 0.8551 | ENST00000680860 | ENST00000679540 | 1.738e-13 | 0.01074 | False | 0.1906 | False |
-| PPIL2 | scz | 0.9385 | ENST00000335025 | ENST00000680860 | 0.532 | 1.738e-13 | False | 0.2163 | False |
-| PPIL2 | scz | 0.9385 | ENST00000680860 | ENST00000335025 | 1.738e-13 | 0.532 | False | 0.2163 | False |
-| PPIL2 | scz | 0.9358 | ENST00000680860 | ENST00000406385 | 1.738e-13 | 1.761e-14 | False | 0.2598 | False |
-| PPIL2 | scz | 0.9358 | ENST00000335025 | ENST00000406385 | 0.532 | 1.761e-14 | False | 0.3057 | False |
-| PPIL2 | scz | 0.9358 | ENST00000335025 | ENST00000446951 | 0.532 | 5.891e-14 | False | 0.3079 | False |
-| PPIL2 | scz | 0.9358 | ENST00000680860 | ENST00000446951 | 1.738e-13 | 5.891e-14 | False | 0.5074 | False |
+| PPIL2 | scz | 0.8551 | ENST00000335025 | ENST00000680860 | 0.532 | 1.738e-13 | False | 0.2163 | False |
+| PPIL2 | scz | 0.8551 | ENST00000680860 | ENST00000335025 | 1.738e-13 | 0.532 | False | 0.2163 | False |
 | PPIL2 | scz | 0.8551 | ENST00000335025 | ENST00000462188 | 0.532 | 0.005814 | False | 0.5076 | False |
 | PPIL2 | scz | 0.8551 | ENST00000680860 | ENST00000462188 | 1.738e-13 | 0.005814 | False | 0.5124 | False |
-| PPIL2 | scz | 0.9385 | ENST00000680860 | ENST00000681735 | 1.738e-13 | 9.425e-14 | False | 0.5245 | False |
+| PPIL2 | scz | 0.8551 | ENST00000680860 | ENST00000681735 | 1.738e-13 | 9.425e-14 | False | 0.5245 | False |
 | PPIL2 | scz | 0.8551 | ENST00000335025 | ENST00000679540 | 0.532 | 0.01074 | True | 0.6763 | False |
-| PTPRN | als | 0.8318 | ENST00000295718 | ENST00000460801 | 0.04108 | 0.8109 | True | -0.5245 | True |
-| PTPRN | als | 0.8318 | ENST00000443981 | ENST00000462351 | 0.0004587 | 0.04637 | True | -0.3658 | True |
-| PTPRN | als | 0.8318 | ENST00000295718 | ENST00000462351 | 0.04108 | 0.04637 | True | -0.3427 | True |
-| PTPRN | als | 0.8318 | ENST00000409251 | ENST00000460801 | 0.03341 | 0.8109 | True | -0.1678 | True |
-| PTPRN | als | 0.8318 | ENST00000295718 | ENST00000409251 | 0.04108 | 0.03341 | True | -0.09091 | True |
-| PTPRN | als | 0.8318 | ENST00000409251 | ENST00000295718 | 0.03341 | 0.04108 | True | -0.09091 | True |
-| PTPRN | als | 0.8318 | ENST00000443981 | ENST00000460801 | 0.0004587 | 0.8109 | True | -0.06345 | True |
-| PTPRN | als | 0.8318 | ENST00000409251 | ENST00000462351 | 0.03341 | 0.04637 | True | 0.0979 | False |
-| PTPRN | als | 0.8318 | ENST00000443981 | ENST00000409251 | 0.0004587 | 0.03341 | True | 0.3359 | False |
-| PTPRN | als | 0.8318 | ENST00000409251 | ENST00000443981 | 0.03341 | 0.0004587 | True | 0.3359 | False |
-| PTPRN | als | 0.8318 | ENST00000443981 | ENST00000295718 | 0.0004587 | 0.04108 | True | 0.6644 | False |
-| PTPRN | als | 0.8318 | ENST00000295718 | ENST00000443981 | 0.04108 | 0.0004587 | True | 0.6644 | False |
-| PTPRN | als | 0.8318 | ENST00000443981 | ENST00000497977 | 0.0004587 | 0 | False |  | False |
-| PTPRN | als | 0.8318 | ENST00000409251 | ENST00000497977 | 0.03341 | 0 | False |  | False |
-| PTPRN | als | 0.8318 | ENST00000295718 | ENST00000497977 | 0.04108 | 0 | False |  | False |
-| RNASEH2C | scz | 0.946 | ENST00000308418 | ENST00000645835 | 0.4776 | 0.007872 | True | -0.5071 | True |
-| RNASEH2C | scz | 0.946 | ENST00000528220 | ENST00000644198 | 0.2706 | 0.01541 | True | -0.4266 | True |
-| RNASEH2C | scz | 0.946 | ENST00000644198 | ENST00000528220 | 0.01541 | 0.2706 | True | -0.4266 | True |
-| RNASEH2C | scz | 0.946 | ENST00000308418 | ENST00000534482 | 0.4776 | 0.02598 | True | -0.2797 | True |
-| RNASEH2C | scz | 0.946 | ENST00000534482 | ENST00000308418 | 0.02598 | 0.4776 | True | -0.2797 | True |
-| RNASEH2C | scz | 0.946 | ENST00000534482 | ENST00000645835 | 0.02598 | 0.007872 | True | -0.2676 | True |
-| RNASEH2C | scz | 0.946 | ENST00000531596 | ENST00000645835 | 0.0004766 | 0.007872 | False | -0.2496 | False |
-| RNASEH2C | scz | 0.946 | ENST00000528220 | ENST00000308418 | 0.2706 | 0.4776 | True | -0.2028 | True |
-| RNASEH2C | scz | 0.946 | ENST00000308418 | ENST00000528220 | 0.4776 | 0.2706 | True | -0.2028 | True |
-| RNASEH2C | scz | 0.946 | ENST00000528220 | ENST00000534482 | 0.2706 | 0.02598 | True | -0.05594 | True |
-| RNASEH2C | scz | 0.946 | ENST00000534482 | ENST00000528220 | 0.02598 | 0.2706 | True | -0.05594 | True |
-| RNASEH2C | scz | 0.946 | ENST00000528220 | ENST00000645835 | 0.2706 | 0.007872 | True | -0.0493 | True |
-| RNASEH2C | scz | 0.946 | ENST00000644198 | ENST00000531596 | 0.01541 | 0.0004766 | False | -0.03672 | False |
-| RNASEH2C | scz | 0.946 | ENST00000531596 | ENST00000644198 | 0.0004766 | 0.01541 | False | -0.03672 | False |
-| RNASEH2C | scz | 0.946 | ENST00000644198 | ENST00000534482 | 0.01541 | 0.02598 | True | 0.07692 | False |
-| RNASEH2C | scz | 0.946 | ENST00000534482 | ENST00000644198 | 0.02598 | 0.01541 | True | 0.07692 | False |
-| RNASEH2C | scz | 0.946 | ENST00000644198 | ENST00000645835 | 0.01541 | 0.007872 | True | 0.1479 | False |
-| RNASEH2C | scz | 0.946 | ENST00000528220 | ENST00000531596 | 0.2706 | 0.0004766 | False | 0.2295 | False |
-| RNASEH2C | scz | 0.946 | ENST00000531596 | ENST00000528220 | 0.0004766 | 0.2706 | False | 0.2295 | False |
-| RNASEH2C | scz | 0.946 | ENST00000308418 | ENST00000644198 | 0.4776 | 0.01541 | True | 0.2308 | False |
-| RNASEH2C | scz | 0.946 | ENST00000644198 | ENST00000308418 | 0.01541 | 0.4776 | True | 0.2308 | False |
-| RNASEH2C | scz | 0.946 | ENST00000534482 | ENST00000531596 | 0.02598 | 0.0004766 | False | 0.2662 | False |
-| RNASEH2C | scz | 0.946 | ENST00000531596 | ENST00000534482 | 0.0004766 | 0.02598 | False | 0.2662 | False |
-| RNASEH2C | scz | 0.946 | ENST00000308418 | ENST00000531596 | 0.4776 | 0.0004766 | False | 0.3121 | False |
-| RNASEH2C | scz | 0.946 | ENST00000531596 | ENST00000308418 | 0.0004766 | 0.4776 | False | 0.3121 | False |
-| SCFD1 | als | 0.8562 | ENST00000544052 | ENST00000553280 | 0.00925 | 0.0197 | True | -0.019 | True |
-| SCFD1 | als | 0.8562 | ENST00000544052 | ENST00000556768 | 0.00925 | 0.0006289 | False | 0.489 | False |
-| SCFD1 | als | 0.8562 | ENST00000544052 | ENST00000458591 | 0.00925 | 0.2495 | True | 0.5019 | False |
-| SCFD1 | als | 0.8562 | ENST00000544052 | ENST00000557076 | 0.00925 | 0 | False |  | False |
-| SCFD1 | als | 0.8562 | ENST00000544052 | ENST00000396629 | 0.00925 | 0 | False |  | False |
+| PRDM2 | als | 0.9642 | ENST00000235372 | ENST00000376048 | 0.5376 | 0.009417 | True | -0.7552 | True |
+| PRDM2 | als | 0.9642 | ENST00000376048 | ENST00000235372 | 0.009417 | 0.5376 | True | -0.7552 | True |
+| PRDM2 | als | 0.9642 | ENST00000505823 | ENST00000343137 | 0.004298 | 2.762e-09 | False | -0.6395 | False |
+| PRDM2 | als | 0.9642 | ENST00000311066 | ENST00000413440 | 0.2535 | 0.192 | True | -0.4476 | True |
+| PRDM2 | als | 0.9642 | ENST00000235372 | ENST00000413440 | 0.5376 | 0.192 | True | -0.4056 | True |
+| PRDM2 | als | 0.9642 | ENST00000235372 | ENST00000343137 | 0.5376 | 2.762e-09 | False | -0.3661 | False |
+| PRDM2 | als | 0.9642 | ENST00000311066 | ENST00000505823 | 0.2535 | 0.004298 | False | -0.3172 | False |
+| PRDM2 | als | 0.9642 | ENST00000505823 | ENST00000311066 | 0.004298 | 0.2535 | False | -0.3172 | False |
+| PRDM2 | als | 0.9642 | ENST00000235372 | ENST00000311066 | 0.5376 | 0.2535 | True | -0.2937 | True |
+| PRDM2 | als | 0.9642 | ENST00000311066 | ENST00000235372 | 0.2535 | 0.5376 | True | -0.2937 | True |
+| PRDM2 | als | 0.9642 | ENST00000235372 | ENST00000505823 | 0.5376 | 0.004298 | False | -0.2538 | False |
+| PRDM2 | als | 0.9642 | ENST00000505823 | ENST00000235372 | 0.004298 | 0.5376 | False | -0.2538 | False |
+| PRDM2 | als | 0.9452 | ENST00000235372 | ENST00000491134 | 0.5376 | 5.96e-11 | False | -0.131 | False |
+| PRDM2 | als | 0.9642 | ENST00000376048 | ENST00000343137 | 0.009417 | 2.762e-09 | False | -0.008321 | False |
+| PRDM2 | als | 0.9642 | ENST00000376048 | ENST00000413440 | 0.009417 | 0.192 | True | 0.1888 | False |
+| PRDM2 | als | 0.9452 | ENST00000376048 | ENST00000491134 | 0.009417 | 5.96e-11 | False | 0.2184 | False |
+| PRDM2 | als | 0.9642 | ENST00000311066 | ENST00000376048 | 0.2535 | 0.009417 | True | 0.2238 | False |
+| PRDM2 | als | 0.9642 | ENST00000376048 | ENST00000311066 | 0.009417 | 0.2535 | True | 0.2238 | False |
+| PRDM2 | als | 0.9642 | ENST00000505823 | ENST00000413440 | 0.004298 | 0.192 | False | 0.377 | False |
+| PRDM2 | als | 0.9452 | ENST00000311066 | ENST00000491134 | 0.2535 | 5.96e-11 | False | 0.393 | False |
+| PRDM2 | als | 0.9642 | ENST00000376048 | ENST00000505823 | 0.009417 | 0.004298 | False | 0.5001 | False |
+| PRDM2 | als | 0.9642 | ENST00000505823 | ENST00000376048 | 0.004298 | 0.009417 | False | 0.5001 | False |
+| PRDM2 | als | 0.9642 | ENST00000311066 | ENST00000343137 | 0.2535 | 2.762e-09 | False | 0.5575 | False |
+| PTPRN | als | 0.8903 | ENST00000423636 | ENST00000462351 | 7.426e-05 | 0.04637 | False | -0.6574 | False |
+| PTPRN | als | 0.8903 | ENST00000295718 | ENST00000460801 | 0.04108 | 0.8109 | True | -0.5245 | True |
+| PTPRN | als | 0.8903 | ENST00000443981 | ENST00000462351 | 0.0004587 | 0.04637 | True | -0.3658 | True |
+| PTPRN | als | 0.8903 | ENST00000295718 | ENST00000462351 | 0.04108 | 0.04637 | True | -0.3427 | True |
+| PTPRN | als | 0.8903 | ENST00000409251 | ENST00000460801 | 0.03341 | 0.8109 | True | -0.1678 | True |
+| PTPRN | als | 0.8903 | ENST00000409251 | ENST00000295718 | 0.03341 | 0.04108 | True | -0.09091 | True |
+| PTPRN | als | 0.8903 | ENST00000295718 | ENST00000409251 | 0.04108 | 0.03341 | True | -0.09091 | True |
+| PTPRN | als | 0.8903 | ENST00000443981 | ENST00000460801 | 0.0004587 | 0.8109 | True | -0.06345 | True |
+| PTPRN | als | 0.8903 | ENST00000409251 | ENST00000462351 | 0.03341 | 0.04637 | True | 0.0979 | False |
+| PTPRN | als | 0.8903 | ENST00000423636 | ENST00000460801 | 7.426e-05 | 0.8109 | False | 0.104 | False |
+| PTPRN | als | 0.8903 | ENST00000409251 | ENST00000423636 | 0.03341 | 7.426e-05 | False | 0.1123 | False |
+| PTPRN | als | 0.8903 | ENST00000423636 | ENST00000409251 | 7.426e-05 | 0.03341 | False | 0.1123 | False |
+| PTPRN | als | 0.8903 | ENST00000443981 | ENST00000409251 | 0.0004587 | 0.03341 | True | 0.3359 | False |
+| PTPRN | als | 0.8903 | ENST00000409251 | ENST00000443981 | 0.03341 | 0.0004587 | True | 0.3359 | False |
+| PTPRN | als | 0.8903 | ENST00000423636 | ENST00000295718 | 7.426e-05 | 0.04108 | False | 0.4493 | False |
+| PTPRN | als | 0.8903 | ENST00000295718 | ENST00000423636 | 0.04108 | 7.426e-05 | False | 0.4493 | False |
+| PTPRN | als | 0.8903 | ENST00000443981 | ENST00000423636 | 0.0004587 | 7.426e-05 | False | 0.564 | False |
+| PTPRN | als | 0.8903 | ENST00000423636 | ENST00000443981 | 7.426e-05 | 0.0004587 | False | 0.564 | False |
+| PTPRN | als | 0.8903 | ENST00000295718 | ENST00000443981 | 0.04108 | 0.0004587 | True | 0.6644 | False |
+| PTPRN | als | 0.8903 | ENST00000443981 | ENST00000295718 | 0.0004587 | 0.04108 | True | 0.6644 | False |
+| RERE | scz | 0.8565 | ENST00000659924 | ENST00000337907 | 0.04749 | 0.6504 | True | -0.3427 | True |
+| RERE | scz | 0.8565 | ENST00000659924 | ENST00000465125 | 0.04749 | 0.0002917 | False | 0 | False |
+| RERE | scz | 0.8565 | ENST00000659924 | ENST00000400908 | 0.04749 | 0.09081 | True | 0.04895 | False |
+| RERE | scz | 0.8565 | ENST00000659924 | ENST00000377464 | 0.04749 | 0.1939 | True | 0.04895 | False |
+| RERE | scz | 0.8565 | ENST00000659924 | ENST00000467350 | 0.04749 | 0.0002987 | False | 0.1331 | False |
 | SH3GL2 | pd | 0.8344 | ENST00000380607 | ENST00000467085 | 0.9994 | 0.00062 | False | -1 | False |
-| SIRPA | ad | 0.9654 | ENST00000358771 | ENST00000622179 | 0.918 | 0.03187 | True | -0.869 | True |
 | SIRPA | ad | 0.9654 | ENST00000622179 | ENST00000358771 | 0.03187 | 0.918 | True | -0.869 | True |
+| SIRPA | ad | 0.9654 | ENST00000358771 | ENST00000622179 | 0.918 | 0.03187 | True | -0.869 | True |
 | SIRPA | ad | 0.9654 | ENST00000358771 | ENST00000356025 | 0.918 | 0.02503 | False | -0.5916 | False |
 | SIRPA | ad | 0.9654 | ENST00000356025 | ENST00000358771 | 0.02503 | 0.918 | False | -0.5916 | False |
-| SIRPA | ad | 0.9654 | ENST00000400068 | ENST00000358771 | 0.02513 | 0.918 | False | -0.5654 | False |
 | SIRPA | ad | 0.9654 | ENST00000358771 | ENST00000400068 | 0.918 | 0.02513 | False | -0.5654 | False |
-| SIRPA | ad | 0.9654 | ENST00000622179 | ENST00000400068 | 0.03187 | 0.02513 | False | 0.2183 | False |
+| SIRPA | ad | 0.9654 | ENST00000400068 | ENST00000358771 | 0.02513 | 0.918 | False | -0.5654 | False |
 | SIRPA | ad | 0.9654 | ENST00000400068 | ENST00000622179 | 0.02513 | 0.03187 | False | 0.2183 | False |
+| SIRPA | ad | 0.9654 | ENST00000622179 | ENST00000400068 | 0.03187 | 0.02513 | False | 0.2183 | False |
 | SIRPA | ad | 0.9654 | ENST00000356025 | ENST00000622179 | 0.02503 | 0.03187 | False | 0.3807 | False |
 | SIRPA | ad | 0.9654 | ENST00000622179 | ENST00000356025 | 0.03187 | 0.02503 | False | 0.3807 | False |
-| SIRPA | ad | 0.9654 | ENST00000356025 | ENST00000400068 | 0.02503 | 0.02513 | False | 0.737 | False |
 | SIRPA | ad | 0.9654 | ENST00000400068 | ENST00000356025 | 0.02513 | 0.02503 | False | 0.737 | False |
-| SNCA | lbd,pd | 0.9743 | ENST00000508895 | ENST00000336904 | 0.002885 | 0.1561 | True | -0.3626 | True |
-| SNCA | lbd,pd | 0.9552 | ENST00000508895 | ENST00000345009 | 0.002885 | 0.1115 | True | 0.116 | False |
-| SNCA | lbd,pd | 0.9743 | ENST00000508895 | ENST00000506244 | 0.002885 | 0.00627 | True | 0.482 | False |
-| SNCA | lbd,pd | 0.9743 | ENST00000508895 | ENST00000394986 | 0.002885 | 0.0551 | True | 0.5873 | False |
-| SNCA | lbd,pd | 0.9743 | ENST00000508895 | ENST00000394991 | 0.002885 | 0.5537 | True | 0.6091 | False |
-| SNCA | lbd,pd | 0.9743 | ENST00000508895 | ENST00000394989 | 0.002885 | 0.001128 | True | 0.6353 | False |
-| TMED4 | scz | 0.9613 | ENST00000289577 | ENST00000457408 | 0.4645 | 0.3996 | True | -0.9441 | True |
-| TMED4 | scz | 0.9541 | ENST00000457408 | ENST00000289577 | 0.3996 | 0.4645 | True | -0.9441 | True |
-| TMED4 | scz | 0.9613 | ENST00000289577 | ENST00000481238 | 0.4645 | 0.1186 | True | -0.8951 | True |
-| TMED4 | scz | 0.9613 | ENST00000289577 | ENST00000444131 | 0.4645 | 8.093e-05 | False | -0.3057 | False |
-| TMED4 | scz | 0.9613 | ENST00000289577 | ENST00000477639 | 0.4645 | 0.01717 | True | -0.2767 | True |
-| TMED4 | scz | 0.9541 | ENST00000457408 | ENST00000477639 | 0.3996 | 0.01717 | True | 0.2592 | False |
-| TMED4 | scz | 0.9541 | ENST00000457408 | ENST00000444131 | 0.3996 | 8.093e-05 | False | 0.393 | False |
-| TMED4 | scz | 0.9541 | ENST00000457408 | ENST00000481238 | 0.3996 | 0.1186 | True | 0.7972 | False |
+| SIRPA | ad | 0.9654 | ENST00000356025 | ENST00000400068 | 0.02503 | 0.02513 | False | 0.737 | False |
+| SNAP91 | scz | 0.9745 | ENST00000439399 | ENST00000195649 | 0.2685 | 0.2861 | True | -0.7133 | True |
+| SNAP91 | scz | 0.9745 | ENST00000195649 | ENST00000439399 | 0.2861 | 0.2685 | True | -0.7133 | True |
+| SNAP91 | scz | 0.9745 | ENST00000520302 | ENST00000521743 | 0.003844 | 0.003412 | True | -0.6993 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521743 | ENST00000520302 | 0.003412 | 0.003844 | True | -0.6993 | True |
+| SNAP91 | scz | 0.9745 | ENST00000195649 | ENST00000520302 | 0.2861 | 0.003844 | True | -0.5105 | True |
+| SNAP91 | scz | 0.9745 | ENST00000520302 | ENST00000195649 | 0.003844 | 0.2861 | True | -0.5105 | True |
+| SNAP91 | scz | 0.9745 | ENST00000439399 | ENST00000521743 | 0.2685 | 0.003412 | True | -0.4685 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521743 | ENST00000439399 | 0.003412 | 0.2685 | True | -0.4685 | True |
+| SNAP91 | scz | 0.9745 | ENST00000195649 | ENST00000521485 | 0.2861 | 0.2873 | True | -0.2378 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521485 | ENST00000195649 | 0.2873 | 0.2861 | True | -0.2378 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521485 | ENST00000369694 | 0.2873 | 0.1432 | True | -0.2308 | True |
+| SNAP91 | scz | 0.9745 | ENST00000369694 | ENST00000521485 | 0.1432 | 0.2873 | True | -0.2308 | True |
+| SNAP91 | scz | 0.9745 | ENST00000195649 | ENST00000369694 | 0.2861 | 0.1432 | True | -0.1818 | True |
+| SNAP91 | scz | 0.9745 | ENST00000369694 | ENST00000195649 | 0.1432 | 0.2861 | True | -0.1818 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521485 | ENST00000520302 | 0.2873 | 0.003844 | True | -0.1818 | True |
+| SNAP91 | scz | 0.9745 | ENST00000520302 | ENST00000521485 | 0.003844 | 0.2873 | True | -0.1818 | True |
+| SNAP91 | scz | 0.9745 | ENST00000369694 | ENST00000439399 | 0.1432 | 0.2685 | True | -0.08392 | True |
+| SNAP91 | scz | 0.9745 | ENST00000439399 | ENST00000369694 | 0.2685 | 0.1432 | True | -0.08392 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521743 | ENST00000369694 | 0.003412 | 0.1432 | True | -0.03497 | True |
+| SNAP91 | scz | 0.9745 | ENST00000369694 | ENST00000521743 | 0.1432 | 0.003412 | True | -0.03497 | True |
+| SNAP91 | scz | 0.9745 | ENST00000521485 | ENST00000439399 | 0.2873 | 0.2685 | True | 0.06294 | False |
+| SNAP91 | scz | 0.9745 | ENST00000439399 | ENST00000521485 | 0.2685 | 0.2873 | True | 0.06294 | False |
+| SNAP91 | scz | 0.9745 | ENST00000521485 | ENST00000521743 | 0.2873 | 0.003412 | True | 0.1189 | False |
+| SNAP91 | scz | 0.9745 | ENST00000521743 | ENST00000521485 | 0.003412 | 0.2873 | True | 0.1189 | False |
+| SNAP91 | scz | 0.9745 | ENST00000369694 | ENST00000520302 | 0.1432 | 0.003844 | True | 0.4056 | False |
+| SNAP91 | scz | 0.9745 | ENST00000520302 | ENST00000369694 | 0.003844 | 0.1432 | True | 0.4056 | False |
+| SNAP91 | scz | 0.9745 | ENST00000195649 | ENST00000521743 | 0.2861 | 0.003412 | True | 0.4266 | False |
+| SNAP91 | scz | 0.9745 | ENST00000521743 | ENST00000195649 | 0.003412 | 0.2861 | True | 0.4266 | False |
+| SNAP91 | scz | 0.9745 | ENST00000439399 | ENST00000520302 | 0.2685 | 0.003844 | True | 0.4406 | False |
+| SNAP91 | scz | 0.9745 | ENST00000520302 | ENST00000439399 | 0.003844 | 0.2685 | True | 0.4406 | False |
 | TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000335509 | 0.8941 | 0.05742 | True | -0.838 | True |
 | TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000541517 | 0.05742 | 0.8941 | True | -0.838 | True |
-| TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000550785 | 0.8941 | 0.01397 | True | -0.7535 | True |
 | TPCN1 | ad | 0.8353 | ENST00000550785 | ENST00000541517 | 0.01397 | 0.8941 | True | -0.7535 | True |
+| TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000550785 | 0.8941 | 0.01397 | True | -0.7535 | True |
 | TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000552542 | 0.8941 | 0.001296 | False | -0.09179 | False |
 | TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000552542 | 0.05742 | 0.001296 | False | -0.05546 | False |
 | TPCN1 | ad | 0.8353 | ENST00000551127 | ENST00000552542 | 0.01618 | 0.001296 | False | -0.01839 | False |
@@ -409,17 +287,46 @@ Per pair: `exception_pair_confirmation.parquet`.
 | TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000551127 | 0.05742 | 0.01618 | True | 0.134 | False |
 | TPCN1 | ad | 0.8353 | ENST00000550785 | ENST00000551127 | 0.01397 | 0.01618 | True | 0.1446 | False |
 | TPCN1 | ad | 0.8353 | ENST00000551127 | ENST00000550785 | 0.01618 | 0.01397 | True | 0.1446 | False |
-| TPCN1 | ad | 0.8353 | ENST00000550785 | ENST00000335509 | 0.01397 | 0.05742 | True | 0.9362 | False |
 | TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000550785 | 0.05742 | 0.01397 | True | 0.9362 | False |
-| TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000428632 | 0.8941 | 0 | False |  | False |
-| TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000552542 | 0 | 0.001296 | False |  | False |
-| TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000428632 | 0.05742 | 0 | False |  | False |
+| TPCN1 | ad | 0.8353 | ENST00000550785 | ENST00000335509 | 0.01397 | 0.05742 | True | 0.9362 | False |
+| TPCN1 | ad | 0.8353 | ENST00000551127 | ENST00000428632 | 0.01618 | 0 | False |  | False |
 | TPCN1 | ad | 0.8353 | ENST00000550785 | ENST00000428632 | 0.01397 | 0 | False |  | False |
 | TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000335509 | 0 | 0.05742 | False |  | False |
-| TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000550785 | 0 | 0.01397 | False |  | False |
+| TPCN1 | ad | 0.8353 | ENST00000541517 | ENST00000428632 | 0.8941 | 0 | False |  | False |
+| TPCN1 | ad | 0.8353 | ENST00000335509 | ENST00000428632 | 0.05742 | 0 | False |  | False |
+| TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000552542 | 0 | 0.001296 | False |  | False |
 | TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000551127 | 0 | 0.01618 | False |  | False |
+| TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000550785 | 0 | 0.01397 | False |  | False |
 | TPCN1 | ad | 0.8353 | ENST00000428632 | ENST00000541517 | 0 | 0.8941 | False |  | False |
-| TPCN1 | ad | 0.8353 | ENST00000551127 | ENST00000428632 | 0.01618 | 0 | False |  | False |
+| WIPI2 | als | 0.8925 | ENST00000484262 | ENST00000288828 | 0.02454 | 0.708 | True | -0.3357 | True |
+| WIPI2 | als | 0.8925 | ENST00000382384 | ENST00000471851 | 0.001797 | 0.245 | True | -0.324 | True |
+| WIPI2 | als | 0.8925 | ENST00000382384 | ENST00000484262 | 0.001797 | 0.02454 | True | -0.02113 | True |
+| WIPI2 | als | 0.8925 | ENST00000484262 | ENST00000382384 | 0.02454 | 0.001797 | True | -0.02113 | True |
+| WIPI2 | als | 0.8925 | ENST00000382384 | ENST00000288828 | 0.001797 | 0.708 | True | 0.3028 | False |
+| WIPI2 | als | 0.8925 | ENST00000484262 | ENST00000471851 | 0.02454 | 0.245 | True | 0.3287 | False |
+| WIPI2 | als | 0.8925 | ENST00000382384 | ENST00000401525 | 0.001797 | 0.00127 | True | 0.4681 | False |
+| WIPI2 | als | 0.8925 | ENST00000484262 | ENST00000401525 | 0.02454 | 0.00127 | True | 0.5423 | False |
+| WIPI2 | als | 0.8925 | ENST00000484262 | ENST00000479690 | 0.02454 | 0 | False |  | False |
+| WIPI2 | als | 0.8925 | ENST00000382384 | ENST00000479690 | 0.001797 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000477675 | ENST00000339468 | 0.04529 | 0.9547 | False | -1 | False |
+| YPEL1 | scz | 0.9818 | ENST00000339468 | ENST00000477675 | 0.9547 | 0.04529 | False | -1 | False |
+| YPEL1 | scz | 0.9818 | ENST00000339468 | ENST00000403503 | 0.9547 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000672036 | ENST00000403503 | 0 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000672036 | ENST00000339468 | 0 | 0.9547 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000477675 | ENST00000672036 | 0.04529 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000477675 | ENST00000403503 | 0.04529 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000339468 | ENST00000672036 | 0.9547 | 0 | False |  | False |
+| YPEL1 | scz | 0.9818 | ENST00000672036 | ENST00000477675 | 0 | 0.04529 | False |  | False |
+| YWHAB | scz | 0.8914 | ENST00000353703 | ENST00000372839 | 0.859 | 0.1249 | True | -0.8951 | True |
+| YWHAB | scz | 0.8914 | ENST00000353703 | ENST00000631616 | 0.859 | 0.01581 | True | -0.4895 | True |
+| YWHAB | scz | 0.8914 | ENST00000479421 | ENST00000353703 | 0.0001904 | 0.859 | False | -0.4139 | False |
+| YWHAB | scz | 0.8914 | ENST00000353703 | ENST00000479421 | 0.859 | 0.0001904 | False | -0.4139 | False |
+| YWHAB | scz | 0.8914 | ENST00000479421 | ENST00000631616 | 0.0001904 | 0.01581 | False | 0.1075 | False |
+| YWHAB | scz | 0.8914 | ENST00000479421 | ENST00000372839 | 0.0001904 | 0.1249 | False | 0.5913 | False |
+| YWHAB | scz | 0.8914 | ENST00000479421 | ENST00000633979 | 0.0001904 | 0 | False |  | False |
+| YWHAB | scz | 0.8914 | ENST00000353703 | ENST00000477896 | 0.859 | 0 | False |  | False |
+| YWHAB | scz | 0.8914 | ENST00000479421 | ENST00000477896 | 0.0001904 | 0 | False |  | False |
+| YWHAB | scz | 0.8914 | ENST00000353703 | ENST00000633979 | 0.859 | 0 | False |  | False |
 
 ## How to read a negative
 

@@ -1,6 +1,6 @@
 # Locus event audit
 
-**SENSITIVITY ARM: GWAS SuSiE SNP guard 30,000** (primary 12,000). A tier assigned here to a locus the primary grid could not fit is a sensitivity result, and may not enter the biological narrative without a locus-specific LD audit (`26.locus_ld_robustness.sh`).
+**SENSITIVITY ARM: GWAS SuSiE SNP guard 30,000** (primary 12,000). A tier assigned here to a locus the primary grid could not fit is a sensitivity result, and may not enter the biological narrative without a locus-specific LD audit (`08d.locus_ld_robustness.sh`).
 
 Nomination source: `susie` at `PP4_sQTL >= 0.8`.
 
@@ -31,9 +31,9 @@ sQTL arm: `all`.
 ## Tier counts
 
 - `known_mechanism_recovered`: 0
-- `context_distinct_splice_colocalization`: 1
+- `context_distinct_splice_colocalization`: 0
 - `disease_locus_splice_linked`: 0
-- `novel_splice_led_candidate`: 7
+- `novel_splice_led_candidate`: 4
 - `not_resolved`: 0
 
 ## Evidence strength per nomination
@@ -43,46 +43,36 @@ Two descriptors travel with every nominated PP4, read at the headline tissue the
 - **Prior robustness**: the smallest `p12` in the sweep at which PP4 still clears 0.8. `robust` holds at 1e-6, `intermediate` from 5e-6, `primary_prior` only from the pre-specified 1e-5 upward. PP4 is monotone in p12, so this is the range the call survives rather than one arbitrary prior.
 - **Why coloc.abf**, for a headline `coloc.susie` did not score: the first place the cell left the signal-level pipeline. `gwas_locus_over_max_snps` was never tested at signal level. `gwas_no_credible_set` was tested and the GWAS did not fine-map, which weakens any colocalization claimed there. `qtl_cs_not_matching_gtex` is the reference-LD artefact the agreement filter exists to remove.
 
-| headline estimator | `robust` | `intermediate` | `primary_prior` | total |
-|---|---|---|---|---|
-| abf | 1 | 2 | 2 | 5 |
-| susie | 0 | 1 | 2 | 3 |
+| headline estimator | `intermediate` | `primary_prior` | total |
+|---|---|---|---|
+| abf | 2 | 1 | 3 |
+| susie | 0 | 1 | 1 |
 
 | why coloc.abf | nominations |
 |---|---|
-| `gwas_no_credible_set` | 2 |
-| `no_qtl_credible_set` | 2 |
-| `qtl_cs_not_matching_gtex` | 1 |
+| `gwas_no_credible_set` | 1 |
+| `gwas_locus_over_max_snps` | 1 |
+| `no_qtl_credible_set` | 1 |
 
 | gene | trait | PP4 sQTL | headline tissue | estimator | why abf | PP4 at p12=1e-6 | calls from p12 | prior | robust tissues |
 |---|---|---|---|---|---|---|---|---|---|
-| ZNF232 | ad | 0.935 | Brain_Frontal_Cortex_BA9 | susie | — | 0.590 | 5e-06 | `intermediate` | 0/1 |
 | TPCN1 | ad | 0.861 | Brain_Cerebellar_Hemisphere | susie | — | 0.382 | 1e-05 | `primary_prior` | 0/2 |
-| PICALM | ad | 0.813 | Brain_Cortex | susie | — | 0.303 | 1e-05 | `primary_prior` | 0/1 |
-| CTSH | ad | 0.989 | Brain_Hippocampus | abf | `gwas_no_credible_set` | 0.901 | 1e-06 | `robust` | 5/6 |
 | SIRPA | ad | 0.965 | Brain_Cerebellar_Hemisphere | abf | `gwas_no_credible_set` | 0.736 | 5e-06 | `intermediate` | 0/13 |
-| SPI1 | ad | 0.926 | Brain_Cerebellar_Hemisphere | abf | `no_qtl_credible_set` | 0.555 | 5e-06 | `intermediate` | 0/1 |
-| DOC2A | ad | 0.881 | Brain_Amygdala | abf | `qtl_cs_not_matching_gtex` | 0.425 | 1e-05 | `primary_prior` | 0/1 |
+| ZNF232 | ad | 0.899 | Brain_Spinal_cord_cervical_c-1 | abf | `gwas_locus_over_max_snps` | 0.471 | 5e-06 | `intermediate` | 0/1 |
 | NDUFS3 | ad | 0.864 | Brain_Cerebellar_Hemisphere | abf | `no_qtl_credible_set` | 0.388 | 1e-05 | `primary_prior` | 0/1 |
 
 ## Loci with a curated event
 
-| gene | trait | PP4 sQTL | tissues coloc | colocalizing introns | interval match | promotes | tier |
-|---|---|---|---|---|---|---|---|
-| PICALM | ad | 0.813 | 1/13 | chr11:85974812-85981129 | no | no | `context_distinct_splice_colocalization` |
+_None of the nominated loci carries a curated event._
 
 ## Top nominations by posterior
 
 | gene | trait | PP4 sQTL | PP4 eQTL | introns named | driver tx | tier |
 |---|---|---|---|---|---|---|
-| CTSH | ad | 0.989 | 0.993 | 2 | 44 | `novel_splice_led_candidate` |
 | SIRPA | ad | 0.965 | 0.947 | 2 | 4 | `novel_splice_led_candidate` |
-| ZNF232 | ad | 0.935 | 0.788 | 1 | 2 | `novel_splice_led_candidate` |
-| SPI1 | ad | 0.926 | 0.881 | 1 | 1 | `novel_splice_led_candidate` |
-| DOC2A | ad | 0.881 | 0.986 | 1 | 6 | `novel_splice_led_candidate` |
+| ZNF232 | ad | 0.899 | 0.750 | 1 | 6 | `novel_splice_led_candidate` |
 | NDUFS3 | ad | 0.864 | 0.099 | 1 | 1 | `novel_splice_led_candidate` |
 | TPCN1 | ad | 0.861 | 0.819 | 2 | 8 | `novel_splice_led_candidate` |
-| PICALM | ad | 0.813 | 0.491 | 1 | 2 | `context_distinct_splice_colocalization` |
 
 ## References for the curated events
 
@@ -103,7 +93,7 @@ Every interval above is traceable to a publication and to the local file it was 
   - Supplementary: Supplementary Table 11 (TWAS), file 41588_2018_238_MOESM10_ESM.xlsx, md5 c29d708ec9ece1c93eaaca7e7b3e5f13. PICALM row: Intron.Usage.Cluster "11:85737409:85742511:clu_7404", BEST.GWAS.ID rs3851179, BEST.GWAS.Z -7.91, TWAS.Z 3.52. Local copy: inputs/raw/literature/raj2018/.
 - *Which event, and why:* The locus carries more than one PICALM splicing signal and they are NOT the same event, so picking the wrong one would have silently mis-stated the result. Supplementary Table 10 (the FDR<0.05 sQTL catalogue, MOESM9, md5 ff1b3ebf75e59345a0db0169ab4be949) lists exactly one PICALM sQTL -- "11:85689136:85692172:clu_7402", lead SNP rs540422 -- which lifts to chr11:85,978,093-85,981,129 (GRCh38). That is a real PICALM sQTL but it is NOT the event carrying the AD association. The TWAS table anchors PICALM's splicing association on rs3851179, the canonical PICALM AD GWAS lead (GWAS Z = -7.91), and on a DIFFERENT cluster, clu_7404. The reviewed interval above is clu_7404.
 - *Coordinate verification:* Derived locally, not quoted. The paper imputed against HRC r1.1 and reports GRCh37 coordinates, so the interval was lifted rather than copied. 187 variants flanking the cluster carry an rsID in both the hg19 1000G EUR panel and this project's GRCh38 TOPMed panel; their offsets are +288,958 (107) and +288,957 (80), a 1 bp ambiguity. Both candidates resolve onto the SAME annotated feature: GENCODE v47 carries a PICALM intron at chr11:86,026,368-86,031,468 (5,101 bp), which fixes the interval independently of the offset. As a cross-check, rs3851179 itself lifts 85,868,640 -> 86,157,598.
-- *GTEx testability:* GTEx v11 carries an sQTL phenotype at this exact intron, with LeafCutter bounds 86,026,367-86,031,469 -- the same 1 bp offset from GENCODE seen at UNC13A. So the event is testable and a non-match is a real result. It is NOT GTEx's grouped-permutation representative intron for PICALM, so the representative arm never tested it; only the all-introns arm can. Re-derived across all 13 brain tissues by `curated_event_testability` on 2026-09-10: present in 10 of 13, INCLUDING Cortex, the one tissue where PICALM's coloc.abf posterior reached 0.818. GTEx's own SuSiE calls no credible set for it in any of them; the only PICALM sQTL credible sets in brain are at chr11:85,974,812-85,981,129 (Cortex) and chr11:85,976,682-85,981,129 (Cerebellar Hemisphere), ~50 kb upstream and a different event. CAVEAT ON READING ANY PICALM RESULT AT SIGNAL LEVEL: as of 2026-09-10 PICALM has no coloc.susie row in EITHER sQTL arm, and that is not a negative result. Its AD locus (locus60_chr11) carries 15,713 SNPs and was dropped by the MAX_SNPS = 12,000 guard in 22.coloc_gwas_susie.R before any GWAS SuSiE fit, so no signal-level test has run at this locus at all. Until a run with COLOC_GWAS_MAX_SNPS raised past 15,713 recovers it, PICALM's only colocalization evidence is coloc.abf, and the audit cannot tier it on signal-level evidence.
+- *GTEx testability:* GTEx v11 carries an sQTL phenotype at this exact intron, with LeafCutter bounds 86,026,367-86,031,469 -- the same 1 bp offset from GENCODE seen at UNC13A. So the event is testable and a non-match is a real result. It is NOT GTEx's grouped-permutation representative intron for PICALM, so the representative arm never tested it; only the all-introns arm can. Re-derived across all 13 brain tissues by `curated_event_testability` on 2026-09-10: present in 10 of 13, INCLUDING Cortex, the one tissue where PICALM's coloc.abf posterior reached 0.818. GTEx's own SuSiE calls no credible set for it in any of them; the only PICALM sQTL credible sets in brain are at chr11:85,974,812-85,981,129 (Cortex) and chr11:85,976,682-85,981,129 (Cerebellar Hemisphere), ~50 kb upstream and a different event. SIGNAL-LEVEL STATUS OF PICALM (updated 2026-09-11). On the uniform primary grid (MAX_SNPS = 12,000) PICALM still has no coloc.susie row in either sQTL arm: its AD locus (locus60_chr11, 15,713 SNPs) exceeds the guard, so its primary evidence is coloc.abf alone (Cortex PP4_sQTL 0.818) and the primary audit tiers it `disease_locus_splice_linked`. The prespecified AD sensitivity arm at MAX_SNPS = 30,000 (coloc_signal_susie/sensitivity/max_snps_30000/) fits the locus: coloc.susie gives Cortex PP4_sQTL 0.813 on the same chr11:85,974,812-85,981,129 intron, the curated clu_7404 intron is tested and does not colocalize, and the sensitivity audit tiers PICALM `context_distinct_splice_colocalization`. The locus LD audit (26.locus_ld_robustness) finds that fit LD-robust -- one 2-variant credible set (rs10792832/rs3851179, purity 0.994), stable under 100-500 kb boundary trims, kriging outlier removal and a residual-variance refit -- but prior-sensitive: PP4 0.813 at p12 = 1e-5, 0.685 at 5e-6, 0.303 at 1e-6. Quote the signal-level tier as the sensitivity arm's, never as the primary grid's.
 - *Caution:* PICALM is an established AD locus with evidence that the susceptibility allele acts through splicing, but it is not an established causal-splicing positive control in the way UNC13A's cryptic exon is: the TWAS Z is 3.52, and some isoform-associated variants at this locus are not independently associated with AD after conditioning on the main signal. Decisively: the anchor is a **TWAS** association (TWAS.Z 3.52), not a colocalization. TWAS does not establish a shared causal variant -- LD-driven co-regulation at the locus yields the same signal -- so this record is capped at `disease_locus_splice_linked` by `evidence_class` regardless of how well the coordinates match. Promoting it would require a colocalization or a functional demonstration of the event, neither of which this source provides.
 
 Article metadata retrieved from PubMed.

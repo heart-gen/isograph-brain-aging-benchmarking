@@ -1,32 +1,33 @@
 # Preprocessing sensitivity of the switch representation
 
-`switch_feature_sensitivity.py` on **gtex/cortex** (RSEM, n=270, 37 modules). The cross-region summary and the quantification axis are in `../../SWITCH_FEATURE_SENSITIVITY.md`.
+`switch_feature_sensitivity.py` on **gtex/cortex** (RSEM, n=270, 25 modules). The cross-region summary and the quantification axis are in `../../SWITCH_FEATURE_SENSITIVITY.md`.
 
 ## Scope, stated up front
 
 module partition held fixed at the published one; preprocessing is varied and the features, eigengenes and age association are recomputed. A full refit per setting would additionally let the network change and is not done here.
 
-Published settings for this cohort: `{"pseudocount": 0.5, "min_count": 0.0, "min_fraction": 0.0, "min_usage": 0.0}`. Gate passed: the baseline rebuild reproduces the published switch channel with max |diff| = 3.37508e-14 (tolerance 1e-10), so every comparison below is against the published quantity and not a lookalike.
+Published settings for this cohort: `{"pseudocount": 0.5, "transcript_filter": "switching", "min_tx_prop": 0.1, "min_tx_fraction": 0.1, "min_usage": 0.0}`. Gate passed: the baseline rebuild reproduces the published switch channel with max |diff| = 0 (tolerance 1e-10), so every comparison below is against the published quantity and not a lookalike.
 
 ## 1-3. Pseudocount, expression filter, minor-isoform threshold
 
 | axis | setting | is_published | n_switch_genes | n_switch_genes_lost | median_abs_feature_r_vs_published | frac_features_sign_flipped | effect_pearson_vs_published | n_fdr_sig | n_fdr_sig_published | n_published_sig_retained | n_sign_flips_among_published_sig |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| pseudocount | pseudocount=0.1 | False | 16489 | 0 | 0.989 | 0.1006 | 0.9964 | 24 | 24 | 24 | 0 |
-| pseudocount | pseudocount=0.25 | False | 16489 | 0 | 0.9975 | 0.05252 | 0.9982 | 24 | 24 | 24 | 0 |
-| pseudocount | pseudocount=0.5 | True | 16489 | 0 | 1 | 0 | 1 | 24 | 24 | 24 | 0 |
-| pseudocount | pseudocount=1 | False | 16489 | 0 | 0.9965 | 0.06016 | 0.9873 | 24 | 24 | 23 | 0 |
-| pseudocount | pseudocount=2 | False | 16489 | 0 | 0.9828 | 0.1263 | 0.975 | 22 | 24 | 21 | 0 |
-| expression | no filter | True | 16489 | 0 | 1 | 0 | 1 | 24 | 24 | 24 | 0 |
-| expression | count>5,frac>=0.5 | False | 13474 | 3015 | 0.8355 | 0.3136 | 0.9575 | 22 | 24 | 20 | 1 |
-| expression | count>10,frac>=0.5 | False | 12217 | 4272 | 0.7107 | 0.3479 | 0.9423 | 22 | 24 | 19 | 1 |
-| expression | count>10,frac>=0.7 | False | 11008 | 5481 | 0.3484 | 0.4334 | 0.8051 | 9 | 24 | 8 | 4 |
-| expression | count>20,frac>=0.7 | False | 9542 | 6947 | 0.2803 | 0.4526 | 0.7462 | 6 | 24 | 6 | 4 |
-| expression | count>10,frac>=0.9 | False | 9078 | 7411 | 0.1975 | 0.4891 | 0.3406 | 6 | 24 | 6 | 8 |
-| minor_isoform | min_usage=0 | True | 16489 | 0 | 1 | 0 | 1 | 24 | 24 | 24 | 0 |
-| minor_isoform | min_usage=0.01 | False | 15198 | 1291 | 0.9785 | 0.2057 | 0.962 | 19 | 24 | 19 | 1 |
-| minor_isoform | min_usage=0.05 | False | 13083 | 3406 | 0.6508 | 0.368 | 0.7844 | 11 | 24 | 10 | 4 |
-| minor_isoform | min_usage=0.1 | False | 11023 | 5466 | 0.3613 | 0.4339 | 0.504 | 8 | 24 | 8 | 7 |
+| pseudocount | pseudocount=0.1 | False | 12449 | 0 | 0.9955 | 0.02426 | 0.9982 | 7 | 7 | 7 | 0 |
+| pseudocount | pseudocount=0.25 | False | 12449 | 0 | 0.999 | 0.01205 | 0.9989 | 7 | 7 | 7 | 0 |
+| pseudocount | pseudocount=0.5 | True | 12449 | 0 | 1 | 0 | 1 | 7 | 7 | 7 | 0 |
+| pseudocount | pseudocount=1 | False | 12449 | 0 | 0.9986 | 0.01526 | 0.9997 | 7 | 7 | 7 | 0 |
+| pseudocount | pseudocount=2 | False | 12449 | 0 | 0.9936 | 0.03542 | 0.998 | 7 | 7 | 7 | 0 |
+| expression | switching share>=0.1,frac>=0.1 | True | 12449 | 0 | 1 | 0 | 1 | 7 | 7 | 7 | 0 |
+| expression | switching share>=0.05,frac>=0.1 | False | 13508 | 0 | 1 | 0.1533 | 0.9697 | 6 | 7 | 6 | 0 |
+| expression | switching share>=0.2,frac>=0.1 | False | 10264 | 2185 | 1 | 0.2034 | 0.8268 | 2 | 7 | 2 | 1 |
+| expression | switching share>=0.1,frac>=0.05 | False | 13033 | 0 | 1 | 0.08418 | 0.9957 | 7 | 7 | 7 | 0 |
+| expression | switching share>=0.1,frac>=0.25 | False | 11179 | 1270 | 1 | 0.1539 | 0.9487 | 6 | 7 | 6 | 0 |
+| expression | legacy count>10,frac>=0.7 | False | 11008 | 2686 | 0.8499 | 0.314 | 0.8899 | 4 | 7 | 4 | 0 |
+| expression | no filter | False | 16489 | 0 | 0.7554 | 0.3481 | 0.9407 | 4 | 7 | 4 | 0 |
+| minor_isoform | min_usage=0 | True | 12449 | 0 | 1 | 0 | 1 | 7 | 7 | 7 | 0 |
+| minor_isoform | min_usage=0.01 | False | 12449 | 0 | 1 | 0 | 1 | 7 | 7 | 7 | 0 |
+| minor_isoform | min_usage=0.05 | False | 12311 | 138 | 1 | 0.03793 | 0.9945 | 7 | 7 | 7 | 0 |
+| minor_isoform | min_usage=0.1 | False | 11102 | 1347 | 1 | 0.1874 | 0.8425 | 3 | 7 | 3 | 0 |
 
 `median_abs_feature_r_vs_published` is the per-gene correlation of the rebuilt switch coordinate with the published one; `n_published_sig_retained` is how many of the published FDR-significant module-age associations survive. A sign flip in a switch coordinate is not itself a problem -- PC1's sign is arbitrary and sign-stabilised -- but a flip among *published-significant modules* would change the direction of a reported effect, so it is counted separately.
 
@@ -36,8 +37,7 @@ If the switch signal were a quantification artefact it should grow with the numb
 
 | n_tx_stratum | n_genes | median_abs_age_r | frac_abs_age_r_above_0_2 | module_membership_rate | cohort | region |
 |---|---|---|---|---|---|---|
-| [2, 3) | 1168 | 0.07135 | 0.06421 | 0.2269 | gtex | cortex |
-| [3, 5) | 2523 | 0.06252 | 0.04043 | 0.1371 | gtex | cortex |
-| [5, 10) | 5426 | 0.06081 | 0.03907 | 0.1209 | gtex | cortex |
-| [10, 20) | 4710 | 0.0672 | 0.06985 | 0.1907 | gtex | cortex |
-| [20, 10000) | 2662 | 0.08008 | 0.1168 | 0.2791 | gtex | cortex |
+| [2, 3) | 4809 | 0.07957 | 0.1185 | 0.2653 | gtex | cortex |
+| [3, 5) | 5507 | 0.0737 | 0.09642 | 0.3072 | gtex | cortex |
+| [5, 10) | 2105 | 0.06858 | 0.06651 | 0.2675 | gtex | cortex |
+| [10, 20) | 28 | 0.05533 | 0.03571 | 0.2143 | gtex | cortex |

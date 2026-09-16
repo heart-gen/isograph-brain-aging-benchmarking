@@ -5,14 +5,15 @@
   "artifacts": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/02_module_discovery/gtex/cerebellar_hemisphere/_m/isograph_vae",
   "published_settings": {
     "pseudocount": 0.5,
-    "min_count": 0.0,
-    "min_fraction": 0.0,
+    "transcript_filter": "switching",
+    "min_tx_prop": 0.1,
+    "min_tx_fraction": 0.1,
     "min_usage": 0.0
   },
-  "baseline_max_abs_diff_vs_feature_scores": 1.176836406102666e-13,
+  "baseline_max_abs_diff_vs_feature_scores": 0.0,
   "tol": 1e-10,
   "n_samples": 277,
-  "n_modules": 30,
+  "n_modules": 22,
   "fdr": 0.05,
   "scope": "module partition held fixed at the published one; preprocessing is varied and the features, eigengenes and age association are recomputed. A full refit per setting would additionally let the network change and is not done here."
 }

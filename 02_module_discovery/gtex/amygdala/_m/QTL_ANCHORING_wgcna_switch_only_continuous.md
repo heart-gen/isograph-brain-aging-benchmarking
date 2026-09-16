@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4858 | 0.1136 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 3751 | 0.109 | 0.1292 | 0.96 | 0.9 | 1.03 | 2.51e-01 | ols_rankint_matched_standard |
-| sQTL | go_invisible_modules | 1982 | 0.1054 | 0.1193 | 0.97 | 0.92 | 1.02 | 2.66e-01 | ols_rankint_matched_standard |
-| sQTL | go_visible_modules | 1769 | 0.1131 | 0.114 | 1.0 | 0.95 | 1.06 | 8.89e-01 | ols_rankint_matched_standard |
-| eQTL | all_modules | 6069 | 0.2595 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 4591 | 0.2566 | 0.2686 | 0.94 | 0.89 | 1.0 | 5.19e-02 | ols_rankint_matched_standard |
-| eQTL | go_invisible_modules | 2247 | 0.2555 | 0.2619 | 0.99 | 0.94 | 1.04 | 7.34e-01 | ols_rankint_matched_standard |
-| eQTL | go_visible_modules | 2344 | 0.2577 | 0.2607 | 0.96 | 0.92 | 1.02 | 1.70e-01 | ols_rankint_matched_standard |
+| sQTL | all_modules | 5252 | 0.1247 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | pheno_sig_modules | 2763 | 0.1227 | 0.127 | 1.0 | 0.94 | 1.05 | 8.61e-01 | ols_rankint_matched_standard |
+| sQTL | go_invisible_modules | 1607 | 0.1213 | 0.1262 | 0.99 | 0.94 | 1.05 | 8.18e-01 | ols_rankint_matched_standard |
+| sQTL | go_visible_modules | 1156 | 0.1246 | 0.1248 | 1.0 | 0.94 | 1.07 | 9.65e-01 | ols_rankint_matched_standard |
+| eQTL | all_modules | 5813 | 0.2663 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | pheno_sig_modules | 3056 | 0.2703 | 0.2619 | 0.98 | 0.93 | 1.03 | 4.89e-01 | ols_rankint_matched_standard |
+| eQTL | go_invisible_modules | 1780 | 0.2719 | 0.2638 | 0.97 | 0.92 | 1.03 | 3.18e-01 | ols_rankint_matched_standard |
+| eQTL | go_visible_modules | 1276 | 0.268 | 0.2658 | 1.01 | 0.95 | 1.07 | 7.82e-01 | ols_rankint_matched_standard |
 
 ## Reading
 

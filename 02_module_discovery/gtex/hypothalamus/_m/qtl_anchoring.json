@@ -4,16 +4,18 @@
   "tissue": "Brain_Hypothalamus",
   "variant": "standard",
   "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 18968,
+  "n_universe_genes": 18397,
   "universe_sizes": {
-    "sQTL": 14022,
-    "eQTL": 18917
+    "sQTL": 13929,
+    "eQTL": 18359
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 5228,
-    "pheno_sig_modules": 610,
-    "go_invisible_modules": 234,
-    "go_visible_modules": 376
+    "all_modules": 5060,
+    "pheno_sig_modules": 373,
+    "go_invisible_modules": 373
   }
 }

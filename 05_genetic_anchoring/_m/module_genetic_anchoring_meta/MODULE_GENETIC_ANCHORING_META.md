@@ -6,35 +6,35 @@ Per phenotype-associated module, the splicing-specificity contrast (log sQTL mat
 
 | stratum | n_modules | n_pos_contrast | n_anchored_p05 | median_contrast | frac_pos |
 | --- | --- | --- | --- | --- | --- |
-| all_phenosig | 177.0 | 84.0 | 14.0 | -0.034 | 0.47 |
-| go_invisible | 124.0 | 57.0 | 7.0 | -0.041 | 0.46 |
-| go_visible | 53.0 | 27.0 | 7.0 | 0.008 | 0.51 |
-| neurodegen_gtex | 156.0 | 73.0 | 11.0 | -0.034 | 0.47 |
-| brainseq_sczd | 7.0 | 4.0 | 1.0 | 0.098 | 0.57 |
+| all_phenosig | 97.0 | 51.0 | 7.0 | 0.016 | 0.53 |
+| go_invisible | 67.0 | 39.0 | 4.0 | 0.034 | 0.58 |
+| go_visible | 30.0 | 12.0 | 3.0 | -0.053 | 0.4 |
+| neurodegen_gtex | 83.0 | 45.0 | 6.0 | 0.016 | 0.54 |
+| brainseq_sczd | 10.0 | 5.0 | 1.0 | -0.038 | 0.5 |
 
 ## Most-anchored modules (smallest perm_p)
 
 | analysis | region | module_id | module_size | go_invisible | sqtl_or | eqtl_or | contrast_log | perm_p |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| gtex-aging | anterior_cingulate_cortex_ba24 | M011 | 165 | False | 2.151 | 0.71 | 1.109 | 0.001 |
-| gtex-aging | hippocampus | M026 | 43 | False | 1.461 | 0.332 | 1.483 | 0.001 |
-| brainseq-aging | caudate | M005 | 331 | True | 1.637 | 0.956 | 0.538 | 0.002 |
-| gtex-aging | amygdala | M009 | 127 | True | 2.081 | 0.927 | 0.808 | 0.004 |
-| gtex-aging | hypothalamus | M005 | 240 | True | 2.127 | 1.257 | 0.526 | 0.004 |
+| gtex-aging | amygdala | M007 | 137 | False | 2.384 | 0.85 | 1.031 | 0.001 |
 | gtex-aging | putamen_basal_ganglia | M009 | 256 | False | 0.837 | 0.482 | 0.552 | 0.006 |
-| gtex-aging | anterior_cingulate_cortex_ba24 | M032 | 29 | True | 2.864 | 0.761 | 1.325 | 0.011 |
-| brainseq-sczd |  | M012 | 58 | False | 0.821 | 0.314 | 0.96 | 0.019 |
-| gtex-aging | frontal_cortex_ba9 | M005 | 504 | False | 1.676 | 1.25 | 0.293 | 0.02 |
-| gtex-aging | cerebellum | M002 | 234 | False | 0.846 | 0.559 | 0.413 | 0.027 |
-| brainseq-aging | caudate | M002 | 561 | True | 1.41 | 1.092 | 0.255 | 0.036 |
+| gtex-aging | cerebellum | M006 | 225 | False | 0.869 | 0.579 | 0.406 | 0.025 |
+| gtex-aging | anterior_cingulate_cortex_ba24 | M007 | 131 | True | 1.719 | 1.08 | 0.464 | 0.041 |
 | gtex-aging | substantia_nigra | M031 | 26 | True | 2.572 | 0.814 | 1.15 | 0.044 |
-| gtex-aging | hippocampus | M029 | 35 | False | 2.105 | 0.89 | 0.861 | 0.046 |
+| brainseq-sczd |  | M030 | 22 | True | 1.935 | 0.651 | 1.089 | 0.046 |
 | gtex-aging | putamen_basal_ganglia | M019 | 92 | True | 1.814 | 1.083 | 0.516 | 0.048 |
-| gtex-aging | hippocampus | M001 | 779 | False | 1.117 | 0.912 | 0.203 | 0.054 |
-| gtex-aging | amygdala | M022 | 29 | True | 0.812 | 0.293 | 1.019 | 0.055 |
 | gtex-aging | substantia_nigra | M015 | 86 | False | 0.916 | 0.513 | 0.58 | 0.058 |
-| gtex-aging | cortex | M005 | 157 | True | 1.184 | 0.811 | 0.378 | 0.061 |
+| brainseq-sczd |  | M017 | 59 | True | 1.287 | 0.693 | 0.62 | 0.062 |
 | gtex-aging | substantia_nigra | M036 | 22 | True | 1.458 | 0.472 | 1.129 | 0.062 |
-| brainseq-aging | caudate | M042 | 23 | True | 1.756 | 0.646 | 1.0 | 0.064 |
+| gtex-aging | frontal_cortex_ba9 | M002 | 604 | False | 1.083 | 0.913 | 0.172 | 0.082 |
+| gtex-aging | hippocampus | M000 | 1369 | False | 0.826 | 0.713 | 0.148 | 0.091 |
+| gtex-aging | amygdala | M016 | 31 | True | 1.966 | 0.907 | 0.774 | 0.091 |
+| gtex-aging | amygdala | M008 | 115 | True | 1.147 | 0.741 | 0.437 | 0.096 |
+| gtex-aging | frontal_cortex_ba9 | M022 | 23 | True | 2.423 | 1.149 | 0.746 | 0.102 |
+| gtex-aging | frontal_cortex_ba9 | M014 | 81 | True | 1.287 | 0.862 | 0.401 | 0.112 |
+| gtex-aging | amygdala | M018 | 26 | True | 0.373 | 0.17 | 0.787 | 0.115 |
+| gtex-aging | substantia_nigra | M026 | 41 | True | 0.86 | 0.477 | 0.589 | 0.137 |
+| gtex-aging | hippocampus | M004 | 272 | False | 1.346 | 1.102 | 0.201 | 0.148 |
+| brainseq-aging | caudate | M008 | 205 | True | 1.105 | 0.881 | 0.226 | 0.172 |
 
 _A module with positive contrast + small perm_p is anchored to splicing genetics as a unit — evidence the *program*, not just pooled member genes, is genetically anchored. SCZD is expected to be weak (disease is eQTL-led); the splicing-anchored modules should concentrate in GO-invisible / neurodegen-relevant GTEx analyses._

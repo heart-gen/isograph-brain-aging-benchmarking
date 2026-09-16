@@ -3,13 +3,13 @@
 ## wrapper: steps in one tier run in parallel once the steps they wait on have finished.
 ##
 ##   bash 06_switch_mechanism/_h/run_stage.sh --dry-run
-##   bash 06_switch_mechanism/_h/run_stage.sh --after <stage 05 job ids> --login-done 01f
+##   bash 06_switch_mechanism/_h/run_stage.sh --after <stage 05 job ids>
 ## Options: scripts/slurm_dag.sh. Inputs: stage-03 structure_switch_pairs, stage-05 coloc events
 ## (04b), deep_dive_events (05c) and signal-layer events (08a); GTEx junction usage from
 ## inputs/_h/build_gtex_junction_usage.sh.
 ##
-## 01f downloads ClinVar/gnomAD and needs a login node (compute nodes have no outbound network).
-## It skips files already present; pass --login-done 01f once inputs/raw/clinical/ is populated.
+## 01f downloads ClinVar/gnomAD. It runs as an ordinary batch step -- compute nodes do reach
+## the network -- and skips files already present, so re-running the stage is cheap.
 set -euo pipefail
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
 dag_init 06_switch_mechanism "$@"
@@ -21,7 +21,7 @@ step 01b "" $H/01b.validate_switch_splicing_brainseq.sh
 step 01c "" $H/01c.validate_switch_splicing_gtex.sh
 step 01d "" $H/01d.isa_concordance.sh
 step 01e "" $H/01e.longread_switch_confirm.sh
-login_step 01f "" $H/01f.download_clinical.sh
+step 01f "" $H/01f.download_clinical.sh
 step 01g "" $H/01g.scz_confound_sensitivity.sh
 step 01h "" $H/01h.switch_feature_sensitivity.sh --cohort brainseq --region caudate
 step 01i "" $H/01i.switch_feature_sensitivity_gtex.sh

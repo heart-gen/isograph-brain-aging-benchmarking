@@ -35,24 +35,24 @@ Statistics: `pearson` = Pearson r, no covariates (the published statistic); `par
 
 | covariates | statistic | T_obs | n pairs | null | null mean ± sd | p_emp |
 |---|---|---|---|---|---|---|
-| complement | pearson | 3 | 53 | age | 0.67 ± 1.53 | 0.1159 |
-| complement | pearson | 3 | 53 | matching | 0.85 ± 0.85 | 0.0403 |
-| complement | partial_linear | 2 | 53 | age | 0.65 ± 1.53 | 0.1704 |
-| complement | partial_linear | 2 | 53 | matching | 0.71 ± 0.78 | 0.1473 |
-| complement | spline_f | 7 | 53 | age | 0.64 ± 1.46 | 0.009399 |
-| complement | spline_f | 7 | 53 | matching | 2.83 ± 1.46 | 0.008399 |
-| none | pearson | 3 | 53 | age | 0.68 ± 1.53 | 0.1168 |
-| none | pearson | 3 | 53 | matching | 0.85 ± 0.85 | 0.0403 |
-| none | partial_linear | 3 | 53 | age | 0.68 ± 1.53 | 0.1168 |
-| none | partial_linear | 3 | 53 | matching | 0.85 ± 0.85 | 0.0403 |
-| none | spline_f | 8 | 53 | age | 0.71 ± 1.54 | 0.007499 |
-| none | spline_f | 8 | 53 | matching | 3.11 ± 1.53 | 0.0037 |
-| full | pearson | 3 | 53 | age | 0.34 ± 0.97 | 0.05369 |
-| full | pearson | 3 | 53 | matching | 0.85 ± 0.85 | 0.0403 |
-| full | partial_linear | 3 | 53 | age | 0.44 ± 1.12 | 0.06279 |
-| full | partial_linear | 3 | 53 | matching | 1.55 ± 1.13 | 0.1912 |
-| full | spline_f | 2 | 53 | age | 0.32 ± 0.99 | 0.06009 |
-| full | spline_f | 2 | 53 | matching | 0.57 ± 0.63 | 0.07509 |
+| complement | pearson | 2 | 52 | age | 0.59 ± 1.34 | 0.1587 |
+| complement | pearson | 2 | 52 | matching | 0.72 ± 0.78 | 0.1506 |
+| complement | partial_linear | 2 | 52 | age | 0.52 ± 1.20 | 0.1408 |
+| complement | partial_linear | 2 | 52 | matching | 0.72 ± 0.78 | 0.1506 |
+| complement | spline_f | 5 | 52 | age | 0.53 ± 1.24 | 0.0256 |
+| complement | spline_f | 5 | 52 | matching | 3.08 ± 1.44 | 0.1611 |
+| none | pearson | 2 | 52 | age | 0.58 ± 1.32 | 0.1543 |
+| none | pearson | 2 | 52 | matching | 0.72 ± 0.78 | 0.1506 |
+| none | partial_linear | 2 | 52 | age | 0.58 ± 1.32 | 0.1543 |
+| none | partial_linear | 2 | 52 | matching | 0.72 ± 0.78 | 0.1506 |
+| none | spline_f | 5 | 52 | age | 0.56 ± 1.24 | 0.0246 |
+| none | spline_f | 5 | 52 | matching | 3.08 ± 1.44 | 0.1611 |
+| full | pearson | 2 | 52 | age | 0.37 ± 0.79 | 0.07889 |
+| full | pearson | 2 | 52 | matching | 0.72 ± 0.78 | 0.1506 |
+| full | partial_linear | 3 | 52 | age | 0.30 ± 0.80 | 0.0391 |
+| full | partial_linear | 3 | 52 | matching | 1.44 ± 1.07 | 0.1585 |
+| full | spline_f | 2 | 52 | age | 0.21 ± 0.65 | 0.05049 |
+| full | spline_f | 2 | 52 | matching | 1.24 ± 0.98 | 0.3647 |
 
 Statistics: `pearson` = Pearson r, no covariates (the published statistic); `partial_linear` = linear age term, covariate-adjusted; `spline_f` = df=3 natural cubic spline block F-test, covariate-adjusted
 

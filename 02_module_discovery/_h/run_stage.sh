@@ -12,6 +12,10 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh
 dag_init 02_module_discovery "$@"
 H=02_module_discovery/_h
 
+## 00 -- the shared gene universe (production transcript filter applied to each bundle).
+## The gene-level WGCNA baselines read it so they are fit on the genes IsoGraph models.
+step 00a "" $H/00a.production_gene_universe.sh
+
 ## 01 -- fits and the three WGCNA baselines, straight from the bundles
 step 01a ""  $H/01a.run_isograph_brainseq_aging.sh
 step 01b ""  $H/01b.run_isograph_brainseq_sczd.sh
@@ -20,9 +24,9 @@ step 01c ""  $H/01c.run_isograph_gtex.sh
 step 01a.res2 "" $H/01a.run_isograph_brainseq_aging.sh --leiden-resolution 2.0
 step 01b.res2 "" $H/01b.run_isograph_brainseq_sczd.sh --leiden-resolution 2.0
 step 01c.res2 "" $H/01c.run_isograph_gtex.sh --leiden-resolution 2.0
-step 01d ""  $H/01d.wgcna_gene_brainseq_aging.sh
-step 01e ""  $H/01e.wgcna_gene_brainseq_sczd.sh
-step 01f ""  $H/01f.wgcna_gene_gtex.sh
+step 01d "00a"  $H/01d.wgcna_gene_brainseq_aging.sh
+step 01e "00a"  $H/01e.wgcna_gene_brainseq_sczd.sh
+step 01f "00a"  $H/01f.wgcna_gene_gtex.sh
 step 01g ""  $H/01g.wgcna_matched_features_brainseq.sh
 step 01h ""  $H/01h.wgcna_matched_features_sczd.sh
 step 01i ""  $H/01i.wgcna_matched_features_gtex.sh

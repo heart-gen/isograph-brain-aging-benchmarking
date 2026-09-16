@@ -1,28 +1,24 @@
 Welcome to MAGMA v1.10 (linux)
 Using flags:
-	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/als_noMHC.genes.raw
-	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt
-	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/als_noMHC_wgcna_gene
+	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/als_noMHC.genes.raw
+	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/wgcna_gene_gene_sets.txt
+	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene
 
-Start time is 00:16:07, Saturday 18 Jul 2026
+Start time is 21:13:34, Tuesday 15 Sep 2026
 
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/als_noMHC.genes.raw... 
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/als_noMHC.genes.raw... 
 	17652 genes read from file
 Loading gene-set annotation...
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt... 
-	WARNING: gene set gtex__cerebellum__M015 contains no genes defined in genotype data
-	WARNING: gene set gtex__hippocampus__M004 contains no genes defined in genotype data
-	WARNING: gene set gtex__nucleus_accumbens_basal_ganglia__M007 contains no genes defined in genotype data
-	WARNING: gene set brainseq__caudate__M020 contains no genes defined in genotype data
-	WARNING: gene set brainseq__caudate_sczd__M022 contains no genes defined in genotype data
-	185 gene-set definitions read from file
-	found 180 gene sets containing genes defined in genotype data (containing a total of 14990 unique genes)
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/wgcna_gene_gene_sets.txt... 
+	WARNING: gene set gtex__cerebellum__M011 contains no genes defined in genotype data
+	WARNING: gene set gtex__cortex__M011 contains no genes defined in genotype data
+	WARNING: gene set gtex__hypothalamus__M006 contains no genes defined in genotype data
+	181 gene-set definitions read from file
+	found 178 gene sets containing genes defined in genotype data (containing a total of 14773 unique genes)
 Preparing variables for analysis...
 	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
-	WARNING: discarding gene set 'gtex__cerebellar_hemisphere__M011' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
-	WARNING: discarding gene set 'brainseq__dlpfc__M023' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
-	WARNING: discarding gene set 'brainseq__dlpfc__M022' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
-	WARNING: discarding gene set 'brainseq__dlpfc__M024' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
+	WARNING: discarding gene set 'gtex__cerebellar_hemisphere__M011' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
+	WARNING: discarding gene set 'gtex__nucleus_accumbens_basal_ganglia__M007' from file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/wgcna_gene_gene_sets.txt, variance is too low (set contains only one gene used in analysis)
 	truncating covariate values more than 5 standard deviations from the mean
 	total variables available for analysis: 176 gene sets
 
@@ -37,8 +33,8 @@ Performing regression analysis...
 	analysing individual variables
 
 	analysing single-variable models (number of models: 176)
-	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/als_noMHC_wgcna_gene.gsa.out
-	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/als_noMHC_wgcna_gene.gsa.genes.out
-	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/als_noMHC_wgcna_gene.gsa.sets.genes.out
+	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene.gsa.out
+	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene.gsa.genes.out
+	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene.gsa.sets.genes.out
 
-End time is 00:16:25, Saturday 18 Jul 2026 (elapsed: 00:00:18)
+End time is 21:13:46, Tuesday 15 Sep 2026 (elapsed: 00:00:12)

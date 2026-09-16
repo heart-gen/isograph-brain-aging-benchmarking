@@ -10,9 +10,9 @@
       "n_pheno_sig_fdr10": 10
     },
     "wgcna": {
-      "n_modules": 23,
-      "n_go_enriched": 17,
-      "frac_go_enriched": 0.739,
+      "n_modules": 24,
+      "n_go_enriched": 19,
+      "frac_go_enriched": 0.792,
       "n_pheno_sig_fdr10": 6
     },
     "wgcna_switch": {

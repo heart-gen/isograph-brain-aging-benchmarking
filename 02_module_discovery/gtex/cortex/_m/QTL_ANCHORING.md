@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 2527 | 0.2489 | 0.2196 | 0.98 | 0.88 | 1.09 | 6.88e-01 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 1380 | 0.2312 | 0.2243 | 0.85 | 0.74 | 0.98 | 2.22e-02 | logit_matched_standard |
-| sQTL | go_invisible_modules | 824 | 0.2536 | 0.2232 | 0.89 | 0.75 | 1.05 | 1.64e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 556 | 0.1978 | 0.2262 | 0.81 | 0.65 | 1.02 | 6.95e-02 | logit_matched_standard |
-| eQTL | all_modules | 3164 | 0.5035 | 0.5442 | 0.82 | 0.76 | 0.89 | 4.66e-07 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 1676 | 0.4875 | 0.5422 | 0.77 | 0.69 | 0.85 | 2.76e-07 | logit_matched_standard |
-| eQTL | go_invisible_modules | 879 | 0.5006 | 0.539 | 0.8 | 0.69 | 0.91 | 1.08e-03 | logit_matched_standard |
-| eQTL | go_visible_modules | 797 | 0.473 | 0.5401 | 0.76 | 0.66 | 0.87 | 1.28e-04 | logit_matched_standard |
+| sQTL | all_modules | 3980 | 0.2317 | 0.2219 | 0.89 | 0.81 | 0.97 | 1.26e-02 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 2551 | 0.2148 | 0.2271 | 0.82 | 0.73 | 0.91 | 3.24e-04 | logit_matched_standard |
+| sQTL | go_invisible_modules | 511 | 0.2329 | 0.2245 | 0.91 | 0.73 | 1.14 | 4.11e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 2040 | 0.2103 | 0.2273 | 0.81 | 0.71 | 0.91 | 5.11e-04 | logit_matched_standard |
+| eQTL | all_modules | 4510 | 0.5182 | 0.5449 | 0.88 | 0.82 | 0.94 | 1.30e-04 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 2904 | 0.5017 | 0.5452 | 0.83 | 0.77 | 0.9 | 6.94e-06 | logit_matched_standard |
+| eQTL | go_invisible_modules | 568 | 0.5123 | 0.5391 | 0.86 | 0.73 | 1.02 | 8.15e-02 | logit_matched_standard |
+| eQTL | go_visible_modules | 2336 | 0.4991 | 0.544 | 0.84 | 0.77 | 0.91 | 6.36e-05 | logit_matched_standard |
 
 ## Reading
 

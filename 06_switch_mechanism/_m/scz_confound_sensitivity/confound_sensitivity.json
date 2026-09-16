@@ -1,7 +1,7 @@
 {
   "analysis": "SCZD module diagnosis association under clinical/technical confounders",
   "cohort": "BrainSEQ caudate (Dx = SCZD vs Control)",
-  "artifacts": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/brainseq/caudate_sczd/_m/isograph_vae",
+  "artifacts": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae",
   "published_covariates": [
     "Age",
     "Sex",
@@ -61,5 +61,5 @@
   "fdr": 0.05,
   "baseline_tolerance": 1e-06,
   "n_samples": 390,
-  "n_modules": 30
+  "n_modules": 33
 }

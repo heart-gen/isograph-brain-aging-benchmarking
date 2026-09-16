@@ -10,22 +10,10 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4806 | 0.0976 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 4272 | 0.0974 | 0.0993 | 0.87 | 0.64 | 1.19 | 3.88e-01 | logit_matched_standard |
-| sQTL | go_invisible_modules | 142 | 0.0704 | 0.0984 | 0.79 | 0.41 | 1.53 | 4.83e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 4130 | 0.0983 | 0.0932 | 0.94 | 0.7 | 1.25 | 6.60e-01 | logit_matched_standard |
-| sQTL | all_modules | 4806 | 0.0976 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 4272 | 0.0974 | 0.0993 | 0.91 | 0.66 | 1.25 | 5.61e-01 | logit_matched_constraint |
-| sQTL | go_invisible_modules | 142 | 0.0704 | 0.0984 | 0.71 | 0.36 | 1.38 | 3.14e-01 | logit_matched_constraint |
-| sQTL | go_visible_modules | 4130 | 0.0983 | 0.0932 | 1.0 | 0.74 | 1.34 | 9.84e-01 | logit_matched_constraint |
-| eQTL | all_modules | 5594 | 0.2376 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 4905 | 0.2318 | 0.2787 | 0.79 | 0.66 | 0.95 | 1.02e-02 | logit_matched_standard |
-| eQTL | go_invisible_modules | 149 | 0.2081 | 0.2384 | 0.86 | 0.57 | 1.28 | 4.54e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 4756 | 0.2325 | 0.2661 | 0.84 | 0.71 | 0.99 | 4.25e-02 | logit_matched_standard |
-| eQTL | all_modules | 5594 | 0.2376 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 4905 | 0.2318 | 0.2787 | 0.86 | 0.71 | 1.03 | 1.01e-01 | logit_matched_constraint |
-| eQTL | go_invisible_modules | 149 | 0.2081 | 0.2384 | 0.87 | 0.58 | 1.31 | 4.96e-01 | logit_matched_constraint |
-| eQTL | go_visible_modules | 4756 | 0.2325 | 0.2661 | 0.9 | 0.76 | 1.07 | 2.28e-01 | logit_matched_constraint |
+| sQTL | all_modules | 4452 | 0.1181 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | all_modules | 4452 | 0.1181 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | all_modules | 4770 | 0.244 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | all_modules | 4770 | 0.244 | nan | nan | nan | nan | NA | insufficient |
 
 ## Reading
 

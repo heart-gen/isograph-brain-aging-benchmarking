@@ -3,7 +3,7 @@
   "statistic": "spline_f",
   "null": "matching",
   "covariates": "full",
-  "n_matched_rows": 53,
+  "n_matched_rows": 52,
   "min_jaccard": 0.0,
   "T_obs": 2,
   "per_pair_obs": {
@@ -14,10 +14,10 @@
   "B": 10000,
   "seed": 13,
   "sig": 0.05,
-  "p_emp": 0.0750924907509249,
-  "null_mean": 0.5667,
-  "null_sd": 0.628959990036653,
-  "z": 2.2788412978645485,
-  "null_max": 2,
-  "null_q95": 2.0
+  "p_emp": 0.36466353364663534,
+  "null_mean": 1.2442,
+  "null_sd": 0.9842069021921317,
+  "z": 0.7679279614038479,
+  "null_max": 5,
+  "null_q95": 3.0
 }

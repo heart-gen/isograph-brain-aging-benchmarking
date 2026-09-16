@@ -15,77 +15,56 @@ Reproduce: `python -m isograph_benchmark.real_data.module_coloc_convergence`
 
 | trait | source | n_pool | n_coloc_genes | n_modules_with_coloc | concentration_obs | concentration_null_mean | concentration_p | n_anchored_modules | frac_coloc_anchored | frac_pool_anchored | anchored_hyperg_p | frac_allgenes_anchored | anchored_hyperg_p_allgenes_denom |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AD | gtex_caudate_bg | 177 | 8 | 5 | 16.0 | 13.029 | 0.241 | 5 | 0.625 | 0.401 | 0.17 | 0.27854806044555225 | 0.042755672357479714 |
-| AD | brainseq_caudate | 106 | 4 | 3 | 6.0 | 4.883 | 0.358 | 4 | 0.5 | 0.245 | 0.252 | 0.20345125107851597 | 0.18607164957593011 |
-| PD | gtex_caudate_bg | 131 | 9 | 6 | 17.0 | 14.814 | 0.309 | 3 | 0.222 | 0.168 | 0.466 | 0.0945630160461131 | 0.206493764708039 |
-| PD | brainseq_caudate | 71 | 5 | 4 | 7.0 | 6.776 | 0.602 | 3 | 0.0 | 0.014 | 1 | 0.04227782571182054 | 1.0 |
-| LBD | gtex_caudate_bg | 45 | 2 | 2 | 2.0 | 2.198 | 1 | 1 | 0.0 | 0.0 | NA | 0.011060912914784234 | 1.0 |
-| LBD | brainseq_caudate | 30 | 1 | 1 | 1.0 | 1.0 | 1 | 2 | 0.0 | 0.0 | NA | 0.02985332182916307 | 1.0 |
-| ALS | gtex_caudate_bg | 128 | 11 | 9 | 15.0 | 21.905 | 0.962 | 4 | 0.091 | 0.055 | 0.475 | 0.09300514098769279 | 0.6585940662942692 |
-| ALS | brainseq_caudate | 71 | 3 | 3 | 3.0 | 3.451 | 1 | 4 | 0.333 | 0.155 | 0.401 | 0.12148403796376187 | 0.3220184577036663 |
-| SCZ | gtex_caudate_bg | 482 | 27 | 14 | 87.0 | 96.118 | 0.647 | 5 | 0.444 | 0.38 | 0.302 | 0.22589188347094563 | 0.009526550908027911 |
-| SCZ | brainseq_caudate | 303 | 18 | 11 | 52.0 | 42.323 | 0.188 | 5 | 0.333 | 0.343 | 0.627 | 0.2286453839516825 | 0.21227344361798486 |
+| AD | gtex_caudate_bg | 212 | 7 | 3.0 | 19.0 | 21.494 | 0.686 | 1.0 | 0.429 | 0.231 | 0.203 | 0.19966348850252383 | 0.1473246969623006 |
+| AD | brainseq_caudate | 148 | 4 | 4.0 | 4.0 | 5.19 | 1 | 2.0 | 0.0 | 0.243 | 1 | 0.13375130616509928 | 1.0 |
+| PD | gtex_caudate_bg | 118 | 11 | 4.0 | 37.0 | 49.121 | 0.861 | 1.0 | 0.364 | 0.508 | 0.908 | 0.3380071041316134 | 0.5408688038534893 |
+| PD | brainseq_caudate | 72 | 4 | 3.0 | 6.0 | 5.451 | 0.53 | 3.0 | 0.25 | 0.278 | 0.737 | 0.14350400557297108 | 0.46194672782800716 |
+| LBD | gtex_caudate_bg | 57 | 2 | 2.0 | 2.0 | 2.637 | 1 | 3.0 | 0.0 | 0.018 | 1 | 0.06169377453729669 | 1.0 |
+| LBD | brainseq_caudate | 41 | 0 |  |  |  | NA |  |  |  | NA |  |  |
+| ALS | gtex_caudate_bg | 144 | 9 | 3.0 | 41.0 | 36.258 | 0.371 | 2.0 | 0.667 | 0.556 | 0.37 | 0.4099831744251262 | 0.11070810967671942 |
+| ALS | brainseq_caudate | 98 | 6 | 5.0 | 8.0 | 9.796 | 0.849 | 4.0 | 0.5 | 0.398 | 0.451 | 0.19592476489028213 | 0.09382987911555346 |
+| SCZ | gtex_caudate_bg | 496 | 26 | 4.0 | 414.0 | 268.981 | 0.0103 | 3.0 | 0.962 | 0.879 | 0.153 | 0.5978687605159843 | 2.779959073695038e-05 |
+| SCZ | brainseq_caudate | 365 | 21 | 9.0 | 93.0 | 70.658 | 0.113 | 8.0 | 0.429 | 0.463 | 0.708 | 0.3793103448275862 | 0.39853655090447354 |
 
 ## Modules carrying colocalizing switch genes
 
 | trait | source | module_id | testable | n_module_genes_in_pool | n_coloc_genes | n_coloc_loci | n_go_invisible | hyperg_p | hyperg_fdr | loo_worst_p | magma_p |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| AD | gtex_caudate_bg | M000 | True | 34 | 3 | 3 | 3 | 0.182 | 0.261 | 0.403 | 0.0292 |
-| AD | gtex_caudate_bg | M010 | True | 13 | 2 | 2 | 1 | 0.109 | 0.261 | 0.419 | 0.0201 |
-| AD | gtex_caudate_bg | M005 | True | 3 | 1 | 1 | 1 | 0.13 | 0.261 | 1 | 0.814 |
-| AD | gtex_caudate_bg | M007 | True | 5 | 1 | 1 | 1 | 0.209 | 0.261 | 1 | 0.305 |
-| AD | gtex_caudate_bg | M006 | True | 7 | 1 | 1 | 0 | 0.281 | 0.281 | 1 | 0.719 |
-| AD | brainseq_caudate | M001 | True | 18 | 2 | 2 | 2 | 0.133 | 0.266 | 0.431 | 0.0411 |
-| AD | brainseq_caudate | M003 | True | 18 | 1 | 1 | 1 | 0.531 | 0.531 | 1 | 0.188 |
-| AD | brainseq_caudate | M021 | False | 2 | 1 | 1 | 1 | 0.0744 | NA | 1 | 0.078 |
-| PD | gtex_caudate_bg | M000 | True | 27 | 3 | 3 | 3 | 0.274 | 0.411 | 0.52 | 0.664 |
-| PD | gtex_caudate_bg | M004 | True | 12 | 2 | 2 | 2 | 0.193 | 0.411 | 0.547 | 0.306 |
-| PD | gtex_caudate_bg | M005 | True | 4 | 1 | 1 | 1 | 0.25 | 0.411 | 1 | 0.201 |
-| PD | gtex_caudate_bg | M029 | True | 4 | 1 | 1 | 1 | 0.25 | 0.411 | 1 | 1.41e-05 |
-| PD | gtex_caudate_bg | M008 | True | 7 | 1 | 1 | 0 | 0.4 | 0.48 | 1 | 0.172 |
-| PD | gtex_caudate_bg | M002 | True | 15 | 1 | 1 | 1 | 0.678 | 0.678 | 1 | 0.00191 |
-| PD | brainseq_caudate | M001 | True | 14 | 2 | 2 | 1 | 0.254 | 0.366 | 0.593 | 0.0966 |
-| PD | brainseq_caudate | M012 | True | 3 | 1 | 1 | 1 | 0.199 | 0.366 | 1 | 0.359 |
-| PD | brainseq_caudate | M000 | True | 6 | 1 | 1 | 1 | 0.366 | 0.366 | 1 | 0.441 |
-| PD | brainseq_caudate | M016 | False | 1 | 1 | 1 | 1 | 0.0704 | NA | 1 | 0.522 |
-| LBD | gtex_caudate_bg | M029 | False | 1 | 1 | 1 | 1 | 0.0444 | NA | 1 | 0.256 |
-| LBD | gtex_caudate_bg | M007 | False | 2 | 1 | 1 | 1 | 0.0879 | NA | 1 | 0.299 |
-| LBD | brainseq_caudate | M012 | False | 1 | 1 | 1 | 1 | 0.0333 | NA | 0 | 0.144 |
-| ALS | gtex_caudate_bg | M004 | True | 16 | 2 | 2 | 2 | 0.412 | 0.593 | 0.751 | 0.145 |
-| ALS | gtex_caudate_bg | M000 | True | 29 | 2 | 2 | 2 | 0.763 | 0.784 | 0.931 | 0.54 |
-| ALS | gtex_caudate_bg | M005 | True | 3 | 1 | 1 | 1 | 0.238 | 0.593 | 1 | 0.937 |
-| ALS | gtex_caudate_bg | M001 | True | 5 | 1 | 1 | 1 | 0.367 | 0.593 | 1 | 0.0814 |
-| ALS | gtex_caudate_bg | M007 | True | 5 | 1 | 1 | 0 | 0.367 | 0.593 | 1 | 0.412 |
-| ALS | gtex_caudate_bg | M006 | True | 6 | 1 | 1 | 0 | 0.423 | 0.593 | 1 | 0.0131 |
-| ALS | gtex_caudate_bg | M002 | True | 16 | 1 | 1 | 1 | 0.784 | 0.784 | 1 | 0.0543 |
-| ALS | gtex_caudate_bg | M017 | False | 2 | 1 | 1 | 1 | 0.165 | NA | 1 | 0.796 |
-| ALS | gtex_caudate_bg | M019 | False | 2 | 1 | 1 | 1 | 0.165 | NA | 1 | 0.173 |
-| ALS | brainseq_caudate | M003 | True | 10 | 1 | 1 | 1 | 0.37 | 0.37 | 1 | 0.0228 |
-| ALS | brainseq_caudate | M017 | False | 2 | 1 | 1 | 1 | 0.0833 | NA | 1 | 0.0579 |
-| ALS | brainseq_caudate | M031 | False | 2 | 1 | 1 | 1 | 0.0833 | NA | 1 | 0.545 |
-| SCZ | gtex_caudate_bg | M002 | True | 58 | 6 | 6 | 5 | 0.0915 | 0.672 | 0.191 | 0.0109 |
-| SCZ | gtex_caudate_bg | M000 | True | 105 | 5 | 5 | 5 | 0.738 | 0.853 | 0.856 | 0.134 |
-| SCZ | gtex_caudate_bg | M008 | True | 47 | 3 | 3 | 1 | 0.502 | 0.818 | 0.744 | 0.000748 |
-| SCZ | gtex_caudate_bg | M009 | True | 20 | 2 | 2 | 1 | 0.31 | 0.672 | 0.678 | 0.437 |
-| SCZ | gtex_caudate_bg | M004 | True | 57 | 2 | 2 | 2 | 0.853 | 0.853 | 0.965 | 0.0478 |
-| SCZ | gtex_caudate_bg | M016 | True | 3 | 1 | 1 | 1 | 0.159 | 0.672 | 1 | 0.3 |
-| SCZ | gtex_caudate_bg | M029 | True | 4 | 1 | 1 | 1 | 0.207 | 0.672 | 1 | 0.113 |
-| SCZ | gtex_caudate_bg | M005 | True | 6 | 1 | 1 | 1 | 0.294 | 0.672 | 1 | 0.185 |
-| SCZ | gtex_caudate_bg | M018 | True | 6 | 1 | 1 | 1 | 0.294 | 0.672 | 1 | 0.346 |
-| SCZ | gtex_caudate_bg | M012 | True | 12 | 1 | 1 | 1 | 0.503 | 0.818 | 1 | 0.768 |
-| SCZ | gtex_caudate_bg | M006 | True | 17 | 1 | 1 | 0 | 0.631 | 0.853 | 1 | 0.035 |
-| SCZ | gtex_caudate_bg | M007 | True | 21 | 1 | 1 | 1 | 0.71 | 0.853 | 1 | 0.659 |
-| SCZ | gtex_caudate_bg | M001 | True | 32 | 1 | 1 | 1 | 0.852 | 0.853 | 1 | 0.174 |
-| SCZ | gtex_caudate_bg | M026 | False | 2 | 1 | 1 | 1 | 0.109 | NA | 1 | 0.146 |
-| SCZ | brainseq_caudate | M003 | True | 42 | 6 | 6 | 6 | 0.0255 | 0.229 | 0.0694 | 0.447 |
-| SCZ | brainseq_caudate | M004 | True | 25 | 2 | 2 | 2 | 0.449 | 0.673 | 0.778 | 0.0449 |
-| SCZ | brainseq_caudate | M001 | True | 54 | 2 | 2 | 0 | 0.865 | 0.904 | 0.968 | 0.0168 |
-| SCZ | brainseq_caudate | M022 | True | 3 | 1 | 1 | 1 | 0.168 | 0.673 | 1 | 0.704 |
-| SCZ | brainseq_caudate | M011 | True | 7 | 1 | 1 | 1 | 0.352 | 0.673 | 1 | 0.0933 |
-| SCZ | brainseq_caudate | M014 | True | 7 | 1 | 1 | 1 | 0.352 | 0.673 | 1 | 0.687 |
-| SCZ | brainseq_caudate | M012 | True | 8 | 1 | 1 | 1 | 0.391 | 0.673 | 1 | 0.0125 |
-| SCZ | brainseq_caudate | M009 | True | 14 | 1 | 1 | 0 | 0.584 | 0.751 | 1 | 5.8e-05 |
-| SCZ | brainseq_caudate | M000 | True | 36 | 1 | 1 | 1 | 0.904 | 0.904 | 1 | 0.338 |
-| SCZ | brainseq_caudate | M016 | False | 2 | 1 | 1 | 1 | 0.115 | NA | 1 | 0.958 |
-| SCZ | brainseq_caudate | M028 | False | 2 | 1 | 1 | 1 | 0.115 | NA | 1 | 0.186 |
+| AD | gtex_caudate_bg | M001 | True | 49 | 3 | 3 | 1 | 0.203 | 0.304 | 0.422 | 0.0367 |
+| AD | gtex_caudate_bg | M000 | True | 112 | 3 | 3 | 2 | 0.821 | 0.821 | 0.918 | 0.424 |
+| AD | gtex_caudate_bg | M009 | True | 3 | 1 | 1 | 1 | 0.0963 | 0.289 | 1 | 0.43 |
+| AD | brainseq_caudate | M011 | True | 4 | 1 | 1 | 1 | 0.105 | 0.314 | 1 | 0.184 |
+| AD | brainseq_caudate | M006 | True | 13 | 1 | 1 | 1 | 0.31 | 0.461 | 1 | 0.673 |
+| AD | brainseq_caudate | M001 | True | 21 | 1 | 1 | 1 | 0.461 | 0.461 | 1 | 0.0671 |
+| AD | brainseq_caudate | M021 | False | 1 | 1 | 1 | 0 | 0.027 | NA | 1 | 0.809 |
+| PD | gtex_caudate_bg | M001 | True | 35 | 4 | 4 | 3 | 0.42 | 0.56 | 0.616 | 0.377 |
+| PD | gtex_caudate_bg | M000 | True | 60 | 4 | 3 | 0 | 0.908 | 0.908 | 0.986 | 0.0383 |
+| PD | gtex_caudate_bg | M004 | True | 7 | 2 | 2 | 0 | 0.128 | 0.513 | 0.471 | 0.415 |
+| PD | gtex_caudate_bg | M003 | True | 4 | 1 | 1 | 1 | 0.328 | 0.56 | 1 | 0.429 |
+| PD | brainseq_caudate | M003 | True | 7 | 2 | 2 | 1 | 0.0447 | 0.134 | 0.268 | 0.717 |
+| PD | brainseq_caudate | M001 | True | 10 | 1 | 1 | 0 | 0.458 | 0.687 | 1 | 0.17 |
+| PD | brainseq_caudate | M002 | True | 20 | 1 | 1 | 0 | 0.737 | 0.737 | 1 | 0.012 |
+| LBD | gtex_caudate_bg | M003 | True | 5 | 1 | 1 | 1 | 0.169 | 0.338 | 1 | 0.4 |
+| LBD | gtex_caudate_bg | M001 | True | 14 | 1 | 1 | 1 | 0.434 | 0.434 | 1 | 0.512 |
+| ALS | gtex_caudate_bg | M000 | True | 77 | 6 | 6 | 0 | 0.321 | 0.481 | 0.439 | 0.000547 |
+| ALS | gtex_caudate_bg | M001 | True | 44 | 2 | 2 | 2 | 0.823 | 0.823 | 0.951 | 0.171 |
+| ALS | gtex_caudate_bg | M002 | True | 3 | 1 | 1 | 1 | 0.177 | 0.481 | 1 | 0.846 |
+| ALS | brainseq_caudate | M002 | True | 28 | 2 | 2 | 0 | 0.553 | 0.553 | 0.822 | 0.0109 |
+| ALS | brainseq_caudate | M007 | True | 8 | 1 | 1 | 1 | 0.409 | 0.553 | 1 | 0.0581 |
+| ALS | brainseq_caudate | M013 | False | 1 | 1 | 1 | 1 | 0.0612 | NA | 1 | 0.133 |
+| ALS | brainseq_caudate | M017 | False | 1 | 1 | 1 | 0 | 0.0612 | NA | 1 | 0.886 |
+| ALS | brainseq_caudate | M019 | False | 2 | 1 | 1 | 0 | 0.119 | NA | 1 | 0.0299 |
+| SCZ | gtex_caudate_bg | M000 | True | 269 | 20 | 19 | 7 | 0.0129 | 0.0514 | 0.0278 | 2.45e-05 |
+| SCZ | gtex_caudate_bg | M001 | True | 135 | 3 | 3 | 2 | 0.987 | 0.987 | 0.997 | 0.00234 |
+| SCZ | gtex_caudate_bg | M004 | True | 32 | 2 | 2 | 2 | 0.512 | 0.863 | 0.819 | 0.0294 |
+| SCZ | gtex_caudate_bg | M005 | True | 19 | 1 | 1 | 1 | 0.647 | 0.863 | 1 | 0.322 |
+| SCZ | brainseq_caudate | M002 | True | 91 | 8 | 7 | 4 | 0.122 | 0.506 | 0.327 | 0.00383 |
+| SCZ | brainseq_caudate | M003 | True | 43 | 4 | 4 | 2 | 0.225 | 0.506 | 0.426 | 0.24 |
+| SCZ | brainseq_caudate | M000 | True | 8 | 2 | 2 | 1 | 0.0716 | 0.506 | 0.366 | 0.139 |
+| SCZ | brainseq_caudate | M001 | True | 56 | 2 | 2 | 2 | 0.862 | 0.862 | 0.968 | 0.102 |
+| SCZ | brainseq_caudate | M025 | True | 4 | 1 | 1 | 0 | 0.212 | 0.506 | 1 | 0.167 |
+| SCZ | brainseq_caudate | M009 | True | 8 | 1 | 1 | 1 | 0.38 | 0.685 | 1 | 0.591 |
+| SCZ | brainseq_caudate | M008 | True | 15 | 1 | 1 | 0 | 0.596 | 0.862 | 1 | 0.0578 |
+| SCZ | brainseq_caudate | M007 | True | 26 | 1 | 1 | 0 | 0.798 | 0.862 | 1 | 0.382 |
+| SCZ | brainseq_caudate | M004 | True | 30 | 1 | 1 | 1 | 0.844 | 0.862 | 1 | 0.00493 |
 

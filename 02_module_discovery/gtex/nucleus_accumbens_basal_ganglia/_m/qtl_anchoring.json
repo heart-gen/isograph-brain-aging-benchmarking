@@ -4,15 +4,16 @@
   "tissue": "Brain_Nucleus_accumbens_basal_ganglia",
   "variant": "standard",
   "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 18539,
+  "n_universe_genes": 18180,
   "universe_sizes": {
-    "sQTL": 13667,
-    "eQTL": 18486
+    "sQTL": 13605,
+    "eQTL": 18142
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 5735,
-    "pheno_sig_modules": 194,
-    "go_visible_modules": 194
+    "all_modules": 5083
   }
 }

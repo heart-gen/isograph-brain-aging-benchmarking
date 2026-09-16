@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=4
-#SBATCH --time=00:30:00
+#SBATCH --time=08:00:00
 #SBATCH --output=04_module_trust/_m/logs/%x-%j.log
 
 # Cross-cohort GO consistency for replicated, age-associated modules. Requires
@@ -32,6 +32,6 @@ module load anaconda3/2024.10-1
 conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 
 log_message "**** Cross-cohort GO consistency starts ****"
-python -m isograph_benchmark.real_data.replication_go "$@"
+python -u -m isograph_benchmark.real_data.replication_go "$@"
 conda deactivate
 log_message "**** Complete ****"

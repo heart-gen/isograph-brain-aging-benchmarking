@@ -15,7 +15,14 @@ suppressPackageStartupMessages({
 .args <- commandArgs(trailingOnly = FALSE)
 .script_path <- sub("^--file=", "", .args[grep("^--file=", .args)])
 script_dir <- dirname(normalizePath(if (interactive()) getwd() else .script_path, mustWork = FALSE))
-project_root <- normalizePath(file.path(script_dir, "../../.."), mustWork = FALSE)
+# The wrappers export ISOGRAPH_BENCHMARK_ROOT; fall back to the repo root two
+# levels above <stage>/_h/ so a direct Rscript call still resolves correctly.
+project_root <- Sys.getenv("ISOGRAPH_BENCHMARK_ROOT", unset = "")
+if (!nzchar(project_root)) project_root <- file.path(script_dir, "..", "..")
+project_root <- normalizePath(project_root, mustWork = TRUE)
+if (!dir.exists(file.path(project_root, "isograph_benchmark"))) {
+    stop("project_root is not the repo root: ", project_root)
+}
 out_dir <- file.path(project_root, "05_genetic_anchoring", "_m", "gwas", "gene_sets")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 
@@ -65,7 +72,11 @@ build_gene_set_file <- function(backend) {
     for (coll in COLLECTIONS) {
         for (region in coll$regions) {
             mod_path <- file.path(coll$root, region, "_m", backend, "modules.parquet")
-            if (!file.exists(mod_path)) next
+            if (!file.exists(mod_path)) {
+                cat(sprintf("  %s / %s / %s: no modules.parquet, skipped\n",
+                            coll$label, region, backend))
+                next
+            }
 
             mods <- read_parquet(mod_path)
             module_ids <- unique(mods$module_id)
@@ -85,6 +96,13 @@ build_gene_set_file <- function(backend) {
         }
     }
 
+    # An empty gene set file is never a valid result: MAGMA would silently fall
+    # back to whatever stale file is already on disk. Fail instead of writing it.
+    if (n_sets == 0L) {
+        stop("no gene sets built for backend ", backend,
+             " -- no modules.parquet found under ", project_root)
+    }
+
     out_path <- file.path(out_dir, paste0(backend, "_gene_sets.txt"))
     writeLines(all_lines, out_path)
     cat(sprintf("Wrote %d gene sets → %s\n", n_sets, out_path))
@@ -93,8 +111,5 @@ build_gene_set_file <- function(backend) {
 
 for (backend in BACKENDS) {
     cat(sprintf("\n=== Backend: %s ===\n", backend))
-    tryCatch(
-        build_gene_set_file(backend),
-        error = function(e) message("ERROR: ", conditionMessage(e))
-    )
+    build_gene_set_file(backend)
 }

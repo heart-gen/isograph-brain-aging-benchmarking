@@ -10,18 +10,10 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3714 | 0.2046 | 0.2136 | 0.97 | 0.87 | 1.07 | 5.22e-01 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 809 | 0.2064 | 0.211 | 0.98 | 0.82 | 1.18 | 8.33e-01 | logit_matched_standard |
-| sQTL | go_invisible_modules | 809 | 0.2064 | 0.211 | 0.98 | 0.82 | 1.18 | 8.33e-01 | logit_matched_standard |
-| sQTL | all_modules | 3714 | 0.2046 | 0.2136 | 0.97 | 0.88 | 1.08 | 6.14e-01 | logit_matched_constraint |
-| sQTL | pheno_sig_modules | 809 | 0.2064 | 0.211 | 0.97 | 0.8 | 1.17 | 7.44e-01 | logit_matched_constraint |
-| sQTL | go_invisible_modules | 809 | 0.2064 | 0.211 | 0.97 | 0.8 | 1.17 | 7.44e-01 | logit_matched_constraint |
-| eQTL | all_modules | 4203 | 0.4916 | 0.5117 | 0.92 | 0.85 | 0.99 | 1.93e-02 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 887 | 0.5152 | 0.5045 | 1.04 | 0.9 | 1.19 | 5.95e-01 | logit_matched_standard |
-| eQTL | go_invisible_modules | 887 | 0.5152 | 0.5045 | 1.04 | 0.9 | 1.19 | 5.95e-01 | logit_matched_standard |
-| eQTL | all_modules | 4203 | 0.4916 | 0.5117 | 0.97 | 0.9 | 1.05 | 4.34e-01 | logit_matched_constraint |
-| eQTL | pheno_sig_modules | 887 | 0.5152 | 0.5045 | 1.06 | 0.92 | 1.22 | 3.92e-01 | logit_matched_constraint |
-| eQTL | go_invisible_modules | 887 | 0.5152 | 0.5045 | 1.06 | 0.92 | 1.22 | 3.92e-01 | logit_matched_constraint |
+| sQTL | all_modules | 3995 | 0.202 | 0.2122 | 1.0 | 0.9 | 1.1 | 9.26e-01 | logit_matched_standard |
+| sQTL | all_modules | 3995 | 0.202 | 0.2122 | 0.96 | 0.86 | 1.07 | 4.70e-01 | logit_matched_constraint |
+| eQTL | all_modules | 4448 | 0.4674 | 0.5239 | 0.79 | 0.73 | 0.85 | 9.28e-11 | logit_matched_standard |
+| eQTL | all_modules | 4448 | 0.4674 | 0.5239 | 0.82 | 0.76 | 0.89 | 1.78e-06 | logit_matched_constraint |
 
 ## Reading
 

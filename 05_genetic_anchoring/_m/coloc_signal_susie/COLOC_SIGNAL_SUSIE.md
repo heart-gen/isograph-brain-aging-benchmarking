@@ -8,16 +8,16 @@ Each gene contributes GTEx's single grouped-permutation representative intron, s
 
 ## What was fit
 
-- signal-pair posteriors: 23,910
-- cells surviving `gtex_matched`: 2,878 (432 genes)
-- cells surviving `all_signals`: 3,542 (464 genes)
-- estimator hierarchy: **2,878 coloc.susie**, 39,252 coloc.abf fallback
+- signal-pair posteriors: 32,455
+- cells surviving `gtex_matched`: 3,745 (537 genes)
+- cells surviving `all_signals`: 4,618 (591 genes)
+- estimator hierarchy: **3,745 coloc.susie**, 48,139 coloc.abf fallback
   - why coloc.abf, first place the cell left the signal-level pipeline:
-    - `gwas_no_credible_set`: 16,043
-    - `no_qtl_credible_set`: 11,771
-    - `gwas_locus_over_max_snps`: 10,774
-    - `qtl_cs_not_matching_gtex`: 664
-- prior robustness of the 340 cells calling at the primary prior: abf `intermediate` 122, abf `primary_prior` 71, abf `robust` 24, susie `intermediate` 78, susie `primary_prior` 25, susie `robust` 20
+    - `gwas_no_credible_set`: 19,956
+    - `no_qtl_credible_set`: 14,602
+    - `gwas_locus_over_max_snps`: 12,708
+    - `qtl_cs_not_matching_gtex`: 873
+- prior robustness of the 400 cells calling at the primary prior: abf `intermediate` 141, abf `primary_prior` 99, abf `robust` 64, susie `intermediate` 55, susie `primary_prior` 16, susie `robust` 25
 
 ## Reference-LD caveat
 
@@ -27,13 +27,13 @@ The QTL side is fine-mapped under the 1000G EUR Phase 3 panel, because that is t
 
 | analysis | trait | genes | sQTL coloc | eQTL coloc | splicing-only | expression-only | McNemar P |
 |---|---|---|---|---|---|---|---|
-| aging__ad | ad | 348 | 9 | 11 | 4 | 6 | 0.754 |
-| aging__als | als | 159 | 9 | 9 | 5 | 5 | 1.000 |
-| aging__lbd | lbd | 58 | 1 | 1 | 1 | 1 | 1.000 |
-| aging__pd | pd | 155 | 6 | 7 | 4 | 5 | 1.000 |
-| aging__scz | scz | 852 | 18 | 33 | 7 | 22 | 0.008 |
-| brainseq-sczd__scz | scz | 67 | 0 | 4 | 0 | 4 | 0.125 |
-| POOLED | ALL | 1639 | 43 | 65 | 21 | 43 | 0.008 |
+| aging__ad | ad | 403 | 4 | 13 | 2 | 11 | 0.022 |
+| aging__als | als | 188 | 6 | 4 | 4 | 2 | 0.688 |
+| aging__lbd | lbd | 78 | 0 | 1 | 0 | 1 | 1.000 |
+| aging__pd | pd | 167 | 4 | 11 | 1 | 8 | 0.039 |
+| aging__scz | scz | 1041 | 23 | 41 | 7 | 25 | 0.002 |
+| brainseq-sczd__scz | scz | 152 | 3 | 6 | 1 | 4 | 0.375 |
+| POOLED | ALL | 2029 | 40 | 76 | 15 | 51 | 1.01e-05 |
 
 Conditioning on `PP4_sQTL >= 0.8` and then reading `PP4_eQTL` is a **selection**, so a splicing-preferential count is a set of locus nominations, not an unbiased splicing-specificity estimate. The unbiased test is the paired McNemar / Wilcoxon above.
 
@@ -43,28 +43,28 @@ Conditioning on `PP4_sQTL >= 0.8` and then reading `PP4_eQTL` is a **selection**
 
 | gene | trait | PP4 sQTL | PP4 eQTL | tissues coloc | max tissue |
 |---|---|---|---|---|---|
-| TPP1 | als | 0.996 | 0.774 | 1/9 | Brain_Cerebellum |
-| GPM6A | scz | 0.991 | 0.990 | 4/13 | Brain_Caudate_basal_ganglia |
-| CTSH | ad | 0.989 | 0.993 | 6/13 | Brain_Hippocampus |
-| PITPNM2 | pd | 0.989 | 0.614 | 1/13 | Brain_Cerebellar_Hemisphere |
-| RNASEH2C | scz | 0.981 | 0.975 | 5/13 | Brain_Anterior_cingulate_cortex_BA24 |
-| PGS1 | als | 0.976 | 0.165 | 13/13 | Brain_Cortex |
-| PLCB2 | scz | 0.975 | 0.157 | 2/13 | Brain_Hypothalamus |
-| SNCA | lbd | 0.974 | 0.113 | 8/13 | Brain_Cortex |
-| SNCA | pd | 0.970 | 0.382 | 6/13 | Brain_Substantia_nigra |
+| ACTR1B | scz | 0.997 | 0.996 | 11/13 | Brain_Caudate_basal_ganglia |
+| ACTR1B | scz | 0.997 | 0.996 | 11/13 | Brain_Caudate_basal_ganglia |
+| MRPS33 | scz | 0.994 | 0.970 | 3/13 | Brain_Hypothalamus |
+| IRF3 | scz | 0.994 | 0.977 | 11/13 | Brain_Cortex |
+| YPEL1 | scz | 0.985 | 0.864 | 8/13 | Brain_Cerebellar_Hemisphere |
+| POLG | scz | 0.982 | 0.274 | 2/13 | Brain_Cerebellar_Hemisphere |
+| PSMD6 | scz | 0.976 | 0.228 | 1/13 | Brain_Hippocampus |
+| SNAP91 | scz | 0.974 | 0.930 | 6/13 | Brain_Cerebellum |
+| RAI1 | scz | 0.971 | 0.717 | 2/13 | Brain_Cerebellum |
 | TXNDC15 | als | 0.969 | 0.379 | 1/13 | Brain_Caudate_basal_ganglia |
-| DOC2A | scz | 0.966 | 0.755 | 9/13 | Brain_Cortex |
 | SIRPA | ad | 0.965 | 0.947 | 13/13 | Brain_Cerebellar_Hemisphere |
-| TMED4 | scz | 0.965 | 0.954 | 13/13 | Brain_Hypothalamus |
-| UNC13A | als | 0.961 | 0.377 | 2/13 | Brain_Cerebellum |
-| NT5C2 | scz | 0.958 | 0.963 | 7/13 | Brain_Cerebellum |
-| CDIP1 | scz | 0.949 | 0.854 | 6/13 | Brain_Caudate_basal_ganglia |
+| PRDM2 | als | 0.964 | 0.495 | 6/13 | Brain_Cortex |
+| NUP50 | scz | 0.960 | 0.972 | 11/13 | Brain_Caudate_basal_ganglia |
+| UNC13A | als | 0.959 | 0.377 | 2/13 | Brain_Cerebellum |
+| DGKZ | scz | 0.953 | 0.858 | 9/13 | Brain_Frontal_Cortex_BA9 |
+| CDIP1 | scz | 0.951 | 0.848 | 6/13 | Brain_Caudate_basal_ganglia |
+| RASA1 | scz | 0.946 | 0.856 | 1/13 | Brain_Cerebellum |
 | PPIL2 | scz | 0.943 | 0.938 | 8/13 | Brain_Amygdala |
-| EDEM3 | scz | 0.926 | 0.996 | 1/13 | Brain_Cerebellum |
-| PPIP5K1 | scz | 0.926 | 0.761 | 2/13 | Brain_Cerebellar_Hemisphere |
-| SPI1 | ad | 0.926 | 0.881 | 1/13 | Brain_Cerebellar_Hemisphere |
 | PTPRN | als | 0.918 | 0.964 | 5/13 | Brain_Nucleus_accumbens_basal_ganglia |
-| GGNBP2 | als | 0.911 | 0.989 | 1/13 | Brain_Cerebellum |
+| GGNBP2 | als | 0.912 | 0.988 | 1/13 | Brain_Cerebellum |
+| NDUFAF7 | scz | 0.909 | 0.980 | 2/13 | Brain_Putamen_basal_ganglia |
+| FGFR1 | scz | 0.908 | 0.653 | 2/13 | Brain_Caudate_basal_ganglia |
 | SYT5 | scz | 0.904 | 0.911 | 1/13 | Brain_Frontal_Cortex_BA9 |
 | ZNF232 | ad | 0.899 | 0.750 | 1/13 | Brain_Spinal_cord_cervical_c-1 |
 | WIPI2 | als | 0.893 | 0.478 | 1/13 | Brain_Nucleus_accumbens_basal_ganglia |

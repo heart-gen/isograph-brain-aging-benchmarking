@@ -151,6 +151,22 @@ select_soft_power <- function(datExpr) {
     as.integer(power)
 }
 
+# The gene universe is the genes surviving the production transcript filter, written by
+# 02_module_discovery/_h/00a.production_gene_universe.sh. WGCNA must be fit on the same
+# universe IsoGraph models, or the two module sets are not comparable downstream (MAGMA
+# GSA, module trust, replication). Before 2026-09-15 this took the bundle's full gene
+# list, which is wider than IsoGraph's.
+read_gene_universe <- function(region_m_dir, label) {
+    p <- file.path(region_m_dir, "production_gene_universe.parquet")
+    if (!file.exists(p)) {
+        stop("missing gene universe for ", label, ": ", p,
+             "\n  run 02_module_discovery/_h/00a.production_gene_universe.sh first.")
+    }
+    u <- read_parquet(p)
+    if (nrow(u) == 0) stop("empty gene universe for ", label, ": ", p)
+    as.character(u$gene_id)
+}
+
 # ── Per-region runner ──────────────────────────────────────────────────────────
 run_gtex_wgcna <- function(region) {
     cat(sprintf("[%s] %s\n", format(Sys.time(), "%H:%M:%S"), region))
@@ -162,15 +178,14 @@ run_gtex_wgcna <- function(region) {
 
     # Load sample list from bundle to match IsoGraph exactly
     bundle_samples <- read_parquet(file.path(bundle_dir, "samples.parquet"))
-    bundle_genes <- read_parquet(file.path(bundle_dir, "genes.parquet"))
     keep_ids <- bundle_samples$sample_id
-    keep_gene_ids <- bundle_genes$gene_id
+    keep_gene_ids <- read_gene_universe(dirname(out_dir), sprintf("gtex/%s", region))
 
     # Load gene TPM
     gene_tpm <- read_parquet(file.path(proc_dir, "gene_tpm.parquet"))
     gene_ids_avail <- intersect(keep_gene_ids, gene_tpm$Name)
     if (length(gene_ids_avail) < MIN_MODULE_SIZE) {
-        warning(sprintf("  %s: only %d matching bundle-filtered genes; skipping.", region, length(gene_ids_avail)))
+        warning(sprintf("  %s: only %d genes from the production universe; skipping.", region, length(gene_ids_avail)))
         return(invisible(NULL))
     }
     gene_tpm <- gene_tpm[match(gene_ids_avail, gene_tpm$Name), ]
@@ -184,7 +199,7 @@ run_gtex_wgcna <- function(region) {
     expr_mat <- as.matrix(gene_tpm[, sample_cols])
     rownames(expr_mat) <- gene_ids
     expr_mat <- log2(expr_mat + 1)
-    cat(sprintf("  Bundle expression filter retained %d genes for WGCNA\n", nrow(expr_mat)))
+    cat(sprintf("  Production gene universe retained %d genes for WGCNA\n", nrow(expr_mat)))
 
     # Samples × genes for WGCNA
     datExpr <- t(expr_mat)

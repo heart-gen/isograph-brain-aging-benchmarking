@@ -48,8 +48,9 @@ the plan). The leading number of a wrapper is its tier; steps in one tier run in
 
 | Step | Wrapper | Waits on | Produces |
 |---|---|---|---|
+| 00a | `production_gene_universe` | bundles | `production_gene_universe.{parquet,json}` per region — the genes surviving the production transcript filter. The gene-level WGCNA baseline is fit in R and cannot call that filter, so it reads this |
 | 01a–01c | `run_isograph_{brainseq_aging,brainseq_sczd,gtex}` | bundles | IsoGraph fits: `modules`, `edges`, `traits`, `age_{linear,spline}`, `feature_scores`, `module_gene_roles`, `calibration`. The same wrappers with `--leiden-resolution 2.0` write `isograph_vae_res2`, the disclosed resolution comparison |
-| 01d–01f | `wgcna_gene_{brainseq_aging,brainseq_sczd,gtex}` | bundles | Classical gene-level WGCNA baseline |
+| 01d–01f | `wgcna_gene_{brainseq_aging,brainseq_sczd,gtex}` | 00a | Classical gene-level WGCNA baseline, on the 00a gene universe |
 | 01g–01i | `wgcna_matched_features_{brainseq,sczd,gtex}` | bundles | `wgcna_switch_only` + `wgcna_multiplex` baselines on **identical** features — the primary internal control |
 | 02a–02b | `sweep_leiden_{brainseq,gtex}` | 01a–01c | Resolution sweep (re-clusters saved edges, no refit); GTEx is a disclosed sensitivity — the CLI refuses `--write-best` for GTEx |
 | 02c | `module_sizes` | 01a–01i | Module-size tables for every method in every store (`_m/module_sizes/`) |
@@ -63,6 +64,13 @@ unreferenced `aging_models.R`.
 Three WGCNA baselines exist on purpose: `wgcna_gene` (classical abundance),
 `wgcna_switch_only` and `wgcna_multiplex` hold the switch features fixed and vary only
 the network inference, which is what isolates a method effect from a feature effect.
+
+All three are fit on the same gene universe as IsoGraph. The matched baselines get it for
+free — `run_matched_wgcna` applies `filter_production_transcripts` itself. `wgcna_gene` is
+fit in R, so it reads the universe 00a writes; before 2026-09-15 it took the bundle's full
+gene list instead, which is wider (BrainSEQ caudate 20,365 vs 19,309) and made every
+IsoGraph-vs-WGCNA head-to-head — MAGMA GSA, module trust, replication — compare module sets
+drawn from different gene pools. A missing universe file stops the fit; it never falls back.
 
 ## Granularity: resolution and edge thresholds
 

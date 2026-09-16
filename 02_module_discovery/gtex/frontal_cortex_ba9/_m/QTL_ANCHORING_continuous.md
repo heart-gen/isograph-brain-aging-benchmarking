@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 6830 | 0.2151 | 0.2145 | 0.96 | 0.93 | 0.99 | 1.40e-02 | ols_rankint_matched_standard |
-| sQTL | pheno_sig_modules | 5822 | 0.2133 | 0.2159 | 0.95 | 0.92 | 0.99 | 5.92e-03 | ols_rankint_matched_standard |
-| sQTL | go_invisible_modules | 2615 | 0.2528 | 0.2058 | 1.03 | 0.99 | 1.08 | 1.36e-01 | ols_rankint_matched_standard |
-| sQTL | go_visible_modules | 3207 | 0.1812 | 0.2251 | 0.91 | 0.88 | 0.95 | 4.73e-06 | ols_rankint_matched_standard |
-| eQTL | all_modules | 8211 | 0.5007 | 0.5542 | 0.84 | 0.82 | 0.86 | 9.48e-32 | ols_rankint_matched_standard |
-| eQTL | pheno_sig_modules | 6983 | 0.5019 | 0.5475 | 0.86 | 0.84 | 0.89 | 2.79e-22 | ols_rankint_matched_standard |
-| eQTL | go_invisible_modules | 3138 | 0.5376 | 0.5285 | 1.0 | 0.96 | 1.04 | 9.57e-01 | ols_rankint_matched_standard |
-| eQTL | go_visible_modules | 3845 | 0.4728 | 0.5454 | 0.81 | 0.78 | 0.84 | 6.72e-31 | ols_rankint_matched_standard |
+| sQTL | all_modules | 5845 | 0.2087 | 0.2195 | 0.93 | 0.9 | 0.96 | 2.42e-05 | ols_rankint_matched_standard |
+| sQTL | pheno_sig_modules | 4257 | 0.1976 | 0.2227 | 0.93 | 0.89 | 0.96 | 1.87e-05 | ols_rankint_matched_standard |
+| sQTL | go_invisible_modules | 1801 | 0.2099 | 0.2156 | 0.94 | 0.9 | 0.99 | 1.19e-02 | ols_rankint_matched_standard |
+| sQTL | go_visible_modules | 2456 | 0.1885 | 0.2207 | 0.94 | 0.9 | 0.98 | 3.52e-03 | ols_rankint_matched_standard |
+| eQTL | all_modules | 6846 | 0.4963 | 0.551 | 0.88 | 0.85 | 0.9 | 1.51e-17 | ols_rankint_matched_standard |
+| eQTL | pheno_sig_modules | 5056 | 0.4941 | 0.5443 | 0.89 | 0.86 | 0.92 | 5.12e-12 | ols_rankint_matched_standard |
+| eQTL | go_invisible_modules | 1985 | 0.4922 | 0.5349 | 0.91 | 0.86 | 0.95 | 3.28e-05 | ols_rankint_matched_standard |
+| eQTL | go_visible_modules | 3071 | 0.4953 | 0.5374 | 0.91 | 0.87 | 0.95 | 1.79e-06 | ols_rankint_matched_standard |
 
 ## Reading
 

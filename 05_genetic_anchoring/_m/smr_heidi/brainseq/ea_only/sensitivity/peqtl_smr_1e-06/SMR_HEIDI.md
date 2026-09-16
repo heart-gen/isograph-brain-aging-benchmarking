@@ -16,16 +16,16 @@ Two families, corrected apart. The **primary confirmatory family** holds one pre
 
 | analysis | modality | family | probes | instrumented | threshold | F median [min-max] | F p5 | `no_instrument` | `instrumented_tested_null` | `smr_signal_heidi_unavailable` | `smr_signal_heidi_rejects` | `smr_heidi_supported` |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| aging__ad | A_g | primary | 30 | 8 | 0.006 | 45 [24-91] | 24 | 22 | 4 | 0 | 1 | 3 |
-| aging__ad | S_g | primary | 26 | 2 | 0.025 | 41 [33-49] | 34 | 24 | 1 | 0 | 0 | 1 |
-| aging__als | A_g | primary | 27 | 10 | 0.005 | 58 [26-108] | 26 | 17 | 4 | 0 | 0 | 6 |
-| aging__als | S_g | primary | 27 | 3 | 0.017 | 27 [27-33] | 27 | 24 | 1 | 0 | 0 | 2 |
-| aging__lbd | A_g | primary | 3 | 0 | — | — | — | 3 | 0 | 0 | 0 | 0 |
-| aging__lbd | S_g | primary | 3 | 0 | — | — | — | 3 | 0 | 0 | 0 | 0 |
-| aging__pd | A_g | primary | 18 | 5 | 0.010 | 43 [29-47] | 31 | 13 | 2 | 0 | 0 | 3 |
-| aging__pd | S_g | primary | 15 | 0 | — | — | — | 15 | 0 | 0 | 0 | 0 |
-| aging__scz | A_g | primary | 60 | 20 | 0.003 | 38 [24-596] | 25 | 40 | 7 | 0 | 5 | 8 |
-| aging__scz | S_g | primary | 59 | 4 | 0.013 | 39 [28-125] | 29 | 55 | 3 | 0 | 0 | 1 |
+| aging__ad | A_g | primary | 12 | 5 | 0.010 | 48 [41-91] | 41 | 7 | 2 | 0 | 1 | 2 |
+| aging__ad | S_g | primary | 10 | 0 | — | — | — | 10 | 0 | 0 | 0 | 0 |
+| aging__als | A_g | primary | 18 | 5 | 0.010 | 37 [26-103] | 28 | 13 | 2 | 0 | 0 | 3 |
+| aging__als | S_g | primary | 10 | 1 | 0.050 | 35 [35-35] | 35 | 9 | 0 | 0 | 0 | 1 |
+| aging__pd | A_g | primary | 18 | 10 | 0.005 | 42 [27-117] | 29 | 8 | 2 | 0 | 1 | 7 |
+| aging__pd | S_g | primary | 15 | 2 | 0.025 | 28 [25-31] | 26 | 13 | 0 | 0 | 0 | 2 |
+| aging__scz | A_g | primary | 75 | 25 | 0.002 | 35 [25-77] | 26 | 50 | 12 | 0 | 1 | 12 |
+| aging__scz | S_g | primary | 59 | 5 | 0.010 | 29 [25-67] | 25 | 54 | 2 | 0 | 0 | 3 |
+| brainseq-sczd__scz | A_g | primary | 12 | 2 | 0.025 | 80 [52-108] | 55 | 10 | 1 | 0 | 0 | 1 |
+| brainseq-sczd__scz | S_g | primary | 10 | 4 | 0.013 | 27 [25-35] | 25 | 6 | 1 | 0 | 0 | 3 |
 
 **`no_instrument` is not a negative result** — the probe was never tested, because no cis-QTL reached the instrument threshold. It is the largest cell in every arm here and must never be read as evidence against a locus.
 
@@ -33,16 +33,16 @@ Two families, corrected apart. The **primary confirmatory family** holds one pre
 
 | analysis | modality | probes | instrumented | threshold | `coloc_and_smr_heidi_not_rejected` | `coloc_and_smr_heidi_rejected` | `coloc_and_smr_heidi_untestable` | `coloc_smr_not_significant` | `coloc_no_instrument` | `smr_without_coloc` | `smr_coloc_not_scored` | `neither_tested_null` | `neither_no_instrument` |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| aging__ad | A_g | 30 | 8 | 0.006 | 3 | 0 | 0 | 0 | 1 | 1 | 0 | 4 | 21 |
-| aging__ad | S_g | 26 | 2 | 0.025 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 24 |
-| aging__als | A_g | 27 | 10 | 0.005 | 5 | 0 | 0 | 0 | 2 | 1 | 0 | 4 | 15 |
-| aging__als | S_g | 27 | 3 | 0.017 | 0 | 0 | 0 | 0 | 0 | 2 | 0 | 1 | 24 |
-| aging__lbd | A_g | 3 | 0 | — | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 2 |
-| aging__lbd | S_g | 3 | 0 | — | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 3 |
-| aging__pd | A_g | 18 | 5 | 0.010 | 2 | 0 | 0 | 0 | 0 | 1 | 0 | 2 | 13 |
-| aging__pd | S_g | 15 | 0 | — | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 15 |
-| aging__scz | A_g | 60 | 20 | 0.003 | 2 | 0 | 0 | 1 | 0 | 11 | 0 | 6 | 40 |
-| aging__scz | S_g | 59 | 4 | 0.013 | 0 | 0 | 0 | 1 | 3 | 1 | 0 | 2 | 52 |
+| aging__ad | A_g | 12 | 5 | 0.010 | 2 | 0 | 0 | 0 | 1 | 1 | 0 | 2 | 6 |
+| aging__ad | S_g | 10 | 0 | — | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 10 |
+| aging__als | A_g | 18 | 5 | 0.010 | 2 | 0 | 0 | 0 | 1 | 1 | 0 | 2 | 12 |
+| aging__als | S_g | 10 | 1 | 0.050 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 9 |
+| aging__pd | A_g | 18 | 10 | 0.005 | 4 | 1 | 0 | 0 | 0 | 3 | 0 | 2 | 8 |
+| aging__pd | S_g | 15 | 2 | 0.025 | 1 | 0 | 0 | 0 | 0 | 1 | 0 | 0 | 13 |
+| aging__scz | A_g | 75 | 25 | 0.002 | 4 | 0 | 0 | 1 | 2 | 9 | 0 | 11 | 48 |
+| aging__scz | S_g | 59 | 5 | 0.010 | 2 | 0 | 0 | 1 | 1 | 1 | 0 | 1 | 53 |
+| brainseq-sczd__scz | A_g | 12 | 2 | 0.025 | 0 | 0 | 0 | 0 | 2 | 1 | 0 | 1 | 8 |
+| brainseq-sczd__scz | S_g | 10 | 4 | 0.013 | 2 | 0 | 0 | 0 | 0 | 1 | 0 | 1 | 6 |
 
 ## SNP attrition into HEIDI
 
@@ -52,13 +52,13 @@ HEIDI is computed on the SNPs shared by the BESD, the LD reference and the GWAS,
 
 | step | median across runs |
 |---|---|
-| BESD SNPs in the probe's cis window | 10,046 |
+| BESD SNPs in the probe's cis window | 9,542 |
 | ... found in the LD panel by rsID | 100.0% |
 | ... with matching alleles | 100.0% |
-| ... also carried by the GWAS | 4,595 |
+| ... also carried by the GWAS | 4,223 |
 | dropped by SMR beyond that (frequency check, duplicates) | 0 |
 
-Genuine harmonization loss — SNPs present in all three and still dropped — peaks at **4** SNPs in any run. The identifier and allele steps are the QC ones, and both sit at 100%.
+Genuine harmonization loss — SNPs present in all three and still dropped — peaks at **6** SNPs in any run. The identifier and allele steps are the QC ones, and both sit at 100%.
 
 **Do not compare BESD-SNP retention across QTL sources.** Its denominator is imputation density: BrainSEQ's TOPMed cis windows carry several times the SNPs of GTEx's pre-filtered all-pairs, so BrainSEQ retains a far smaller *fraction* of a far larger set against the same GWAS loci. The ratio measures panel density, not quality.
 
@@ -68,110 +68,113 @@ Per GTEx signal-level nomination, the `S_g` agreement class in each region (`*` 
 
 | gene | trait | caudate | dlpfc | hippocampus |
 |---|---|---|---|---|
-| ASB3 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| AZI2 | pd | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| ACTR1B | scz | — | — | `coloc_and_smr_heidi_not_rejected`* |
 | CDIP1 | scz | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument`* |
 | COPA | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| CTSH | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument`* |
-| DOC2A | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| DOC2A | scz | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
-| FAM221A | scz | `smr_without_coloc` | `neither_no_instrument` | `neither_no_instrument` |
-| G2E3 | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| GABBR2 | scz | `neither_no_instrument` | `neither_no_instrument` | — |
-| GGNBP2 | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| GPM6A | scz | `neither_no_instrument`* | `neither_tested_null` | `neither_no_instrument` |
-| HMOX2 | scz | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument` |
-| KLC1 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| CTSB | pd | `neither_no_instrument` | `smr_without_coloc` | `neither_no_instrument` |
+| DDRGK1 | pd | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| DGKZ | scz | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
+| FGFR1 | scz | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument` |
+| GABBR2 | scz | `neither_no_instrument` | — | — |
+| GLYCTK | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| IRF3 | scz | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
+| KLC1 | scz | `neither_no_instrument` | `neither_no_instrument` | `smr_without_coloc` |
+| LPCAT4 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| MED19 | scz | — | — | `neither_no_instrument`* |
+| MRPS33 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
 | NCOR1 | pd | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| NDUFAF7 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
 | NDUFS3 | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
 | NEK4 | scz | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument` |
-| NT5C2 | scz | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument` |
-| PGS1 | als | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
-| PICALM | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| PITPNM2 | pd | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| PLCB2 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| PPIL2 | scz | `coloc_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument` |
-| PPIP5K1 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| NUP50 | scz | — | — | `neither_no_instrument`* |
+| POLG | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| PPIL2 | scz | `coloc_smr_not_significant`* | `neither_no_instrument`* | `neither_no_instrument` |
+| PRDM2 | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument`* |
+| PSMD6 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument`* |
 | PTPRN | als | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument` |
-| RNASEH2C | scz | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument` |
-| SCFD1 | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| SIRPA | ad | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
-| SNCA | lbd | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument`* |
-| SNCA | pd | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument`* |
-| SPAG9 | ad | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument`* |
-| SYT5 | scz | `neither_no_instrument` | `neither_no_instrument`* | `neither_no_instrument` |
-| TMED4 | scz | `neither_no_instrument`* | `neither_no_instrument`* | `neither_no_instrument`* |
+| RASA1 | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| RERE | scz | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
+| SIRPA | ad | `neither_no_instrument`* | — | — |
+| SNAP91 | scz | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument` |
+| SYT5 | scz | `neither_no_instrument` | `neither_no_instrument`* | `neither_tested_null` |
+| TAOK2 | scz | `neither_no_instrument` | `neither_tested_null` | `neither_no_instrument` |
 | TPCN1 | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| TPP1 | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
 | TTC19 | pd | `neither_no_instrument`* | `neither_no_instrument` | `neither_no_instrument` |
-| TXNDC15 | als | `neither_no_instrument`* | `smr_without_coloc` | `smr_without_coloc` |
-| UNC13A | als | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
-| WIPI2 | als | `neither_tested_null` | `neither_no_instrument` | `neither_no_instrument` |
-| ZNF232 | ad | `neither_no_instrument` | `neither_no_instrument` | — |
+| TXNDC15 | als | — | — | `neither_no_instrument` |
+| WIPI2 | als | `smr_without_coloc` | `neither_no_instrument` | `neither_no_instrument` |
+| YWHAB | scz | `coloc_and_smr_heidi_not_rejected`* | — | — |
+| ZNF232 | ad | `neither_no_instrument` | `neither_no_instrument` | `neither_no_instrument` |
 
 ## Primary probes
 
 | gene | trait | region | axis | coloc PP4 | b_SMR (se) | p_SMR | p_HEIDI (nsnp) | pin | agreement |
 |---|---|---|---|---|---|---|---|---|---|
-| CTSH | ad | caudate | A_g | 0.990 (abf) | 0.123 (0.032) | 9.3e-05 | 0.089 (7) |  | `coloc_and_smr_heidi_not_rejected` |
-| DOC2A | ad | hippocampus | A_g | 0.164 (susie) | 0.034 (0.061) | 0.580 | 0.010 (4) |  | `neither_tested_null` |
-| NDUFS3 | ad | caudate | A_g | 0.000144 (susie) | -0.197 (0.054) | 0.000225 | 1.22e-05 (20) |  | `smr_without_coloc` |
+| NDUFS3 | ad | caudate | A_g | 7.03e-05 (susie) | -0.197 (0.054) | 0.000225 | 1.22e-05 (20) |  | `smr_without_coloc` |
 | SIRPA | ad | caudate | A_g | 0.960 (abf) | 0.104 (0.025) | 4.02e-05 | 0.878 (10) |  | `coloc_and_smr_heidi_not_rejected` |
 | SIRPA | ad | dlpfc | A_g | 0.961 (abf) | 0.166 (0.044) | 0.000143 | 0.835 (10) |  | `coloc_and_smr_heidi_not_rejected` |
 | SIRPA | ad | hippocampus | A_g | 0.946 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
-| TMEM106B | ad | caudate | A_g | 0.010 (abf) | 0.113 (0.073) | 0.124 | 0.438 (20) |  | `neither_tested_null` |
-| TMEM106B | ad | caudate | S_g | 0.741 (susie) | -0.029 (0.018) | 0.107 | 0.012 (20) | pinned | `neither_tested_null` |
-| TMEM106B | ad | dlpfc | S_g | 0.923 (susie) | 0.068 (0.017) | 4.9e-05 | 0.172 (20) | pinned | `coloc_and_smr_heidi_not_rejected` |
 | ZNF232 | ad | caudate | A_g | 0.046 (abf) | -0.045 (0.018) | 0.014 | 0.275 (6) |  | `neither_tested_null` |
 | ZNF232 | ad | hippocampus | A_g | 1.71e-08 (abf) | -0.021 (0.015) | 0.153 | 0.238 (13) |  | `neither_tested_null` |
-| G2E3 | als | dlpfc | A_g | 0.822 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
 | GGNBP2 | als | caudate | A_g | 0.947 (susie) | 0.252 (0.064) | 8.04e-05 | 0.559 (8) |  | `coloc_and_smr_heidi_not_rejected` |
 | GGNBP2 | als | hippocampus | A_g | 0.829 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
-| PGS1 | als | caudate | A_g | 0.006 (abf) | 0.054 (0.048) | 0.265 | 0.355 (18) |  | `neither_tested_null` |
-| PGS1 | als | dlpfc | A_g | 0.026 (abf) | -0.060 (0.028) | 0.030 | 0.002 (15) |  | `neither_tested_null` |
-| PGS1 | als | hippocampus | A_g | 0.087 (abf) | -0.125 (0.061) | 0.039 | 0.002 (16) |  | `neither_tested_null` |
-| PTPRN | als | caudate | A_g | 0.812 (susie) | -0.156 (0.036) | 1.69e-05 | 0.247 (20) |  | `coloc_and_smr_heidi_not_rejected` |
+| PRDM2 | als | dlpfc | A_g | 0.003 (abf) | -0.006 (0.065) | 0.932 | 0.353 (17) |  | `neither_tested_null` |
+| PTPRN | als | caudate | A_g | 0.834 (susie) | -0.156 (0.036) | 1.69e-05 | 0.247 (20) |  | `coloc_and_smr_heidi_not_rejected` |
 | PTPRN | als | dlpfc | A_g | 0.029 (abf) | -0.013 (0.075) | 0.865 | 0.052 (7) |  | `neither_tested_null` |
-| SCFD1 | als | caudate | A_g | 0.946 (susie) | 0.349 (0.070) | 6.96e-07 | 0.296 (20) |  | `coloc_and_smr_heidi_not_rejected` |
-| SCFD1 | als | dlpfc | A_g | 0.936 (susie) | 0.197 (0.032) | 6.89e-10 | 0.444 (20) |  | `coloc_and_smr_heidi_not_rejected` |
-| SCFD1 | als | hippocampus | A_g | 0.931 (susie) | 0.422 (0.079) | 8.61e-08 | 0.089 (20) |  | `coloc_and_smr_heidi_not_rejected` |
-| TXNDC15 | als | dlpfc | S_g | 0.772 (abf) | 0.086 (0.029) | 0.003 | 0.164 (5) | pinned | `smr_without_coloc` |
 | TXNDC15 | als | hippocampus | A_g | 0.317 (abf) | -0.177 (0.057) | 0.002 | 0.189 (20) |  | `smr_without_coloc` |
-| TXNDC15 | als | hippocampus | S_g | 0.662 (abf) | -0.095 (0.033) | 0.004 | 0.224 (7) | pinned, axis unstable | `smr_without_coloc` |
-| WIPI2 | als | caudate | S_g | 0.019 (abf) | -0.017 (0.050) | 0.737 | 0.002 (20) | pinned | `neither_tested_null` |
-| SNCA | lbd | caudate | A_g | 0.857 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
-| AZI2 | pd | dlpfc | A_g | 0.017 (abf) | -0.043 (0.101) | 0.671 | 0.200 (18) |  | `neither_tested_null` |
+| WIPI2 | als | caudate | S_g | 0.088 (abf) | -0.090 (0.031) | 0.004 | 0.016 (20) | pinned | `smr_without_coloc` |
+| CTSB | pd | caudate | A_g | 0.891 (susie) | -0.161 (0.043) | 0.000165 | 0.000167 (20) |  | `coloc_and_smr_heidi_rejected` |
+| CTSB | pd | dlpfc | A_g | 0.870 (susie) | -0.190 (0.055) | 0.000499 | 0.017 (20) |  | `coloc_and_smr_heidi_not_rejected` |
+| CTSB | pd | dlpfc | S_g | 0.218 (abf) | 0.104 (0.038) | 0.006 | 0.079 (20) | pinned | `smr_without_coloc` |
+| CTSB | pd | hippocampus | A_g | 0.672 (susie) | -0.281 (0.089) | 0.002 | 0.312 (20) |  | `smr_without_coloc` |
+| DDRGK1 | pd | caudate | A_g | 0.081 (abf) | -0.044 (0.072) | 0.543 | 0.020 (20) |  | `neither_tested_null` |
+| DDRGK1 | pd | dlpfc | A_g | 0.985 (abf) | 0.315 (0.083) | 0.000148 | 0.045 (20) |  | `coloc_and_smr_heidi_not_rejected` |
 | NCOR1 | pd | caudate | A_g | 0.891 (susie) | 0.444 (0.104) | 2.14e-05 | 0.058 (20) |  | `coloc_and_smr_heidi_not_rejected` |
 | SH3GL2 | pd | caudate | A_g | 0.001 (abf) | 0.169 (0.091) | 0.064 | 0.359 (20) |  | `neither_tested_null` |
 | SH3GL2 | pd | dlpfc | A_g | 0.964 (abf) | 0.198 (0.065) | 0.002 | 0.171 (20) |  | `coloc_and_smr_heidi_not_rejected` |
+| STX4 | pd | caudate | A_g | 0.120 (susie) | 0.409 (0.112) | 0.00025 | 0.050 (20) |  | `smr_without_coloc` |
+| STX4 | pd | caudate | S_g | 0.942 (susie) | 0.384 (0.099) | 0.000112 | 0.502 (12) | pinned | `coloc_and_smr_heidi_not_rejected` |
 | TTC19 | pd | caudate | A_g | 0.737 (susie) | -0.326 (0.081) | 5.9e-05 | 0.222 (18) |  | `smr_without_coloc` |
+| ACTR1B | scz | caudate | A_g | 4.57e-05 (abf) | 0.024 (0.037) | 0.511 | 0.388 (15) |  | `neither_tested_null` |
+| ACTR1B | scz | caudate | A_g | 4.57e-05 (abf) | 0.024 (0.037) | 0.511 | 0.388 (15) |  | `neither_tested_null` |
+| ACTR1B | scz | dlpfc | A_g | 0.902 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
+| ACTR1B | scz | dlpfc | A_g | 0.902 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
+| ACTR1B | scz | hippocampus | S_g | 0.858 (abf) | 0.105 (0.030) | 0.000444 | 0.903 (7) | pinned | `coloc_and_smr_heidi_not_rejected` |
+| ACTR1B | scz | hippocampus | S_g | 0.858 (abf) | 0.105 (0.030) | 0.000444 | 0.903 (7) | pinned | `coloc_and_smr_heidi_not_rejected` |
+| ARL14EP | scz | caudate | S_g | 0.834 (abf) | -0.101 (0.031) | 0.001 | 0.090 (20) | pinned | `coloc_and_smr_heidi_not_rejected` |
+| ARL14EP | scz | dlpfc | A_g | 0.794 (abf) | 0.093 (0.025) | 0.000183 | 0.198 (20) |  | `smr_without_coloc` |
+| ARL14EP | scz | dlpfc | S_g | 0.788 (abf) | -0.081 (0.025) | 0.002 | 0.103 (7) | pinned | `smr_without_coloc` |
 | COPA | scz | caudate | A_g | 0.200 (abf) | -0.104 (0.039) | 0.007 | 0.052 (18) |  | `neither_tested_null` |
 | COPA | scz | dlpfc | A_g | 0.199 (abf) | -0.076 (0.025) | 0.002 | 0.037 (20) |  | `smr_without_coloc` |
 | COPA | scz | hippocampus | A_g | 0.243 (abf) | -0.143 (0.058) | 0.014 | 0.062 (20) |  | `neither_tested_null` |
-| DOC2A | scz | hippocampus | A_g | 0.051 (susie) | 0.173 (0.076) | 0.023 | 0.107 (4) |  | `neither_tested_null` |
-| FAM221A | scz | caudate | A_g | 0.010 (susie) | 0.029 (0.009) | 0.001 | 0.010 (20) |  | `smr_without_coloc` |
-| FAM221A | scz | caudate | S_g | 0.722 (susie) | -0.053 (0.012) | 1.69e-05 | 0.094 (20) | pinned | `smr_without_coloc` |
-| FAM221A | scz | dlpfc | A_g | 0.009 (susie) | 0.042 (0.014) | 0.002 | 0.003 (20) |  | `smr_without_coloc` |
-| FAM221A | scz | hippocampus | A_g | 0.010 (susie) | 0.048 (0.016) | 0.002 | 0.027 (20) |  | `smr_without_coloc` |
-| GPM6A | scz | dlpfc | S_g | 0.000606 (susie) | 0.022 (0.017) | 0.194 | 0.108 (20) | pinned | `neither_tested_null` |
-| KLC1 | scz | caudate | A_g | 1.13e-06 (susie) | -0.112 (0.036) | 0.002 | 6.32e-05 (20) |  | `smr_without_coloc` |
-| KLC1 | scz | dlpfc | A_g | 0.003 (susie) | -0.086 (0.028) | 0.002 | 0.009 (20) |  | `smr_without_coloc` |
+| KLC1 | scz | caudate | A_g | 8.14e-08 (susie) | -0.112 (0.036) | 0.002 | 6.32e-05 (20) |  | `smr_without_coloc` |
+| KLC1 | scz | dlpfc | A_g | 0.003 (susie) | -0.086 (0.028) | 0.002 | 0.009 (20) |  | `neither_tested_null` |
 | KLC1 | scz | hippocampus | A_g | 0.001 (susie) | -0.141 (0.049) | 0.004 | 0.092 (16) |  | `neither_tested_null` |
+| KLC1 | scz | hippocampus | S_g | 0.721 (susie) | 0.187 (0.043) | 1.27e-05 | 0.152 (20) | pinned | `smr_without_coloc` |
+| LPCAT4 | scz | caudate | A_g | 0.002 (susie) | -0.005 (0.039) | 0.899 | 0.272 (6) |  | `neither_tested_null` |
+| NDUFAF7 | scz | caudate | A_g | 0.948 (susie) | -0.101 (0.047) | 0.032 | 0.008 (20) |  | `coloc_smr_not_significant` |
 | NEK4 | scz | caudate | A_g | 0.003 (abf) | 0.198 (0.042) | 2.36e-06 | 0.028 (20) |  | `smr_without_coloc` |
 | NEK4 | scz | dlpfc | A_g | 0.368 (abf) | 0.142 (0.030) | 2.36e-06 | 0.030 (20) |  | `smr_without_coloc` |
 | NEK4 | scz | hippocampus | A_g | 0.076 (abf) | 0.244 (0.053) | 4.58e-06 | 0.098 (20) |  | `smr_without_coloc` |
-| NGEF | scz | caudate | S_g | 0.886 (abf) | — (—) | — | — (—) | pinned | `coloc_no_instrument` |
-| NSF | scz | caudate | S_g | 0.094 (abf) | 0.033 (0.026) | 0.211 | 0.033 (12) | pinned | `neither_tested_null` |
-| NSF | scz | dlpfc | S_g | 0.804 (abf) | 0.033 (0.019) | 0.088 | 0.008 (16) | pinned | `coloc_smr_not_significant` |
-| NT5C2 | scz | dlpfc | A_g | 0.845 (susie) | 0.027 (0.029) | 0.352 | 0.004 (20) |  | `coloc_smr_not_significant` |
-| NT5C2 | scz | hippocampus | A_g | 0.530 (abf) | -0.203 (0.066) | 0.002 | 0.001 (20) |  | `smr_without_coloc` |
-| PPIL2 | scz | caudate | S_g | 0.811 (abf) | — (—) | — | — (—) | pinned | `coloc_no_instrument` |
-| RNASEH2C | scz | caudate | A_g | 0.981 (susie) | -0.170 (0.046) | 0.000213 | 0.597 (12) |  | `coloc_and_smr_heidi_not_rejected` |
-| RNASEH2C | scz | dlpfc | A_g | 0.983 (susie) | -0.145 (0.038) | 0.000162 | 0.569 (20) |  | `coloc_and_smr_heidi_not_rejected` |
+| NUP50 | scz | caudate | A_g | 0.687 (abf) | -0.138 (0.040) | 0.00052 | 0.441 (20) |  | `smr_without_coloc` |
+| NUP50 | scz | dlpfc | A_g | 0.768 (abf) | -0.119 (0.038) | 0.001 | 0.446 (12) |  | `smr_without_coloc` |
+| POLG | scz | caudate | A_g | 0.146 (abf) | -0.110 (0.039) | 0.005 | 0.051 (18) |  | `neither_tested_null` |
+| POLG | scz | dlpfc | A_g | 0.081 (abf) | -0.094 (0.029) | 0.001 | 0.109 (20) |  | `smr_without_coloc` |
+| PPIL2 | scz | caudate | S_g | 0.858 (abf) | 0.033 (0.021) | 0.116 | 0.072 (20) | pinned | `coloc_smr_not_significant` |
+| PSMD6 | scz | caudate | A_g | 0.611 (susie) | -0.094 (0.038) | 0.013 | 0.002 (20) |  | `neither_tested_null` |
+| SNAP91 | scz | caudate | A_g | 0.963 (susie) | 0.307 (0.076) | 5.75e-05 | 0.119 (10) |  | `coloc_and_smr_heidi_not_rejected` |
+| SNAP91 | scz | dlpfc | A_g | 0.966 (susie) | 0.247 (0.063) | 7.71e-05 | 0.198 (15) |  | `coloc_and_smr_heidi_not_rejected` |
+| SNAP91 | scz | hippocampus | A_g | 0.959 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
 | SYT5 | scz | dlpfc | A_g | 0.004 (abf) | 0.009 (0.038) | 0.811 | 0.003 (9) |  | `neither_tested_null` |
-| TMED4 | scz | caudate | A_g | 0.356 (susie) | -0.139 (0.048) | 0.004 | 0.100 (11) |  | `neither_tested_null` |
-| TMED4 | scz | dlpfc | A_g | 0.190 (susie) | -0.108 (0.035) | 0.002 | 0.109 (20) |  | `smr_without_coloc` |
-| ZNF592 | scz | hippocampus | S_g | 0.839 (abf) | — (—) | — | — (—) | pinned | `coloc_no_instrument` |
+| SYT5 | scz | hippocampus | S_g | 0.020 (abf) | 0.035 (0.027) | 0.193 | 0.275 (5) | pinned | `neither_tested_null` |
+| TAOK2 | scz | caudate | A_g | 0.933 (abf) | — (—) | — | — (—) |  | `coloc_no_instrument` |
+| TAOK2 | scz | dlpfc | S_g | 0.005 (susie) | 0.021 (0.028) | 0.455 | 0.119 (9) | pinned | `neither_tested_null` |
+| YPEL1 | scz | dlpfc | A_g | 0.601 (abf) | -0.078 (0.024) | 0.000892 | 0.925 (20) |  | `smr_without_coloc` |
+| YPEL1 | scz | hippocampus | A_g | 0.619 (abf) | -0.147 (0.049) | 0.003 | 0.498 (15) |  | `neither_tested_null` |
+| YWHAB | scz | caudate | A_g | 0.845 (abf) | 0.231 (0.068) | 0.000633 | 0.074 (11) |  | `coloc_and_smr_heidi_not_rejected` |
+| YWHAB | scz | caudate | S_g | 0.837 (abf) | 0.061 (0.016) | 0.000164 | 0.265 (20) | pinned | `coloc_and_smr_heidi_not_rejected` |
+| YWHAB | scz | dlpfc | A_g | 0.856 (abf) | 0.130 (0.037) | 0.000473 | 0.136 (7) |  | `coloc_and_smr_heidi_not_rejected` |
+| YWHAB | scz | hippocampus | A_g | 0.660 (abf) | -0.002 (0.063) | 0.979 | — (—) |  | `neither_tested_null` |
+| ZNF592 | scz | hippocampus | S_g | 0.888 (abf) | — (—) | — | — (—) | pinned | `coloc_no_instrument` |
 
 Probes with neither an SMR instrument nor a coloc call are in `smr_results.parquet` and not listed here.
 

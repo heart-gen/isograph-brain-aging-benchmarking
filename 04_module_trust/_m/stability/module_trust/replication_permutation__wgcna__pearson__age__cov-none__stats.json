@@ -3,21 +3,21 @@
   "statistic": "pearson",
   "null": "age",
   "covariates": "none",
-  "n_matched_rows": 53,
+  "n_matched_rows": 52,
   "min_jaccard": 0.0,
-  "T_obs": 3,
+  "T_obs": 2,
   "per_pair_obs": {
     "caudate": 0,
     "hippocampus": 0,
-    "dlpfc_ba9": 3
+    "dlpfc_ba9": 2
   },
   "B": 10000,
   "seed": 13,
   "sig": 0.05,
-  "p_emp": 0.11678832116788321,
-  "null_mean": 0.6819,
-  "null_sd": 1.5296883292483028,
-  "z": 1.5154067372267443,
-  "null_max": 15,
+  "p_emp": 0.15428457154284572,
+  "null_mean": 0.5832,
+  "null_sd": 1.3194134474017303,
+  "z": 1.0738104896460234,
+  "null_max": 11,
   "null_q95": 4.0
 }

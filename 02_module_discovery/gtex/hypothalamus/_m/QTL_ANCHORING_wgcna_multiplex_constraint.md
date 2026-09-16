@@ -10,22 +10,18 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 11347 | 0.1671 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 448 | 0.1585 | 0.1674 | 0.96 | 0.73 | 1.26 | 7.83e-01 | logit_matched_standard |
-| sQTL | go_invisible_modules | 137 | 0.2336 | 0.1663 | 1.19 | 0.78 | 1.81 | 4.28e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 311 | 0.1254 | 0.1683 | 0.84 | 0.59 | 1.2 | 3.41e-01 | logit_matched_standard |
-| sQTL | all_modules | 11347 | 0.1671 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 448 | 0.1585 | 0.1674 | 1.08 | 0.81 | 1.42 | 6.08e-01 | logit_matched_constraint |
-| sQTL | go_invisible_modules | 137 | 0.2336 | 0.1663 | 1.21 | 0.79 | 1.85 | 3.88e-01 | logit_matched_constraint |
-| sQTL | go_visible_modules | 311 | 0.1254 | 0.1683 | 0.99 | 0.69 | 1.43 | 9.62e-01 | logit_matched_constraint |
-| eQTL | all_modules | 13358 | 0.359 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 604 | 0.3162 | 0.361 | 0.76 | 0.64 | 0.91 | 2.38e-03 | logit_matched_standard |
-| eQTL | go_invisible_modules | 141 | 0.3262 | 0.3593 | 0.76 | 0.53 | 1.08 | 1.23e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 463 | 0.3132 | 0.3606 | 0.77 | 0.63 | 0.94 | 9.63e-03 | logit_matched_standard |
-| eQTL | all_modules | 13358 | 0.359 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 604 | 0.3162 | 0.361 | 0.72 | 0.6 | 0.86 | 3.94e-04 | logit_matched_constraint |
-| eQTL | go_invisible_modules | 141 | 0.3262 | 0.3593 | 0.82 | 0.57 | 1.19 | 2.97e-01 | logit_matched_constraint |
-| eQTL | go_visible_modules | 463 | 0.3132 | 0.3606 | 0.69 | 0.56 | 0.85 | 5.39e-04 | logit_matched_constraint |
+| sQTL | all_modules | 11252 | 0.1668 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | pheno_sig_modules | 691 | 0.165 | 0.1669 | 0.92 | 0.74 | 1.14 | 4.59e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 691 | 0.165 | 0.1669 | 0.92 | 0.74 | 1.14 | 4.59e-01 | logit_matched_standard |
+| sQTL | all_modules | 11252 | 0.1668 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | pheno_sig_modules | 691 | 0.165 | 0.1669 | 1.0 | 0.8 | 1.25 | 9.95e-01 | logit_matched_constraint |
+| sQTL | go_visible_modules | 691 | 0.165 | 0.1669 | 1.0 | 0.8 | 1.25 | 9.95e-01 | logit_matched_constraint |
+| eQTL | all_modules | 13105 | 0.3599 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | pheno_sig_modules | 843 | 0.3416 | 0.3612 | 0.88 | 0.76 | 1.01 | 7.76e-02 | logit_matched_standard |
+| eQTL | go_visible_modules | 843 | 0.3416 | 0.3612 | 0.88 | 0.76 | 1.01 | 7.76e-02 | logit_matched_standard |
+| eQTL | all_modules | 13105 | 0.3599 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | pheno_sig_modules | 843 | 0.3416 | 0.3612 | 0.88 | 0.76 | 1.02 | 9.08e-02 | logit_matched_constraint |
+| eQTL | go_visible_modules | 843 | 0.3416 | 0.3612 | 0.88 | 0.76 | 1.02 | 9.08e-02 | logit_matched_constraint |
 
 ## Reading
 
