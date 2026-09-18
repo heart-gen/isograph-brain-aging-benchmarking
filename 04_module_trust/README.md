@@ -29,6 +29,7 @@ plan). The leading number of a wrapper is its tier; steps in one tier run in par
 | 02b | `module_meta` | 01a–01b | Per-module meta tables, driver loadings, one job per region × method (re-run after any split-half re-fit, then 03b) |
 | 02c | `trust_gate` | 01a–01b | Q1 trust gate (`module_trust stability`): the trusted sets read by 03c–03g |
 | 02d | `replication_go` | 01c, stage 03 enrichment | GO consistency of matched modules |
+| 02e | `dtu_added_value_saturn` | 01a | satuRn age-DTU on every split half (6 regions × 5 seeds × 2 halves), plus per-gene technical covariates and abundance co-expression neighbours |
 | 03a | `stability_aggregate` | 01a–01b, 02a | `stability_summary`, one row per method and resolution |
 | 03b | `within_cohort` | 02b | Within-cohort Q2 driver reproducibility + Q3 sign concordance (`module_trust within`), per method |
 | 03c | `module_trust_replication` | 02c, stage 03 interpretation | Q3 cross-cohort aging replication of trusted modules, linear and `--model spline` |
@@ -37,21 +38,96 @@ plan). The leading number of a wrapper is its tier; steps in one tier run in par
 | 03f | `eigengene_projection` | 02c | Frozen-weight cross-cohort eigengene projection |
 | 03g | `complementarity` | 02c, stage 03 interpretation + composition-unique | Q4 DTU-without-DGE / WGCNA complementarity of trusted modules |
 | 03h | `baseline_comparison` | 02d, stage 03 enrichment | Three-baseline per-module rate comparison (the scope bound) |
+| 03i | `dtu_added_value_analyze` | 01a, 02e | Held-out module-context test for one region: 5 seeds × 2 directions, stratified and plain permutation nulls, abundance-neighbour joint model |
 | 04a | `replication_model_contrast` | 03c | Linear-vs-spline decomposition of the Q3 count |
 | 04b | `replication_permutation_report` | 03d | `REPLICATION_PERMUTATION.md` over all three covariate modes |
 | 04c | `eigengene_projection_aggregate` | 03f | Cross-pair eigengene-projection summary |
+| 04d | `dtu_added_value_summarize` | 03i | BH across regions, the pre-registered verdict, `DTU_ADDED_VALUE.md` |
 
 Retired (`_h/retired/`): `lr_validation`, `lr_validation_launch`, `lr_aggregate` (learning-rate /
 software-robustness validation, retired 2026-09-14 — settled the single-LR promotion; outputs only
 at tag `legacy_expression_filter`) and `gcap_ab` (giant-cap ablation, retired 2026-09-12 — a
 resolution-2.0 A/B of a cap never promoted, superseded by resolution 5.0 and cited nowhere).
 
-`_m/` holds `stability/`, `replication/` and `baseline_comparison/`. The resolution-2.0 siblings
+`_m/` holds `stability/`, `replication/`, `baseline_comparison/` and `dtu_added_value/`. The resolution-2.0 siblings
 (`stability_res2`, `replication_res2`, which nothing read or wrote), the giant-cap ablation and the
 LR validation outputs were removed from the live tree on 2026-09-14 and survive only at tag
 `legacy_expression_filter`.
 
-**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,age_model_curvature,eigengene_projection,baseline_comparison}.py`.
+**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,age_model_curvature,eigengene_projection,baseline_comparison,module_dtu_added_value}.py`.
+
+## Module context and held-out DTU evidence (PI review item 12a)
+
+Gene-wise DTU and IsoGraph answer complementary questions. satuRn (the test IsoformSwitchAnalyzeR
+v2 runs) asks which individual genes change transcript usage with age; IsoGraph asks whether those
+gene-level effects are organized into coordinated programs. `isa_concordance` (stage 06) shows the
+two agree. Steps 02e → 03i → 04d test whether the organization carries information that gene-wise
+DTU statistics do not: does the DTU evidence of a gene's module neighbours in one donor subset
+predict that gene's DTU evidence in an independent donor subset, after conditioning on its own
+discovery-subset evidence? This does not ask whether satuRn is adequate, and should not be written
+up that way.
+
+Design. The donor subsets are the 01a split halves, so each discovery partition was fit without the
+held-out donors. Context is leave-one-out. The statistic is a partial correlation given a spline of
+the gene's own discovery evidence plus technical covariates, one value per split direction (5 seeds ×
+2 = 10). The null permutes module labels **within technical strata** (expression decile ×
+minor-isoform-usage tertile), so a module that is only a bin of well-measured genes cannot pass. The
+comparator is each gene's 50 nearest co-expression neighbours on the same subset. Design and
+decision rule were fixed in the CLI docstring before the first run; the reporting was reorganized
+afterwards to lead with effect sizes (the rule itself is unchanged).
+
+The co-expression comparator is built on the IsoGraph halves in Python because the committed WGCNA
+split-half partitions cannot stand in for it: `stability_wgcna.R` draws its halves with R's RNG
+(`set.seed(1000 + k); sample.int(n)`), so WGCNA's "seed k, half A" is **not** IsoGraph's seed k,
+half A, despite the shared `SEED_BASE`. That is harmless for within-method ARI (03a), but any
+analysis that pairs the two methods' halves sample-for-sample would be comparing different donors.
+
+### Result (run 2026-09-18; `_m/dtu_added_value/DTU_ADDED_VALUE.md`)
+
+Effect size first, then split consistency, then permutation q:
+
+| Analysis | Partial r, mean (range over 10 directions) | Positive directions | q | Given co-expression | Co-expression alone |
+|---|---|---:|---:|---|---:|
+| GTEx frontal cortex BA9 | 0.102 (0.010 to 0.192) | 10/10 | 0.002 | 0.086 (10/10, q = 0.002) | 0.143 |
+| GTEx hippocampus | 0.095 (−0.007 to 0.190) | 9/10 | 0.002 | 0.074 (9/10, q = 0.002) | 0.150 |
+| BrainSEQ caudate | 0.056 (−0.268 to 0.208) | 8/10 | 0.002 | 0.056 (8/10, q = 0.002) | 0.008 |
+| GTEx caudate | 0.009 (−0.068 to 0.071) | 6/10 | 0.016 | 0.004 (6/10, q = 0.21) | 0.059 |
+| BrainSEQ dlpfc | 0.008 (−0.040 to 0.062) | 6/10 | 0.055 | 0.006 (q = 0.11) | 0.060 |
+| BrainSEQ hippocampus | −0.002 (−0.041 to 0.045) | 3/10 | 0.73 | −0.003 (q = 0.75) | 0.011 |
+
+- **The result is heterogeneous, and that is part of it.** Module context carries modest but
+  reproducible incremental information in three of six region/cohort analyses, each surviving
+  conditioning on co-expression. GTEx caudate shows a small association that co-expression absorbs;
+  BrainSEQ dlpfc and hippocampus show none. In the two GTEx cortical/hippocampal analyses, co-expression
+  context alone predicts more strongly (0.14–0.15), so there the module adds to co-expression rather
+  than replacing it; BrainSEQ caudate is the analysis where the information is specific to the switch
+  structure (co-expression context 0.008).
+- **Effect sizes, not q-values, carry the result.** The permutation null conditions on each split's
+  partition; its SD (≈ 0.004) is far below the spread across split directions, so the range and
+  positive-direction counts are the measure of reproducibility. The caudate range includes one
+  direction at −0.268: seed 2's half B is globally inflated (1,104 genes at BH q < 0.05 vs 17–200 in
+  every other caudate half).
+- **Practical meaning.** Although the incremental correlations are small, module context enriches for
+  replication among genes that do not individually meet the discovery DTU criterion (BH q ≥ 0.05):
+  top vs bottom context tertile replicate at p < 0.05 in 0.339 vs 0.201 of genes (GTEx BA9; adjusted
+  OR 1.72, > 1 in 9/10 directions), 0.312 vs 0.236 (GTEx hippocampus; 1.39, 8/10), 0.235 vs 0.180
+  (BrainSEQ caudate; 1.45, 8/10). This is descriptive. Both tertiles pass through the same criterion,
+  so regression to the mean acts on them alike, and the OR conditions on the gene's own evidence; the
+  continuous test is the inference.
+- **Major residual limitation: shared confounding.** A factor present in both donor subsets replicates
+  across a split as faithfully as coordinated switching does; the technical strata remove expression
+  level and isoform-usage range, not every such factor. The two strongest analyses are also those with
+  the most inflated satuRn evidence (median genomic-control λ 3.2 and 2.6 vs 1.4–1.8 elsewhere), which
+  fits either more age-DTU to borrow or a shared age-correlated artefact. Cross-cohort module
+  preservation (03f) is the complementary evidence because it does not share a cohort's confounds.
+- **Supplement (post hoc): giant modules contribute but do not drive it.** Without modules of ≥ 900
+  genes (size in the whole discovery partition) the three robust analyses keep 77–93% of the effect
+  (BrainSEQ caudate 0.056 → 0.043, GTEx BA9 0.102 → 0.090, hippocampus 0.095 → 0.088) with the same or
+  more positive directions. (An earlier ad hoc check that sized modules by tested genes only read
+  "unchanged or larger"; superseded.)
+- Pre-registered rule (BH q < 0.05 in ≥ 4/6 analyses, one or more per cohort): **SUPPORTED**, 4/6. It
+  counts GTEx caudate, whose effect is a tenth the size and not independent of co-expression, so quote
+  the three-analysis reading above, with the rule outcome as its formal record.
 
 ## Caveat
 

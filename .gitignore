@@ -104,6 +104,10 @@ reports/pi/
 # Regenerable from 01a.stability_isograph.sh --save-edges; ~4 MB x seeds x halves x regions.
 04_module_trust/_m/stability/edges/
 
+# Per-half satuRn runs for the module-context held-out DTU test (04_module_trust/_h/02e).
+# Regenerable in minutes; the committed outputs are the per-region replicate/null tables.
+04_module_trust/_m/dtu_added_value/halves/
+
 # Signal-level colocalization (coloc.susie). The per-locus GWAS SuSiE fits and the
 # per-(analysis, tissue) result shards are heavy and fully regenerable by
 # `sbatch 05_genetic_anchoring/_h/03c.coloc_gwas_susie.sh` then `06b.coloc_signal_susie.sh`.
