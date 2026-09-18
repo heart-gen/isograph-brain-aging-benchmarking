@@ -29,6 +29,7 @@ for cr in "${TRUST[@]}"; do
 done
 step 02c "01a 01b" $H/02c.trust_gate.sh
 step 02d "01c"     $H/02d.replication_go.sh
+step 02e "01a"     $H/02e.dtu_added_value_saturn.sh
 
 ## 03
 step 03a "01a 01b 02a" $H/03a.stability_aggregate.sh
@@ -43,10 +44,12 @@ step 03e "02c" $H/03e.replication_pooled.sh
 step 03f "02c" $H/03f.eigengene_projection.sh
 step 03g "02c" $H/03g.complementarity.sh
 step 03h "02d" $H/03h.baseline_comparison.sh
+step 03i "01a 02e" $H/03i.dtu_added_value_analyze.sh
 
 ## 04
 step 04a "03c" $H/04a.replication_model_contrast.sh
 step 04b "03d" $H/04b.replication_permutation_report.sh
 step 04c "03f" $H/04c.eigengene_projection_aggregate.sh
+step 04d "03i" $H/04d.dtu_added_value_summarize.sh
 
 dag_finish
