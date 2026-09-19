@@ -149,3 +149,97 @@ and neither PSC project share holds a BAM or CRAM. CRAM is not the obstacle — 
 pysam and GATK all read it and the GRCh38 reference is available — the obstacle is that the
 reads and their WASP tags exist only on Quest. **Run the junction-level arm on Quest
 (b1042), where the alignments and the storage are.**
+
+## Allele-aware junction recount — the two-sided rescue, on Quest (PI item 10a)
+
+`ase_junction_switch.py` counts fragments that cross an isoform-**specific** splice
+junction *and* carry a phased heterozygous site, from the WASP-tagged STAR BAMs. A junction
+is two-sided by construction, so the pairs the exonic screen lost for want of a second side
+become testable. The pre-registered gate is unchanged and imported from
+`ase_switch_direction.py`: per pair, ≥ 30 donors with ≥ 5 informative fragments,
+informative on both isoforms. The arm proceeds only if ≥ 30 pairs of the **gate family**
+pass (pairs in genes with an all_samples DLPFC switch-QTL, q < 0.05). Otherwise it is
+reported as the pre-specified negative result.
+
+**Runs on Quest only; nothing bulk moves from Bridges-2.** The BAMs have moved from the old
+`ase-processing` path to `/projects/b1042/HEART-GeN-Lab/brainseq_data/bsp2_dlpfc/star-wasp/`
+(498 DLPFC BAMs, read in place). The phASER release, including the per-sample VCFs with the
+genome-wide phase `PW`, is at `/projects/b1213/resources/processed-data/ase-files/`. The
+population-phased genotypes are at `/projects/b1213/resources/processed-data/genotypes/ase/`.
+All paths are in `configs/data_sources.yaml` under `quest:`. The switch pairs and QTL
+leads come through git-LFS. Only `junction_allelic_counts.parquet` and the report travel back.
+
+| Step | Wrapper | Writes (`_m/ase_junction_switch/<region>/`) |
+|---|---|---|
+| targets | `01l.ase_junction_targets.sh` | `pairs.parquet`, `junctions.parquet`, `lead_genotypes.parquet`, `regions.bed`, `samples.tsv` |
+| count | `02f.ase_junction_count.sh` (array, one BAM per task) | `counts/<sample>.{pair_counts,pair_sites,site_counts}.tsv.gz`, `.qc.json` (gitignored) |
+| concordance | `python -m …ase_junction_switch --stage concordance --sample R#####` | `counts/<sample>.concordance.json` |
+| screen | `03b.ase_junction_screen.sh` | `junction_allelic_counts.parquet`, `pair_feasibility.parquet`, `screen_summary.json`, `ASE_JUNCTION_SCREEN.md` |
+| test (step 4) | `04a.ase_junction_allelic.sh` (`ase_junction_allelic.py`) | `allelic_test.parquet`, `allelic_donor_counts.parquet`, `allelic_summary.json`, `ASE_JUNCTION_ALLELIC.md` |
+
+Run all four for one region with
+`bash 06_switch_mechanism/_h/ase_junction_quest.sh --region <dlpfc|caudate|hippocampus>`.
+It sizes the count array from that region's manifest. `targets` drops any BAM that fails
+`samtools quickcheck`, because the BAMs are staged onto Quest one region at a time
+(DLPFC `bsp2_dlpfc/`, caudate `bsp3/`, hippocampus `bsp2_hippo/`). The Bridges-2 DAG lists
+the four as manual steps and never submits them.
+
+A fragment counts only if no mate fails WASP (`vW` ≠ 1), every junction it carries inside
+the pair's span is an intron of the isoform it is assigned to, and all its phased sites
+agree on the haplotype.
+
+**Step 4, the allelic test (`ase_junction_allelic.py`), runs only where the gate passed**
+(it exits cleanly as the pre-specified negative otherwise). It reads the lead-ALT haplotype
+straight off each donor's phased genotype at the all_samples lead. That works because `PW`
+is anchored to the same population phasing: at the DLPFC gate-family leads, `PW` equals the
+lead `GT` in 243/243 heterozygous calls checked. Per pair, a beta-binomial GLMM on
+donor × haplotype units (T1 of T1 + T2 fragments, a random donor intercept, LRT on the ALT
+effect `beta`) gives the within-donor log odds of T1 on ALT vs REF. A random intercept, not a
+fixed one: with two units per donor a fixed intercept biases `beta` away from zero. Pairs
+need ≥ 10 lead-heterozygous donors informative on both haplotypes. BH runs over the fitted
+gate-family pairs. Donors homozygous at the lead are the built-in null (same model, arbitrary
+haplotype). A model-free stratified score test and the between-donor dosage-vs-T1-fraction
+Spearman, from the same reads, are reported beside it. `beta` is ALT-oriented;
+`--risk-alleles` (a few-KB rsID → risk-allele TSV from Bridges-2) re-orients it. Each pair also carries its IsoGraph module, the gene's module role, the module's age association and its module polarity r(T1) − r(T2). The module-direction check asks whether `beta` tracks that polarity across a gene's pairs, against a within-gene permutation null: does the lead move the isoforms along the module's own switch axis? Caveats: composition cancels only if allelic effects do not differ by cell type, and
+some mapping bias survives WASP.
+
+### After the git transfer: mapping `beta` to disease direction (risk-allele table)
+
+`beta` is oriented to the switch-QTL lead's **ALT** allele, which says nothing about disease.
+Turning it into "the risk allele shifts the isoforms toward T1/T2, and toward or away from the
+module's direction" needs each lead's GWAS risk allele. The GWAS summary statistics live on
+Bridges-2 (ALS is not on Quest), so this step runs there after the tables come over.
+
+1. **Quest → Bridges-2.** Commit `_m/ase_junction_switch/<region>/allelic_test.parquet` (plus
+   `allelic_donor_counts.parquet`, `allelic_summary.json`, `ASE_JUNCTION_ALLELIC.md`; parquet is
+   git-LFS), push, then on Bridges-2 `git pull && git lfs pull`. `allelic_test.parquet`
+   already carries what orientation needs: `variant_id_all` (lead rsID), `lead_ref`,
+   `lead_alt`, `palindromic`, `coloc_traits`, `beta`, `module_polarity`, `module_age_trait`,
+   `module_age_effect`.
+2. **Build the risk-allele table on Bridges-2.** For the coloc-nominated rows, take each
+   (trait in `coloc_traits`, `variant_id_all`) and call `coloc_direction._gwas_risk(trait,
+   rsids, tmp_dir)`, which returns `rsid, risk_allele, gwas_other_allele, risk_beta, gwas_p`.
+   Write one TSV per trait (for example `_m/ase_junction_switch/risk_alleles.<trait>.tsv`).
+   A lead can colocalize with several traits whose risk alleles differ, so do not collapse
+   traits into one file.
+3. **Orient.** Either compute it on Bridges-2 directly from `allelic_test.parquet`, or commit
+   the TSV and re-run `04a` on Quest with `--risk-alleles <tsv>`, one trait per run (the flag
+   keeps one risk allele per rsID). The rule is the same either way:
+   `beta_risk = +beta` if `risk_allele == lead_alt`, `-beta` if `risk_allele == lead_ref`,
+   otherwise missing. Then `risk_along_module = beta_risk * sign(module_polarity)`: > 0 means
+   the risk allele shifts the pair's isoforms the way the module score rises. Read it against
+   the module's age association only where `module_age_trait == Age_linear`. An `Age_spline`
+   effect is a slope at one age point (p25), not an overall direction.
+4. **Check before believing a sign:**
+   - **Allele match.** Drop any lead whose GWAS alleles are neither `lead_ref` nor
+     `lead_alt`, and any `palindromic` (A/T, C/G) lead unless the GWAS frequency confirms the
+     strand. Report how many were dropped.
+   - **Same variant.** The risk allele must be looked up at the switch-QTL lead
+     (`variant_id_all`, all_samples arm), not at coloc's best SNP. If the GWAS lacks the lead,
+     use an EUR LD proxy and carry the allele across through the phased haplotype, not by
+     frequency; say so for each gene.
+   - **Arm.** Coloc ran on the ea_only arm. Where the ea_only lead differs (`lead_differs_ea`
+     in `pair_feasibility.parquet`), the within-donor test is about a different variant than
+     the one coloc paired with the GWAS, so orientation needs LD between the two leads.
+   - **Significance.** Only pairs with `qval < 0.05` carry a direction. Coloc-nominated pairs
+     outside the gate family have no q, and their p-values are nominal.

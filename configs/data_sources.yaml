@@ -26,3 +26,31 @@ gtex_v11:
   required_external:
     subject_phenotypes: "GTEx subject phenotype data table with age and sex; not present in inspected metadata directory."
 
+# Quest (Northwestern) inputs for the allele-aware junction recount (PI item 10a,
+# real_data/ase_junction_switch.py). The WASP-tagged STAR BAMs exist only here; they are
+# read in place and never copied, and staged one region at a time (40 TB budget).
+quest:
+  ase_junction:
+    gtf: /projects/b1213/resources/genomes/human/gencode-v47/gtf/gencode.v47.primary_assembly.annotation.gtf
+    # population-phased genotypes, all sites, every donor (the source of the WASP VCFs)
+    genotype_vcf_template: /projects/b1213/resources/processed-data/genotypes/ase/{chrom}.vcf.gz
+    regions:
+      dlpfc:
+        bam_dir: /projects/b1042/HEART-GeN-Lab/brainseq_data/bsp2_dlpfc/star-wasp/aligned_bams
+        bam_pattern: "{sample}_Aligned.sortedByCoord.out.bam"
+        # phASER per-sample output VCFs: GT plus PW (genome-wide phased genotype)
+        phaser_vcf_dir: /projects/b1213/resources/processed-data/ase-files/dlpfc/phASER
+        per_sample_dir: /projects/b1213/resources/processed-data/ase-files/dlpfc/per-sample-files
+        manifest: /projects/b1213/resources/processed-data/ase-files/dlpfc/qc/sample_manifest.validated.tsv
+      caudate:
+        bam_dir: /projects/b1042/HEART-GeN-Lab/brainseq_data/bsp3/star-wasp/aligned_bams
+        bam_pattern: "{sample}_Aligned.sortedByCoord.out.bam"
+        phaser_vcf_dir: /projects/b1213/resources/processed-data/ase-files/caudate/phASER
+        per_sample_dir: /projects/b1213/resources/processed-data/ase-files/caudate/per-sample-files
+        manifest: /projects/b1213/resources/processed-data/ase-files/caudate/qc/sample_manifest.validated.tsv
+      hippocampus:
+        bam_dir: /projects/b1042/HEART-GeN-Lab/brainseq_data/bsp2_hippo/star-wasp/aligned_bams
+        bam_pattern: "{sample}_Aligned.sortedByCoord.out.bam"
+        phaser_vcf_dir: /projects/b1213/resources/processed-data/ase-files/hippocampus/phASER
+        per_sample_dir: /projects/b1213/resources/processed-data/ase-files/hippocampus/per-sample-files
+        manifest: /projects/b1213/resources/processed-data/ase-files/hippocampus/qc/sample_manifest.validated.tsv

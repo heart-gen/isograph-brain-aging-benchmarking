@@ -40,4 +40,11 @@ step 02e "01j" $H/02e.switch_feature_refit_aggregate.sh
 ## 03
 step 03a "02c" $H/03a.clinical_consequence_meta.sh
 
+## Quest only (PI item 10a): the WASP BAMs exist only on Quest, so these four are never
+## submitted from Bridges-2. On Quest: bash 06_switch_mechanism/_h/ase_junction_quest.sh
+manual_step 01l "Quest only: 01l.ase_junction_targets.sh (see the stage README)"
+manual_step 02f "Quest only: 02f.ase_junction_count.sh, one task per WASP BAM, after 01l"
+manual_step 03b "Quest only: 03b.ase_junction_screen.sh, after 02f"
+manual_step 04a "Quest only: 04a.ase_junction_allelic.sh, after 03b (only if its gate passed)"
+
 dag_finish
