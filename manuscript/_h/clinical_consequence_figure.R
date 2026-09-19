@@ -79,12 +79,15 @@ pc <- panel |> filter(!is.na(loeuf)) |>
 pC <- ggplot(pc, aes(v, loeuf, colour = v)) +
   geom_hline(yintercept = 1, linewidth = 0.3, linetype = "dashed", colour = "grey60") +
   geom_boxplot(outlier.shape = NA, width = 0.5, fill = NA, linewidth = 0.5) +
-  geom_jitter(width = 0.14, height = 0, size = 1.1, alpha = 0.7) +
+  geom_point(position = position_jitter(width = 0.14, height = 0, seed = 13), size = 1.1, alpha = 0.7) +
   scale_colour_manual(values = c(`splicing-led` = "#D55E00",
                                  `splicing\n(unresolved)` = "#E69F00",
                                  `expression-led` = "#56B4E9"), guide = "none") +
+  scale_x_discrete(labels = c(`splicing-led` = "splicing-led\n(resolved)",
+                              `splicing\n(unresolved)` = "splicing\n(unresolved)",
+                              `expression-led` = "expression-\nled")) +
   labs(x = NULL, y = "gnomAD LOEUF") +
-  theme_pub() + theme(axis.text.x = element_text(size = 7))
+  theme_pub() + theme(axis.text.x = element_text(size = 7, lineheight = 0.9))
 
 fig <- pA + pB + pC + plot_layout(widths = c(0.9, 1.25, 1.1)) +
   plot_annotation(tag_levels = "A") &

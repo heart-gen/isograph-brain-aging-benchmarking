@@ -2,7 +2,9 @@
 # (A) across 9 structural classes, switched transcript pairs are enriched for productive
 #     UTR and CDS remodeling but not for decay routing (NMD), biotype change, or
 #     coding-status loss; (B) the productive-remodeling signal is indistinguishable between
-#     GO-invisible and GO-visible switch modules. Reads 06_switch_mechanism/_m/switch_consequence_meta.parquet;
+#     GO-invisible and GO-visible switch modules. Both panels show the aging analysis only:
+#     the meta table also carries a single-region disease analysis, and mixing the two
+#     stacks (A) or overplots (B) the bars. Reads 06_switch_mechanism/_m/switch_consequence_meta.parquet;
 # writes figSwitchConsequence.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/switch_consequence_figure.R
@@ -31,7 +33,8 @@ save_fig <- function(p, name, width, height) {
 }
 sig_star <- function(p) ifelse(p < 1e-3, "***", ifelse(p < 1e-2, "**", ifelse(p < 0.05, "*", "")))
 
-sc <- as.data.frame(read_parquet(rel("06_switch_mechanism", "_m", "switch_consequence_meta.parquet")))
+sc <- as.data.frame(read_parquet(rel("06_switch_mechanism", "_m", "switch_consequence_meta.parquet"))) |>
+  filter(analysis_class == "aging")
 LAB <- c(utr_changed = "UTR remodeled", coding_consequence = "CDS remodeled",
          cds_changed = "CDS length change", first_exon_changed = "First exon change",
          internal_exon_difference = "Internal exon diff.", last_exon_changed = "Last exon change",
@@ -42,7 +45,9 @@ LAB <- c(utr_changed = "UTR remodeled", coding_consequence = "CDS remodeled",
 a <- sc |> filter(stratum == "all", consequence != "cds_changed") |>
   mutate(lab = LAB[consequence],
          enriched = median_enrichment > 1 & n_enriched_p05 == n_regions,
-         star = ifelse(enriched, sprintf("%d/%d %s", n_enriched_p05, n_regions, sig_star(fisher_p)), ""),
+         # label every class with its regional consistency; colour marks all-region enrichment
+         star = ifelse(n_enriched_p05 > 0,
+                       sprintf("%d/%d %s", n_enriched_p05, n_regions, sig_star(fisher_p)), ""),
          lab = reorder(lab, median_enrichment))
 pA <- ggplot(a, aes(median_enrichment, lab, fill = enriched)) +
   geom_vline(xintercept = 1, linewidth = 0.3, linetype = "dashed", colour = "grey55") +
