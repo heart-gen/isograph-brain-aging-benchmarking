@@ -10,6 +10,11 @@
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | als | eQTL | Brain_Putamen_basal_ganglia | 0.02 | no | — | no | — | direction unresolved |
 
+### Signed risk-allele direction (colocalized loci with allele matching)
+| trait | tissue | rsID | risk allele | risk QTL effect | direction |
+|-------|--------|------|-------------|-----------------|-----------|
+| als | Brain_Putamen_basal_ganglia | rs11749545 | G | nan | unresolved (variant not in GTEx signif_pairs or allele mismatch) |
+
 ## 4. Regulatory logic (RBP motifs in switched exons)
 - **All switched-motif RBPs (recurrence across regions):** —
 

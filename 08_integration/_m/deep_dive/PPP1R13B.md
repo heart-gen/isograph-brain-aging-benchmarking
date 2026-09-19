@@ -16,8 +16,8 @@
 | scz | Brain_Caudate_basal_ganglia | rs66676135 | A | 0.18532906472682953 | risk allele A increases expression of PPP1R13B |
 
 ## 4. Regulatory logic (RBP motifs in switched exons)
-- **Switched *and* module-enriched (q<0.05) RBPs:** KHDRBS1, HNRNPD, ELAVL3, RBM41, PPIE, G3BP1, CPEB4, TIAL1, CPEB1, HNRNPDL, RBM6, AGO1, DHX58, ZC3H10
-- **All switched-motif RBPs (recurrence across regions):** A1CF(5), ACO1(5), AGO1(5), AGO2(5), CELF4(5), ELAVL3(5), CELF5(5), CELF6(5), CNOT4(5), CPEB2(5), CSTF2(5), DHX58(5), DDX19B(5), EIF4A3(5), EIF4B(5), HNRNPU(5), HNRNPA3(5), G3BP1(5), HNRNPA0(5), FXR1(5)
+- **Switched *and* module-enriched (q<0.05) RBPs:** DDX58, PABPC5, ZNF346, ADAR, IFIH1, RBM41, ERI1, PABPC4, CNOT4, MBNL1, RBMY1A1, CPEB2
+- **All switched-motif RBPs (recurrence across regions):** A1CF(3), ACO1(3), AGO1(3), AGO2(3), CELF5(3), CELF4(3), ELAVL3(3), EIF4B(3), CELF6(3), CNOT4(3), CPEB2(3), CSTF2(3), DHX58(3), DDX19B(3), EIF4A3(3), HNRNPM(3), HNRNPA3(3), HNRNPAB(3), HNRNPA0(3), G3BP1(3)
 
 ## 5. Interpretation
 PPP1R13B colocalizes as an eQTL (gene-level expression), with no splicing event resolving to an IsoGraph switch pair — an honest expression-confounded case that abundance networks would also capture.
