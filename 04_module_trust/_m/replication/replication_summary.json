@@ -25,26 +25,26 @@
     {
       "method": "isograph_vae",
       "region": "caudate",
-      "mean_best_jaccard": 0.101,
-      "frac_preserved": 0.525,
-      "age_sign_concordance": 0.619,
-      "age_effect_spearman": 0.355
+      "mean_best_jaccard": 0.084,
+      "frac_preserved": 0.632,
+      "age_sign_concordance": 0.636,
+      "age_effect_spearman": 0.737
     },
     {
       "method": "isograph_vae",
       "region": "dlpfc_ba9",
-      "mean_best_jaccard": 0.066,
-      "frac_preserved": 0.298,
-      "age_sign_concordance": 0.662,
-      "age_effect_spearman": 0.176
+      "mean_best_jaccard": 0.084,
+      "frac_preserved": 0.343,
+      "age_sign_concordance": 0.8,
+      "age_effect_spearman": 0.437
     },
     {
       "method": "isograph_vae",
       "region": "hippocampus",
-      "mean_best_jaccard": 0.094,
-      "frac_preserved": 0.315,
-      "age_sign_concordance": 0.136,
-      "age_effect_spearman": 0.263
+      "mean_best_jaccard": 0.115,
+      "frac_preserved": 0.496,
+      "age_sign_concordance": 0.198,
+      "age_effect_spearman": -0.38
     },
     {
       "method": "wgcna_gene",

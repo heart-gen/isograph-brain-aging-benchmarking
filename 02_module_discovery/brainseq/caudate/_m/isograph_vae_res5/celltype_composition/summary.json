@@ -1,0 +1,29 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "caudate",
+  "variant": "standard",
+  "cell_types": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC",
+    "Oligo"
+  ],
+  "composition_covariates": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC"
+  ],
+  "n_samples": 238,
+  "n_samples_covered": 238,
+  "marker_top_n": 25,
+  "n_module_celltype_marker_depleted_fdr05": 0,
+  "n_module_celltype_marker_enriched_fdr05": 1
+}

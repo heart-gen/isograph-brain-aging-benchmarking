@@ -59,17 +59,38 @@ log "  mapped $(wc -l < "${MAP}") / $(wc -l < "${MDIR}/_cs_variant_ids.txt") CS 
 
 ## --- per-locus LD matrices ---------------------------------------------------
 # loci_testable.tsv columns: LOCUS_ID chr start stop genes n_gwas_snp ...
-n_done=0
+# A matrix on disk is reused only if it belongs to THIS locus: every variant in its .vars is
+# in the current SNP list and the file holds exactly n^2 float32s. Locus ids are positional
+# (locusNN_chrC), so a re-prep with a different gene set re-uses the same ids for different
+# regions; a bare existence test silently fed coloc stale LD (2026-09-17: 229 of 1,146
+# aging loci). The size test also catches a matrix truncated by an OOM kill.
+ld_valid() {
+    local bin="$1.unphased.vcor1.bin" vars="$1.unphased.vcor1.bin.vars" n
+    [[ -s "${bin}" && -s "${vars}" ]] || return 1
+    n=$(wc -l < "${vars}")
+    [[ $(stat -c %s "${bin}") -eq $(( n * n * 4 )) ]] || return 1
+    awk 'NR==FNR{s[$1]; next} !($1 in s){exit 1}' "$2" "${vars}"
+}
+# plink2 must know the cgroup budget, not the node's RAM (a 54k-SNP square is 11.7 GB).
+PLINK_MEM=$(( ${SLURM_CPUS_PER_TASK:-4} * 2000 * 9 / 10 ))
 tail -n +2 "${LOCI}" | while IFS=$'\t' read -r LID CHR START STOP REST; do
     SNPS="${SUSIE_DIR}/${LID}.snps.txt"
     OUT="${SUSIE_DIR}/${LID}"
     [[ -s "${SNPS}" ]] || { log "skip ${LID} (no snp list)"; continue; }
-    if [[ -f "${OUT}.unphased.vcor1.bin" ]]; then continue; fi
+    if ld_valid "${OUT}" "${SNPS}"; then continue; fi
+    rm -f "${OUT}.unphased.vcor1.bin" "${OUT}.unphased.vcor1.bin.vars"
     log "${LID} (chr${CHR}, $(wc -l < "${SNPS}") SNPs)"
-    plink2 --bfile "${PANEL_DIR}/1000G.EUR.QC.${CHR}" \
-           --extract "${SNPS}" \
-           --r-unphased square ref-based bin4 \
-           --out "${OUT}" 2>&1 | grep -E "variants remaining|Matrix written|Error|error" || true
+    if ! plink2 --bfile "${PANEL_DIR}/1000G.EUR.QC.${CHR}" \
+                --extract "${SNPS}" \
+                --r-unphased square ref-based bin4 \
+                --threads "${SLURM_CPUS_PER_TASK:-4}" --memory "${PLINK_MEM}" \
+                --out "${OUT}" > "${OUT}.plink.out" 2>&1; then
+        tail -5 "${OUT}.plink.out"
+        rm -f "${OUT}.unphased.vcor1.bin" "${OUT}.unphased.vcor1.bin.vars"
+        log "ERROR: plink2 failed on ${LID}"; exit 1
+    fi
+    grep -E "variants remaining|Matrix written" "${OUT}.plink.out" || true
+    ld_valid "${OUT}" "${SNPS}" || { log "ERROR: ${LID} matrix fails validation"; exit 1; }
 done
 
 n_ld=$(ls -1 "${SUSIE_DIR}"/*.unphased.vcor1.bin 2>/dev/null | wc -l)

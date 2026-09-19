@@ -11,7 +11,7 @@
 
 ## Phenotype-blind Leiden resolution sweep on the split halves.
 ##
-## Answers the standing objection that the canonical resolution (5.0) was chosen while
+## Answers the standing objection that the canonical resolution (2.0) was chosen while
 ## looking at a trait: this picks it on a split-half stability curve instead, and demotes
 ## the GWAS giant-module argument to post-hoc confirmation.
 ##
@@ -27,6 +27,9 @@
 ## The canonical resolution is skipped: its partitions are the committed baseline and the
 ## sweep must not rewrite them. Every other resolution is tagged 'isograph_resXpY', so
 ## `aggregate` reports it as its own method and the curve falls out of stability_summary.
+## Clustering is production's edge-weighted Leiden (sweep_leiden._build_module_table calls
+## IsoGraph's NetworkModel._module_table). 5.0 is skipped when its split-half FITS exist
+## (isograph_res5__*, the retired canonical arm), so that point is fitted, not re-clustered.
 ##
 ## Bridges memory is --cpus-per-task x 2000MB; do NOT pass --mem. Calls the env interpreter
 ## directly rather than `module load` + `conda activate`, so an array task cannot die on
@@ -53,7 +56,7 @@ SPECS=(
 spec="${SPECS[$((${SLURM_ARRAY_TASK_ID:-1} - 1))]}"
 read -r COHORT REGION <<< "${spec}"
 
-# Geometric-ish grid bracketing the canonical 5.0 on both sides, so the curve can show an
+# Geometric-ish grid bracketing the canonical 2.0 on both sides, so the curve can show an
 # optimum away from it rather than only confirming it.
 RESOLUTIONS="${SWEEP_RESOLUTIONS:-0.5 1 2 3 5 8 12 20}"
 

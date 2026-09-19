@@ -24,8 +24,6 @@ import argparse
 import time
 from pathlib import Path
 
-import igraph as ig
-import leidenalg
 import numpy as np
 import pandas as pd
 from sklearn.metrics import normalized_mutual_info_score
@@ -147,30 +145,32 @@ def _build_module_table(
     seed: int = 13,
     min_module_size: int = 20,
 ) -> pd.DataFrame:
-    """Run Leiden on positive edges; return module_table with M000/M001/... IDs."""
-    pos_edges = edges[edges["weight"] > 0].copy()
-    nodes_list = sorted(all_gene_ids)
-    node_to_idx = {n: i for i, n in enumerate(nodes_list)}
-    mask = pos_edges["source"].isin(node_to_idx) & pos_edges["target"].isin(node_to_idx)
-    pos_edges = pos_edges[mask]
-    ig_edges = [
-        (node_to_idx[r["source"]], node_to_idx[r["target"]])
-        for _, r in pos_edges.iterrows()
-    ]
-    g = ig.Graph(n=len(nodes_list), edges=ig_edges)
-    partition = leidenalg.find_partition(
-        g, leidenalg.RBConfigurationVertexPartition,
-        resolution_parameter=leiden_resolution, seed=seed,
-    )
-    communities = sorted(partition, key=len, reverse=True)
-    rows = []
-    for module_index, community in enumerate(communities):
-        nodes = {nodes_list[v] for v in community}
-        if len(nodes) < min_module_size:
-            continue
-        for gene_id in sorted(nodes):
-            rows.append({"gene_id": gene_id, "module_id": f"M{module_index:03d}"})
-    return pd.DataFrame(rows)
+    """Production module detection at ``leiden_resolution``; module_table with M000/M001/...
+
+    Calls IsoGraph's own ``NetworkModel._module_table`` -- seeded, EDGE-WEIGHTED Leiden on
+    the positive edges -- on a graph built the way the fit builds it (nodes = sorted gene
+    ids, edges added in ``edges`` order), so a sweep point is the partition production would
+    ship at that resolution. Until 2026-09-17 this was an unweighted reimplementation that
+    did not reproduce production partitions at the canonical resolution.
+    """
+    from types import SimpleNamespace
+
+    import networkx as nx
+    from isograph.models.base import NetworkModel
+
+    nodes = sorted(all_gene_ids)
+    keep = set(nodes)
+    graph = nx.Graph()
+    graph.add_nodes_from(nodes)
+    for s, t, w in edges[["source", "target", "weight"]].itertuples(index=False):
+        if s in keep and t in keep:
+            graph.add_edge(s, t, weight=float(w))
+    model = NetworkModel()
+    model.config = SimpleNamespace(
+        leiden_resolution=float(leiden_resolution), leiden_max_giant_frac=None,
+        random_state=seed, min_module_size=min_module_size, grey_min_intra_degree=0)
+    table = model._module_table(graph)
+    return table if not table.empty else pd.DataFrame(columns=["gene_id", "module_id"])
 
 
 def _pivot_eigengenes(eigengene_table: pd.DataFrame) -> pd.DataFrame:

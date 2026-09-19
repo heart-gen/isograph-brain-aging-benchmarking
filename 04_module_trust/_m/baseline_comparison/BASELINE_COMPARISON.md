@@ -8,8 +8,8 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
 | method | features | n_regions | med_n_mod | med_size | pheno_sig_rate | both_rate | go_rate | tot_pheno_sig |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | switch+abundance | 17 | 25.0 | 71.0 | 0.17 | 0.048 | 0.186 | 72 |
-| wgcna_gene | abundance | 17 | 8.0 | 387.0 | 0.18 | 0.171 | 0.885 | 34 |
+| isograph | switch+abundance | 17 | 25.0 | 108.0 | 0.146 | 0.052 | 0.253 | 54 |
+| wgcna_gene | abundance | 17 | 8.0 | 468.0 | 0.178 | 0.159 | 0.862 | 28 |
 | wgcna_switch_only | switch-only | 17 | 18.0 | 159.0 | 0.214 | 0.025 | 0.184 | 64 |
 | wgcna_multiplex | switch+abundance | 17 | 25.0 | 242.0 | 0.189 | 0.117 | 0.649 | 75 |
 
@@ -17,8 +17,8 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
 | method | features | n_modules | frac_pheno_sig | frac_both | frac_go_enriched |
 | --- | --- | --- | --- | --- | --- |
-| isograph | switch+abundance | 28 | 0.107 | 0.071 | 0.286 |
-| wgcna_gene | abundance | 21 | 0.048 | 0.048 | 0.81 |
+| isograph | switch+abundance | 13 | 0.077 | 0.077 | 0.385 |
+| wgcna_gene | abundance | 23 | 0.043 | 0.043 | 0.826 |
 | wgcna_switch_only | switch-only | 9 | 0.0 | 0.0 | 0.222 |
 | wgcna_multiplex | switch+abundance | 30 | 0.233 | 0.167 | 0.7 |
 
@@ -38,7 +38,7 @@ Reproduce: `python -m isograph_benchmark.real_data.baseline_comparison`.
 
 | method | n_preserved_aging_pairs | n_pairs_with_go | mean_go_jaccard | median_go_jaccard | perm_p | null_mean_go_jaccard |
 | --- | --- | --- | --- | --- | --- | --- |
-| isograph | 23 | 18 | 0.0934 | 0.0 | 9.99e-04 | 0.0049 |
-| wgcna_gene | 26 | 26 | 0.2068 | 0.1007 | 9.99e-04 | 0.0404 |
+| isograph | 17 | 15 | 0.1338 | 0.0 | 9.99e-04 | 0.0107 |
+| wgcna_gene | 23 | 23 | 0.1959 | 0.1003 | 9.99e-04 | 0.049 |
 
 Replication covers isograph vs classical `wgcna_gene` only (the matched baselines were not run through replication_go). Classical WGCNA's preserved aging modules carry more cross-cohort GO overlap — again the abundance/GO advantage — while both beat their permutation null.

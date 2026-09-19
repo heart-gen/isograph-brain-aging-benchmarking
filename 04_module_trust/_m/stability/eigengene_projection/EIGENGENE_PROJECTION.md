@@ -6,8 +6,8 @@ Each trusted module's eigengene weights are frozen in the source cohort and appl
 
 | method | direction | modules | preserved q<0.05 | median signed kME (null) | median |r| vs native PC1 | age-z sign match | among source-age-sig | both sig | Spearman age z | raw sign match | raw both sig |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| isograph | brainseq_to_gtex | 94 | 77 (0.82) | 0.381 (0.250) | 0.958 | 76/94 (p = 5.9e-10) | 36/41 | 30 | 0.637 (p = 5.14e-12) | 57/94 | 60 |
-| isograph | gtex_to_brainseq | 63 | 61 (0.97) | 0.337 (0.181) | 0.948 | 48/63 (p = 1.88e-05) | 20/27 | 16 | 0.447 (p = 0.000244) | 15/63 | 21 |
+| isograph | brainseq_to_gtex | 38 | 37 (0.97) | 0.456 (0.269) | 0.981 | 33/38 (p = 2.13e-06) | 21/25 | 19 | 0.490 (p = 0.00181) | 22/38 | 29 |
+| isograph | gtex_to_brainseq | 55 | 53 (0.96) | 0.332 (0.161) | 0.939 | 44/55 (p = 4.35e-06) | 18/22 | 17 | 0.555 (p = 1.09e-05) | 17/55 | 17 |
 | wgcna | brainseq_to_gtex | 52 | 49 (0.94) | 0.733 (0.599) | 1.000 | 28/52 (p = 0.339) | 23/38 | 32 | 0.395 (p = 0.00379) | 28/52 | 8 |
 | wgcna | gtex_to_brainseq | 10 | 10 (1.00) | 0.672 (0.253) | 0.999 | 3/10 (p = 0.945) | 3/9 | 8 | 0.685 (p = 0.0289) | 6/10 | 3 |
 

@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4607 | 0.2129 | 0.2306 | 0.91 | 0.83 | 1.0 | 4.01e-02 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 417 | 0.2518 | 0.2238 | 1.09 | 0.86 | 1.38 | 4.58e-01 | logit_matched_standard |
-| sQTL | go_invisible_modules | 380 | 0.2553 | 0.2237 | 1.1 | 0.86 | 1.4 | 4.50e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 37 | 0.2162 | 0.2246 | 1.03 | 0.45 | 2.32 | 9.52e-01 | logit_matched_standard |
-| eQTL | all_modules | 5816 | 0.4713 | 0.5494 | 0.74 | 0.69 | 0.79 | 3.38e-21 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 458 | 0.548 | 0.5244 | 1.08 | 0.9 | 1.3 | 4.17e-01 | logit_matched_standard |
-| eQTL | go_invisible_modules | 415 | 0.5494 | 0.5244 | 1.08 | 0.88 | 1.31 | 4.63e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 43 | 0.5349 | 0.525 | 1.12 | 0.61 | 2.04 | 7.19e-01 | logit_matched_standard |
+| sQTL | all_modules | 5649 | 0.2261 | 0.2236 | 0.98 | 0.9 | 1.07 | 6.21e-01 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 1618 | 0.2831 | 0.2167 | 1.29 | 1.15 | 1.46 | 3.29e-05 | logit_matched_standard |
+| sQTL | go_invisible_modules | 1297 | 0.2791 | 0.2189 | 1.21 | 1.06 | 1.38 | 5.43e-03 | logit_matched_standard |
+| sQTL | go_visible_modules | 321 | 0.2991 | 0.2228 | 1.58 | 1.23 | 2.04 | 4.13e-04 | logit_matched_standard |
+| eQTL | all_modules | 6983 | 0.4875 | 0.5476 | 0.78 | 0.74 | 0.83 | 1.20e-15 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 1809 | 0.5412 | 0.5232 | 1.03 | 0.93 | 1.14 | 5.48e-01 | logit_matched_standard |
+| eQTL | go_invisible_modules | 1427 | 0.5501 | 0.5229 | 1.06 | 0.95 | 1.18 | 3.01e-01 | logit_matched_standard |
+| eQTL | go_visible_modules | 382 | 0.5079 | 0.5253 | 0.93 | 0.76 | 1.14 | 4.97e-01 | logit_matched_standard |
 
 ## Reading
 

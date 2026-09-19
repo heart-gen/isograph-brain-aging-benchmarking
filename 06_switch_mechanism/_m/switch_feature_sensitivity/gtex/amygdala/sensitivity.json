@@ -13,7 +13,7 @@
   "baseline_max_abs_diff_vs_feature_scores": 0.0,
   "tol": 1e-10,
   "n_samples": 181,
-  "n_modules": 24,
+  "n_modules": 33,
   "fdr": 0.05,
   "scope": "module partition held fixed at the published one; preprocessing is varied and the features, eigengenes and age association are recomputed. A full refit per setting would additionally let the network change and is not done here."
 }

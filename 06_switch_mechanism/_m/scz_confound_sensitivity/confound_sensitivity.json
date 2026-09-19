@@ -61,5 +61,5 @@
   "fdr": 0.05,
   "baseline_tolerance": 1e-06,
   "n_samples": 390,
-  "n_modules": 33
+  "n_modules": 12
 }

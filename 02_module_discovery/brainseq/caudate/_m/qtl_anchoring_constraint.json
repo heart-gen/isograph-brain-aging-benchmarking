@@ -25,6 +25,8 @@
     }
   },
   "module_set_sizes": {
-    "all_modules": 5742
+    "all_modules": 6880,
+    "pheno_sig_modules": 1395,
+    "go_visible_modules": 1395
   }
 }

@@ -118,6 +118,22 @@ def test_targets_do_not_require_a_reported_competitor():
     assert set(snca["region"]) <= {"dlpfc", "caudate"}
 
 
+def test_absent_genes_are_a_null_not_a_crash(tmp_path, monkeypatch):
+    """Genes missing from the deep dive yield zero targets, and the region loop skips them."""
+    ev = pd.DataFrame({"gene_name": ["OTHER"], "junction": ["chr1:1-2"], "trait": ["ad"],
+                       "tissue": ["Brain_Cortex"], "junction_in_switch_pair": [True],
+                       "ens": ["ENSG0"], "clpp": [0.1], "risk_allele": ["A"]})
+    path = tmp_path / "deep_dive_events.parquet"
+    ev.to_parquet(path)
+    monkeypatch.setattr(jcc, "_DEEP_DIVE", path)
+    tgt = jcc.load_targets(("SNCA", "CTSH"))
+    assert tgt.empty and "region" in tgt.columns
+    res, nul = jcc.run_region("dlpfc", tgt, alpha=0.05, min_n=30, n_background_genes=1,
+                              max_pairs=1, seed=0, min_usage=0.05)
+    assert res.empty and nul.empty
+    assert "SNCA, CTSH" in jcc._write_report(res, 0.05, 0.05, missing=("SNCA", "CTSH"))
+
+
 # --------------------------------------------------------------------------- #
 # upstream parser (validate_switch_splicing)
 # --------------------------------------------------------------------------- #

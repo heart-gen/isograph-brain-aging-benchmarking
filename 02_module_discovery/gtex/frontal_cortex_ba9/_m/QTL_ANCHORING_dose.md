@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 5845 | 0.2087 | 0.2195 | 0.83 | 0.79 | 0.87 | 4.64e-15 | poisson_matched_standard |
-| sQTL | pheno_sig_modules | 4257 | 0.1976 | 0.2227 | 0.8 | 0.76 | 0.84 | 1.12e-17 | poisson_matched_standard |
-| sQTL | go_invisible_modules | 1801 | 0.2099 | 0.2156 | 0.81 | 0.76 | 0.87 | 2.20e-09 | poisson_matched_standard |
-| sQTL | go_visible_modules | 2456 | 0.1885 | 0.2207 | 0.86 | 0.81 | 0.91 | 1.49e-06 | poisson_matched_standard |
-| eQTL | all_modules | 6846 | 0.4963 | 0.551 | 0.85 | 0.81 | 0.89 | 6.31e-12 | poisson_matched_standard |
-| eQTL | pheno_sig_modules | 5056 | 0.4941 | 0.5443 | 0.84 | 0.8 | 0.89 | 9.93e-11 | poisson_matched_standard |
-| eQTL | go_invisible_modules | 1985 | 0.4922 | 0.5349 | 0.86 | 0.8 | 0.93 | 1.23e-04 | poisson_matched_standard |
-| eQTL | go_visible_modules | 3071 | 0.4953 | 0.5374 | 0.87 | 0.81 | 0.92 | 5.94e-06 | poisson_matched_standard |
+| sQTL | all_modules | 7881 | 0.2223 | 0.2046 | 0.86 | 0.82 | 0.9 | 4.82e-11 | poisson_matched_standard |
+| sQTL | pheno_sig_modules | 5360 | 0.2155 | 0.2144 | 0.85 | 0.81 | 0.89 | 1.40e-12 | poisson_matched_standard |
+| sQTL | go_invisible_modules | 702 | 0.235 | 0.2138 | 0.88 | 0.8 | 0.97 | 1.23e-02 | poisson_matched_standard |
+| sQTL | go_visible_modules | 4658 | 0.2125 | 0.2161 | 0.86 | 0.82 | 0.91 | 1.82e-09 | poisson_matched_standard |
+| eQTL | all_modules | 9201 | 0.5089 | 0.5525 | 0.87 | 0.83 | 0.91 | 2.85e-10 | poisson_matched_standard |
+| eQTL | pheno_sig_modules | 6299 | 0.5069 | 0.5427 | 0.87 | 0.83 | 0.91 | 1.50e-08 | poisson_matched_standard |
+| eQTL | go_invisible_modules | 775 | 0.5097 | 0.5311 | 0.92 | 0.82 | 1.02 | 1.23e-01 | poisson_matched_standard |
+| eQTL | go_visible_modules | 5524 | 0.5065 | 0.5407 | 0.88 | 0.84 | 0.92 | 2.43e-07 | poisson_matched_standard |
 
 ## Reading
 

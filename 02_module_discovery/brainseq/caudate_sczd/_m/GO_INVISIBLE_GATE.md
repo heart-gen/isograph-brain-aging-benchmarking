@@ -1,6 +1,6 @@
 # Biology gate — GO-invisible switch modules (brainseq-sczd)
 
-Phenotype-significant IsoGraph switch modules (pheno_fdr <= 0.1): **10** — 1 GO-enriched, **9 GO-invisible** (M010, M017, M015, M013, M031, M030, M012, M018, M014).
+Phenotype-significant IsoGraph switch modules (pheno_fdr <= 0.1): **6** — 1 GO-enriched, **5 GO-invisible** (M004, M007, M006, M008, M009).
 
 Reproduce: `python -m isograph_benchmark.real_data.go_invisible_gate --analysis brainseq-sczd`
 
@@ -8,18 +8,14 @@ Reproduce: `python -m isograph_benchmark.real_data.go_invisible_gate --analysis 
 
 | module | go_invisible | n_genes | pheno_fdr | genes_with_real_switch | max_switch_strength | n_sig_switch_tx | top_switch_genes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M020 | False | 43 | 0.0065 | 33 | 1.72 | 144 | NDUFS8, PPME1, AP2M1, ZNHIT1, NDUFB9, CNOT2, BLOC1S1, FH |
-| M010 | True | 145 | 0.0002 | 126 | 1.226 | 277 | LINC03000, ENSG00000293389, PALS2, MYEF2, NDRG4, FRG1HP, PASK, ABL2 |
-| M017 | True | 59 | 0.0017 | 57 | 1.558 | 228 | CWC27, DCAF6, GDAP2, BAZ2B, COQ9, PPP6R1, ATXN2, MRPS33 |
-| M015 | True | 66 | 0.0066 | 65 | 1.646 | 239 | BCCIP, SYT7, RPL15, H2BC6, SC5D, GSTM2, GTF3C1, SLC38A1 |
-| M013 | True | 105 | 0.0113 | 103 | 1.718 | 485 | ATP5IF1, ERCC6L2, FLCN, H2BC26, ACTR1B, TM2D3, KCTD13, CDK10 |
-| M031 | True | 21 | 0.0113 | 21 | 1.389 | 75 | PPP1R12C, DNAJC8, PDAP1, USP4, SLC6A8, FAM98C, OSBPL1A, C1orf174 |
-| M030 | True | 22 | 0.0364 | 22 | 1.423 | 60 | LAMP1, RNF13, NRXN2, SYNGR2, TUBA1A, PCCB, CLDND1, LPAR1 |
-| M012 | True | 113 | 0.0712 | 98 | 1.748 | 423 | NAPA, REEP1, LRP11, ANKLE2, UBE3C, CABP1, MACROD2, JPH4 |
-| M018 | True | 53 | 0.0712 | 50 | 1.779 | 326 | ENSA, NEDD8, CYTH2, NDUFV1, MSANTD1, AVL9, UQCRC1, PRMT7 |
-| M014 | True | 69 | 0.082 | 69 | 1.652 | 378 | CISD1, NDUFA3, EIF3L, UBB, MEIS2, DDX18, CDIPT, RAN |
+| M005 | False | 382 | 0.0243 | 348 | 1.814 | 1798 | RPAIN, COX11, GET4, TAF9, MAEA, AACS, RBX1, HARS1 |
+| M004 | True | 432 | 0.003 | 415 | 1.824 | 1652 | PIN1, CWC27, CADPS, FBXO9, ILKAP, PLEKHO1, FRA10AC1, COX7A2L |
+| M007 | True | 266 | 0.0064 | 262 | 1.83 | 1417 | TBCD, PRKAG2, BBIP1, DDX56, CZIB, DRG2, NPAS2, TTC19 |
+| M006 | True | 343 | 0.0179 | 343 | 1.795 | 1567 | MBTPS1, YEATS2, ERCC3, N4BP2L2, INTS11, FLCN, CBR4, UBE2Z |
+| M008 | True | 230 | 0.0197 | 228 | 1.785 | 1276 | PTRH2, COPS5, OAZ2, SPIRE2, DDRGK1, MPV17, WDR11, DDX19A |
+| M009 | True | 170 | 0.0243 | 169 | 1.839 | 1101 | FIG4, LGI1, MARK3, MACROH2A1, PRMT8, NUP93, RUVBL1, RAE1 |
 
-Pooled background functional-consequence fractions: cds_changed 0.929, coding_status_change 0.761, biotype_switch 0.847, utr_changed 0.606.
+Pooled background functional-consequence fractions: cds_changed 0.887, coding_status_change 0.775, biotype_switch 0.835, utr_changed 0.518.
 
 ## Reading
 

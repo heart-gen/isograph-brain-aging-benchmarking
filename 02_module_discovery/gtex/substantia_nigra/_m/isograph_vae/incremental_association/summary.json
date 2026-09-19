@@ -7,8 +7,8 @@
     "neither": 12235
   },
   "module_level": {
-    "n_tested": 29,
-    "composition_unique": 8,
+    "n_tested": 24,
+    "composition_unique": 3,
     "abundance_unique": 0,
     "both": 0,
     "neither": 21

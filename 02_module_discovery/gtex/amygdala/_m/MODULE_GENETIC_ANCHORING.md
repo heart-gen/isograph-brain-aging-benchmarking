@@ -6,16 +6,14 @@ Reproduce: `python -m isograph_benchmark.real_data.module_genetic_anchoring --an
 
 | module_id | module_size | go_invisible | sqtl_or | eqtl_or | contrast_log | null_mean | perm_p |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M000 | 1241 | False | 0.723 | 0.817 | -0.123 | -0.002 | 0.836 |
-| M001 | 1002 | False | 0.786 | 0.977 | -0.218 | -0.004 | 0.937 |
-| M003 | 449 | True | 1.004 | 1.058 | -0.052 | -0.003 | 0.601 |
-| M007 | 137 | False | 2.384 | 0.85 | 1.031 | -0.035 | 0.001 |
-| M008 | 115 | True | 1.147 | 0.741 | 0.437 | -0.011 | 0.096 |
-| M009 | 76 | True | 1.3 | 1.145 | 0.127 | -0.06 | 0.349 |
-| M010 | 72 | False | 0.446 | 0.798 | -0.581 | -0.06 | 0.877 |
-| M015 | 36 | True | 1.662 | 1.095 | 0.417 | -1.074 | 0.231 |
-| M016 | 31 | True | 1.966 | 0.907 | 0.774 | -0.79 | 0.091 |
-| M018 | 26 | True | 0.373 | 0.17 | 0.787 | -0.928 | 0.115 |
-| M022 | 20 | True | 1.856 | 1.746 | 0.061 | -3.19 | 0.463 |
+| M000 | 1370 | False | 0.799 | 0.945 | -0.168 | 0.005 | 0.945 |
+| M001 | 1252 | False | 0.647 | 0.76 | -0.161 | -0.006 | 0.927 |
+| M006 | 211 | True | 1.04 | 0.913 | 0.13 | -0.01 | 0.290 |
+| M007 | 156 | False | 2.507 | 0.819 | 1.119 | -0.013 | 0.001 |
+| M010 | 88 | True | 0.995 | 0.906 | 0.094 | -0.037 | 0.392 |
+| M012 | 68 | False | 0.448 | 0.703 | -0.451 | -0.061 | 0.830 |
+| M020 | 37 | True | 1.626 | 0.954 | 0.533 | -0.127 | 0.162 |
+| M022 | 30 | True | 1.433 | 1.365 | 0.049 | -1.176 | 0.456 |
+| M030 | 20 | True | 3.01 | 0.994 | 1.108 | -3.342 | 0.065 |
 
 _Caveat: cis-sQTL anchors member-gene splicing; a positive module contrast shows the module concentrates splicing-anchored genes above chance, not that a single variant drives the whole module. The eigenswitch×genotype and module-restricted S-LDSC tests (new controlled-genotype extraction) are the deeper follow-ons._

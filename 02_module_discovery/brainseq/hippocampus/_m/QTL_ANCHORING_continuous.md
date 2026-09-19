@@ -10,8 +10,12 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3551 | 0.149 | 0.1751 | 0.92 | 0.89 | 0.96 | 4.35e-05 | ols_rankint_matched_standard |
-| eQTL | all_modules | 4075 | 0.3367 | 0.3948 | 0.85 | 0.82 | 0.88 | 2.18e-19 | ols_rankint_matched_standard |
+| sQTL | all_modules | 3976 | 0.1461 | 0.1775 | 0.91 | 0.88 | 0.95 | 1.17e-06 | ols_rankint_matched_standard |
+| sQTL | pheno_sig_modules | 74 | 0.0946 | 0.1684 | 0.76 | 0.61 | 0.95 | 1.71e-02 | ols_rankint_matched_standard |
+| sQTL | go_invisible_modules | 74 | 0.0946 | 0.1684 | 0.76 | 0.61 | 0.95 | 1.71e-02 | ols_rankint_matched_standard |
+| eQTL | all_modules | 4588 | 0.3354 | 0.3975 | 0.84 | 0.82 | 0.87 | 6.94e-23 | ols_rankint_matched_standard |
+| eQTL | pheno_sig_modules | 76 | 0.3421 | 0.3818 | 0.86 | 0.69 | 1.08 | 1.85e-01 | ols_rankint_matched_standard |
+| eQTL | go_invisible_modules | 76 | 0.3421 | 0.3818 | 0.86 | 0.69 | 1.08 | 1.85e-01 | ols_rankint_matched_standard |
 
 ## Reading
 

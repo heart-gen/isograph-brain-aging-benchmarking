@@ -10,14 +10,12 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4196 | 0.1118 | 0.126 | 0.93 | 0.9 | 0.96 | 8.36e-05 | ols_rankint_matched_standard |
-| sQTL | pheno_sig_modules | 2745 | 0.0991 | 0.1274 | 0.91 | 0.88 | 0.95 | 2.03e-05 | ols_rankint_matched_standard |
-| sQTL | go_invisible_modules | 631 | 0.1347 | 0.1208 | 0.93 | 0.86 | 1.01 | 9.04e-02 | ols_rankint_matched_standard |
-| sQTL | go_visible_modules | 2114 | 0.0885 | 0.1278 | 0.92 | 0.87 | 0.96 | 1.86e-04 | ols_rankint_matched_standard |
-| eQTL | all_modules | 4823 | 0.2451 | 0.3016 | 0.87 | 0.84 | 0.9 | 1.79e-15 | ols_rankint_matched_standard |
-| eQTL | pheno_sig_modules | 3149 | 0.2232 | 0.2998 | 0.86 | 0.83 | 0.89 | 2.15e-14 | ols_rankint_matched_standard |
-| eQTL | go_invisible_modules | 697 | 0.2539 | 0.2874 | 0.92 | 0.86 | 1.0 | 3.68e-02 | ols_rankint_matched_standard |
-| eQTL | go_visible_modules | 2452 | 0.2145 | 0.2977 | 0.85 | 0.82 | 0.89 | 3.14e-13 | ols_rankint_matched_standard |
+| sQTL | all_modules | 6105 | 0.1242 | 0.1191 | 0.97 | 0.93 | 1.0 | 5.44e-02 | ols_rankint_matched_standard |
+| sQTL | pheno_sig_modules | 50 | 0.02 | 0.1218 | 0.82 | 0.63 | 1.08 | 1.68e-01 | ols_rankint_matched_standard |
+| sQTL | go_visible_modules | 50 | 0.02 | 0.1218 | 0.82 | 0.63 | 1.08 | 1.68e-01 | ols_rankint_matched_standard |
+| eQTL | all_modules | 7044 | 0.2656 | 0.2998 | 0.9 | 0.88 | 0.93 | 6.90e-11 | ols_rankint_matched_standard |
+| eQTL | pheno_sig_modules | 68 | 0.2059 | 0.2864 | 0.82 | 0.65 | 1.04 | 1.07e-01 | ols_rankint_matched_standard |
+| eQTL | go_visible_modules | 68 | 0.2059 | 0.2864 | 0.82 | 0.65 | 1.04 | 1.07e-01 | ols_rankint_matched_standard |
 
 ## Reading
 

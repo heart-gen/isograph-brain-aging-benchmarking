@@ -25,5 +25,5 @@
   "n_samples_covered": 270,
   "marker_top_n": 25,
   "n_module_celltype_marker_depleted_fdr05": 0,
-  "n_module_celltype_marker_enriched_fdr05": 2
+  "n_module_celltype_marker_enriched_fdr05": 1
 }

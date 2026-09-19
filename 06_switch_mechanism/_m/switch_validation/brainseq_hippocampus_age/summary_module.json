@@ -7,25 +7,25 @@
   "gene_corroboration": {
     "switch_set": "module",
     "n_genes": 12527,
-    "n_switch_pos": 0,
+    "n_switch_pos": 71,
     "n_psi_pos": 16,
     "contingency": {
       "switch_psi": 0,
-      "switch_only": 0,
+      "switch_only": 71,
       "psi_only": 16,
-      "neither": 12511
+      "neither": 12440
     },
     "psi_pos_rate_in_switch_genes": 0.0,
-    "psi_pos_rate_in_background": 0.001277241159096352,
-    "fisher_or": NaN,
+    "psi_pos_rate_in_background": 0.0012845215157353885,
+    "fisher_or": 0.0,
     "fisher_p": 1.0,
-    "adjusted_or": NaN,
-    "adjusted_p": NaN,
+    "adjusted_or": 2.6789074232682813e-07,
+    "adjusted_p": 0.9981214487501434,
     "alpha": 0.05
   },
   "event_resolved": {
-    "n_resolved_junctions": 39,
-    "n_matched_to_psi": 26,
+    "n_resolved_junctions": 76,
+    "n_matched_to_psi": 58,
     "n_both_significant": 0,
     "n_concordant": 0,
     "alpha": 0.05

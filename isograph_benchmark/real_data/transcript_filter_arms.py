@@ -60,7 +60,7 @@ from isograph_benchmark.paths import ensure_dir, region_store, stage_out
 
 COHORT = "brainseq"
 FDR = 0.05
-GIANT_GENES = 900  # the phenotype-blind giant-module criterion behind resolution 5.0
+GIANT_GENES = 900  # the phenotype-blind giant-module criterion (stated basis for 5.0 until 2026-09-16)
 
 SWITCHING = dict(min_gene_count=10.0, min_gene_fraction=0.70,
                  min_tx_count=10.0, min_tx_prop=0.10, min_tx_fraction=0.10)

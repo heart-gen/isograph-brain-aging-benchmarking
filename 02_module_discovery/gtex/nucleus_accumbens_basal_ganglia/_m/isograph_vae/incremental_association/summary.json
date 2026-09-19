@@ -7,11 +7,11 @@
     "neither": 12269
   },
   "module_level": {
-    "n_tested": 21,
+    "n_tested": 27,
     "composition_unique": 0,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 21
+    "neither": 27
   },
   "gene_level_effect_sizes": {
     "partial_r2_switch_given_abund": {

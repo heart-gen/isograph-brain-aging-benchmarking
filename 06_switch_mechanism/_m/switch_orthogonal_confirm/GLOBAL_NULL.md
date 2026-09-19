@@ -10,16 +10,16 @@ Is the long-read switch-like rate of IsoGraph switch pairs above that of abundan
 
 ## Result — nominally significant, and negligible
 
-- IsoGraph switch pairs: **0.6542** switch-like (8186 detected of 31258).
-- Abundance-matched non-switch pairs from the same genes: **0.6309** (95% null interval 0.6207-0.6410).
-- Empirical two-sided p = 0.0005; the difference is **+0.0232**.
-- Mean usage correlation: -0.2112 vs a null of -0.1696 (p = 0.0005).
+- IsoGraph switch pairs: **0.6487** switch-like (16016 detected of 58745).
+- Abundance-matched non-switch pairs from the same genes: **0.6229** (95% null interval 0.6161-0.6300).
+- Empirical two-sided p = 0.0005; the difference is **+0.0258**.
+- Mean usage correlation: -0.1945 vs a null of -0.1546 (p = 0.0005).
 
 **Read the effect size, not the p-value.** With ~18,000 focal pairs a difference of under one percentage point clears significance easily while meaning almost nothing. The honest statement is that IsoGraph switch pairs are *barely* more anti-correlated in long-read than arbitrary transcript pairs from the same genes.
 
 ## Why the null rate is so high, and what it costs the switch-like criterion
 
-Non-switch pairs are switch-like 63.1% of the time, and their mean usage correlation is -0.170 — negative before any biology is invoked. That is compositional closure, not a finding: within-gene isoform fractions sum to one, so any two isoforms of the same gene are negatively correlated by construction, and the more so the fewer isoforms the gene has.
+Non-switch pairs are switch-like 62.3% of the time, and their mean usage correlation is -0.155 — negative before any biology is invoked. That is compositional closure, not a finding: within-gene isoform fractions sum to one, so any two isoforms of the same gene are negatively correlated by construction, and the more so the fewer isoforms the gene has.
 
 The consequence is specific and should be carried wherever the long-read confirmation is cited: **a bare negative usage correlation is close to vacuous as evidence that a pair is a switch.** It does not invalidate the long-read confirmation — it means the rate must be read against this null rather than against zero, and that comparisons *within* the switch-pair universe (as in `--mode anchored`, where genetically anchored pairs beat matched switch pairs 0.453 to 0.252) carry far more information than the raw rate does.
 

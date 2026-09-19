@@ -113,13 +113,29 @@ gcs <- gcs[tissue == TISSUE]
 
 is_ambig <- function(a, b) (a=="A"&b=="T")|(a=="T"&b=="A")|(a=="C"&b=="G")|(a=="G"&b=="C")
 
-read_ld <- function(lid) {
+## An LD matrix is opened lazily and only the block a fit uses is read, row by row: a
+## whole-file readBin needs n*n in R's 32-bit integer range (<= 46,340 SNPs), which the
+## recurrence-1 aging loci exceed (54k-82k), and loading them to fit <= MAX_SNPS is waste.
+ld_open <- function(lid) {
     vf <- file.path(CDIR, paste0(lid, ".unphased.vcor1.bin.vars"))
     bf <- file.path(CDIR, paste0(lid, ".unphased.vcor1.bin"))
     if (!file.exists(vf) || !file.exists(bf)) return(NULL)
-    vars <- readLines(vf); n <- length(vars)
-    con <- file(bf, "rb"); m <- readBin(con, "numeric", n = n*n, size = 4); close(con)
-    R <- matrix(m, n, n, byrow = TRUE); dimnames(R) <- list(vars, vars); R
+    list(bf = bf, vars = readLines(vf))
+}
+ld_block <- function(ld, keep) {
+    n <- length(ld$vars); idx <- match(keep, ld$vars)
+    stopifnot(!anyNA(idx))
+    con <- file(ld$bf, "rb"); on.exit(close(con))
+    if (n <= 46340L) {  # fits one readBin: the original whole-matrix read
+        R <- matrix(readBin(con, "numeric", n = n * n, size = 4), n, n, byrow = TRUE)
+        R <- R[idx, idx, drop = FALSE]; dimnames(R) <- list(keep, keep); return(R)
+    }
+    R <- matrix(NA_real_, length(idx), length(idx), dimnames = list(keep, keep))
+    for (k in seq_along(idx)) {  # row-major float32; offsets as double past 2 GB
+        seek(con, (as.numeric(idx[k]) - 1) * n * 4)
+        R[k, ] <- readBin(con, "numeric", n = n, size = 4)[idx]
+    }
+    R
 }
 
 ## One (gwas signal x qtl signal) posterior table for one cell, swept over p12.
@@ -231,9 +247,9 @@ for (CH in chrs) {
         if (!file.exists(rds)) next
         G <- readRDS(rds)
         if (!length(G$fit$sets$cs)) { rm(G); next }
-        R <- read_ld(lid)
+        R <- ld_open(lid)
         if (is.null(R)) { rm(G); next }
-        Rg <- R[G$snps, G$snps, drop = FALSE]
+        Rg <- ld_block(R, G$snps)
         rm(R); gc(verbose = FALSE)
 
         lg <- tg[LOCUS_ID == lid]

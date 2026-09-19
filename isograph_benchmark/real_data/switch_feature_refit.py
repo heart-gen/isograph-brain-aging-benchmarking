@@ -84,7 +84,7 @@ def counts_for_setting(counts: np.ndarray, table: pd.DataFrame, setting: dict):
 
 
 def production_config(cohort: str):
-    """The production VaeModelConfig (run_models.run_{brainseq,gtex}_region), resolution 5.0."""
+    """The production VaeModelConfig (run_models.run_{brainseq,gtex}_region), canonical resolution."""
     from isograph.workflow.config import VaeModelConfig
 
     return VaeModelConfig(

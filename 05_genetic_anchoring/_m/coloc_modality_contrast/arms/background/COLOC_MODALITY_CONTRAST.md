@@ -26,13 +26,13 @@ cells with `>= 100` shared SNPs in **both** modalities.
 
 | analysis | trait | genes | sQTL coloc | eQTL coloc | splicing-only | expression-only | McNemar P | q | median cond PP4 sQTL | eQTL | Wilcoxon P |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| aging__ad | ad | 2614 | 34 | 60 | 19 | 45 | 0.00156 | 0.00313 | 0.234 | 0.224 | 0.0521 |
-| aging__als | als | 1323 | 24 | 29 | 14 | 19 | 0.487 | 0.487 | 0.28 | 0.268 | 0.154 |
-| aging__lbd | lbd | 486 | 1 | 5 | 1 | 5 | 0.219 | 0.263 | 0.263 | 0.256 | 0.696 |
-| aging__pd | pd | 1065 | 12 | 29 | 6 | 23 | 0.00232 | 0.00347 | 0.248 | 0.246 | 0.556 |
-| aging__scz | scz | 5824 | 90 | 170 | 52 | 132 | 3.28e-09 | 1.97e-08 | 0.257 | 0.231 | 5.72e-09 |
-| brainseq-sczd__scz | scz | 2312 | 50 | 87 | 30 | 67 | 0.000219 | 0.000657 | 0.279 | 0.255 | 0.014 |
-| **POOLED** | ALL | 13624 | 211 | 380 | 122 | 291 | 5.01e-17 | - | 0.257 | 0.24 | 1.1e-09 |
+| aging__ad | ad | 3205 | 35 | 70 | 17 | 52 | 2.93e-05 | 5.86e-05 | 0.227 | 0.216 | 0.075 |
+| aging__als | als | 1504 | 25 | 30 | 15 | 20 | 0.5 | 0.5 | 0.268 | 0.261 | 0.0512 |
+| aging__lbd | lbd | 647 | 1 | 5 | 1 | 5 | 0.219 | 0.263 | 0.251 | 0.251 | 0.587 |
+| aging__pd | pd | 1361 | 13 | 30 | 7 | 24 | 0.00333 | 0.00499 | 0.228 | 0.232 | 0.155 |
+| aging__scz | scz | 6983 | 96 | 187 | 55 | 146 | 1.05e-10 | 6.29e-10 | 0.244 | 0.223 | 4.46e-08 |
+| brainseq-sczd__scz | scz | 4651 | 78 | 146 | 49 | 117 | 1.35e-07 | 4.04e-07 | 0.266 | 0.242 | 7.14e-07 |
+| **POOLED** | ALL | 18351 | 248 | 468 | 144 | 364 | 5.27e-23 | - | 0.247 | 0.231 | 2e-12 |
 
 `splicing-only` / `expression-only` are the **discordant** genes -- the ones the
 McNemar test is computed on. Concordant genes (both or neither) carry no
@@ -53,11 +53,11 @@ information about which modality colocalizes and are excluded by construction.
 
 | arm | p12 | PP4 call | min shared SNPs | pooled genes | splicing-only | expression-only | McNemar P |
 |---|---|---|---|---|---|---|---|
-| primary | 1e-05 | 0.8 | 100 | 13624 | 122 | 291 | 5.01e-17 |
-| p12_5e-6 | 5e-06 | 0.8 | 100 | 13624 | 85 | 202 | 3.8e-12 |
-| p12_1e-6 | 1e-06 | 0.8 | 100 | 13624 | 26 | 61 | 0.000224 |
-| pp4_call_0.5 | 1e-05 | 0.5 | 100 | 13624 | 326 | 662 | 5.12e-27 |
-| min_shared_500 | 1e-05 | 0.8 | 500 | 13607 | 122 | 291 | 5.01e-17 |
+| primary | 1e-05 | 0.8 | 100 | 18351 | 144 | 364 | 5.27e-23 |
+| p12_5e-6 | 5e-06 | 0.8 | 100 | 18351 | 93 | 250 | 9.63e-18 |
+| p12_1e-6 | 1e-06 | 0.8 | 100 | 18351 | 28 | 65 | 0.000158 |
+| pp4_call_0.5 | 1e-05 | 0.5 | 100 | 18351 | 408 | 800 | 7.33e-30 |
+| min_shared_500 | 1e-05 | 0.8 | 500 | 18334 | 144 | 364 | 5.27e-23 |
 
 ## GO-invisible split
 
@@ -67,29 +67,29 @@ set-level `qtl_anchoring` result does **not** localise there after the
 
 | analysis | GO-invisible | genes | splicing-only | expression-only | McNemar P |
 |---|---|---|---|---|---|
-| aging__ad | False | 233 | 2 | 5 | 0.453 |
-| aging__ad | NA | 2210 | 16 | 34 | 0.0153 |
-| aging__ad | True | 171 | 1 | 6 | 0.125 |
-| aging__als | False | 96 | 2 | 2 | 1 |
-| aging__als | NA | 1134 | 10 | 16 | 0.327 |
-| aging__als | True | 93 | 2 | 1 | 1 |
-| aging__lbd | False | 40 | 0 | 0 | n/a |
-| aging__lbd | NA | 407 | 1 | 4 | 0.375 |
-| aging__lbd | True | 39 | 0 | 1 | 1 |
-| aging__pd | False | 101 | 0 | 4 | 0.125 |
-| aging__pd | NA | 897 | 6 | 15 | 0.0784 |
-| aging__pd | True | 67 | 0 | 4 | 0.125 |
-| aging__scz | False | 584 | 6 | 13 | 0.167 |
-| aging__scz | NA | 4779 | 44 | 107 | 3.09e-07 |
-| aging__scz | True | 461 | 2 | 12 | 0.0129 |
-| brainseq-sczd__scz | False | 14 | 0 | 0 | n/a |
-| brainseq-sczd__scz | NA | 2159 | 29 | 63 | 0.000509 |
-| brainseq-sczd__scz | True | 139 | 1 | 4 | 0.375 |
+| aging__ad | False | 861 | 8 | 21 | 0.0241 |
+| aging__ad | NA | 1917 | 6 | 20 | 0.00936 |
+| aging__ad | True | 427 | 3 | 11 | 0.0574 |
+| aging__als | False | 402 | 6 | 9 | 0.607 |
+| aging__als | NA | 905 | 5 | 7 | 0.774 |
+| aging__als | True | 197 | 4 | 4 | 1 |
+| aging__lbd | False | 142 | 0 | 2 | 0.5 |
+| aging__lbd | NA | 427 | 0 | 3 | 0.25 |
+| aging__lbd | True | 78 | 1 | 0 | 1 |
+| aging__pd | False | 345 | 3 | 10 | 0.0923 |
+| aging__pd | NA | 821 | 4 | 11 | 0.118 |
+| aging__pd | True | 195 | 0 | 3 | 0.25 |
+| aging__scz | False | 2107 | 20 | 57 | 2.93e-05 |
+| aging__scz | NA | 3840 | 19 | 63 | 1.15e-06 |
+| aging__scz | True | 1036 | 16 | 26 | 0.164 |
+| brainseq-sczd__scz | False | 116 | 1 | 0 | 1 |
+| brainseq-sczd__scz | NA | 4064 | 44 | 101 | 2.49e-06 |
+| brainseq-sczd__scz | True | 471 | 4 | 16 | 0.0118 |
 
 ## Scope and limits
 
-* 1,058,898 `coloc.abf` fits; 156,775 paired (gene, locus, tissue) cells;
-  13,624 (gene, locus) pairs after collapsing tissues by maximum.
+* 1,424,571 `coloc.abf` fits; 210,582 paired (gene, locus, tissue) cells;
+  18,351 (gene, locus) pairs after collapsing tissues by maximum.
 * `coloc.abf` assumes a **single causal variant** per trait per window. Where two
   independent causal variants sit in one window it under-calls sharing, for both
   arms alike. The CLPP layer (`03b.coloc_clpp.R`) does not make this assumption and

@@ -1,0 +1,29 @@
+{
+  "analysis": "gtex-aging",
+  "region": "nucleus_accumbens_basal_ganglia",
+  "variant": "standard",
+  "cell_types": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC",
+    "Oligo"
+  ],
+  "composition_covariates": [
+    "Astro",
+    "D1-SPN",
+    "D2-SPN",
+    "Immune",
+    "Inhib",
+    "Micro",
+    "OPC"
+  ],
+  "n_samples": 285,
+  "n_samples_covered": 285,
+  "marker_top_n": 25,
+  "n_module_celltype_marker_depleted_fdr05": 0,
+  "n_module_celltype_marker_enriched_fdr05": 1
+}

@@ -317,7 +317,7 @@ def _testable_gene_universe() -> pd.DataFrame:
 
 
 def _wgcna_pheno_sig_genes(arm: str, fdr: float = 0.05,
-                           min_recurrence: int = 2) -> pd.DataFrame:
+                           min_recurrence: int | None = None) -> pd.DataFrame:
     """Genes in the matched WGCNA phenotype-significant modules, with module ids.
 
     Mirrors `coloc_prep._resolve_switch_genes` bundle logic (recurrence over the same
@@ -326,10 +326,12 @@ def _wgcna_pheno_sig_genes(arm: str, fdr: float = 0.05,
     """
     from collections import Counter
 
-    from isograph_benchmark.real_data.coloc_prep import _artifact_dir
+    from isograph_benchmark.real_data.coloc_prep import MIN_RECURRENCE, _artifact_dir
     from isograph_benchmark.real_data.qtl_anchoring import build_gene_sets
     from isograph_benchmark.real_data.switch_bundles import get_bundle
 
+    if min_recurrence is None:  # same gate as the IsoGraph switch arm (was 2 vs 3)
+        min_recurrence = MIN_RECURRENCE
     counts: Counter = Counter()
     frames = []
     for a, r in get_bundle("aging"):

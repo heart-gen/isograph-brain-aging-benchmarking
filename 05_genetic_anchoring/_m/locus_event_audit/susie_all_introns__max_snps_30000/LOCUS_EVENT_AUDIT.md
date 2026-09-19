@@ -31,9 +31,9 @@ sQTL arm: `all`.
 ## Tier counts
 
 - `known_mechanism_recovered`: 0
-- `context_distinct_splice_colocalization`: 0
+- `context_distinct_splice_colocalization`: 1
 - `disease_locus_splice_linked`: 0
-- `novel_splice_led_candidate`: 4
+- `novel_splice_led_candidate`: 20
 - `not_resolved`: 0
 
 ## Evidence strength per nomination
@@ -43,36 +43,73 @@ Two descriptors travel with every nominated PP4, read at the headline tissue the
 - **Prior robustness**: the smallest `p12` in the sweep at which PP4 still clears 0.8. `robust` holds at 1e-6, `intermediate` from 5e-6, `primary_prior` only from the pre-specified 1e-5 upward. PP4 is monotone in p12, so this is the range the call survives rather than one arbitrary prior.
 - **Why coloc.abf**, for a headline `coloc.susie` did not score: the first place the cell left the signal-level pipeline. `gwas_locus_over_max_snps` was never tested at signal level. `gwas_no_credible_set` was tested and the GWAS did not fine-map, which weakens any colocalization claimed there. `qtl_cs_not_matching_gtex` is the reference-LD artefact the agreement filter exists to remove.
 
-| headline estimator | `intermediate` | `primary_prior` | total |
-|---|---|---|---|
-| abf | 2 | 1 | 3 |
-| susie | 0 | 1 | 1 |
+| headline estimator | `robust` | `intermediate` | `primary_prior` | total |
+|---|---|---|---|---|
+| abf | 0 | 5 | 6 | 11 |
+| susie | 6 | 2 | 2 | 10 |
 
 | why coloc.abf | nominations |
 |---|---|
-| `gwas_no_credible_set` | 1 |
+| `gwas_no_credible_set` | 4 |
+| `no_qtl_credible_set` | 4 |
+| `qtl_cs_not_matching_gtex` | 2 |
 | `gwas_locus_over_max_snps` | 1 |
-| `no_qtl_credible_set` | 1 |
 
 | gene | trait | PP4 sQTL | headline tissue | estimator | why abf | PP4 at p12=1e-6 | calls from p12 | prior | robust tissues |
 |---|---|---|---|---|---|---|---|---|---|
-| TPCN1 | ad | 0.861 | Brain_Cerebellar_Hemisphere | susie | — | 0.382 | 1e-05 | `primary_prior` | 0/2 |
+| TMEM259 | ad | 1.000 | Brain_Hippocampus | susie | — | 1.000 | 1e-06 | `robust` | 1/1 |
+| PILRB | ad | 0.999 | Brain_Putamen_basal_ganglia | susie | — | 0.985 | 1e-06 | `robust` | 1/1 |
+| BCKDK | ad | 0.995 | Brain_Spinal_cord_cervical_c-1 | susie | — | 0.955 | 1e-06 | `robust` | 4/4 |
+| RAD51C | ad | 0.992 | Brain_Cortex | susie | — | 0.923 | 1e-06 | `robust` | 1/1 |
+| SLC39A13 | ad | 0.986 | Brain_Spinal_cord_cervical_c-1 | susie | — | 0.874 | 1e-06 | `robust` | 2/4 |
+| ITGB1BP1 | ad | 0.979 | Brain_Cerebellar_Hemisphere | susie | — | 0.822 | 1e-06 | `robust` | 2/5 |
+| INTS8 | ad | 0.940 | Brain_Nucleus_accumbens_basal_ganglia | susie | — | 0.609 | 5e-06 | `intermediate` | 0/4 |
+| INO80E | ad | 0.903 | Brain_Cerebellum | susie | — | 0.482 | 5e-06 | `intermediate` | 0/3 |
+| TPCN1 | ad | 0.861 | Brain_Cerebellar_Hemisphere | susie | — | 0.383 | 1e-05 | `primary_prior` | 0/2 |
+| PICALM | ad | 0.813 | Brain_Cortex | susie | — | 0.303 | 1e-05 | `primary_prior` | 0/1 |
 | SIRPA | ad | 0.965 | Brain_Cerebellar_Hemisphere | abf | `gwas_no_credible_set` | 0.736 | 5e-06 | `intermediate` | 0/13 |
+| YPEL3 | ad | 0.935 | Brain_Substantia_nigra | abf | `no_qtl_credible_set` | 0.591 | 5e-06 | `intermediate` | 0/4 |
+| SPI1 | ad | 0.926 | Brain_Cerebellar_Hemisphere | abf | `no_qtl_credible_set` | 0.555 | 5e-06 | `intermediate` | 0/1 |
+| SERPINB1 | ad | 0.917 | Brain_Spinal_cord_cervical_c-1 | abf | `gwas_no_credible_set` | 0.526 | 5e-06 | `intermediate` | 0/1 |
 | ZNF232 | ad | 0.899 | Brain_Spinal_cord_cervical_c-1 | abf | `gwas_locus_over_max_snps` | 0.471 | 5e-06 | `intermediate` | 0/1 |
+| DOC2A | ad | 0.881 | Brain_Amygdala | abf | `qtl_cs_not_matching_gtex` | 0.425 | 1e-05 | `primary_prior` | 0/1 |
+| IFNAR2 | ad | 0.870 | Brain_Nucleus_accumbens_basal_ganglia | abf | `gwas_no_credible_set` | 0.401 | 1e-05 | `primary_prior` | 0/7 |
 | NDUFS3 | ad | 0.864 | Brain_Cerebellar_Hemisphere | abf | `no_qtl_credible_set` | 0.388 | 1e-05 | `primary_prior` | 0/1 |
+| VWA5B2 | ad | 0.864 | Brain_Amygdala | abf | `gwas_no_credible_set` | 0.388 | 1e-05 | `primary_prior` | 0/1 |
+| AKT1 | ad | 0.840 | Brain_Caudate_basal_ganglia | abf | `no_qtl_credible_set` | 0.345 | 1e-05 | `primary_prior` | 0/1 |
+| COG7 | ad | 0.837 | Brain_Amygdala | abf | `qtl_cs_not_matching_gtex` | 0.339 | 1e-05 | `primary_prior` | 0/1 |
 
 ## Loci with a curated event
 
-_None of the nominated loci carries a curated event._
+| gene | trait | PP4 sQTL | tissues coloc | colocalizing introns | interval match | promotes | tier |
+|---|---|---|---|---|---|---|---|
+| PICALM | ad | 0.813 | 1/13 | chr11:85974812-85981129 | no | no | `context_distinct_splice_colocalization` |
 
 ## Top nominations by posterior
 
 | gene | trait | PP4 sQTL | PP4 eQTL | introns named | driver tx | tier |
 |---|---|---|---|---|---|---|
+| TMEM259 | ad | 1.000 | 0.001 | 1 | 6 | `novel_splice_led_candidate` |
+| PILRB | ad | 0.999 | 0.000 | 1 | 1 | `novel_splice_led_candidate` |
+| BCKDK | ad | 0.995 | 0.258 | 2 | 0 | `novel_splice_led_candidate` |
+| RAD51C | ad | 0.992 | 0.031 | 1 | 1 | `novel_splice_led_candidate` |
+| SLC39A13 | ad | 0.986 | 0.974 | 3 | 8 | `novel_splice_led_candidate` |
+| ITGB1BP1 | ad | 0.979 | 0.215 | 2 | 4 | `novel_splice_led_candidate` |
 | SIRPA | ad | 0.965 | 0.947 | 2 | 4 | `novel_splice_led_candidate` |
+| INTS8 | ad | 0.940 | 0.086 | 2 | 7 | `novel_splice_led_candidate` |
+| YPEL3 | ad | 0.935 | 0.932 | 2 | 2 | `novel_splice_led_candidate` |
+| SPI1 | ad | 0.926 | 0.881 | 1 | 1 | `novel_splice_led_candidate` |
+| SERPINB1 | ad | 0.917 | 0.967 | 1 | 1 | `novel_splice_led_candidate` |
+| INO80E | ad | 0.903 | 0.860 | 2 | 6 | `novel_splice_led_candidate` |
 | ZNF232 | ad | 0.899 | 0.750 | 1 | 6 | `novel_splice_led_candidate` |
+| DOC2A | ad | 0.881 | 0.986 | 1 | 6 | `novel_splice_led_candidate` |
+| IFNAR2 | ad | 0.870 | 0.829 | 3 | 12 | `novel_splice_led_candidate` |
 | NDUFS3 | ad | 0.864 | 0.099 | 1 | 1 | `novel_splice_led_candidate` |
+| VWA5B2 | ad | 0.864 | 0.642 | 1 | 0 | `novel_splice_led_candidate` |
 | TPCN1 | ad | 0.861 | 0.819 | 2 | 8 | `novel_splice_led_candidate` |
+| AKT1 | ad | 0.840 | 0.157 | 1 | 1 | `novel_splice_led_candidate` |
+| COG7 | ad | 0.837 | 0.939 | 1 | 2 | `novel_splice_led_candidate` |
+| PICALM | ad | 0.813 | 0.491 | 1 | 2 | `context_distinct_splice_colocalization` |
 
 ## References for the curated events
 

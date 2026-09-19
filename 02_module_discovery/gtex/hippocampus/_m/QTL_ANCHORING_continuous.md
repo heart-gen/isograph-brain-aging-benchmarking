@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4607 | 0.153 | 0.1741 | 0.91 | 0.88 | 0.94 | 3.64e-07 | ols_rankint_matched_standard |
-| sQTL | pheno_sig_modules | 1406 | 0.1408 | 0.1699 | 0.89 | 0.85 | 0.94 | 3.75e-05 | ols_rankint_matched_standard |
-| sQTL | go_invisible_modules | 33 | 0.0909 | 0.167 | 0.93 | 0.66 | 1.29 | 6.55e-01 | ols_rankint_matched_standard |
-| sQTL | go_visible_modules | 1373 | 0.142 | 0.1696 | 0.89 | 0.84 | 0.94 | 4.25e-05 | ols_rankint_matched_standard |
-| eQTL | all_modules | 5370 | 0.3512 | 0.4068 | 0.89 | 0.86 | 0.92 | 8.29e-13 | ols_rankint_matched_standard |
-| eQTL | pheno_sig_modules | 1731 | 0.3056 | 0.3991 | 0.84 | 0.8 | 0.88 | 1.40e-12 | ols_rankint_matched_standard |
-| eQTL | go_invisible_modules | 40 | 0.3 | 0.3902 | 0.89 | 0.66 | 1.22 | 4.81e-01 | ols_rankint_matched_standard |
-| eQTL | go_visible_modules | 1691 | 0.3057 | 0.3989 | 0.84 | 0.8 | 0.88 | 1.86e-12 | ols_rankint_matched_standard |
+| sQTL | all_modules | 6678 | 0.1628 | 0.1709 | 0.92 | 0.89 | 0.95 | 7.73e-07 | ols_rankint_matched_standard |
+| sQTL | pheno_sig_modules | 1165 | 0.1279 | 0.1705 | 0.89 | 0.84 | 0.94 | 5.85e-05 | ols_rankint_matched_standard |
+| sQTL | go_invisible_modules | 40 | 0.225 | 0.1666 | 0.98 | 0.72 | 1.33 | 8.94e-01 | ols_rankint_matched_standard |
+| sQTL | go_visible_modules | 1125 | 0.1244 | 0.1707 | 0.88 | 0.83 | 0.94 | 4.98e-05 | ols_rankint_matched_standard |
+| eQTL | all_modules | 7780 | 0.3695 | 0.4059 | 0.91 | 0.88 | 0.94 | 2.81e-10 | ols_rankint_matched_standard |
+| eQTL | pheno_sig_modules | 1458 | 0.2867 | 0.3992 | 0.82 | 0.77 | 0.86 | 7.73e-14 | ols_rankint_matched_standard |
+| eQTL | go_invisible_modules | 43 | 0.4419 | 0.3899 | 0.86 | 0.64 | 1.16 | 3.23e-01 | ols_rankint_matched_standard |
+| eQTL | go_visible_modules | 1415 | 0.282 | 0.3993 | 0.82 | 0.77 | 0.86 | 1.38e-13 | ols_rankint_matched_standard |
 
 ## Reading
 

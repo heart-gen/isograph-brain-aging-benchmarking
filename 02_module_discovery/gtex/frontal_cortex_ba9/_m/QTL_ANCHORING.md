@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 5845 | 0.2087 | 0.2195 | 0.87 | 0.79 | 0.95 | 1.42e-03 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 4257 | 0.1976 | 0.2227 | 0.82 | 0.75 | 0.91 | 6.23e-05 | logit_matched_standard |
-| sQTL | go_invisible_modules | 1801 | 0.2099 | 0.2156 | 0.85 | 0.75 | 0.96 | 1.18e-02 | logit_matched_standard |
-| sQTL | go_visible_modules | 2456 | 0.1885 | 0.2207 | 0.86 | 0.77 | 0.97 | 1.04e-02 | logit_matched_standard |
-| eQTL | all_modules | 6846 | 0.4963 | 0.551 | 0.8 | 0.75 | 0.85 | 1.03e-12 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 5056 | 0.4941 | 0.5443 | 0.83 | 0.78 | 0.89 | 3.21e-08 | logit_matched_standard |
-| eQTL | go_invisible_modules | 1985 | 0.4922 | 0.5349 | 0.82 | 0.75 | 0.91 | 6.34e-05 | logit_matched_standard |
-| eQTL | go_visible_modules | 3071 | 0.4953 | 0.5374 | 0.88 | 0.81 | 0.95 | 1.08e-03 | logit_matched_standard |
+| sQTL | all_modules | 7881 | 0.2223 | 0.2046 | 0.95 | 0.87 | 1.04 | 2.80e-01 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 5360 | 0.2155 | 0.2144 | 0.91 | 0.83 | 0.99 | 3.58e-02 | logit_matched_standard |
+| sQTL | go_invisible_modules | 702 | 0.235 | 0.2138 | 0.99 | 0.82 | 1.19 | 8.79e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 4658 | 0.2125 | 0.2161 | 0.91 | 0.83 | 0.99 | 3.70e-02 | logit_matched_standard |
+| eQTL | all_modules | 9201 | 0.5089 | 0.5525 | 0.82 | 0.77 | 0.87 | 1.51e-10 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 6299 | 0.5069 | 0.5427 | 0.87 | 0.81 | 0.92 | 5.86e-06 | logit_matched_standard |
+| eQTL | go_invisible_modules | 775 | 0.5097 | 0.5311 | 0.88 | 0.76 | 1.01 | 7.47e-02 | logit_matched_standard |
+| eQTL | go_visible_modules | 5524 | 0.5065 | 0.5407 | 0.88 | 0.83 | 0.94 | 9.95e-05 | logit_matched_standard |
 
 ## Reading
 

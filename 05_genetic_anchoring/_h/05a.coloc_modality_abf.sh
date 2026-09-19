@@ -4,7 +4,7 @@
 #SBATCH --job-name=coloc-mod-abf
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH --time=04:00:00
 #SBATCH --array=0-12
 #SBATCH --output=05_genetic_anchoring/_m/logs/coloc-mod-abf-%A_%a.log
@@ -14,8 +14,9 @@
 # pushdown (a chromosome's candidate genes read in ~1 s eQTL / ~4 s sQTL), so the
 # 273 GB of brain all-pairs is never scanned.
 #
-# Memory on PSC is --cpus-per-task x 2000MB; 8 cpus = 16 GB, which holds one
-# chromosome of both modalities plus the chromosome's variant bridge.
+# Memory on PSC is --cpus-per-task x 2000MB; 16 cpus = 32 GB. One chromosome of both
+# modalities plus its variant bridge peaked at 14.6 GB of 16 on the recurrence-1 gene
+# pool (2026-09-18; Brain_Cerebellum + Brain_Cortex background arm OOM), so 8 cpus is too tight.
 #
 # Requires 04d.coloc_modality_prep.sh to have run (targets + variant bridge).
 
