@@ -146,6 +146,12 @@ reports/pi/
 # single-pass stream over the multi-GB allelic-count file, regenerated every run.
 06_switch_mechanism/_m/ase_switch_direction/**/_buckets.txt
 
+# Allele-aware junction recount (Quest): per-BAM count shards and bcftools scratch. The
+# pooled junction_allelic_counts.parquet is the tracked product.
+06_switch_mechanism/_m/ase_junction_switch/**/counts/
+06_switch_mechanism/_m/ase_junction_switch/**/_lead_*
+06_switch_mechanism/_m/ase_junction_switch/**/_donors.txt
+
 # BrainSEQ swQTL/eQTL nominal cis output (18 GB of tensorQTL cis_qtl_pairs shards, plus
 # the two phenotype BEDs per region) and the per-locus GWAS SuSiE cache (348 MB of RDS).
 # Same class as 05_genetic_anchoring/_m/coloc/*/ above: regenerable from 05_genetic_anchoring/_h/03c + 06b and
