@@ -1,0 +1,87 @@
+{
+  "region": "dlpfc",
+  "min_paired_het_donors": 10,
+  "min_reads_between": 5,
+  "qval_threshold": 0.05,
+  "families": {
+    "gate_family": {
+      "n_pairs": 1014,
+      "n_fitted": 853,
+      "n_genes_fitted": 115,
+      "n_nominal_p05": 189,
+      "n_q05": 98,
+      "n_genes_q05": 37,
+      "sign_agreement_between": 0.593200468933177,
+      "sign_agreement_between_q05": 0.8163265306122449,
+      "n_not_converged": 13,
+      "n_at_bound": 21,
+      "n_at_bound_q05": 6
+    },
+    "coloc_nominated": {
+      "n_pairs": 97,
+      "n_fitted": 69,
+      "n_genes_fitted": 9,
+      "n_nominal_p05": 7,
+      "n_q05": 0,
+      "n_genes_q05": 0,
+      "sign_agreement_between": 0.5507246376811594,
+      "sign_agreement_between_q05": null,
+      "n_not_converged": 0,
+      "n_at_bound": 4,
+      "n_at_bound_q05": 0
+    }
+  },
+  "status_counts": {
+    "fitted": 915,
+    "too_few_paired_het_donors": 127,
+    "one_isoform_in_het_donors": 62
+  },
+  "hom_null": {
+    "n_fitted": 851,
+    "frac_p05": 0.043478260869565216,
+    "lambda_gc": 1.0110232660926892
+  },
+  "lambda_gc_het": 2.609950475689715,
+  "score_vs_glmm_spearman": 0.8726348522340011,
+  "median_lead_site_kb": 18.185,
+  "risk_alleles": null,
+  "modules": [
+    {
+      "module_id": "M000",
+      "module_age_trait": "Age_spline",
+      "module_age_effect": -2.0463829957266806,
+      "pairs_fitted": 441,
+      "genes_fitted": 58,
+      "pairs_q05": 47,
+      "genes_q05": 20
+    },
+    {
+      "module_id": "M007",
+      "module_age_trait": "Age_spline",
+      "module_age_effect": -1.5072675295121307,
+      "pairs_fitted": 278,
+      "genes_fitted": 32,
+      "pairs_q05": 35,
+      "genes_q05": 11
+    },
+    {
+      "module_id": "M008",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.22849790863580655,
+      "pairs_fitted": 134,
+      "genes_fitted": 25,
+      "pairs_q05": 16,
+      "genes_q05": 6
+    }
+  ],
+  "module_direction": {
+    "n_genes": 104,
+    "min_pairs": 3,
+    "median_abs_rho": 0.39999999999999997,
+    "null_median_abs_rho": 0.30660934898328873,
+    "null_q95": 0.36904761904761907,
+    "perm_p": 0.005994005994005994,
+    "n_genes_ge2_sig_pairs": 22,
+    "n_genes_all_sig_pairs_aligned": 7
+  }
+}
