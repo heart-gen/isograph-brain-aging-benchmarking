@@ -864,7 +864,9 @@ def run(cfg: dict[str, Any], config_path: Path) -> dict[str, Path]:
     membership = pd.read_parquet(membership_path)
     ctag_calls = pd.read_parquet(ctag_path)
     membership_candidate_ids = set(membership["candidate_id"].dropna())
-    if len(membership_candidate_ids) != int(stage["expected_candidate_rows"]):
+    # Membership holds canonical candidate ids, which regions can share.
+    expected_unique = stage.get("expected_unique_candidates", stage["expected_candidate_rows"])
+    if len(membership_candidate_ids) != int(expected_unique):
         raise RuntimeError("Frozen human-window candidate membership changed")
     if set(human_windows["candidate_id"].dropna()) - membership_candidate_ids:
         raise RuntimeError("Frozen human windows contain unexpected candidates")

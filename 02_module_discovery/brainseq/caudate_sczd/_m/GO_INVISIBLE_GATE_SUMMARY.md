@@ -52,17 +52,20 @@ environment with fixed seeds.
 ## Results text
 
 **All phenotype-significant SCZD switch modules are GO-invisible.** Four IsoGraph switch
-modules are associated with schizophrenia case/control status (pheno_fdr ≤ 0.1): M026
-(FDR 0.0019), M020 (0.017), M010 (0.027), and M023 (0.047). **All four return zero enriched
-GO terms** (`n_go_terms = 0`); there are no GO-enriched disease switch modules in this
-analysis. Classical pathway enrichment is blind to the entire phenotype-associated switch
-signal here.
+*(Corrected 2026-09-12: the committed gate table was a mixed-generation artifact — two rows reported more real-switch genes than the module has (31/30, 28/27) and no row matches any module's current interpretation data; the guarded re-run below is on the committed partition, enrichment and interpretation tables.)*
 
-**They carry genuine isoform switching, not abundance shifts.** In every module nearly all
-members carry a real anticorrelated transcript pair: 21/23 (M026), 31/30 (M020 — count
-includes multi-transcript genes), 73/83 (M010), 28/27 (M023), with maximum switch strength
-1.10–1.39 and 93–459 significant switch transcripts per module. The modules are DTU, not
-re-described differential expression.
+modules are associated with schizophrenia case/control status (pheno_fdr ≤ 0.1): **8** — M012
+(FDR 0.0001), M026 (0.0019), M020 (0.017), M010 (0.027), M022 (0.033), M011 (0.045), M023 (0.047)
+and M025 (0.071). **Six return zero enriched GO terms** (M026, M020, M010, M022, M023, M025);
+two are GO-visible (M012, 128 terms; M011, 177). Classical pathway enrichment is blind to most,
+not all, of the phenotype-associated switch signal here.
+
+**Four of the six carry genuine isoform switching in nearly every member.** Members with a real
+anticorrelated transcript pair: 23/23 (M026), 29/29 (M022), 27/27 (M023), 65/83 (M010); partial
+in M025 (11/24) and weak in M020 (4/30, 7 significant switch transcripts). Maximum switch
+strength across the six is 1.02–1.72, with 7–509 significant switch transcripts per module. The
+two GO-visible disease modules switch comparably (40/58, 59/65). The coherent modules are DTU,
+not re-described differential expression; M020 should not be cited as one.
 
 **Their switches are functionally consequential at or above background.** Driver
 functional-consequence fractions match or exceed the pooled background (CDS 0.84,
@@ -125,10 +128,10 @@ pipelines — the disease-axis instance of IsoGraph's defensible complementary v
   generality. The cross-region/aging analog of "is the switch signal real" is the
   module-trust funnel; the genetic-mechanism analog is the QTL splicing-specificity contrast
   (the GO-invisible modules are exactly where splicing-QTL are spared).
-- The result is **post-refit**: the covariate-decouple production re-fit changed the
-  phenotype-FDR landscape, and the current gate yields 4 phenotype-significant modules, all
-  GO-invisible (an earlier res-5.0 run reported 8 disease modules with 2 GO-visible). Cite
-  the regenerated parquet, not earlier prose.
+- ~~The result is **post-refit** … the current gate yields 4 phenotype-significant modules, all
+  GO-invisible~~ **Corrected 2026-09-12.** That "4, all GO-invisible" table was the stale one: the
+  committed enrichment table has always held 8 phenotype-significant modules, 2 GO-visible, and
+  the guarded re-run on the committed inputs reproduces 8 / 6. Cite the regenerated parquet.
 - The honest framing is **complementary, not superior**: the absence of GO-visible disease
   modules here is not a claim that IsoGraph finds pathways WGCNA cannot — it reflects that
   the signal is isoform regulation, which GO does not represent. Integrate with the

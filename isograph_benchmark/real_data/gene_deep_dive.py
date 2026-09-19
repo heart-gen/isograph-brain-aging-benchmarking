@@ -20,9 +20,15 @@ switch pair -- the IsoGraph-unique, GO-invisible case), expression-led (eQTL gen
 or splicing-unresolved (an sQTL that does not map onto the switch pair). Writes one markdown
 vignette per gene plus a panel-wide parquet of one row per gene.
 
+Two parts, because the layers above come from different stages. ``--part events`` needs only the
+coloc layer and writes ``deep_dive_events`` into stage 05, where stage 06 reads it;
+``--part panel`` needs the clinical (06) and RBP (07) layers and writes the vignettes, the panel
+and the remaining tables into 08_integration.
+
 Deterministic; pure joins over existing parquets (no heavy compute). Usage:
-  python -m isograph_benchmark.real_data.gene_deep_dive
-  python -m isograph_benchmark.real_data.gene_deep_dive --genes SNCA,CTSH,PPP6R2
+  python -m isograph_benchmark.real_data.gene_deep_dive --part events
+  python -m isograph_benchmark.real_data.gene_deep_dive --part panel
+  python -m isograph_benchmark.real_data.gene_deep_dive --part panel --genes SNCA,CTSH,PPP6R2
 """
 from __future__ import annotations
 
@@ -176,9 +182,14 @@ def _ens(series: pd.Series) -> pd.Series:
     return series.astype(str).str.split(".").str[0]
 
 
-def _load() -> dict:
+def _load(part: str = "panel") -> dict:
     ev = pd.read_parquet(stage_out("anchoring.coloc", "coloc_isoform_events_combined.parquet"))
     di = pd.read_parquet(stage_out("anchoring.coloc", "coloc_direction_combined.parquet"))
+    if part == "events":
+        for df in (ev, di):
+            if "gene" in df.columns:
+                df["ens"] = _ens(df["gene"])
+        return {"ev": ev, "di": di}
     calls = pd.read_parquet(stage_out("regulation", "rbp", "rbp_switch_calls.parquet"))
     regulon = pd.read_parquet(stage_out("regulation", "rbp", "rbp_regulon.parquet"))
     con = []
@@ -334,9 +345,21 @@ def _interpretation(row: dict) -> str:
             "switch; a candidate for deeper transcript-level follow-up.")
 
 
-def run(genes: list[str]) -> pd.DataFrame:
-    d = _load()
-    out_dir = ensure_dir(stage_out("anchoring", "deep_dive"))
+def run(genes: list[str], part: str = "panel") -> pd.DataFrame:
+    d = _load(part)
+    if part == "events":
+        # Stage 05: the per-event table needs only the coloc layer, and stage 06 reads it, so it
+        # is written before (and apart from) the panel, which needs stages 06 and 07.
+        out_dir = ensure_dir(stage_out("anchoring", "deep_dive"))
+        ens_set = set()
+        for g in genes:
+            g_ev = d["ev"][d["ev"]["gene_name"] == g]
+            if not g_ev.empty:
+                ens_set.add(g_ev["ens"].iloc[0])
+        _write_events(d, ens_set, out_dir)
+        print(f"deep-dive events over {len(ens_set)} genes -> {out_dir}")
+        return d["ev"][d["ev"]["ens"].isin(ens_set)]
+    out_dir = ensure_dir(stage_out("integration", "deep_dive"))
     rows = []
     for g in genes:
         row = _gene_row(g, d)
@@ -363,15 +386,11 @@ def _emit(df: pd.DataFrame, out_dir, name: str) -> None:
     print(f"  supp table {name}: {len(df)} rows")
 
 
-def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
-    """Machine-readable per-gene tables so readers can reconstruct any gene's deep-dive.
-
-    (1) events  - one row per colocalized isoform event (anchor -> switch -> consequence),
-                  merged with the signed risk-allele direction where allele matching succeeded;
-    (2) rbp     - per gene, RBP motifs both switched in the gene and enriched in its module;
-    (3) exons   - per gene/region/exon: switched vs constitutive, CDS overlap, ClinVar P/LP.
+def _write_events(d: dict, ens_set: set, out_dir) -> None:
+    """(1) events - one row per colocalized isoform event (anchor -> switch -> consequence),
+    merged with the signed risk-allele direction where allele matching succeeded. Coloc layer
+    only; written by ``--part events`` into stage 05, where stage 06 reads it.
     """
-    # (1) per-event table + signed direction
     ev = d["ev"][d["ev"]["ens"].isin(ens_set)].copy()
     # one direction row per locus (the table is keyed per-junction; dedup avoids fan-out)
     dkeep = (d["di"][["ens", "trait", "tissue", "best_rsid", "variant_id", "ref", "alt",
@@ -386,6 +405,15 @@ def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
         ["gene_name", "trait", "clpp"], ascending=[True, True, False])
     _emit(events, out_dir, "deep_dive_events")
 
+
+def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
+    """Machine-readable per-gene tables so readers can reconstruct any gene's deep-dive.
+
+    (2) rbp        - per gene, RBP motifs both switched in the gene and enriched in its module;
+    (3) exons      - per gene/region/exon: switched vs constitutive, CDS overlap, ClinVar P/LP;
+    (4) literature - curated isoform biology for the resolved splicing-led genes.
+    The per-event table (1) is ``_write_events``, written by ``--part events`` into stage 05.
+    """
     # (2) per-gene switched + module-enriched RBP regulators
     ens2sym = dict(zip(d["ev"]["ens"], d["ev"]["gene_name"]))
     calls = d["calls"][(d["calls"]["ens"].isin(ens_set)) & (d["calls"]["switched"])]
@@ -455,9 +483,13 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Per-gene mechanistic deep-dive of coloc genes.")
     ap.add_argument("--genes", default="",
                     help="comma-separated gene symbols (default: every colocalized gene).")
+    ap.add_argument("--part", choices=("events", "panel"), required=True,
+                    help="events: per-event table from the coloc layer (stage 05; stage 06 reads "
+                         "it). panel: vignettes, panel, RBP/exon/literature tables (stage 08; "
+                         "needs the 06 clinical and 07 RBP layers).")
     args = ap.parse_args()
     genes = [g.strip() for g in args.genes.split(",") if g.strip()] or _all_coloc_genes()
-    run(genes)
+    run(genes, args.part)
 
 
 if __name__ == "__main__":

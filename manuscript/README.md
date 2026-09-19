@@ -20,12 +20,12 @@ Numbers are never hand-edited here: each item regenerates from committed ledgers
 | Item | Builder | Reads from |
 | --- | --- | --- |
 | Fig 1 `figConceptOverview` | `_h/concept_overview_figure.R` | `01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet` |
-| Fig 2 `figTrustFunnel` | `_h/trust_funnel_figure.R` | `03_module_trust/_m/stability/module_trust/` |
+| Fig 2 `figTrustFunnel` | `_h/trust_funnel_figure.R` | `04_module_trust/_m/stability/module_trust/` |
 | Fig 3 `figQtlSpecificity` | `_h/qtl_specificity_figure.R` | `05_genetic_anchoring/_m/qtl_anchoring_meta/` |
 | Fig 4 `figGeneticAnchoring` | `_h/genetic_anchoring_figure.R` | `05_genetic_anchoring/_m/{deep_dive,ldsc,scz_age_projection}/` |
-| Fig 5 `figCompositionRobustness` | `_h/composition_robustness_figure.R` | `04_module_characterization/_m/`, `02_module_discovery/gtex/_m/composition/` |
+| Fig 5 `figCompositionRobustness` | `_h/composition_robustness_figure.R` | `03_module_characterization/_m/`, `02_module_discovery/gtex/_m/composition/` |
 | Table 1 `table2_qtl_specificity_contrast` | `_h/assemble_main_tables.py` | `05_genetic_anchoring/_m/qtl_anchoring_meta/` |
-| Table 2 `table3_splicing_led_genes` | `_h/assemble_main_tables.py` | `05_genetic_anchoring/_m/deep_dive/` |
+| Table 2 `table3_splicing_led_genes` | `_h/assemble_main_tables.py` | `08_integration/_m/deep_dive/` |
 
 The synthetic supplements (S1–S12) are built **in place** inside
 `01_synthetic_benchmark/03_metrics/figures/` by
@@ -37,13 +37,13 @@ as supplementary material, not as Fig 1.
 
 | Item | Builder | Reads from |
 | --- | --- | --- |
-| S-real-1 `figBaselineRates` | `_h/baseline_rates_figure.R` | `04_module_characterization/_m/baseline_comparison/` |
+| S-real-1 `figBaselineRates` | `_h/baseline_rates_figure.R` | `04_module_trust/_m/baseline_comparison/` |
 | S-real-2 `figGwasResolution` | `_h/gwas_resolution_figure.R` | `05_genetic_anchoring/_m/gwas/` |
 | S-real-3 `figGoInvisible` | `_h/go_invisible_figure.R` | `02_module_discovery/brainseq/caudate_sczd/_m/` |
 | S-real-4 `figSeparation` | `_h/abundance_structure_figure.R` | `02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/` |
 | S-real-5 `figSwitchConsequence` | `_h/switch_consequence_figure.R` | `06_switch_mechanism/_m/` |
 | S-real-6 `figRbpRegulon` | `_h/rbp_regulon_figure.R` | `07_rbp_regulation/_m/rbp/` |
-| S-real-7 `figClinicalConsequence` | `_h/clinical_consequence_figure.R` | `06_switch_mechanism/_m/`, `05_genetic_anchoring/_m/deep_dive/` |
+| S-real-7 `figClinicalConsequence` | `_h/clinical_consequence_figure.R` | `06_switch_mechanism/_m/`, `08_integration/_m/deep_dive/` |
 | S-real-8 `figOrthogonalConfirm` | `_h/orthogonal_confirm_figure.R` | `06_switch_mechanism/_m/switch_orthogonal_confirm/` |
 | S-real-9 `figIsaConcordance` | `_h/isa_concordance_figure.R` | `06_switch_mechanism/_m/isa_concordance/` |
 

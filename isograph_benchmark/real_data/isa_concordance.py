@@ -64,7 +64,7 @@ from scipy import stats
 from isograph.io.artifacts import load_dataset_bundle
 
 from isograph_benchmark.paths import ensure_dir, stage_out
-from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+from isograph_benchmark.real_data.run_models import filter_production_transcripts
 from isograph_benchmark.real_data.validate_switch_splicing import (
     BRAINSEQ_AGING_REGIONS,
     GTEX_REGIONS,
@@ -342,7 +342,7 @@ def run_region(cohort: str, region: str, variant: str, trait: str, alpha: float,
                cores: int, smoke: int) -> dict:
     bundle = load_dataset_bundle(_bundle_path(cohort, region, trait))
     sample_table = bundle.sample_table
-    tc, tt = _filter_expressed_transcripts(
+    tc, tt = filter_production_transcripts(
         bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
     del bundle
     out = _out_dir(cohort, region, trait)

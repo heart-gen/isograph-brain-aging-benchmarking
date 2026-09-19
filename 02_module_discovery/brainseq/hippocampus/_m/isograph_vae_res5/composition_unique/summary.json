@@ -1,0 +1,11 @@
+{
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "n_composition_unique": 1,
+  "n_tested": 13130,
+  "n_modules_enriched_fdr10": 0,
+  "n_go_terms": 0,
+  "top_go_terms": [],
+  "top_concentrated_modules": []
+}

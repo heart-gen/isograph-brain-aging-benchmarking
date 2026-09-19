@@ -2,16 +2,16 @@
 
 Per-gene Spearman rho between IsoGraph's switch-axis usage change and the lead sQTL's per-transcript intron direction, pooled across the 17 brain cohorts. `pvalue` compares the pooled mean |rho| to a within-gene rank-permutation null (seed 13, 2000 draws); |rho| is used because both the sQTL allele reference and the switch-axis orientation are arbitrary.
 
-Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` (after the per-cohort array in `05_genetic_anchoring/_h/03.sqtl_concordance.sh`).
+Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance_meta` (after the per-cohort array in `05_genetic_anchoring/_h/01d.sqtl_concordance.sh`).
 
 ## Pooled concordance by module set
 
 | module_set | n_obs | n_cohorts | mean_abs_rho | perm_mean_abs_rho | frac_strong | pvalue |
 | --- | --- | --- | --- | --- | --- | --- |
-| all_modules | 2185 | 17 | 0.3088 | 0.332 | 0.2137 | 1 |
-| pheno_sig_modules | 859 | 10 | 0.306 | 0.324 | 0.2002 | 0.994 |
-| go_invisible_modules | 517 | 10 | 0.2861 | 0.3106 | 0.176 | 0.997 |
-| go_visible_modules | 342 | 8 | 0.336 | 0.3441 | 0.2368 | 0.764 |
+| all_modules | 2926 | 17 | 0.3252 | 0.3495 | 0.2355 | 1 |
+| pheno_sig_modules | 1089 | 9 | 0.3291 | 0.3517 | 0.2388 | 1 |
+| go_invisible_modules | 389 | 7 | 0.3242 | 0.3372 | 0.2237 | 0.898 |
+| go_visible_modules | 700 | 8 | 0.3318 | 0.3598 | 0.2471 | 1 |
 
 ## Reading
 

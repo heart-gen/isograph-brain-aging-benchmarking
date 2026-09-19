@@ -8,45 +8,45 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring_meta` (after th
 
 | graph_method | module_set | xqtl_kind | k | n_fg_total | or_fe | or_fe_low | or_fe_high | p_fe | or_re | p_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | eQTL | 17 | 86465.0 | 0.88 | 0.87 | 0.89 | 3.63e-206 | 0.88 | 9.22e-69 | 0.67 |
-| isograph | all_modules | sQTL | 17 | 70399.0 | 0.95 | 0.95 | 0.96 | 1.14e-24 | 0.95 | 4.17e-19 | 0.23 |
-| isograph | pheno_sig_modules | eQTL | 12 | 20631.0 | 0.85 | 0.84 | 0.87 | 3.96e-91 | 0.84 | 2.46e-20 | 0.75 |
-| isograph | pheno_sig_modules | sQTL | 12 | 16433.0 | 0.95 | 0.93 | 0.97 | 2.84e-09 | 0.95 | 4.26e-06 | 0.32 |
-| isograph | go_invisible_modules | eQTL | 11 | 9926.0 | 0.95 | 0.93 | 0.97 | 5.75e-06 | 0.94 | 7.37e-03 | 0.69 |
-| isograph | go_invisible_modules | sQTL | 11 | 8396.0 | 0.99 | 0.97 | 1.01 | 2.69e-01 | 0.98 | 2.40e-01 | 0.52 |
-| isograph | go_visible_modules | eQTL | 11 | 10705.0 | 0.8 | 0.78 | 0.81 | 1.03e-107 | 0.77 | 4.05e-23 | 0.78 |
-| isograph | go_visible_modules | sQTL | 11 | 8037.0 | 0.92 | 0.9 | 0.94 | 1.06e-11 | 0.92 | 1.31e-08 | 0.15 |
+| isograph | all_modules | eQTL | 17 | 120520.0 | 0.9 | 0.89 | 0.91 | 2.09e-166 | 0.9 | 1.72e-27 | 0.84 |
+| isograph | all_modules | sQTL | 17 | 104145.0 | 0.95 | 0.94 | 0.96 | 8.24e-35 | 0.95 | 7.05e-20 | 0.45 |
+| isograph | pheno_sig_modules | eQTL | 10 | 21586.0 | 0.91 | 0.89 | 0.92 | 1.69e-37 | 0.9 | 4.22e-07 | 0.83 |
+| isograph | pheno_sig_modules | sQTL | 10 | 18252.0 | 0.95 | 0.94 | 0.97 | 5.59e-10 | 0.94 | 1.19e-02 | 0.85 |
+| isograph | go_invisible_modules | eQTL | 7 | 5455.0 | 0.98 | 0.95 | 1.01 | 1.28e-01 | 0.97 | 2.17e-01 | 0.57 |
+| isograph | go_invisible_modules | sQTL | 7 | 4971.0 | 1.01 | 0.98 | 1.04 | 6.33e-01 | 0.99 | 7.85e-01 | 0.7 |
+| isograph | go_visible_modules | eQTL | 9 | 16131.0 | 0.89 | 0.87 | 0.9 | 1.27e-42 | 0.88 | 6.53e-14 | 0.63 |
+| isograph | go_visible_modules | sQTL | 9 | 13281.0 | 0.93 | 0.91 | 0.95 | 7.17e-14 | 0.94 | 2.54e-03 | 0.73 |
 | wgcna_switch_only | all_modules | eQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
 | wgcna_switch_only | all_modules | sQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
-| wgcna_switch_only | pheno_sig_modules | eQTL | 11 | 30161.0 | 0.98 | 0.96 | 1.0 | 2.13e-02 | 0.94 | 7.65e-02 | 0.89 |
-| wgcna_switch_only | pheno_sig_modules | sQTL | 11 | 25165.0 | 0.97 | 0.95 | 0.99 | 7.27e-03 | 0.96 | 1.28e-02 | 0.44 |
-| wgcna_switch_only | go_invisible_modules | eQTL | 7 | 5829.0 | 1.02 | 0.99 | 1.05 | 1.48e-01 | 1.02 | 3.53e-01 | 0.48 |
-| wgcna_switch_only | go_invisible_modules | sQTL | 7 | 5115.0 | 1.02 | 0.98 | 1.05 | 3.11e-01 | 1.02 | 3.28e-01 | 0.41 |
-| wgcna_switch_only | go_visible_modules | eQTL | 11 | 24332.0 | 0.97 | 0.95 | 0.99 | 1.77e-03 | 0.93 | 1.30e-02 | 0.85 |
-| wgcna_switch_only | go_visible_modules | sQTL | 11 | 20050.0 | 0.97 | 0.94 | 0.99 | 1.41e-03 | 0.96 | 4.53e-03 | 0.3 |
+| wgcna_switch_only | pheno_sig_modules | eQTL | 6 | 22366.0 | 1.01 | 0.99 | 1.03 | 4.17e-01 | 1.01 | 5.24e-01 | 0.39 |
+| wgcna_switch_only | pheno_sig_modules | sQTL | 6 | 20534.0 | 0.98 | 0.96 | 1.01 | 1.68e-01 | 0.98 | 3.82e-01 | 0.81 |
+| wgcna_switch_only | go_invisible_modules | eQTL | 6 | 20788.0 | 1.01 | 0.98 | 1.03 | 5.71e-01 | 1.01 | 6.51e-01 | 0.37 |
+| wgcna_switch_only | go_invisible_modules | sQTL | 6 | 19102.0 | 0.98 | 0.96 | 1.0 | 9.31e-02 | 0.97 | 3.11e-01 | 0.78 |
+| wgcna_switch_only | go_visible_modules | eQTL | 2 | 1578.0 | 1.02 | 0.96 | 1.07 | 5.49e-01 | 1.02 | 5.49e-01 | 0.0 |
+| wgcna_switch_only | go_visible_modules | sQTL | 2 | 1432.0 | 1.02 | 0.96 | 1.08 | 5.27e-01 | 1.02 | 5.20e-01 | 0.14 |
 | wgcna_multiplex | all_modules | eQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
 | wgcna_multiplex | all_modules | sQTL | 0 | 0.0 | nan | nan | nan | NA | nan | NA | nan |
-| wgcna_multiplex | pheno_sig_modules | eQTL | 9 | 56696.0 | 0.97 | 0.96 | 0.99 | 1.86e-05 | 0.91 | 1.13e-02 | 0.97 |
-| wgcna_multiplex | pheno_sig_modules | sQTL | 9 | 43914.0 | 0.97 | 0.96 | 0.98 | 2.98e-05 | 0.96 | 7.68e-03 | 0.7 |
-| wgcna_multiplex | go_invisible_modules | eQTL | 7 | 7561.0 | 0.99 | 0.97 | 1.01 | 4.08e-01 | 0.99 | 7.67e-01 | 0.93 |
-| wgcna_multiplex | go_invisible_modules | sQTL | 7 | 6354.0 | 1.01 | 0.98 | 1.03 | 6.55e-01 | 1.0 | 8.94e-01 | 0.66 |
-| wgcna_multiplex | go_visible_modules | eQTL | 9 | 53239.0 | 0.97 | 0.96 | 0.98 | 5.97e-07 | 0.9 | 4.94e-03 | 0.97 |
-| wgcna_multiplex | go_visible_modules | sQTL | 9 | 41201.0 | 0.97 | 0.96 | 0.98 | 2.29e-05 | 0.96 | 1.03e-02 | 0.73 |
+| wgcna_multiplex | pheno_sig_modules | eQTL | 8 | 35511.0 | 0.94 | 0.93 | 0.96 | 2.96e-13 | 0.9 | 6.83e-03 | 0.96 |
+| wgcna_multiplex | pheno_sig_modules | sQTL | 8 | 28196.0 | 0.98 | 0.97 | 1.0 | 7.84e-02 | 0.98 | 2.37e-01 | 0.76 |
+| wgcna_multiplex | go_invisible_modules | eQTL | 4 | 5804.0 | 0.92 | 0.89 | 0.95 | 6.41e-09 | 0.89 | 1.81e-03 | 0.75 |
+| wgcna_multiplex | go_invisible_modules | sQTL | 4 | 5162.0 | 0.97 | 0.94 | 1.0 | 5.78e-02 | 0.97 | 3.29e-01 | 0.61 |
+| wgcna_multiplex | go_visible_modules | eQTL | 8 | 32960.0 | 0.96 | 0.94 | 0.97 | 1.01e-08 | 0.91 | 1.90e-02 | 0.96 |
+| wgcna_multiplex | go_visible_modules | sQTL | 8 | 26053.0 | 0.99 | 0.98 | 1.01 | 4.93e-01 | 0.98 | 4.34e-01 | 0.86 |
 
 ## Splicing-specificity contrast (pooled sQTL OR / eQTL OR, paired within analysis)
 
 | graph_method | module_set | k | ratio_fe | ratio_fe_low | ratio_fe_high | p_fe | ratio_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | 17 | 1.082 | 1.069 | 1.095 | 9.97e-38 | 1.082 | 0.629 |
-| isograph | pheno_sig_modules | 12 | 1.113 | 1.088 | 1.139 | 1.37e-19 | 1.113 | 0.067 |
-| isograph | go_invisible_modules | 11 | 1.038 | 1.007 | 1.07 | 1.60e-02 | 1.038 | 0.099 |
-| isograph | go_visible_modules | 11 | 1.155 | 1.12 | 1.191 | 2.91e-20 | 1.171 | 0.513 |
-| wgcna_switch_only | pheno_sig_modules | 11 | 0.986 | 0.956 | 1.018 | 3.92e-01 | 0.989 | 0.607 |
-| wgcna_switch_only | go_invisible_modules | 7 | 0.994 | 0.951 | 1.038 | 7.72e-01 | 0.994 | 0.0 |
-| wgcna_switch_only | go_visible_modules | 11 | 0.991 | 0.962 | 1.021 | 5.49e-01 | 0.998 | 0.472 |
-| wgcna_multiplex | pheno_sig_modules | 9 | 0.994 | 0.976 | 1.014 | 5.71e-01 | 1.03 | 0.906 |
-| wgcna_multiplex | go_invisible_modules | 7 | 1.016 | 0.981 | 1.052 | 3.79e-01 | 1.013 | 0.458 |
-| wgcna_multiplex | go_visible_modules | 9 | 0.998 | 0.979 | 1.018 | 8.59e-01 | 1.033 | 0.89 |
+| isograph | all_modules | 17 | 1.054 | 1.042 | 1.065 | 1.93e-20 | 1.054 | 0.687 |
+| isograph | pheno_sig_modules | 10 | 1.045 | 1.023 | 1.069 | 7.85e-05 | 1.045 | 0.0 |
+| isograph | go_invisible_modules | 7 | 1.028 | 0.989 | 1.069 | 1.62e-01 | 1.028 | 0.0 |
+| isograph | go_visible_modules | 9 | 1.048 | 1.022 | 1.075 | 2.57e-04 | 1.052 | 0.252 |
+| wgcna_switch_only | pheno_sig_modules | 6 | 0.974 | 0.942 | 1.007 | 1.19e-01 | 0.969 | 0.51 |
+| wgcna_switch_only | go_invisible_modules | 6 | 0.973 | 0.94 | 1.006 | 1.08e-01 | 0.968 | 0.501 |
+| wgcna_switch_only | go_visible_modules | 2 | 1.001 | 0.926 | 1.083 | 9.72e-01 | 1.001 | 0.0 |
+| wgcna_multiplex | pheno_sig_modules | 8 | 1.04 | 1.016 | 1.064 | 8.36e-04 | 1.06 | 0.826 |
+| wgcna_multiplex | go_invisible_modules | 4 | 1.055 | 1.012 | 1.099 | 1.08e-02 | 1.056 | 0.062 |
+| wgcna_multiplex | go_visible_modules | 8 | 1.036 | 1.013 | 1.06 | 2.20e-03 | 1.057 | 0.818 |
 
 ## Cross-method contrast on the 13 tissues all methods share
 
@@ -54,22 +54,23 @@ The matched WGCNA baselines (`wgcna_switch_only`, `wgcna_multiplex`) consume the
 
 | graph_method | module_set | k | ratio_fe | ratio_fe_low | ratio_fe_high | p_fe | ratio_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | 8 | 1.095 | 1.076 | 1.115 | 3.08e-24 | 1.095 | 0.589 |
-| isograph | pheno_sig_modules | 8 | 1.116 | 1.089 | 1.143 | 1.38e-18 | 1.116 | 0.0 |
-| wgcna_switch_only | pheno_sig_modules | 8 | 0.983 | 0.95 | 1.016 | 3.02e-01 | 0.978 | 0.696 |
-| wgcna_multiplex | pheno_sig_modules | 8 | 0.992 | 0.973 | 1.011 | 4.05e-01 | 1.011 | 0.908 |
-| isograph | go_invisible_modules | 7 | 1.034 | 1.0 | 1.069 | 4.82e-02 | 1.03 | 0.347 |
-| wgcna_switch_only | go_invisible_modules | 6 | 0.992 | 0.949 | 1.037 | 7.18e-01 | 0.993 | 0.102 |
-| wgcna_multiplex | go_invisible_modules | 7 | 1.016 | 0.981 | 1.052 | 3.79e-01 | 1.013 | 0.458 |
-| isograph | go_visible_modules | 8 | 1.154 | 1.119 | 1.19 | 1.58e-19 | 1.165 | 0.491 |
-| wgcna_switch_only | go_visible_modules | 8 | 0.988 | 0.958 | 1.02 | 4.55e-01 | 0.993 | 0.58 |
-| wgcna_multiplex | go_visible_modules | 8 | 0.996 | 0.977 | 1.015 | 6.59e-01 | 1.016 | 0.891 |
+| isograph | all_modules | 5 | 1.04 | 1.019 | 1.061 | 1.37e-04 | 1.04 | 0.382 |
+| isograph | pheno_sig_modules | 5 | 1.039 | 1.013 | 1.065 | 2.83e-03 | 1.039 | 0.0 |
+| wgcna_switch_only | pheno_sig_modules | 5 | 0.964 | 0.929 | 1.001 | 5.47e-02 | 0.959 | 0.546 |
+| wgcna_multiplex | pheno_sig_modules | 5 | 1.03 | 1.005 | 1.056 | 1.68e-02 | 1.032 | 0.864 |
+| isograph | go_invisible_modules | 4 | 1.026 | 0.972 | 1.083 | 3.57e-01 | 1.026 | 0.0 |
+| wgcna_switch_only | go_invisible_modules | 5 | 0.962 | 0.927 | 0.999 | 4.35e-02 | 0.958 | 0.516 |
+| wgcna_multiplex | go_invisible_modules | 3 | 1.051 | 1.009 | 1.095 | 1.76e-02 | 1.051 | 0.0 |
+| isograph | go_visible_modules | 5 | 1.039 | 1.011 | 1.067 | 5.66e-03 | 1.039 | 0.0 |
+| wgcna_switch_only | go_visible_modules | 1 | 1.032 | 0.874 | 1.218 | 7.10e-01 | 1.032 | 0.0 |
+| wgcna_multiplex | go_visible_modules | 5 | 1.028 | 1.003 | 1.053 | 2.63e-02 | 1.032 | 0.857 |
 
 ## Reading
 
 - Co-switch module genes are cis-QTL **depleted** for both QTL types (OR < 1) — expected: coordinated/network genes are more constrained and carry fewer common-variant cis-QTL. This shared baseline is NOT the result.
-- **The result is the splicing-specificity contrast: sQTL OR / eQTL OR > 1**, strongest for the GO-invisible modules — splicing-QTL is spared relative to expression-QTL exactly where the DTU-without-DGE value concentrates.
+- **The result is the splicing-specificity contrast: sQTL OR / eQTL OR > 1**, carried by the phenotype-associated modules — splicing-QTL is spared relative to expression-QTL in the modules that track the trait.
+- **Do NOT read a GO-invisible localisation off this table.** On the 2026-08-29 refresh the `go_invisible_modules` and `go_visible_modules` arms are statistically indistinguishable, so neither is the site of the effect and neither is a null. The DTU-without-DGE claim rests on the GO-invisible content gate, not on these genetics. An earlier framing made `go_invisible` the headline; it came from a stale `module_enrichment` join that relabelled the partition and must not be restored.
 - **If the matched WGCNA baselines show the SAME specificity**, the splicing-QTL signal is a property of the switch features (which both methods share), not of IsoGraph's inference — the genetic-anchoring analog of the three-baseline result. IsoGraph's value is the switch-feature *representation* and its finer modules, not a unique network-inference effect.
-- **Primary internal control = the matched WGCNA baselines**, not `go_visible_modules`. The baselines hold the switch features fixed and vary only the inference, so a null there localises the effect to IsoGraph's inference. `go_visible_modules` is a secondary control on module CONTENT and is only ever a relative contrast — read it as the low end of a gradient, not as an on/off null.
+- **Primary internal control = the matched WGCNA baselines**, not `go_visible_modules`. The baselines hold the switch features fixed and vary only the inference, so a null there localises the effect to IsoGraph's inference. `go_visible_modules` is a secondary, exploratory stratification on module CONTENT and is only ever a relative contrast — never an on/off null.
 - High I2 flags between-tissue heterogeneity; prefer RE there. A nominally significant ratio carrying high I2 is driven by a few tissues, not by a consistent effect, and is weaker evidence than a smaller ratio at I2 near 0 — compare module sets on consistency as well as magnitude. The contrast se is conservative (treats sQTL/eQTL estimates as independent though they share the foreground genes).
 - Scope unchanged: cis-sQTL anchors member-gene splicing to genetics, not the co-switching coordination itself.

@@ -42,24 +42,24 @@ Each released covariate the published model does not already adjust for is added
 
 | model | tier | added | n_modules | n_fdr_sig | n_fdr_sig_baseline | n_baseline_sig_retained | median_abs_effect_shift | max_abs_effect_shift | median_effect_ratio |
 |---|---|---|---|---|---|---|---|---|---|
-| published | baseline |  | 30 | 7 | 7 | 7 | 0 | 0 | 1 |
-| plus_PMI | measured | PMI | 30 | 7 | 7 | 7 | 0.002461 | 0.008204 | 0.9988 |
-| plus_Race | measured | Race | 30 | 7 | 7 | 7 | 0.003873 | 0.009897 | 1.042 |
-| plus_r_rna_rate | measured | r_rna_rate | 30 | 4 | 7 | 4 | 0.02694 | 0.07708 | 0.6564 |
-| plus_SNP_PC6 | measured | SNP_PC6 | 30 | 7 | 7 | 7 | 0.0007742 | 0.002524 | 1.004 |
-| plus_SNP_PC7 | measured | SNP_PC7 | 30 | 7 | 7 | 7 | 0.002241 | 0.005514 | 1.009 |
-| plus_SNP_PC8 | measured | SNP_PC8 | 30 | 7 | 7 | 7 | 0.0002909 | 0.001676 | 1.001 |
-| plus_SNP_PC9 | measured | SNP_PC9 | 30 | 7 | 7 | 7 | 0.001879 | 0.006516 | 0.9919 |
-| plus_SNP_PC10 | measured | SNP_PC10 | 30 | 7 | 7 | 7 | 0.001608 | 0.004019 | 1.011 |
-| plus_all_measured | measured | PMI,Race,r_rna_rate,SNP_PC6,SNP_PC7,SNP_PC8,SNP_PC9,SNP_PC10 | 30 | 4 | 7 | 4 | 0.01959 | 0.06083 | 0.7341 |
-| plus_smoking_ahr_battery | proxy | smoking_ahr_battery | 30 | 6 | 7 | 6 | 0.02696 | 0.1572 | 0.9465 |
-| plus_antipsychotic_drd2 | proxy | antipsychotic_drd2 | 30 | 6 | 7 | 6 | 0.0146 | 0.05427 | 1.057 |
-| plus_all_proxies | proxy | smoking_ahr_battery,antipsychotic_drd2 | 30 | 6 | 7 | 5 | 0.0173 | 0.139 | 1.019 |
-| plus_everything | combined | PMI,Race,r_rna_rate,SNP_PC6,SNP_PC7,SNP_PC8,SNP_PC9,SNP_PC10,smoking_ahr_battery,antipsychotic_drd2 | 30 | 2 | 7 | 2 | 0.03046 | 0.1571 | 0.7145 |
+| published | baseline |  | 12 | 6 | 6 | 6 | 0 | 0 | 1 |
+| plus_PMI | measured | PMI | 12 | 6 | 6 | 6 | 0.001003 | 0.005596 | 0.9954 |
+| plus_Race | measured | Race | 12 | 6 | 6 | 6 | 0.00149 | 0.006003 | 1.03 |
+| plus_r_rna_rate | measured | r_rna_rate | 12 | 1 | 6 | 1 | 0.01904 | 0.05473 | 0.6824 |
+| plus_SNP_PC6 | measured | SNP_PC6 | 12 | 6 | 6 | 6 | 0.0004611 | 0.001684 | 1.006 |
+| plus_SNP_PC7 | measured | SNP_PC7 | 12 | 6 | 6 | 6 | 0.001109 | 0.002978 | 1.011 |
+| plus_SNP_PC8 | measured | SNP_PC8 | 12 | 6 | 6 | 6 | 0.0002159 | 0.0009083 | 1.003 |
+| plus_SNP_PC9 | measured | SNP_PC9 | 12 | 6 | 6 | 6 | 0.001201 | 0.002667 | 0.9852 |
+| plus_SNP_PC10 | measured | SNP_PC10 | 12 | 6 | 6 | 6 | 0.0008816 | 0.003565 | 1.01 |
+| plus_all_measured | measured | PMI,Race,r_rna_rate,SNP_PC6,SNP_PC7,SNP_PC8,SNP_PC9,SNP_PC10 | 12 | 3 | 6 | 3 | 0.01699 | 0.04792 | 0.7362 |
+| plus_smoking_ahr_battery | proxy | smoking_ahr_battery | 12 | 6 | 6 | 6 | 0.008939 | 0.04535 | 1.019 |
+| plus_antipsychotic_drd2 | proxy | antipsychotic_drd2 | 12 | 6 | 6 | 6 | 0.003649 | 0.0386 | 1.014 |
+| plus_all_proxies | proxy | smoking_ahr_battery,antipsychotic_drd2 | 12 | 6 | 6 | 6 | 0.01044 | 0.04263 | 1.078 |
+| plus_everything | combined | PMI,Race,r_rna_rate,SNP_PC6,SNP_PC7,SNP_PC8,SNP_PC9,SNP_PC10,smoking_ahr_battery,antipsychotic_drd2 | 12 | 1 | 6 | 1 | 0.01279 | 0.04545 | 0.7945 |
 
 Excluded as untestable in this cohort (a single-level column drops out of the design, so a null result for it would be an artefact of the encoding, not evidence): `Protocol` — released but invariant in this cohort (single level: RiboZeroGold).
 
-Baseline: 7 modules at FDR < 0.05 of 30 tested.
+Baseline: 6 modules at FDR < 0.05 of 12 tested.
 
 `n_baseline_sig_retained` is the number of *baseline-significant* modules still significant under that model, which is the quantity a confounding argument turns on. `median_effect_ratio` below 1 means the diagnosis effect shrank.
 
@@ -76,48 +76,19 @@ Modules whose diagnosis effect changes by more than 20% under a proxy:
 
 | module_id | proxy | effect_published | effect_adjusted | fdr_published | fdr_adjusted |
 |---|---|---|---|---|---|
-| M000 | plus_smoking_ahr_battery | 0.1312 | 0.1796 | 0.1939 | 0.07943 |
-| M002 | plus_smoking_ahr_battery | -0.07451 | -0.04324 | 0.1799 | 0.4609 |
-| M003 | plus_smoking_ahr_battery | 0.09377 | 0.1211 | 0.213 | 0.1386 |
-| M004 | plus_smoking_ahr_battery | 0.09556 | 0.1222 | 0.1799 | 0.07785 |
-| M005 | plus_smoking_ahr_battery | -0.01407 | -0.06327 | 0.8828 | 0.5267 |
-| M006 | plus_smoking_ahr_battery | -0.05254 | 0.005844 | 0.6134 | 0.99 |
-| M007 | plus_smoking_ahr_battery | 0.04908 | 0.09708 | 0.5763 | 0.2392 |
-| M008 | plus_smoking_ahr_battery | -0.05004 | -0.07048 | 0.1799 | 0.06789 |
-| M009 | plus_smoking_ahr_battery | 0.02916 | -0.00137 | 0.8438 | 0.99 |
-| M011 | plus_smoking_ahr_battery | -0.2238 | -0.2851 | 0.04483 | 0.00807 |
-| M012 | plus_smoking_ahr_battery | 0.38 | 0.2228 | 7.166e-05 | 0.00739 |
-| M013 | plus_smoking_ahr_battery | -0.1141 | -0.1568 | 0.1799 | 0.07005 |
-| M015 | plus_smoking_ahr_battery | -0.03409 | 0.002771 | 0.6134 | 0.99 |
-| M018 | plus_smoking_ahr_battery | -0.0897 | -0.05563 | 0.3809 | 0.6316 |
-| M019 | plus_smoking_ahr_battery | -0.01292 | -0.009553 | 0.6134 | 0.7646 |
-| M021 | plus_smoking_ahr_battery | -0.1565 | -0.09429 | 0.1799 | 0.4593 |
-| M024 | plus_smoking_ahr_battery | -0.1066 | -0.07259 | 0.1799 | 0.3357 |
-| M028 | plus_smoking_ahr_battery | 0.003267 | 0.008603 | 0.8834 | 0.7813 |
-| M029 | plus_smoking_ahr_battery | -0.05331 | -0.02978 | 0.5614 | 0.7646 |
-| M000 | plus_antipsychotic_drd2 | 0.1312 | 0.08973 | 0.1939 | 0.2646 |
-| M005 | plus_antipsychotic_drd2 | -0.01407 | -0.007312 | 0.8828 | 0.9233 |
-| M006 | plus_antipsychotic_drd2 | -0.05254 | -0.1068 | 0.6134 | 0.1929 |
-| M007 | plus_antipsychotic_drd2 | 0.04908 | 0.01548 | 0.5763 | 0.8392 |
-| M008 | plus_antipsychotic_drd2 | -0.05004 | -0.03995 | 0.1799 | 0.1978 |
-| M009 | plus_antipsychotic_drd2 | 0.02916 | 0.0721 | 0.8438 | 0.5151 |
-| M015 | plus_antipsychotic_drd2 | -0.03409 | -0.06581 | 0.6134 | 0.1929 |
-| M018 | plus_antipsychotic_drd2 | -0.0897 | -0.1219 | 0.3809 | 0.1929 |
-| M019 | plus_antipsychotic_drd2 | -0.01292 | -0.01851 | 0.6134 | 0.415 |
-| M029 | plus_antipsychotic_drd2 | -0.05331 | -0.07219 | 0.5614 | 0.318 |
-| M000 | plus_all_proxies | 0.1312 | 0.09168 | 0.1939 | 0.2694 |
-| M002 | plus_all_proxies | -0.07451 | -0.05559 | 0.1799 | 0.2722 |
-| M005 | plus_all_proxies | -0.01407 | -0.05849 | 0.8828 | 0.4751 |
-| M006 | plus_all_proxies | -0.05254 | -0.1104 | 0.6134 | 0.1784 |
-| M007 | plus_all_proxies | 0.04908 | 0.02783 | 0.5763 | 0.6277 |
-| M009 | plus_all_proxies | 0.02916 | 0.09427 | 0.8438 | 0.3858 |
-| M010 | plus_all_proxies | -0.2325 | -0.1683 | 0.02723 | 0.08329 |
-| M012 | plus_all_proxies | 0.38 | 0.241 | 7.166e-05 | 0.004884 |
-| M015 | plus_all_proxies | -0.03409 | -0.06458 | 0.6134 | 0.2108 |
-| M018 | plus_all_proxies | -0.0897 | -0.1248 | 0.3809 | 0.1784 |
-| M019 | plus_all_proxies | -0.01292 | -0.02214 | 0.6134 | 0.3384 |
-| M028 | plus_all_proxies | 0.003267 | 0.01134 | 0.8834 | 0.6277 |
-| M029 | plus_all_proxies | -0.05331 | -0.06947 | 0.5614 | 0.3384 |
+| M000 | plus_smoking_ahr_battery | 0.07503 | 0.1031 | 0.2388 | 0.07885 |
+| M002 | plus_smoking_ahr_battery | -0.06576 | -0.0204 | 0.4248 | 0.8175 |
+| M003 | plus_smoking_ahr_battery | -0.01331 | -0.02993 | 0.7502 | 0.4907 |
+| M010 | plus_smoking_ahr_battery | -0.02548 | -0.01077 | 0.4455 | 0.8175 |
+| M011 | plus_smoking_ahr_battery | 0.02094 | 0.01568 | 0.7542 | 0.8175 |
+| M000 | plus_antipsychotic_drd2 | 0.07503 | 0.05603 | 0.2388 | 0.2857 |
+| M002 | plus_antipsychotic_drd2 | -0.06576 | -0.1044 | 0.4248 | 0.07539 |
+| M010 | plus_antipsychotic_drd2 | -0.02548 | -0.04159 | 0.4455 | 0.1036 |
+| M011 | plus_antipsychotic_drd2 | 0.02094 | 0.04148 | 0.7542 | 0.5596 |
+| M002 | plus_all_proxies | -0.06576 | -0.1022 | 0.4248 | 0.07985 |
+| M003 | plus_all_proxies | -0.01331 | -0.03169 | 0.7502 | 0.344 |
+| M010 | plus_all_proxies | -0.02548 | -0.04588 | 0.4455 | 0.07985 |
+| M011 | plus_all_proxies | 0.02094 | 0.06357 | 0.7542 | 0.344 |
 
 ## 4. What remains untestable
 

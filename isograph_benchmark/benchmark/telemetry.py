@@ -53,6 +53,22 @@ def _run_short(cmd: list[str], timeout: int = 5) -> str | None:
     return text or None
 
 
+def _git_state(path: Path) -> tuple[str | None, bool | None]:
+    """(HEAD commit, working tree dirty) for the git checkout containing ``path``."""
+    try:
+        commit = subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"], check=True,
+                                capture_output=True, text=True, timeout=5).stdout.strip()
+        # `git status` walks the whole working tree; with the committed `_m` result stores
+        # this repo takes ~20 s warm, so a short timeout silently cost every artifact its
+        # commit stamp (the except below turns any failure into a null provenance record).
+        status = subprocess.run(["git", "-C", str(path), "status", "--porcelain",
+                                 "--untracked-files=no"], check=True,
+                                capture_output=True, text=True, timeout=180).stdout
+    except Exception:
+        return None, None
+    return commit or None, bool(status.strip())
+
+
 def software_versions(include_r: bool = False) -> dict[str, Any]:
     versions: dict[str, Any] = {
         "python": sys.version.split()[0],
@@ -62,6 +78,19 @@ def software_versions(include_r: bool = False) -> dict[str, Any]:
         "pyarrow": _version("pyarrow"),
         "torch": _version("torch"),
     }
+    # The package version alone does not identify code: IsoGraph is an editable install, and
+    # its metadata read "0.1.4" across two months of VAE changes, so no stored synthetic row
+    # could be traced to the code that produced it. Record the commit (and whether the tree
+    # was dirty) for IsoGraph and for this benchmark repository on every run.
+    try:
+        import isograph
+
+        iso_dir = Path(isograph.__file__).resolve().parent
+    except Exception:
+        iso_dir = None
+    if iso_dir is not None:
+        versions["isograph_commit"], versions["isograph_dirty"] = _git_state(iso_dir)
+    versions["benchmark_commit"], versions["benchmark_dirty"] = _git_state(Path(__file__).resolve().parent)
     if include_r:
         versions["r"] = _run_short(["Rscript", "--version"])
         versions["wgcna"] = _run_short(

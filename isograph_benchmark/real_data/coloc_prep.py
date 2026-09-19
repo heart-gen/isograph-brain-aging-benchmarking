@@ -16,7 +16,7 @@ Only credible-set-based colocalization is possible: GTEx v11 ships SuSiE fine-ma
 (SuSiE_summary parquet: per phenotype, the 95% credible-set variants with PIP), not
 full cis allpairs, so downstream (coloc_clpp.R) uses eCAVIAR CLPP = sum PIP_gwas *
 PIP_qtl over shared variants. coloc.susie is NOT run: GTEx ships
-credible-set summaries, not full SuSiE objects (see 10.coloc_clpp.R). This restricts the
+credible-set summaries, not full SuSiE objects (see 03b.coloc_clpp.R). This restricts the
 test to genome-wide-significant loci; disclosed as scope.
 
 Matching: IsoGraph modules and GTEx SuSiE both carry Ensembl gene_id, matched bare
@@ -54,6 +54,12 @@ DEFAULT_XQTL_DIR = rel("inputs", "raw", "gtex_v11", "xqtl")
 WINDOW = 1_000_000       # +/- bp around gene body
 P_THRESH = 1e-5          # min GWAS signal required in a window
 _QVAL = 0.05
+# Bundle recurrence gate for coloc candidates: a gene enters if it sits in a
+# phenotype-significant module in >= this many bundle analyses. 1 = any analysis
+# (2026-09-17; was 3, which excluded single-tissue switches such as SNCA). S-LDSC
+# (ldsc_annot_prep) and the matched WGCNA arms in coloc_modality_contrast import this, so
+# coloc and S-LDSC test the same aging gene set and the arms differ only in method.
+MIN_RECURRENCE = 1
 
 # QTL kinds tested, and the SuSiE_summary file suffix for each.
 _QTL_KINDS = {"sQTL": "sQTLs", "eQTL": "eQTLs"}
@@ -252,7 +258,7 @@ def _resolve_switch_genes(gene_source: str, region: str | None, variant: str,
     """Switch genes (gene, module_id, go_invisible) for a single analysis or a bundle.
 
     For a bundle, keep genes whose switch-module membership recurs in >= min_recurrence
-    analyses (the size-controlled core switch layer, same definition as S-LDSC), and
+    analyses (``MIN_RECURRENCE`` by default; 1 keeps every switch gene), and
     tag a gene GO-invisible if it is GO-invisible in any contributing analysis.
     """
     if gene_source in BUNDLES:
@@ -356,7 +362,7 @@ def main() -> None:
     p.add_argument("--region", default=None)
     p.add_argument("--variant", default="standard")
     p.add_argument("--fdr", type=float, default=_QVAL)
-    p.add_argument("--min-recurrence", type=int, default=3,
+    p.add_argument("--min-recurrence", type=int, default=MIN_RECURRENCE,
                    help="for a bundle gene-source: keep genes recurring in >= this "
                         "many analyses (core switch layer).")
     p.add_argument("--xqtl-dir", default=str(DEFAULT_XQTL_DIR))

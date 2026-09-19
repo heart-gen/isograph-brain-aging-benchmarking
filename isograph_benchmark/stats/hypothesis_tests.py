@@ -48,6 +48,7 @@ from scipy.stats import rankdata, wilcoxon
 
 from isograph_benchmark.stats.summarize import (
     METRIC_FAMILY,
+    METRIC_POLARITY,
     METRICS,
     benjamini_hochberg,
     bootstrap_ci,
@@ -274,8 +275,21 @@ def paired_tests(
 
     result["significant_05"] = result["p_adj"] < 0.05
     result["significant_10"] = result["p_adj"] < 0.10
+    result["polarity"] = result["metric"].map(METRIC_POLARITY).astype(int)
+    result["higher_is_better"] = pd.array(
+        [True if p > 0 else (False if p < 0 else pd.NA) for p in result["polarity"]],
+        dtype="boolean",
+    )
+    # `direction_raw` is only the sign of mean_diff; `direction` reads it against the metric's
+    # polarity, so `method_better` means better on every metric. Descriptive metrics (counts,
+    # sizes) have no better side and are labelled `not_applicable` rather than guessed.
+    result["direction_raw"] = np.where(
+        result["mean_diff"] > 0, "method_higher",
+        np.where(result["mean_diff"] < 0, "method_lower", "tied"),
+    )
+    signed = np.sign(result["mean_diff"].to_numpy(float)) * result["polarity"].to_numpy()
     result["direction"] = np.where(
-        result["mean_diff"] > 0, "method_better",
-        np.where(result["mean_diff"] < 0, "ref_better", "tied"),
+        result["polarity"] == 0, "not_applicable",
+        np.where(signed > 0, "method_better", np.where(signed < 0, "ref_better", "tied")),
     )
     return result.sort_values(["scenario", "metric", "method"]).reset_index(drop=True)

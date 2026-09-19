@@ -7,27 +7,27 @@
   "outcome": "binary",
   "covariate_set": "constraint",
   "fdr": 0.05,
-  "n_universe_genes": 17612,
+  "n_universe_genes": 17318,
   "universe_sizes": {
-    "sQTL": 11205,
-    "eQTL": 13476
+    "sQTL": 11189,
+    "eQTL": 13367
   },
   "covariate_coverage": {
     "sQTL": {
-      "n_tested": 13291,
-      "n_constraint_complete": 11205,
-      "frac_retained": 0.8431
+      "n_tested": 13236,
+      "n_constraint_complete": 11189,
+      "frac_retained": 0.8453
     },
     "eQTL": {
-      "n_tested": 17572,
-      "n_constraint_complete": 13476,
-      "frac_retained": 0.7669
+      "n_tested": 17280,
+      "n_constraint_complete": 13367,
+      "frac_retained": 0.7736
     }
   },
   "module_set_sizes": {
-    "all_modules": 17612,
-    "pheno_sig_modules": 13600,
-    "go_invisible_modules": 2152,
-    "go_visible_modules": 13009
+    "all_modules": 17318,
+    "pheno_sig_modules": 13498,
+    "go_invisible_modules": 1944,
+    "go_visible_modules": 13109
   }
 }

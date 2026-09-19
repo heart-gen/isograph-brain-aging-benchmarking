@@ -1,0 +1,10 @@
+{
+  "cohort": "gtex",
+  "region": "substantia_nigra",
+  "bundle": "gtex_v11_brain/substantia_nigra",
+  "filter": "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts)",
+  "n_genes_bundle": 18229,
+  "n_genes_kept": 17631,
+  "n_transcripts_kept": 45646,
+  "n_multi_transcript_genes": 12286
+}

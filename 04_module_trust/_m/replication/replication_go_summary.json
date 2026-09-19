@@ -1,0 +1,20 @@
+[
+  {
+    "method": "isograph_vae",
+    "n_preserved_aging_pairs": 17,
+    "n_pairs_with_go": 15,
+    "mean_go_jaccard": 0.13380845304447456,
+    "median_go_jaccard": 0.0,
+    "perm_p": 0.000999000999000999,
+    "null_mean_go_jaccard": 0.010746450148113137
+  },
+  {
+    "method": "wgcna_gene",
+    "n_preserved_aging_pairs": 23,
+    "n_pairs_with_go": 23,
+    "mean_go_jaccard": 0.19585327860216878,
+    "median_go_jaccard": 0.10034602076124567,
+    "perm_p": 0.000999000999000999,
+    "null_mean_go_jaccard": 0.04898091008038382
+  }
+]

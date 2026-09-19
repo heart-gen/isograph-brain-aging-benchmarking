@@ -1,0 +1,10 @@
+source	module_id	n_coloc_loci	n_go_invisible	frac_same_dx_direction	scz_p	candidate_rbp_regulators
+gtex_caudate_bg	M000	11	7	0.6470588235294118	4.7288e-05	
+gtex_caudate_bg	M002	8	8	0.6842105263157895	0.025718	
+gtex_caudate_bg	M001	7	10	0.6428571428571429	0.0043454	
+brainseq_caudate	M003	7	11	0.7142857142857143	1.8352e-05	
+gtex_caudate_bg	M004	6	9	0.6666666666666666	0.047611	
+brainseq_caudate	M000	3	1	0.8571428571428571	0.0032388	
+brainseq_caudate	M001	2	0	1.0	0.0016472	
+gtex_caudate_bg	M007	1	1	1.0	0.029597	
+brainseq_caudate	M010	1	2	1.0	0.023701	

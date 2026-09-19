@@ -2,7 +2,7 @@
 # IsoGraph is NOT globally superior on module-level metrics; phenotype signal lives in the
 # switch features (both switch-fed methods beat both abundance-fed ones), GO-enrichment is
 # low for IsoGraph by construction. Reads
-# 04_module_characterization/_m/baseline_comparison/baseline_comparison_pooled.parquet, writes
+# 04_module_trust/_m/baseline_comparison/baseline_comparison_pooled.parquet, writes
 # figBaselineRates.{pdf,png} to manuscript/_m/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/baseline_rates_figure.R
@@ -20,7 +20,7 @@ find_root <- function() {
 }
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
-BC_FILE <- rel("04_module_characterization", "_m", "baseline_comparison", "baseline_comparison_pooled.parquet")
+BC_FILE <- rel("04_module_trust", "_m", "baseline_comparison", "baseline_comparison_pooled.parquet")
 FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 

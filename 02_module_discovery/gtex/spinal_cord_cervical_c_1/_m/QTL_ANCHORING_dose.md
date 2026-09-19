@@ -10,14 +10,8 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3698 | 0.146 | 0.1574 | 0.77 | 0.72 | 0.82 | 2.63e-17 | poisson_matched_standard |
-| sQTL | pheno_sig_modules | 46 | 0.1304 | 0.1543 | 0.9 | 0.55 | 1.47 | 6.70e-01 | poisson_matched_standard |
-| sQTL | go_invisible_modules | 18 | 0.1667 | 0.1542 | 0.87 | 0.39 | 1.94 | 7.36e-01 | poisson_matched_standard |
-| sQTL | go_visible_modules | 28 | 0.1071 | 0.1543 | 0.92 | 0.49 | 1.7 | 7.82e-01 | poisson_matched_standard |
-| eQTL | all_modules | 4761 | 0.3398 | 0.3789 | 0.79 | 0.74 | 0.84 | 3.29e-13 | poisson_matched_standard |
-| eQTL | pheno_sig_modules | 59 | 0.4407 | 0.3685 | 1.11 | 0.71 | 1.74 | 6.59e-01 | poisson_matched_standard |
-| eQTL | go_invisible_modules | 21 | 0.5238 | 0.3686 | 0.96 | 0.43 | 2.15 | 9.29e-01 | poisson_matched_standard |
-| eQTL | go_visible_modules | 38 | 0.3947 | 0.3687 | 1.19 | 0.69 | 2.05 | 5.36e-01 | poisson_matched_standard |
+| sQTL | all_modules | 5703 | 0.1582 | 0.1516 | 0.8 | 0.76 | 0.85 | 3.54e-15 | poisson_matched_standard |
+| eQTL | all_modules | 6505 | 0.3686 | 0.3745 | 0.9 | 0.85 | 0.95 | 2.06e-04 | poisson_matched_standard |
 
 ## Reading
 

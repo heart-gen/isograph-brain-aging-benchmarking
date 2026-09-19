@@ -122,13 +122,23 @@ scenarios (`isograph_vae_residual`), a degradation-reliability variant
 (`isograph_baseline`, `isograph_latent`, `isograph_graph`, `isograph_spearman_leiden`)
 on the core switch-recovery scenarios.
 
-`isograph_vae_gpu` is **numerically matched** to the CPU `isograph_vae` (same model, same
-features, same graph construction) and exists to report scale **timing**. Its accuracy
-rows are therefore redundant with the CPU VAE: the accuracy tables and headline figures
-report the CPU `isograph_vae`, and the GPU build is reported only in the runtime/compute
-tables. (For completeness, `isograph_vae_gpu` rows are still present in the paired-test
-table and the FDR family; because they duplicate the CPU VAE numerically, they should be
-read as the same method, not as an independent eighth comparator.)
+`isograph_vae_gpu` is the **same model and configuration** as the CPU `isograph_vae` (same
+features, same graph construction; only `device="cuda"` differs) and exists to report scale
+**timing**. The accuracy tables and headline figures report the CPU `isograph_vae`, and the GPU
+build is reported only in the runtime/compute tables. It is **not numerically identical** to the
+CPU build: across the 1,330 stored pairs, module recovery is bit-identical in 334 (median absolute
+difference 0.009), the expected consequence of different floating-point kernels. Its rows remain
+in the paired-test table and the FDR family and should be read as the same method on different
+hardware, not as an independent comparator.
+
+**Reproducibility (probe 2026-09-12, `03_metrics/_m/gpu_repro_probe/GPU_REPRO_PROBE.md`).** A
+scenario-stratified re-run of 24 GPU runs and their CPU twins found the GPU arm **deterministic**
+(two GPU re-runs identical on every metric, 24/24). Neither arm reproduces its *stored* values under
+current code (module recovery identical in 3/24 GPU, 2/24 CPU): run telemetry recorded only IsoGraph's
+editable-install package version, which did not change across months of VAE development, so the code
+behind a stored row cannot be identified. As with the cached datasets, the archived results — not a
+re-run — are the reproducibility record for the synthetic benchmark; run telemetry now records the
+IsoGraph and benchmark git commits (and whether each tree was dirty) so this cannot recur.
 
 ### Metrics
 
@@ -359,7 +369,8 @@ drives a module but should be read cautiously for *how much*.
 On the core 400-gene grid, IsoGraph VAE and WGCNA have comparable median runtimes
 (~4–5 s). At BrainSEQ scale (`scale_realistic`), the GPU VAE is the fastest method
 (24.6 s) versus the CPU VAE (226.3 s) and WGCNA (383.5 s); the GPU and CPU VAE backends
-are numerically matched, so the GPU build is a drop-in accelerator, not a different model
+run the same model and configuration — close but not bit-identical results, and the GPU arm is
+deterministic run-to-run — so the GPU build is a drop-in accelerator, not a different model
 (see `tableS_scale_compute_summary.csv` for the full genes × method timing/memory grid).
 
 ## Summary

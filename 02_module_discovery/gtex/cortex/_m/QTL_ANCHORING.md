@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 2527 | 0.2489 | 0.2196 | 0.98 | 0.88 | 1.09 | 6.88e-01 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 1380 | 0.2312 | 0.2243 | 0.85 | 0.74 | 0.98 | 2.22e-02 | logit_matched_standard |
-| sQTL | go_invisible_modules | 824 | 0.2536 | 0.2232 | 0.89 | 0.75 | 1.05 | 1.64e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 556 | 0.1978 | 0.2262 | 0.81 | 0.65 | 1.02 | 6.95e-02 | logit_matched_standard |
-| eQTL | all_modules | 3164 | 0.5035 | 0.5442 | 0.82 | 0.76 | 0.89 | 4.66e-07 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 1676 | 0.4875 | 0.5422 | 0.77 | 0.69 | 0.85 | 2.76e-07 | logit_matched_standard |
-| eQTL | go_invisible_modules | 879 | 0.5006 | 0.539 | 0.8 | 0.69 | 0.91 | 1.08e-03 | logit_matched_standard |
-| eQTL | go_visible_modules | 797 | 0.473 | 0.5401 | 0.76 | 0.66 | 0.87 | 1.28e-04 | logit_matched_standard |
+| sQTL | all_modules | 5816 | 0.2395 | 0.2137 | 0.93 | 0.85 | 1.01 | 9.84e-02 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 2712 | 0.2297 | 0.2235 | 0.88 | 0.79 | 0.98 | 1.89e-02 | logit_matched_standard |
+| sQTL | go_invisible_modules | 818 | 0.2726 | 0.2217 | 1.01 | 0.85 | 1.2 | 8.99e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 1894 | 0.2112 | 0.227 | 0.84 | 0.74 | 0.95 | 4.93e-03 | logit_matched_standard |
+| eQTL | all_modules | 6594 | 0.5253 | 0.5456 | 0.89 | 0.83 | 0.94 | 1.47e-04 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 3097 | 0.5082 | 0.5444 | 0.85 | 0.78 | 0.92 | 3.98e-05 | logit_matched_standard |
+| eQTL | go_invisible_modules | 877 | 0.5564 | 0.5373 | 1.02 | 0.89 | 1.17 | 8.21e-01 | logit_matched_standard |
+| eQTL | go_visible_modules | 2220 | 0.4892 | 0.5451 | 0.8 | 0.73 | 0.88 | 1.28e-06 | logit_matched_standard |
 
 ## Reading
 

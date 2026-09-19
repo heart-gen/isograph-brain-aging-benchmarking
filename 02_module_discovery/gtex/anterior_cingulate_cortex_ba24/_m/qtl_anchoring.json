@@ -4,16 +4,18 @@
   "tissue": "Brain_Anterior_cingulate_cortex_BA24",
   "variant": "standard",
   "method": "isograph",
+  "outcome": "binary",
+  "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 18100,
+  "n_universe_genes": 17797,
   "universe_sizes": {
-    "sQTL": 13477,
-    "eQTL": 18053
+    "sQTL": 13429,
+    "eQTL": 17756
   },
+  "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 5819,
-    "pheno_sig_modules": 3955,
-    "go_invisible_modules": 1910,
-    "go_visible_modules": 2045
+    "all_modules": 8169,
+    "pheno_sig_modules": 3193,
+    "go_visible_modules": 3193
   }
 }

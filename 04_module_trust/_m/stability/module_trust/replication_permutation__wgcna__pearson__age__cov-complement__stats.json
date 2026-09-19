@@ -1,0 +1,23 @@
+{
+  "method": "wgcna",
+  "statistic": "pearson",
+  "null": "age",
+  "covariates": "complement",
+  "n_matched_rows": 52,
+  "min_jaccard": 0.0,
+  "T_obs": 2,
+  "per_pair_obs": {
+    "caudate": 0,
+    "hippocampus": 0,
+    "dlpfc_ba9": 2
+  },
+  "B": 10000,
+  "seed": 13,
+  "sig": 0.05,
+  "p_emp": 0.1586841315868413,
+  "null_mean": 0.591,
+  "null_sd": 1.340857483060369,
+  "z": 1.0508201041501464,
+  "null_max": 12,
+  "null_q95": 4.0
+}

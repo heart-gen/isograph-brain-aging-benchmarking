@@ -1,0 +1,23 @@
+{
+  "method": "isograph",
+  "statistic": "pearson",
+  "null": "age",
+  "covariates": "complement",
+  "n_matched_rows": 38,
+  "min_jaccard": 0.0,
+  "T_obs": 1,
+  "per_pair_obs": {
+    "caudate": 1,
+    "hippocampus": 0,
+    "dlpfc_ba9": 0
+  },
+  "B": 10000,
+  "seed": 13,
+  "sig": 0.05,
+  "p_emp": 0.24947505249475052,
+  "null_mean": 0.5579,
+  "null_sd": 1.3895469312216147,
+  "z": 0.31816125822488744,
+  "null_max": 14,
+  "null_q95": 3.0
+}

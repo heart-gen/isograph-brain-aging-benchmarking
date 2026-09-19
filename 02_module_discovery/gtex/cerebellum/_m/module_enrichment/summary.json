@@ -3,11 +3,29 @@
   "region": "cerebellum",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 21,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.238,
+      "n_pheno_sig_fdr10": 7
+    },
+    "wgcna": {
+      "n_modules": 12,
+      "n_go_enriched": 9,
+      "frac_go_enriched": 0.75,
+      "n_pheno_sig_fdr10": 5
+    },
+    "wgcna_switch": {
+      "n_modules": 20,
+      "n_go_enriched": 3,
+      "frac_go_enriched": 0.15,
+      "n_pheno_sig_fdr10": 8
+    },
     "wgcna_multiplex": {
-      "n_modules": 32,
-      "n_go_enriched": 21,
-      "frac_go_enriched": 0.656,
-      "n_pheno_sig_fdr10": 12
+      "n_modules": 29,
+      "n_go_enriched": 18,
+      "frac_go_enriched": 0.621,
+      "n_pheno_sig_fdr10": 9
     }
   }
 }

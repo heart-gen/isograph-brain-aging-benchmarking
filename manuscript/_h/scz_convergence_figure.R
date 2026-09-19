@@ -6,7 +6,7 @@
 #   the module's significant candidate RBP regulons (rbp_regulon combined scope, q<0.05)
 #   printed alongside. Set-level convergence: 15/32 SCZ coloc loci fall in age-sensitive
 #   modules vs 25% background (hypergeometric P=0.0058).
-# Reads  05_genetic_anchoring/_m/scz_age_projection/convergence.parquet
+# Reads  08_integration/_m/scz_age_projection/convergence.parquet
 # Writes manuscript/_m/figures/figSczConvergence.{pdf,png}
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/scz_convergence_figure.R
@@ -63,7 +63,7 @@ compact_reg <- function(s) {
   else paste(nm, collapse = ", ")
 }
 
-conv <- read_parquet(rel("05_genetic_anchoring", "_m", "scz_age_projection", "convergence.parquet")) |>
+conv <- read_parquet(rel("08_integration", "_m", "scz_age_projection", "convergence.parquet")) |>
   mutate(
     cohort = unname(COHORT_LAB[source]),
     reg    = vapply(candidate_rbp_regulators, compact_reg, character(1)),

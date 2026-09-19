@@ -1,0 +1,74 @@
+{
+  "region_pairs": [
+    {
+      "brainseq": "caudate",
+      "gtex": "caudate_basal_ganglia",
+      "label": "caudate"
+    },
+    {
+      "brainseq": "hippocampus",
+      "gtex": "hippocampus",
+      "label": "hippocampus"
+    },
+    {
+      "brainseq": "dlpfc",
+      "gtex": "frontal_cortex_ba9",
+      "label": "dlpfc_ba9"
+    }
+  ],
+  "n_permutations": 1000,
+  "methods": [
+    "isograph_vae",
+    "wgcna_gene"
+  ],
+  "by_method_region": [
+    {
+      "method": "isograph_vae",
+      "region": "caudate",
+      "mean_best_jaccard": 0.084,
+      "frac_preserved": 0.632,
+      "age_sign_concordance": 0.636,
+      "age_effect_spearman": 0.737
+    },
+    {
+      "method": "isograph_vae",
+      "region": "dlpfc_ba9",
+      "mean_best_jaccard": 0.084,
+      "frac_preserved": 0.343,
+      "age_sign_concordance": 0.8,
+      "age_effect_spearman": 0.437
+    },
+    {
+      "method": "isograph_vae",
+      "region": "hippocampus",
+      "mean_best_jaccard": 0.115,
+      "frac_preserved": 0.496,
+      "age_sign_concordance": 0.198,
+      "age_effect_spearman": -0.38
+    },
+    {
+      "method": "wgcna_gene",
+      "region": "caudate",
+      "mean_best_jaccard": 0.192,
+      "frac_preserved": 0.87,
+      "age_sign_concordance": 0.681,
+      "age_effect_spearman": -0.282
+    },
+    {
+      "method": "wgcna_gene",
+      "region": "dlpfc_ba9",
+      "mean_best_jaccard": 0.24,
+      "frac_preserved": 0.896,
+      "age_sign_concordance": 0.607,
+      "age_effect_spearman": 0.347
+    },
+    {
+      "method": "wgcna_gene",
+      "region": "hippocampus",
+      "mean_best_jaccard": 0.264,
+      "frac_preserved": 0.889,
+      "age_sign_concordance": 0.333,
+      "age_effect_spearman": 0.183
+    }
+  ]
+}

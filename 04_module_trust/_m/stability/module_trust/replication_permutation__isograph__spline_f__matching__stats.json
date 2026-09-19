@@ -1,0 +1,23 @@
+{
+  "method": "isograph",
+  "statistic": "spline_f",
+  "null": "matching",
+  "covariates": "full",
+  "n_matched_rows": 38,
+  "min_jaccard": 0.0,
+  "T_obs": 0,
+  "per_pair_obs": {
+    "caudate": 0,
+    "hippocampus": 0,
+    "dlpfc_ba9": 0
+  },
+  "B": 10000,
+  "seed": 13,
+  "sig": 0.05,
+  "p_emp": 1.0,
+  "null_mean": 0.167,
+  "null_sd": 0.3951286026868545,
+  "z": -0.422647206161256,
+  "null_max": 3,
+  "null_q95": 1.0
+}

@@ -10,10 +10,10 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 11029 | 0.1388 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | all_modules | 11029 | 0.1388 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | all_modules | 13387 | 0.339 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | all_modules | 13387 | 0.339 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | all_modules | 11047 | 0.1389 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | all_modules | 11047 | 0.1389 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | all_modules | 13183 | 0.3428 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | all_modules | 13183 | 0.3428 | nan | nan | nan | nan | NA | insufficient |
 
 ## Reading
 

@@ -21,7 +21,7 @@ light-scope, download-only evidence sources:
      biology here, not a defect — the test asks whether IsoGraph's switches deviate from it.
 
 One region+resolution per invocation (mirrors switch_consequence). Deterministic given --seed.
-Requires the downloaded ClinVar VCF + gnomAD constraint table (see 17.download_clinical.sh).
+Requires the downloaded ClinVar VCF + gnomAD constraint table (see 06_switch_mechanism/_h/01f.download_clinical.sh).
 
 Output (<artifact_dir>/clinical_consequence/): exon_clinvar.parquet (per exon), gene_constraint
 .parquet (per gene LOEUF), clinical_consequence.parquet (per stratum: densities, ratio, perm p),
@@ -68,7 +68,7 @@ def _load_clinvar() -> tuple[dict[str, np.ndarray], dict[str, np.ndarray]]:
     """Parse the ClinVar VCF once into per-chromosome sorted POS arrays: all variants and the
     Pathogenic/Likely_pathogenic subset (for the P/LP density and its all-ClinVar denominator)."""
     if not _CLINVAR_VCF.exists():
-        raise SystemExit(f"{_CLINVAR_VCF} missing; run 17.download_clinical.sh first.")
+        raise SystemExit(f"{_CLINVAR_VCF} missing; run 06_switch_mechanism/_h/01f.download_clinical.sh first.")
     all_pos: dict[str, list[int]] = {}
     plp_pos: dict[str, list[int]] = {}
     with gzip.open(_CLINVAR_VCF, "rt") as fh:
@@ -216,7 +216,7 @@ def _load_constraint() -> pd.DataFrame:
     """gnomAD constraint table -> bare gene_id + LOEUF + missense o/e (one row per gene, the
     most-constrained transcript)."""
     if not _GNOMAD_CONSTRAINT.exists():
-        raise SystemExit(f"{_GNOMAD_CONSTRAINT} missing; run 17.download_clinical.sh first.")
+        raise SystemExit(f"{_GNOMAD_CONSTRAINT} missing; run 06_switch_mechanism/_h/01f.download_clinical.sh first.")
     df = pd.read_csv(_GNOMAD_CONSTRAINT, sep="\t", dtype=str, low_memory=False)
     gid = next((c for c in ("gene_id", "gene_id.", "ensembl_gene_id", "gene")
                 if c in df.columns), None)

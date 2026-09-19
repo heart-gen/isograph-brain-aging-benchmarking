@@ -10,10 +10,18 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3081 | 0.1444 | 0.1548 | 0.97 | 0.86 | 1.09 | 5.91e-01 | logit_matched_standard |
-| sQTL | all_modules | 3081 | 0.1444 | 0.1548 | 0.98 | 0.86 | 1.11 | 7.25e-01 | logit_matched_constraint |
-| eQTL | all_modules | 3484 | 0.3401 | 0.3662 | 0.88 | 0.81 | 0.95 | 2.23e-03 | logit_matched_standard |
-| eQTL | all_modules | 3484 | 0.3401 | 0.3662 | 0.93 | 0.86 | 1.02 | 1.10e-01 | logit_matched_constraint |
+| sQTL | all_modules | 3651 | 0.1408 | 0.1552 | 0.92 | 0.81 | 1.03 | 1.43e-01 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 70 | 0.0857 | 0.1509 | 0.51 | 0.21 | 1.19 | 1.18e-01 | logit_matched_standard |
+| sQTL | go_invisible_modules | 70 | 0.0857 | 0.1509 | 0.51 | 0.21 | 1.19 | 1.18e-01 | logit_matched_standard |
+| sQTL | all_modules | 3651 | 0.1408 | 0.1552 | 0.94 | 0.83 | 1.07 | 3.51e-01 | logit_matched_constraint |
+| sQTL | pheno_sig_modules | 70 | 0.0857 | 0.1509 | 0.52 | 0.22 | 1.24 | 1.40e-01 | logit_matched_constraint |
+| sQTL | go_invisible_modules | 70 | 0.0857 | 0.1509 | 0.52 | 0.22 | 1.24 | 1.40e-01 | logit_matched_constraint |
+| eQTL | all_modules | 4136 | 0.3274 | 0.3752 | 0.79 | 0.73 | 0.86 | 7.45e-09 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 72 | 0.3333 | 0.3606 | 0.85 | 0.52 | 1.38 | 5.05e-01 | logit_matched_standard |
+| eQTL | go_invisible_modules | 72 | 0.3333 | 0.3606 | 0.85 | 0.52 | 1.38 | 5.05e-01 | logit_matched_standard |
+| eQTL | all_modules | 4136 | 0.3274 | 0.3752 | 0.87 | 0.8 | 0.94 | 9.16e-04 | logit_matched_constraint |
+| eQTL | pheno_sig_modules | 72 | 0.3333 | 0.3606 | 0.91 | 0.55 | 1.5 | 7.19e-01 | logit_matched_constraint |
+| eQTL | go_invisible_modules | 72 | 0.3333 | 0.3606 | 0.91 | 0.55 | 1.5 | 7.19e-01 | logit_matched_constraint |
 
 ## Reading
 

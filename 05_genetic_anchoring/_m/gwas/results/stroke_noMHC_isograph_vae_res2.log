@@ -1,33 +1,21 @@
 Welcome to MAGMA v1.10 (linux)
 Using flags:
-	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/stroke_noMHC.genes.raw
-	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_res2_gene_sets.txt
-	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/stroke_noMHC_isograph_vae_res2
+	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/stroke_noMHC.genes.raw
+	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_res2_gene_sets.txt
+	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/stroke_noMHC_isograph_vae_res2
 
-Start time is 09:30:48, Friday 17 Jul 2026
+Start time is 21:16:27, Tuesday 15 Sep 2026
 
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/stroke_noMHC.genes.raw... 
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/stroke_noMHC.genes.raw... 
 	17948 genes read from file
 Loading gene-set annotation...
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_res2_gene_sets.txt... 
-	WARNING: gene set gtex__amygdala__M020 contains no genes defined in genotype data
-	WARNING: gene set gtex__caudate_basal_ganglia__M017 contains no genes defined in genotype data
-	WARNING: gene set gtex__cerebellar_hemisphere__M021 contains no genes defined in genotype data
-	WARNING: gene set gtex__cerebellum__M021 contains no genes defined in genotype data
-	WARNING: gene set gtex__cortex__M012 contains no genes defined in genotype data
-	WARNING: gene set gtex__frontal_cortex_ba9__M011 contains no genes defined in genotype data
-	WARNING: gene set gtex__frontal_cortex_ba9__M012 contains no genes defined in genotype data
-	WARNING: gene set gtex__hypothalamus__M023 contains no genes defined in genotype data
-	WARNING: gene set gtex__putamen_basal_ganglia__M018 contains no genes defined in genotype data
-	WARNING: gene set gtex__spinal_cord_cervical_c_1__M019 contains no genes defined in genotype data
-	WARNING: gene set gtex__substantia_nigra__M010 contains no genes defined in genotype data
-	WARNING: gene set brainseq__caudate_sczd__M017 contains no genes defined in genotype data
-	301 gene-set definitions read from file
-	found 289 gene sets containing genes defined in genotype data (containing a total of 13158 unique genes)
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_res2_gene_sets.txt... 
+	388 gene-set definitions read from file
+	found 388 gene sets containing genes defined in genotype data (containing a total of 12828 unique genes)
 Preparing variables for analysis...
 	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
 	truncating covariate values more than 5 standard deviations from the mean
-	total variables available for analysis: 289 gene sets
+	total variables available for analysis: 388 gene sets
 
 Parsing model specifications...
 Inverting gene-gene correlation matrix...
@@ -39,7 +27,7 @@ Performing regression analysis...
 		inverse mac, log(inverse mac)
 	analysing individual variables
 
-	analysing single-variable models (number of models: 289)
-	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/stroke_noMHC_isograph_vae_res2.gsa.out
+	analysing single-variable models (number of models: 388)
+	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/stroke_noMHC_isograph_vae_res2.gsa.out
 
-End time is 09:31:03, Friday 17 Jul 2026 (elapsed: 00:00:15)
+End time is 21:16:47, Tuesday 15 Sep 2026 (elapsed: 00:00:20)

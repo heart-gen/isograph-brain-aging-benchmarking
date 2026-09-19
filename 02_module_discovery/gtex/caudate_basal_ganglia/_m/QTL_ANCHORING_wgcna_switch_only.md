@@ -10,12 +10,8 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 5981 | 0.2125 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 117 | 0.1026 | 0.2147 | 0.49 | 0.27 | 0.92 | 2.53e-02 | logit_matched_standard |
-| sQTL | go_visible_modules | 117 | 0.1026 | 0.2147 | 0.49 | 0.27 | 0.92 | 2.53e-02 | logit_matched_standard |
-| eQTL | all_modules | 7228 | 0.5059 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 209 | 0.3493 | 0.5106 | 0.5 | 0.37 | 0.67 | 2.51e-06 | logit_matched_standard |
-| eQTL | go_visible_modules | 209 | 0.3493 | 0.5106 | 0.5 | 0.37 | 0.67 | 2.51e-06 | logit_matched_standard |
+| sQTL | all_modules | 5432 | 0.2321 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | all_modules | 5966 | 0.5183 | nan | nan | nan | nan | NA | insufficient |
 
 ## Reading
 

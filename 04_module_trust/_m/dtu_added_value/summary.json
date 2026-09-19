@@ -1,0 +1,16 @@
+{
+  "question": "Does the DTU evidence of a gene's module neighbours in one donor subset predict that gene's DTU evidence in an independent donor subset, after conditioning on its own discovery-subset evidence?",
+  "framing": "Gene-wise DTU identifies genes whose transcript usage changes; IsoGraph identifies coordinated structure among those changes. This tests whether that structure carries information not represented by gene-wise DTU statistics alone.",
+  "n_regions_robust_to_coexpression": 3,
+  "n_regions_sig": 4,
+  "preregistered_rule": "SUPPORTED if BH q_strat < 0.05 in >= 4/6 regions with at least one per cohort; PARTIAL if 1-3; NOT SUPPORTED if 0",
+  "preregistered_verdict": "SUPPORTED",
+  "n_perm": 1000,
+  "seeds": 5,
+  "split_directions": 10,
+  "min_module_genes": 5,
+  "spline_df": 4,
+  "coexpression_neighbours": 50,
+  "strata": "10 log-mean-count bins x 3 minor-usage bins",
+  "giant_sensitivity_present": true
+}

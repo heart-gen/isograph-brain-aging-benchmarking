@@ -1,0 +1,15 @@
+tier	tier_label	gene_name	ensembl_gene_id	n_regions	n_regions_binding	selection_reason
+0	regulator	KHDRBS1	ENSG00000121774	1	1	KHDRBS1 itself -- the perturbation target
+1	core recurrent	RIPOR1	ENSG00000039523	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	GRAMD2A	ENSG00000175318	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	DNAH7	ENSG00000118997	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	CLXN	ENSG00000034239	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	EXOSC10-AS1	ENSG00000230337	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	DNAAF8	ENSG00000166246	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	PTOV1	ENSG00000104960	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+1	core recurrent	NAV2	ENSG00000166833	3	3	switched + enriched module in 3 region(s); 3 eCLIP-supported
+2	disease anchor	TMEM63A	ENSG00000196187	2	2	colocalized SCZ (sQTL); splicing (sQTL not resolved to switch pair)
+2	disease anchor	FLCN	ENSG00000154803	2	2	colocalized AD,SCZ (sQTL); splicing-led (IsoGraph-resolved switch)
+2	disease anchor	B3GAT1	ENSG00000109956	1	1	colocalized SCZ (eQTL,sQTL); splicing-led (IsoGraph-resolved switch)
+2	disease anchor	RBFA	ENSG00000101546	1	1	colocalized SCZ (sQTL); splicing-led (IsoGraph-resolved switch)
+2	disease anchor	GSTO2	ENSG00000065621	1	1	colocalized SCZ (sQTL); splicing-led (IsoGraph-resolved switch)

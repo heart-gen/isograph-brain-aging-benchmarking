@@ -32,7 +32,7 @@ then submit if clear:**
 ```bash
 squeue -u kbenjamin -n clinical-consequence -o '%i %t %r'   # expect empty
 # if empty:
-sbatch --array=0,3,4,5 06_switch_mechanism/_h/09.clinical_consequence.sh
+sbatch --array=0,3,4,5 06_switch_mechanism/_h/02c.clinical_consequence.sh
 ```
 Confirm success = each of the 4 either writes `.../clinical_consequence/clinical_consequence.parquet`
 OR logs a legitimate "skipping" reason (caudate_sczd should NOT skip — it's the SCZD region).
@@ -40,8 +40,8 @@ OR logs a legitimate "skipping" reason (caudate_sczd should NOT skip — it's th
 ### A2. Commit the wrapper fixes (USER ALREADY APPROVED, gated on A1 success)
 Once the re-run completes cleanly, commit the module-init guard added to both wrappers:
 ```bash
-git add 06_switch_mechanism/_h/01.switch_consequence.sh \
-        06_switch_mechanism/_h/09.clinical_consequence.sh
+git add 06_switch_mechanism/_h/01a.switch_consequence.sh \
+        06_switch_mechanism/_h/02c.clinical_consequence.sh
 git commit   # message below
 ```
 Commit message:
@@ -125,7 +125,7 @@ Classify each gene as:
 Add `isograph_benchmark/real_data/gene_deep_dive.py`:
 - input: `--gene SYMBOL` (or `--genes SNCA,MYO18A,…`), resolves symbol→`gene_id`;
 - joins the six layers above across all regions where the gene switches;
-- emits per-gene `05_genetic_anchoring/_m/deep_dive/<GENE>.md` vignette + a panel-wide
+- emits per-gene `08_integration/_m/deep_dive/<GENE>.md` vignette + a panel-wide
   `deep_dive_panel.parquet` (one row/gene, the B2 columns) for the summary table;
 - deterministic, no new heavy compute — pure joins over existing parquets.
 - SLURM: trivial, single `RM-shared` task (or run interactively).

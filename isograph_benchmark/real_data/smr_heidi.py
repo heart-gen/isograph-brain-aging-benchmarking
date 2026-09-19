@@ -47,8 +47,27 @@ release with different defaults cannot change the analysis silently: instrument 
 SNPs at p < 1.5654e-3, 3-20 HEIDI SNPs, a 2 Mb cis window, and the allele-frequency QC (0.2 per
 SNP, at most 5% failing). Interpretation, fixed before any result existed: SMR significance is
 Bonferroni over instrumented probes within (analysis, QTL modality), and p_HEIDI < 0.01 rejects
-a single shared causal variant. A relaxed instrument threshold (`--peqtl-smr`) is a sensitivity
-arm and writes to its own directory; the ESD/BESD files do not depend on it and are shared.
+a single shared causal variant.
+
+SENSITIVITY ARMS
+----------------
+Two, each writing to its own directory under `sensitivity/` so neither can overwrite the
+primary result. The ESD/BESD files depend on neither and are shared, so both run on a
+primary array's BESD without rebuilding it.
+
+  --peqtl-smr <p>  A relaxed instrument threshold. One pre-specified arm at 1e-6; this is
+                   not a sweep, and the relaxed arm is where weak instruments (see WEAK_F)
+                   should be looked for.
+  --smr-multi      SMR's multi-SNP test, which combines the cis SNPs surviving LD pruning
+                   at r2 LD_MULTI_SNP instead of testing the top SNP alone. It asks whether
+                   a signal rests on one lead SNP or on the cis signal more broadly, and is
+                   a robustness arm for the SMR estimate -- never a second discovery pass.
+                   SMR writes `.msmr` here, not `.smr`, with `p_SMR_multi` added. `p_SMR`
+                   and `smr_status` stay the single-SNP quantities so the arms compare row
+                   for row; the multi verdict is `smr_multi_status`, corrected over the
+                   probes the multi test actually ran on. Where too few cis SNPs survive
+                   pruning SMR skips the test, and that probe is `multi_unavailable` -- an
+                   absence of evidence, not a null.
 
 INPUTS, AND THE BUILD
 ---------------------
@@ -83,6 +102,7 @@ STAGES
                  Login-node safe. BrainSEQ needs `coloc_brainseq --stage meta` first.
   --stage besd   per work-list task: nominal statistics -> ESD -> `smr --make-besd`.
   --stage smr    per work-list task: `smr` for every analysis with targets in that cell.
+                 `--peqtl-smr` / `--smr-multi` select a sensitivity arm; both reuse the BESD.
   --stage meta   assemble, apply the multiple-testing family, join coloc per probe, classify,
                  report.
 
@@ -120,6 +140,9 @@ HEIDI_MAX_M = 20
 CIS_WIND_KB = 2000
 DIFF_FREQ = 0.2
 DIFF_FREQ_PROP = 0.05
+# Multi-SNP SMR (`--smr-multi`). SMR prunes the cis SNPs it combines at this LD r2 before
+# testing; 0.1 is SMR 1.4.2's own default (src/SMR.cpp:122), passed explicitly like the rest.
+LD_MULTI_SNP = 0.1
 
 # Interpretation, pre-specified.
 SMR_ALPHA = 0.05
@@ -137,6 +160,12 @@ FLIST_COLS = ["Chr", "ProbeID", "GeneticDistance", "ProbeBp", "Gene", "Orientati
 SMR_OUT_COLS = ["probeID", "ProbeChr", "Gene", "Probe_bp", "topSNP", "topSNP_chr", "topSNP_bp",
                 "A1", "A2", "Freq", "b_GWAS", "se_GWAS", "p_GWAS", "b_eQTL", "se_eQTL",
                 "p_eQTL", "b_SMR", "se_SMR", "p_SMR", "p_HEIDI", "nsnp_HEIDI"]
+# `--smr-multi` writes `.msmr`, not `.smr`, with one extra column inserted before p_HEIDI.
+# Verified against the three writers in src/SMR_data_p1.cpp (lines 2039, 2632, 4811), which
+# emit an identical header, so the format does not depend on which dispatch path runs.
+SMR_MULTI_COL = "p_SMR_multi"
+SMR_MULTI_OUT_COLS = [*SMR_OUT_COLS[:SMR_OUT_COLS.index("p_HEIDI")], SMR_MULTI_COL,
+                      *SMR_OUT_COLS[SMR_OUT_COLS.index("p_HEIDI"):]]
 
 AGREEMENT: tuple[str, ...] = (
     "coloc_and_smr_heidi_not_rejected",   # coloc call, SMR significant, HEIDI not rejected
@@ -160,6 +189,20 @@ SMR_STATUS: tuple[str, ...] = (
     "smr_signal_heidi_unavailable",   # SMR significant, HEIDI skipped (< HEIDI_MIN_M SNPs)
     "smr_signal_heidi_rejects",       # SMR significant, HEIDI rejects one shared variant
     "smr_heidi_supported",            # SMR significant, HEIDI not rejected
+)
+
+# The multi-SNP arm's own verdict. Kept apart from `smr_status` rather than replacing it:
+# `p_SMR` is still emitted in `.msmr`, so both arms carry a comparable single-SNP verdict, and
+# the interesting quantity is whether a probe significant on its top SNP survives the
+# multi-SNP test. `multi_unavailable` is NOT a null -- SMR skips the test when too few cis
+# SNPs survive LD pruning, and folding that into "tested and null" would invent evidence.
+SMR_MULTI_STATUS: tuple[str, ...] = (
+    "no_instrument",                    # no cis-QTL clears --peqtl-smr; UNTESTED either way
+    "multi_unavailable",                # instrumented, but the multi-SNP test produced no p
+    "multi_tested_null",                # multi-SNP p above its own family threshold
+    "multi_signal_heidi_unavailable",   # multi-SNP significant, HEIDI skipped
+    "multi_signal_heidi_rejects",       # multi-SNP significant, HEIDI rejects
+    "multi_heidi_supported",            # multi-SNP significant, HEIDI not rejected
 )
 
 # Instrument strength F = (b/se)^2 for the top cis-QTL SNP. Reported on every row and never
@@ -204,7 +247,7 @@ def check_qtl_source(qtl_source: str, arm: str | None = None,
     if failures:
         raise SystemExit(
             f"BrainSEQ `{arm}` has not passed its QTL checks, so no SMR estimate is built on it: "
-            + "; ".join(failures) + " (run 28.brainseq_qtl_checks.sh)")
+            + "; ".join(failures) + " (run 02g.brainseq_qtl_checks.sh)")
 
 
 def modalities(qtl_source: str) -> tuple[str, ...]:
@@ -222,11 +265,21 @@ def source_root(qtl_source: str = "gtex", arm: str | None = None) -> Path:
 
 
 def run_root(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
-             arm: str | None = None) -> Path:
-    """SMR runs and meta outputs; a non-default instrument threshold is a sensitivity arm."""
+             arm: str | None = None, multi: bool = False) -> Path:
+    """SMR runs and meta outputs.
+
+    The primary arm is the bare source root. A non-default instrument threshold and the
+    multi-SNP test are each sensitivity arms with their own directory, so neither can
+    overwrite the primary result; requesting both composes one directory rather than
+    silently collapsing onto either.
+    """
     base = source_root(qtl_source, arm)
-    return base if np.isclose(peqtl_smr, PEQTL_SMR) else (
-        base / "sensitivity" / f"peqtl_smr_{peqtl_smr:g}")
+    tags: list[str] = []
+    if not np.isclose(peqtl_smr, PEQTL_SMR):
+        tags.append(f"peqtl_smr_{peqtl_smr:g}")
+    if multi:
+        tags.append("smr_multi")
+    return base if not tags else base / "sensitivity" / "__".join(tags)
 
 
 def _safe(s: str) -> str:
@@ -535,7 +588,7 @@ def read_brainseq_qtl(arm: str, region: str, chrom: int, genes: set[str],
 def load_sign_pin(arm: str, region: str) -> pd.DataFrame:
     f = stage_out("anchoring.brainseq_qtl", arm) / "checks" / f"sign_pin_{region}.parquet"
     if not f.exists():
-        raise SystemExit(f"missing {f}; run 28.brainseq_qtl_checks.sh for {arm}")
+        raise SystemExit(f"missing {f}; run 02g.brainseq_qtl_checks.sh for {arm}")
     return pd.read_parquet(f)[["gene", "r", "sign", "flipped", "axis_unstable", "pinnable"]]
 
 
@@ -612,22 +665,31 @@ def run_besd(qtl_source: str = "gtex", task: int | None = None, arm: str | None 
 # --------------------------------------------------------------------------- #
 # Stage: smr
 # --------------------------------------------------------------------------- #
+def smr_out_suffix(multi: bool = False) -> str:
+    """SMR names its table `.msmr` under `--smr-multi` and `.smr` otherwise."""
+    return ".msmr" if multi else ".smr"
+
+
 def smr_command(bfile: Path, ma: Path, besd: Path, probes: Path, out: Path,
-                peqtl_smr: float = PEQTL_SMR, threads: int = 4) -> list[str]:
-    return [str(SMR_BIN), "--bfile", str(bfile), "--gwas-summary", str(ma),
-            "--beqtl-summary", str(besd), "--extract-probe", str(probes), "--out", str(out),
-            "--peqtl-smr", f"{peqtl_smr:g}", "--peqtl-heidi", f"{PEQTL_HEIDI:g}",
-            "--heidi-min-m", str(HEIDI_MIN_M), "--heidi-max-m", str(HEIDI_MAX_M),
-            "--cis-wind", str(CIS_WIND_KB), "--diff-freq", f"{DIFF_FREQ:g}",
-            "--diff-freq-prop", f"{DIFF_FREQ_PROP:g}", "--thread-num", str(threads)]
+                peqtl_smr: float = PEQTL_SMR, threads: int = 4,
+                multi: bool = False) -> list[str]:
+    cmd = [str(SMR_BIN), "--bfile", str(bfile), "--gwas-summary", str(ma),
+           "--beqtl-summary", str(besd), "--extract-probe", str(probes), "--out", str(out),
+           "--peqtl-smr", f"{peqtl_smr:g}", "--peqtl-heidi", f"{PEQTL_HEIDI:g}",
+           "--heidi-min-m", str(HEIDI_MIN_M), "--heidi-max-m", str(HEIDI_MAX_M),
+           "--cis-wind", str(CIS_WIND_KB), "--diff-freq", f"{DIFF_FREQ:g}",
+           "--diff-freq-prop", f"{DIFF_FREQ_PROP:g}", "--thread-num", str(threads)]
+    if multi:
+        cmd += ["--smr-multi", "--ld-multi-snp", f"{LD_MULTI_SNP:g}"]
+    return cmd
 
 
 def run_smr(qtl_source: str = "gtex", task: int | None = None, peqtl_smr: float = PEQTL_SMR,
-            threads: int = 4, arm: str | None = None) -> None:
+            threads: int = 4, arm: str | None = None, multi: bool = False) -> None:
     check_qtl_source(qtl_source, arm)
     from isograph_benchmark.real_data.coloc_prep import PANEL_DIR
 
-    root, dest = source_root(qtl_source, arm), run_root(qtl_source, peqtl_smr, arm)
+    root, dest = source_root(qtl_source, arm), run_root(qtl_source, peqtl_smr, arm, multi)
     targets = pd.read_parquet(root / "targets.parquet")
     for w in _tasks(root, task).itertuples(index=False):
         tissue, ch = str(w.tissue), int(w.chr)
@@ -649,7 +711,7 @@ def run_smr(qtl_source: str = "gtex", task: int | None = None, peqtl_smr: float 
                 probes.to_csv(pf, index=False, header=False)
                 out = odir / f"{mod}.chr{ch}"
                 cmd = smr_command(PANEL_DIR / f"1000G.EUR.QC.{ch}", ma, besd, pf, out,
-                                  peqtl_smr=peqtl_smr, threads=threads)
+                                  peqtl_smr=peqtl_smr, threads=threads, multi=multi)
                 rc = _run(cmd, Path(f"{out}.log"))
                 # SMR exits non-zero when no probe clears the instrument threshold; that is
                 # an outcome (`coloc_no_instrument`), so it is recorded, not raised.
@@ -660,8 +722,11 @@ def run_smr(qtl_source: str = "gtex", task: int | None = None, peqtl_smr: float 
 # Stage: meta
 # --------------------------------------------------------------------------- #
 def read_smr(path: Path) -> pd.DataFrame:
+    """One SMR table. `.msmr` (from `--smr-multi`) carries one extra column; both are checked
+    against the exact header SMR 1.4.2 writes, so a format change fails loudly here."""
     d = pd.read_csv(path, sep="\t")
-    missing = [c for c in SMR_OUT_COLS if c not in d.columns]
+    want = SMR_MULTI_OUT_COLS if Path(path).suffix == ".msmr" else SMR_OUT_COLS
+    missing = [c for c in want if c not in d.columns]
     if missing:
         raise SystemExit(f"{path} lacks SMR output columns {missing}")
     return d
@@ -690,6 +755,21 @@ def instrumented_family_sizes(d: pd.DataFrame) -> pd.DataFrame:
                .rename("n_instrumented_family").reset_index())
 
 
+def multi_family_sizes(d: pd.DataFrame) -> pd.DataFrame:
+    """Probes the multi-SNP test actually produced a p-value for, per family.
+
+    Its own denominator, not the single-SNP one: SMR skips the multi-SNP test where too few
+    cis SNPs survive LD pruning, so correcting it over every instrumented probe would divide
+    by tests that were never run and make the arm conservative for the wrong reason.
+    """
+    ins = d[d[SMR_MULTI_COL].notna()] if SMR_MULTI_COL in d.columns else d.iloc[:0]
+    if ins.empty:
+        return pd.DataFrame(columns=["analysis", "modality", "probe_family", "n_multi_family"])
+    return (ins.drop_duplicates(["analysis", "modality", "probe_family", "tissue", "probeID"])
+               .groupby(["analysis", "modality", "probe_family"]).size()
+               .rename("n_multi_family").reset_index())
+
+
 def smr_status(p_smr, p_heidi, nsnp_heidi, threshold) -> str:
     """The SMR-side verdict alone, with no coloc input (see `SMR_STATUS`).
 
@@ -704,6 +784,24 @@ def smr_status(p_smr, p_heidi, nsnp_heidi, threshold) -> str:
     if pd.isna(p_heidi) or pd.isna(nsnp_heidi) or nsnp_heidi < HEIDI_MIN_M:
         return "smr_signal_heidi_unavailable"
     return "smr_signal_heidi_rejects" if p_heidi < HEIDI_REJECT else "smr_heidi_supported"
+
+
+def smr_multi_status(p_smr, p_smr_multi, p_heidi, nsnp_heidi, threshold) -> str:
+    """The multi-SNP arm's verdict (see `SMR_MULTI_STATUS`).
+
+    `p_smr` decides only whether the probe was instrumented at all; the verdict itself is the
+    multi-SNP p-value against the multi-SNP family's own threshold. A probe SMR instrumented
+    but could not run the multi-SNP test on is `multi_unavailable`, never a null.
+    """
+    if pd.isna(p_smr):
+        return "no_instrument"
+    if pd.isna(p_smr_multi):
+        return "multi_unavailable"
+    if not (pd.notna(threshold) and p_smr_multi <= threshold):
+        return "multi_tested_null"
+    if pd.isna(p_heidi) or pd.isna(nsnp_heidi) or nsnp_heidi < HEIDI_MIN_M:
+        return "multi_signal_heidi_unavailable"
+    return "multi_signal_heidi_rejects" if p_heidi < HEIDI_REJECT else "multi_heidi_supported"
 
 
 def classify(pp4, p_smr, p_heidi, nsnp_heidi, threshold, call: float = PP4_CALL) -> str:
@@ -900,10 +998,12 @@ _PROBE_FILE = re.compile(r"^(eQTL|sQTL|A_g|S_g)\.chr(\d+)\.probes$")
 
 
 def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
-             arm: str | None = None) -> Path:
+             arm: str | None = None, multi: bool = False) -> Path:
     check_qtl_source(qtl_source, arm)
-    root, dest = source_root(qtl_source, arm), run_root(qtl_source, peqtl_smr, arm)
+    root = source_root(qtl_source, arm)
+    dest = run_root(qtl_source, peqtl_smr, arm, multi)
     targets = pd.read_parquet(root / "targets.parquet")
+    suffix = smr_out_suffix(multi)
 
     tested, results, runs = [], [], []
     for pf in sorted((dest / "smr").rglob("*.probes")):
@@ -914,19 +1014,22 @@ def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
         pr = pd.read_csv(pf, header=None, names=["probeID"]).assign(
             analysis=analysis, tissue=tissue, modality=mod)
         tested.append(pr)
-        sf = Path(str(pf)[:-len(".probes")] + ".smr")
+        sf = Path(str(pf)[:-len(".probes")] + suffix)
         runs.append({"analysis": analysis, "tissue": tissue, "modality": mod,
                      "chr": int(m.group(2)), "n_probes": len(pr), "smr_file": sf.exists()})
         if sf.exists():
             s = read_smr(sf)
-            if len(s):  # a header-only .smr is a run where no probe was instrumented
+            if len(s):  # a header-only table is a run where no probe was instrumented
                 results.append(s.assign(analysis=analysis, tissue=tissue, modality=mod))
     if not tested:
-        raise SystemExit(f"no SMR runs under {dest / 'smr'}; run --stage smr first")
+        raise SystemExit(f"no SMR runs under {dest / 'smr'}; run --stage smr first"
+                         + (" --smr-multi" if multi else ""))
 
     d = pd.concat(tested, ignore_index=True)
     stat = ["topSNP", "A1", "A2", "b_GWAS", "p_GWAS", "b_eQTL", "se_eQTL", "p_eQTL",
             "b_SMR", "se_SMR", "p_SMR", "p_HEIDI", "nsnp_HEIDI"]
+    if multi:
+        stat.append(SMR_MULTI_COL)
     if results:
         r = pd.concat(results, ignore_index=True)[["analysis", "tissue", "modality", "probeID",
                                                    *stat]]
@@ -969,6 +1072,11 @@ def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
     d = d.merge(fam, on=["analysis", "modality", "probe_family"], how="left")
     d["n_instrumented_family"] = d["n_instrumented_family"].fillna(0).astype(int)
     d["smr_threshold"] = d["n_instrumented_family"].map(smr_threshold)
+    if multi:
+        d = d.merge(multi_family_sizes(d), on=["analysis", "modality", "probe_family"],
+                    how="left")
+        d["n_multi_family"] = d["n_multi_family"].fillna(0).astype(int)
+        d["smr_multi_threshold"] = d["n_multi_family"].map(smr_threshold)
 
     # Instrument strength on every row; flagged, never filtered (see WEAK_F).
     with np.errstate(invalid="ignore", divide="ignore"):
@@ -980,6 +1088,13 @@ def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
 
     d["smr_status"] = [smr_status(r.p_SMR, r.p_HEIDI, r.nsnp_HEIDI, r.smr_threshold)
                        for r in d.itertuples(index=False)]
+    if multi:
+        # `smr_status` stays the single-SNP verdict in this arm too, so the two arms are
+        # comparable row for row; the multi-SNP verdict is a separate column.
+        d["smr_multi_status"] = [
+            smr_multi_status(r.p_SMR, getattr(r, SMR_MULTI_COL), r.p_HEIDI, r.nsnp_HEIDI,
+                             r.smr_multi_threshold)
+            for r in d.itertuples(index=False)]
     d["agreement"] = [classify(r.coloc_PP4_probe, r.p_SMR, r.p_HEIDI, r.nsnp_HEIDI,
                                r.smr_threshold)
                       for r in d.itertuples(index=False)]
@@ -990,8 +1105,10 @@ def run_meta(qtl_source: str = "gtex", peqtl_smr: float = PEQTL_SMR,
 
     d.to_parquet(dest / "smr_results.parquet", index=False)
     pd.DataFrame(runs).to_csv(dest / "smr_runs.tsv", sep="\t", index=False)
-    _write_report(dest, d, qtl_source, peqtl_smr, arm, attrition)
+    _write_report(dest, d, qtl_source, peqtl_smr, arm, attrition, multi)
     print(f"  {len(d):,} probe rows; agreement: {d['agreement'].value_counts().to_dict()}")
+    if multi:
+        print(f"  multi-SNP: {d['smr_multi_status'].value_counts().to_dict()}")
     print(f"  wrote {dest}")
     return dest
 
@@ -1005,7 +1122,8 @@ def _fmt(v, nd=3) -> str:
 
 
 def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float,
-                  arm: str | None = None, attrition: pd.DataFrame | None = None) -> None:
+                  arm: str | None = None, attrition: pd.DataFrame | None = None,
+                  multi: bool = False) -> None:
     brainseq = qtl_source == "brainseq"
     L: list[str] = []
     A = L.append
@@ -1013,7 +1131,9 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
     A("")
     A(f"QTL source: `{qtl_source}`" + (f" (`{arm}` arm)" if brainseq else "")
       + f". Instrument threshold `--peqtl-smr {peqtl_smr:g}`"
-      + ("" if np.isclose(peqtl_smr, PEQTL_SMR) else " -- **SENSITIVITY ARM**") + ". "
+      + ("" if np.isclose(peqtl_smr, PEQTL_SMR) else " -- **SENSITIVITY ARM**")
+      + (f". Multi-SNP SMR (`--smr-multi`, LD pruned at r2 {LD_MULTI_SNP:g}) "
+         "-- **SENSITIVITY ARM**" if multi else "") + ". "
       f"HEIDI SNPs at p < {PEQTL_HEIDI:g}, {HEIDI_MIN_M}-{HEIDI_MAX_M} SNPs, "
       f"{CIS_WIND_KB} kb cis window. Significance: Bonferroni at {SMR_ALPHA} over the "
       f"instrumented probes of the row's OWN family (primary confirmatory / secondary "
@@ -1055,10 +1175,14 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
       "event-localization family** with its own Bonferroni correction, so the primary "
       "threshold is not inflated by introns and the introns do not escape correction when they "
       "are discussed. `F` is the instrument strength `(b_eQTL/se_eQTL)^2` of the top cis-QTL "
-      "SNP, reported on every row and never used to exclude one.")
+      "SNP, reported on every row and never used to exclude one. It is summarized by its 5th "
+      "percentile rather than a count below the conventional F < 10: an instrument that clears "
+      "p < 5e-8 has |z| ≳ 5.4 and so F ≳ 30 (≈ 24 at the relaxed 1e-6 arm), so a weak-instrument "
+      "count is zero by construction and carries no information; the per-row `weak_instrument` "
+      "flag stays in `smr_results.parquet` for any run at a looser threshold.")
     A("")
     A("| analysis | modality | family | probes | instrumented | threshold | "
-      "F median [min-max] | weak F | "
+      "F median [min-max] | F p5 | "
       + " | ".join(f"`{s}`" for s in SMR_STATUS) + " |")
     A("|---|---|---|---|---|---|---|---|" + "---|" * len(SMR_STATUS))
     for (an, mod, fam), sub in d.groupby(["analysis", "modality", "probe_family"]):
@@ -1067,9 +1191,9 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
         f = ins["F_instrument"].dropna()
         frange = ("—" if f.empty else
                   f"{f.median():.0f} [{f.min():.0f}-{f.max():.0f}]")
+        fp5 = "—" if f.empty else f"{f.quantile(0.05):.0f}"
         A(f"| {an} | {mod} | {fam} | {len(sub)} | {len(ins)} | "
-          f"{_fmt(sub['smr_threshold'].iloc[0])} | {frange} | "
-          f"{int(ins['weak_instrument'].sum())} | "
+          f"{_fmt(sub['smr_threshold'].iloc[0])} | {frange} | {fp5} | "
           + " | ".join(str(int(cnt.get(s, 0))) for s in SMR_STATUS) + " |")
     A("")
     A("**`no_instrument` is not a negative result** — the probe was never tested, because no "
@@ -1195,6 +1319,42 @@ def _write_report(dest: Path, d: pd.DataFrame, qtl_source: str, peqtl_smr: float
             row += f"{pin} | "
         A(row + f"`{r.agreement}` |")
     A("")
+    if multi:
+        A("## The multi-SNP arm")
+        A("")
+        A("`--smr-multi` combines the cis SNPs surviving LD pruning at r2 "
+          f"{LD_MULTI_SNP:g} instead of testing the top SNP alone. It is a robustness arm "
+          "for the SMR estimate, not a second discovery pass: it answers whether a signal "
+          "rests on one lead SNP or on the cis signal more broadly.")
+        A("")
+        A(f"`p_SMR` and `smr_status` in this table are still the single-SNP quantities, so "
+          f"rows match the primary arm one for one. The multi-SNP verdict is "
+          f"`{SMR_MULTI_COL}` / `smr_multi_status`, Bonferroni-corrected over the probes the "
+          "multi-SNP test actually ran on (`n_multi_family`) -- a smaller denominator than "
+          "the instrumented count, because SMR skips the test where too few cis SNPs survive "
+          "pruning. Those probes are `multi_unavailable`, which is **not** a null result.")
+        A("")
+        if "smr_multi_status" in d.columns:
+            vc = d["smr_multi_status"].value_counts()
+            A("| smr_multi_status | probes |")
+            A("|---|---|")
+            for k in SMR_MULTI_STATUS:
+                if k in vc.index:
+                    A(f"| `{k}` | {int(vc[k]):,} |")
+            A("")
+            both = d[d["p_SMR"].notna() & d["smr_threshold"].notna()]
+            sig1 = both[both["p_SMR"] <= both["smr_threshold"]]
+            if len(sig1):
+                surv = sig1[sig1["smr_multi_status"].isin(
+                    ("multi_signal_heidi_unavailable", "multi_signal_heidi_rejects",
+                     "multi_heidi_supported"))]
+                unav = sig1[sig1["smr_multi_status"] == "multi_unavailable"]
+                A(f"Of the {len(sig1):,} probes significant on the single-SNP test, "
+                  f"{len(surv):,} are also significant under the multi-SNP test and "
+                  f"{len(unav):,} could not be tested. A probe that does not survive is a "
+                  "signal carried by its lead SNP alone; that is a caveat on the SMR "
+                  "estimate, not a refutation of the colocalization.")
+            A("")
     if brainseq:
         A("Probes with neither an SMR instrument nor a coloc call are in `smr_results.parquet` "
           "and not listed here.")
@@ -1215,6 +1375,8 @@ def main(argv=None) -> None:
                     help="0-based row of work_list.tsv (besd/smr); default: every row")
     ap.add_argument("--peqtl-smr", type=float, default=PEQTL_SMR,
                     help="instrument threshold; anything but 5e-8 is a sensitivity arm")
+    ap.add_argument("--smr-multi", action="store_true",
+                    help="multi-SNP SMR sensitivity arm; writes under sensitivity/smr_multi/")
     ap.add_argument("--threads", type=int, default=4)
     args = ap.parse_args(argv)
     if args.stage == "prep":
@@ -1223,9 +1385,10 @@ def main(argv=None) -> None:
         run_besd(args.qtl_source, task=args.task, arm=args.arm)
     elif args.stage == "smr":
         run_smr(args.qtl_source, task=args.task, peqtl_smr=args.peqtl_smr,
-                threads=args.threads, arm=args.arm)
+                threads=args.threads, arm=args.arm, multi=args.smr_multi)
     else:
-        run_meta(args.qtl_source, peqtl_smr=args.peqtl_smr, arm=args.arm)
+        run_meta(args.qtl_source, peqtl_smr=args.peqtl_smr, arm=args.arm,
+                 multi=args.smr_multi)
 
 
 if __name__ == "__main__":

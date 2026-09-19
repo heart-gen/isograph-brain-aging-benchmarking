@@ -111,7 +111,7 @@ _TISSUE_TO_REGION: dict[str, tuple[str, ...]] = {
     "Brain_Frontal_Cortex_BA9": ("dlpfc", "caudate"),
 }
 
-_DEEP_DIVE = ("05_genetic_anchoring", "_m", "deep_dive", "deep_dive_events.parquet")
+_DEEP_DIVE = stage_out("anchoring", "deep_dive", "deep_dive_events.parquet")
 
 # The competing arm each gene's DISPLAY ITEM actually claims, as a coordinate that must
 # appear in the event's competing arm. The anchored junction usually takes part in several
@@ -133,6 +133,10 @@ def out_dir():
 # --------------------------------------------------------------------------- #
 # Target construction
 # --------------------------------------------------------------------------- #
+_TARGET_COLUMNS = ["gene_name", "ens", "trait", "tissue", "region", "anchored_junction",
+                   "competing_junctions", "n_competing", "clpp", "risk_allele"]
+
+
 def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
     """One row per (gene, trait, tissue, region) anchored junction.
 
@@ -142,9 +146,7 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
     locus untestable, because a PSI event contrasting the anchored junction with an
     alternative form supplies the competitor by construction (``direct`` mode).
     """
-    from isograph_benchmark.paths import root
-
-    ev = pd.read_parquet(root().joinpath(*_DEEP_DIVE))
+    ev = pd.read_parquet(_DEEP_DIVE)
     ev = ev[ev["gene_name"].isin(genes) & ev["junction"].astype(str).str.len().gt(0)]
 
     rows: list[dict] = []
@@ -164,7 +166,9 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
                     "n_competing": len(comp),
                     "clpp": float(a["clpp"]), "risk_allele": str(a["risk_allele"]),
                 })
-    return pd.DataFrame(rows)
+    # Explicit columns: a gene set absent from the deep dive is a legitimate null, and an
+    # empty frame without them would crash the per-region filter downstream.
+    return pd.DataFrame(rows, columns=_TARGET_COLUMNS)
 
 
 def _match_events(junction: str, gene_meta: pd.DataFrame) -> list[str]:
@@ -435,10 +439,13 @@ def run_region(region: str, targets: pd.DataFrame, *, alpha: float, min_n: int,
     return res, nul
 
 
-def _write_report(res: pd.DataFrame, alpha: float, min_usage: float) -> str:
+def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
+                  missing: tuple[str, ...] = ()) -> str:
     lines = ["# Short-read junction confirmation of the anchored switch pairs", ""]
     if res.empty:
-        return "\n".join(lines + ["No testable targets."])
+        why = (f" No anchored switch junction in `deep_dive_events` for: "
+               f"{', '.join(missing)}." if missing else "")
+        return "\n".join(lines + ["No testable targets." + why])
     n_val = int((res["verdict"] == "validated").sum())
     lines += [
         f"Targets: **{len(res)}**  |  validated: **{n_val}**  |  "
@@ -564,7 +571,9 @@ def main() -> None:
         pd.concat(null_all, ignore_index=True).to_parquet(od / "null_rhos.parquet",
                                                           index=False)
     (od / "JUNCTION_COLOC_CONFIRM.md").write_text(
-        _write_report(res, args.alpha, args.min_usage))
+        _write_report(res, args.alpha, args.min_usage,
+                      missing=tuple(g for g in args.genes
+                                    if g not in set(targets["gene_name"]))))
     (od / "params.json").write_text(json.dumps(vars(args), indent=2))
     print(f"wrote {od}", flush=True)
     if not res.empty:

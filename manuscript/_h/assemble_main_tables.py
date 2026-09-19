@@ -2,7 +2,7 @@
 
 Mirror of assemble_supp_tables.py for the main display items. Presentation only:
 every number is copied verbatim from the committed source ledgers under
-04_module_characterization/_m -- regenerate, do not hand-edit.
+03_module_characterization/_m -- regenerate, do not hand-edit.
 
 Table 2 (Colocalized splicing-led genes) is the promoted main biology table: the
 12 genes where a disease-GWAS-colocalizing sQTL resolves onto an IsoGraph switch
@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from isograph_benchmark.paths import ensure_dir, stage_out  # noqa: E402
 
 OUT = ensure_dir(stage_out("manuscript", "main_tables"))
-DEEP = stage_out("anchoring", "deep_dive")
+DEEP = stage_out("integration", "deep_dive")
 QTL = stage_out("anchoring", "qtl_anchoring_meta")
 
 # eCAVIAR CLPP thresholds used by the coloc pipeline (coloc_summary.py):
@@ -188,13 +188,15 @@ def main() -> None:
         "and I2 heterogeneity. The contrast removes the shared cis-QTL depletion "
         "baseline of constrained network genes. The effect is carried by the "
         "phenotype-associated set (1.111, p = 3.6e-4); on the 8-tissue set common to "
-        "all methods it is 1.108 (p = 0.001) at I2 = 0.00. **It does NOT localise to "
+        "all methods it is 1.112 (p = 6.5e-4) at I2 = 0.00. **It does NOT localise to "
         "the GO-invisible modules:** GO-invisible (1.068, p = 0.077) and GO-visible "
         "(1.084, p = 0.050) are indistinguishable, so this table does not support a "
         "GO-invisible-specific genetic claim -- the DTU-without-DGE content claim "
         "rests on the GO-invisible gate (Fig S-real-3) instead. The primary internal "
         "control is the matched WGCNA baselines, which consume identical switch "
-        "features and are null in every module set (p >= 0.41). This is the "
+        "features and reach significance in no module set; the closest is "
+        "wgcna_multiplex on the phenotype-associated set (1.046, p = 0.053, I2 = 0.75), "
+        "so the control is \"no baseline clears 0.05\", not \"every baseline is flat\". This is the "
         "statistical anchor of the genetic-anchoring result (cf. per-gene resolution "
         "in Table 3, whose colocalization posteriors are individually modest). "
         "Verbatim from "
@@ -226,10 +228,12 @@ def main() -> None:
         f"({n_hi} high-confidence, {n_mod} moderate; CTSH is the sole *** case at "
         "0.39): the defensible claim is the *set-level* coherence -- splicing-led "
         "equivalent to GO-invisible, cross-disease concordance (SNCA in LBD+PD) -- not "
-        "any single locus. The set-level statistical support is Table 2 (contrast) and "
-        "partitioned heritability (S-LDSC), not per-gene CLPP. Risk allele aligned to "
+        "any single locus. The set-level statistical support is Table 2 (contrast), not "
+        "per-gene CLPP; the S-LDSC splicing arm does **not** support it -- the sQTL "
+        "coefficient clears nominal p<0.05 in 1 of 6 trait-contexts (AD, p=0.0355) with "
+        "no multiple-testing correction, while eQTL clears 4 of 6. Risk allele aligned to "
         "the GWAS trait; LOEUF is gnomAD constraint; Status = established disease "
-        "isoform biology vs novel candidate. Verbatim from 05_genetic_anchoring/_m/deep_dive/ "
+        "isoform biology vs novel candidate. Verbatim from 08_integration/_m/deep_dive/ "
         "(deep_dive_panel.parquet, deep_dive_literature.parquet); see Tables S8-S12 "
         "for per-event/RBP/clinical/literature layers."
     )

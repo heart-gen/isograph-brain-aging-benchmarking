@@ -25,7 +25,7 @@ Subcommands:
   fit-isograph  fit IsoGraph on both halves for each seed; write per-half partitions
   aggregate     read all per-half partitions (both methods) -> ARI/NMI -> summary
 
-WGCNA partitions are produced by ``03_module_trust/_h/stability_wgcna.R`` (R/WGCNA)
+WGCNA partitions are produced by ``04_module_trust/_h/stability_wgcna.R`` (R/WGCNA)
 and written to the same ``partitions/`` dir, so ``aggregate`` treats both methods
 uniformly. Splits are drawn independently per method with seed = k (k = 0..seeds-1);
 we compare the mean +/- SD over seeds, not a paired per-split test, so identical
@@ -54,7 +54,7 @@ from isograph.io.artifacts import load_dataset_bundle
 from isograph.models.vae import VaeNetworkModel
 from isograph.workflow.config import VaeModelConfig
 from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out
-from isograph_benchmark.real_data.run_models import _filter_expressed_transcripts
+from isograph_benchmark.real_data.run_models import filter_production_transcripts
 from isograph_benchmark.real_data.replication import REGION_PAIRS
 
 SEED_BASE = 1000  # split seeds are SEED_BASE + k; VAE init seed is fixed (below)
@@ -71,7 +71,7 @@ COHORTS = {
         "covariates": ["RIN", "mapping_rate", "mito_rate",
                        "SNP_PC1", "SNP_PC2", "SNP_PC3", "SNP_PC4", "SNP_PC5"],
         "age_col": "Age",
-        "filter_transcripts": True,   # run_brainseq_region filters; GTEx bundles are pre-filtered
+        "filter_transcripts": True,   # run_models.filter_production_transcripts (switching, 2026-09-14)
         "lr": None,                   # default (1e-3)
     },
     "gtex": {
@@ -79,7 +79,7 @@ COHORTS = {
         "regions": ["caudate_basal_ganglia", "hippocampus", "frontal_cortex_ba9"],
         "covariates": ["SMRIN", "SMTSISCH", "SMMAPRT"],
         "age_col": "AGE",
-        "filter_transcripts": False,
+        "filter_transcripts": True,
         "lr": None,                   # promoted single LR: default 1e-3 + grad_clip_norm=1.0
                                       # (gate B.2) replaces the old hand-tuned GTEx lr=3e-4.
     },
@@ -88,7 +88,7 @@ COHORTS = {
 
 #: Split-half fits must cluster at the SAME resolution as production, or the trust funnel
 #: validates a partition the paper does not ship. Mirrors run_models.CANONICAL_LEIDEN_RESOLUTION.
-CANONICAL_LEIDEN_RESOLUTION = 5.0
+CANONICAL_LEIDEN_RESOLUTION = 2.0
 
 
 def _res_token(leiden_resolution: float) -> str:
@@ -247,7 +247,7 @@ def fit_isograph(cohort: str, region: str, seeds: int, only_seed: int | None = N
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         # ensure a standalone (non-view) array we can column-slice cheaply
         tc = np.asarray(tc)
@@ -329,6 +329,11 @@ def sweep(cohort: str, region: str, resolutions: list[float], method: str = "iso
     `aggregate` picks them up and emits one stability row per resolution with no further
     work. The canonical resolution is skipped when its partitions already exist -- it is the
     committed baseline, not something a sweep should rewrite.
+
+    Clustering is production's own edge-weighted detector (via `sweep_leiden`). A
+    re-clustered half still need not match the fit's own partition exactly: the saved edge
+    table omits the fit's isolated genes, which shifts vertex order and so Leiden's
+    seeded search.
     """
     from isograph_benchmark.real_data.sweep_leiden import _build_module_table
 
@@ -492,7 +497,7 @@ def fit_rmse(cohort: str, region: str, lr: float = 1e-3,
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         tc = np.asarray(tc)
     del bundle

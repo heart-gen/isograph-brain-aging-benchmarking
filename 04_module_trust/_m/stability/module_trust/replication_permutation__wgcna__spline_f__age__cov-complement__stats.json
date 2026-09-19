@@ -1,0 +1,23 @@
+{
+  "method": "wgcna",
+  "statistic": "spline_f",
+  "null": "age",
+  "covariates": "complement",
+  "n_matched_rows": 52,
+  "min_jaccard": 0.0,
+  "T_obs": 5,
+  "per_pair_obs": {
+    "caudate": 0,
+    "hippocampus": 1,
+    "dlpfc_ba9": 4
+  },
+  "B": 10000,
+  "seed": 13,
+  "sig": 0.05,
+  "p_emp": 0.025597440255974404,
+  "null_mean": 0.5349,
+  "null_sd": 1.2394093769051273,
+  "z": 3.6026030488405674,
+  "null_max": 10,
+  "null_q95": 4.0
+}

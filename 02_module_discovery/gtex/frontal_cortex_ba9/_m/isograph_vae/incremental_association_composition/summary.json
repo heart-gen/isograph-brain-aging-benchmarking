@@ -1,17 +1,73 @@
 {
   "gene_level": {
-    "n_tested": 16362,
-    "composition_unique": 0,
-    "abundance_unique": 726,
+    "n_tested": 12322,
+    "composition_unique": 2,
+    "abundance_unique": 491,
     "both": 0,
-    "neither": 15636
+    "neither": 11829
   },
   "module_level": {
-    "n_tested": 47,
+    "n_tested": 21,
     "composition_unique": 0,
-    "abundance_unique": 1,
+    "abundance_unique": 0,
     "both": 0,
-    "neither": 46
+    "neither": 21
+  },
+  "gene_level_effect_sizes": {
+    "partial_r2_switch_given_abund": {
+      "n": 12322,
+      "quantiles": {
+        "0.1": 0.0008994569297336514,
+        "0.25": 0.002390375643586874,
+        "0.5": 0.005745334566918576,
+        "0.75": 0.011506286259447992,
+        "0.9": 0.01916731441129524
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 491,
+          "median": 0.005421021737288749,
+          "q90": 0.019488964143575937
+        },
+        "composition_unique": {
+          "n": 2,
+          "median": 0.10029700083613546,
+          "q90": 0.10035791047707002
+        },
+        "neither": {
+          "n": 11829,
+          "median": 0.00576619038251337,
+          "q90": 0.019143193608226992
+        }
+      }
+    },
+    "partial_r2_abund_given_switch": {
+      "n": 12322,
+      "quantiles": {
+        "0.1": 0.0016312026355704591,
+        "0.25": 0.004261230272386014,
+        "0.5": 0.00964010394600711,
+        "0.75": 0.018658011570505992,
+        "0.9": 0.030250442096036206
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 491,
+          "median": 0.05337269193907763,
+          "q90": 0.07673612970610642
+        },
+        "composition_unique": {
+          "n": 2,
+          "median": 0.018012229925315974,
+          "q90": 0.022199651178055297
+        },
+        "neither": {
+          "n": 11829,
+          "median": 0.009097550155958999,
+          "q90": 0.026294912354537774
+        }
+      }
+    }
   },
   "analysis": "gtex-aging",
   "region": "frontal_cortex_ba9",
@@ -26,5 +82,27 @@
     "Mural",
     "OPC",
     "Oligo"
-  ]
+  ],
+  "gene_level_ladder": {
+    "n_tested": 12345,
+    "model": "ols",
+    "delta_r2_switch_given_abund": {
+      "quantiles": {
+        "0.1": 5.288658601133354e-05,
+        "0.25": 0.00034004035683251276,
+        "0.5": 0.0015773740510197506,
+        "0.75": 0.004514754188452376,
+        "0.9": 0.00901197681107102
+      }
+    },
+    "delta_r2_abund_given_switch": {
+      "quantiles": {
+        "0.1": 8.821878871240913e-05,
+        "0.25": 0.0005699236997189327,
+        "0.5": 0.0025174481846319255,
+        "0.75": 0.007495890962888097,
+        "0.9": 0.01605491344758704
+      }
+    }
+  }
 }
