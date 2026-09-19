@@ -62,7 +62,9 @@ That cannot be done from anything in this repo or on this cluster:
     shares turns up no BAM or CRAM at all.
 
 So the junction-level arm is a **Quest (b1042) job**, where the alignments and the storage
-live. CRAM would be fine there in principle -- samtools, pysam and GATK all read CRAM, and
+live. It is built as `ase_junction_switch.py`, which imports this module's gate. The BAMs
+have since moved to `/projects/b1042/HEART-GeN-Lab/brainseq_data/bsp2_dlpfc/star-wasp/`;
+the paths are in `configs/data_sources.yaml` under `quest:`. CRAM would be fine there in principle -- samtools, pysam and GATK all read CRAM, and
 the GRCh38 reference it needs is available -- but the format is not the constraint. The
 constraint is that the WASP tags and the reads themselves only exist on Quest.
 
