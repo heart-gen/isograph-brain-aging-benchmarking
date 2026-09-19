@@ -3,8 +3,9 @@
 #     alternative-first-exon junction, mapping onto one IsoGraph switch pair (GO-invisible);
 # (B) S-LDSC partitioned heritability of the aging switch layer across five traits
 #     (single-annot cis/sQTL/eQTL enrichment) - splicing- vs expression-lean by trait;
-# (C) the 12 splicing-led resolved coloc genes (max CLPP, coloured by trait span; all GO-invisible);
-# (D) verdict breakdown over all 68 colocalized genes;
+# (C) the splicing-led coloc genes resolved to a switch pair (max CLPP, coloured by trait;
+#     genes concordant with more than one trait share one 'multiple traits' colour);
+# (D) verdict breakdown over all colocalized genes (n computed from the panel table);
 # (E) Colocalizing genes do NOT concentrate in particular modules, in any trait: observed
 #     concentration against a size-matched null that holds module sizes fixed.
 #     RETRACTION NOTE: panel E previously showed per-module SCZ coloc counts (folded in
@@ -109,7 +110,7 @@ pA <- ggplot() +
   # junction callout in the open intronic space
   annotate("text", x = 89837.05, y = 3.42, size = 2.5, fontface = "italic", colour = "#D55E00",
            label = "alt. first-exon junction\n(5' UTR switch, GO-invisible)") +
-  annotate("segment", x = 89836.55, xend = JUNC_MID + 0.02, y = 3.3, yend = 3.02,
+  annotate("segment", x = 89836.38, xend = JUNC_MID + 0.02, y = 3.36, yend = 3.04,
            arrow = arrow(length = unit(0.1, "cm")), colour = "#D55E00", linewidth = 0.4) +
   # disease anchors: both risk alleles raise junction usage
   annotate("text", x = 89838.05, y = 2.5, hjust = 0, size = 2.5, fontface = "bold",
@@ -121,7 +122,7 @@ pA <- ggplot() +
   scale_x_reverse(limits = c(W_HI + 0.05, W_LO - 0.05),
                   breaks = c(89836, 89837, 89838)) +
   scale_y_continuous(breaks = 1:3, labels = unname(TX[names(TX)]), limits = c(0.6, 3.7)) +
-  labs(x = "SNCA · chr4 position (kb)", y = NULL) +
+  labs(x = "SNCA, chr4 position (kb)", y = NULL) +
   theme_pub() +
   theme(axis.text.y = element_text(size = 6.8, lineheight = 0.85),
         axis.ticks.y = element_blank(), panel.grid.major.y = element_blank())
@@ -140,37 +141,42 @@ lb <- ld |>
 pB <- ggplot(lb, aes(trait, enrichment, fill = annot)) +
   geom_hline(yintercept = 1, linewidth = 0.3, linetype = "dashed", colour = "grey55") +
   geom_col(position = position_dodge(width = 0.75), width = 0.68, colour = NA) +
-  geom_text(aes(label = star, y = enrichment + 0.15),
-            position = position_dodge(width = 0.75), size = 3, vjust = 0.6) +
+  # stars run vertically: three dodged bars are narrower than "***" set horizontally
+  geom_text(aes(label = star, y = enrichment + 0.06), angle = 90, hjust = 0, vjust = 0.75,
+            position = position_dodge(width = 0.75), size = 2.6) +
   scale_fill_manual(values = ANNOT_COLORS, name = NULL) +
+  # legend sits above the panel: an inset legend hid the tops of the tallest bars
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   labs(x = NULL,
        y = expression(atop("Partitioned " * italic(h)^2 * " enrichment",
                            "(aging switch layer)"))) +
-  theme_pub() + theme(legend.position = c(0.5, 0.92), legend.direction = "horizontal")
+  theme_pub() + theme(legend.position = "top", legend.direction = "horizontal",
+                      legend.margin = margin(0, 0, 0, 0), legend.box.spacing = unit(2, "pt"))
 
 # ===========================================================================
-# Panel C - the 12 resolved splicing-led coloc genes (max CLPP, by trait span)
+# Panel C - the resolved splicing-led coloc genes (max CLPP, by trait span)
 # ===========================================================================
 panel <- as.data.frame(read_parquet(file.path(DD_DIR, "deep_dive_panel.parquet")))
 pc <- panel |>
   filter(resolved_to_switch_pair) |>
-  mutate(trait_span = ifelse(grepl(",", concordant_traits), "cross-disease", concordant_traits),
-         trait_col = ifelse(trait_span == "cross-disease", "ALS", concordant_traits),
+  mutate(trait_span = ifelse(grepl(",", concordant_traits), "multiple traits", concordant_traits),
+         trait_span = factor(trait_span, intersect(c(names(TRAIT_COLORS), "multiple traits"),
+                                                   trait_span)),
          gene = reorder(gene, max_clpp)) |>
   arrange(desc(max_clpp))
-# label multi-locus genes
-pc$face <- ifelse(pc$multi_locus, "bold", "plain")
 
 pC <- ggplot(pc, aes(max_clpp, gene)) +
   geom_segment(aes(x = 0, xend = max_clpp, yend = gene), colour = "grey80", linewidth = 0.4) +
-  geom_point(aes(colour = concordant_traits, shape = multi_locus), size = 2) +
-  scale_colour_manual(values = c(TRAIT_COLORS, "ALS,SCZ" = "#0072B2", "LBD,PD" = "#009E73"),
+  geom_point(aes(colour = trait_span, shape = multi_locus), size = 2) +
+  scale_colour_manual(values = c(TRAIT_COLORS, "multiple traits" = "grey35"),
                       name = "concordant trait(s)") +
   scale_shape_manual(values = c(`FALSE` = 16, `TRUE` = 18),
                      labels = c("single", "multi-locus"), name = NULL) +
-  labs(x = "max eCAVIAR CLPP", y = NULL) +
+  # square-root axis: a few high-CLPP genes would otherwise crush the rest against zero
+  scale_x_sqrt(breaks = c(0, 0.05, 0.25, 0.5)) +
+  labs(x = "max eCAVIAR CLPP (square-root scale)", y = NULL) +
   theme_pub() +
-  theme(axis.text.y = element_text(size = 7, face = pc$face[order(pc$max_clpp)]),
+  theme(axis.text.y = element_text(size = 7),
         legend.position = "right", legend.box = "vertical",
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
@@ -197,7 +203,7 @@ pD <- ggplot(vd, aes(n, v, fill = v)) +
   geom_text(aes(label = n), hjust = -0.35, size = 3) +
   scale_fill_manual(values = VD_COLORS, guide = "none") +
   scale_x_continuous(expand = expansion(mult = c(0.02, 0.20))) +
-  labs(x = "colocalized genes (n = 68)", y = NULL) +
+  labs(x = sprintf("colocalized genes (n = %d)", sum(vd$n)), y = NULL) +
   theme_pub() +
   theme(panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
