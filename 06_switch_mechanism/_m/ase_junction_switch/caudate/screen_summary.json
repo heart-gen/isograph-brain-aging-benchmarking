@@ -1,0 +1,39 @@
+{
+  "region": "caudate",
+  "min_donors_informative": 30,
+  "min_reads_per_donor": 5,
+  "min_pairs_to_proceed": 30,
+  "n_samples": 486,
+  "n_samples_missing": 0,
+  "families": {
+    "gate_family": {
+      "n_pairs": 8480,
+      "n_genes": 661,
+      "n_two_sided": 6449,
+      "n_any_informative": 8178,
+      "n_testable": 3896,
+      "n_genes_testable": 531
+    },
+    "coloc_nominated": {
+      "n_pairs": 624,
+      "n_genes": 45,
+      "n_two_sided": 489,
+      "n_any_informative": 606,
+      "n_testable": 258,
+      "n_genes_testable": 37
+    },
+    "all_pairs": {
+      "n_pairs": 48412,
+      "n_genes": 3932,
+      "n_two_sided": 37500,
+      "n_any_informative": 45566,
+      "n_testable": 18266,
+      "n_genes_testable": 2618
+    }
+  },
+  "gate_passed": true,
+  "hap_conflict_rate": 7.128869209686639e-05,
+  "wasp_fail_rate": 0.0028641548568940395,
+  "wasp_missing": 0,
+  "het_gt_fallback": 0
+}

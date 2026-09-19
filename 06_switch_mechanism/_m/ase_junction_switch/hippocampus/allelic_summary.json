@@ -1,0 +1,195 @@
+{
+  "region": "hippocampus",
+  "min_paired_het_donors": 10,
+  "min_reads_between": 5,
+  "qval_threshold": 0.05,
+  "families": {
+    "gate_family": {
+      "n_pairs": 2213,
+      "n_fitted": 1892,
+      "n_genes_fitted": 291,
+      "n_nominal_p05": 448,
+      "n_q05": 247,
+      "n_genes_q05": 92,
+      "sign_agreement_between": 0.6284355179704016,
+      "sign_agreement_between_q05": 0.8623481781376519,
+      "n_not_converged": 48,
+      "n_at_bound": 61,
+      "n_at_bound_q05": 5
+    },
+    "coloc_nominated": {
+      "n_pairs": 202,
+      "n_fitted": 114,
+      "n_genes_fitted": 17,
+      "n_nominal_p05": 10,
+      "n_q05": 6,
+      "n_genes_q05": 2,
+      "sign_agreement_between": 0.5964912280701754,
+      "sign_agreement_between_q05": 1.0,
+      "n_not_converged": 2,
+      "n_at_bound": 3,
+      "n_at_bound_q05": 0
+    }
+  },
+  "status_counts": {
+    "fitted": 1976,
+    "too_few_paired_het_donors": 218,
+    "one_isoform_in_het_donors": 188
+  },
+  "hom_null": {
+    "n_fitted": 1802,
+    "frac_p05": 0.0560488346281909,
+    "lambda_gc": 1.0340384352007848
+  },
+  "lambda_gc_het": 2.656507273986836,
+  "score_vs_glmm_spearman": 0.8701985573284592,
+  "median_lead_site_kb": 22.07,
+  "risk_alleles": null,
+  "modules": [
+    {
+      "module_id": "M000",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.2664416241604259,
+      "pairs_fitted": 193,
+      "genes_fitted": 28,
+      "pairs_q05": 36,
+      "genes_q05": 12
+    },
+    {
+      "module_id": "M001",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.43982257018782533,
+      "pairs_fitted": 295,
+      "genes_fitted": 44,
+      "pairs_q05": 39,
+      "genes_q05": 16
+    },
+    {
+      "module_id": "M002",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.34538135773711054,
+      "pairs_fitted": 195,
+      "genes_fitted": 28,
+      "pairs_q05": 17,
+      "genes_q05": 6
+    },
+    {
+      "module_id": "M003",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.40706963400802104,
+      "pairs_fitted": 90,
+      "genes_fitted": 13,
+      "pairs_q05": 2,
+      "genes_q05": 2
+    },
+    {
+      "module_id": "M004",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.4236284332487987,
+      "pairs_fitted": 451,
+      "genes_fitted": 77,
+      "pairs_q05": 57,
+      "genes_q05": 22
+    },
+    {
+      "module_id": "M005",
+      "module_age_trait": "Age_spline",
+      "module_age_effect": -3.646596875228497,
+      "pairs_fitted": 80,
+      "genes_fitted": 12,
+      "pairs_q05": 13,
+      "genes_q05": 3
+    },
+    {
+      "module_id": "M006",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.17378356038861972,
+      "pairs_fitted": 33,
+      "genes_fitted": 7,
+      "pairs_q05": 2,
+      "genes_q05": 1
+    },
+    {
+      "module_id": "M007",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.3472290501493729,
+      "pairs_fitted": 203,
+      "genes_fitted": 31,
+      "pairs_q05": 13,
+      "genes_q05": 6
+    },
+    {
+      "module_id": "M008",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.393636218307878,
+      "pairs_fitted": 155,
+      "genes_fitted": 22,
+      "pairs_q05": 31,
+      "genes_q05": 9
+    },
+    {
+      "module_id": "M009",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.3034728186814904,
+      "pairs_fitted": 99,
+      "genes_fitted": 12,
+      "pairs_q05": 9,
+      "genes_q05": 5
+    },
+    {
+      "module_id": "M010",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.28094286264815727,
+      "pairs_fitted": 11,
+      "genes_fitted": 3,
+      "pairs_q05": 8,
+      "genes_q05": 3
+    },
+    {
+      "module_id": "M011",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.38735128548736675,
+      "pairs_fitted": 61,
+      "genes_fitted": 8,
+      "pairs_q05": 19,
+      "genes_q05": 6
+    },
+    {
+      "module_id": "M012",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.2844571479151647,
+      "pairs_fitted": 16,
+      "genes_fitted": 4,
+      "pairs_q05": 0,
+      "genes_q05": 0
+    },
+    {
+      "module_id": "M013",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.24738922556642365,
+      "pairs_fitted": 3,
+      "genes_fitted": 1,
+      "pairs_q05": 0,
+      "genes_q05": 0
+    },
+    {
+      "module_id": "M015",
+      "module_age_trait": "Age_linear",
+      "module_age_effect": 0.4504971718525378,
+      "pairs_fitted": 7,
+      "genes_fitted": 1,
+      "pairs_q05": 1,
+      "genes_q05": 1
+    }
+  ],
+  "module_direction": {
+    "n_genes": 239,
+    "min_pairs": 3,
+    "median_abs_rho": 0.41818181818181815,
+    "null_median_abs_rho": 0.329359753023231,
+    "null_q95": 0.37142857142857144,
+    "perm_p": 0.000999000999000999,
+    "n_genes_ge2_sig_pairs": 64,
+    "n_genes_all_sig_pairs_aligned": 25
+  }
+}
