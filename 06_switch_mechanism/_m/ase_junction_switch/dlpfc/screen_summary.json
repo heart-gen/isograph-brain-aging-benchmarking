@@ -1,0 +1,39 @@
+{
+  "region": "dlpfc",
+  "min_donors_informative": 30,
+  "min_reads_per_donor": 5,
+  "min_pairs_to_proceed": 30,
+  "n_samples": 498,
+  "n_samples_missing": 0,
+  "families": {
+    "gate_family": {
+      "n_pairs": 2219,
+      "n_genes": 163,
+      "n_two_sided": 1682,
+      "n_any_informative": 2170,
+      "n_testable": 1014,
+      "n_genes_testable": 126
+    },
+    "coloc_nominated": {
+      "n_pairs": 251,
+      "n_genes": 18,
+      "n_two_sided": 199,
+      "n_any_informative": 229,
+      "n_testable": 102,
+      "n_genes_testable": 15
+    },
+    "all_pairs": {
+      "n_pairs": 16206,
+      "n_genes": 1324,
+      "n_two_sided": 12566,
+      "n_any_informative": 15343,
+      "n_testable": 5849,
+      "n_genes_testable": 855
+    }
+  },
+  "gate_passed": true,
+  "hap_conflict_rate": 5.7622801908679364e-05,
+  "wasp_fail_rate": 0.0030327545010110962,
+  "wasp_missing": 0,
+  "het_gt_fallback": 0
+}

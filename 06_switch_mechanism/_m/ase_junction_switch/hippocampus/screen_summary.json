@@ -1,0 +1,39 @@
+{
+  "region": "hippocampus",
+  "min_donors_informative": 30,
+  "min_reads_per_donor": 5,
+  "min_pairs_to_proceed": 30,
+  "n_samples": 451,
+  "n_samples_missing": 0,
+  "families": {
+    "gate_family": {
+      "n_pairs": 5529,
+      "n_genes": 429,
+      "n_two_sided": 4119,
+      "n_any_informative": 5305,
+      "n_testable": 2219,
+      "n_genes_testable": 322
+    },
+    "coloc_nominated": {
+      "n_pairs": 621,
+      "n_genes": 46,
+      "n_two_sided": 486,
+      "n_any_informative": 605,
+      "n_testable": 221,
+      "n_genes_testable": 34
+    },
+    "all_pairs": {
+      "n_pairs": 55508,
+      "n_genes": 4450,
+      "n_two_sided": 43369,
+      "n_any_informative": 52052,
+      "n_testable": 17206,
+      "n_genes_testable": 2673
+    }
+  },
+  "gate_passed": true,
+  "hap_conflict_rate": 5.9561655895404945e-05,
+  "wasp_fail_rate": 0.003193090256087132,
+  "wasp_missing": 0,
+  "het_gt_fallback": 0
+}
