@@ -1,12 +1,12 @@
 # Functional preservation of cross-cohort matched modules
 
-Method `wgcna`, age model `linear`, 53 matched BrainSEQ<->GTEx module pairs (3 with concordant age effects). Median gene Jaccard 0.1005 — the gene-level overlap these measures are asked to look past.
+Method `wgcna`, age model `linear`, 52 matched BrainSEQ<->GTEx module pairs (2 with concordant age effects). Median gene Jaccard 0.0708 — the gene-level overlap these measures are asked to look past.
 
 The null re-pairs each BrainSEQ module with a random GTEx module **from the same gene-count decile**, because all three similarity measures increase with module size. `p_emp` is the size-matched permutation p for the overall matched mean; the Mann-Whitney column asks the separate question of whether the age-concordant pairs are more similar than the other matched pairs.
 
 | measure | n finite | matched mean | size-matched null | p_emp | concordant | discordant | diff 95% CI | MWU p |
 |---|---|---|---|---|---|---|---|---|
-| `go_jaccard` | 53 | 0.1492 | 0.1692 | 1 | 0.1886 | 0.1468 | -0.1032 to 0.1969 | 0.1311 |
+| `go_jaccard` | 52 | 0.1356 | 0.1393 | 1 | 0.0857 | 0.1376 | -0.1770 to 0.0711 | n/a |
 | `celltype_r` | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 | `structure_r` | 0 | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
 

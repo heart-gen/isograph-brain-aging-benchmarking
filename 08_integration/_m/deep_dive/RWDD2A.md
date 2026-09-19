@@ -1,6 +1,6 @@
 # RWDD2A — mechanistic deep-dive
 
-**Verdict:** expression-led (eQTL gene-level) · GO-invisible
+**Verdict:** expression-led (eQTL gene-level)
 
 - **Traits:** SCZ  ·  **QTL kinds:** eQTL  ·  **max CLPP:** 0.01 (Brain_Cerebellar_Hemisphere)
 - **Constraint:** LOEUF n/a  ·  missense o/e n/a
@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | eQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C decreases RWDD2A expression (gene-level; no intron) |
+| scz | eQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | no | — | risk allele C decreases RWDD2A expression (gene-level; no intron) |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |

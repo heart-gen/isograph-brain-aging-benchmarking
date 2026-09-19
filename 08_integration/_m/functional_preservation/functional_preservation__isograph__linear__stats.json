@@ -1,36 +1,36 @@
 {
   "method": "isograph",
   "model": "linear",
-  "n_pairs": 130,
-  "n_concordant": 25,
+  "n_pairs": 38,
+  "n_concordant": 1,
   "n_permutations": 1000,
   "n_boot": 2000,
   "seed": 13,
-  "median_gene_jaccard": 0.016666666666666666,
+  "median_gene_jaccard": 0.03763948364398799,
   "measures": {
     "go_jaccard": {
-      "n_finite": 47,
-      "mean_matched": 0.025613511033636918,
-      "mean_concordant": 0.125,
-      "mean_discordant": 0.016368256246068257,
-      "null_mean": 0.005749601386654588,
-      "null_sd": 0.005683248980354528,
-      "p_emp": 0.002997002997002997,
-      "mwu_p_concordant_vs_not": 0.14266219994342993,
-      "diff_ci_low": -0.031247056846205327,
-      "diff_ci_high": 0.36162759042755244
+      "n_finite": 24,
+      "mean_matched": 0.09711878846436645,
+      "mean_concordant": 0.42727272727272725,
+      "mean_discordant": 0.08276426938574208,
+      "null_mean": 0.029597674419731327,
+      "null_sd": 0.018891779433280815,
+      "p_emp": 0.000999000999000999,
+      "mwu_p_concordant_vs_not": null,
+      "diff_ci_low": null,
+      "diff_ci_high": null
     },
     "celltype_r": {
-      "n_finite": 130,
-      "mean_matched": 0.26037968186020144,
-      "mean_concordant": 0.38835392958122755,
-      "mean_discordant": 0.22990962287900465,
-      "null_mean": 0.20487825738574805,
-      "null_sd": 0.027592597935702075,
-      "p_emp": 0.02097902097902098,
-      "mwu_p_concordant_vs_not": 0.08075152777263994,
-      "diff_ci_low": 0.04639545077184228,
-      "diff_ci_high": 0.2673002115231934
+      "n_finite": 38,
+      "mean_matched": 0.20810964604059332,
+      "mean_concordant": 0.27099265397127636,
+      "mean_discordant": 0.20641010528571002,
+      "null_mean": 0.03957921542839869,
+      "null_sd": 0.06814390749078005,
+      "p_emp": 0.005994005994005994,
+      "mwu_p_concordant_vs_not": null,
+      "diff_ci_low": null,
+      "diff_ci_high": null
     },
     "structure_r": {
       "n_finite": 0,
@@ -74,7 +74,7 @@
       "brainseq/hippocampus": {
         "go_jaccard": true,
         "celltype_r": true,
-        "structure_r": false
+        "structure_r": true
       },
       "gtex/hippocampus": {
         "go_jaccard": true,
