@@ -76,7 +76,7 @@ def collect() -> pd.DataFrame:
                 if f.exists():
                     rows.append(pd.DataFrame(_parse(f, trait, case, annotation, model, annots)))
     if not rows:
-        raise SystemExit("No S-LDSC .results files found; run 03.munge_h2.sh first.")
+        raise SystemExit("No S-LDSC .results files found; run 05_genetic_anchoring/_h/03d.ldsc_munge_h2.sh first.")
     return pd.concat(rows, ignore_index=True)
 
 

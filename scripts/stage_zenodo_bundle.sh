@@ -38,7 +38,10 @@ fi
 
 mapfile -t FILES < <(
     for n in "${NAMES[@]}"; do
-        find real_data -type f -name "${n}" -not -path '*/_m/tmp/*' -not -path '*/logs/*'
+        # real-data stages 02-07 (the synthetic benchmark in 01 is archived separately)
+        find 02_module_discovery 04_module_trust 03_module_characterization \
+             05_genetic_anchoring 06_switch_mechanism 07_rbp_regulation \
+             -type f -name "${n}" -not -path '*/_m/tmp/*' -not -path '*/logs/*'
     done | sort
 )
 

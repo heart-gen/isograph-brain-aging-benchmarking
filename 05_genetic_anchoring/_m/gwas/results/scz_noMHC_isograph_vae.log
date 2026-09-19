@@ -1,33 +1,21 @@
 Welcome to MAGMA v1.10 (linux)
 Using flags:
-	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/scz_noMHC.genes.raw
-	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_gene_sets.txt
-	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae
+	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/scz_noMHC.genes.raw
+	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_gene_sets.txt
+	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/scz_noMHC_isograph_vae
 
-Start time is 00:11:21, Saturday 18 Jul 2026
+Start time is 11:48:58, Thursday 17 Sep 2026
 
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_analysis/scz_noMHC.genes.raw... 
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/scz_noMHC.genes.raw... 
 	17866 genes read from file
 Loading gene-set annotation...
-Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/gene_sets/isograph_vae_gene_sets.txt... 
-	WARNING: gene set gtex__amygdala__M026 contains no genes defined in genotype data
-	WARNING: gene set gtex__caudate_basal_ganglia__M039 contains no genes defined in genotype data
-	WARNING: gene set gtex__cerebellar_hemisphere__M029 contains no genes defined in genotype data
-	WARNING: gene set gtex__cerebellum__M027 contains no genes defined in genotype data
-	WARNING: gene set gtex__cortex__M035 contains no genes defined in genotype data
-	WARNING: gene set gtex__frontal_cortex_ba9__M046 contains no genes defined in genotype data
-	WARNING: gene set gtex__frontal_cortex_ba9__M047 contains no genes defined in genotype data
-	WARNING: gene set gtex__hypothalamus__M025 contains no genes defined in genotype data
-	WARNING: gene set gtex__putamen_basal_ganglia__M038 contains no genes defined in genotype data
-	WARNING: gene set gtex__spinal_cord_cervical_c_1__M031 contains no genes defined in genotype data
-	WARNING: gene set gtex__substantia_nigra__M039 contains no genes defined in genotype data
-	WARNING: gene set brainseq__caudate_sczd__M019 contains no genes defined in genotype data
-	637 gene-set definitions read from file
-	found 625 gene sets containing genes defined in genotype data (containing a total of 12665 unique genes)
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_gene_sets.txt... 
+	388 gene-set definitions read from file
+	found 388 gene sets containing genes defined in genotype data (containing a total of 12812 unique genes)
 Preparing variables for analysis...
 	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
 	truncating covariate values more than 5 standard deviations from the mean
-	total variables available for analysis: 625 gene sets
+	total variables available for analysis: 388 gene sets
 
 Parsing model specifications...
 Inverting gene-gene correlation matrix...
@@ -40,9 +28,9 @@ Performing regression analysis...
 		inverse mac, log(inverse mac)
 	analysing individual variables
 
-	analysing single-variable models (number of models: 625)
-	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae.gsa.out
-	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae.gsa.genes.out
-	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/real_data/gwas/_m/results/scz_noMHC_isograph_vae.gsa.sets.genes.out
+	analysing single-variable models (number of models: 388)
+	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/scz_noMHC_isograph_vae.gsa.out
+	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/scz_noMHC_isograph_vae.gsa.genes.out
+	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/scz_noMHC_isograph_vae.gsa.sets.genes.out
 
-End time is 00:11:40, Saturday 18 Jul 2026 (elapsed: 00:00:19)
+End time is 11:49:22, Thursday 17 Sep 2026 (elapsed: 00:00:24)

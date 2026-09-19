@@ -1,0 +1,8 @@
+tier	tier_label	gene_name	ensembl_gene_id	n_regions	n_regions_binding	selection_reason
+0	regulator	NONO	ENSG00000147140			NONO itself -- the perturbation target
+1	core recurrent	EXT1	ENSG00000182197	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	VIRMA	ENSG00000164944	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	NRDE2	ENSG00000119720	2	2	switched + enriched module in 2 region(s); 2 eCLIP-supported
+1	core recurrent	AKAIN1	ENSG00000231824	1	1	switched + enriched module in 1 region(s); 1 eCLIP-supported
+2	disease anchor	RNH1	ENSG00000023191	1	1	colocalized SCZ (sQTL); splicing (sQTL not resolved to switch pair)
+2	disease anchor	CAMK1	ENSG00000134072	1	1	colocalized SCZ (sQTL); splicing (sQTL not resolved to switch pair)

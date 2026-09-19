@@ -1,5 +1,7 @@
-version: 6
-frozen_date: "2026-08-26"
+# v7 (2026-09-18): guards re-locked to the switching-filter re-run at canonical Leiden
+# resolution 2.0 (module partitions changed); v6 pinned the legacy expression-filter modules.
+version: 7
+frozen_date: "2026-09-18"
 accessed_date: "2026-08-01"
 seed: 13
 
@@ -13,20 +15,20 @@ candidate_source:
   switch_calls: 07_rbp_regulation/_m/rbp/rbp_switch_calls_intronic.parquet
   motif_counts: 07_rbp_regulation/_m/rbp/rbp_counts_intronic.parquet
   q_max: 0.05
-  expected_module_rbp_nominations: 17
-  expected_candidate_identity_sha256: 210f28fbc47eb3a17a301dc4e54985583e52b26bd49cb7f75e094520fe17e782
+  expected_module_rbp_nominations: 15
+  expected_candidate_identity_sha256: d7fae76469083f2190bb1e9d7238b968c73a5beb8980d96c4c8f552fcc071902
   rbps: [TARDBP, NOVA1, NOVA2, RBFOX2, PTBP2]
 
 window_stage:
-  gtf_cache: 04_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  gtf_cache: 03_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
   genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
   genome_build: GRCh38.primary_assembly
   gencode_release: 47
   output_dir: 07_rbp_regulation/_m/neuronal_clip/windows
   primary_width: 100
   sensitivity_widths: [50, 250]
-  expected_candidate_rows: 11261
-  expected_unique_candidates: 10410
+  expected_candidate_rows: 58134
+  expected_unique_candidates: 38194
   control_source: motif_negative_transcript_intronic_flanks
   match_without_replacement: true
   length_ratio_min: 0.80
@@ -56,7 +58,7 @@ motif_opportunity_stage:
 nova_family_renomination:
   output_dir: 07_rbp_regulation/_m/neuronal_clip/nova_family_renomination
   candidate_manifest: 07_rbp_regulation/_m/neuronal_clip_manifests/nova_family_candidate_manifest.parquet
-  gtf_cache: 04_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
+  gtf_cache: 03_module_characterization/_m/tmp/gencode.v47.primary_assembly.annotation.gtf_cache.parquet
   genome_fasta: /ocean/projects/bio260021p/shared/resources/genomes/human/gencode-v47/fasta/GRCh38.primary_assembly.genome.fa
   primary_width: 100
   motifs_dna_sense: [CCAC, CCAT, TCAC, TCAT]
@@ -70,11 +72,11 @@ nova_family_renomination:
     - log_total_intronic_opportunity
     - log_eligible_pair_count
     - log_transcript_count
-  expected_transcripts: 79763
-  expected_eligible_pairs: 374296
-  expected_regulon_nominations: 2
-  expected_candidate_rows: 1993
-  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+  expected_transcripts: 82294
+  expected_eligible_pairs: 394694
+  expected_regulon_nominations: 4
+  expected_candidate_rows: 7861
+  expected_candidate_identity_sha256: 0dc6134e1f81c2e9be260dff69466d3babe7719f7bcad33ed59d375fb5485cfd
 nova2_ctag_stage:
   output_dir: 07_rbp_regulation/_m/neuronal_clip/nova2_ctag
   candidate_manifest: 07_rbp_regulation/_m/neuronal_clip_manifests/nova_family_candidate_manifest.parquet
@@ -93,8 +95,9 @@ nova2_ctag_stage:
   peak_status: study_processed_unique_tag_coverage_not_called_peaks
   primary_contexts: [nova2_emx1_cortex, nova2_gad2_cortex]
   secondary_contexts: [nova2_pcp2_purkinje]
-  expected_candidate_rows: 1993
-  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+  expected_candidate_rows: 7861
+  expected_candidate_identity_sha256: 0dc6134e1f81c2e9be260dff69466d3babe7719f7bcad33ed59d375fb5485cfd
+  expected_unique_candidates: 7592
 
 nova2_perturbation_stage:
   output_dir: 07_rbp_regulation/_m/neuronal_clip/nova2_perturbation
@@ -120,24 +123,25 @@ nova2_perturbation_stage:
     nova2_emx1_cko: nova2_emx1_cortex
     nova2_gad2_cko: nova2_gad2_cortex
     nova2_pcp2_cko: nova2_pcp2_purkinje
-  expected_candidate_rows: 1993
-  expected_candidate_identity_sha256: 8970b1cf1baaae6b9bf4585053ca2c55b586bfabb6c19b0038e03588a22320e8
+  expected_candidate_rows: 7861
+  expected_candidate_identity_sha256: 0dc6134e1f81c2e9be260dff69466d3babe7719f7bcad33ed59d375fb5485cfd
+  expected_unique_candidates: 7592
   expected_context_counts:
     nova2_emx1_cko:
       unique_events: 2677
       event_flanks: {50: 11708, 100: 11353, 250: 10715}
       reciprocal_flanks: {50: 2245, 100: 586, 250: 59}
-      localized_windows: {50: 31, 100: 2, 250: 1}
+      localized_windows: {50: 119, 100: 61, 250: 6}
     nova2_gad2_cko:
       unique_events: 1964
       event_flanks: {50: 8433, 100: 8199, 250: 7730}
       reciprocal_flanks: {50: 1609, 100: 435, 250: 53}
-      localized_windows: {50: 18, 100: 3, 250: 2}
+      localized_windows: {50: 74, 100: 35, 250: 6}
     nova2_pcp2_cko:
       unique_events: 603
       event_flanks: {50: 2699, 100: 2611, 250: 2424}
       reciprocal_flanks: {50: 626, 100: 181, 250: 14}
-      localized_windows: {50: 0, 100: 0, 250: 0}
+      localized_windows: {50: 58, 100: 16, 250: 0}
 
 overlap_stage:
   output_dir: 07_rbp_regulation/_m/neuronal_clip/overlap

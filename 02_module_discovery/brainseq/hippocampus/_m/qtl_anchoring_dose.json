@@ -7,13 +7,15 @@
   "outcome": "dose",
   "covariate_set": "standard",
   "fdr": 0.05,
-  "n_universe_genes": 17515,
+  "n_universe_genes": 18901,
   "universe_sizes": {
-    "sQTL": 12535,
-    "eQTL": 16756
+    "sQTL": 13068,
+    "eQTL": 18003
   },
   "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 3941
+    "all_modules": 4626,
+    "pheno_sig_modules": 76,
+    "go_invisible_modules": 76
   }
 }

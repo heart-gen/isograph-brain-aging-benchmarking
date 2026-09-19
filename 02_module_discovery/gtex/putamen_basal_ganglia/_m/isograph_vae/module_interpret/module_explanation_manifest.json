@@ -16,10 +16,10 @@
   "isograph_version": "0.1.5",
   "module_ids": [
     "M001",
-    "M037",
-    "M012",
+    "M002",
+    "M005",
     "M011",
-    "M030"
+    "M025"
   ],
   "n_modules": 5,
   "plot_files": [],

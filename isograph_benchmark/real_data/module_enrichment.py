@@ -16,7 +16,7 @@ Per analysis it writes, under <region>/_m/module_enrichment/:
   summary.json — method comparison (fraction of modules GO-enriched, etc.).
 
 Complements IsoGraph's built-in transcript-level interpretation
-(interpret_modules.py / 04.interpret_modules.sh), which explains the switch
+(interpret_modules.py / 03_module_characterization/_h/01a.interpret_modules_brainseq.sh), which explains the switch
 events inside the phenotype-significant modules.
 """
 from __future__ import annotations

@@ -33,11 +33,12 @@ from isograph_benchmark.paths import COHORTS, ensure_dir, root, stage_out
 STAGE_DIRS: dict[str, str] = {
     "01": "01_synthetic_benchmark",
     "02": "02_module_discovery",
-    "03": "03_module_trust",
-    "04": "04_module_characterization",
+    "03": "03_module_characterization",
+    "04": "04_module_trust",
     "05": "05_genetic_anchoring",
     "06": "06_switch_mechanism",
     "07": "07_rbp_regulation",
+    "08": "08_integration",
 }
 
 # ANALYSIS_MAP.md writes per-region outputs against a placeholder store. These

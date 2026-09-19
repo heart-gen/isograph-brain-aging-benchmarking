@@ -4,16 +4,28 @@
   "variant": "standard",
   "methods": {
     "isograph": {
-      "n_modules": 30,
-      "n_go_enriched": 5,
-      "frac_go_enriched": 0.167,
-      "n_pheno_sig_fdr10": 8
+      "n_modules": 12,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.333,
+      "n_pheno_sig_fdr10": 6
     },
     "wgcna": {
-      "n_modules": 23,
-      "n_go_enriched": 17,
-      "frac_go_enriched": 0.739,
+      "n_modules": 24,
+      "n_go_enriched": 19,
+      "frac_go_enriched": 0.792,
       "n_pheno_sig_fdr10": 6
+    },
+    "wgcna_switch": {
+      "n_modules": 11,
+      "n_go_enriched": 4,
+      "frac_go_enriched": 0.364,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_multiplex": {
+      "n_modules": 30,
+      "n_go_enriched": 25,
+      "frac_go_enriched": 0.833,
+      "n_pheno_sig_fdr10": 9
     }
   }
 }

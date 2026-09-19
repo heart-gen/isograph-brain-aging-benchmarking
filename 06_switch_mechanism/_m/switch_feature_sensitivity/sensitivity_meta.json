@@ -1,0 +1,34 @@
+{
+  "regions": [
+    "brainseq/caudate",
+    "gtex/amygdala",
+    "gtex/anterior_cingulate_cortex_ba24",
+    "gtex/caudate_basal_ganglia",
+    "gtex/cerebellar_hemisphere",
+    "gtex/cerebellum",
+    "gtex/cortex",
+    "gtex/frontal_cortex_ba9",
+    "gtex/hippocampus",
+    "gtex/hypothalamus",
+    "gtex/nucleus_accumbens_basal_ganglia",
+    "gtex/putamen_basal_ganglia",
+    "gtex/spinal_cord_cervical_c_1",
+    "gtex/substantia_nigra"
+  ],
+  "gate_max_abs_diff": {
+    "brainseq/caudate": 0.0,
+    "gtex/amygdala": 0.0,
+    "gtex/anterior_cingulate_cortex_ba24": 0.0,
+    "gtex/caudate_basal_ganglia": 0.0,
+    "gtex/cerebellar_hemisphere": 0.0,
+    "gtex/cerebellum": 0.0,
+    "gtex/cortex": 0.0,
+    "gtex/frontal_cortex_ba9": 0.0,
+    "gtex/hippocampus": 0.0,
+    "gtex/hypothalamus": 0.0,
+    "gtex/nucleus_accumbens_basal_ganglia": 0.0,
+    "gtex/putamen_basal_ganglia": 0.0,
+    "gtex/spinal_cord_cervical_c_1": 0.0,
+    "gtex/substantia_nigra": 0.0
+  }
+}

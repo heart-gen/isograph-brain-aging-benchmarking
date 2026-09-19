@@ -24,8 +24,8 @@ def test_canonical_resolution_is_unsuffixed():
 
 
 def test_noncanonical_resolutions_get_distinct_tags():
-    tags = {st._res_token(r) for r in (1.0, 2.0, 2.5, 12.0)}
-    assert tags == {"_res1", "_res2", "_res2p5", "_res12"}
+    tags = {st._res_token(r) for r in (1.0, 5.0, 2.5, 12.0)}
+    assert tags == {"_res1", "_res5", "_res2p5", "_res12"}
     assert "" not in tags
 
 
@@ -33,12 +33,12 @@ def test_sweep_partitions_cannot_collide_with_canonical(tmp_path, monkeypatch):
     """Two resolutions of the same (cohort, region, seed, half) must be different files."""
     monkeypatch.setattr(st, "_partitions_dir", lambda: tmp_path)
     mods = pd.DataFrame({"gene_id": ["g1", "g2"], "module_id": ["M000", "M000"]})
-    for res in (st.CANONICAL_LEIDEN_RESOLUTION, 2.0):
+    for res in (st.CANONICAL_LEIDEN_RESOLUTION, 5.0):
         st._write_partition(mods, "gtex", "cortex", "isograph" + st._res_token(res), 0, "A")
     written = sorted(p.name for p in tmp_path.glob("*.parquet"))
     assert written == [
         "isograph__gtex__cortex__seed0__A.parquet",
-        "isograph_res2__gtex__cortex__seed0__A.parquet",
+        "isograph_res5__gtex__cortex__seed0__A.parquet",
     ]
 
 
@@ -83,18 +83,18 @@ def test_sweep_reclusters_saved_graphs_without_refitting(tmp_path, monkeypatch):
     for half in ("A", "B"):
         st._write_edges(edges, "gtex", "cortex", "isograph", 0, half)
 
-    st.sweep("gtex", "cortex", [st.CANONICAL_LEIDEN_RESOLUTION, 2.0])
+    st.sweep("gtex", "cortex", [st.CANONICAL_LEIDEN_RESOLUTION, 1.0])
 
     names = sorted(p.name for p in parts_dir.glob("*.parquet"))
     # the canonical arm is the committed baseline; a sweep must not rewrite it
     assert names == [
-        "isograph_res2__gtex__cortex__seed0__A.parquet",
-        "isograph_res2__gtex__cortex__seed0__B.parquet",
+        "isograph_res1__gtex__cortex__seed0__A.parquet",
+        "isograph_res1__gtex__cortex__seed0__B.parquet",
     ]
     out = pd.read_parquet(parts_dir / names[0])
     assert out["module_id"].nunique() == 3, "planted cliques should recover as 3 modules"
     assert set(out.columns) >= {"gene_id", "module_id", "method", "cohort", "region"}
-    assert out["method"].iloc[0] == "isograph_res2"
+    assert out["method"].iloc[0] == "isograph_res1"
 
 
 def test_sweep_without_saved_graphs_says_what_to_run(tmp_path, monkeypatch):
@@ -112,10 +112,10 @@ def test_sweep_resumes_and_does_not_rewrite(tmp_path, monkeypatch):
     monkeypatch.setattr(st, "_partitions_dir", lambda: parts_dir)
     st._write_edges(_planted_edges(), "gtex", "cortex", "isograph", 0, "A")
 
-    st.sweep("gtex", "cortex", [2.0])
-    target = parts_dir / "isograph_res2__gtex__cortex__seed0__A.parquet"
+    st.sweep("gtex", "cortex", [5.0])
+    target = parts_dir / "isograph_res5__gtex__cortex__seed0__A.parquet"
     stamp = target.stat().st_mtime_ns
-    st.sweep("gtex", "cortex", [2.0])
+    st.sweep("gtex", "cortex", [5.0])
     assert target.stat().st_mtime_ns == stamp, "an existing partition was rewritten"
 
 
@@ -159,3 +159,24 @@ def test_resume_key_includes_the_edges_when_saving(tmp_path, monkeypatch):
 
     st._write_edges(_planted_edges().head(3), "gtex", "cortex", "isograph", 0, "A")
     assert resume_done(save_edges=True), "once both exist, resume should skip"
+
+
+# --------------------------------------------------------------------------- #
+# sweep clustering = production's edge-weighted detector
+# --------------------------------------------------------------------------- #
+def test_sweep_clustering_uses_edge_weights():
+    """Two groups joined by every cross pair, but only weakly: the topology is one complete
+    graph, so only weighted Leiden can recover the groups. Unweighted Leiden (the pre-
+    2026-09-17 sweep) sees K40 and cannot split it along the weights."""
+    from itertools import combinations
+
+    from isograph_benchmark.real_data.sweep_leiden import _build_module_table
+
+    genes = [f"g{i:02d}" for i in range(40)]
+    group = {g: i // 20 for i, g in enumerate(genes)}
+    edges = pd.DataFrame(
+        [(a, b, 1.0 if group[a] == group[b] else 0.01) for a, b in combinations(genes, 2)],
+        columns=["source", "target", "weight"])
+    mods = _build_module_table(edges, genes, 1.0, seed=13, min_module_size=20)
+    got = mods.groupby("module_id")["gene_id"].apply(frozenset)
+    assert set(got) == {frozenset(genes[:20]), frozenset(genes[20:])}

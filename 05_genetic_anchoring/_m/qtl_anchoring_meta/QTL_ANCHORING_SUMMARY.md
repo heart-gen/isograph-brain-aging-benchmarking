@@ -95,12 +95,16 @@ contrast (I²=0.00 vs 0.68) is gone — on the refreshed inputs GO-visible's I²
 
 **Matched-baseline method effect — only IsoGraph shows it.** On the 13 GTEx tissues all
 methods share (8-tissue common-subset contrast, `qtl_anchoring_meta_contrast_common.parquet`),
-IsoGraph reproduces the specificity (`all_modules` **1.105**, p=5.8e-6, I²=0.00;
-`pheno_sig` **1.108**, p=0.001, I²=0.00; `go_visible` 1.076, p=0.078; `go_invisible` 1.066,
-p=0.11, n.s.) while the matched WGCNA baselines on identical switch features are **null
-everywhere**: `wgcna_switch_only` pheno_sig 0.968 (p=0.46), go_invisible 1.021 (p=0.71),
-go_visible 0.959 (p=0.30); `wgcna_multiplex` pheno_sig 0.980 (p=0.41), go_invisible 0.993
-(p=0.86), go_visible 0.993 (p=0.77). **This is the primary internal control** — it holds
+IsoGraph reproduces the specificity (`all_modules` **1.110**, p=2.4e-6, I²=0.00;
+`pheno_sig` **1.112**, p=6.5e-4, I²=0.00; `go_visible` 1.083, p=0.055; `go_invisible` 1.066,
+p=0.11, n.s.) while the matched WGCNA baselines on identical switch features **reach
+significance in no module set**: `wgcna_switch_only` pheno_sig 1.015 (p=0.74), go_invisible
+1.065 (p=0.16), go_visible 0.957 (p=0.28); `wgcna_multiplex` pheno_sig 1.044 (p=0.070,
+I²=0.80), go_invisible 1.019 (p=0.71), go_visible 1.041 (p=0.085). All fixed-effects.
+**Updated 2026-09-12** to the 2026-09-09 matched-baseline re-fit: the previous values
+(pheno_sig 0.968 / 0.980, p≥0.41) predated it and must not be quoted. The baselines are
+still non-significant, but `wgcna_multiplex` is now borderline rather than flat, so state the
+control as "no baseline clears 0.05". **This is the primary internal control** — it holds
 the switch features fixed and varies only the inference, which localises the effect far
 more sharply than a module-content contrast can. Same features + classical inference loses
 the splicing-genetic signal that IsoGraph's VAE + Leiden concentrates in the

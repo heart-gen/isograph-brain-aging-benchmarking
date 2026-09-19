@@ -3,11 +3,29 @@
   "region": "putamen_basal_ganglia",
   "variant": "standard",
   "methods": {
+    "isograph": {
+      "n_modules": 27,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.185,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 7,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.857,
+      "n_pheno_sig_fdr10": 2
+    },
     "wgcna_switch": {
-      "n_modules": 15,
+      "n_modules": 20,
       "n_go_enriched": 4,
-      "frac_go_enriched": 0.267,
-      "n_pheno_sig_fdr10": 1
+      "frac_go_enriched": 0.2,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_multiplex": {
+      "n_modules": 23,
+      "n_go_enriched": 13,
+      "frac_go_enriched": 0.565,
+      "n_pheno_sig_fdr10": 5
     }
   }
 }

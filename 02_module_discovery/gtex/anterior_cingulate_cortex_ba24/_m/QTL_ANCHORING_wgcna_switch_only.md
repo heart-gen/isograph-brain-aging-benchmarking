@@ -10,14 +10,12 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 6451 | 0.1572 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 5268 | 0.1631 | 0.131 | 1.1 | 0.91 | 1.33 | 3.28e-01 | logit_matched_standard |
-| sQTL | go_invisible_modules | 2307 | 0.1886 | 0.1397 | 1.26 | 1.09 | 1.45 | 1.85e-03 | logit_matched_standard |
-| sQTL | go_visible_modules | 2961 | 0.1432 | 0.1691 | 0.85 | 0.74 | 0.98 | 2.25e-02 | logit_matched_standard |
-| eQTL | all_modules | 7631 | 0.3853 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 6184 | 0.3858 | 0.3829 | 0.99 | 0.88 | 1.11 | 8.70e-01 | logit_matched_standard |
-| eQTL | go_invisible_modules | 2573 | 0.3956 | 0.38 | 1.03 | 0.94 | 1.14 | 5.14e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 3611 | 0.3788 | 0.391 | 0.97 | 0.88 | 1.06 | 4.58e-01 | logit_matched_standard |
+| sQTL | all_modules | 5996 | 0.1841 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | pheno_sig_modules | 4682 | 0.1773 | 0.2085 | 0.81 | 0.69 | 0.95 | 1.03e-02 | logit_matched_standard |
+| sQTL | go_invisible_modules | 4682 | 0.1773 | 0.2085 | 0.81 | 0.69 | 0.95 | 1.03e-02 | logit_matched_standard |
+| eQTL | all_modules | 6573 | 0.3883 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | pheno_sig_modules | 5103 | 0.3837 | 0.4041 | 0.95 | 0.84 | 1.07 | 4.31e-01 | logit_matched_standard |
+| eQTL | go_invisible_modules | 5103 | 0.3837 | 0.4041 | 0.95 | 0.84 | 1.07 | 4.31e-01 | logit_matched_standard |
 
 ## Reading
 

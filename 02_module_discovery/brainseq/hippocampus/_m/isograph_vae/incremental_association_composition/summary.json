@@ -1,17 +1,73 @@
 {
   "gene_level": {
-    "n_tested": 11114,
-    "composition_unique": 0,
-    "abundance_unique": 542,
+    "n_tested": 13130,
+    "composition_unique": 1,
+    "abundance_unique": 707,
     "both": 0,
-    "neither": 10572
+    "neither": 12422
   },
   "module_level": {
-    "n_tested": 50,
-    "composition_unique": 1,
+    "n_tested": 16,
+    "composition_unique": 2,
     "abundance_unique": 0,
     "both": 0,
-    "neither": 49
+    "neither": 14
+  },
+  "gene_level_effect_sizes": {
+    "partial_r2_switch_given_abund": {
+      "n": 13130,
+      "quantiles": {
+        "0.1": 0.0011971090506807008,
+        "0.25": 0.0033275120495610353,
+        "0.5": 0.007969090246113888,
+        "0.75": 0.016383005912997458,
+        "0.9": 0.02720836751426258
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 707,
+          "median": 0.009278270875680429,
+          "q90": 0.030000406579682098
+        },
+        "composition_unique": {
+          "n": 1,
+          "median": 0.12100854448689849,
+          "q90": 0.12100854448689849
+        },
+        "neither": {
+          "n": 12422,
+          "median": 0.007889248687349325,
+          "q90": 0.02693345191360446
+        }
+      }
+    },
+    "partial_r2_abund_given_switch": {
+      "n": 13130,
+      "quantiles": {
+        "0.1": 0.0020879066008809544,
+        "0.25": 0.005619369712476549,
+        "0.5": 0.013477077829368005,
+        "0.75": 0.02639130535694984,
+        "0.9": 0.04272054914776476
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 707,
+          "median": 0.06600673965644929,
+          "q90": 0.09468212981702046
+        },
+        "composition_unique": {
+          "n": 1,
+          "median": 0.006125327694781102,
+          "q90": 0.006125327694781102
+        },
+        "neither": {
+          "n": 12422,
+          "median": 0.01254910918022268,
+          "q90": 0.03566671884314891
+        }
+      }
+    }
   },
   "analysis": "brainseq-aging",
   "region": "hippocampus",
@@ -26,5 +82,27 @@
     "Mural",
     "OPC",
     "Oligo"
-  ]
+  ],
+  "gene_level_ladder": {
+    "n_tested": 13130,
+    "model": "ols",
+    "delta_r2_switch_given_abund": {
+      "quantiles": {
+        "0.1": 5.046435813350571e-05,
+        "0.25": 0.00032504722853153806,
+        "0.5": 0.0015021867296307276,
+        "0.75": 0.00439020243581423,
+        "0.9": 0.009072574000854785
+      }
+    },
+    "delta_r2_abund_given_switch": {
+      "quantiles": {
+        "0.1": 0.00010704130794205958,
+        "0.25": 0.0006959539185791803,
+        "0.5": 0.0030632711528136873,
+        "0.75": 0.008916073517060134,
+        "0.9": 0.01806211599891263
+      }
+    }
+  }
 }

@@ -15,19 +15,9 @@
   "ig_attribution_available": false,
   "isograph_version": "0.1.5",
   "module_ids": [
-    "M000",
-    "M002",
-    "M003",
-    "M006",
-    "M012",
-    "M013",
-    "M014",
-    "M019",
-    "M026",
-    "M016",
-    "M031"
+    "M019"
   ],
-  "n_modules": 11,
+  "n_modules": 1,
   "plot_files": [],
   "tables_per_module": [
     "gene_driver_table.parquet",

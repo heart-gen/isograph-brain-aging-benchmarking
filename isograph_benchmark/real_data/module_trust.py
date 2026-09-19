@@ -1,9 +1,9 @@
 """Per-module trust funnel for real-data IsoGraph modules (see
-``03_module_trust/docs/MODULE_TRUST_PLAN.md``).
+``04_module_trust/docs/MODULE_TRUST_PLAN.md``).
 
 Q1 (this module, ``stability`` command): which *production* modules are stable enough to
 trust? A production module's gene set is scored for how tightly its genes stay co-clustered
-across the split-half ensemble (`03_module_trust/_m/stability/partitions/`), relative to a
+across the split-half ensemble (`04_module_trust/_m/stability/partitions/`), relative to a
 size-matched permutation null. Trusted = co-assignment density exceeds chance at BH-FDR<0.05.
 
 Primary statistic — **co-assignment density** (the user-chosen Q1 gate): among a module's
@@ -30,7 +30,7 @@ from scipy.stats import chi2, hypergeom, norm, spearmanr
 
 from isograph_benchmark.paths import OUTPUT_DIRS, ensure_dir, rel, stage_out
 from isograph_benchmark.real_data.stability import (
-    COHORTS, SEED_BASE, _filter_expressed_transcripts, _split_indices,
+    COHORTS, SEED_BASE, filter_production_transcripts, _split_indices,
 )
 
 # production output dir name <- split-half partition method tag
@@ -580,7 +580,7 @@ def meta(cohort: str, region: str, method: str, k: int) -> None:
     tc = bundle.matrices["transcript_counts"]
     tt = bundle.feature_tables["transcript"]
     if spec["filter_transcripts"]:
-        tc, tt = _filter_expressed_transcripts(tc, tt)
+        tc, tt = filter_production_transcripts(tc, tt)
     else:
         tc = np.asarray(tc)
     del bundle

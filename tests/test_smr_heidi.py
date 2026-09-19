@@ -19,7 +19,11 @@ from isograph_benchmark.real_data.smr_heidi import (
     FLIST_COLS,
     HEIDI_REJECT,
     MA_COLS,
+    LD_MULTI_SNP,
     PEQTL_SMR,
+    SMR_MULTI_COL,
+    SMR_MULTI_OUT_COLS,
+    SMR_MULTI_STATUS,
     SMR_OUT_COLS,
     SMR_STATUS,
     SOURCE_MODALITIES,
@@ -27,6 +31,10 @@ from isograph_benchmark.real_data.smr_heidi import (
     collect_attrition,
     instrumented_family_sizes,
     parse_smr_log,
+    multi_family_sizes,
+    smr_command,
+    smr_multi_status,
+    smr_out_suffix,
     smr_status,
     tss_fallback_genes,
     build_brainseq_targets,
@@ -531,3 +539,93 @@ def test_brainseq_probe_coloc_is_the_hierarchy_cell_for_that_region_and_axis():
     pc = probe_coloc_brainseq(hier).set_index(["tissue", "modality", "probe_key"])
     assert pc.at[("dlpfc", "S_g", "G1"), "coloc_PP4_probe"] == pytest.approx(0.88)
     assert pc.at[("dlpfc", "A_g", "G1"), "coloc_estimator_probe"] == "abf"
+
+
+# --------------------------------------------------------------------------- #
+# Multi-SNP SMR sensitivity arm (--smr-multi)
+# --------------------------------------------------------------------------- #
+def test_msmr_header_is_the_smr_header_with_p_smr_multi_before_heidi():
+    """Pinned to the header SMR 1.4.2 writes (src/SMR_data_p1.cpp:2632), not to memory."""
+    assert SMR_MULTI_OUT_COLS == [
+        "probeID", "ProbeChr", "Gene", "Probe_bp", "topSNP", "topSNP_chr", "topSNP_bp",
+        "A1", "A2", "Freq", "b_GWAS", "se_GWAS", "p_GWAS", "b_eQTL", "se_eQTL", "p_eQTL",
+        "b_SMR", "se_SMR", "p_SMR", "p_SMR_multi", "p_HEIDI", "nsnp_HEIDI"]
+    # the single-SNP columns survive unchanged and in order
+    assert [c for c in SMR_MULTI_OUT_COLS if c != SMR_MULTI_COL] == SMR_OUT_COLS
+
+
+def test_multi_arm_writes_its_own_directory_and_composes_with_the_threshold_arm():
+    primary = run_root("gtex")
+    assert run_root("gtex", multi=True) == primary / "sensitivity" / "smr_multi"
+    # the pre-specified relaxed arm keeps the exact directory the wrapper documents
+    assert run_root("gtex", peqtl_smr=1e-6) == primary / "sensitivity" / "peqtl_smr_1e-06"
+    # both at once must not collapse onto either single-arm directory
+    both = run_root("gtex", peqtl_smr=1e-6, multi=True)
+    assert both == primary / "sensitivity" / "peqtl_smr_1e-06__smr_multi"
+    assert both != run_root("gtex", multi=True) and both != run_root("gtex", peqtl_smr=1e-6)
+    # a threshold equal to the default is the primary arm, not a sensitivity directory
+    assert run_root("gtex", peqtl_smr=PEQTL_SMR) == primary
+
+
+def test_smr_command_adds_the_multi_flags_only_when_asked():
+    args = dict(bfile=Path("b"), ma=Path("m.ma"), besd=Path("x"), probes=Path("p"),
+                out=Path("o"))
+    single = smr_command(**args)
+    assert "--smr-multi" not in single and "--ld-multi-snp" not in single
+    multi = smr_command(**args, multi=True)
+    assert "--smr-multi" in multi
+    assert multi[multi.index("--ld-multi-snp") + 1] == f"{LD_MULTI_SNP:g}"
+    # the multi arm changes nothing else about the call
+    assert [a for a in multi if a not in ("--smr-multi", "--ld-multi-snp",
+                                          f"{LD_MULTI_SNP:g}")] == single
+    assert smr_out_suffix(False) == ".smr" and smr_out_suffix(True) == ".msmr"
+
+
+def test_read_smr_checks_the_header_that_matches_the_extension(tmp_path):
+    row = {c: 1 for c in SMR_MULTI_OUT_COLS}
+    m = tmp_path / "x.msmr"
+    pd.DataFrame([row]).to_csv(m, sep="\t", index=False)
+    assert SMR_MULTI_COL in read_smr(m).columns
+
+    # a .smr missing the single-SNP columns must fail loudly rather than parse
+    bad = tmp_path / "x.smr"
+    pd.DataFrame([{"probeID": "P1"}]).to_csv(bad, sep="\t", index=False)
+    with pytest.raises(SystemExit):
+        read_smr(bad)
+
+
+def test_multi_unavailable_is_not_a_null_result():
+    thr = 0.05 / 10
+    # never instrumented: neither test ran
+    assert smr_multi_status(np.nan, np.nan, 0.5, 10, thr) == "no_instrument"
+    # instrumented, but too few cis SNPs survived pruning for the multi test
+    assert smr_multi_status(1e-9, np.nan, 0.5, 10, thr) == "multi_unavailable"
+    # tested and null
+    assert smr_multi_status(1e-9, 0.5, 0.5, 10, thr) == "multi_tested_null"
+    # significant, and HEIDI decides the rest
+    assert smr_multi_status(1e-9, 1e-9, 0.5, 10, thr) == "multi_heidi_supported"
+    assert smr_multi_status(1e-9, 1e-9, 1e-4, 10, thr) == "multi_signal_heidi_rejects"
+    assert smr_multi_status(1e-9, 1e-9, 0.5, 2, thr) == "multi_signal_heidi_unavailable"
+    assert set(SMR_MULTI_STATUS) >= {
+        smr_multi_status(1e-9, p, h, n, thr)
+        for p, h, n in [(np.nan, 0.5, 10), (0.5, 0.5, 10), (1e-9, 0.5, 10),
+                        (1e-9, 1e-4, 10), (1e-9, 0.5, 2)]}
+
+
+def test_the_multi_family_denominator_counts_only_probes_the_multi_test_ran_on():
+    base = dict(analysis="ad", modality="sQTL", probe_family="primary", tissue="cortex")
+    d = pd.DataFrame([
+        {**base, "probeID": "P1", "p_SMR": 1e-9, SMR_MULTI_COL: 1e-9},
+        {**base, "probeID": "P2", "p_SMR": 1e-9, SMR_MULTI_COL: np.nan},  # unavailable
+        {**base, "probeID": "P3", "p_SMR": np.nan, SMR_MULTI_COL: np.nan},  # no instrument
+    ])
+    assert int(instrumented_family_sizes(d)["n_instrumented_family"].iloc[0]) == 2
+    assert int(multi_family_sizes(d)["n_multi_family"].iloc[0]) == 1
+
+    # the same probe in two tissues is two tests, in both denominators
+    d2 = pd.concat([d, d.assign(tissue="cerebellum")], ignore_index=True)
+    assert int(multi_family_sizes(d2)["n_multi_family"].iloc[0]) == 2
+
+    # nothing tested -> an empty frame with the right columns, never a divide by zero
+    empty = multi_family_sizes(d.assign(**{SMR_MULTI_COL: np.nan}))
+    assert empty.empty and "n_multi_family" in empty.columns

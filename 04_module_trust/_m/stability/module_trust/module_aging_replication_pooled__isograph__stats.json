@@ -1,0 +1,17 @@
+{
+  "method": "isograph",
+  "n_pairs_reproducible": 38,
+  "min_jaccard": 0.0,
+  "n_perm": 10000,
+  "sig": 0.05,
+  "stouffer_K": 21,
+  "stouffer_Z": -3.865673118595518,
+  "stouffer_p_normal": 0.9999446083829353,
+  "stouffer_p_perm": 0.13908609139086092,
+  "sign_concordant": 17,
+  "sign_frac": 0.4473684210526316,
+  "sign_p_perm": 0.2318768123187681,
+  "sign_p_binom_vs_0.5": 0.7911539045817335,
+  "spearman_rho": -0.013483168122181699,
+  "spearman_p_perm": 0.5347465253474653
+}

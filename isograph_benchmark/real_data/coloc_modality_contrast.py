@@ -18,7 +18,7 @@ cancels: the IsoGraph module membership that chose the gene is identical for bot
 
 Only now possible because GTEx v11 cis all-pairs (nominal stats for every variant, not
 just the significant ones) is on disk. eCAVIAR CLPP -- the estimator used by
-10.coloc_clpp.R -- consumes credible sets, which is what GTEx used to ship, and it
+03b.coloc_clpp.R -- consumes credible sets, which is what GTEx used to ship, and it
 requires fine-mapping resolution on BOTH sides, which is why its yield is 2-37 genes
 per trait. coloc.abf needs the full cis window and has no such requirement.
 
@@ -68,7 +68,7 @@ STAGES
                    cache under inputs/raw/gtex_v11/variant_bridge/ (gitignored).
   --stage prep     per-analysis (gene, locus) targets + the GTEx representative sQTL
                    phenotype per (tissue, gene). Cheap; login-node safe.
-  [R stage]        05_genetic_anchoring/_h/20.coloc_modality_abf.R <tissue> -- extracts
+  [R stage]        05_genetic_anchoring/_h/05a.coloc_modality_abf.R <tissue> -- extracts
                    cis all-pairs, joins the locus GWAS, runs coloc::coloc.abf.
   --stage meta     the paired statistics, sensitivity arms and the report.
 
@@ -260,7 +260,7 @@ def build_variant_bridge(lookup: Path = V8_LOOKUP, dest: Path | None = None,
 def load_targets(analysis: str) -> pd.DataFrame:
     """(LOCUS_ID, gene) pairs to colocalize, from the analysis' testable loci.
 
-    Uses the same locus->gene membership as 10.coloc_clpp.R, so the per-gene contrast
+    Uses the same locus->gene membership as 03b.coloc_clpp.R, so the per-gene contrast
     is computed on exactly the gene/locus pairs the CLPP layer already reports on.
     """
     d = coloc_dir(analysis)
@@ -317,7 +317,7 @@ def _testable_gene_universe() -> pd.DataFrame:
 
 
 def _wgcna_pheno_sig_genes(arm: str, fdr: float = 0.05,
-                           min_recurrence: int = 2) -> pd.DataFrame:
+                           min_recurrence: int | None = None) -> pd.DataFrame:
     """Genes in the matched WGCNA phenotype-significant modules, with module ids.
 
     Mirrors `coloc_prep._resolve_switch_genes` bundle logic (recurrence over the same
@@ -326,10 +326,12 @@ def _wgcna_pheno_sig_genes(arm: str, fdr: float = 0.05,
     """
     from collections import Counter
 
-    from isograph_benchmark.real_data.coloc_prep import _artifact_dir
+    from isograph_benchmark.real_data.coloc_prep import MIN_RECURRENCE, _artifact_dir
     from isograph_benchmark.real_data.qtl_anchoring import build_gene_sets
     from isograph_benchmark.real_data.switch_bundles import get_bundle
 
+    if min_recurrence is None:  # same gate as the IsoGraph switch arm (was 2 vs 3)
+        min_recurrence = MIN_RECURRENCE
     counts: Counter = Counter()
     frames = []
     for a, r in get_bundle("aging"):
@@ -509,7 +511,7 @@ def run_prep(analyses=tuple(ANALYSES), dest: Path | None = None,
 def _load_abf(src: Path) -> pd.DataFrame:
     abf = src / "abf"
     if not abf.exists():
-        raise SystemExit(f"no abf/ results in {src}; run 20.coloc_modality_abf.sh first")
+        raise SystemExit(f"no abf/ results in {src}; run 05a.coloc_modality_abf.sh first")
     parts = [pd.read_parquet(p) for p in sorted(abf.iterdir()) if p.suffix == ".parquet"]
     if not parts:
         raise SystemExit(f"no parquet files under {abf}")
@@ -929,15 +931,15 @@ def _write_report(src: Path, abf: pd.DataFrame, wide: pd.DataFrame,
     A(f"  {len(genes):,} (gene, locus) pairs after collapsing tissues by maximum.")
     A("* `coloc.abf` assumes a **single causal variant** per trait per window. Where two")
     A("  independent causal variants sit in one window it under-calls sharing, for both")
-    A("  arms alike. The CLPP layer (`10.coloc_clpp.R`) does not make this assumption and")
+    A("  arms alike. The CLPP layer (`03b.coloc_clpp.R`) does not make this assumption and")
     A("  remains the estimator of record for *whether* a gene colocalizes at all.")
     A("* Only loci passing the GWAS window threshold enter, so this says nothing about")
     A("  sub-threshold signal.")
     A("* The rsID bridge (GTEx v8 WGS lookup) covers 98.6% of v11 variants. Dropped")
     A("  variants are dropped from both arms of a gene identically.")
     A("")
-    A("Regenerate: `05_genetic_anchoring/_h/19.coloc_modality_prep.sh`,")
-    A("`20.coloc_modality_abf.sh` (array over 13 tissues), `21.coloc_modality_meta.sh`.")
+    A("Regenerate: `05_genetic_anchoring/_h/04d.coloc_modality_prep.sh`,")
+    A("`05a.coloc_modality_abf.sh` (array over 13 tissues), `06a.coloc_modality_meta.sh`.")
     (src / "COLOC_MODALITY_CONTRAST.md").write_text("\n".join(L) + "\n")
     print(f"  report -> {src / 'COLOC_MODALITY_CONTRAST.md'}")
 

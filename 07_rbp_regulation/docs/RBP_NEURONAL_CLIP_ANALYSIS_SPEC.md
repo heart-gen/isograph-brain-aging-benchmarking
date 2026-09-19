@@ -461,7 +461,7 @@ extraction.
 The implemented pre-CLIP window stage is run with:
 
 ```bash
-sbatch 07_rbp_regulation/_h/09.neuronal_clip_windows.sh
+sbatch 07_rbp_regulation/_h/05a.neuronal_clip_windows.sh
 ```
 
 The wrapper calls `neuronal_clip_validation.py prepare-windows` and writes under
@@ -475,7 +475,7 @@ explicitly deferred to the callable-window stage; no IP peaks enter pre-CLIP mat
 The post-window motif-opportunity gate is run with:
 
 ```bash
-sbatch 07_rbp_regulation/_h/10.neuronal_clip_motif_qc.sh
+sbatch 07_rbp_regulation/_h/06a.neuronal_clip_motif_qc.sh
 ```
 
 This stage writes `candidate_eligibility.parquet` plus strand-aware exploratory
@@ -490,7 +490,7 @@ not be reported as NOVA1-specific evidence.
 An independent, opportunity-controlled NOVA-family re-nomination is run with:
 
 ```bash
-sbatch 07_rbp_regulation/_h/12.nova_family_renomination.sh
+sbatch 07_rbp_regulation/_h/07b.nova_family_renomination.sh
 ```
 
 This stage rescans the complete 17-analysis switch-pair universe and requires both
@@ -512,7 +512,7 @@ the optional controlled-access neuronal eCLIP extension.
 Public Tier-2 NOVA2 cTag-CLIP validation is run with:
 
 ```bash
-sbatch 07_rbp_regulation/_h/13.nova2_ctag_clip.sh
+sbatch 07_rbp_regulation/_h/08a.nova2_ctag_clip.sh
 ```
 
 The configuration pins the GSE103315 processed archive and reciprocal UCSC
@@ -567,7 +567,7 @@ sensitivity if perturbation-supported loci justify it.
 Callable-window overlap is run only after that gate succeeds:
 
 ```bash
-sbatch 07_rbp_regulation/_h/11.neuronal_clip_overlap.sh
+sbatch 07_rbp_regulation/_h/07a.neuronal_clip_overlap.sh
 ```
 
 The overlap CLI reads only candidates marked `confirmatory_eligible`. For TDP-43,

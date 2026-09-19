@@ -34,7 +34,7 @@ from isograph.workflow.config import WgcnaModelConfig
 from isograph_benchmark.paths import ensure_dir, region_store, rel
 from isograph_benchmark.real_data.run_models import (
     GTEX_REGIONS,
-    _filter_expressed_transcripts,
+    filter_production_transcripts,
     _gtex_qc_covariate_table,
     _rnaseqc_covariate_table,
     _save_age_artifacts,
@@ -173,7 +173,7 @@ def _cfg(seed: int, timeout_seconds: int) -> WgcnaModelConfig:
 def run_brainseq_aging(regions: list[str], variants: list[str], seed: int, timeout_seconds: int) -> None:
     for region in regions:
         bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
-        tc, tt = _filter_expressed_transcripts(bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
+        tc, tt = filter_production_transcripts(bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
         for variant in variants:
             print(f"[brainseq-aging/{region}/{variant}] matched-feature WGCNA", flush=True)
             art = _fit_artifacts(bundle, tc, tt, BRAINSEQ_COVARIATES, variant, _cfg(seed, timeout_seconds))
@@ -187,12 +187,10 @@ def run_brainseq_aging(regions: list[str], variants: list[str], seed: int, timeo
 def run_gtex_aging(regions: list[str], variants: list[str], seed: int, timeout_seconds: int) -> None:
     for region in regions:
         bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region))
+        tc, tt = filter_production_transcripts(bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
         for variant in variants:
             print(f"[gtex-aging/{region}/{variant}] matched-feature WGCNA", flush=True)
-            art = _fit_artifacts(
-                bundle, bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
-                GTEX_COVARIATES, variant, _cfg(seed, timeout_seconds),
-            )
+            art = _fit_artifacts(bundle, tc, tt, GTEX_COVARIATES, variant, _cfg(seed, timeout_seconds))
             out = ensure_dir(region_store("gtex", region, VARIANT_DIRS[variant]))
             _save_age_artifacts(
                 art, out, bundle.sample_table, GTEX_COVARIATES, age_col="AGE",
@@ -202,11 +200,11 @@ def run_gtex_aging(regions: list[str], variants: list[str], seed: int, timeout_s
 
 def run_brainseq_sczd(variants: list[str], seed: int, timeout_seconds: int) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
+    tc, tt = filter_production_transcripts(bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"])
     for variant in variants:
         print(f"[brainseq-sczd/caudate/{variant}] matched-feature WGCNA", flush=True)
         art = _fit_artifacts(
-            bundle, bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
-            BRAINSEQ_COVARIATES, variant, _cfg(seed, timeout_seconds),
+            bundle, tc, tt, BRAINSEQ_COVARIATES, variant, _cfg(seed, timeout_seconds),
         )
         out = ensure_dir(region_store("brainseq", "caudate_sczd", VARIANT_DIRS[variant]))
         _save_diagnosis_artifacts(

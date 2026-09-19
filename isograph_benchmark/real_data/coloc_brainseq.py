@@ -47,7 +47,7 @@ STAGES
   --stage prep   targets (the GTEx switch-gene grid, restricted to genes BrainSEQ mapped), the
                  per-region phenotype ids, donor lists and n, and the (analysis, region) work
                  list. Login-node safe.
-  [R]            05_genetic_anchoring/_h/29.coloc_brainseq_susie.R <analysis> <region>
+  [R]            05_genetic_anchoring/_h/07c.coloc_brainseq_susie.R <analysis> <region>
   --stage meta   hierarchy, per-region cells, gene collapse over regions, the paired S_g vs
                  A_g test, the GTEx nominations read in BrainSEQ, and BrainSEQ's own
                  nominations. Login-node safe.
@@ -97,7 +97,7 @@ def check_arm(arm: str, failures: list[str] | None = None) -> None:
     failures = arm_check_failures(arm) if failures is None else failures
     if failures:
         raise SystemExit(f"BrainSEQ `{arm}` has not passed its QTL checks: "
-                         + "; ".join(failures) + " (run 28.brainseq_qtl_checks.sh)")
+                         + "; ".join(failures) + " (run 02g.brainseq_qtl_checks.sh)")
 
 
 # --------------------------------------------------------------------------- #
@@ -110,7 +110,7 @@ def phenotype_table(arm: str, regions=REGIONS) -> pd.DataFrame:
         for axis, ftype in FTYPE.items():
             f = qtl_dir(arm, region) / "qtl" / f"cis_qtl_{ftype}.parquet"
             if not f.exists():
-                raise SystemExit(f"missing {f}; run 25.brainseq_switch_qtl.sh for {arm}")
+                raise SystemExit(f"missing {f}; run 01i.brainseq_switch_qtl.sh for {arm}")
             ids = pd.read_parquet(f, columns=["phenotype_id"])["phenotype_id"].astype(str)
             rows.append(pd.DataFrame({"region": region, "modality": axis,
                                       "gene": ids.str.split(".", n=1).str[0].to_numpy(),
@@ -132,7 +132,7 @@ def region_table(arm: str, regions=REGIONS, dest: Path | None = None) -> pd.Data
         for axis, ftype in FTYPE.items():
             f = q / f"covariates_used_{ftype}.txt"
             if not f.exists():
-                raise SystemExit(f"missing {f}; run 25.brainseq_switch_qtl.sh for {arm}")
+                raise SystemExit(f"missing {f}; run 01i.brainseq_switch_qtl.sh for {arm}")
             donors[axis] = [str(x) for x in pd.read_csv(f, sep="\t", index_col=0).index]
         if set(donors["S_g"]) != set(donors["A_g"]):
             raise SystemExit(f"{region}: the S_g and A_g arms were mapped in different donors")
@@ -170,7 +170,7 @@ def run_prep(arm: str = "ea_only") -> Path:
     cached = {p.name for p in gw.iterdir() if p.is_dir()} if gw.exists() else set()
     uncached = sorted(set(t["analysis"]) - cached)
     if uncached:
-        raise SystemExit(f"no stage-A GWAS SuSiE cache for {uncached}; run 22.coloc_gwas_susie.sh")
+        raise SystemExit(f"no stage-A GWAS SuSiE cache for {uncached}; run 03c.coloc_gwas_susie.sh")
 
     t.to_parquet(dest / "targets.parquet", index=False)
     ph[ph["gene"].isin(set(t["gene"]))].to_parquet(dest / "phenotypes.parquet", index=False)
@@ -201,7 +201,7 @@ def _load(root: Path, kind: str, required: bool = True) -> pd.DataFrame:
     parts = [p for p in parts if len(p)]
     if not parts:
         if required:
-            raise SystemExit(f"no {kind}/ shards under {root}; run 29.coloc_brainseq_susie.sh")
+            raise SystemExit(f"no {kind}/ shards under {root}; run 07c.coloc_brainseq_susie.sh")
         return pd.DataFrame()
     return pd.concat(parts, ignore_index=True)
 

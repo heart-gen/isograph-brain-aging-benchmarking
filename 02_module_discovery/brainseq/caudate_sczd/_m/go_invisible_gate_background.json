@@ -1,9 +1,9 @@
 {
   "module": "_background",
   "go_invisible": null,
-  "frac_cds_changed": 0.84,
-  "frac_coding_status_change": 0.671,
-  "frac_biotype_switch": 0.736,
-  "frac_utr_changed": 0.612,
-  "n_sig_switch_tx": 1376
+  "frac_cds_changed": 0.887,
+  "frac_coding_status_change": 0.775,
+  "frac_biotype_switch": 0.835,
+  "frac_utr_changed": 0.518,
+  "n_sig_switch_tx": 8940
 }

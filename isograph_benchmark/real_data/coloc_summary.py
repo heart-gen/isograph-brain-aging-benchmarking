@@ -54,7 +54,7 @@ def run(analysis: str, region: str | None) -> pd.DataFrame:
     m_dir = stage_out("anchoring.coloc", analysis + (f"_{region}" if region else ""))
     clpp_path = m_dir / "coloc" / "clpp_results.tsv"
     if not clpp_path.exists():
-        raise SystemExit(f"{clpp_path} not found; run 03.coloc_clpp.R first.")
+        raise SystemExit(f"{clpp_path} not found; run 05_genetic_anchoring/_h/03b.coloc_clpp.R first.")
     clpp = pd.read_csv(clpp_path, sep="\t")
     # attach HGNC symbol (from the credible-set file) for readable gene naming
     cs_path = m_dir / "qtl_credible_sets.tsv"
@@ -124,7 +124,7 @@ def _write_report(out_dir: Path, analysis: str, region: str | None,
         "the genes of IsoGraph's phenotype-associated co-switch modules. Paired across "
         "sQTL and eQTL. CLPP >= 0.01 = colocalized (eCAVIAR convention); >= 0.05 = strong.",
         "",
-        "Reproduce: `Rscript 05_genetic_anchoring/_h/10.coloc_clpp.R " + analysis + "` then "
+        "Reproduce: `Rscript 05_genetic_anchoring/_h/03b.coloc_clpp.R " + analysis + "` then "
         "`python -m isograph_benchmark.real_data.coloc_summary --analysis " + analysis + "`.",
         "",
         "## Colocalization rate by QTL kind and module class",

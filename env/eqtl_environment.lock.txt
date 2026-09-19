@@ -1,6 +1,6 @@
 # QTL-mapping environment lock — tensorQTL / plink2
 # Captured 2026-09-10T14:13:11Z from the shared conda env used by the
-# BrainSEQ switch-QTL stage (05_genetic_anchoring/_h/25.brainseq_switch_qtl.sh).
+# BrainSEQ switch-QTL stage (05_genetic_anchoring/_h/01i.brainseq_switch_qtl.sh).
 # Env prefix: /ocean/projects/bio260021p/shared/opt/envs/eqtl
 # Python: 3.11.15
 # plink2: PLINK v2.0.0-a.6.9LM 64-bit Intel (29 Jan 2025)

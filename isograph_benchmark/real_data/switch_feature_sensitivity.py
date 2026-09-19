@@ -19,23 +19,32 @@ here is whether the *representation and its trait signal* are stable, not whethe
 independently refit network would recover the same modules.
 
 **The baseline is verified, not assumed.** Before any perturbation, the harness rebuilds the
-switch channel at the published settings and requires it to reproduce
-``feature_scores.parquet`` exactly (max |diff| = 0). If that gate fails the run aborts,
-because every downstream comparison would otherwise be against a lookalike.
+switch channel at the region's published settings and requires it to reproduce
+``feature_scores.parquet`` (max |diff| <= ``--tol``). If that gate fails the run aborts,
+because every downstream comparison would otherwise be against a lookalike. The published
+settings are kept per cohort, and since 2026-09-14 they are the same: both cohorts are fit on
+the switching (usage) transcript filter, `run_models.filter_switching_transcripts`. The legacy
+fits (tag `legacy_expression_filter`) used count > 10 in >= 70% of samples for BrainSEQ and no
+filter for GTEx; the table stays keyed by cohort so a cohort can be gated against its own fits.
 
 Axes
 ----
 ``pseudocount``      the constant added to transcript counts before the composition is taken
-``expression``       the (min_count, min_fraction) transcript filter
+``expression``       the transcript filter: the switching filter's share (min_tx_prop) and
+                     prevalence (min_tx_fraction) thresholds, plus the legacy expression filter
+                     and no filter as fixed alternatives
 ``minor_isoform``    drop transcripts below a mean within-gene usage before the CLR
 ``identifiability``  no perturbation -- stratifies genes by transcript number and asks
                      whether the age signal concentrates where isoforms are hardest to
                      resolve, which is what an identifiability artefact would look like
-``quantification``   Salmon (BrainSEQ) versus RSEM (GTEx) on shared genes and a shared
-                     region; the pipelines cannot be swapped within a cohort, so this is a
-                     cross-cohort concordance, and it is reported as such
+``quantification``   Salmon (BrainSEQ) versus RSEM (GTEx) on shared genes and matched
+                     regions; the pipelines cannot be swapped within a cohort, so this is a
+                     cross-cohort concordance. Run once, in ``--aggregate``, beside a
+                     same-quantifier reference (region pairs within one cohort) so the
+                     cross-cohort figure has something to be read against.
 
-Outputs land in ``06_switch_mechanism/_m/switch_feature_sensitivity/``.
+Per-region outputs land in ``06_switch_mechanism/_m/switch_feature_sensitivity/<cohort>/<region>/``;
+``--aggregate`` writes the cross-region tables and report one level up.
 """
 from __future__ import annotations
 
@@ -58,11 +67,21 @@ from isograph_benchmark.paths import (
 )
 from isograph_benchmark.real_data.run_models import (
     _filter_expressed_transcripts,
+    filter_switching_transcripts,
     linear_age_association,
 )
 
-# Published preprocessing (run_models.run_brainseq_region / run_gtex_region).
-PUBLISHED = {"pseudocount": 0.5, "min_count": 10.0, "min_fraction": 0.70, "min_usage": 0.0}
+# Published preprocessing, per cohort (run_models.run_brainseq_region / run_gtex_region).
+# `transcript_filter` is "switching" (production since 2026-09-14; its share and prevalence
+# thresholds are min_tx_prop / min_tx_fraction), "expression" (the legacy count > 10 in >= 70%
+# filter) or "none". The gene criterion and transcript count of the switching filter are fixed.
+PUBLISHED_BY_COHORT = {
+    "brainseq": {"pseudocount": 0.5, "transcript_filter": "switching",
+                 "min_tx_prop": 0.10, "min_tx_fraction": 0.10, "min_usage": 0.0},
+    "gtex": {"pseudocount": 0.5, "transcript_filter": "switching",
+             "min_tx_prop": 0.10, "min_tx_fraction": 0.10, "min_usage": 0.0},
+}
+PUBLISHED = PUBLISHED_BY_COHORT["brainseq"]
 
 COHORTS = {
     "brainseq": {
@@ -79,11 +98,40 @@ COHORTS = {
     },
 }
 
+# Matched regions across cohorts (quantifier differs), and region pairs within one cohort
+# (quantifier fixed, tissue differs) as the reference the cross-cohort figure is read against.
+CROSS_QUANTIFIER_PAIRS = [
+    ("brainseq", "caudate", "gtex", "caudate_basal_ganglia"),
+    ("brainseq", "hippocampus", "gtex", "hippocampus"),
+    ("brainseq", "dlpfc", "gtex", "frontal_cortex_ba9"),
+]
+SAME_QUANTIFIER_PAIRS = [
+    ("gtex", "caudate_basal_ganglia", "gtex", "putamen_basal_ganglia"),
+    ("gtex", "caudate_basal_ganglia", "gtex", "nucleus_accumbens_basal_ganglia"),
+    ("gtex", "frontal_cortex_ba9", "gtex", "cortex"),
+    ("gtex", "cerebellum", "gtex", "cerebellar_hemisphere"),
+    ("brainseq", "caudate", "brainseq", "dlpfc"),
+    ("brainseq", "caudate", "brainseq", "hippocampus"),
+    ("brainseq", "dlpfc", "brainseq", "hippocampus"),
+]
+
 _META = {"feature_id", "gene_id", "feature_type", "n_transcripts"}
+# (transcript_filter, min_tx_prop, min_tx_fraction): the switching filter's share and prevalence
+# thresholds varied one at a time around the published 0.10 / 0.10, then the legacy expression
+# filter and no filter as fixed alternatives (their thresholds are not used, so they are 0).
+_EXPRESSION_GRID = (
+    ("switching", 0.10, 0.10), ("switching", 0.05, 0.10), ("switching", 0.20, 0.10),
+    ("switching", 0.10, 0.05), ("switching", 0.10, 0.25),
+    ("expression", 0.0, 0.0), ("none", 0.0, 0.0),
+)
 
 
-def _out_dir() -> Path:
+def _root_out() -> Path:
     return ensure_dir(stage_out("mechanism", "switch_feature_sensitivity"))
+
+
+def _out_dir(cohort: str, region: str) -> Path:
+    return ensure_dir(_root_out() / cohort / region)
 
 
 def _artifact_dir(cohort: str, region: str) -> Path:
@@ -104,7 +152,6 @@ def _drop_minor_isoforms(
     if min_usage <= 0:
         return counts, table
     keep = np.ones(len(table), dtype=bool)
-    totals = np.zeros(counts.shape[1])
     for _, idx in table.groupby("gene_id", sort=False).indices.items():
         sub = counts[idx]
         totals = sub.sum(axis=0)
@@ -114,27 +161,50 @@ def _drop_minor_isoforms(
     return counts[keep], table.loc[keep].reset_index(drop=True)
 
 
+def apply_transcript_filter(
+    counts: np.ndarray, table: pd.DataFrame, setting: dict
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """The transcript filter named by ``setting['transcript_filter']``.
+
+    ``switching`` at the published thresholds is exactly `run_models.filter_production_transcripts`.
+    """
+    kind = setting["transcript_filter"]
+    if kind == "switching":
+        return filter_switching_transcripts(
+            counts, table, min_tx_prop=setting["min_tx_prop"],
+            min_tx_fraction=setting["min_tx_fraction"],
+        )
+    if kind == "expression":
+        return _filter_expressed_transcripts(counts, table)
+    if kind == "none":
+        return counts, table
+    raise ValueError(f"unknown transcript_filter {kind!r}")
+
+
 def build_features(
     counts: np.ndarray,
     table: pd.DataFrame,
     pseudocount: float,
-    min_count: float,
-    min_fraction: float,
+    transcript_filter: str,
+    min_tx_prop: float,
+    min_tx_fraction: float,
     min_usage: float,
 ) -> tuple[np.ndarray, pd.DataFrame]:
     """Rebuild the multiplex feature matrix under one preprocessing setting.
 
     ``gene_feature_channels`` is called with no ``switch_design`` because the production fit
     leaves the composition unresidualized (``residualize_composition`` is False) and
-    persists the raw channels; matching that is what makes the baseline reproduce exactly.
+    persists the raw channels; matching that is what makes the baseline reproduce.
     """
-    tc, tt = _filter_expressed_transcripts(
-        counts, table, min_count=min_count, min_fraction=min_fraction
+    tc, tt = apply_transcript_filter(
+        np.asarray(counts), table,
+        {"transcript_filter": transcript_filter, "min_tx_prop": min_tx_prop,
+         "min_tx_fraction": min_tx_fraction},
     )
     tc, tt = _drop_minor_isoforms(tc, tt, min_usage)
     if pseudocount != PUBLISHED["pseudocount"]:
-        # transcript_usage adds PUBLISHED["pseudocount"] internally, so shifting by the
-        # difference yields counts + pseudocount exactly. No clipping: the shifted value is
+        # transcript_usage adds 0.5 internally, so shifting by the difference yields
+        # counts + pseudocount exactly. No clipping: the shifted value is
         # >= pseudocount - 0.5 > -0.5, so the internal +0.5 keeps every entry positive, and
         # clipping here would silently restore 0.5 for zero counts whenever pseudocount<0.5.
         tc = tc.astype(np.float64) + (pseudocount - PUBLISHED["pseudocount"])
@@ -193,15 +263,18 @@ def _compare_to_published(
 # --------------------------------------------------------------------------- #
 # Axes
 # --------------------------------------------------------------------------- #
-def _settings(axis: str) -> list[dict]:
-    base = dict(PUBLISHED)
+def _settings(axis: str, published: dict | None = None) -> list[dict]:
+    base = dict(published or PUBLISHED)
     if axis == "pseudocount":
         return [dict(base, pseudocount=v) for v in (0.1, 0.25, 0.5, 1.0, 2.0)]
     if axis == "expression":
-        return [
-            dict(base, min_count=c, min_fraction=f)
-            for c, f in ((5.0, 0.50), (10.0, 0.50), (10.0, 0.70), (20.0, 0.70), (10.0, 0.90))
-        ]
+        grid = list(_EXPRESSION_GRID)
+        pub = (base["transcript_filter"], base["min_tx_prop"], base["min_tx_fraction"])
+        if pub in grid:
+            grid.remove(pub)
+        grid.insert(0, pub)  # the published filter always leads the axis
+        return [dict(base, transcript_filter=k, min_tx_prop=p, min_tx_fraction=f)
+                for k, p, f in grid]
     if axis == "minor_isoform":
         return [dict(base, min_usage=v) for v in (0.0, 0.01, 0.05, 0.10)]
     raise ValueError(axis)
@@ -211,11 +284,17 @@ def _label(setting: dict, axis: str) -> str:
     if axis == "pseudocount":
         return f"pseudocount={setting['pseudocount']:g}"
     if axis == "expression":
-        return f"count>{setting['min_count']:g},frac>={setting['min_fraction']:g}"
+        kind = setting["transcript_filter"]
+        if kind == "none":
+            return "no filter"
+        if kind == "expression":
+            return "legacy count>10,frac>=0.7"
+        return f"switching share>={setting['min_tx_prop']:g},frac>={setting['min_tx_fraction']:g}"
     return f"min_usage={setting['min_usage']:g}"
 
 
 def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    published = PUBLISHED_BY_COHORT[args.cohort]
     art = _artifact_dir(args.cohort, args.region)
     bundle = load_dataset_bundle(rel(*COHORTS[args.cohort]["bundle"], args.region))
     sample_table = bundle.sample_table
@@ -227,8 +306,8 @@ def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     modules = pd.read_parquet(art / "modules.parquet")
     published_age = pd.read_parquet(art / "age_linear.parquet")
 
-    # ---- gate: the baseline must reproduce the published switch channel exactly ----
-    m0, i0 = build_features(counts, table, **PUBLISHED)
+    # ---- gate: the baseline must reproduce the published switch channel ----
+    m0, i0 = build_features(counts, table, **published)
     base = _to_frame(m0, i0, samples)
     pub_sw = published_fs[published_fs["feature_type"] == "switch"].set_index("gene_id")
     new_sw = base[base["feature_type"] == "switch"].set_index("gene_id")
@@ -241,21 +320,22 @@ def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
             )
         )
     )
-    if worst > args.tol or len(shared) != len(pub_sw):
+    if worst > args.tol or len(shared) != len(pub_sw) or len(new_sw) != len(pub_sw):
         raise SystemExit(
             f"baseline switch channel does not reproduce feature_scores.parquet "
-            f"(max |diff| = {worst:.3g} over {len(shared)}/{len(pub_sw)} genes); every "
-            "sensitivity below would be measured against the wrong baseline."
+            f"(max |diff| = {worst:.3g} over {len(shared)}/{len(pub_sw)} genes, "
+            f"{len(new_sw)} rebuilt); every sensitivity below would be measured against the "
+            "wrong baseline."
         )
-    print(f"[verify] baseline reproduces the published switch channel exactly "
-          f"(max |diff| = {worst:g}, {len(shared)} genes)")
+    print(f"[verify] baseline reproduces the published switch channel "
+          f"(max |diff| = {worst:g} <= tol {args.tol:g}, {len(shared)} genes)")
 
     base_sw = new_sw[samples]
     rows, per_gene_rows = [], []
     for axis in ("pseudocount", "expression", "minor_isoform"):
-        for setting in _settings(axis):
+        for setting in _settings(axis, published):
             label = _label(setting, axis)
-            is_base = all(setting[k] == PUBLISHED[k] for k in PUBLISHED)
+            is_base = all(setting[k] == published[k] for k in published)
             m, i = (m0, i0) if is_base else build_features(counts, table, **setting)
             feats = _to_frame(m, i, samples)
             sw = feats[feats["feature_type"] == "switch"].set_index("gene_id")
@@ -272,10 +352,12 @@ def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
             eig = eigengenes_from_features(feats, modules, samples)
             assoc = linear_age_association(eig, sample_table, COHORTS[args.cohort]["age_col"])
             rec = {
+                "cohort": args.cohort,
+                "region": args.region,
                 "axis": axis,
                 "setting": label,
                 "is_published": is_base,
-                **{k: setting[k] for k in PUBLISHED},
+                **{k: setting[k] for k in published},
                 "n_switch_genes": int(len(sw)),
                 "n_switch_genes_published": int(len(base_sw)),
                 "n_switch_genes_lost": int(len(base_sw) - len(common)),
@@ -298,8 +380,9 @@ def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
         "region": args.region,
         "quantifier": COHORTS[args.cohort]["quantifier"],
         "artifacts": str(art),
-        "published_settings": PUBLISHED,
+        "published_settings": published,
         "baseline_max_abs_diff_vs_feature_scores": worst,
+        "tol": args.tol,
         "n_samples": int(len(sample_table)),
         "n_modules": int(modules["module_id"].nunique()),
         "fdr": args.fdr,
@@ -315,6 +398,22 @@ def run_perturbation_axes(args) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
 # --------------------------------------------------------------------------- #
 # Identifiability (stratification, not perturbation)
 # --------------------------------------------------------------------------- #
+def _gene_age_r(features: pd.DataFrame, samples: list[str], sample_table: pd.DataFrame,
+                age_col: str) -> pd.Series:
+    """Per-gene Pearson r of the published switch coordinate with age, keyed on gene id."""
+    st = sample_table.set_index(sample_table["sample_id"].astype(str))
+    age = pd.to_numeric(st.loc[samples, age_col], errors="coerce").to_numpy(float)
+    sw = features[features["feature_type"] == "switch"]
+    Y = sw[samples].to_numpy(float)
+    ok = np.isfinite(age)
+    a = age[ok] - age[ok].mean()
+    Yz = Y[:, ok] - Y[:, ok].mean(axis=1, keepdims=True)
+    den = np.sqrt((Yz**2).sum(1) * (a**2).sum())
+    with np.errstate(invalid="ignore", divide="ignore"):
+        r = np.where(den > 0, (Yz * a).sum(1) / np.where(den > 0, den, np.nan), np.nan)
+    return pd.Series(r, index=sw["gene_id"].astype(str).to_numpy())
+
+
 def run_identifiability(args) -> pd.DataFrame:
     """Does the age signal concentrate in genes with many transcripts?
 
@@ -328,19 +427,10 @@ def run_identifiability(args) -> pd.DataFrame:
     samples = [c for c in fs.columns if c not in _META]
     modules = pd.read_parquet(art / "modules.parquet")
     bundle = load_dataset_bundle(rel(*COHORTS[args.cohort]["bundle"], args.region))
-    st = bundle.sample_table.set_index(bundle.sample_table["sample_id"].astype(str))
-    age = pd.to_numeric(st.loc[samples, COHORTS[args.cohort]["age_col"]], errors="coerce").to_numpy(float)
+    r = _gene_age_r(fs, samples, bundle.sample_table, COHORTS[args.cohort]["age_col"])
 
     sw = fs[fs["feature_type"] == "switch"].copy()
-    Y = sw[samples].to_numpy(float)
-    ok = np.isfinite(age)
-    a = age[ok] - age[ok].mean()
-    Yz = Y[:, ok] - Y[:, ok].mean(axis=1, keepdims=True)
-    denom = np.sqrt((Yz**2).sum(1) * (a**2).sum())
-    with np.errstate(invalid="ignore", divide="ignore"):
-        r = np.where(denom > 0, (Yz * a).sum(1) / np.where(denom > 0, denom, np.nan), np.nan)
-
-    sw = sw.assign(age_r=r, in_module=sw["gene_id"].astype(str).isin(
+    sw = sw.assign(age_r=r.to_numpy(), in_module=sw["gene_id"].astype(str).isin(
         set(modules["gene_id"].astype(str))))
     bins = [1, 2, 3, 5, 10, 20, 10_000]
     sw["n_tx_stratum"] = pd.cut(sw["n_transcripts"], bins=bins, right=False)
@@ -361,76 +451,85 @@ def run_identifiability(args) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
-# Quantification pipeline (cross-cohort concordance)
+# Quantification pipeline (cross-cohort concordance, with a same-quantifier reference)
 # --------------------------------------------------------------------------- #
-def run_quantification(args) -> pd.DataFrame:
-    """Salmon (BrainSEQ) versus RSEM (GTEx) on a shared region and shared genes.
+def _donor_ids(sample_table: pd.DataFrame, samples: list[str], cohort: str) -> set[str]:
+    """Donor identifiers, so overlapping donors between two regions can be counted.
 
-    The pipelines cannot be swapped within a cohort -- neither cohort releases a second
-    quantification -- so this is a concordance between cohorts that differ in quantifier,
-    and it therefore confounds quantifier with cohort. It is reported as an upper bound on
-    how much of the cross-cohort attenuation the quantifier could explain, not as an
-    isolated quantifier effect.
+    GTEx sample ids are GTEX-<donor>-<tissue sample>; BrainSEQ carries BrNum when present.
+    Shared donors inflate a same-cohort concordance, so the count is reported beside it.
     """
-    pairs = [("brainseq", "caudate", "gtex", "caudate_basal_ganglia"),
-             ("brainseq", "hippocampus", "gtex", "hippocampus")]
+    if cohort == "gtex":
+        return {"-".join(s.split("-")[:2]) for s in samples}
+    st = sample_table.set_index(sample_table["sample_id"].astype(str))
+    if "BrNum" in st.columns:
+        return set(st.loc[samples, "BrNum"].astype(str))
+    return set()
+
+
+def run_quantification() -> pd.DataFrame:
+    """Per-gene switch--age effects compared between region pairs.
+
+    ``cross_quantifier`` pairs are matched regions in different cohorts (Salmon vs RSEM).
+    The pipelines cannot be swapped within a cohort -- neither cohort releases a second
+    quantification -- so these confound quantifier with cohort and are an upper bound on the
+    quantifier's contribution. ``same_quantifier`` pairs hold the quantifier fixed and vary
+    the tissue within one cohort, often on overlapping donors (counted), which is the
+    reference a near-zero cross-cohort concordance has to be read against: if same-quantifier
+    concordance is also near zero, the cross-cohort figure says nothing about the quantifier.
+    """
+    cache: dict = {}
+
+    def load(cohort: str, region: str):
+        key = (cohort, region)
+        if key not in cache:
+            f = pd.read_parquet(_artifact_dir(cohort, region) / "feature_scores.parquet")
+            samples = [c for c in f.columns if c not in _META]
+            st = load_dataset_bundle(rel(*COHORTS[cohort]["bundle"], region)).sample_table
+            r = _gene_age_r(f, samples, st, COHORTS[cohort]["age_col"])
+            r.index = r.index.str.split(".").str[0]
+            cache[key] = (r, _donor_ids(st, samples, cohort), len(samples))
+        return cache[key]
+
     rows = []
-    for c1, r1, c2, r2 in pairs:
-        try:
-            f1 = pd.read_parquet(_artifact_dir(c1, r1) / "feature_scores.parquet")
-            f2 = pd.read_parquet(_artifact_dir(c2, r2) / "feature_scores.parquet")
-        except FileNotFoundError:
-            continue
-        s1 = [c for c in f1.columns if c not in _META]
-        s2 = [c for c in f2.columns if c not in _META]
-        b1 = load_dataset_bundle(rel(*COHORTS[c1]["bundle"], r1)).sample_table
-        b2 = load_dataset_bundle(rel(*COHORTS[c2]["bundle"], r2)).sample_table
-
-        def gene_age_r(f, samples, bundle_st, age_col):
-            st = bundle_st.set_index(bundle_st["sample_id"].astype(str))
-            age = pd.to_numeric(st.loc[samples, age_col], errors="coerce").to_numpy(float)
-            sw = f[f["feature_type"] == "switch"]
-            Y = sw[samples].to_numpy(float)
-            ok = np.isfinite(age)
-            a = age[ok] - age[ok].mean()
-            Yz = Y[:, ok] - Y[:, ok].mean(axis=1, keepdims=True)
-            den = np.sqrt((Yz**2).sum(1) * (a**2).sum())
-            with np.errstate(invalid="ignore", divide="ignore"):
-                r = np.where(den > 0, (Yz * a).sum(1) / np.where(den > 0, den, np.nan), np.nan)
-            return pd.Series(r, index=sw["gene_id"].astype(str).str.split(".").str[0])
-
-        g1 = gene_age_r(f1, s1, b1, COHORTS[c1]["age_col"])
-        g2 = gene_age_r(f2, s2, b2, COHORTS[c2]["age_col"])
-        common = g1.index.intersection(g2.index)
-        v1, v2 = g1.loc[common].to_numpy(float), g2.loc[common].to_numpy(float)
-        ok = np.isfinite(v1) & np.isfinite(v2)
-        rows.append(
-            {
-                "cohort_1": c1, "region_1": r1, "quantifier_1": COHORTS[c1]["quantifier"],
-                "cohort_2": c2, "region_2": r2, "quantifier_2": COHORTS[c2]["quantifier"],
-                "n_shared_genes": int(ok.sum()),
-                "pearson_gene_age_effect": float(stats.pearsonr(v1[ok], v2[ok]).statistic),
-                "spearman_gene_age_effect": float(stats.spearmanr(v1[ok], v2[ok]).statistic),
-                "sign_concordance": float(np.mean(np.sign(v1[ok]) == np.sign(v2[ok]))),
-            }
-        )
+    for pair_type, pairs in (("cross_quantifier", CROSS_QUANTIFIER_PAIRS),
+                             ("same_quantifier", SAME_QUANTIFIER_PAIRS)):
+        for c1, r1, c2, r2 in pairs:
+            try:
+                g1, d1, n1 = load(c1, r1)
+                g2, d2, n2 = load(c2, r2)
+            except FileNotFoundError:
+                continue
+            common = g1.index.intersection(g2.index)
+            v1, v2 = g1.loc[common].to_numpy(float), g2.loc[common].to_numpy(float)
+            ok = np.isfinite(v1) & np.isfinite(v2)
+            rows.append(
+                {
+                    "pair_type": pair_type,
+                    "cohort_1": c1, "region_1": r1, "quantifier_1": COHORTS[c1]["quantifier"],
+                    "cohort_2": c2, "region_2": r2, "quantifier_2": COHORTS[c2]["quantifier"],
+                    "n_samples_1": n1, "n_samples_2": n2,
+                    "n_shared_donors": int(len(d1 & d2)) if (d1 and d2) else np.nan,
+                    "n_shared_genes": int(ok.sum()),
+                    "pearson_gene_age_effect": float(stats.pearsonr(v1[ok], v2[ok]).statistic),
+                    "spearman_gene_age_effect": float(stats.spearmanr(v1[ok], v2[ok]).statistic),
+                    "sign_concordance": float(np.mean(np.sign(v1[ok]) == np.sign(v2[ok]))),
+                }
+            )
     return pd.DataFrame(rows)
 
 
 # --------------------------------------------------------------------------- #
 def run(args) -> None:
-    out_dir = _out_dir()
+    out_dir = _out_dir(args.cohort, args.region)
     summary, per_gene, meta = run_perturbation_axes(args)
     ident = run_identifiability(args)
-    quant = run_quantification(args)
 
     summary.to_parquet(out_dir / "sensitivity_summary.parquet", index=False)
     per_gene.to_parquet(out_dir / "sensitivity_per_gene.parquet", index=False)
     ident.to_parquet(out_dir / "identifiability_strata.parquet", index=False)
-    if not quant.empty:
-        quant.to_parquet(out_dir / "quantification_concordance.parquet", index=False)
     (out_dir / "sensitivity.json").write_text(json.dumps(meta, indent=2, default=str))
-    _write_report(out_dir, summary, ident, quant, meta)
+    _write_report(out_dir, summary, ident, meta)
     print(summary.to_string(index=False))
 
 
@@ -451,30 +550,36 @@ def _md(frame: pd.DataFrame, floats: int = 4) -> str:
     )
 
 
-def _write_report(out_dir, summary, ident, quant, meta) -> None:
-    keep = [
-        "axis", "setting", "is_published", "n_switch_genes", "n_switch_genes_lost",
-        "median_abs_feature_r_vs_published", "frac_features_sign_flipped",
-        "effect_pearson_vs_published", "n_fdr_sig", "n_fdr_sig_published",
-        "n_published_sig_retained", "n_sign_flips_among_published_sig",
-    ]
+_SUMMARY_COLS = [
+    "axis", "setting", "is_published", "n_switch_genes", "n_switch_genes_lost",
+    "median_abs_feature_r_vs_published", "frac_features_sign_flipped",
+    "effect_pearson_vs_published", "n_fdr_sig", "n_fdr_sig_published",
+    "n_published_sig_retained", "n_sign_flips_among_published_sig",
+]
+
+
+def _write_report(out_dir, summary, ident, meta) -> None:
     lines = [
         "# Preprocessing sensitivity of the switch representation",
         "",
         f"`switch_feature_sensitivity.py` on **{meta['cohort']}/{meta['region']}** "
-        f"({meta['quantifier']}, n={meta['n_samples']}, {meta['n_modules']} modules).",
+        f"({meta['quantifier']}, n={meta['n_samples']}, {meta['n_modules']} modules). "
+        "The cross-region summary and the quantification axis are in "
+        "`../../SWITCH_FEATURE_SENSITIVITY.md`.",
         "",
         "## Scope, stated up front",
         "",
         meta["scope"],
         "",
+        f"Published settings for this cohort: `{json.dumps(meta['published_settings'])}`. "
         f"Gate passed: the baseline rebuild reproduces the published switch channel with "
-        f"max |diff| = {meta['baseline_max_abs_diff_vs_feature_scores']:g}, so every "
-        "comparison below is against the published quantity and not a lookalike.",
+        f"max |diff| = {meta['baseline_max_abs_diff_vs_feature_scores']:g} "
+        f"(tolerance {meta['tol']:g}), so every comparison below is against the published "
+        "quantity and not a lookalike.",
         "",
         "## 1-3. Pseudocount, expression filter, minor-isoform threshold",
         "",
-        _md(summary[keep]),
+        _md(summary[_SUMMARY_COLS]),
         "",
         "`median_abs_feature_r_vs_published` is the per-gene correlation of the rebuilt "
         "switch coordinate with the published one; `n_published_sig_retained` is how many "
@@ -492,20 +597,134 @@ def _write_report(out_dir, summary, ident, quant, meta) -> None:
         _md(ident),
         "",
     ]
-    if not quant.empty:
+    (out_dir / "SWITCH_FEATURE_SENSITIVITY.md").write_text("\n".join(lines))
+
+
+# --------------------------------------------------------------------------- #
+# Aggregate across regions
+# --------------------------------------------------------------------------- #
+def region_worst_case(summary: pd.DataFrame) -> pd.DataFrame:
+    """One row per (cohort, region): the least favourable non-published setting on each measure."""
+    pert = summary[~summary["is_published"]].copy()
+    pert["retained_frac"] = np.where(
+        pert["n_fdr_sig_published"] > 0,
+        pert["n_published_sig_retained"] / pert["n_fdr_sig_published"].where(
+            pert["n_fdr_sig_published"] > 0),
+        np.nan,
+    )
+    return (
+        pert.groupby(["cohort", "region"])
+        .agg(
+            n_settings=("setting", "size"),
+            n_fdr_sig_published=("n_fdr_sig_published", "first"),
+            min_effect_pearson=("effect_pearson_vs_published", "min"),
+            min_retained_frac=("retained_frac", "min"),
+            max_sign_flips_among_published_sig=("n_sign_flips_among_published_sig", "max"),
+            min_median_abs_feature_r=("median_abs_feature_r_vs_published", "min"),
+        )
+        .reset_index()
+    )
+
+
+def axis_worst_case(summary: pd.DataFrame) -> pd.DataFrame:
+    """Per (region, axis) minimum age-effect correlation, pivoted to one column per axis."""
+    pert = summary[~summary["is_published"]]
+    return (
+        pert.groupby(["cohort", "region", "axis"])["effect_pearson_vs_published"].min()
+        .unstack("axis").reset_index()
+    )
+
+
+def aggregate(args) -> None:
+    root = _root_out()
+    summaries, idents, metas = [], [], []
+    for sp in sorted(root.glob("*/*/sensitivity_summary.parquet")):
+        cohort, region = sp.parent.parent.name, sp.parent.name
+        s = pd.read_parquet(sp)
+        s["cohort"], s["region"] = cohort, region
+        summaries.append(s)
+        ip = sp.parent / "identifiability_strata.parquet"
+        if ip.exists():
+            idents.append(pd.read_parquet(ip))
+        metas.append(json.loads((sp.parent / "sensitivity.json").read_text()))
+    if not summaries:
+        raise SystemExit(f"no per-region outputs under {root}; run the per-region arm first")
+    summary = pd.concat(summaries, ignore_index=True)
+    ident = pd.concat(idents, ignore_index=True) if idents else pd.DataFrame()
+    quant = run_quantification()
+    worst = region_worst_case(summary)
+    by_axis = axis_worst_case(summary)
+
+    summary.to_parquet(root / "sensitivity_summary_all.parquet", index=False)
+    if not ident.empty:
+        ident.to_parquet(root / "identifiability_strata_all.parquet", index=False)
+    quant.to_parquet(root / "quantification_concordance.parquet", index=False)
+    worst.to_parquet(root / "region_worst_case.parquet", index=False)
+    (root / "sensitivity_meta.json").write_text(json.dumps(
+        {"regions": [f"{m['cohort']}/{m['region']}" for m in metas],
+         "gate_max_abs_diff": {f"{m['cohort']}/{m['region']}":
+                               m["baseline_max_abs_diff_vs_feature_scores"] for m in metas}},
+        indent=2))
+    _write_aggregate_report(root, worst, by_axis, ident, quant, metas)
+    print(worst.to_string(index=False))
+    print(quant.to_string(index=False))
+
+
+def _write_aggregate_report(root, worst, by_axis, ident, quant, metas) -> None:
+    gate = max(m["baseline_max_abs_diff_vs_feature_scores"] for m in metas)
+    lines = [
+        "# Preprocessing sensitivity of the switch representation — all regions",
+        "",
+        f"`switch_feature_sensitivity.py --aggregate` over **{len(metas)} cohort × region "
+        "fits**. Per-region tables are in `<cohort>/<region>/SWITCH_FEATURE_SENSITIVITY.md`.",
+        "",
+        "## Scope",
+        "",
+        "The module partition is held fixed at the published one; preprocessing is varied and "
+        "the features, eigengenes and age association are recomputed. It measures the stability "
+        "of the representation and its trait signal, not of an independently refit network. "
+        f"Every region passed the exact-rebuild gate (largest max |diff| = {gate:.3g}). "
+        "Both cohorts are fit on the switching transcript filter, so the transcript-filter "
+        "(`expression`) axis is the same grid in every region.",
+        "",
+        "## 1-3. Worst case over every non-published setting, per region",
+        "",
+        "`min_retained_frac` is the smallest fraction of the region's published FDR-significant "
+        "module–age associations that survive any single setting (blank where the region has "
+        "none); `max_sign_flips_among_published_sig` counts reversals of a reported effect.",
+        "",
+        _md(worst, floats=3),
+        "",
+        "Minimum module age-effect correlation with the published effects, by axis:",
+        "",
+        _md(by_axis, floats=3),
+        "",
+    ]
+    if not ident.empty:
+        piv = ident.pivot_table(index=["cohort", "region"], columns="n_tx_stratum",
+                                values="median_abs_age_r").reset_index()
+        piv.columns = [str(c) for c in piv.columns]
         lines += [
-            "## 5. Quantification pipeline",
+            "## 4. Identifiability — median |switch–age r| by transcript-number stratum",
             "",
-            "Neither cohort releases a second quantification, so the pipelines cannot be "
-            "swapped within a cohort. This compares matched regions across cohorts that "
-            "differ in quantifier, which **confounds quantifier with cohort** and is "
-            "therefore an upper bound on the quantifier's contribution, not an isolated "
-            "estimate of it.",
-            "",
-            _md(quant),
+            _md(piv, floats=3),
             "",
         ]
-    (out_dir / "SWITCH_FEATURE_SENSITIVITY.md").write_text("\n".join(lines))
+    if not quant.empty:
+        lines += [
+            "## 5. Quantification pipeline, read against a same-quantifier reference",
+            "",
+            "`cross_quantifier` rows compare matched regions across cohorts (Salmon vs RSEM), "
+            "which confounds quantifier with cohort. `same_quantifier` rows hold the quantifier "
+            "fixed and vary the tissue within a cohort, usually on overlapping donors "
+            "(`n_shared_donors`), which inflates their concordance through shared donor effects. "
+            "A cross-cohort figure is only evidence about the quantifier to the extent it falls "
+            "below the same-quantifier reference.",
+            "",
+            _md(quant, floats=3),
+            "",
+        ]
+    (root / "SWITCH_FEATURE_SENSITIVITY.md").write_text("\n".join(lines))
 
 
 def main() -> None:
@@ -513,11 +732,18 @@ def main() -> None:
     ap.add_argument("--cohort", choices=list(COHORTS), default="brainseq")
     ap.add_argument("--region", default="caudate")
     ap.add_argument("--fdr", type=float, default=0.05)
-    ap.add_argument("--tol", type=float, default=0.0,
+    ap.add_argument("--tol", type=float, default=1e-10,
                     help="max |diff| allowed between the rebuilt and published switch "
-                         "channel; 0 because the rebuild is exact by construction")
+                         "channel. BrainSEQ rebuilds to 0; GTEx to ~1e-14, floating-point "
+                         "noise from a different reduction order, so the gate is not 0.")
+    ap.add_argument("--aggregate", action="store_true",
+                    help="combine every per-region output, run the quantification axis once, "
+                         "and write the cross-region report")
     args = ap.parse_args()
-    run(args)
+    if args.aggregate:
+        aggregate(args)
+    else:
+        run(args)
 
 
 if __name__ == "__main__":

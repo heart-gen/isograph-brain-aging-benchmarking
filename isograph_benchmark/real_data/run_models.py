@@ -51,20 +51,26 @@ _PROMOTED_VAE = dict(
 
 # Canonical production Leiden resolution for the standard variant. See the wiki
 # (Tuning-and-Stability-Selection) for the rationale and the biology-driven sweep.
-CANONICAL_LEIDEN_RESOLUTION = 5.0
+CANONICAL_LEIDEN_RESOLUTION = 2.0
 
 
 def _isograph_out_subdir(leiden_resolution: float | None) -> str:
     """Output subdir name for a standard isograph_vae fit.
 
-    With no override (None) or the canonical resolution (5.0) this is the
+    With no override (None) or the canonical resolution (2.0) this is the
     canonical ``isograph_vae`` dir that the GWAS and trust-funnel cascades
     consume. Any *other* explicit ``leiden_resolution`` is written to a
-    resolution-suffixed sibling (e.g. ``isograph_vae_res5`` for 5.0 is the
-    canonical dir, ``isograph_vae_res2`` for 2.0) so a non-canonical resolution
-    is a side-by-side comparison set and never clobbers the canonical modules.
+    resolution-suffixed sibling (e.g. ``isograph_vae_res5`` for 5.0, the
+    retired comparison arm) so a non-canonical resolution is a side-by-side
+    comparison set and never clobbers the canonical modules.
+
     The suffix encodes the resolution with '.' -> 'p' (e.g. 2.25 ->
     isograph_vae_res2p25).
+
+    PI decision 2026-09-16 moved the canonical resolution 5.0 -> 2.0: the
+    >=900-gene giant-module criterion that justified 5.0 reverses under the
+    switching transcript filter (20/26 significant MAGMA hits are giant at 5.0
+    vs 24/37 at 2.0), and 2.0 assigns 38% more genes to modules.
     """
     if leiden_resolution is None or leiden_resolution == CANONICAL_LEIDEN_RESOLUTION:
         return "isograph_vae"
@@ -78,9 +84,10 @@ def _filter_expressed_transcripts(
     min_count: float = 10.0,
     min_fraction: float = 0.70,
 ) -> tuple[np.ndarray, pd.DataFrame]:
-    """Keep transcripts with count > min_count in >= min_fraction of samples.
+    """LEGACY production filter (before 2026-09-14): count > min_count in >= min_fraction of samples.
 
-    Mirrors the filterByExpr-style filter used in the SCZD bundle creation,
+    Superseded by `filter_switching_transcripts`; kept for sensitivity arms and for reading the
+    `legacy_expression_filter` results. Mirrors the filterByExpr-style filter used in the SCZD bundle creation,
     adapted for a continuous covariate (aging spline) by treating all samples
     as a single group.  Drops lowly-expressed isoforms that add noise to the
     switch-coordinate computation and would otherwise inflate the (n_features²)
@@ -99,6 +106,57 @@ def _filter_expressed_transcripts(
         flush=True,
     )
     return transcript_counts[tx_pass], transcript_table.loc[tx_pass].reset_index(drop=True)
+
+
+def filter_switching_transcripts(
+    transcript_counts: np.ndarray,
+    transcript_table: pd.DataFrame,
+    min_gene_count: float = 10.0,
+    min_gene_fraction: float = 0.70,
+    min_tx_count: float = 10.0,
+    min_tx_prop: float = 0.10,
+    min_tx_fraction: float = 0.10,
+) -> tuple[np.ndarray, pd.DataFrame]:
+    """Production transcript filter since 2026-09-14 (PI decision): usage-oriented.
+
+    DRIMSeq ``dmFilter`` semantics (Soneson et al. 2016; Nowicka & Robinson 2016), with sample
+    fractions standing in for group sizes so one phenotype-blind rule serves age and diagnosis:
+
+        gene        total count >= min_gene_count in >= min_gene_fraction of samples
+        transcript  count >= min_tx_count in >= min_tx_fraction of samples, AND
+                    share of its gene >= min_tx_prop in >= min_tx_fraction of samples
+
+    Each prevalence is ceil(fraction * n). Genes left with one transcript are kept (they carry
+    the abundance channel). Chosen over the legacy count > 10 in >= 70% filter after the
+    BrainSEQ transcript-filter arms and seed floor (`transcript_filter_arms`).
+    """
+    c = np.asarray(transcript_counts)
+    n = c.shape[1]
+    gidx = pd.factorize(transcript_table["gene_id"].astype(str))[0]
+    gene_tot = pd.DataFrame(c, copy=False).groupby(gidx).sum().sort_index().to_numpy(np.float64)
+    gene_ok = (gene_tot >= min_gene_count).sum(axis=1) >= np.ceil(min_gene_fraction * n)
+    need = np.ceil(min_tx_fraction * n)
+    tx_expr = (c >= min_tx_count).sum(axis=1) >= need
+    gt = gene_tot[gidx]
+    with np.errstate(divide="ignore", invalid="ignore"):
+        share_ok = np.where(gt > 0, c / gt, 0.0) >= min_tx_prop
+    del gt
+    keep = gene_ok[gidx] & tx_expr & (share_ok.sum(axis=1) >= need)
+    kept = transcript_table.loc[keep].reset_index(drop=True)
+    print(f"  switching filter (gene>={min_gene_count:g} in >={min_gene_fraction:.0%}; tx>="
+          f"{min_tx_count:g} and share>={min_tx_prop:g} in >={min_tx_fraction:.0%} of {n}): "
+          f"{int(keep.sum())}/{len(transcript_table)} transcripts, {kept['gene_id'].nunique()}/"
+          f"{transcript_table['gene_id'].nunique()} genes retained", flush=True)
+    return c[keep], kept
+
+
+#: The one transcript filter every production fit applies, and every consumer that rebuilds the
+#: production switch coordinate from a bundle must apply. Change it here, nowhere else.
+filter_production_transcripts = filter_switching_transcripts
+PRODUCTION_TRANSCRIPT_FILTER_LABEL = (
+    "switching: gene count >= 10 in >= 70% of samples; transcript count >= 10 and share of "
+    "its gene >= 0.10, each in >= 10% of samples (run_models.filter_switching_transcripts)"
+)
 
 
 AGE_LABELS = ["p25", "p50", "p75"]
@@ -527,13 +585,17 @@ def run_gtex_aging(regions: list[str] | None = None,
 
 
 
-def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> None:
+def run_brainseq_region(region: str, leiden_resolution: float | None = None,
+                        transcript_filter=filter_production_transcripts,
+                        out: Path | None = None, random_state: int = 13) -> None:
+    """Production BrainSEQ aging fit. `transcript_filter`, `out` and `random_state` exist for
+    sensitivity arms (transcript_filter_arms); the defaults are the production filter (the
+    switching filter since 2026-09-14), store and seed."""
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
     sample_table = bundle.sample_table
-    tc, tt = _filter_expressed_transcripts(
-        bundle.matrices["transcript_counts"],
-        bundle.feature_tables["transcript"],
-    )
+    tc, tt = bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"]
+    if transcript_filter is not None:
+        tc, tt = transcript_filter(tc, tt)
     del bundle  # free ~415 MB transcript_counts before VAE feature computation
 
     covariate_cols = BRAINSEQ_COVARIATES
@@ -547,7 +609,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
     cfg = VaeModelConfig(
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
-        min_module_size=20, trait_columns=["Age"], random_state=13,
+        min_module_size=20, trait_columns=["Age"], random_state=random_state,
         allow_abundance_abundance=True,
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
@@ -564,7 +626,7 @@ def run_brainseq_region(region: str, leiden_resolution: float | None = None) -> 
     del tc, tt  # free filtered transcript data; no longer needed after fit
     print(f"[{region}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(region_store("brainseq", region, _isograph_out_subdir(leiden_resolution)))
+    out = ensure_dir(out or region_store("brainseq", region, _isograph_out_subdir(leiden_resolution)))
     _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="Age", label=region,
                         qc_table=_rnaseqc_covariate_table(region))
 
@@ -581,7 +643,7 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
         leiden_resolution = BEST_LEIDEN_RESOLUTION.get(region, 2.0)
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_v1", region))
     sample_table = bundle.sample_table
-    tc, tt = _filter_expressed_transcripts(
+    tc, tt = filter_production_transcripts(
         bundle.matrices["transcript_counts"],
         bundle.feature_tables["transcript"],
     )
@@ -617,6 +679,15 @@ def run_brainseq_region_with_abundance(region: str, leiden_resolution: float | N
 
 def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None) -> None:
     bundle = load_dataset_bundle(rel("inputs", "bundles", "gtex_v11_brain", region_dir_name))
+    sample_table = bundle.sample_table
+    # Same transcript filter as run_brainseq_region, so both cohorts build the switch
+    # coordinate from matched preprocessing. The legacy GTEx fits (tag legacy_expression_filter)
+    # were unfiltered.
+    tc, tt = filter_production_transcripts(
+        bundle.matrices["transcript_counts"],
+        bundle.feature_tables["transcript"],
+    )
+    del bundle
 
     # GTEx QC covariates: RIN (SMRIN), ischemic time (SMTSISCH), mapping rate (SMMAPRT), sex (SEX)
     covariate_cols = GTEX_COVARIATES
@@ -641,15 +712,16 @@ def run_gtex_region(region_dir_name: str, leiden_resolution: float | None = None
     print(f"[{region_dir_name}] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
-        transcript_counts=bundle.matrices["transcript_counts"],
-        transcript_table=bundle.feature_tables["transcript"],
-        sample_table=bundle.sample_table,
+        transcript_counts=tc,
+        transcript_table=tt,
+        sample_table=sample_table,
     )
+    del tc, tt
     print(f"[{region_dir_name}] fit done in {time.time() - _t0:.0f}s", flush=True)
 
     out = ensure_dir(region_store("gtex", region_dir_name, _isograph_out_subdir(leiden_resolution)))
-    _save_age_artifacts(artifacts, out, bundle.sample_table, covariate_cols, age_col="AGE",
-                        label=region_dir_name, qc_table=_gtex_qc_covariate_table(bundle.sample_table))
+    _save_age_artifacts(artifacts, out, sample_table, covariate_cols, age_col="AGE",
+                        label=region_dir_name, qc_table=_gtex_qc_covariate_table(sample_table))
 
 
 def _drd2_gene_id(transcript_table: pd.DataFrame) -> str | None:
@@ -684,9 +756,18 @@ def check_drd2(artifacts, transcript_table: pd.DataFrame) -> bool:
     return True
 
 
-def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
-    """Run IsoGraph VAE on the SCZD+Control caudate bundle (Dx as trait)."""
+def run_brainseq_caudate_sczd(leiden_resolution: float | None = None,
+                              transcript_filter=filter_production_transcripts,
+                              out: Path | None = None, random_state: int = 13) -> None:
+    """Run IsoGraph VAE on the SCZD+Control caudate bundle (Dx as trait).
+
+    Production applies the same switching filter as the aging fits since 2026-09-14 (the legacy
+    SCZD fit was unfiltered). `transcript_filter`, `out` and `random_state` exist for
+    sensitivity arms (transcript_filter_arms); defaults are production."""
     bundle = load_dataset_bundle(rel("inputs", "bundles", "brainseq_sczd", "caudate"))
+    tc, tt = bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"]
+    if transcript_filter is not None:
+        tc, tt = transcript_filter(tc, tt)
 
     covariate_cols = BRAINSEQ_COVARIATES
 
@@ -699,7 +780,7 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
         hidden_dim=256, latent_dim=32, n_epochs=500,
         residualize_covariates=BRAINSEQ_DISCOVERY_COVARIATES,
         min_module_size=20, trait_columns=["Dx"],
-        random_state=13,
+        random_state=random_state,
         allow_abundance_abundance=True,
         alpha_switch=0.5,
         alpha_abundance_grid=[0.70, 0.75, 0.80, 0.85, 0.90, 0.95],
@@ -709,13 +790,14 @@ def run_brainseq_caudate_sczd(leiden_resolution: float | None = None) -> None:
     print(f"[caudate_sczd] fitting model (res={cfg.leiden_resolution}) ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
-        transcript_counts=bundle.matrices["transcript_counts"],
-        transcript_table=bundle.feature_tables["transcript"],
+        transcript_counts=tc,
+        transcript_table=tt,
         sample_table=bundle.sample_table,
     )
+    del tc, tt
     print(f"[caudate_sczd] fit done in {time.time() - _t0:.0f}s", flush=True)
 
-    out = ensure_dir(region_store("brainseq", "caudate_sczd", _isograph_out_subdir(leiden_resolution)))
+    out = ensure_dir(out or region_store("brainseq", "caudate_sczd", _isograph_out_subdir(leiden_resolution)))
     diagnosis_covariates = ["Age"] + covariate_cols
     _save_diagnosis_artifacts(
         artifacts, out, bundle, covariate_cols=diagnosis_covariates, label="caudate_sczd",
@@ -747,13 +829,17 @@ def run_brainseq_caudate_sczd_with_abundance(leiden_resolution: float | None = N
         leiden_resolution=leiden_resolution,
         **_PROMOTED_VAE,
     )
+    tc, tt = filter_production_transcripts(
+        bundle.matrices["transcript_counts"], bundle.feature_tables["transcript"],
+    )
     print("[caudate_sczd+abundance] fitting model ...", flush=True)
     _t0 = time.time()
     artifacts = VaeNetworkModel(cfg).fit(
-        transcript_counts=bundle.matrices["transcript_counts"],
-        transcript_table=bundle.feature_tables["transcript"],
+        transcript_counts=tc,
+        transcript_table=tt,
         sample_table=bundle.sample_table,
     )
+    del tc, tt
     print(f"[caudate_sczd+abundance] fit done in {time.time() - _t0:.0f}s | "
           f"alpha_abundance={artifacts.calibration.get('alpha_abundance') if artifacts.calibration else 'n/a'}",
           flush=True)

@@ -34,7 +34,7 @@ from pathlib import Path
 import pandas as pd
 
 from isograph_benchmark.paths import ensure_dir, rel, stage_out
-from isograph_benchmark.real_data.coloc_prep import load_switch_genes
+from isograph_benchmark.real_data.coloc_prep import MIN_RECURRENCE, load_switch_genes
 from isograph_benchmark.real_data.qtl_anchoring import _GTEX_TISSUE, _bare
 from isograph_benchmark.real_data.sweep_leiden import _artifact_dir
 from isograph_benchmark.real_data.switch_bundles import get_bundle
@@ -174,7 +174,7 @@ def main() -> None:
                         "overrides --analysis/--region.")
     p.add_argument("--variant", default="standard")
     p.add_argument("--fdr", type=float, default=_QVAL)
-    p.add_argument("--min-recurrence", type=int, default=3,
+    p.add_argument("--min-recurrence", type=int, default=MIN_RECURRENCE,
                    help="for --bundle: keep genes whose switch membership recurs in "
                         ">= this many analyses (size-controlled core switch layer).")
     p.add_argument("--xqtl-dir", default=str(DEFAULT_XQTL_DIR))

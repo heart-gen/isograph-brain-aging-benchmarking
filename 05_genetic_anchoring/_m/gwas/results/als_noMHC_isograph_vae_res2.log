@@ -1,0 +1,35 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--gene-results /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/als_noMHC.genes.raw
+	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_res2_gene_sets.txt
+	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_isograph_vae_res2
+
+Start time is 21:16:57, Tuesday 15 Sep 2026
+
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/als_noMHC.genes.raw... 
+	17652 genes read from file
+Loading gene-set annotation...
+Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_res2_gene_sets.txt... 
+	388 gene-set definitions read from file
+	found 388 gene sets containing genes defined in genotype data (containing a total of 12708 unique genes)
+Preparing variables for analysis...
+	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
+	truncating covariate values more than 5 standard deviations from the mean
+	total variables available for analysis: 388 gene sets
+
+Parsing model specifications...
+Inverting gene-gene correlation matrix...
+Performing regression analysis...
+	testing direction: one-sided, positive (sets), two-sided (covar)
+	conditioning on internal variables:
+		gene size, log(gene size)
+		gene density, log(gene density)
+		inverse mac, log(inverse mac)
+	analysing individual variables
+
+	analysing single-variable models (number of models: 388)
+	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_isograph_vae_res2.gsa.out
+	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_isograph_vae_res2.gsa.genes.out
+	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_isograph_vae_res2.gsa.sets.genes.out
+
+End time is 21:17:09, Tuesday 15 Sep 2026 (elapsed: 00:00:12)

@@ -10,6 +10,15 @@ citekey still needs pinning (never fabricated). North-star: IsoGraph is a **comp
 DTU-without-DGE layer**, and this section is the orthogonal-evidence payoff that the layer is
 genetically real and disease-relevant.
 
+> **Framing changed 2026-09-12.** The paper no longer leads with splicing-QTL specificity
+> (`MANUSCRIPT_PLAN.md` §10); Fig 3's set-level contrast stays as supporting evidence. BrainSEQ
+> in-sample colocalization — the discovery cohort, correctly mapped — favours abundance 33 to 5
+> (P = 4.3e-6), so the statement below that the per-gene expression skew is "GTEx eQTL discovery
+> power, not biology" is no longer demonstrated: power is an available explanation, not an
+> established one. SNCA is the worked example of what the layer resolves; it colocalizes
+> identically in the all-genes background pool, so it is not evidence the method was needed to
+> find the locus.
+
 ---
 
 ## Signal-level colocalization nominates candidate loci, and an event audit bounds them
@@ -94,7 +103,7 @@ causal direction.
 ## Disease variants colocalize onto GO-invisible isoform switches (eCAVIAR CLPP layer)
 
 Source: `05_genetic_anchoring/_m/coloc/SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md`,
-`05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
+`08_integration/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
 
 To ask whether the switch layer carries genuine disease genetics rather than technical
 structure, we colocalized brain splicing- and expression-QTL credible sets (GTEx v11 sQTL/eQTL,
@@ -207,7 +216,7 @@ synucleinopathy.
 
 ## Per-gene deep-dive and literature (Fig 4C–D; Tables S8–S12)
 
-Source: `05_genetic_anchoring/_m/deep_dive/DEEP_DIVE_PANEL.md`, `deep_dive_literature.parquet`.
+Source: `08_integration/_m/deep_dive/DEEP_DIVE_PANEL.md`, `deep_dive_literature.parquet`.
 
 A deterministic per-gene join (`gene_deep_dive.py`) assembles all six layers into one vignette
 per colocalized gene, classifies the verdict (12 splicing-led / 23 splicing-unresolved /

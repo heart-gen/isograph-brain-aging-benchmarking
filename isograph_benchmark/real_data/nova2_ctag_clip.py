@@ -577,8 +577,10 @@ def _prepare_human_windows(
     derived["window_stage"]["expected_candidate_rows"] = int(
         stage["expected_candidate_rows"]
     )
+    # Regions can nominate the same RBP/gene/transcript pair, so unique canonical
+    # candidates may be fewer than manifest rows; legacy configs pinned only rows.
     derived["window_stage"]["expected_unique_candidates"] = int(
-        stage["expected_candidate_rows"]
+        stage.get("expected_unique_candidates", stage["expected_candidate_rows"])
     )
     derived["window_stage"]["output_dir"] = str(output_dir)
     return prepare_windows(derived, config_path, output_dir, set(), None)

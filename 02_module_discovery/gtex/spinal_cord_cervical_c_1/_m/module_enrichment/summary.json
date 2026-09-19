@@ -3,11 +3,29 @@
   "region": "spinal_cord_cervical_c_1",
   "variant": "standard",
   "methods": {
-    "wgcna_switch": {
-      "n_modules": 14,
+    "isograph": {
+      "n_modules": 25,
+      "n_go_enriched": 6,
+      "frac_go_enriched": 0.24,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna": {
+      "n_modules": 8,
       "n_go_enriched": 8,
-      "frac_go_enriched": 0.571,
-      "n_pheno_sig_fdr10": 1
+      "frac_go_enriched": 1.0,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_switch": {
+      "n_modules": 18,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.278,
+      "n_pheno_sig_fdr10": 0
+    },
+    "wgcna_multiplex": {
+      "n_modules": 19,
+      "n_go_enriched": 14,
+      "frac_go_enriched": 0.737,
+      "n_pheno_sig_fdr10": 0
     }
   }
 }

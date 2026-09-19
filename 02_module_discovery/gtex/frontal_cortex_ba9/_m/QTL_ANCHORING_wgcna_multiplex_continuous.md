@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 13415 | 0.2141 | nan | nan | nan | nan | NA | insufficient |
-| sQTL | pheno_sig_modules | 8025 | 0.2204 | 0.2046 | 0.98 | 0.95 | 1.01 | 2.68e-01 | ols_rankint_matched_standard |
-| sQTL | go_invisible_modules | 1683 | 0.2436 | 0.2099 | 1.0 | 0.96 | 1.06 | 8.54e-01 | ols_rankint_matched_standard |
-| sQTL | go_visible_modules | 7320 | 0.2178 | 0.2097 | 0.99 | 0.96 | 1.02 | 4.98e-01 | ols_rankint_matched_standard |
-| eQTL | all_modules | 17569 | 0.5273 | nan | nan | nan | nan | NA | insufficient |
-| eQTL | pheno_sig_modules | 10046 | 0.533 | 0.5197 | 1.03 | 1.0 | 1.06 | 5.40e-02 | ols_rankint_matched_standard |
-| eQTL | go_invisible_modules | 1883 | 0.5236 | 0.5278 | 0.96 | 0.91 | 1.0 | 6.03e-02 | ols_rankint_matched_standard |
-| eQTL | go_visible_modules | 9249 | 0.5355 | 0.5183 | 1.04 | 1.01 | 1.07 | 4.69e-03 | ols_rankint_matched_standard |
+| sQTL | all_modules | 13359 | 0.2129 | nan | nan | nan | nan | NA | insufficient |
+| sQTL | pheno_sig_modules | 8234 | 0.2253 | 0.193 | 1.01 | 0.98 | 1.05 | 4.30e-01 | ols_rankint_matched_standard |
+| sQTL | go_invisible_modules | 3089 | 0.2069 | 0.2147 | 0.94 | 0.91 | 0.98 | 3.80e-03 | ols_rankint_matched_standard |
+| sQTL | go_visible_modules | 6649 | 0.2355 | 0.1905 | 1.06 | 1.02 | 1.09 | 6.72e-04 | ols_rankint_matched_standard |
+| eQTL | all_modules | 17390 | 0.5278 | nan | nan | nan | nan | NA | insufficient |
+| eQTL | pheno_sig_modules | 10056 | 0.5369 | 0.5153 | 1.04 | 1.01 | 1.07 | 1.90e-02 | ols_rankint_matched_standard |
+| eQTL | go_invisible_modules | 3463 | 0.5088 | 0.5325 | 0.92 | 0.88 | 0.95 | 5.69e-06 | ols_rankint_matched_standard |
+| eQTL | go_visible_modules | 8213 | 0.5443 | 0.513 | 1.07 | 1.04 | 1.1 | 3.36e-06 | ols_rankint_matched_standard |
 
 ## Reading
 

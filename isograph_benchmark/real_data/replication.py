@@ -27,7 +27,7 @@ Usage::
     python -m isograph_benchmark.real_data.replication                 # both methods
     python -m isograph_benchmark.real_data.replication --methods isograph_vae
 
-Outputs (under ``03_module_trust/_m/replication/``):
+Outputs (under ``04_module_trust/_m/replication/``):
     <method>_module_match.parquet   per-source-module best match + age concordance
     replication_summary.parquet     per method × region × direction summary
     replication_summary.json        compact headline summary

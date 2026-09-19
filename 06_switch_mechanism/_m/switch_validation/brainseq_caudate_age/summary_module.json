@@ -6,27 +6,27 @@
   "switch_set": "module",
   "gene_corroboration": {
     "switch_set": "module",
-    "n_genes": 11144,
-    "n_switch_pos": 822,
+    "n_genes": 12542,
+    "n_switch_pos": 572,
     "n_psi_pos": 59,
     "contingency": {
-      "switch_psi": 9,
-      "switch_only": 813,
-      "psi_only": 50,
-      "neither": 10272
+      "switch_psi": 8,
+      "switch_only": 564,
+      "psi_only": 51,
+      "neither": 11919
     },
-    "psi_pos_rate_in_switch_genes": 0.010948905109489052,
-    "psi_pos_rate_in_background": 0.00484402247626429,
-    "fisher_or": 2.2742435424354244,
-    "fisher_p": 0.027851416694062235,
-    "adjusted_or": 2.058944329787917,
-    "adjusted_p": 0.04843423964227623,
+    "psi_pos_rate_in_switch_genes": 0.013986013986013986,
+    "psi_pos_rate_in_background": 0.004260651629072682,
+    "fisher_or": 3.314977054651648,
+    "fisher_p": 0.005075194954871418,
+    "adjusted_or": 3.2776392311704727,
+    "adjusted_p": 0.0019283382144322553,
     "alpha": 0.05
   },
   "event_resolved": {
-    "n_resolved_junctions": 17,
-    "n_matched_to_psi": 11,
-    "n_both_significant": 0,
+    "n_resolved_junctions": 76,
+    "n_matched_to_psi": 58,
+    "n_both_significant": 2,
     "n_concordant": 0,
     "alpha": 0.05
   }

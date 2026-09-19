@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 2341 | 0.217 | 0.2257 | 0.9 | 0.85 | 0.96 | 5.97e-04 | poisson_matched_standard |
-| sQTL | pheno_sig_modules | 207 | 0.2512 | 0.2238 | 1.03 | 0.87 | 1.22 | 7.61e-01 | poisson_matched_standard |
-| sQTL | go_invisible_modules | 136 | 0.2868 | 0.2236 | 1.07 | 0.88 | 1.3 | 4.83e-01 | poisson_matched_standard |
-| sQTL | go_visible_modules | 71 | 0.1831 | 0.2245 | 0.91 | 0.64 | 1.28 | 5.79e-01 | poisson_matched_standard |
-| eQTL | all_modules | 3350 | 0.463 | 0.5326 | 0.76 | 0.71 | 0.81 | 2.25e-17 | poisson_matched_standard |
-| eQTL | pheno_sig_modules | 285 | 0.407 | 0.5222 | 0.6 | 0.48 | 0.75 | 7.64e-06 | poisson_matched_standard |
-| eQTL | go_invisible_modules | 165 | 0.5212 | 0.5205 | 0.78 | 0.6 | 1.01 | 6.00e-02 | poisson_matched_standard |
-| eQTL | go_visible_modules | 120 | 0.25 | 0.5222 | 0.34 | 0.22 | 0.54 | 5.67e-06 | poisson_matched_standard |
+| sQTL | all_modules | 5649 | 0.2261 | 0.2236 | 0.94 | 0.9 | 0.99 | 1.05e-02 | poisson_matched_standard |
+| sQTL | pheno_sig_modules | 1618 | 0.2831 | 0.2167 | 1.19 | 1.12 | 1.27 | 1.93e-08 | poisson_matched_standard |
+| sQTL | go_invisible_modules | 1297 | 0.2791 | 0.2189 | 1.1 | 1.03 | 1.18 | 4.80e-03 | poisson_matched_standard |
+| sQTL | go_visible_modules | 321 | 0.2991 | 0.2228 | 1.55 | 1.37 | 1.76 | 4.09e-12 | poisson_matched_standard |
+| eQTL | all_modules | 6983 | 0.4875 | 0.5476 | 0.79 | 0.75 | 0.82 | 2.58e-23 | poisson_matched_standard |
+| eQTL | pheno_sig_modules | 1809 | 0.5412 | 0.5232 | 1.06 | 0.99 | 1.14 | 1.09e-01 | poisson_matched_standard |
+| eQTL | go_invisible_modules | 1427 | 0.5501 | 0.5229 | 1.1 | 1.01 | 1.19 | 2.35e-02 | poisson_matched_standard |
+| eQTL | go_visible_modules | 382 | 0.5079 | 0.5253 | 0.93 | 0.79 | 1.09 | 3.57e-01 | poisson_matched_standard |
 
 ## Reading
 

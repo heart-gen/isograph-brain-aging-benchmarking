@@ -1,6 +1,6 @@
 # Biology gate — GO-invisible switch modules (brainseq-sczd)
 
-Phenotype-significant IsoGraph switch modules (pheno_fdr <= 0.1): **4** — 0 GO-enriched, **4 GO-invisible** (M026, M020, M010, M023).
+Phenotype-significant IsoGraph switch modules (pheno_fdr <= 0.1): **6** — 1 GO-enriched, **5 GO-invisible** (M004, M007, M006, M008, M009).
 
 Reproduce: `python -m isograph_benchmark.real_data.go_invisible_gate --analysis brainseq-sczd`
 
@@ -8,12 +8,14 @@ Reproduce: `python -m isograph_benchmark.real_data.go_invisible_gate --analysis 
 
 | module | go_invisible | n_genes | pheno_fdr | genes_with_real_switch | max_switch_strength | n_sig_switch_tx | top_switch_genes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M026 | True | 23 | 0.0019 | 21 | 1.098 | 93 | ABCB6, JAM3, XPO1, DDX3X, TEX2, DBNDD2, ENPP2, IFNAR2 |
-| M020 | True | 30 | 0.0172 | 31 | 1.392 | 148 | SNF8, UBE2Z, SFXN1, STXBP5, ZDHHC17, PAM16, SPTBN1, CANX |
-| M010 | True | 83 | 0.0272 | 73 | 1.251 | 459 | SEPTIN8, FAM107B, SPART, HAGLR, ENSG00000291176, SOX2-OT, PHLDB1, SH3TC2-DT |
-| M023 | True | 27 | 0.0471 | 28 | 1.309 | 121 | DHX36, ARNT2, SLC25A12, SLC25A46, FAM234B, PBX1, CAPZA2, DGKH |
+| M005 | False | 382 | 0.0243 | 348 | 1.814 | 1798 | RPAIN, COX11, GET4, TAF9, MAEA, AACS, RBX1, HARS1 |
+| M004 | True | 432 | 0.003 | 415 | 1.824 | 1652 | PIN1, CWC27, CADPS, FBXO9, ILKAP, PLEKHO1, FRA10AC1, COX7A2L |
+| M007 | True | 266 | 0.0064 | 262 | 1.83 | 1417 | TBCD, PRKAG2, BBIP1, DDX56, CZIB, DRG2, NPAS2, TTC19 |
+| M006 | True | 343 | 0.0179 | 343 | 1.795 | 1567 | MBTPS1, YEATS2, ERCC3, N4BP2L2, INTS11, FLCN, CBR4, UBE2Z |
+| M008 | True | 230 | 0.0197 | 228 | 1.785 | 1276 | PTRH2, COPS5, OAZ2, SPIRE2, DDRGK1, MPV17, WDR11, DDX19A |
+| M009 | True | 170 | 0.0243 | 169 | 1.839 | 1101 | FIG4, LGI1, MARK3, MACROH2A1, PRMT8, NUP93, RUVBL1, RAE1 |
 
-Pooled background functional-consequence fractions: cds_changed 0.84, coding_status_change 0.671, biotype_switch 0.736, utr_changed 0.612.
+Pooled background functional-consequence fractions: cds_changed 0.887, coding_status_change 0.775, biotype_switch 0.835, utr_changed 0.518.
 
 ## Reading
 

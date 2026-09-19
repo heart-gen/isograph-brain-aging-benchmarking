@@ -1,6 +1,8 @@
 # Genetic anchoring — isograph co-switch modules vs GTEx Brain_Nucleus_accumbens_basal_ganglia xQTL (gtex-aging/nucleus_accumbens_basal_ganglia)
 
-Power-matched enrichment (logistic: qtl status ~ module membership + log cis-variant count + log gene length + log isoform count [+ log intron group size for sQTL]) within each xQTL's tested-gene universe intersected with the method's tested genes.
+Power-matched enrichment (logistic: sGene/eGene status ~ module membership + covariates) within each xQTL's tested-gene universe intersected with the method's tested genes.
+
+Covariates: log cis-variant count, log gene length, log isoform count [+ log intron group size for sQTL].
 
 Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex-aging --region nucleus_accumbens_basal_ganglia`
 
@@ -8,15 +10,11 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4731 | 0.2228 | 0.2187 | 0.9 | 0.82 | 0.98 | 1.79e-02 | logit_matched |
-| sQTL | pheno_sig_modules | 104 | 0.0577 | 0.2213 | 0.24 | 0.1 | 0.55 | 7.55e-04 | logit_matched |
-| sQTL | go_visible_modules | 104 | 0.0577 | 0.2213 | 0.24 | 0.1 | 0.55 | 7.55e-04 | logit_matched |
-| eQTL | all_modules | 5690 | 0.49 | 0.52 | 0.85 | 0.8 | 0.9 | 5.41e-07 | logit_matched |
-| eQTL | pheno_sig_modules | 194 | 0.3557 | 0.5124 | 0.5 | 0.37 | 0.67 | 4.28e-06 | logit_matched |
-| eQTL | go_visible_modules | 194 | 0.3557 | 0.5124 | 0.5 | 0.37 | 0.67 | 4.28e-06 | logit_matched |
+| sQTL | all_modules | 6788 | 0.2219 | 0.2177 | 0.86 | 0.79 | 0.93 | 3.82e-04 | logit_matched_standard |
+| eQTL | all_modules | 7775 | 0.4945 | 0.5237 | 0.85 | 0.8 | 0.91 | 3.33e-07 | logit_matched_standard |
 
 ## Reading
 
-- On-thesis result: **sQTL OR > 1 and significant** while the matched **eQTL OR is near 1** for the same module set => the genetic signal on co-switch modules is splicing-specific (DTU-without-DGE) rather than expression-level.
+- **Read the two arms together, not the ratio alone.** Co-switch module genes are cis-QTL *depleted* for BOTH modalities (OR < 1 in every tissue tested); the result is that splicing-QTL is spared RELATIVE to expression-QTL, i.e. sQTL OR / eQTL OR > 1. It is a ratio of two depletions, not an enrichment, and must never be described as sQTL enrichment.
 - Matching on cis-variant count / gene length / isoform multiplicity controls the dominant QTL-detectability confound; `rate_fg` vs `rate_bg` is the raw (unmatched) contrast for reference.
 - Scope: cis-sQTL enrichment shows module *members* undergo genetically regulated splicing; it does not by itself prove the *co-switching* is genetic (a shared trans regulator / cell composition could coordinate it).
