@@ -15,7 +15,7 @@
 ## neurodegeneration sumstats are joined to the hg19 LD panel by rsID.
 ##
 ##   disease : sbatch 05_genetic_anchoring/_h/01g.coloc_prep.sh --gene-source brainseq-sczd --trait scz
-##   aging   : sbatch 05_genetic_anchoring/_h/01g.coloc_prep.sh --gene-source aging --trait ad --min-recurrence 3
+##   aging   : sbatch 05_genetic_anchoring/_h/01g.coloc_prep.sh --gene-source aging --trait ad --min-recurrence 1
 ##
 ## Output dir <gene_source>__<trait>; then 05_genetic_anchoring/_h/02e.locus_ld.sh <dir> and 05_genetic_anchoring/_h/03b.coloc_clpp.sh <dir>.
 set -euo pipefail

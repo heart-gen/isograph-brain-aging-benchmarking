@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4607 | 0.153 | 0.1741 | 0.72 | 0.65 | 0.8 | 4.63e-10 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 1406 | 0.1408 | 0.1699 | 0.74 | 0.63 | 0.87 | 3.37e-04 | logit_matched_standard |
-| sQTL | go_invisible_modules | 33 | 0.0909 | 0.167 | 0.59 | 0.18 | 1.96 | 3.87e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 1373 | 0.142 | 0.1696 | 0.75 | 0.63 | 0.88 | 4.92e-04 | logit_matched_standard |
-| eQTL | all_modules | 5370 | 0.3512 | 0.4068 | 0.77 | 0.72 | 0.82 | 1.36e-14 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 1731 | 0.3056 | 0.3991 | 0.67 | 0.6 | 0.75 | 3.10e-13 | logit_matched_standard |
-| eQTL | go_invisible_modules | 40 | 0.3 | 0.3902 | 0.63 | 0.32 | 1.24 | 1.81e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 1691 | 0.3057 | 0.3989 | 0.67 | 0.6 | 0.75 | 8.67e-13 | logit_matched_standard |
+| sQTL | all_modules | 6678 | 0.1628 | 0.1709 | 0.75 | 0.68 | 0.82 | 2.59e-09 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 1165 | 0.1279 | 0.1705 | 0.7 | 0.58 | 0.84 | 1.44e-04 | logit_matched_standard |
+| sQTL | go_invisible_modules | 40 | 0.225 | 0.1666 | 1.41 | 0.65 | 3.04 | 3.85e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 1125 | 0.1244 | 0.1707 | 0.68 | 0.56 | 0.82 | 5.39e-05 | logit_matched_standard |
+| eQTL | all_modules | 7780 | 0.3695 | 0.4059 | 0.82 | 0.77 | 0.87 | 2.01e-10 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 1458 | 0.2867 | 0.3992 | 0.62 | 0.55 | 0.7 | 3.86e-15 | logit_matched_standard |
+| eQTL | go_invisible_modules | 43 | 0.4419 | 0.3899 | 1.22 | 0.67 | 2.24 | 5.12e-01 | logit_matched_standard |
+| eQTL | go_visible_modules | 1415 | 0.282 | 0.3993 | 0.61 | 0.54 | 0.69 | 6.36e-16 | logit_matched_standard |
 
 ## Reading
 

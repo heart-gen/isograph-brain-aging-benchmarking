@@ -74,14 +74,26 @@ drawn from different gene pools. A missing universe file stops the fit; it never
 
 ## Granularity: resolution and edge thresholds
 
-**Resolution.** Canonical Leiden resolution 5.0, stated on the ≥ 900-gene giant-module
-criterion: at 2.0, 17 of 28 significant module–GWAS hits were modules of ≥ 900 genes; at 5.0
-none are (`05_genetic_anchoring/_m/gwas/GWAS_RESOLUTION_SUMMARY.md`). The size criterion is
-phenotype-blind; the GWAS result is its confirmation. **Decided 2026-09-12 (PI): keep this as
-the stated basis.** The phenotype-blind split-half sweep (`04_module_trust/_h/02a`) was run and
-cannot select a resolution — ARI is U-shaped and NMI monotone, both tracking granularity — so
-it is reported as a disclosed sensitivity with that reason, alongside the BrainSEQ (`_h/02a`)
-and GTEx (`_h/02b`) module-count sweeps.
+**Resolution.** Canonical Leiden resolution **2.0**. **Decided 2026-09-16 (PI), reversing the
+2026-09-12 decision to keep 5.0.** Resolution 5.0 had been stated on the ≥ 900-gene
+giant-module criterion — at 2.0, 17 of 28 significant module–GWAS hits were modules of
+≥ 900 genes, and at 5.0 none were. That result predates both the PGC3 SCZ swap and the
+switching transcript filter, and it reverses under the current data: of the FDR-significant
+MAGMA hits, **20 of 26 are ≥ 900-gene modules at 5.0 versus 24 of 37 at 2.0**
+(`05_genetic_anchoring/_m/gwas/magma_results_combined{,_res5}.parquet`), so 5.0 is now the
+more giant-dominated of the two. Resolution 2.0 also assigns **38 % more genes to modules**
+(88,318 → 121,521 gene-region assignments across the 17 regions); the cost is a larger
+largest module (2,215 → 3,212 genes). The retired 5.0 fits remain beside the canonical ones
+as `isograph_vae_res5` and are carried as the disclosed resolution comparison. The
+phenotype-blind split-half sweep (`04_module_trust/_h/02a`) was run and cannot select a
+resolution — ARI is U-shaped and NMI monotone, both tracking granularity — so it is reported
+as a disclosed sensitivity with that reason, alongside the BrainSEQ (`_h/02a`) and GTEx
+(`_h/02b`) module-count sweeps.
+
+Note that resolution is **not** what sets module coverage: only 25–38 % of the gene universe
+is assigned at 5.0, and the dominant cause is the `alpha_switch = 0.5` edge threshold, which
+leaves 39–68 % of genes with no edge at all (`node_diagnostics.parquet`, `fate` column).
+`min_module_size = 20` is the only channel through which resolution affects coverage.
 
 **Edge thresholds.** The gene graph Leiden clusters is built from VAE feature similarity with
 two thresholds, and neither was tuned against a trait:

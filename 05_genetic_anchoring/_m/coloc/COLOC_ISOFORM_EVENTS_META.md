@@ -4,9 +4,9 @@ Per anchoring analysis (switch layer × trait): colocalized events, how many sQT
 
 | switch layer | trait | case | events | sQTL | junction mapped | GTEx concordant | GO-invisible | BrainSeq replicated |
 |--------------|-------|------|--------|------|-----------------|-----------------|--------------|---------------------|
-| aging | AD | aging | 26 | 22 | 15 | 2 | 2 | 0 |
-| aging | ALS | aging | 43 | 41 | 23 | 6 | 0 | 0 |
-| aging | LBD | aging | 4 | 3 | 3 | 0 | 0 | 0 |
-| aging | PD | aging | 19 | 13 | 11 | 7 | 0 | 0 |
-| aging | SCZ | disease | 79 | 55 | 49 | 21 | 4 | 8 |
-| brainseq-sczd | SCZ | disease | 26 | 22 | 11 | 3 | 3 | 0 |
+| aging | AD | aging | 66 | 54 | 27 | 7 | 5 | 0 |
+| aging | ALS | aging | 121 | 107 | 67 | 13 | 8 | 4 |
+| aging | LBD | aging | 9 | 7 | 6 | 0 | 0 | 0 |
+| aging | PD | aging | 29 | 22 | 22 | 5 | 1 | 0 |
+| aging | SCZ | disease | 150 | 114 | 90 | 31 | 17 | 10 |
+| brainseq-sczd | SCZ | disease | 92 | 75 | 55 | 20 | 18 | 7 |

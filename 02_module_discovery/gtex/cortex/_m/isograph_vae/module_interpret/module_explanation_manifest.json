@@ -19,14 +19,15 @@
     "M001",
     "M002",
     "M003",
+    "M010",
+    "M013",
     "M017",
     "M021",
-    "M024",
-    "M004",
-    "M007",
-    "M011"
+    "M022",
+    "M005",
+    "M009"
   ],
-  "n_modules": 10,
+  "n_modules": 11,
   "plot_files": [],
   "tables_per_module": [
     "gene_driver_table.parquet",

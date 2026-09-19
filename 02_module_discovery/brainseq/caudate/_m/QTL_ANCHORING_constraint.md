@@ -10,10 +10,18 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis brai
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3995 | 0.202 | 0.2122 | 1.0 | 0.9 | 1.1 | 9.26e-01 | logit_matched_standard |
-| sQTL | all_modules | 3995 | 0.202 | 0.2122 | 0.96 | 0.86 | 1.07 | 4.70e-01 | logit_matched_constraint |
-| eQTL | all_modules | 4448 | 0.4674 | 0.5239 | 0.79 | 0.73 | 0.85 | 9.28e-11 | logit_matched_standard |
-| eQTL | all_modules | 4448 | 0.4674 | 0.5239 | 0.82 | 0.76 | 0.89 | 1.78e-06 | logit_matched_constraint |
+| sQTL | all_modules | 4860 | 0.2111 | 0.2067 | 1.03 | 0.94 | 1.14 | 5.02e-01 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 579 | 0.2176 | 0.2081 | 0.95 | 0.77 | 1.18 | 6.60e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 579 | 0.2176 | 0.2081 | 0.95 | 0.77 | 1.18 | 6.60e-01 | logit_matched_standard |
+| sQTL | all_modules | 4860 | 0.2111 | 0.2067 | 1.0 | 0.9 | 1.11 | 9.45e-01 | logit_matched_constraint |
+| sQTL | pheno_sig_modules | 579 | 0.2176 | 0.2081 | 0.94 | 0.76 | 1.16 | 5.67e-01 | logit_matched_constraint |
+| sQTL | go_visible_modules | 579 | 0.2176 | 0.2081 | 0.94 | 0.76 | 1.16 | 5.67e-01 | logit_matched_constraint |
+| eQTL | all_modules | 5375 | 0.4793 | 0.5225 | 0.83 | 0.77 | 0.89 | 8.02e-08 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 630 | 0.4921 | 0.5059 | 0.93 | 0.79 | 1.09 | 3.84e-01 | logit_matched_standard |
+| eQTL | go_visible_modules | 630 | 0.4921 | 0.5059 | 0.93 | 0.79 | 1.09 | 3.84e-01 | logit_matched_standard |
+| eQTL | all_modules | 5375 | 0.4793 | 0.5225 | 0.87 | 0.8 | 0.94 | 2.54e-04 | logit_matched_constraint |
+| eQTL | pheno_sig_modules | 630 | 0.4921 | 0.5059 | 0.94 | 0.8 | 1.11 | 4.91e-01 | logit_matched_constraint |
+| eQTL | go_visible_modules | 630 | 0.4921 | 0.5059 | 0.94 | 0.8 | 1.11 | 4.91e-01 | logit_matched_constraint |
 
 ## Reading
 

@@ -14,7 +14,7 @@
 ## ldsc_annot_prep.py (was previously run interactively).
 ##
 ##   disease : sbatch 05_genetic_anchoring/_h/01h.ldsc_annot_prep.sh --analysis brainseq-sczd
-##   aging   : sbatch 05_genetic_anchoring/_h/01h.ldsc_annot_prep.sh --bundle aging --min-recurrence 3
+##   aging   : sbatch 05_genetic_anchoring/_h/01h.ldsc_annot_prep.sh --bundle aging --min-recurrence 1
 ##
 ## Then 05_genetic_anchoring/_h/02f.ldsc_make_annot_ldscores.sh <annot> and 05_genetic_anchoring/_h/03d.ldsc_munge_h2.sh <trait> <annot>.
 set -euo pipefail

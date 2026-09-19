@@ -10,24 +10,24 @@ Covariate modes: `full` adds every covariate; `complement` adds only those the f
 
 | covariates | statistic | T_obs | n pairs | null | null mean ± sd | p_emp |
 |---|---|---|---|---|---|---|
-| complement | pearson | 4 | 94 | age | 1.23 ± 2.59 | 0.1064 |
-| complement | pearson | 4 | 94 | matching | 8.58 ± 2.64 | 0.9821 |
-| complement | partial_linear | 2 | 94 | age | 1.10 ± 2.48 | 0.2153 |
-| complement | partial_linear | 2 | 94 | matching | 7.94 ± 2.54 | 0.9985 |
-| complement | spline_f | 2 | 94 | age | 1.08 ± 2.48 | 0.2035 |
-| complement | spline_f | 2 | 94 | matching | 6.14 ± 2.26 | 0.9913 |
-| none | pearson | 4 | 94 | age | 1.23 ± 2.57 | 0.1042 |
-| none | pearson | 4 | 94 | matching | 8.58 ± 2.64 | 0.9821 |
-| none | partial_linear | 4 | 94 | age | 1.23 ± 2.57 | 0.1042 |
-| none | partial_linear | 4 | 94 | matching | 8.58 ± 2.64 | 0.9821 |
-| none | spline_f | 1 | 94 | age | 1.13 ± 2.50 | 0.3659 |
-| none | spline_f | 1 | 94 | matching | 6.38 ± 2.30 | 0.9993 |
-| full | pearson | 4 | 94 | age | 0.66 ± 1.08 | 0.0247 |
-| full | pearson | 4 | 94 | matching | 8.58 ± 2.64 | 0.9821 |
-| full | partial_linear | 0 | 94 | age | 0.25 ± 0.63 | 1 |
-| full | partial_linear | 0 | 94 | matching | 1.46 ± 1.09 | 1 |
-| full | spline_f | 0 | 94 | age | 0.25 ± 0.59 | 1 |
-| full | spline_f | 0 | 94 | matching | 1.63 ± 1.16 | 1 |
+| complement | pearson | 1 | 38 | age | 0.56 ± 1.39 | 0.2495 |
+| complement | pearson | 1 | 38 | matching | 2.24 ± 1.38 | 0.9116 |
+| complement | partial_linear | 0 | 38 | age | 0.50 ± 1.34 | 1 |
+| complement | partial_linear | 0 | 38 | matching | 2.64 ± 1.48 | 1 |
+| complement | spline_f | 0 | 38 | age | 0.49 ± 1.29 | 1 |
+| complement | spline_f | 0 | 38 | matching | 1.44 ± 1.11 | 1 |
+| none | pearson | 1 | 38 | age | 0.54 ± 1.37 | 0.2462 |
+| none | pearson | 1 | 38 | matching | 2.24 ± 1.38 | 0.9116 |
+| none | partial_linear | 1 | 38 | age | 0.54 ± 1.37 | 0.2462 |
+| none | partial_linear | 1 | 38 | matching | 2.24 ± 1.38 | 0.9116 |
+| none | spline_f | 0 | 38 | age | 0.49 ± 1.29 | 1 |
+| none | spline_f | 0 | 38 | matching | 1.94 ± 1.28 | 1 |
+| full | pearson | 1 | 38 | age | 0.24 ± 0.60 | 0.1867 |
+| full | pearson | 1 | 38 | matching | 2.24 ± 1.38 | 0.9116 |
+| full | partial_linear | 0 | 38 | age | 0.10 ± 0.34 | 1 |
+| full | partial_linear | 0 | 38 | matching | 0.21 ± 0.43 | 1 |
+| full | spline_f | 0 | 38 | age | 0.08 ± 0.28 | 1 |
+| full | spline_f | 0 | 38 | matching | 0.17 ± 0.40 | 1 |
 
 Statistics: `pearson` = Pearson r, no covariates (the published statistic); `partial_linear` = linear age term, covariate-adjusted; `spline_f` = df=3 natural cubic spline block F-test, covariate-adjusted
 
@@ -58,6 +58,6 @@ Statistics: `pearson` = Pearson r, no covariates (the published statistic); `par
 
 ## How to write this up
 
-The primary (covariate-adjusted spline) count is **2/94**, p_emp=0.9913 against the matching null. The published covariate-free Pearson count is **4/94**, p_emp=0.9821.
+The primary (covariate-adjusted spline) count is **0/38**, p_emp=1 against the matching null. The published covariate-free Pearson count is **1/38**, p_emp=0.9116.
 
 **The count does not survive under the primary model.** Per the pre-registered decision rule the word "replication" must not be used; the honest wording is "matched modules with concordant age effects", reported alongside the covariate-free sensitivity analysis and the note that the two disagree.

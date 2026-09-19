@@ -9,9 +9,9 @@
   "seed": 13,
   "n_lead_sqtl_introns": 13335,
   "module_set_sizes": {
-    "all_modules": 4060,
-    "pheno_sig_modules": 2346,
-    "go_invisible_modules": 683,
-    "go_visible_modules": 1663
+    "all_modules": 5794,
+    "pheno_sig_modules": 3188,
+    "go_invisible_modules": 1098,
+    "go_visible_modules": 2090
   }
 }

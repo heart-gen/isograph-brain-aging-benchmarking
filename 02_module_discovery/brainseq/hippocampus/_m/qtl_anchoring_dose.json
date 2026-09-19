@@ -14,6 +14,8 @@
   },
   "covariate_coverage": {},
   "module_set_sizes": {
-    "all_modules": 4112
+    "all_modules": 4626,
+    "pheno_sig_modules": 76,
+    "go_invisible_modules": 76
   }
 }

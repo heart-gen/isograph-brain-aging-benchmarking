@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=8
-#SBATCH --time=02:00:00
+#SBATCH --time=08:00:00
 #SBATCH --array=1-6
 #SBATCH --output=04_module_trust/_m/logs/%x-%A_%a.log
 

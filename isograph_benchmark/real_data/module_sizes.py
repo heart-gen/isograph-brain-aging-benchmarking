@@ -26,7 +26,7 @@ import pandas as pd
 from isograph_benchmark.paths import COHORTS, ensure_dir, stage_out
 
 METHODS = ("isograph_vae", "wgcna_gene", "wgcna_switch_only", "wgcna_multiplex")
-GIANT_GENES = 900  # the phenotype-blind giant-module criterion behind resolution 5.0
+GIANT_GENES = 900  # the phenotype-blind giant-module criterion (stated basis for 5.0 until 2026-09-16)
 
 
 def _partition_sha256(modules: pd.DataFrame) -> str:

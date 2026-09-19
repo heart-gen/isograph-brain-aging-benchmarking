@@ -4,7 +4,7 @@ Using flags:
 	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/wgcna_gene_gene_sets.txt
 	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene
 
-Start time is 21:13:34, Tuesday 15 Sep 2026
+Start time is 11:52:22, Thursday 17 Sep 2026
 
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/als_noMHC.genes.raw... 
 	17652 genes read from file
@@ -37,4 +37,4 @@ Performing regression analysis...
 	writing gene information to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene.gsa.genes.out
 	writing gene analysis results per significant result (after multiple testing correction, at alpha = 0.05) to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/als_noMHC_wgcna_gene.gsa.sets.genes.out
 
-End time is 21:13:46, Tuesday 15 Sep 2026 (elapsed: 00:00:12)
+End time is 11:52:35, Thursday 17 Sep 2026 (elapsed: 00:00:13)

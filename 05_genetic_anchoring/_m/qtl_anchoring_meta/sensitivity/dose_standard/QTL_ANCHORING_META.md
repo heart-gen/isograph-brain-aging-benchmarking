@@ -8,23 +8,23 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring_meta` (after th
 
 | graph_method | module_set | xqtl_kind | k | n_fg_total | or_fe | or_fe_low | or_fe_high | p_fe | or_re | p_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | eQTL | 17 | 87530.0 | 0.82 | 0.81 | 0.83 | 1.31e-192 | 0.81 | 1.18e-25 | 0.89 |
-| isograph | all_modules | sQTL | 17 | 75492.0 | 0.82 | 0.81 | 0.83 | 1.82e-221 | 0.8 | 2.73e-25 | 0.91 |
-| isograph | pheno_sig_modules | eQTL | 8 | 19371.0 | 0.82 | 0.8 | 0.85 | 1.71e-45 | 0.82 | 2.18e-05 | 0.9 |
-| isograph | pheno_sig_modules | sQTL | 8 | 16601.0 | 0.81 | 0.79 | 0.83 | 3.67e-63 | 0.8 | 2.90e-14 | 0.79 |
-| isograph | go_invisible_modules | eQTL | 8 | 5228.0 | 0.9 | 0.86 | 0.94 | 5.02e-06 | 0.9 | 2.81e-03 | 0.43 |
-| isograph | go_invisible_modules | sQTL | 8 | 4736.0 | 0.91 | 0.88 | 0.95 | 1.82e-06 | 0.91 | 3.15e-02 | 0.78 |
-| isograph | go_visible_modules | eQTL | 7 | 14143.0 | 0.81 | 0.78 | 0.83 | 4.14e-40 | 0.78 | 4.42e-06 | 0.89 |
-| isograph | go_visible_modules | sQTL | 7 | 11865.0 | 0.79 | 0.77 | 0.82 | 8.48e-57 | 0.79 | 2.51e-11 | 0.8 |
+| isograph | all_modules | eQTL | 17 | 120520.0 | 0.85 | 0.84 | 0.86 | 9.02e-153 | 0.84 | 1.85e-24 | 0.86 |
+| isograph | all_modules | sQTL | 17 | 104145.0 | 0.83 | 0.82 | 0.84 | 3.00e-203 | 0.82 | 7.13e-27 | 0.89 |
+| isograph | pheno_sig_modules | eQTL | 10 | 21586.0 | 0.88 | 0.86 | 0.9 | 1.28e-26 | 0.84 | 8.02e-05 | 0.9 |
+| isograph | pheno_sig_modules | sQTL | 10 | 18252.0 | 0.89 | 0.87 | 0.91 | 1.65e-24 | 0.87 | 3.05e-03 | 0.93 |
+| isograph | go_invisible_modules | eQTL | 7 | 5455.0 | 0.99 | 0.95 | 1.03 | 5.80e-01 | 0.98 | 5.00e-01 | 0.53 |
+| isograph | go_invisible_modules | sQTL | 7 | 4971.0 | 0.97 | 0.94 | 1.01 | 1.36e-01 | 0.95 | 3.29e-01 | 0.86 |
+| isograph | go_visible_modules | eQTL | 9 | 16131.0 | 0.84 | 0.82 | 0.87 | 2.79e-33 | 0.81 | 1.16e-06 | 0.84 |
+| isograph | go_visible_modules | sQTL | 9 | 13281.0 | 0.87 | 0.85 | 0.89 | 2.19e-26 | 0.91 | 1.13e-01 | 0.93 |
 
 ## Splicing-specificity contrast (pooled sQTL OR / eQTL OR, paired within analysis)
 
 | graph_method | module_set | k | ratio_fe | ratio_fe_low | ratio_fe_high | p_fe | ratio_re | I2 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| isograph | all_modules | 17 | 0.995 | 0.978 | 1.014 | 6.14e-01 | 0.992 | 0.78 |
-| isograph | pheno_sig_modules | 8 | 0.981 | 0.946 | 1.017 | 2.99e-01 | 0.986 | 0.397 |
-| isograph | go_invisible_modules | 8 | 1.0 | 0.942 | 1.061 | 9.92e-01 | 1.004 | 0.361 |
-| isograph | go_visible_modules | 7 | 0.977 | 0.936 | 1.019 | 2.83e-01 | 0.989 | 0.489 |
+| isograph | all_modules | 17 | 0.979 | 0.962 | 0.995 | 1.23e-02 | 0.977 | 0.839 |
+| isograph | pheno_sig_modules | 10 | 1.01 | 0.978 | 1.043 | 5.60e-01 | 1.021 | 0.536 |
+| isograph | go_invisible_modules | 7 | 0.981 | 0.93 | 1.035 | 4.83e-01 | 0.981 | 0.0 |
+| isograph | go_visible_modules | 9 | 1.026 | 0.988 | 1.066 | 1.81e-01 | 1.094 | 0.801 |
 
 ## Reading
 

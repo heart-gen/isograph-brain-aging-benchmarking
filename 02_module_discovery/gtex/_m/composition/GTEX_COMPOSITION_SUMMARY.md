@@ -5,11 +5,11 @@ MuSiC deconvolution re-run in-repo on the GTEx brain bundles using the same Tran
 | region | n_tested | comp_unique_base | comp_unique_adj | retained_frac | both_base | both_adj | n_cell_types | samples_covered | marker_depleted | marker_enriched |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | GTEx amygdala | 12042 | 33 | 5 | 0.15 | 6 | 0 | 8 | 181 | 0 | 1 |
-| GTEx anterior_cingulate_cortex_ba24 | 12190 | 928 | 365 | 0.39 | 198 | 14 | 6 | 233 | 1 | 3 |
+| GTEx anterior_cingulate_cortex_ba24 | 12190 | 928 | 365 | 0.39 | 198 | 14 | 6 | 233 | 0 | 2 |
 | GTEx frontal_cortex_ba9 | 12322 | 797 | 2 | 0.0 | 320 | 0 | 8 | 269 | 0 | 0 |
-| GTEx cortex | 12426 | 1169 | 2 | 0.0 | 152 | 0 | 8 | 270 | 0 | 2 |
+| GTEx cortex | 12426 | 1169 | 2 | 0.0 | 152 | 0 | 8 | 270 | 0 | 1 |
 | GTEx hippocampus | 12313 | 44 | 29 | 0.66 | 6 | 2 | 8 | 255 | 0 | 2 |
-| GTEx caudate_basal_ganglia | 12424 | 87 | 50 | 0.57 | 4 | 6 | 8 | 300 | 0 | 0 |
+| GTEx caudate_basal_ganglia | 12424 | 87 | 50 | 0.57 | 4 | 6 | 8 | 300 | 0 | 2 |
 | GTEx putamen_basal_ganglia | 12100 | 2 | 4 | 2.0 | 1 | 2 | 8 | 254 | 0 | 0 |
 | GTEx nucleus_accumbens_basal_ganglia | 12492 | 2 | 2 | 1.0 | 0 | 0 | 8 | 285 | 0 | 1 |
 

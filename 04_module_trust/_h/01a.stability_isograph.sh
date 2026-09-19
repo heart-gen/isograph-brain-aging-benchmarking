@@ -5,7 +5,7 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=24  # 24 x 2000M = 48G; dlpfc (idx 3) peaks ~46G, OOMs at 32G
-#SBATCH --time=04:00:00
+#SBATCH --time=08:00:00
 #SBATCH --array=1-6
 #SBATCH --output=04_module_trust/_m/logs/%x-%A_%a.log
 

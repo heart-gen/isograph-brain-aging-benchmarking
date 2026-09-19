@@ -4,10 +4,10 @@
   "variant": "standard",
   "methods": {
     "isograph": {
-      "n_modules": 28,
-      "n_go_enriched": 8,
-      "frac_go_enriched": 0.286,
-      "n_pheno_sig_fdr10": 3
+      "n_modules": 13,
+      "n_go_enriched": 5,
+      "frac_go_enriched": 0.385,
+      "n_pheno_sig_fdr10": 1
     },
     "wgcna": {
       "n_modules": 23,

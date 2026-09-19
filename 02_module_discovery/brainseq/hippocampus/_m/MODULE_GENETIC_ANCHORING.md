@@ -6,6 +6,7 @@ Reproduce: `python -m isograph_benchmark.real_data.module_genetic_anchoring --an
 
 | module_id | module_size | go_invisible | sqtl_or | eqtl_or | contrast_log | null_mean | perm_p |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M022 | 47 | True | 0.853 | 0.916 | -0.072 | -0.077 | 0.547 |
+| M013 | 38 | True | 0.396 | 1.163 | -1.076 | -0.096 | 0.947 |
+| M014 | 38 | True | 0.885 | 0.982 | -0.104 | -0.162 | 0.534 |
 
 _Caveat: cis-sQTL anchors member-gene splicing; a positive module contrast shows the module concentrates splicing-anchored genes above chance, not that a single variant drives the whole module. The eigenswitch×genotype and module-restricted S-LDSC tests (new controlled-genotype extraction) are the deeper follow-ons._

@@ -1,0 +1,100 @@
+{
+  "gene_level": {
+    "n_tested": 13130,
+    "composition_unique": 1,
+    "abundance_unique": 521,
+    "both": 0,
+    "neither": 12608
+  },
+  "module_level": {
+    "n_tested": 32,
+    "composition_unique": 1,
+    "abundance_unique": 0,
+    "both": 0,
+    "neither": 31
+  },
+  "gene_level_effect_sizes": {
+    "partial_r2_switch_given_abund": {
+      "n": 13130,
+      "quantiles": {
+        "0.1": 0.0011788636436049255,
+        "0.25": 0.0032753851807751666,
+        "0.5": 0.007941440532807086,
+        "0.75": 0.01608720138932177,
+        "0.9": 0.026723392183819052
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 521,
+          "median": 0.008395396987644634,
+          "q90": 0.02807486916296026
+        },
+        "composition_unique": {
+          "n": 1,
+          "median": 0.12085641966943912,
+          "q90": 0.12085641966943912
+        },
+        "neither": {
+          "n": 12608,
+          "median": 0.007916641126558717,
+          "q90": 0.02666031185614357
+        }
+      }
+    },
+    "partial_r2_abund_given_switch": {
+      "n": 13130,
+      "quantiles": {
+        "0.1": 0.0021407350667430017,
+        "0.25": 0.005753883873350232,
+        "0.5": 0.013327380772644089,
+        "0.75": 0.025026630685308103,
+        "0.9": 0.04003123564911241
+      },
+      "by_category": {
+        "abundance_unique": {
+          "n": 521,
+          "median": 0.0659120150044951,
+          "q90": 0.09232143028964682
+        },
+        "composition_unique": {
+          "n": 1,
+          "median": 0.00227766028924903,
+          "q90": 0.00227766028924903
+        },
+        "neither": {
+          "n": 12608,
+          "median": 0.012667910392006822,
+          "q90": 0.03491754131749749
+        }
+      }
+    }
+  },
+  "analysis": "brainseq-aging",
+  "region": "hippocampus",
+  "variant": "standard",
+  "fdr_alpha": 0.1,
+  "composition_adjusted": false,
+  "composition_covariates": [],
+  "gene_level_ladder": {
+    "n_tested": 13130,
+    "model": "ols",
+    "delta_r2_switch_given_abund": {
+      "quantiles": {
+        "0.1": 5.219344797047022e-05,
+        "0.25": 0.000339104676234208,
+        "0.5": 0.0015714296953061198,
+        "0.75": 0.004580461050564885,
+        "0.9": 0.00929512764907312
+      }
+    },
+    "delta_r2_abund_given_switch": {
+      "quantiles": {
+        "0.1": 0.00013333103372377083,
+        "0.25": 0.0008493949120416549,
+        "0.5": 0.0035970814536414953,
+        "0.75": 0.009599159319630277,
+        "0.9": 0.018443367066216326
+      }
+    }
+  }
+}

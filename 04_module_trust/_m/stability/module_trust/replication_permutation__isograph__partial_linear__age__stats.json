@@ -3,7 +3,7 @@
   "statistic": "partial_linear",
   "null": "age",
   "covariates": "full",
-  "n_matched_rows": 94,
+  "n_matched_rows": 38,
   "min_jaccard": 0.0,
   "T_obs": 0,
   "per_pair_obs": {
@@ -15,9 +15,9 @@
   "seed": 13,
   "sig": 0.05,
   "p_emp": 1.0,
-  "null_mean": 0.2545,
-  "null_sd": 0.6347992178671146,
-  "z": -0.40091416756168036,
-  "null_max": 7,
-  "null_q95": 2.0
+  "null_mean": 0.101,
+  "null_sd": 0.34177577601127146,
+  "z": -0.2955153849074111,
+  "null_max": 2,
+  "null_q95": 1.0
 }

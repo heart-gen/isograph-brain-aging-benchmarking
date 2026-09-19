@@ -9,12 +9,12 @@ For each module and RBP, whether binding-site switching (motif gained/lost betwe
 
 The adjusted arm is the stricter reading and the two can disagree in both directions; where they do, the disagreement is reported below rather than resolved in favour of the larger number.
 
-- switch genes tested: **11637** over 16 regions
-- module x RBP cells: **22560**
-- hypergeometric q<0.05: **486** (GO-invisible 71)
-- estimable GLM cells (BH family): **21095** of 22560
-- covariate-adjusted q<0.05: **543**
-- of the 486 hypergeometric hits: 485 estimable, **131** also adjusted-q<0.05, 258 with an adjusted CI entirely above 1, **2** entirely *below* it (enriched on raw counts, depleted once opportunity is adjusted for)
+- switch genes tested: **11790** over 16 regions
+- module x RBP cells: **11040**
+- hypergeometric q<0.05: **384** (GO-invisible 61)
+- estimable GLM cells (BH family): **9955** of 11040
+- covariate-adjusted q<0.05: **416**
+- of the 384 hypergeometric hits: 383 estimable, **89** also adjusted-q<0.05, 216 with an adjusted CI entirely above 1, **1** entirely *below* it (enriched on raw counts, depleted once opportunity is adjusted for)
 
 ### Estimability
 
@@ -22,52 +22,51 @@ A cell whose 2x2 has an empty margin admits no maximum-likelihood fit; including
 
 | GLM cell status | n | meaning |
 |---|---|---|
-| `fit` | 21095 | estimable; carries a p-value and enters the BH family |
-| `separated_zero_cell` | 1348 | an empty cell in the (in-module x switched) 2x2 -- complete separation, no finite MLE |
-| `quasi_separated` | 62 | fitted probabilities pinned at 0/1, or a degenerate coefficient/standard error |
-| `outcome_or_predictor_constant` | 55 | no variation to model in the region |
+| `fit` | 9955 | estimable; carries a p-value and enters the BH family |
+| `outcome_or_predictor_constant` | 530 | no variation to model in the region |
+| `separated_zero_cell` | 510 | an empty cell in the (in-module x switched) 2x2 -- complete separation, no finite MLE |
+| `quasi_separated` | 45 | fitted probabilities pinned at 0/1, or a degenerate coefficient/standard error |
 
 ### Top candidate regulons (by hypergeometric q)
 
 | region | module | RBP | module size | switched | enrichment | q | adj. OR (95% CI) | adj. q | GO-inv |
 |---|---|---|---|---|---|---|---|---|---|
-| caudate | M004 | DHX9 | 444.0 | 248.0 | 1.37 | 4.47e-08 | 1.53 (1.23-1.91) | 1.55e-02 | no |
-| caudate | M004 | ADAR | 444.0 | 271.0 | 1.33 | 4.47e-08 | 1.60 (1.28-2.00) | 6.04e-03 | no |
-| hippocampus | M000 | ELAVL4 | 1481.0 | 348.0 | 1.31 | 1.82e-07 | 1.20 (0.98-1.46) | 4.21e-01 | no |
-| cerebellar_hemisphere | M000 | RBM41 | 1667.0 | 819.0 | 1.13 | 1.52e-06 | 1.11 (0.96-1.29) | 5.49e-01 | no |
-| hippocampus | M000 | ELAVL1 | 1481.0 | 251.0 | 1.36 | 2.78e-06 | 1.08 (0.86-1.35) | 8.39e-01 | no |
-| cerebellar_hemisphere | M000 | RBM6 | 1667.0 | 738.0 | 1.14 | 5.01e-06 | 1.09 (0.95-1.27) | 6.34e-01 | no |
-| frontal_cortex_ba9 | M001 | IGF2BP1 | 1182.0 | 469.0 | 1.21 | 7.55e-06 | 1.29 (1.12-1.49) | 2.68e-02 | yes |
-| nucleus_accumbens_basal_ganglia | M010 | TIAL1 | 69.0 | 29.0 | 3.12 | 7.58e-06 | 0.78 (0.44-1.38) | 7.66e-01 | no |
-| caudate | M004 | DDX58 | 444.0 | 219.0 | 1.34 | 7.58e-06 | 1.38 (1.11-1.72) | 1.02e-01 | no |
-| caudate | M004 | EIF4A3 | 444.0 | 357.0 | 1.16 | 1.06e-05 | 1.90 (1.47-2.46) | 7.41e-04 | no |
-| frontal_cortex_ba9 | M001 | G3BP2 | 1182.0 | 633.0 | 1.15 | 1.14e-05 | 1.23 (1.07-1.41) | 8.60e-02 | yes |
-| caudate | M004 | ZNF346 | 444.0 | 172.0 | 1.42 | 1.33e-05 | 1.61 (1.28-2.02) | 6.94e-03 | no |
-| frontal_cortex_ba9 | M001 | RBM6 | 1182.0 | 519.0 | 1.19 | 1.90e-05 | 1.20 (1.04-1.38) | 1.64e-01 | yes |
-| cerebellar_hemisphere | M000 | FXR1 | 1667.0 | 602.0 | 1.15 | 2.40e-05 | 1.20 (1.03-1.39) | 2.33e-01 | no |
-| caudate | M004 | HNRNPCL1 | 444.0 | 374.0 | 1.14 | 3.59e-05 | 1.95 (1.48-2.57) | 1.16e-03 | no |
-| putamen_basal_ganglia | M001 | ACO1 | 947.0 | 591.0 | 1.11 | 3.90e-05 | 1.76 (1.44-2.13) | 4.82e-05 | no |
-| nucleus_accumbens_basal_ganglia | M010 | ELAVL4 | 69.0 | 28.0 | 2.89 | 5.09e-05 | 0.72 (0.41-1.27) | 6.62e-01 | no |
-| nucleus_accumbens_basal_ganglia | M001 | SAMD4A | 1253.0 | 756.0 | 1.11 | 6.15e-05 | 1.38 (1.20-1.59) | 1.92e-03 | no |
-| putamen_basal_ganglia | M001 | G3BP2 | 947.0 | 496.0 | 1.13 | 6.15e-05 | 1.63 (1.34-1.97) | 7.41e-04 | no |
-| nucleus_accumbens_basal_ganglia | M001 | YTHDC1 | 1253.0 | 860.0 | 1.09 | 6.51e-05 | 1.42 (1.23-1.65) | 1.10e-03 | no |
-| cerebellar_hemisphere | M000 | SNRNP70 | 1667.0 | 596.0 | 1.14 | 6.51e-05 | 1.14 (0.98-1.32) | 4.54e-01 | no |
-| nucleus_accumbens_basal_ganglia | M010 | NUDT21 | 69.0 | 36.0 | 2.30 | 6.51e-05 | 1.07 (0.63-1.80) | 9.49e-01 | no |
-| nucleus_accumbens_basal_ganglia | M010 | OAS1 | 69.0 | 21.0 | 3.64 | 7.33e-05 | 1.04 (0.58-1.89) | 9.69e-01 | no |
-| amygdala | M001 | G3BP1 | 997.0 | 564.0 | 1.14 | 9.63e-05 | 0.99 (0.83-1.17) | 9.70e-01 | no |
-| caudate | M004 | FMR1 | 444.0 | 137.0 | 1.46 | 1.07e-04 | 1.55 (1.22-1.97) | 2.50e-02 | no |
-| cerebellar_hemisphere | M000 | RBM14 | 1667.0 | 834.0 | 1.10 | 1.07e-04 | 1.15 (1.00-1.33) | 3.42e-01 | no |
-| amygdala | M001 | G3BP2 | 997.0 | 508.0 | 1.15 | 1.12e-04 | 1.09 (0.92-1.28) | 7.14e-01 | no |
-| caudate | M004 | RBMS3 | 444.0 | 282.0 | 1.22 | 1.16e-04 | 1.45 (1.16-1.81) | 4.49e-02 | no |
-| hippocampus | M000 | ZFP36 | 1481.0 | 404.0 | 1.21 | 1.17e-04 | 1.12 (0.94-1.34) | 5.98e-01 | no |
-| caudate | M004 | NOVA2 | 444.0 | 261.0 | 1.24 | 1.21e-04 | 1.92 (1.54-2.39) | 3.01e-05 | no |
+| cerebellar_hemisphere | M000 | RBM14 | 2700.0 | 1394.0 | 1.13 | 7.76e-16 | 1.30 (1.15-1.47) | 3.61e-03 | no |
+| cerebellar_hemisphere | M000 | RBM41 | 2700.0 | 1217.0 | 1.14 | 8.41e-15 | 1.10 (0.97-1.25) | 5.13e-01 | no |
+| cerebellar_hemisphere | M000 | G3BP1 | 2700.0 | 1460.0 | 1.11 | 3.97e-14 | 1.06 (0.93-1.21) | 7.21e-01 | no |
+| cerebellar_hemisphere | M000 | RBM6 | 2700.0 | 1231.0 | 1.13 | 1.65e-12 | 1.18 (1.04-1.34) | 1.19e-01 | no |
+| cerebellar_hemisphere | M000 | SNRPB2 | 2700.0 | 1322.0 | 1.12 | 2.20e-12 | 1.11 (0.98-1.27) | 4.26e-01 | no |
+| cerebellar_hemisphere | M000 | RBMS3 | 2700.0 | 1311.0 | 1.11 | 2.25e-11 | 1.04 (0.91-1.18) | 8.40e-01 | no |
+| cerebellar_hemisphere | M000 | PPRC1 | 2700.0 | 1080.0 | 1.13 | 4.04e-11 | 1.13 (0.99-1.29) | 3.73e-01 | no |
+| cerebellar_hemisphere | M000 | G3BP2 | 2700.0 | 1259.0 | 1.10 | 4.22e-09 | 1.10 (0.97-1.24) | 5.08e-01 | no |
+| cerebellar_hemisphere | M000 | ENOX1 | 2700.0 | 1372.0 | 1.10 | 4.45e-09 | 1.11 (0.98-1.26) | 4.38e-01 | no |
+| cerebellar_hemisphere | M000 | ZC3H10 | 2700.0 | 1124.0 | 1.11 | 4.79e-09 | 1.14 (1.00-1.30) | 2.84e-01 | no |
+| cerebellar_hemisphere | M000 | IGF2BP1 | 2700.0 | 974.0 | 1.13 | 4.79e-09 | 1.15 (1.01-1.31) | 2.68e-01 | no |
+| cerebellar_hemisphere | M000 | CNOT4 | 2700.0 | 1328.0 | 1.10 | 4.79e-09 | 1.02 (0.90-1.15) | 9.42e-01 | no |
+| cerebellar_hemisphere | M000 | HNRNPA3 | 2700.0 | 1658.0 | 1.08 | 7.30e-09 | 1.09 (0.96-1.24) | 5.55e-01 | no |
+| cerebellar_hemisphere | M000 | CELF4 | 2700.0 | 1593.0 | 1.08 | 1.60e-08 | 1.22 (1.08-1.39) | 3.90e-02 | no |
+| cerebellar_hemisphere | M000 | CELF5 | 2700.0 | 1577.0 | 1.08 | 3.22e-08 | 1.19 (1.05-1.35) | 9.00e-02 | no |
+| cerebellar_hemisphere | M000 | FXR1 | 2700.0 | 944.0 | 1.12 | 6.36e-08 | 1.19 (1.04-1.36) | 1.35e-01 | no |
+| cerebellar_hemisphere | M000 | CELF6 | 2700.0 | 1577.0 | 1.08 | 1.16e-07 | 1.18 (1.05-1.34) | 1.03e-01 | no |
+| cerebellar_hemisphere | M003 | HNRNPDL | 933.0 | 561.0 | 1.18 | 1.37e-07 | 1.14 (0.97-1.33) | 4.55e-01 | no |
+| putamen_basal_ganglia | M001 | G3BP2 | 1357.0 | 655.0 | 1.15 | 1.38e-07 | 1.51 (1.30-1.75) | 7.90e-05 | no |
+| cerebellar_hemisphere | M000 | MATR3 | 2700.0 | 1169.0 | 1.10 | 1.62e-07 | 1.07 (0.94-1.21) | 6.92e-01 | no |
+| cerebellar_hemisphere | M000 | SNRNP70 | 2700.0 | 957.0 | 1.12 | 1.75e-07 | 1.16 (1.02-1.33) | 2.25e-01 | no |
+| cerebellar_hemisphere | M000 | PABPC3 | 2700.0 | 1260.0 | 1.09 | 2.04e-07 | 1.13 (1.00-1.28) | 3.09e-01 | no |
+| cerebellar_hemisphere | M000 | RBM46 | 2700.0 | 1112.0 | 1.10 | 2.67e-07 | 1.07 (0.94-1.22) | 6.62e-01 | no |
+| cerebellar_hemisphere | M000 | PABPC5 | 2700.0 | 1682.0 | 1.07 | 4.14e-07 | 1.16 (1.03-1.31) | 1.76e-01 | no |
+| cerebellar_hemisphere | M000 | YTHDC1 | 2700.0 | 1795.0 | 1.06 | 8.55e-07 | 1.21 (1.06-1.37) | 6.95e-02 | no |
+| cerebellar_hemisphere | M000 | EIF4B | 2700.0 | 1058.0 | 1.10 | 1.29e-06 | 1.14 (1.00-1.30) | 2.89e-01 | no |
+| cerebellar_hemisphere | M000 | RBMS1 | 2700.0 | 882.0 | 1.12 | 1.39e-06 | 0.91 (0.79-1.05) | 5.56e-01 | no |
+| cerebellar_hemisphere | M000 | A1CF | 2700.0 | 1492.0 | 1.07 | 2.26e-06 | 1.02 (0.91-1.16) | 9.06e-01 | no |
+| cerebellar_hemisphere | M003 | HNRNPA0 | 933.0 | 547.0 | 1.17 | 2.26e-06 | 1.09 (0.93-1.27) | 6.67e-01 | no |
+| putamen_basal_ganglia | M001 | ACO1 | 1357.0 | 865.0 | 1.10 | 2.71e-06 | 1.60 (1.37-1.85) | 3.84e-06 | no |
 
 ### Contradicted by opportunity adjustment
 
-These 2 cells are hypergeometric-significant yet have an adjusted 95% CI entirely below 1 -- the raw enrichment is explained, and then some, by the motif opportunity their genes carry. They must not be described as candidate regulons.
+These 1 cells are hypergeometric-significant yet have an adjusted 95% CI entirely below 1 -- the raw enrichment is explained, and then some, by the motif opportunity their genes carry. They must not be described as candidate regulons.
 
 | region | module | RBP | enrichment | q | adj. OR (95% CI) |
 |---|---|---|---|---|---|
-| nucleus_accumbens_basal_ganglia | M010 | KHDRBS1 | 1.72 | 6.53e-03 | 0.48 (0.28-0.84) |
-| nucleus_accumbens_basal_ganglia | M010 | HNRNPC | 1.80 | 1.95e-02 | 0.49 (0.29-0.85) |
+| cerebellar_hemisphere | M003 | TIAL1 | 1.25 | 6.03e-03 | 0.81 (0.66-1.00) |
 

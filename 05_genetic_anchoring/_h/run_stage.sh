@@ -5,7 +5,7 @@
 ##
 ##   bash 05_genetic_anchoring/_h/run_stage.sh --dry-run
 ##   bash 05_genetic_anchoring/_h/run_stage.sh --after <stage 04 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: stage-02 fits (incl. isograph_vae_res2 and the matched
+## Options: scripts/slurm_dag.sh. Inputs: stage-02 fits (incl. isograph_vae_res5 and the matched
 ## WGCNA baselines), stage-03 module_enrichment and structure_switch_pairs.
 ##
 ## Re-running over an existing tree: several steps SKIP outputs that already exist or glob-collect
@@ -20,7 +20,7 @@ dag_init 05_genetic_anchoring "$@"
 H=05_genetic_anchoring/_h
 COLOC=(aging__ad aging__als aging__lbd aging__pd aging__scz brainseq-sczd__scz)
 ARMS=(switch background wgcna_switch wgcna_multiplex)
-RES2=--export=ALL,MAGMA_ISOGRAPH_BACKEND=isograph_vae_res2
+RES5=--export=ALL,MAGMA_ISOGRAPH_BACKEND=isograph_vae_res5
 
 ## 01 -- everything that reads only stages 02-04
 step 01a "" $H/01a.qtl_anchoring.sh
@@ -31,15 +31,15 @@ step 01c "" $H/01c.qtl_anchoring_sensitivity.sh
 step 01d "" $H/01d.sqtl_concordance.sh
 step 01e "" $H/01e.module_anchoring.sh
 step 01f "" $H/01f.prep_module_gene_sets.sh
-step 01f.res2 "" "${RES2}" $H/01f.prep_module_gene_sets.sh
+step 01f.res5 "" "${RES5}" $H/01f.prep_module_gene_sets.sh
 for t in ad als lbd pd scz; do
-    step "01g.aging__${t}" "" --time=03:00:00 $H/01g.coloc_prep.sh --gene-source aging --trait ${t} --min-recurrence 3
+    step "01g.aging__${t}" "" --time=03:00:00 $H/01g.coloc_prep.sh --gene-source aging --trait ${t} --min-recurrence 1
 done
 # shares coloc/_tmp/_scz_rsids.txt with aging__scz
 step 01g.brainseq-sczd__scz "01g.aging__scz" --time=03:00:00 $H/01g.coloc_prep.sh --gene-source brainseq-sczd --trait scz
 step 01h.brainseq-sczd "" $H/01h.ldsc_annot_prep.sh --analysis brainseq-sczd
 # shares ldsc/_tmp/_want_variants.txt with the brainseq-sczd prep
-step 01h.aging "01h.brainseq-sczd" $H/01h.ldsc_annot_prep.sh --bundle aging --min-recurrence 3
+step 01h.aging "01h.brainseq-sczd" $H/01h.ldsc_annot_prep.sh --bundle aging --min-recurrence 1
 step 01i.all_samples "" $H/01i.brainseq_switch_qtl.sh
 step 01i.ea_only "" --export=ALL,SWQTL_ARM=ea_only $H/01i.brainseq_switch_qtl.sh
 
@@ -52,9 +52,12 @@ step 02b "01d" $H/02b.sqtl_concordance_meta.sh
 step 02c "01e" $H/02c.module_anchoring_meta.sh
 step 02d "01f" $H/02d.run_magma.sh
 # waits on the canonical run so the shared SNP p-value and gene-analysis caches exist
-step 02d.res2 "01f.res2 02d" "${RES2}" $H/02d.run_magma.sh
+step 02d.res5 "01f.res5 02d" "${RES5}" $H/02d.run_magma.sh
+# memory tracks the largest locus: a square float32 LD matrix is 4n^2 bytes, and the aging
+# recurrence-1 gene set reaches 54k SNPs (AD, 11.7 GB) and 82k (SCZ, 27 GB)
 for a in "${COLOC[@]}"; do
-    step "02e.${a}" "01g.${a}" --time=06:00:00 $H/02e.locus_ld.sh "${a}"
+    cpus=16; [[ "${a}" == aging__scz ]] && cpus=32
+    step "02e.${a}" "01g.${a}" --time=06:00:00 --cpus-per-task=${cpus} $H/02e.locus_ld.sh "${a}"
 done
 step 02f.brainseq-sczd "01h.brainseq-sczd" $H/02f.ldsc_make_annot_ldscores.sh brainseq-sczd
 step 02f.aging "01h.aging" $H/02f.ldsc_make_annot_ldscores.sh aging
@@ -64,7 +67,7 @@ step 02h "01i" $H/02h.brainseq_switch_qtl_meta.sh
 
 ## 03
 step 03a "02d" $H/03a.plot_magma.sh
-step 03a.res2 "02d.res2 02d" "${RES2}" $H/03a.plot_magma.sh
+step 03a.res5 "02d.res5 02d" "${RES5}" $H/03a.plot_magma.sh
 for a in "${COLOC[@]}"; do
     step "03b.${a}" "02e.${a}" --time=08:00:00 $H/03b.coloc_clpp.sh "${a}"
 done

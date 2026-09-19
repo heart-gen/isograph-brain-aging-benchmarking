@@ -8,7 +8,9 @@ Reproduce: `python -m isograph_benchmark.real_data.sqtl_concordance --analysis b
 
 | module_set | n_genes | mean_abs_rho | perm_mean_abs_rho | frac_strong | mean_signed_rho | pvalue |
 | --- | --- | --- | --- | --- | --- | --- |
-| all_modules | 176 | 0.3372 | 0.3818 | 0.2557 | -0.0018 | 0.998 |
+| all_modules | 208 | 0.3122 | 0.376 | 0.25 | 0.0124 | 1 |
+| pheno_sig_modules | 45 | 0.3649 | 0.427 | 0.3333 | 0.0024 | 0.968 |
+| go_visible_modules | 45 | 0.3649 | 0.4259 | 0.3333 | 0.0024 | 0.958 |
 
 ## Reading
 

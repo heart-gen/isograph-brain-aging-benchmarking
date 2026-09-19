@@ -30,8 +30,8 @@ sQTL arm: `representative`.
 
 - `known_mechanism_recovered`: 0
 - `context_distinct_splice_colocalization`: 0
-- `disease_locus_splice_linked`: 1
-- `novel_splice_led_candidate`: 39
+- `disease_locus_splice_linked`: 2
+- `novel_splice_led_candidate`: 119
 - `not_resolved`: 0
 
 `context_distinct_splice_colocalization` is unreachable in the `representative` arm and its count above is 0 by construction, not by result: GTEx's grouped-permutation winner is the only intron tested, so a curated non-representative event is never on trial. Only `--sqtl-arm all` can assign it.
@@ -45,91 +45,173 @@ Two descriptors travel with every nominated PP4, read at the headline tissue the
 
 | headline estimator | `none` | total |
 |---|---|---|
-| none | 40 | 40 |
+| none | 121 | 121 |
 
 | gene | trait | PP4 sQTL | headline tissue | estimator | why abf | PP4 at p12=1e-6 | calls from p12 | prior | robust tissues |
 |---|---|---|---|---|---|---|---|---|---|
+| ZDHHC12 | scz | 0.998 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/13 |
+| FOXN2 | scz | 0.997 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
 | ACTR1B | scz | 0.997 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/11 |
 | ACTR1B | scz | 0.997 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/11 |
+| TPP1 | als | 0.996 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| CDHR3 | pd | 0.995 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
 | MRPS33 | scz | 0.994 | Brain_Hypothalamus | None | — | — | — | `none` | 0/3 |
 | IRF3 | scz | 0.994 | Brain_Cortex | None | — | — | — | `none` | 0/11 |
+| MAD1L1 | scz | 0.992 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/3 |
+| C9orf72 | als | 0.991 | Brain_Cerebellum | None | — | — | — | `none` | 0/8 |
+| BCKDK | ad | 0.989 | Brain_Cerebellum | None | — | — | — | `none` | 0/4 |
+| SLC39A13 | ad | 0.987 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/2 |
+| RAD51C | ad | 0.986 | Brain_Cortex | None | — | — | — | `none` | 0/1 |
 | YPEL1 | scz | 0.985 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/8 |
+| PBRM1 | scz | 0.985 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
 | POLG | scz | 0.982 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
 | PSMD6 | scz | 0.976 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
+| SNCA | lbd | 0.975 | Brain_Cortex | None | — | — | — | `none` | 0/8 |
 | RAI1 | scz | 0.974 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
 | UNC13A | als | 0.970 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
 | TXNDC15 | als | 0.969 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| GPM6A | scz | 0.968 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/4 |
 | SNAP91 | scz | 0.967 | Brain_Cerebellum | None | — | — | — | `none` | 0/6 |
 | SIRPA | ad | 0.965 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/13 |
+| EFHB | scz | 0.965 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/1 |
+| DOC2A | scz | 0.964 | Brain_Hippocampus | None | — | — | — | `none` | 0/9 |
 | PRDM2 | als | 0.964 | Brain_Cortex | None | — | — | — | `none` | 0/6 |
+| MAP7D1 | scz | 0.961 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/3 |
 | NUP50 | scz | 0.960 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/11 |
+| ZFYVE21 | scz | 0.959 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| ZFYVE21 | scz | 0.959 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| MAP2K5 | scz | 0.956 | Brain_Cortex | None | — | — | — | `none` | 0/3 |
+| TMED4 | scz | 0.956 | Brain_Hypothalamus | None | — | — | — | `none` | 0/13 |
 | DGKZ | scz | 0.949 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/9 |
+| CCDC62 | pd | 0.946 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
 | RASA1 | scz | 0.946 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| CCDC122 | scz | 0.944 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/5 |
+| INO80E | scz | 0.943 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/4 |
 | PPIL2 | scz | 0.943 | Brain_Amygdala | None | — | — | — | `none` | 0/8 |
+| THAP3 | scz | 0.942 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
+| NT5C2 | scz | 0.941 | Brain_Cerebellum | None | — | — | — | `none` | 0/7 |
+| NSMAF | als | 0.940 | Brain_Cerebellum | None | — | — | — | `none` | 0/2 |
+| CCS | scz | 0.937 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
+| YPEL3 | ad | 0.935 | Brain_Substantia_nigra | None | — | — | — | `none` | 0/4 |
 | CDIP1 | scz | 0.935 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/5 |
+| PRMT7 | scz | 0.934 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
+| PRMT7 | scz | 0.934 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
+| FNBP1 | als | 0.929 | Brain_Hippocampus | None | — | — | — | `none` | 0/5 |
+| SETD6 | scz | 0.926 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
+| EDEM3 | scz | 0.926 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| PPIP5K1 | scz | 0.926 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/2 |
+| SPI1 | ad | 0.926 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
 | NDUFAF7 | scz | 0.925 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/2 |
+| CRELD2 | scz | 0.925 | Brain_Cerebellum | None | — | — | — | `none` | 0/11 |
+| INTS8 | ad | 0.925 | Brain_Hippocampus | None | — | — | — | `none` | 0/3 |
 | PTPRN | als | 0.920 | Brain_Cerebellum | None | — | — | — | `none` | 0/5 |
+| DNAJA3 | scz | 0.920 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/3 |
+| FAM120AOS | scz | 0.919 | Brain_Cerebellum | None | — | — | — | `none` | 0/2 |
+| SERPINB1 | ad | 0.917 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/1 |
+| WHAMM | als | 0.916 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
+| REEP2 | scz | 0.913 | Brain_Cortex | None | — | — | — | `none` | 0/1 |
+| RPS6KL1 | als | 0.912 | Brain_Cerebellum | None | — | — | — | `none` | 0/3 |
+| TNFSF13 | als | 0.911 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/2 |
+| TEAD4 | scz | 0.908 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/1 |
 | SYT5 | scz | 0.904 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/1 |
 | ZNF232 | ad | 0.899 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/1 |
+| PAM16 | scz | 0.895 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
 | GGNBP2 | als | 0.895 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| CATSPER2 | scz | 0.894 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
+| CATSPER2 | scz | 0.894 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
+| NMRAL1 | scz | 0.894 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/9 |
 | WIPI2 | als | 0.893 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
 | YWHAB | scz | 0.891 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/9 |
 | FGFR1 | scz | 0.889 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/2 |
+| RCBTB1 | scz | 0.886 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
 | DDRGK1 | pd | 0.884 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
 | LPCAT4 | scz | 0.884 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| LPCAT4 | scz | 0.884 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| TUBGCP4 | scz | 0.882 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| TUBGCP4 | scz | 0.882 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| DOC2A | ad | 0.881 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
+| FANCI | scz | 0.879 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
 | TTC19 | pd | 0.877 | Brain_Putamen_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| RCSD1 | als | 0.873 | Brain_Spinal_cord_cervical_c-1 | None | — | — | — | `none` | 0/1 |
+| IFNAR2 | ad | 0.870 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/7 |
+| RBM6 | scz | 0.869 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| PAK6 | scz | 0.866 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| PAK6 | scz | 0.866 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| NME4 | als | 0.866 | Brain_Cortex | None | — | — | — | `none` | 0/1 |
 | NDUFS3 | ad | 0.864 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
+| VWA5B2 | ad | 0.864 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
+| IDH3B | scz | 0.860 | Brain_Cerebellum | None | — | — | — | `none` | 0/4 |
+| IDH3B | scz | 0.860 | Brain_Cerebellum | None | — | — | — | `none` | 0/4 |
+| ASB3 | scz | 0.859 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
 | RERE | scz | 0.856 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/2 |
+| SCFD1 | als | 0.856 | Brain_Hypothalamus | None | — | — | — | `none` | 0/1 |
 | KLC1 | scz | 0.855 | Brain_Cortex | None | — | — | — | `none` | 0/1 |
+| IKBIP | scz | 0.853 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/1 |
+| GALNT15 | scz | 0.850 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
+| YPEL3 | scz | 0.845 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
+| AKT1 | ad | 0.840 | Brain_Caudate_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| SPAG9 | ad | 0.839 | Brain_Hypothalamus | None | — | — | — | `none` | 0/8 |
+| G2E3 | als | 0.839 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| COG7 | ad | 0.837 | Brain_Amygdala | None | — | — | — | `none` | 0/1 |
 | SH3GL2 | pd | 0.834 | Brain_Substantia_nigra | None | — | — | — | `none` | 0/9 |
+| INO80E | ad | 0.832 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
+| FAM184A | scz | 0.832 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
 | COPA | scz | 0.830 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
 | TAOK2 | scz | 0.829 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
 | NEK4 | scz | 0.820 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/1 |
+| PCBP3 | scz | 0.819 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
+| PICALM | ad | 0.818 | Brain_Cortex | None | — | — | — | `none` | 0/1 |
+| TSPAN31 | scz | 0.813 | Brain_Frontal_Cortex_BA9 | None | — | — | — | `none` | 0/1 |
+| GLYCTK | scz | 0.812 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
 | GLYCTK | scz | 0.812 | Brain_Anterior_cingulate_cortex_BA24 | None | — | — | — | `none` | 0/1 |
 | MED19 | scz | 0.810 | Brain_Hippocampus | None | — | — | — | `none` | 0/1 |
+| NUCB2 | scz | 0.808 | Brain_Hypothalamus | None | — | — | — | `none` | 0/1 |
 | NCOR1 | pd | 0.805 | Brain_Nucleus_accumbens_basal_ganglia | None | — | — | — | `none` | 0/1 |
 | TPCN1 | ad | 0.804 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| CD46 | scz | 0.804 | Brain_Cerebellum | None | — | — | — | `none` | 0/1 |
+| AZI2 | pd | 0.803 | Brain_Cerebellar_Hemisphere | None | — | — | — | `none` | 0/1 |
 
 ## Loci with a curated event
 
 | gene | trait | PP4 sQTL | tissues coloc | colocalizing introns | interval match | promotes | tier |
 |---|---|---|---|---|---|---|---|
 | UNC13A | als | 0.970 | 2/13 | chr19:17630750-17632782 | no | no | `disease_locus_splice_linked` |
+| PICALM | ad | 0.818 | 1/13 | chr11:85974812-85981129 | no | no | `disease_locus_splice_linked` |
 
 ## Top nominations by posterior
 
 | gene | trait | PP4 sQTL | PP4 eQTL | introns named | driver tx | tier |
 |---|---|---|---|---|---|---|
+| ZDHHC12 | scz | 0.998 | 0.731 | 2 | 3 | `novel_splice_led_candidate` |
+| FOXN2 | scz | 0.997 | 0.997 | 1 | 2 | `novel_splice_led_candidate` |
 | ACTR1B | scz | 0.997 | 0.996 | 1 | 2 | `novel_splice_led_candidate` |
 | ACTR1B | scz | 0.997 | 0.996 | 1 | 2 | `novel_splice_led_candidate` |
+| TPP1 | als | 0.996 | 0.774 | 1 | 0 | `novel_splice_led_candidate` |
+| CDHR3 | pd | 0.995 | 0.019 | 1 | 2 | `novel_splice_led_candidate` |
 | MRPS33 | scz | 0.994 | 0.970 | 1 | 1 | `novel_splice_led_candidate` |
 | IRF3 | scz | 0.994 | 0.977 | 1 | 3 | `novel_splice_led_candidate` |
+| MAD1L1 | scz | 0.992 | 0.870 | 2 | 6 | `novel_splice_led_candidate` |
+| C9orf72 | als | 0.991 | 0.293 | 2 | 6 | `novel_splice_led_candidate` |
+| BCKDK | ad | 0.989 | 0.258 | 2 | 0 | `novel_splice_led_candidate` |
+| SLC39A13 | ad | 0.987 | 0.922 | 1 | 2 | `novel_splice_led_candidate` |
+| RAD51C | ad | 0.986 | 0.031 | 1 | 1 | `novel_splice_led_candidate` |
 | YPEL1 | scz | 0.985 | 0.864 | 1 | 3 | `novel_splice_led_candidate` |
+| PBRM1 | scz | 0.985 | 0.523 | 1 | 12 | `novel_splice_led_candidate` |
 | POLG | scz | 0.982 | 0.274 | 1 | 0 | `novel_splice_led_candidate` |
 | PSMD6 | scz | 0.976 | 0.228 | 1 | 1 | `novel_splice_led_candidate` |
+| SNCA | lbd | 0.975 | 0.113 | 1 | 2 | `novel_splice_led_candidate` |
 | RAI1 | scz | 0.974 | 0.717 | 1 | 0 | `novel_splice_led_candidate` |
 | UNC13A | als | 0.970 | 0.377 | 1 | 4 | `disease_locus_splice_linked` |
 | TXNDC15 | als | 0.969 | 0.379 | 1 | 1 | `novel_splice_led_candidate` |
+| GPM6A | scz | 0.968 | 0.950 | 1 | 3 | `novel_splice_led_candidate` |
 | SNAP91 | scz | 0.967 | 0.930 | 1 | 10 | `novel_splice_led_candidate` |
 | SIRPA | ad | 0.965 | 0.947 | 2 | 4 | `novel_splice_led_candidate` |
-| PRDM2 | als | 0.964 | 0.495 | 1 | 5 | `novel_splice_led_candidate` |
+| EFHB | scz | 0.965 | 0.001 | 1 | 1 | `novel_splice_led_candidate` |
+| DOC2A | scz | 0.964 | 0.755 | 2 | 6 | `novel_splice_led_candidate` |
+| PRDM2 | als | 0.964 | 0.494 | 1 | 5 | `novel_splice_led_candidate` |
+| MAP7D1 | scz | 0.961 | 0.481 | 1 | 1 | `novel_splice_led_candidate` |
 | NUP50 | scz | 0.960 | 0.972 | 2 | 9 | `novel_splice_led_candidate` |
-| DGKZ | scz | 0.949 | 0.858 | 1 | 2 | `novel_splice_led_candidate` |
-| RASA1 | scz | 0.946 | 0.856 | 1 | 0 | `novel_splice_led_candidate` |
-| PPIL2 | scz | 0.943 | 0.938 | 1 | 16 | `novel_splice_led_candidate` |
-| CDIP1 | scz | 0.935 | 0.761 | 2 | 7 | `novel_splice_led_candidate` |
-| NDUFAF7 | scz | 0.925 | 0.971 | 1 | 1 | `novel_splice_led_candidate` |
-| PTPRN | als | 0.920 | 0.964 | 2 | 4 | `novel_splice_led_candidate` |
-| SYT5 | scz | 0.904 | 0.911 | 1 | 1 | `novel_splice_led_candidate` |
-| ZNF232 | ad | 0.899 | 0.750 | 1 | 6 | `novel_splice_led_candidate` |
-| GGNBP2 | als | 0.895 | 0.988 | 1 | 3 | `novel_splice_led_candidate` |
-| WIPI2 | als | 0.893 | 0.478 | 1 | 3 | `novel_splice_led_candidate` |
-| YWHAB | scz | 0.891 | 0.851 | 1 | 2 | `novel_splice_led_candidate` |
-| FGFR1 | scz | 0.889 | 0.653 | 2 | 21 | `novel_splice_led_candidate` |
-| DDRGK1 | pd | 0.884 | 0.902 | 1 | 2 | `novel_splice_led_candidate` |
-| LPCAT4 | scz | 0.884 | 0.999 | 1 | 1 | `novel_splice_led_candidate` |
-| TTC19 | pd | 0.877 | 0.815 | 1 | 2 | `novel_splice_led_candidate` |
-| NDUFS3 | ad | 0.864 | 0.099 | 1 | 1 | `novel_splice_led_candidate` |
+| ZFYVE21 | scz | 0.959 | 0.369 | 1 | 1 | `novel_splice_led_candidate` |
 
 ## References for the curated events
 

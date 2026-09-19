@@ -60,19 +60,35 @@ excl   <- if (file.exists(excl_f)) fread(excl_f) else
 
 is_ambig <- function(a, b) (a=="A"&b=="T")|(a=="T"&b=="A")|(a=="C"&b=="G")|(a=="G"&b=="C")
 
-read_ld <- function(lid) {
+## An LD matrix is opened lazily and only the block a fit uses is read, row by row: a
+## whole-file readBin needs n*n in R's 32-bit integer range (<= 46,340 SNPs), which the
+## recurrence-1 aging loci exceed (54k-82k), and loading them to fit <= MAX_SNPS is waste.
+ld_open <- function(lid) {
     vf <- file.path(SUSIE_D, paste0(lid, ".unphased.vcor1.bin.vars"))
     bf <- file.path(SUSIE_D, paste0(lid, ".unphased.vcor1.bin"))
     if (!file.exists(vf) || !file.exists(bf)) return(NULL)
-    vars <- readLines(vf); n <- length(vars)
-    con <- file(bf, "rb"); m <- readBin(con, "numeric", n = n*n, size = 4); close(con)
-    R <- matrix(m, n, n, byrow = TRUE); dimnames(R) <- list(vars, vars); R
+    list(bf = bf, vars = readLines(vf))
+}
+ld_block <- function(ld, keep) {
+    n <- length(ld$vars); idx <- match(keep, ld$vars)
+    stopifnot(!anyNA(idx))
+    con <- file(ld$bf, "rb"); on.exit(close(con))
+    if (n <= 46340L) {  # fits one readBin: the original whole-matrix read
+        R <- matrix(readBin(con, "numeric", n = n * n, size = 4), n, n, byrow = TRUE)
+        R <- R[idx, idx, drop = FALSE]; dimnames(R) <- list(keep, keep); return(R)
+    }
+    R <- matrix(NA_real_, length(idx), length(idx), dimnames = list(keep, keep))
+    for (k in seq_along(idx)) {  # row-major float32; offsets as double past 2 GB
+        seek(con, (as.numeric(idx[k]) - 1) * n * 4)
+        R[k, ] <- readBin(con, "numeric", n = n, size = 4)[idx]
+    }
+    R
 }
 
 all_clpp <- list(); all_cs <- list()
 for (i in seq_len(nrow(loci))) {
     L <- loci[i]; lid <- L$LOCUS_ID
-    R <- read_ld(lid)
+    R <- ld_open(lid)
     if (is.null(R)) { message("  no LD for ", lid, "; skipping"); next }
     gwas <- fread(file.path(SUSIE_D, paste0(lid, ".gwas.tsv")))
     ## Drop SNPs in the trait's long-range-LD exclusion regions (MHC always; APOE for
@@ -85,18 +101,18 @@ for (i in seq_len(nrow(loci))) {
     bim  <- fread(file.path(PANEL_DIR, sprintf("1000G.EUR.QC.%d.bim", L$chr)),
                   header = FALSE, col.names = c("bchr","rsid","cm","bpos","A1","A2"))
     ## plink1 .bed convention: REF = A2 (col6), ALT = A1 (col5)
-    bim <- bim[rsid %in% rownames(R), .(rsid, REF = A2, ALT = A1)]
+    bim <- bim[rsid %in% R$vars, .(rsid, REF = A2, ALT = A1)]
     dt  <- merge(gwas, bim, by = "rsid")
     dt  <- dt[((a1==REF & a2==ALT) | (a1==ALT & a2==REF)) & !is_ambig(a1, a2)]
     dt[, z_ref := z * fifelse(a1==REF, 1, -1)]
-    dt  <- dt[rsid %in% rownames(R)][!duplicated(rsid)]
+    dt  <- dt[rsid %in% R$vars][!duplicated(rsid)]
     if (nrow(dt) < 20) { message("  ", lid, ": <20 usable SNPs; skipping"); next }
     if (nrow(dt) > MAX_SNPS) {
         message("  ", lid, ": ", nrow(dt), " SNPs > MAX_SNPS (", MAX_SNPS,
                 "); long-range-LD locus, skipping")
         rm(R, gwas, bim, dt); gc(verbose = FALSE); next
     }
-    Rk  <- R[dt$rsid, dt$rsid, drop = FALSE]
+    Rk  <- ld_block(R, dt$rsid)
     nn  <- max(1000, round(L$min_neff))
     fit <- tryCatch(susie_rss(z = dt$z_ref, R = Rk, n = nn, L = L_MAX,
                               estimate_residual_variance = FALSE),

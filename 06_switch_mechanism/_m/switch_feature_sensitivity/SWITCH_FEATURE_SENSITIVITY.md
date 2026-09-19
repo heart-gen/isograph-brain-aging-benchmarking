@@ -12,39 +12,39 @@ The module partition is held fixed at the published one; preprocessing is varied
 
 | cohort | region | n_settings | n_fdr_sig_published | min_effect_pearson | min_retained_frac | max_sign_flips_among_published_sig | min_median_abs_feature_r |
 |---|---|---|---|---|---|---|---|
-| brainseq | caudate | 13 | 4 | 0.94 | 0.75 | 0 | 0.736 |
-| gtex | amygdala | 13 | 6 | 0.781 | 0.667 | 0 | 0.822 |
-| gtex | anterior_cingulate_cortex_ba24 | 13 | 4 | 0.64 | 0 | 1 | 0.825 |
-| gtex | caudate_basal_ganglia | 13 | 0 | 0.622 |  | 0 | 0.79 |
-| gtex | cerebellar_hemisphere | 13 | 6 | 0.765 | 0.833 | 0 | 0.769 |
-| gtex | cerebellum | 13 | 11 | 0.726 | 0.818 | 0 | 0.642 |
-| gtex | cortex | 13 | 7 | 0.827 | 0.286 | 1 | 0.755 |
-| gtex | frontal_cortex_ba9 | 13 | 10 | 0.911 | 0.3 | 1 | 0.811 |
-| gtex | hippocampus | 13 | 9 | 0.717 | 0.667 | 2 | 0.817 |
-| gtex | hypothalamus | 13 | 8 | 0.731 | 0 | 1 | 0.793 |
-| gtex | nucleus_accumbens_basal_ganglia | 13 | 5 | 0.852 | 0 | 1 | 0.821 |
-| gtex | putamen_basal_ganglia | 13 | 0 | 0.702 |  | 0 | 0.803 |
-| gtex | spinal_cord_cervical_c_1 | 13 | 0 | 0.508 |  | 0 | 0.794 |
-| gtex | substantia_nigra | 13 | 0 | 0.621 |  | 0 | 0.79 |
+| brainseq | caudate | 13 | 1 | 0.825 | 1 | 0 | 0.736 |
+| gtex | amygdala | 13 | 6 | 0.615 | 0 | 2 | 0.822 |
+| gtex | anterior_cingulate_cortex_ba24 | 13 | 4 | 0.704 | 0 | 1 | 0.825 |
+| gtex | caudate_basal_ganglia | 13 | 0 | 0.615 |  | 0 | 0.79 |
+| gtex | cerebellar_hemisphere | 13 | 8 | 0.853 | 0.625 | 1 | 0.769 |
+| gtex | cerebellum | 13 | 7 | 0.763 | 0.857 | 0 | 0.642 |
+| gtex | cortex | 13 | 6 | 0.657 | 0.167 | 2 | 0.755 |
+| gtex | frontal_cortex_ba9 | 13 | 4 | 0.64 | 0.25 | 2 | 0.811 |
+| gtex | hippocampus | 13 | 4 | 0.637 | 0.75 | 1 | 0.817 |
+| gtex | hypothalamus | 13 | 9 | 0.626 | 0 | 2 | 0.793 |
+| gtex | nucleus_accumbens_basal_ganglia | 13 | 0 | 0.774 |  | 0 | 0.821 |
+| gtex | putamen_basal_ganglia | 13 | 0 | 0.486 |  | 0 | 0.803 |
+| gtex | spinal_cord_cervical_c_1 | 13 | 0 | 0.399 |  | 0 | 0.794 |
+| gtex | substantia_nigra | 13 | 0 | 0.637 |  | 0 | 0.79 |
 
 Minimum module age-effect correlation with the published effects, by axis:
 
 | cohort | region | expression | minor_isoform | pseudocount |
 |---|---|---|---|---|
-| brainseq | caudate | 0.94 | 0.972 | 0.996 |
-| gtex | amygdala | 0.781 | 0.82 | 0.981 |
-| gtex | anterior_cingulate_cortex_ba24 | 0.64 | 0.909 | 0.979 |
-| gtex | caudate_basal_ganglia | 0.622 | 0.879 | 0.973 |
-| gtex | cerebellar_hemisphere | 0.765 | 0.87 | 0.992 |
-| gtex | cerebellum | 0.726 | 0.849 | 0.993 |
-| gtex | cortex | 0.827 | 0.842 | 0.998 |
-| gtex | frontal_cortex_ba9 | 0.911 | 0.915 | 0.994 |
-| gtex | hippocampus | 0.717 | 0.889 | 0.985 |
-| gtex | hypothalamus | 0.731 | 0.831 | 0.987 |
-| gtex | nucleus_accumbens_basal_ganglia | 0.852 | 0.888 | 0.99 |
-| gtex | putamen_basal_ganglia | 0.702 | 0.797 | 0.992 |
-| gtex | spinal_cord_cervical_c_1 | 0.508 | 0.666 | 0.945 |
-| gtex | substantia_nigra | 0.621 | 0.753 | 0.983 |
+| brainseq | caudate | 0.825 | 0.887 | 0.989 |
+| gtex | amygdala | 0.615 | 0.832 | 0.979 |
+| gtex | anterior_cingulate_cortex_ba24 | 0.704 | 0.853 | 0.984 |
+| gtex | caudate_basal_ganglia | 0.615 | 0.864 | 0.975 |
+| gtex | cerebellar_hemisphere | 0.853 | 0.853 | 0.987 |
+| gtex | cerebellum | 0.763 | 0.85 | 0.995 |
+| gtex | cortex | 0.657 | 0.809 | 0.979 |
+| gtex | frontal_cortex_ba9 | 0.64 | 0.816 | 0.981 |
+| gtex | hippocampus | 0.637 | 0.862 | 0.982 |
+| gtex | hypothalamus | 0.626 | 0.725 | 0.988 |
+| gtex | nucleus_accumbens_basal_ganglia | 0.774 | 0.861 | 0.99 |
+| gtex | putamen_basal_ganglia | 0.486 | 0.78 | 0.97 |
+| gtex | spinal_cord_cervical_c_1 | 0.399 | 0.806 | 0.96 |
+| gtex | substantia_nigra | 0.637 | 0.808 | 0.988 |
 
 ## 4. Identifiability — median |switch–age r| by transcript-number stratum
 

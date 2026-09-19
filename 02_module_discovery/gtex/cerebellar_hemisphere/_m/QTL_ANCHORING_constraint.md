@@ -10,10 +10,10 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 4456 | 0.309 | 0.2604 | 1.01 | 0.92 | 1.11 | 8.23e-01 | logit_matched_standard |
-| sQTL | all_modules | 4456 | 0.309 | 0.2604 | 0.99 | 0.9 | 1.08 | 7.72e-01 | logit_matched_constraint |
-| eQTL | all_modules | 4831 | 0.5957 | 0.5992 | 0.96 | 0.9 | 1.04 | 3.42e-01 | logit_matched_standard |
-| eQTL | all_modules | 4831 | 0.5957 | 0.5992 | 0.91 | 0.85 | 0.99 | 2.21e-02 | logit_matched_constraint |
+| sQTL | all_modules | 6191 | 0.3061 | 0.2468 | 0.99 | 0.9 | 1.08 | 8.02e-01 | logit_matched_standard |
+| sQTL | all_modules | 6191 | 0.3061 | 0.2468 | 0.96 | 0.87 | 1.06 | 4.38e-01 | logit_matched_constraint |
+| eQTL | all_modules | 6721 | 0.6039 | 0.5918 | 1.04 | 0.96 | 1.11 | 3.37e-01 | logit_matched_standard |
+| eQTL | all_modules | 6721 | 0.6039 | 0.5918 | 0.98 | 0.9 | 1.05 | 5.41e-01 | logit_matched_constraint |
 
 ## Reading
 

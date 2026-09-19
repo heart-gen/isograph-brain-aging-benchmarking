@@ -88,7 +88,7 @@ COHORTS = {
 
 #: Split-half fits must cluster at the SAME resolution as production, or the trust funnel
 #: validates a partition the paper does not ship. Mirrors run_models.CANONICAL_LEIDEN_RESOLUTION.
-CANONICAL_LEIDEN_RESOLUTION = 5.0
+CANONICAL_LEIDEN_RESOLUTION = 2.0
 
 
 def _res_token(leiden_resolution: float) -> str:
@@ -329,6 +329,11 @@ def sweep(cohort: str, region: str, resolutions: list[float], method: str = "iso
     `aggregate` picks them up and emits one stability row per resolution with no further
     work. The canonical resolution is skipped when its partitions already exist -- it is the
     committed baseline, not something a sweep should rewrite.
+
+    Clustering is production's own edge-weighted detector (via `sweep_leiden`). A
+    re-clustered half still need not match the fit's own partition exactly: the saved edge
+    table omits the fit's isolated genes, which shifts vertex order and so Leiden's
+    seeded search.
     """
     from isograph_benchmark.real_data.sweep_leiden import _build_module_table
 

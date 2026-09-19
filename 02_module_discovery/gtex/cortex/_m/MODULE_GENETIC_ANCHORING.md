@@ -6,11 +6,9 @@ Reproduce: `python -m isograph_benchmark.real_data.module_genetic_anchoring --an
 
 | module_id | module_size | go_invisible | sqtl_or | eqtl_or | contrast_log | null_mean | perm_p |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| M000 | 1724 | False | 0.961 | 0.984 | -0.024 | -0.0 | 0.589 |
-| M001 | 612 | False | 0.806 | 0.918 | -0.131 | -0.001 | 0.842 |
-| M002 | 290 | True | 0.809 | 0.913 | -0.121 | -0.008 | 0.739 |
-| M003 | 249 | True | 1.092 | 1.133 | -0.037 | 0.003 | 0.572 |
-| M017 | 60 | True | 1.072 | 1.112 | -0.037 | -0.029 | 0.534 |
-| M021 | 29 | True | 0.844 | 1.202 | -0.354 | -0.053 | 0.709 |
+| M000 | 1781 | False | 0.898 | 0.955 | -0.061 | 0.0 | 0.768 |
+| M002 | 862 | True | 1.021 | 1.093 | -0.068 | 0.002 | 0.749 |
+| M003 | 439 | False | 0.829 | 0.849 | -0.023 | -0.002 | 0.561 |
+| M021 | 26 | True | 1.32 | 1.108 | 0.176 | -0.045 | 0.380 |
 
 _Caveat: cis-sQTL anchors member-gene splicing; a positive module contrast shows the module concentrates splicing-anchored genes above chance, not that a single variant drives the whole module. The eigenswitch×genotype and module-restricted S-LDSC tests (new controlled-genotype extraction) are the deeper follow-ons._

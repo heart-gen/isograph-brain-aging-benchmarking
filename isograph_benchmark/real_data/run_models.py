@@ -51,20 +51,26 @@ _PROMOTED_VAE = dict(
 
 # Canonical production Leiden resolution for the standard variant. See the wiki
 # (Tuning-and-Stability-Selection) for the rationale and the biology-driven sweep.
-CANONICAL_LEIDEN_RESOLUTION = 5.0
+CANONICAL_LEIDEN_RESOLUTION = 2.0
 
 
 def _isograph_out_subdir(leiden_resolution: float | None) -> str:
     """Output subdir name for a standard isograph_vae fit.
 
-    With no override (None) or the canonical resolution (5.0) this is the
+    With no override (None) or the canonical resolution (2.0) this is the
     canonical ``isograph_vae`` dir that the GWAS and trust-funnel cascades
     consume. Any *other* explicit ``leiden_resolution`` is written to a
-    resolution-suffixed sibling (e.g. ``isograph_vae_res5`` for 5.0 is the
-    canonical dir, ``isograph_vae_res2`` for 2.0) so a non-canonical resolution
-    is a side-by-side comparison set and never clobbers the canonical modules.
+    resolution-suffixed sibling (e.g. ``isograph_vae_res5`` for 5.0, the
+    retired comparison arm) so a non-canonical resolution is a side-by-side
+    comparison set and never clobbers the canonical modules.
+
     The suffix encodes the resolution with '.' -> 'p' (e.g. 2.25 ->
     isograph_vae_res2p25).
+
+    PI decision 2026-09-16 moved the canonical resolution 5.0 -> 2.0: the
+    >=900-gene giant-module criterion that justified 5.0 reverses under the
+    switching transcript filter (20/26 significant MAGMA hits are giant at 5.0
+    vs 24/37 at 2.0), and 2.0 assigns 38% more genes to modules.
     """
     if leiden_resolution is None or leiden_resolution == CANONICAL_LEIDEN_RESOLUTION:
         return "isograph_vae"

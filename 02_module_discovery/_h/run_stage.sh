@@ -20,10 +20,13 @@ step 00a "" $H/00a.production_gene_universe.sh
 step 01a ""  $H/01a.run_isograph_brainseq_aging.sh
 step 01b ""  $H/01b.run_isograph_brainseq_sczd.sh
 step 01c ""  $H/01c.run_isograph_gtex.sh
-# resolution-2.0 refits (isograph_vae_res2): the disclosed resolution comparison behind S-real-2
-step 01a.res2 "" $H/01a.run_isograph_brainseq_aging.sh --leiden-resolution 2.0
-step 01b.res2 "" $H/01b.run_isograph_brainseq_sczd.sh --leiden-resolution 2.0
-step 01c.res2 "" $H/01c.run_isograph_gtex.sh --leiden-resolution 2.0
+# resolution-5.0 refits (isograph_vae_res5): the disclosed resolution comparison behind S-real-2.
+# 2.0 became canonical on 2026-09-16 (PI), so 5.0 is now the sibling arm. The VAE fit is
+# resolution-independent -- only the post-fit Leiden partition differs -- so these re-fit the
+# same model and differ from the canonical dir in modules.parquet alone.
+step 01a.res5 "" $H/01a.run_isograph_brainseq_aging.sh --leiden-resolution 5.0
+step 01b.res5 "" $H/01b.run_isograph_brainseq_sczd.sh --leiden-resolution 5.0
+step 01c.res5 "" $H/01c.run_isograph_gtex.sh --leiden-resolution 5.0
 step 01d "00a"  $H/01d.wgcna_gene_brainseq_aging.sh
 step 01e "00a"  $H/01e.wgcna_gene_brainseq_sczd.sh
 step 01f "00a"  $H/01f.wgcna_gene_gtex.sh

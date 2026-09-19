@@ -4,18 +4,18 @@ Using flags:
 	--set-annot /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_gene_sets.txt
 	--out /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/stroke_noMHC_isograph_vae
 
-Start time is 21:11:29, Tuesday 15 Sep 2026
+Start time is 11:50:16, Thursday 17 Sep 2026
 
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_analysis/stroke_noMHC.genes.raw... 
 	17948 genes read from file
 Loading gene-set annotation...
 Reading file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/gene_sets/isograph_vae_gene_sets.txt... 
-	444 gene-set definitions read from file
-	found 444 gene sets containing genes defined in genotype data (containing a total of 12086 unique genes)
+	388 gene-set definitions read from file
+	found 388 gene sets containing genes defined in genotype data (containing a total of 12828 unique genes)
 Preparing variables for analysis...
 	truncating Z-scores 3 points below zero or 6 standard deviations above the mean
 	truncating covariate values more than 5 standard deviations from the mean
-	total variables available for analysis: 444 gene sets
+	total variables available for analysis: 388 gene sets
 
 Parsing model specifications...
 Inverting gene-gene correlation matrix...
@@ -27,7 +27,7 @@ Performing regression analysis...
 		inverse mac, log(inverse mac)
 	analysing individual variables
 
-	analysing single-variable models (number of models: 444)
+	analysing single-variable models (number of models: 388)
 	writing results to file /ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/gwas/results/stroke_noMHC_isograph_vae.gsa.out
 
-End time is 21:11:42, Tuesday 15 Sep 2026 (elapsed: 00:00:13)
+End time is 11:50:29, Thursday 17 Sep 2026 (elapsed: 00:00:13)

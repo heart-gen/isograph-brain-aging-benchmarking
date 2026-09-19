@@ -20,7 +20,7 @@ step 01a "" $H/01a.switch_consequence.sh
 step 01b "" $H/01b.validate_switch_splicing_brainseq.sh
 step 01c "" $H/01c.validate_switch_splicing_gtex.sh
 step 01d "" $H/01d.isa_concordance.sh
-step 01e "" $H/01e.longread_switch_confirm.sh
+step 01e "01a" $H/01e.longread_switch_confirm.sh   # reads 01a's pair_consequence
 step 01f "" $H/01f.download_clinical.sh
 step 01g "" $H/01g.scz_confound_sensitivity.sh
 step 01h "" $H/01h.switch_feature_sensitivity.sh --cohort brainseq --region caudate

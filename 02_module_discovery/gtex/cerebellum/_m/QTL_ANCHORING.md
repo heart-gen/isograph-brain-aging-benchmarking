@@ -10,14 +10,14 @@ Reproduce: `python -m isograph_benchmark.real_data.qtl_anchoring --analysis gtex
 
 | xqtl_kind | module_set | n_foreground | rate_fg | rate_bg | odds_ratio | or_ci_low | or_ci_high | pvalue | fit_method |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| sQTL | all_modules | 3643 | 0.3286 | 0.2649 | 0.99 | 0.9 | 1.08 | 7.78e-01 | logit_matched_standard |
-| sQTL | pheno_sig_modules | 2101 | 0.3189 | 0.2757 | 0.91 | 0.81 | 1.01 | 7.38e-02 | logit_matched_standard |
-| sQTL | go_invisible_modules | 617 | 0.3679 | 0.2784 | 1.01 | 0.84 | 1.21 | 9.12e-01 | logit_matched_standard |
-| sQTL | go_visible_modules | 1484 | 0.2985 | 0.2806 | 0.87 | 0.76 | 0.99 | 3.08e-02 | logit_matched_standard |
-| eQTL | all_modules | 4058 | 0.6106 | 0.6131 | 0.95 | 0.88 | 1.02 | 1.44e-01 | logit_matched_standard |
-| eQTL | pheno_sig_modules | 2346 | 0.5968 | 0.6149 | 0.89 | 0.81 | 0.97 | 1.04e-02 | logit_matched_standard |
-| eQTL | go_invisible_modules | 683 | 0.6047 | 0.6129 | 0.93 | 0.8 | 1.09 | 3.83e-01 | logit_matched_standard |
-| eQTL | go_visible_modules | 1663 | 0.5935 | 0.6145 | 0.88 | 0.79 | 0.98 | 1.64e-02 | logit_matched_standard |
+| sQTL | all_modules | 5175 | 0.3277 | 0.2531 | 1.01 | 0.93 | 1.09 | 8.79e-01 | logit_matched_standard |
+| sQTL | pheno_sig_modules | 2869 | 0.3283 | 0.2698 | 0.98 | 0.89 | 1.08 | 7.00e-01 | logit_matched_standard |
+| sQTL | go_invisible_modules | 1001 | 0.3666 | 0.2757 | 1.07 | 0.93 | 1.24 | 3.59e-01 | logit_matched_standard |
+| sQTL | go_visible_modules | 1868 | 0.3078 | 0.2785 | 0.93 | 0.83 | 1.05 | 2.39e-01 | logit_matched_standard |
+| eQTL | all_modules | 5785 | 0.6145 | 0.6117 | 0.97 | 0.9 | 1.03 | 2.94e-01 | logit_matched_standard |
+| eQTL | pheno_sig_modules | 3187 | 0.6056 | 0.614 | 0.93 | 0.86 | 1.01 | 6.68e-02 | logit_matched_standard |
+| eQTL | go_invisible_modules | 1098 | 0.6138 | 0.6125 | 0.98 | 0.86 | 1.11 | 7.00e-01 | logit_matched_standard |
+| eQTL | go_visible_modules | 2089 | 0.6012 | 0.614 | 0.91 | 0.83 | 1.0 | 5.83e-02 | logit_matched_standard |
 
 ## Reading
 
