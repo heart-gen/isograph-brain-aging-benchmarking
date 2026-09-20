@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 import pandas as pd
 
 from isograph_benchmark.real_data import junction_coloc_confirm as jcc
@@ -97,10 +98,20 @@ def test_residualize_removes_the_covariate():
 # targets
 # --------------------------------------------------------------------------- #
 def test_tissue_region_map_covers_the_coloc_tissues():
-    """Each anchored coloc tissue must map to the BrainSEQ region that measures it."""
-    assert jcc._TISSUE_TO_REGION["Brain_Hippocampus"] == ("hippocampus",)
+    """Each anchored coloc tissue must map to the BrainSEQ region that measures it.
+
+    Entries are (region, match) pairs so a reader can restrict to exact anatomy; the
+    striatal and BA24 entries are deliberately flagged `adjacent`, not `exact`.
+    """
+    assert jcc._TISSUE_TO_REGION["Brain_Hippocampus"] == (("hippocampus", "exact"),)
     for cortex in ("Brain_Cortex", "Brain_Frontal_Cortex_BA9"):
-        assert "dlpfc" in jcc._TISSUE_TO_REGION[cortex]
+        assert ("dlpfc", "exact") in jcc._TISSUE_TO_REGION[cortex]
+    for adj in ("Brain_Putamen_basal_ganglia", "Brain_Nucleus_accumbens_basal_ganglia"):
+        assert jcc._TISSUE_TO_REGION[adj] == (("caudate", "adjacent"),)
+    # BrainSEQ sequences no cerebellum; these must stay unmapped so their targets are
+    # reported as untestable rather than silently dropped.
+    for absent in ("Brain_Cerebellum", "Brain_Cerebellar_Hemisphere", "Brain_Amygdala"):
+        assert absent not in jcc._TISSUE_TO_REGION
 
 
 def test_targets_do_not_require_a_reported_competitor():
@@ -167,3 +178,79 @@ def test_match_event_still_requires_the_right_chromosome():
     })
     assert vss._match_event("chr15", 78937423, 78939140, events) == (None, 0)
     assert vss._match_event("chr4", 78937423, 78939140, events) == ("e1", 2)
+
+
+# --------------------------------------------------------------------------- #
+# panel-wide run (all concordant genes, 2026-09-20)
+# --------------------------------------------------------------------------- #
+def _events(rows):
+    return pd.DataFrame(rows, columns=["gene_name", "junction", "trait", "tissue",
+                                       "junction_in_switch_pair", "ens", "clpp",
+                                       "risk_allele"])
+
+
+def test_load_targets_defaults_to_every_concordant_gene(tmp_path, monkeypatch):
+    """`--genes` defaulted to SNCA/CTSH, so the arm went silent when they were dropped."""
+    ev = _events([
+        ["AAA", "chr1:1-2", "ad", "Brain_Cortex", True, "ENSG0", 0.1, "A"],
+        ["BBB", "chr2:3-4", "als", "Brain_Hippocampus", True, "ENSG1", 0.2, "C"],
+    ])
+    path = tmp_path / "deep_dive_events.parquet"
+    ev.to_parquet(path)
+    monkeypatch.setattr(jcc, "_DEEP_DIVE", path)
+    assert set(jcc.load_targets()["gene_name"]) == {"AAA", "BBB"}
+    assert set(jcc.load_targets(("AAA",))["gene_name"]) == {"AAA"}
+
+
+def test_tissue_without_a_brainseq_region_is_reported_not_dropped(tmp_path, monkeypatch):
+    """58 of the 76 concordant events are cerebellar, which BrainSEQ does not sequence.
+
+    Dropping them would make a locus this panel cannot measure indistinguishable from one
+    that was never nominated.
+    """
+    ev = _events([["CBL", "chr1:1-2", "scz", "Brain_Cerebellum", True, "ENSG9", 0.3, "G"]])
+    path = tmp_path / "deep_dive_events.parquet"
+    ev.to_parquet(path)
+    monkeypatch.setattr(jcc, "_DEEP_DIVE", path)
+
+    tgt = jcc.load_targets()
+    assert len(tgt) == 1 and tgt["match"].iloc[0] == "none" and tgt["region"].iloc[0] == ""
+
+    un = jcc.unmatched_targets(tgt)
+    assert un["verdict"].iloc[0] == "no_matched_brainseq_region"
+    # and it never reaches the statistics
+    res, _ = jcc.run_region("dlpfc", tgt[tgt["match"].ne("none")], alpha=0.05, min_n=30,
+                            n_background_genes=1, max_pairs=1, seed=0, min_usage=0.05)
+    assert res.empty
+    assert "no_matched_brainseq_region" in jcc._write_report(un, 0.05, 0.05)
+
+
+def test_bh_corrects_only_the_paired_family():
+    """Direct rows are a usage threshold, not a test, so they must stay out of the family."""
+    res = pd.DataFrame({
+        "gene_name": ["A", "B", "C", "D"],
+        "mode": ["paired", "paired", "direct", "none"],
+        "rho": [-0.5, -0.4, np.nan, np.nan],
+        "p_within_gene": [0.01, 0.04, 0.001, np.nan],
+        "p_matched_gene": [0.01, 0.04, 0.001, np.nan],
+        "verdict": ["validated", "validated", "validated", "no_matched_brainseq_region"],
+    })
+    out = jcc._bh_adjust(res, alpha=0.05)
+    assert np.isnan(out.loc[2, "q_within_gene"])       # direct row excluded
+    assert np.isnan(out.loc[3, "q_within_gene"])       # untestable row excluded
+    assert out.loc[0, "q_within_gene"] == pytest.approx(0.02)
+    assert out.loc[1, "q_within_gene"] == pytest.approx(0.04)
+    # non-paired rows keep their own verdict verbatim
+    assert out.loc[2, "verdict_bh"] == "validated"
+    assert out.loc[3, "verdict_bh"] == "no_matched_brainseq_region"
+
+
+def test_bh_is_monotone_and_bounded():
+    q = jcc._bh(np.array([0.001, 0.5, np.nan, 0.9, 0.02]))
+    finite = q[np.isfinite(q)]
+    assert finite.max() <= 1.0
+    assert np.isnan(q[2])
+    # BH is monotone in the sorted p-values
+    order = np.argsort([0.001, 0.5, 1.1, 0.9, 0.02])
+    seq = [q[i] for i in order if np.isfinite(q[i])]
+    assert seq == sorted(seq)

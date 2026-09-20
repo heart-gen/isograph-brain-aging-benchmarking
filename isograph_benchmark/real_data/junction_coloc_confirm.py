@@ -1,12 +1,27 @@
 """Short-read junction confirmation of the genetically anchored switch pairs.
 
-The colocalization layer nominates *SNCA* and *CTSH* as the two candidate main-figure
-loci, and the long-read check (``switch_orthogonal_confirm``) failed to confirm either:
-SNCA's anchored isoform sits at 0.29% of the gene's ONT output in n = 12 samples. That
-failure is confounded with the assay. This CLI runs the test the long-read data could not:
-the same junctions in BrainSEQ short-read, which measures **the junction the sQTL actually
-tags** rather than a whole-transcript proxy, at roughly 40x the sample size (hippocampus
-n = 452, DLPFC n = 500, caudate n = 487) and in the regions the colocalization was found in.
+Every gene whose colocalizing sQTL junction lands in the tissue-matched IsoGraph switch
+pair is tested here -- 30 genes over 76 events on the 2026-09-19 re-run, not the two the
+arm was originally pointed at. Until 2026-09-20 ``--genes`` defaulted to ``SNCA CTSH``,
+so when those two stopped being the display item the arm reported "No testable targets"
+and said nothing about the other 28 concordant genes.
+
+The long-read check (``switch_orthogonal_confirm``) could not confirm the anchored
+isoforms: SNCA's sits at 0.29% of the gene's ONT output in n = 12 samples, a failure
+confounded with the assay, which measures whole transcripts. This CLI runs the test the
+long-read data could not: the same junctions in BrainSEQ short-read, which measures **the
+junction the sQTL actually tags**, at roughly 40x the sample size (hippocampus n = 452,
+DLPFC n = 500, caudate n = 487).
+
+What the panel can and cannot reach
+-----------------------------------
+BrainSEQ sequences caudate, DLPFC and hippocampus. GTEx brain covers thirteen tissues, and
+**58 of the 76 concordant events are cerebellum or cerebellar hemisphere**, which BrainSEQ
+does not sequence at all. Those targets are reported with verdict
+``no_matched_brainseq_region`` rather than dropped: a locus this panel cannot measure must
+not look like a locus that was never nominated. The ceiling on how much of the concordant
+set this arm can ever confirm is therefore set by GTEx's tissue-wise power -- cerebellum has
+the largest brain sample size -- not by the genes.
 
 What is tested
 --------------
@@ -45,9 +60,19 @@ Decision rule (pre-registered, from ORTHOGONAL_CONFIRMATION.md)
 --------------------------------------------------------------
 If the junctions validate -- anti-correlated beyond the closure baseline at the stated
 alpha -- the short-read result is reported as the orthogonal confirmation and the
-long-read failure is cited as an assay limitation. If they do not, SNCA and CTSH stay off
-any main figure and the set-level result stands alone. The rule is applied by this CLI and
+long-read failure is cited as an assay limitation. If they do not, the locus stays off any
+main figure and the set-level result stands alone. The rule is applied by this CLI and
 written to disk as ``verdict``; it is not re-decided after seeing the numbers.
+
+The rule was written for a two-gene run, so applied across the whole panel its alpha is an
+uncorrected family. ``verdict`` is therefore kept exactly as pre-registered and the
+BH-corrected call is added beside it as ``verdict_bh`` (``q_within_gene``,
+``q_matched_gene``), which is what the panel-wide count in the report uses. ``direct`` rows
+are not in that family: their verdict is a usage threshold, not a test.
+
+The display-item decision rule in ``_REFERENCE_ARM`` stays gene-specific by design -- it
+asks whether the exact contrast a figure panel draws holds up, which only means anything
+for a gene that has a panel. Genes without one are reported, not decided.
 
 Outputs land in ``06_switch_mechanism/_m/junction_coloc_confirm/``.
 """
@@ -100,15 +125,33 @@ def _is_reference(gene: str, event_info: str) -> bool:
         return False
     return any(abs(c - ref) <= _COORD_TOL for c in _event_coords(event_info))
 
-# The GTEx tissue a colocalization was found in -> the BrainSEQ region that measures the
-# same anatomy. SNCA colocalizes in Brain_Cortex (LBD) and Brain_Frontal_Cortex_BA9 (PD),
-# both of which map to BrainSEQ DLPFC; caudate is carried as a secondary region because
-# BrainSEQ's aging switch modules are caudate-derived, so it is where the switch layer is
-# best characterized. CTSH colocalizes in Brain_Hippocampus.
-_TISSUE_TO_REGION: dict[str, tuple[str, ...]] = {
-    "Brain_Hippocampus": ("hippocampus",),
-    "Brain_Cortex": ("dlpfc", "caudate"),
-    "Brain_Frontal_Cortex_BA9": ("dlpfc", "caudate"),
+# The GTEx tissue a colocalization was found in -> the BrainSEQ region(s) that measure the
+# same anatomy, with how close the match is. BrainSEQ has three regions only -- caudate,
+# DLPFC and hippocampus -- so most GTEx brain tissues have NO counterpart here, and that is
+# a property of the panel, not of the gene. `match` is carried on every row so a reader can
+# restrict to exact anatomy:
+#
+#   exact      the same structure (GTEx frontal cortex BA9 ~ BrainSEQ DLPFC).
+#   adjacent   a different structure in the same division (putamen / nucleus accumbens are
+#              striatal like caudate; BA24 is cortex but not dorsolateral prefrontal). A
+#              junction may legitimately behave differently here.
+#   secondary  DLPFC-matched loci are also carried in caudate, because BrainSEQ's aging
+#              switch modules are caudate-derived and that is where the switch layer is
+#              best characterized.
+#
+# Deliberately absent: cerebellum and cerebellar hemisphere (58 of the 76 concordant events,
+# and BrainSEQ sequences no cerebellum), hypothalamus, amygdala, substantia nigra, spinal
+# cord. Targets in those tissues are emitted with verdict `no_matched_brainseq_region`
+# rather than dropped -- silently skipping them would make an untestable locus look like a
+# locus that was never nominated.
+_TISSUE_TO_REGION: dict[str, tuple[tuple[str, str], ...]] = {
+    "Brain_Hippocampus": (("hippocampus", "exact"),),
+    "Brain_Cortex": (("dlpfc", "exact"), ("caudate", "secondary")),
+    "Brain_Frontal_Cortex_BA9": (("dlpfc", "exact"), ("caudate", "secondary")),
+    "Brain_Anterior_cingulate_cortex_BA24": (("dlpfc", "adjacent"),),
+    "Brain_Caudate_basal_ganglia": (("caudate", "exact"),),
+    "Brain_Putamen_basal_ganglia": (("caudate", "adjacent"),),
+    "Brain_Nucleus_accumbens_basal_ganglia": (("caudate", "adjacent"),),
 }
 
 _DEEP_DIVE = stage_out("anchoring", "deep_dive", "deep_dive_events.parquet")
@@ -123,7 +166,11 @@ _DEEP_DIVE = stage_out("anchoring", "deep_dive", "deep_dive_events.parquet")
 #         chr4:89,838,252-89,838,315) that Fig 4A draws the anchored proximal exon against.
 #   CTSH  78937686 -- the competing acceptor the same AD risk allele moves the other way,
 #         per deep_dive_events.
-_REFERENCE_ARM: dict[str, int] = {"SNCA": 89838252, "CTSH": 78937686}
+#   PRDM2 13788079 -- the early 3' terminus (ENST00000413440's last exon end) that Fig 4A
+#         draws the distal terminal exon against. PRDM2 replaced SNCA on the panel
+#         2026-09-19; SNCA and CTSH are kept here because the falsification text still
+#         refers to their contrasts.
+_REFERENCE_ARM: dict[str, int] = {"SNCA": 89838252, "CTSH": 78937686, "PRDM2": 13788079}
 
 
 def out_dir():
@@ -133,12 +180,25 @@ def out_dir():
 # --------------------------------------------------------------------------- #
 # Target construction
 # --------------------------------------------------------------------------- #
-_TARGET_COLUMNS = ["gene_name", "ens", "trait", "tissue", "region", "anchored_junction",
-                   "competing_junctions", "n_competing", "clpp", "risk_allele"]
+_TARGET_COLUMNS = ["gene_name", "ens", "trait", "tissue", "region", "match",
+                   "anchored_junction", "competing_junctions", "n_competing", "clpp",
+                   "risk_allele"]
 
 
-def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
+def load_targets(genes: tuple[str, ...] | None = None) -> pd.DataFrame:
     """One row per (gene, trait, tissue, region) anchored junction.
+
+    ``genes`` restricts to named symbols; ``None`` (the default) takes **every** gene whose
+    junction lands in the tissue-matched IsoGraph switch pair. The CLI ran on SNCA and CTSH
+    alone until 2026-09-20, which meant the arm reported "No testable targets" as soon as
+    those two stopped being the display item, and gave no account of the other 28
+    concordant genes.
+
+    A target whose GTEx tissue has no BrainSEQ counterpart is still emitted, with
+    ``region`` empty and ``match`` ``"none"``; ``run_region`` never sees it and the report
+    counts it as ``no_matched_brainseq_region``. Dropping it here instead would make a
+    locus BrainSEQ cannot measure indistinguishable from one that was never nominated --
+    and since 58 of the 76 concordant events are cerebellar, that is most of the panel.
 
     ``competing_junctions`` carries the junctions the same risk allele moves the other way,
     where the colocalization reported any; it may legitimately be empty. SNCA is the case
@@ -147,7 +207,9 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
     alternative form supplies the competitor by construction (``direct`` mode).
     """
     ev = pd.read_parquet(_DEEP_DIVE)
-    ev = ev[ev["gene_name"].isin(genes) & ev["junction"].astype(str).str.len().gt(0)]
+    ev = ev[ev["junction"].astype(str).str.len().gt(0)]
+    if genes is not None:
+        ev = ev[ev["gene_name"].isin(genes)]
 
     rows: list[dict] = []
     for (gene, trait, tissue), grp in ev.groupby(["gene_name", "trait", "tissue"]):
@@ -155,12 +217,13 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
         competing = grp[~grp["junction_in_switch_pair"].fillna(False).astype(bool)]
         if anchored.empty:
             continue
-        for region in _TISSUE_TO_REGION.get(str(tissue), ()):
+        mapped = _TISSUE_TO_REGION.get(str(tissue), (("", "none"),))
+        for region, match in mapped:
             for _, a in anchored.iterrows():
                 comp = [str(c) for c in competing["junction"] if str(c).strip()]
                 rows.append({
                     "gene_name": gene, "ens": str(a["ens"]), "trait": trait,
-                    "tissue": tissue, "region": region,
+                    "tissue": tissue, "region": region, "match": match,
                     "anchored_junction": str(a["junction"]),
                     "competing_junctions": ";".join(comp),
                     "n_competing": len(comp),
@@ -169,6 +232,22 @@ def load_targets(genes: tuple[str, ...]) -> pd.DataFrame:
     # Explicit columns: a gene set absent from the deep dive is a legitimate null, and an
     # empty frame without them would crash the per-region filter downstream.
     return pd.DataFrame(rows, columns=_TARGET_COLUMNS)
+
+
+def unmatched_targets(targets: pd.DataFrame) -> pd.DataFrame:
+    """Targets in a GTEx tissue BrainSEQ does not sequence, as report-ready rows."""
+    if targets.empty:
+        return targets
+    u = targets[targets["match"].eq("none")].copy()
+    if u.empty:
+        return u
+    u["mode"] = "none"
+    u["verdict"] = "no_matched_brainseq_region"
+    u["verdict_reason"] = (
+        "BrainSEQ sequences caudate, DLPFC and hippocampus only; "
+        + u["tissue"].astype(str) + " has no counterpart, so the junction cannot be "
+        "measured in this panel at all")
+    return u
 
 
 def _match_events(junction: str, gene_meta: pd.DataFrame) -> list[str]:
@@ -253,6 +332,49 @@ def _empirical_p(obs: float, null: np.ndarray) -> float:
     return float((np.sum(null <= obs) + 1) / (null.size + 1))
 
 
+def _bh(pvals: np.ndarray) -> np.ndarray:
+    """Benjamini-Hochberg q-values, NaNs passed through and excluded from the family."""
+    q = np.full(pvals.shape, np.nan, dtype=float)
+    ok = np.isfinite(pvals)
+    if not ok.any():
+        return q
+    p = pvals[ok]
+    order = np.argsort(p)
+    ranked = p[order] * p.size / (np.arange(p.size) + 1)
+    ranked = np.minimum.accumulate(ranked[::-1])[::-1]
+    out = np.empty_like(ranked)
+    out[order] = np.minimum(ranked, 1.0)
+    q[ok] = out
+    return q
+
+
+def _bh_adjust(res: pd.DataFrame, alpha: float = 0.05) -> pd.DataFrame:
+    """BH over the paired-mode p-values, as one family across the whole panel.
+
+    The pre-registered rule applied `alpha` to a raw p-value, which was written when the
+    arm ran on two genes. Over the full concordant panel that is an uncorrected family, so
+    the per-target `verdict` is kept exactly as pre-registered and the corrected call is
+    added beside it as `verdict_bh`. `direct` rows are not in this family at all -- their
+    verdict is a usage threshold, not a test.
+    """
+    if res.empty or "p_within_gene" not in res.columns:
+        return res
+    res = res.copy()
+    paired = res["mode"].eq("paired") if "mode" in res.columns else pd.Series(
+        False, index=res.index)
+    for src, dst in (("p_within_gene", "q_within_gene"),
+                     ("p_matched_gene", "q_matched_gene")):
+        vals = pd.to_numeric(res[src], errors="coerce").to_numpy(dtype=float)
+        vals = np.where(paired.to_numpy(), vals, np.nan)
+        res[dst] = _bh(vals)
+    rho = pd.to_numeric(res.get("rho"), errors="coerce")
+    res["verdict_bh"] = np.where(
+        paired & rho.lt(0) & res["q_within_gene"].le(alpha)
+        & res["q_matched_gene"].le(alpha), "validated",
+        np.where(paired, "not_validated", res["verdict"]))
+    return res
+
+
 # --------------------------------------------------------------------------- #
 # Driver
 # --------------------------------------------------------------------------- #
@@ -298,8 +420,19 @@ def run_region(region: str, targets: pd.DataFrame, *, alpha: float, min_n: int,
 
         a_ids = _match_events(row["anchored_junction"], gm)
         if not a_ids:
+            # The gene IS quantified -- this is a coverage gap in the LIBD event
+            # catalogue, not absence of the junction. PRDM2 is the case in point: 19
+            # events in DLPFC, none reaching past ~13,787,067, so the distal terminal
+            # exon the GTEx sQTL tags (chr1:13,816,570-13,823,159) is simply not one of
+            # the catalogued events. Saying how many events the gene does have keeps
+            # that distinguishable from "gene not measured".
             results.append({**row.to_dict(), "verdict": "junction_not_measured",
-                            "mode": "none", "n_anchored_events": 0})
+                            "mode": "none", "n_anchored_events": 0,
+                            "n_gene_events": int(len(gm)),
+                            "verdict_reason": (
+                                f"gene is quantified ({len(gm)} PSI events) but none "
+                                f"carries the anchored junction; a coverage gap in the "
+                                f"LIBD event catalogue, not evidence against it")})
             continue
 
         c_ids: list[str] = []
@@ -446,17 +579,72 @@ def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
         why = (f" No anchored switch junction in `deep_dive_events` for: "
                f"{', '.join(missing)}." if missing else "")
         return "\n".join(lines + ["No testable targets." + why])
-    n_val = int((res["verdict"] == "validated").sum())
+    # One row per candidate PSI event, so row counts are NOT gene counts: `direct` mode
+    # deliberately emits every event that carries the anchored junction rather than
+    # picking a best one. The headline is therefore stated per gene.
+    n_gene = int(res["gene_name"].nunique())
+    untestable = res["verdict"].eq("no_matched_brainseq_region")
+    g_untestable = set(res.loc[untestable, "gene_name"]) - set(
+        res.loc[~untestable, "gene_name"])
+    tested = res[~untestable]
+    g_measured = set(tested.loc[tested["mode"].ne("none"), "gene_name"]) if len(
+        tested) else set()
+    g_val = set(tested.loc[tested["verdict"].eq("validated"), "gene_name"]) if len(
+        tested) else set()
+    vc = res["verdict"].value_counts()
     lines += [
-        f"Targets: **{len(res)}**  |  validated: **{n_val}**  |  "
-        f"alpha = {alpha}, minor-form usage threshold = {min_usage}", "",
+        f"**{n_gene}** genes carry a junction in the tissue-matched IsoGraph switch pair. "
+        f"**{len(g_untestable)}** sit only in GTEx tissues BrainSEQ does not sequence and "
+        f"cannot be tested here at all. Of the **{n_gene - len(g_untestable)}** that reach "
+        f"a BrainSEQ region, **{len(g_measured)}** have the junction measured by a PSI "
+        f"event and **{len(g_val)}** validate on at least one event.", "",
+        f"alpha = {alpha}, minor-form usage threshold = {min_usage}. Rows below are one "
+        f"per candidate PSI event ({len(res)} rows), not one per gene.", "",
+        "Every gene whose junction lands in the tissue-matched IsoGraph switch pair is",
+        "tested, not only the ones a figure panel highlights.", "",
+        "| verdict | rows |", "| --- | ---: |",
+    ]
+    lines += [f"| {k} | {int(v)} |" for k, v in vc.items()]
+
+    if len(tested):
+        lines += ["", "## Per gene, in the regions BrainSEQ can measure", "",
+                  "`events` counts candidate PSI events, `validated` how many of them pass "
+                  "the usage threshold. A gene with a mixed count validates on some "
+                  "contrasts and not others, which is why the display-item rule below "
+                  "names one.", "",
+                  "| gene | trait | region | match | events | validated | call |",
+                  "| --- | --- | --- | --- | ---: | ---: | --- |"]
+        grp = tested.groupby(["gene_name", "trait", "region", "match"], dropna=False)
+        for (gene, trait, region, match), sub in grp:
+            n_ev = int(sub["mode"].ne("none").sum())
+            n_ok = int((sub["verdict"] == "validated").sum())
+            call = ("junction not measured" if n_ev == 0 else
+                    "validates" if n_ok == n_ev else
+                    "mixed" if n_ok else "does not validate")
+            lines.append(f"| {gene} | {trait} | {region} | {match} | {n_ev} | {n_ok} | "
+                         f"{call} |")
+    if "verdict_bh" in res.columns:
+        paired_n = int(res["mode"].eq("paired").sum()) if "mode" in res.columns else 0
+        if paired_n:
+            n_bh = int((res["verdict_bh"] == "validated").sum())
+            lines += ["", f"Across the panel the `paired` family ({paired_n} targets) is "
+                          f"BH-corrected: **{n_bh}** validate on `verdict_bh`. The "
+                          f"uncorrected `verdict` column is the pre-registered two-gene "
+                          f"rule and is kept for the record."]
+    lines += [
+        "",
         "`direct` rows test a single PSI event whose two arms contrast the anchored",
         "junction against the alternative form, so PSI is the switch ratio itself and there",
         "is no compositional-closure confound; the statistic is minor-form usage,",
         "`min(median PSI, 1 - median PSI)`, which does not depend on PSI orientation.",
-        "`paired` rows test PSI anti-correlation against the closure baseline.", "",
-        "| gene | trait | region | mode | n | minor-form usage | median PSI | rho | p_within | p_matched | verdict |",
-        "| --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+        "`paired` rows test PSI anti-correlation against the closure baseline.",
+        "`no_matched_brainseq_region` rows are concordant events in a GTEx tissue BrainSEQ",
+        "does not sequence (chiefly cerebellum); they are untestable here, not negative.",
+        "`match` says how close the BrainSEQ region is to the GTEx tissue: exact, adjacent",
+        "(same division, different structure) or secondary (caudate carried alongside DLPFC).",
+        "",
+        "| gene | trait | tissue | region | match | mode | n | minor-form usage | median PSI | rho | q_within | q_matched | verdict |",
+        "| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
 
     def f(v, d=3):
@@ -474,13 +662,16 @@ def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
             return "--"
         return "--" if not np.isfinite(v) else str(int(v))
 
-    for _, r in res.iterrows():
+    for _, r in res.sort_values(
+            ["verdict", "gene_name", "region"], kind="stable").iterrows():
         lines.append(
-            f"| {r['gene_name']} | {r['trait']} | {r['region']} | "
+            f"| {r['gene_name']} | {r['trait']} | "
+            f"{str(r.get('tissue', '')).replace('Brain_', '')} | "
+            f"{r.get('region') or '--'} | {r.get('match', '--')} | "
             f"{r.get('mode', '--')} | {n_(r.get('n_samples'))} | "
             f"{f(r.get('minor_form_usage'), 4)} | {f(r.get('median_psi'))} | "
-            f"{f(r.get('rho'))} | {f(r.get('p_within_gene'))} | "
-            f"{f(r.get('p_matched_gene'))} | {r['verdict']} |"
+            f"{f(r.get('rho'))} | {f(r.get('q_within_gene'))} | "
+            f"{f(r.get('q_matched_gene'))} | {r['verdict']} |"
         )
 
     ev = res[res.get("event_info", pd.Series(dtype=str)).notna()] if "event_info" in res else res.iloc[0:0]
@@ -492,8 +683,11 @@ def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
 
     # The gene-level call rests ONLY on the event the display item claims, so that a
     # gene cannot be declared confirmed on the strength of some other alternative form.
-    ref = res[res.get("is_reference_contrast", pd.Series(False, index=res.index))
-              .fillna(False).astype(bool)] if "is_reference_contrast" in res else res.iloc[0:0]
+    # .eq(True) rather than .fillna(False): the column is object dtype once untestable
+    # rows are concatenated, and fillna on object dtype is deprecated.
+    ref = res[res.get("is_reference_contrast",
+                      pd.Series(False, index=res.index)).eq(True)
+              ] if "is_reference_contrast" in res else res.iloc[0:0]
     lines += ["", "## Display-item contrast (the row the decision rests on)", ""]
     if ref.empty:
         lines.append("No event contrasts the anchored junction against the arm the figure "
@@ -506,7 +700,9 @@ def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
                          f"{n_(r.get('n_samples'))} | {f(r.get('minor_form_usage'), 4)} | "
                          f"{r['verdict']} |")
 
-    lines += ["", "## Pre-registered decision rule", ""]
+    lines += ["", "## Pre-registered decision rule", "",
+              "Applies only to genes with a display-item contrast in `_REFERENCE_ARM`; "
+              "every other gene is reported above, not decided.", ""]
     ref_genes = (ref.groupby("gene_name")["verdict"]
                  .apply(lambda s: bool((s == "validated").all())).to_dict()
                  if not ref.empty else {})
@@ -524,17 +720,30 @@ def _write_report(res: pd.DataFrame, alpha: float, min_usage: float,
         lines.append("Decision rule not applicable -- no display-item contrast measured.")
 
     if "verdict_reason" in res:
+        # Untestable-tissue rows all carry the same sentence; one line covers them.
+        tested = res[res["verdict"].ne("no_matched_brainseq_region")]
         lines += ["", "Per-target reasons:", ""]
-        for _, r in res.iterrows():
+        for _, r in tested.iterrows():
             if isinstance(r.get("verdict_reason"), str):
                 lines.append(f"- {r['gene_name']} / {r['region']}: {r['verdict_reason']}")
+        un = res[res["verdict"].eq("no_matched_brainseq_region")]
+        if len(un):
+            by_t = un.groupby("tissue")["gene_name"].nunique().sort_values(ascending=False)
+            lines += ["", f"- {len(un)} targets over {un['gene_name'].nunique()} genes sit "
+                          f"in a tissue BrainSEQ does not sequence: "
+                      + ", ".join(
+                          f"{str(k).replace('Brain_', '')} "
+                          f"({int(v)} gene{'' if int(v) == 1 else 's'})"
+                          for k, v in by_t.items()) + "."]
     return "\n".join(lines)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--genes", nargs="+", default=["SNCA", "CTSH"])
+    ap.add_argument("--genes", nargs="+", default=None,
+                    help="restrict to these symbols; default is EVERY gene whose junction "
+                         "lands in the tissue-matched IsoGraph switch pair")
     ap.add_argument("--regions", nargs="+",
                     default=["hippocampus", "dlpfc", "caudate"])
     ap.add_argument("--alpha", type=float, default=0.05)
@@ -550,13 +759,18 @@ def main() -> None:
     args = ap.parse_args()
 
     od = out_dir()
-    targets = load_targets(tuple(args.genes))
+    genes = tuple(args.genes) if args.genes else None
+    targets = load_targets(genes)
     targets.to_parquet(od / "targets.parquet", index=False)
-    print(f"{len(targets)} (gene, trait, region) targets", flush=True)
+    testable = targets[targets["match"].ne("none")]
+    print(f"{len(targets)} (gene, trait, region) targets over "
+          f"{targets['gene_name'].nunique()} genes; {len(testable)} in a BrainSEQ region, "
+          f"{len(targets) - len(testable)} in a tissue BrainSEQ does not sequence",
+          flush=True)
 
     res_all, null_all = [], []
     for region in args.regions:
-        res, nul = run_region(region, targets, alpha=args.alpha, min_n=args.min_n,
+        res, nul = run_region(region, testable, alpha=args.alpha, min_n=args.min_n,
                               n_background_genes=args.n_background_genes,
                               max_pairs=args.max_pairs, seed=args.seed,
                               min_usage=args.min_usage)
@@ -565,23 +779,30 @@ def main() -> None:
         if not nul.empty:
             null_all.append(nul)
 
+    unmatched = unmatched_targets(targets)
+    if not unmatched.empty:
+        res_all.append(unmatched)
     res = pd.concat(res_all, ignore_index=True) if res_all else pd.DataFrame()
+    res = _bh_adjust(res)
     res.to_parquet(od / "junction_confirm.parquet", index=False)
     if null_all:
         pd.concat(null_all, ignore_index=True).to_parquet(od / "null_rhos.parquet",
                                                           index=False)
     (od / "JUNCTION_COLOC_CONFIRM.md").write_text(
         _write_report(res, args.alpha, args.min_usage,
-                      missing=tuple(g for g in args.genes
+                      missing=tuple(g for g in (args.genes or ())
                                     if g not in set(targets["gene_name"]))))
     (od / "params.json").write_text(json.dumps(vars(args), indent=2))
     print(f"wrote {od}", flush=True)
     if not res.empty:
-        cols = [c for c in ["gene_name", "trait", "region", "mode", "n_samples",
+        cols = [c for c in ["gene_name", "trait", "region", "match", "mode", "n_samples",
                                     "minor_form_usage", "median_psi", "rho",
-                                    "p_within_gene", "p_matched_gene", "verdict"]
+                                    "p_within_gene", "q_within_gene", "p_matched_gene",
+                                    "q_matched_gene", "verdict"]
                 if c in res.columns]
         print(res[cols].to_string(index=False))
+        print()
+        print(res["verdict"].value_counts().to_string())
 
 
 if __name__ == "__main__":

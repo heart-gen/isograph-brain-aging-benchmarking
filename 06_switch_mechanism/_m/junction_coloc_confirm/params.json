@@ -1,8 +1,5 @@
 {
-  "genes": [
-    "SNCA",
-    "CTSH"
-  ],
+  "genes": null,
   "regions": [
     "hippocampus",
     "dlpfc",
