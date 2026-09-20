@@ -102,7 +102,7 @@ submits a stage in that order and `run_pipeline.sh` chains the stages (README "R
 | PSI / junction validation | `real_data/validate_switch_splicing.py` | `_h/01b–01c` | `_m/switch_validation/` | — |
 | ISA / satuRn concordance | `real_data/isa_concordance.py` | `_h/01d` | `_m/isa_concordance/` | **S-real-9** `figIsaConcordance`, Table S15 |
 | Long-read confirmation | `real_data/longread_switch_confirm.py` | `_h/01e` | `_m/longread_switch_confirm/` | — |
-| Short-read junction confirmation (SNCA/CTSH) | `real_data/junction_coloc_confirm.py` | `_h/01k` | `_m/junction_coloc_confirm/` | Fig 4A (confirms SNCA; CTSH withheld) |
+| Short-read junction confirmation, **all concordant genes** | `real_data/junction_coloc_confirm.py` | `_h/01k` | `_m/junction_coloc_confirm/{targets,junction_confirm}.parquet`, `params.json`, `JUNCTION_COLOC_CONFIRM.md` | *(generalised 2026-09-20 from two hardcoded genes to all 30; genes in tissues BrainSEQ cannot sequence are reported as `no_matched_brainseq_region` rather than dropped; BH within the paired family. SNCA and CTSH are no longer in the target set)* |
 | Orthogonal confirmation | `real_data/switch_orthogonal_confirm.py` | `_h/02b` (`--mode anchored`, `--mode global-null`) | `_m/switch_orthogonal_confirm/` | **S-real-8** `figOrthogonalConfirm`, Table S14 |
 | **Orthogonal confirmation, signal-level coloc** | `real_data/coloc_isoform_events.py --layer signal` → `switch_orthogonal_confirm.py --events signal` | `05_genetic_anchoring/_h/08a` → `_h/02b --events signal` | `05_genetic_anchoring/_m/coloc_signal_susie/all_introns/coloc_isoform_events.parquet`, `_m/switch_orthogonal_confirm/signal_coloc/` | *(Analysis 6: long-read check over the coloc.susie nominations; the CLPP arm above is unchanged)* |
 | Clinical consequence | `real_data/clinical_consequence[_meta].py` | `_h/01f` (download, login node), `_h/02c`, then `_h/03a` (meta) | `_m/clinical_consequence_meta.parquet` | S-real-7 |
@@ -132,6 +132,7 @@ submits a stage in that order and `run_pipeline.sh` chains the stages (README "R
 | SCZ age projection | `real_data/scz_age_projection.py` | `_h/01b` | `_m/scz_age_projection/` | **Fig 4E** (folded from `figSczConvergence`), Table S18 |
 | Functional preservation of matched modules | `real_data/replication_functional.py` | `_h/01c` | `_m/functional_preservation/` | Fig 2 |
 | Target panel / assayability | `real_data/rbp_target_panel.py`, `rbp_pair_assayability.py` | `_h/02a` (per RBP arm), `_h/03a` | `_m/rbp_target_panel/` | — |
+| **Anchored gene summary (genetics + orthogonal validation)** | `real_data/anchored_gene_summary.py` | `_h/04a` | `_m/anchored_gene_summary/{anchored_gene_summary.{parquet,tsv},ANCHORED_GENE_SUMMARY.md,provenance.json}` | *(one table for the 30 concordant genes: coloc.abf as primary, SMR/HEIDI, eCAVIAR CLPP as a trailing secondary column, beside long-read / junction-recount / PSI validation. Every number generated; `provenance.json` carries the commit, dirty flag, thresholds and per-input digests. Re-run it whenever stage 05 or 06 is re-run)* |
 
 `<store>` = `02_module_discovery/<cohort>/<region>/_m/`, the shared cohort × region
 artifact store.
