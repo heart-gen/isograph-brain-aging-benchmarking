@@ -4,7 +4,7 @@
 
 Sorted on **coloc**, which is the primary genetic evidence. eCAVIAR **CLPP is secondary** and is carried as a trailing column only: it is noisy per locus and, for the two largest values in this set, contradicted by every other layer. It does not enter `genetics_call`.
 
-Generated 2026-09-20T04:35:27+00:00 from commit `99328586`, pandas 2.3.3, numpy 2.4.4, over 12 input files. Digests, sizes and mtimes are in `provenance.json`; re-run `python -m isograph_benchmark.real_data.anchored_gene_summary` to regenerate. Do not edit any number here by hand.
+Generated 2026-09-20T13:13:23+00:00 from commit `5150594d` **with a dirty working tree -- not reproducible from that commit alone**, pandas 2.3.3, numpy 2.4.4, over 12 input files. Digests, sizes and mtimes are in `provenance.json`; re-run `python -m isograph_benchmark.real_data.anchored_gene_summary` to regenerate. Do not edit any number here by hand.
 
 ## Genetics
 
@@ -52,41 +52,45 @@ Three assays with different failure modes. **Long-read**: ONT DLPFC BA9/46, n = 
 
 **Minor-form usage is a descriptor, not a criterion.** BrainSEQ and GTEx are neurotypical tissue, so an isoform that matters in disease is often a minority form here precisely because disease is what raises it. `usage` is reported for interpretation; the call keys on whether both forms are observed and in how many donors (`both` >= 30). For reference only, 0.05 is the pre-registered threshold the separate PSI arm applies.
 
+**One assay confirms; genes confirmed by more are marked.** The three assays fail for unrelated reasons -- ONT is one tissue on a 5'-truncating chemistry, the recount reaches only the three regions BrainSEQ sequenced, the PSI catalogue covers the events it happens to contain -- so a gene only one of them can reach is less-sampled, not weaker. Rows confirmed by two or three carry a `**` on the gene name and are listed under Counts.
+
+A usage range beginning at 0.000 is marked `!` and is **indeterminate**: at least one carrying pair contributes no fragments for one form, and these data cannot separate a read-depth floor from genuine absence of that form. It is neither a confirmation nor a failure.
+
 | gene | trait | LR conf | LR pairs det/switch | ASE pairs test/carrying | ASE donors both | ASE usage range | PSI | switch replicates | call |
 | --- | --- | :---: | :---: | :---: | ---: | :---: | --- | :---: | --- |
 | DOC2A | scz | no | 4/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | tested, not confirmed |
-| PRDM2 | als | yes | 10/4 | 11/12 | 498/498 | 0.034-0.457 | junction not in catalogue | yes | confirmed (2 assays) |
+| **PRDM2** | als | yes | 10/4 | 11/12 | 498/498 | 0.034-0.457 | junction not in catalogue | yes | confirmed (2 assays) |
 | THAP3 | scz | no | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | not measurable |
 | IFNAR2 | ad | no | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | not measurable |
 | TPP1 | als | yes | 1/1 | 0/0 | 0/0 | -- | no BrainSEQ region | no | confirmed (1 assay) |
-| SNAP91 | scz | yes | 22/6 | 14/18 | 486/486 | 0.084-0.403 | no BrainSEQ region | no | confirmed (2 assays) |
+| **SNAP91** | scz | yes | 22/6 | 14/18 | 486/486 | 0.084-0.403 | no BrainSEQ region | no | confirmed (2 assays) |
 | NT5C2 | scz | yes | 2/0 | 5/5 | 494/495 | 0.221-0.475 | no BrainSEQ region | no | confirmed (1 assay) |
 | CRELD2 | scz | yes | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | tested, not confirmed |
 | PTPRN | als | no | 6/0 | 5/14 | 451/451 | 0.046-0.460 | no BrainSEQ region | no | confirmed (1 assay) |
-| DNAJA3 | scz | yes | 6/3 | 3/9 | 486/486 | 0.050-0.283 | no BrainSEQ region | no | confirmed (2 assays) |
+| **DNAJA3** | scz | yes | 6/3 | 3/9 | 486/486 | 0.050-0.283 | no BrainSEQ region | no | confirmed (2 assays) |
 | INO80E | scz | no | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | not measurable |
 | DLG1 | scz | yes | 6/0 | 24/34 | 498/498 | 0.142-0.496 | no BrainSEQ region | no | confirmed (1 assay) |
 | VAMP2 | als | no | 2/0 | 4/9 | 451/451 | 0.273-0.491 | not validated | no | confirmed (1 assay) |
-| TBC1D15 | pd | yes | 2/2 | 3/15 | 486/486 | 0.111-0.409 | junction not in catalogue | no | confirmed (2 assays) |
-| CTSB | pd | yes | 4/0 | 14/15 | 451/451 | 0.000-0.373 | no BrainSEQ region | no | confirmed (1 assay) |
+| **TBC1D15** | pd | yes | 2/2 | 3/15 | 486/486 | 0.111-0.409 | junction not in catalogue | no | confirmed (2 assays) |
+| CTSB | pd | yes | 4/0 | 14/15 | 451/451 | 0.000-0.373 ! | no BrainSEQ region | no | confirmed (1 assay) |
 | GPR135 | scz | no | 0/0 | 0/1 | 0/0 | -- | no BrainSEQ region | no | not measurable |
 | FLCN | ad | yes | 0/0 | 2/13 | 486/486 | 0.226-0.413 | no BrainSEQ region | no | confirmed (1 assay) |
-| BAIAP3 | als | no | 2/0 | 8/12 | 480/485 | 0.000-0.479 | no BrainSEQ region | no | confirmed (1 assay) |
+| BAIAP3 | als | no | 2/0 | 8/12 | 480/485 | 0.000-0.479 ! | no BrainSEQ region | no | confirmed (1 assay) |
 | CTC1 | als | no | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | not measurable |
-| PIGQ | als | no | 0/0 | 4/15 | 486/486 | 0.085-0.455 | validated | no | confirmed (2 assays) |
-| RPAIN | scz | yes | 0/0 | 7/12 | 451/451 | 0.088-0.455 | validated | no | confirmed (2 assays) |
+| **PIGQ** | als | no | 0/0 | 4/15 | 486/486 | 0.085-0.455 | validated | no | confirmed (2 assays) |
+| **RPAIN** | scz | yes | 0/0 | 7/12 | 451/451 | 0.088-0.455 | validated | no | confirmed (2 assays) |
 | FLCN | scz | yes | 0/0 | 2/13 | 486/486 | 0.226-0.413 | no BrainSEQ region | no | confirmed (1 assay) |
 | SPG7 | scz | yes | 0/0 | 7/15 | 498/498 | 0.052-0.455 | no BrainSEQ region | no | confirmed (1 assay) |
-| PCGF3 | pd | no | 10/0 | 11/20 | 498/498 | 0.000-0.384 | no BrainSEQ region | no | confirmed (1 assay) |
+| PCGF3 | pd | no | 10/0 | 11/20 | 498/498 | 0.000-0.384 ! | no BrainSEQ region | no | confirmed (1 assay) |
 | NADSYN1 | scz | yes | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | tested, not confirmed |
-| TARBP1 | scz | no | 0/0 | 14/15 | 486/486 | 0.000-0.488 | no BrainSEQ region | no | confirmed (1 assay) |
-| B3GAT1 | scz | no | 2/0 | 4/10 | 450/451 | 0.002-0.064 | validated | no | confirmed (2 assays) |
-| PPP6R2 | scz | yes | 2/2 | 9/15 | 451/451 | 0.038-0.468 | junction not in catalogue | no | confirmed (2 assays) |
+| TARBP1 | scz | no | 0/0 | 14/15 | 486/486 | 0.000-0.488 ! | no BrainSEQ region | no | confirmed (1 assay) |
+| **B3GAT1** | scz | no | 2/0 | 4/10 | 450/451 | 0.002-0.064 | validated | no | confirmed (2 assays) |
+| **PPP6R2** | scz | yes | 2/2 | 9/15 | 451/451 | 0.038-0.468 | junction not in catalogue | no | confirmed (2 assays) |
 | TMEM175 | als | no | 10/2 | 0/0 | 0/0 | -- | no BrainSEQ region | no | tested, not confirmed |
 | RBFA | scz | no | 0/0 | 0/0 | 0/0 | -- | no BrainSEQ region | no | not measurable |
 | TMEM175 | ad | no | 10/2 | 0/0 | 0/0 | -- | no BrainSEQ region | no | tested, not confirmed |
 | TMEM175 | pd | no | 10/2 | 0/0 | 0/0 | -- | validated | no | confirmed (1 assay) |
-| GSTO2 | scz | yes | 18/6 | 0/0 | 0/0 | -- | validated | no | confirmed (2 assays) |
+| **GSTO2** | scz | yes | 18/6 | 0/0 | 0/0 | -- | validated | no | confirmed (2 assays) |
 
 ## Counts
 
@@ -104,6 +108,20 @@ Three assays with different failure modes. **Long-read**: ONT DLPFC BA9/46, n = 
 | confirmed (2 assays) | 9 |
 | not measurable | 6 |
 | tested, not confirmed | 5 |
+
+**Confirmed by more than one assay (9 rows):** PRDM2 (als, 2), SNAP91 (scz, 2), DNAJA3 (scz, 2), TBC1D15 (pd, 2), PIGQ (als, 2), RPAIN (scz, 2), B3GAT1 (scz, 2), PPP6R2 (scz, 2), GSTO2 (scz, 2).
+
+**Usage range touching 0.000, indeterminate (4 rows):** CTSB (pd), BAIAP3 (als), PCGF3 (pd), TARBP1 (scz). Depth floor and genuine absence are not separable in these data; neither reading is supported.
+
+## Sensitivity to the donor floor
+
+`MIN_DONORS_BOTH` = 30 is the primary. The junction-recount arm is the only one it touches; the long-read and PSI arms are unaffected. 10 is about the smallest donor count a within-donor comparison can carry, and 100 is deliberately severe -- it demands a fifth of the cohort -- so a confirmed set that survives it is not an artifact of a generous floor.
+
+| floor | confirmed (>=1 assay) | confirmed (>=2) | tested, not confirmed | not measurable | rows changing call |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 10 | 22 | 9 | 5 | 6 | 0 |
+| 30 (primary) | 22 | 9 | 5 | 6 | -- |
+| 100 | 22 | 9 | 5 | 6 | 0 |
 
 ## Reproducibility
 

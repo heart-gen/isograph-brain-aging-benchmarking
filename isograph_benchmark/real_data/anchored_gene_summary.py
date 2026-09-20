@@ -89,6 +89,20 @@ MIN_USAGE_REFERENCE = 0.05
 # handful of donors is not evidence of a switch; one seen in hundreds at 4% is.
 MIN_DONORS_BOTH = 30
 
+# The same call recomputed at a permissive and a conservative floor, reported beside the
+# primary so a reader can see which rows the threshold decides rather than taking 30 on
+# trust. 10 is about the smallest donor count a within-donor comparison can carry; 100 is
+# deliberately severe -- it demands a fifth of the cohort -- and is there to show that the
+# confirmed set does not depend on a generous floor.
+MIN_DONORS_SENSITIVITY = (10, 100)
+
+# A usage range whose minimum is exactly 0 is INDETERMINATE in these data: the pair is
+# carried by the junction and the donors are there, but one form contributes no fragments
+# in at least one pair. Read depth at that junction and genuine absence of the form are not
+# separable without deeper or targeted sequencing, so the floor is reported and never
+# interpreted in either direction.
+USAGE_FLOOR = 0.0
+
 # Fragments a donor must carry across the pair before its usage ratio is computed at all.
 MIN_PAIR_FRAGS = 10
 
@@ -388,18 +402,29 @@ def _genetics_call(r: pd.Series) -> str:
     return "weak coloc"
 
 
-def _orthogonal_call(r: pd.Series) -> str:
+def _n_assays(r: pd.Series, min_donors: int = MIN_DONORS_BOTH) -> int:
+    """Independent assays that OBSERVE the switch, at a given donor floor."""
+    lr = bool(r["lr_confirmed"]) and r["lr_pairs_switchlike"] > 0
+    ase = r["ase_donors_both_forms"] >= min_donors
+    psi = r.get("psi_verdict") == "validated"
+    return int(lr) + int(ase) + int(psi)
+
+
+def _orthogonal_call(r: pd.Series, min_donors: int = MIN_DONORS_BOTH) -> str:
     """How many independent assays OBSERVE the switch.
 
     Observation, not abundance: the junction-recount arm counts as confirming when both
     forms are seen in enough donors, whatever the ratio between them. A 4% minority form
     detected in 495 of 498 neurotypical donors is a well-measured switch, and may be
     exactly the form a disease raises.
+
+    One assay confirms (PI, 2026-09-20). The assays have different and largely disjoint
+    blind spots -- platform, tissue, catalogue coverage -- so a gene reachable by only one
+    of them is not thereby weaker evidence; it is less-sampled evidence. Genes confirmed by
+    two or three are marked in the table so the distinction stays visible without being
+    turned into a gate.
     """
-    lr = bool(r["lr_confirmed"]) and r["lr_pairs_switchlike"] > 0
-    ase = r["ase_donors_both_forms"] >= MIN_DONORS_BOTH
-    psi = r.get("psi_verdict") == "validated"
-    n = int(lr) + int(ase) + int(psi)
+    n = _n_assays(r, min_donors)
     if n >= 2:
         return f"confirmed ({n} assays)"
     if n == 1:
@@ -498,14 +523,29 @@ def build() -> pd.DataFrame:
     t = _psi(t)
     for col in ("n_tissue_sqtl_coloc", "n_tissue_eqtl_coloc"):
         t[col] = t[col].fillna(0).astype(int)
-    t["genetics_call"] = t.apply(_genetics_call, axis=1)
-    t["orthogonal_call"] = t.apply(_orthogonal_call, axis=1)
+    t = _derived(t)
     # Sort on coloc, never on CLPP: strongest splicing evidence first.
     order = {"splicing-specific": 0, "splicing-led": 1, "splicing-led (coloc only)": 2,
              "colocalizes, not splicing-specific": 3, "weak coloc": 4}
     t["_o"] = t["genetics_call"].map(order)
     t = t.sort_values(["_o", "pp4_sqtl"], ascending=[True, False]).drop(columns="_o")
     return t.reset_index(drop=True)
+
+
+def _derived(t: pd.DataFrame) -> pd.DataFrame:
+    """Calls and their descriptors. Separated so a caller can build a frame and re-derive."""
+    if "genetics_call" not in t or t["genetics_call"].isna().all():
+        t["genetics_call"] = t.apply(_genetics_call, axis=1)
+    t["orthogonal_call"] = t.apply(_orthogonal_call, axis=1)
+    t["n_assays_confirming"] = t.apply(_n_assays, axis=1)
+    t["multi_assay"] = t["n_assays_confirming"] >= 2
+    for d in MIN_DONORS_SENSITIVITY:
+        t[f"orthogonal_call_donors_{d}"] = t.apply(_orthogonal_call, axis=1, min_donors=d)
+    # usage that touches zero in at least one carrying pair: depth floor and genuine
+    # absence are not separable here, so the row is flagged rather than read either way
+    t["usage_floor_indeterminate"] = (
+        pd.to_numeric(t["ase_usage_min"], errors="coerce") <= USAGE_FLOOR)
+    return t
 
 
 def _f(v, d=3):
@@ -588,6 +628,8 @@ def report(t: pd.DataFrame, prov: dict | None = None) -> str:
         f"donors (`both` >= {MIN_DONORS_BOTH}). "
         f"For reference only, {MIN_USAGE_REFERENCE} is the pre-registered threshold the "
         "separate PSI arm applies.", "",
+        "**One assay confirms; genes confirmed by more are marked.** The three assays fail for unrelated reasons -- ONT is one tissue on a 5'-truncating chemistry, the recount reaches only the three regions BrainSEQ sequenced, the PSI catalogue covers the events it happens to contain -- so a gene only one of them can reach is less-sampled, not weaker. Rows confirmed by two or three carry a `**` on the gene name and are listed under Counts.", "",
+        "A usage range beginning at 0.000 is marked `!` and is **indeterminate**: at least one carrying pair contributes no fragments for one form, and these data cannot separate a read-depth floor from genuine absence of that form. It is neither a confirmation nor a failure.", "",
         "| gene | trait | LR conf | LR pairs det/switch | ASE pairs test/carrying | "
         "ASE donors both | ASE usage range | PSI | switch replicates | call |",
         "| --- | --- | :---: | :---: | :---: | ---: | :---: | --- | :---: | --- |",
@@ -596,8 +638,12 @@ def report(t: pd.DataFrame, prov: dict | None = None) -> str:
         both, n_d = int(r["ase_donors_both_forms"]), int(r["ase_usage_donors"])
         rng = ("--" if not np.isfinite(pd.to_numeric(r["ase_usage_min"], errors="coerce"))
                else f"{_f(r['ase_usage_min'], 3)}-{_f(r['ase_usage_max'], 3)}")
+        mark = "**" if r["multi_assay"] else ""
+        if r["usage_floor_indeterminate"]:
+            rng += " !"
         L.append(
-            f"| {r['gene']} | {r['trait']} | {'yes' if r['lr_confirmed'] else 'no'} | "
+            f"| {mark}{r['gene']}{mark} | {r['trait']} | "
+            f"{'yes' if r['lr_confirmed'] else 'no'} | "
             f"{int(r['lr_pairs_detected'])}/{int(r['lr_pairs_switchlike'])} | "
             f"{int(r['ase_testable'])}/{int(r['ase_pairs'])} | "
             f"{both}/{n_d} | {rng} | {r['psi_verdict']} | "
@@ -610,6 +656,38 @@ def report(t: pd.DataFrame, prov: dict | None = None) -> str:
     L += [f"| {k} | {int(v)} |" for k, v in gc.items()]
     L += ["", "| orthogonal call | rows |", "| --- | ---: |"]
     L += [f"| {k} | {int(v)} |" for k, v in oc.items()]
+
+    multi = t[t["multi_assay"]]
+    L += ["", f"**Confirmed by more than one assay ({len(multi)} rows):** "
+          + (", ".join(f"{r['gene']} ({r['trait']}, {int(r['n_assays_confirming'])})"
+                       for _, r in multi.iterrows()) or "none") + ".", ""]
+    floor = t[t["usage_floor_indeterminate"]]
+    if len(floor):
+        L += [f"**Usage range touching 0.000, indeterminate ({len(floor)} rows):** "
+              + ", ".join(f"{r['gene']} ({r['trait']})" for _, r in floor.iterrows())
+              + ". Depth floor and genuine absence are not separable in these data; "
+                "neither reading is supported.", ""]
+
+    L += ["## Sensitivity to the donor floor", "",
+          f"`MIN_DONORS_BOTH` = {MIN_DONORS_BOTH} is the primary. The junction-recount arm "
+          "is the only one it touches; the long-read and PSI arms are unaffected. "
+          f"{MIN_DONORS_SENSITIVITY[0]} is about the smallest donor count a within-donor "
+          f"comparison can carry, and {MIN_DONORS_SENSITIVITY[-1]} is deliberately severe -- "
+          "it demands a fifth of the cohort -- so a confirmed set that survives it is not an "
+          "artifact of a generous floor.", "",
+          "| floor | confirmed (>=1 assay) | confirmed (>=2) | tested, not confirmed | "
+          "not measurable | rows changing call |",
+          "| ---: | ---: | ---: | ---: | ---: | ---: |"]
+    for d in (MIN_DONORS_SENSITIVITY[0], MIN_DONORS_BOTH, MIN_DONORS_SENSITIVITY[-1]):
+        col = ("orthogonal_call" if d == MIN_DONORS_BOTH
+               else f"orthogonal_call_donors_{d}")
+        v = t[col]
+        n2 = int(t.apply(_n_assays, axis=1, min_donors=d).ge(2).sum())
+        changed = "--" if d == MIN_DONORS_BOTH else int((v != t["orthogonal_call"]).sum())
+        L.append(f"| {d}{' (primary)' if d == MIN_DONORS_BOTH else ''} | "
+                 f"{int(v.str.startswith('confirmed').sum())} | {n2} | "
+                 f"{int((v == 'tested, not confirmed').sum())} | "
+                 f"{int((v == 'not measurable').sum())} | {changed} |")
     if prov:
         L += ["", "## Reproducibility", "",
               "| input | bytes | mtime (UTC) |", "| --- | ---: | --- |"]
