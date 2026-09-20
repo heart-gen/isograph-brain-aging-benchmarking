@@ -4,11 +4,11 @@
 
 | Method | Module set | Analyses (k) | sQTL/eQTL ratio | 95% CI | p (FE) | I2 |
 | --- | --- | --- | --- | --- | --- | --- |
-| IsoGraph | All modules | 17 | 1.068 | 1.04-1.10 | 1.3e-05 | 0.29 |
-| IsoGraph | Phenotype-associated | 12 | 1.111 | 1.05-1.18 | 0.00036 | 0.23 |
-| IsoGraph | GO-invisible (DTU-without-DGE) | 11 | 1.068 | 0.99-1.15 | 0.077 | 0.0 |
-| IsoGraph | GO-visible (immune/abundance) | 11 | 1.084 | 1.00-1.17 | 0.05 | 0.28 |
-| wgcna_switch_only | Phenotype-associated | 9 | 1.025 | 0.94-1.12 | 0.58 | 0.23 |
-| wgcna_switch_only | GO-invisible (DTU-without-DGE) | 8 | 1.066 | 0.98-1.16 | 0.15 | 0.35 |
-| wgcna_multiplex | Phenotype-associated | 10 | 1.046 | 1.00-1.10 | 0.053 | 0.75 |
-| wgcna_multiplex | GO-invisible (DTU-without-DGE) | 6 | 1.019 | 0.92-1.12 | 0.71 | 0.0 |
+| IsoGraph | All modules | 17 | 1.033 | 1.01-1.06 | 0.018 | 0.6 |
+| IsoGraph | Phenotype-associated | 10 | 1.065 | 1.01-1.12 | 0.02 | 0.1 |
+| IsoGraph | GO-invisible (DTU-without-DGE) | 7 | 1.08 | 0.99-1.18 | 0.093 | 0.0 |
+| IsoGraph | GO-visible (immune/abundance) | 9 | 1.049 | 0.99-1.12 | 0.13 | 0.34 |
+| wgcna_switch_only | Phenotype-associated | 6 | 0.927 | 0.86-1.00 | 0.065 | 0.46 |
+| wgcna_switch_only | GO-invisible (DTU-without-DGE) | 6 | 0.929 | 0.86-1.01 | 0.076 | 0.46 |
+| wgcna_multiplex | Phenotype-associated | 8 | 1.084 | 1.03-1.15 | 0.0044 | 0.64 |
+| wgcna_multiplex | GO-invisible (DTU-without-DGE) | 4 | 1.006 | 0.91-1.11 | 0.91 | 0.61 |

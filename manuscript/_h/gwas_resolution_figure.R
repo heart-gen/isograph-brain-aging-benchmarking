@@ -1,11 +1,22 @@
-# Supplementary real-data figure: Leiden resolution removes IsoGraph's giant-module
-# GWAS artifact while the schizophrenia signal survives.
-# (A) MAGMA module significance vs module size -> sig hits pile up in giant modules at
-#     res 2.0 and for gene-level WGCNA, but are confined to small modules at res 5.0.
-# (B) significant-module counts split by giant (>=900 genes) vs not -> the giant fraction
-#     collapses to 0 at res 5.0. (C) the eight surviving res-5.0 IsoGraph hits, modest-sized
-#     and dominated by schizophrenia. Reads 05_genetic_anchoring/_m/gwas/magma_results_combined{,_res2}
-#     .parquet, writes figGwasResolution.{pdf,png} to manuscript/_m/figures/.
+# Supplementary real-data figure: module size and MAGMA significance, by clustering
+# resolution and by method.
+#
+# REWRITTEN 2026-09-19. Under the legacy expression filter this figure carried "resolution
+# 5.0 removes the giant-module GWAS artifact". On the switching filter that claim REVERSED
+# (PI, 2026-09-16) and production moved to resolution 2.0, so the figure now reports what is
+# actually true: neither resolution escapes giant modules, and gene-level WGCNA is worse than
+# either on the same gene universe.
+#
+# It also fixes a data bug. After the resolution switch the canonical
+# `magma_results_combined.parquet` holds the PRODUCTION (res 2.0) results under the backend
+# label `isograph_vae`, while the res-5.0 arm moved to `..._res5.parquet`
+# (`isograph_vae_res5`). The old script read the canonical file as "res 5.0" and the _res2
+# file as "res 2.0", so it plotted production twice under two different labels.
+#
+# (A) MAGMA significance vs module size, per group. (B) significant-module counts split by
+#     giant (>=900 genes) vs not. (C) the production (res 2.0) significant sets.
+#     Reads 05_genetic_anchoring/_m/gwas/magma_results_combined{,_res5}.parquet,
+#     writes figGwasResolution.{pdf,png} to manuscript/_m/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/gwas_resolution_figure.R
 suppressPackageStartupMessages({
@@ -59,10 +70,12 @@ save_fig <- function(p, name, width, height) {
   cat("  ", name, " saved\n", sep = "")
 }
 
-r5 <- as.data.frame(read_parquet(file.path(GWAS_DIR, "magma_results_combined.parquet")))
-r2 <- as.data.frame(read_parquet(file.path(GWAS_DIR, "magma_results_combined_res2.parquet")))
+# canonical = production (res 2.0); the res-5.0 arm is a disclosed sensitivity
+prod <- as.data.frame(read_parquet(file.path(GWAS_DIR, "magma_results_combined.parquet")))
+r5   <- as.data.frame(read_parquet(file.path(GWAS_DIR, "magma_results_combined_res5.parquet")))
+stopifnot("isograph_vae" %in% prod$backend, "isograph_vae_res5" %in% r5$backend)
 
-GROUP_LEVELS <- c("IsoGraph (res 2.0)", "IsoGraph (res 5.0)", "WGCNA gene")
+GROUP_LEVELS <- c("IsoGraph res 2.0\n(production)", "IsoGraph res 5.0", "WGCNA gene")
 prep <- function(df, backend, group) {
   df |>
     filter(backend == !!backend) |>
@@ -72,9 +85,9 @@ prep <- function(df, backend, group) {
 }
 # WGCNA gene modules are resolution-independent; take them once from the res-5.0 file.
 dat <- bind_rows(
-  prep(r2, "isograph_vae_res2", "IsoGraph (res 2.0)"),
-  prep(r5, "isograph_vae",      "IsoGraph (res 5.0)"),
-  prep(r5, "wgcna_gene",        "WGCNA gene")
+  prep(prod, "isograph_vae",      "IsoGraph res 2.0\n(production)"),
+  prep(r5,   "isograph_vae_res5", "IsoGraph res 5.0"),
+  prep(prod, "wgcna_gene",        "WGCNA gene")   # resolution-independent
 )
 
 # ---------------------------------------------------------------------------
@@ -111,14 +124,15 @@ pB <- ggplot(datB, aes(group, n, fill = size_class)) +
   geom_text(data = tot, aes(group, n, label = n), inherit.aes = FALSE,
             vjust = -0.4, size = 2.6) +
   scale_fill_manual(values = c("Giant (>= 900 genes)" = GIANT_COL,
-                               "< 900 genes" = SMALL_COL)) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.12))) +
+                               "< 900 genes" = SMALL_COL),
+                    guide = guide_legend(nrow = 2)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
   labs(x = NULL, y = "Significant modules\n(FDR < 0.05)") +
-  theme_pub() + theme(legend.position = c(0.62, 0.85),
-                      axis.text.x = element_text(angle = 18, hjust = 1))
+  theme_pub() + theme(legend.position = c(0.5, 0.93), legend.key.size = unit(0.3, "cm"),
+                      axis.text.x = element_text(size = 6.4, lineheight = 0.85))
 
 # ---------------------------------------------------------------------------
-# Panel C - the surviving res-5.0 IsoGraph hits: modest-sized, SCZ-dominated
+# Panel C - the production (res 2.0) significant sets
 # ---------------------------------------------------------------------------
 shorten <- function(v) {
   p <- strsplit(v, "__")
@@ -127,16 +141,21 @@ shorten <- function(v) {
   paste0(reg, " ", mod)
 }
 datC <- dat |>
-  filter(group == "IsoGraph (res 5.0)", sig) |>
+  filter(group == "IsoGraph res 2.0\n(production)", sig) |>
   mutate(label = shorten(variable), nlf = -log10(FDR)) |>
   arrange(nlf)
-datC$label <- factor(datC$label, levels = datC$label)
-pC <- ggplot(datC, aes(nlf, label, colour = trait)) +
-  geom_segment(aes(x = 0, xend = nlf, y = label, yend = label),
+# one module can be significant for several traits, so the label is not unique: order on a
+# unique key and print the shared label on the axis (the old code made it a factor level
+# directly, which errored out with "factor level is duplicated")
+datC$key <- factor(make.unique(paste(datC$label, datC$trait)),
+                   levels = make.unique(paste(datC$label, datC$trait)))
+pC <- ggplot(datC, aes(nlf, key, colour = trait)) +
+  geom_segment(aes(x = 0, xend = nlf, y = key, yend = key),
                linewidth = 0.4, colour = "grey80") +
   geom_point(aes(size = ngenes)) +
-  scale_colour_manual(values = TRAIT_COLORS) +
-  scale_size_area(max_size = 4.2, breaks = c(100, 400, 800), name = "Module genes") +
+  scale_y_discrete(labels = setNames(datC$label, datC$key)) +
+  scale_colour_manual(values = TRAIT_COLORS, name = "GWAS trait") +
+  scale_size_area(max_size = 4.2, breaks = c(300, 900, 2000), name = "Module genes") +
   scale_x_continuous(expand = expansion(mult = c(0.02, 0.12))) +
   labs(x = expression(-log[10] ~ "FDR"), y = NULL) +
   guides(colour = guide_legend(order = 1, override.aes = list(size = 2.4)),
@@ -144,13 +163,14 @@ pC <- ggplot(datC, aes(nlf, label, colour = trait)) +
   theme_pub() + theme(legend.position = "right",
                       legend.title = element_text(size = 7.5),
                       legend.spacing.y = unit(0.02, "cm"),
+                      axis.text.y = element_text(size = 5.6),
                       panel.grid.major.y = element_blank(),
                       panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 fig <- pA / (pB | pC) +
-  plot_layout(heights = c(1, 1.08)) +
+  plot_layout(heights = c(1, 2.6)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figGwasResolution", width = 7.2, height = 5.8)
+save_fig(fig, "figGwasResolution", width = 7.2, height = 8.6)
 cat("Done. Output in", FIG_DIR, "\n")

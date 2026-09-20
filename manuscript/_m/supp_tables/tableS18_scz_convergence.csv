@@ -1,9 +1,10 @@
 source,module_id,n_coloc_loci,n_go_invisible,frac_same_dx_direction,scz_p,candidate_rbp_regulators
-gtex_caudate_bg,M002,6,8,0.6667,0.0109,IGF2BP1(q=0.0061)
-gtex_caudate_bg,M004,3,5,0.5833,0.0478,
-gtex_caudate_bg,M008,3,1,0.75,0.0007,RBM14(q=0.015); RBM6(q=0.023); RBMS1(q=0.025); RBM24(q=0.029); HNRNPA3(q=0.045)
-brainseq_caudate,M004,2,9,0.5556,0.0449,
-gtex_caudate_bg,M006,1,0,1.0,0.035,DDX58(q=0.0001); GRSF1(q=0.0016); ADAR(q=0.0016); TARDBP(q=0.0016); PTBP2(q=0.0039)
-brainseq_caudate,M001,1,0,1.0,0.0168,
-brainseq_caudate,M009,1,0,1.0,0.0001,
-brainseq_caudate,M012,1,1,1.0,0.0125,
+gtex_caudate_bg,M000,11,7,0.6471,0.0,
+gtex_caudate_bg,M002,8,8,0.6842,0.0257,
+gtex_caudate_bg,M001,7,10,0.6429,0.0043,
+brainseq_caudate,M003,7,11,0.7143,0.0,
+gtex_caudate_bg,M004,6,9,0.6667,0.0476,
+brainseq_caudate,M000,3,1,0.8571,0.0032,
+brainseq_caudate,M001,2,0,1.0,0.0016,
+gtex_caudate_bg,M007,1,1,1.0,0.0296,
+brainseq_caudate,M010,1,2,1.0,0.0237,

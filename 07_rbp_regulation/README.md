@@ -35,25 +35,27 @@ The wet-lab target panel and the pair assayability read the per-gene deep dive, 
 
 ## Key results
 
-**714** significant module × RBP tests (hypergeometric q<0.05) across **138** RBPs of
-**160** tested, spanning 14 regions; **149** of the 714 fall in GO-invisible modules.
+**384** significant module × RBP tests (hypergeometric q<0.05) across **125** RBPs of
+**160** tested, spanning 12 of 16 regions; **61** of the 384 fall in GO-invisible modules.
 Under the opportunity-adjusted GLM (transcript length, GC, UTR composition) the count is
-**310** hits across **107** RBPs in 12 regions (50 GO-invisible). **The two arms are not
-nested: only 43 cells are significant in both**, and 267 of the 310 adjusted hits are not
+**416** hits across **124** RBPs in 13 regions (159 GO-invisible). **The two arms are not
+nested: only 89 cells are significant in both**, and 327 of the 416 adjusted hits are not
 hypergeometric hits at all. Quote the GLM number for a regulon claim and the
-hypergeometric one for screening breadth, but never present 310 as "the survivors" of
-714 — the adjustment reshuffles the ranking rather than thinning it.
+hypergeometric one for screening breadth, but never present the adjusted count as "the
+survivors" of the raw one — the adjustment reshuffles the ranking rather than thinning it.
 
-Recurrent neuronal 3′UTR/splicing factors, by the number of the 14 regions in which the
-RBP has a hypergeometric hit: **KHDRBS1, ELAVL4 and PPRC1 at 8/14**; CPEB4, RBMS3,
-RNASEL, ELAVL3, RBM14 and ADAR at 7/14 — i.e. the ELAV and CPEB families recur, as does
-KHDRBS1. On the covariate-adjusted GLM the most recurrent are DHX58, RBFOX2 and SART3
-at 6/14. The GLM regulon test applies an estimability gate that excludes separated cells
-(2,529 of 34,240) before BH correction.
+Recurrent factors, by the number of the 16 regions in which the RBP has a hypergeometric
+hit: **PPRC1 at 8/16** and **IGF2BP3 at 7/16**; DHX9, G3BP2, KHDRBS1, RBM41, PABPC5 and
+NOVA2 at 6/16. On the covariate-adjusted GLM the most recurrent are RBFOX2 at 6/16, then
+IGF2BP3, PABPC5, TARDBP and SART3 at 5/16. The GLM regulon test applies an estimability
+gate that excludes separated cells (510 zero-cell of 11,040) before BH correction.
 
-*(Counts recomputed 2026-09-03 from `_m/rbp/rbp_regulon.parquet`. A previous version of
-this section read "829 ... across 129 RBPs ... ~245 GO-invisible" with a 7/10 recurrence
-list; none of those reproduced, and the denominator is 14 regions, not 10.)*
+*(Counts recomputed 2026-09-19 from `_m/rbp/rbp_regulon.parquet` on the switching-filter
+re-run at Leiden resolution 2.0. The previous section quoted the legacy res-5.0 production
+— 714 hypergeometric / 310 adjusted over 34,240 cells in 14 regions — which does not apply
+to the current partitions. Resolution 2.0 gives fewer, larger modules, so the cell count
+fell roughly threefold. The ELAV/CPEB recurrence story did not survive: the legacy list
+led with KHDRBS1, ELAVL4 and PPRC1 at 8/14.)*
 
 `_m/neuronal_clip/` is gitignored (large downloaded CLIP tracks); the manifests are
 tracked under `_m/neuronal_clip_manifests/`.
