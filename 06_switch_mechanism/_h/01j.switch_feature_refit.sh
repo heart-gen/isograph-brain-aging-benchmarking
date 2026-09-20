@@ -5,14 +5,19 @@
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=kj.benjamin90@gmail.com
 #SBATCH --cpus-per-task=24
-#SBATCH --array=1-12
+#SBATCH --array=1-14
 #SBATCH --time=04:00:00
 #SBATCH --output=06_switch_mechanism/_m/logs/switch-feature-refit-%A_%a.log
 
 ## Full IsoGraph refit per preprocessing setting (the follow-on the fixed-partition harness,
 ## _h/01h and _h/01i, names as its limitation). One production fit per array task: the
-## published setting (task 1, the noise floor) and the 11 perturbed settings of the
+## published setting (task 1, the noise floor) and the 13 perturbed settings of the
 ## pseudocount, expression-filter and minor-isoform axes. The rollup is its own step,
+##
+## **Keep --array in step with the grid.** It said 1-12 while the grid held 14 settings, so
+## the two minor-isoform settings were never re-run on the switching filter and silently kept
+## results computed against the legacy committed fit. `--list` prints the grid and its size;
+## the aggregate step now refuses to mix rows compared against different committed fits.
 ## 06_switch_mechanism/_h/02e.switch_feature_refit_aggregate.sh, after this array.
 ##
 ## Defaults to brainseq/caudate, the region the harness was defined on; override with
