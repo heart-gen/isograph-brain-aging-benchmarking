@@ -36,14 +36,14 @@ BrainSEQ is roughly half African-American and the GWAS are European, so a pooled
 ## Oriented pairs at q < 0.05 (EA refit, BH within this family)
 
 - 4 pairs over 1 genes
-- risk allele raises the module score in 1, lowers it in 3
+- risk allele raises the module score in 0, lowers it in 0
 
 | gene | trait | lead | risk variant | risk allele | GWAS p | r | beta_risk | risk_along_module | q |
 |---|---|---|---|---|---:|---:|---:|---:|---:|
-| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.80 | -0.80 | 0.00025 |
-| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.86 | +0.86 | 0.00025 |
-| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | -0.89 | -0.89 | 0.00025 |
-| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.75 | -0.75 | 0.0029 |
+| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.80 | +nan | 0.00025 |
+| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.86 | +nan | 0.00025 |
+| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | -0.89 | +nan | 0.00025 |
+| KLC1 | scz | rs2273175 | rs10873538 | G | 3e-13 | +0.85 | +0.75 | +nan | 0.0029 |
 
 ## Caveats
 

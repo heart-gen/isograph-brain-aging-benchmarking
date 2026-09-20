@@ -50,7 +50,9 @@ OUTPUT
                                    oriented by construction rather than by LD
   n_paired_het                     donors heterozygous at the GWAS lead and informative
                                    on both haplotypes -- the power this arm trades for
-  risk_along_module                beta_risk_direct signed by the pair's module polarity
+  module_projection_status         whether the pair's module switch axis is meaningful
+  risk_along_module                beta_risk_direct signed by the pair's module polarity,
+                                   NA where the projection is refused (see the guard)
   frame_agreement                  phase-frame concordance behind the whole arm
 """
 from __future__ import annotations
@@ -67,7 +69,7 @@ import pandas as pd
 from isograph_benchmark.real_data.ase_junction_allelic import allelic_contrast
 from isograph_benchmark.real_data.ase_risk_orientation import (
     REGIONS, QVAL_ALLELIC, _PANELS, _PLINK2, _bh, _gwas_risk, _palindromic,
-    build_targets, dest_dir, donor_ancestry,
+    build_targets, dest_dir, donor_ancestry, projection_guard,
 )
 
 # The per-sample phASER VCFs that define the `PW` haplotypes the counts are phased on.
@@ -274,7 +276,7 @@ def fit_region(region: str, targets: pd.DataFrame, panel_gt: pd.DataFrame,
                         "beta_hom_null": f.get("beta_hom_null", np.nan),
                         "at_bound": bool(f.get("at_bound", False)),
                         "status": f.get("status", "not_fitted")}
-        for col in ("module_polarity", "module_id"):
+        for col in ("module_polarity", "module_id", "module_projection_status"):
             if col in sub.columns:
                 rec[col] = r.get(col)
         rows.append(rec)
@@ -283,7 +285,13 @@ def fit_region(region: str, targets: pd.DataFrame, panel_gt: pd.DataFrame,
         return out
     if "beta_risk_direct" in out.columns and "module_polarity" in out.columns:
         pol = pd.to_numeric(out["module_polarity"], errors="coerce")
-        out["risk_along_module"] = out["beta_risk_direct"] * np.sign(pol)
+        s = np.sign(pol).replace(0, np.nan)
+        if "module_projection_status" in out.columns:
+            # Same guard as the fitted-lead arm: a pair whose module axis is meaningless
+            # (abundance-only role, or neither transcript anchored to the eigengene) gets no
+            # projection. KLC1 is the worked example, stage 06a section 5a.
+            s = s.where(out["module_projection_status"].isin(("projected", "not_evaluated")))
+        out["risk_along_module"] = out["beta_risk_direct"] * s
     ok = out.get("pval", pd.Series(dtype=float)).notna()
     out["qval"] = np.nan
     if ok.any():
@@ -296,6 +304,11 @@ def fit_region(region: str, targets: pd.DataFrame, panel_gt: pd.DataFrame,
 # --------------------------------------------------------------------------- #
 def _summary(t: pd.DataFrame, frame: dict) -> dict:
     fitted = t[t["status"] == "fitted"] if "status" in t else t.iloc[0:0]
+    if "at_bound" in fitted.columns:
+        # Rows that never reached the fitter leave `at_bound` unset, which makes the whole
+        # column object dtype; `~` on an object column of Python bools yields -1/-2 instead
+        # of a mask. Coerce before any boolean use.
+        fitted = fitted.assign(at_bound=fitted["at_bound"].fillna(False).astype(bool))
     s = {
         "rows": int(len(t)),
         "pairs": int(t["pair_id"].nunique()) if len(t) else 0,
@@ -394,8 +407,12 @@ def _report(region: str, t: pd.DataFrame, s: dict, dest: Path) -> None:
 
 
 def run(regions: tuple[str, ...]) -> None:
-    t = build_targets(regions)
+    t = projection_guard(build_targets(regions))
     print(f"targets: {len(t)} pair x trait rows, {t['gene'].nunique()} genes", flush=True)
+    if "module_projection_status" in t:
+        n_ref = int((~t["module_projection_status"].isin(
+            ("projected", "not_evaluated"))).sum())
+        print(f"  module projection refused for {n_ref} of {len(t)} rows", flush=True)
 
     risk = []
     for trait, sub in t.dropna(subset=["lead_snp"]).groupby("trait"):
