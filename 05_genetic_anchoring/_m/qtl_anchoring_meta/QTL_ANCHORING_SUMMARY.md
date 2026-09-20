@@ -57,7 +57,7 @@ IsoGraph v0.1.5 under the project Python 3.12 environment with fixed seeds.
 
 **Raw cis-QTL enrichment — a shared depletion baseline, not the result.** Pooled across 17
 analyses, IsoGraph co-switch module genes are cis-QTL *depleted* for both QTL types
-(`all_modules` eQTL OR 0.808, p=7.3e-138; sQTL OR 0.867, p=9.1e-31 —
+(`all_modules` eQTL OR 0.838, p=3.3e-113; sQTL OR 0.870, p=7.3e-35 —
 `qtl_anchoring_meta.parquet`), the expected signature of coordinated/constrained network
 genes carrying fewer common-variant cis-QTL. This shared OR < 1 baseline is the same for
 expression and splicing and is **not** the estimand; it is reported only to motivate the
@@ -65,20 +65,19 @@ contrast.
 
 **Splicing-specificity contrast — the result.** The paired sQTL-OR / eQTL-OR ratio exceeds
 1 and is carried by the **phenotype-associated** modules
-(`qtl_anchoring_meta_contrast.parquet`): `all_modules` **1.068** (95% CI 1.037–1.100,
-p=1.3e-5, I²=0.29, Q=22.6, k=17), `pheno_sig_modules` **1.111** (1.048–1.177, p=3.6e-4,
-I²=0.23, Q=14.3, k=12), `go_invisible_modules` 1.068 (0.993–1.148, **p=0.077, n.s.**,
-I²=0.00, Q=9.4, k=11), and `go_visible_modules` 1.084 (1.000–1.174, p=0.050, I²=0.28,
-Q=14.0, k=11). Splicing-QTL are spared ~7–11% relative to expression-QTL in co-switch
-genes.
+(`qtl_anchoring_meta_contrast.parquet`, re-run 2026-09-19): `all_modules` **1.033** (95% CI
+1.006–1.062, p=0.018, I²=0.60, k=17), `pheno_sig_modules` **1.065** (1.010–1.123, p=0.020,
+I²=0.10, k=10), `go_invisible_modules` 1.080 (0.987–1.182, **p=0.093, n.s.**, I²=0.00, k=7),
+and `go_visible_modules` 1.049 (0.987–1.116, **p=0.126, n.s.**, I²=0.34, k=9). Splicing-QTL
+are spared ~3–7% relative to expression-QTL in co-switch genes — about half the sparing the
+legacy expression-filter production reported (1.068 / 1.111).
 
-**The effect does NOT localise to the GO-invisible modules.** GO-invisible (1.068,
-p=0.077) and GO-visible (1.084, p=0.050) are statistically indistinguishable — overlapping
-CIs, and if anything GO-visible is the nominally larger of the two. Neither is a null and
-neither is the site of the effect: it lives in the phenotype-associated set. The
-GO-invisible arm's I²=0.00 is now a *homogeneous null*, not evidence of a consistent
-effect, so the old "GO-invisible is homogeneous while GO-visible rides on heterogeneity"
-contrast (I²=0.00 vs 0.68) is gone — on the refreshed inputs GO-visible's I² is 0.28.
+**The effect does NOT localise to the GO-invisible modules.** GO-invisible (1.080, p=0.093)
+and GO-visible (1.049, p=0.126) are both non-significant and statistically indistinguishable
+from each other — overlapping CIs, opposite nominal ordering from the legacy run. Neither is
+the site of the effect: it lives in the phenotype-associated set, which is the only IsoGraph
+arm that clears 0.05. The GO-invisible arm's I²=0.00 is a *homogeneous null*, not evidence of
+a consistent effect.
 **IsoGraph's DTU-without-DGE claim rests on the GO-invisible content gate
 (`GO_INVISIBLE_GATE_SUMMARY.md`), not on these genetics.**
 
@@ -93,24 +92,27 @@ contrast (I²=0.00 vs 0.68) is gone — on the refreshed inputs GO-visible's I²
 > which is the control proving the pipeline itself did not change. Guarded since
 > 2026-08-30 by `isograph_benchmark/real_data/partition_provenance.py`.
 
-**Matched-baseline method effect — only IsoGraph shows it.** On the 13 GTEx tissues all
-methods share (8-tissue common-subset contrast, `qtl_anchoring_meta_contrast_common.parquet`),
-IsoGraph reproduces the specificity (`all_modules` **1.110**, p=2.4e-6, I²=0.00;
-`pheno_sig` **1.112**, p=6.5e-4, I²=0.00; `go_visible` 1.083, p=0.055; `go_invisible` 1.066,
-p=0.11, n.s.) while the matched WGCNA baselines on identical switch features **reach
-significance in no module set**: `wgcna_switch_only` pheno_sig 1.015 (p=0.74), go_invisible
-1.065 (p=0.16), go_visible 0.957 (p=0.28); `wgcna_multiplex` pheno_sig 1.044 (p=0.070,
-I²=0.80), go_invisible 1.019 (p=0.71), go_visible 1.041 (p=0.085). All fixed-effects.
-**Updated 2026-09-12** to the 2026-09-09 matched-baseline re-fit: the previous values
-(pheno_sig 0.968 / 0.980, p≥0.41) predated it and must not be quoted. The baselines are
-still non-significant, but `wgcna_multiplex` is now borderline rather than flat, so state the
-control as "no baseline clears 0.05". **This is the primary internal control** — it holds
-the switch features fixed and varies only the inference, which localises the effect far
-more sharply than a module-content contrast can. Same features + classical inference loses
-the splicing-genetic signal that IsoGraph's VAE + Leiden concentrates in the
-phenotype-associated modules — the genetic-anchoring analog of the three-baseline result.
-(One tissue, frontal_cortex, looked specific for `wgcna_switch_only` at 1.29 but does not
-survive pooling; trust the meta, not one tissue.)
+**Matched-baseline method effect — REVERSED on the re-run; the control no longer holds.**
+On the switching filter at Leiden 2.0 the matched `wgcna_multiplex` baseline, built on the
+identical switch+abundance features, now shows a *stronger* splicing-specificity contrast
+than IsoGraph in the full 17-analysis meta: `wgcna_multiplex` pheno_sig **1.084**
+(1.025–1.146, **p=0.0044**, I²=0.64) and go_visible **1.095** (1.036–1.157, p=0.0013),
+against IsoGraph's pheno_sig 1.065 (p=0.020). `wgcna_switch_only` remains null and below 1
+throughout (pheno_sig 0.927, p=0.065; go_invisible 0.929, p=0.076; go_visible 0.969,
+p=0.77). On the common-tissue subset neither method clears 0.05 (IsoGraph pheno_sig 1.040,
+p=0.20, k=5; `wgcna_multiplex` 1.059, p=0.060, k=5; `wgcna_switch_only` 0.930, p=0.10).
+
+**What this means.** The legacy claim — "same features + classical inference loses the
+splicing-genetic signal that IsoGraph's VAE + Leiden concentrates" — is not supported by the
+re-run and must be withdrawn. What survives is narrower and still worth reporting: the
+contrast is a property of **switch+abundance multiplex features**, shown by both methods that
+consume them, and it is absent in the switch-only representation. It is not an IsoGraph-only
+effect and cannot be used as a method-attribution argument. The stage's attribution claim now
+rests on the module-content gate and on the coloc/S-LDSC layers, not on this contrast.
+
+*(Superseded values, not to be quoted: the 2026-09-12 reading gave IsoGraph `all_modules`
+1.110 p=2.4e-6 and pheno_sig 1.112 p=6.5e-4 with every baseline non-significant. The
+2026-08-29 and earlier readings are invalid for the separate reason recorded above.)*
 
 **Headline:** *Splicing-QTL are spared ~11% over expression-QTL in IsoGraph's
 phenotype-associated co-switch modules (1.111, 95% CI 1.048–1.177, p=3.6e-4), and the

@@ -77,6 +77,20 @@ def _contrast(sqtl: pd.DataFrame, eqtl: pd.DataFrame, genes: set[str]) -> tuple[
     return float(np.log(so) - np.log(eo)), s, e
 
 
+def _clear_outputs(out_dir: Path, analysis: str, region: str | None) -> None:
+    """A skipped region must not leave a previous fit's outputs behind.
+
+    Leiden re-assigns module ids at every fit, so a stale `module_genetic_anchoring.parquet`
+    does not merely go out of date -- `meta()` pools every file it finds, so one left behind
+    by a skip contributes modules that no longer exist to the pooled headline.
+    """
+    for name in ("module_genetic_anchoring.parquet", "MODULE_GENETIC_ANCHORING.md"):
+        f = out_dir / name
+        if f.exists():
+            f.unlink()
+            print(f"[{analysis}/{region}] removed stale {name}", flush=True)
+
+
 def run_module_anchoring(analysis: str, region: str | None, variant: str, fdr: float,
                          xqtl_dir: Path, gtf_cache: Path, n_perm: int, seed: int) -> pd.DataFrame:
     iso_dir = _artifact_dir(analysis, region, variant)
@@ -95,11 +109,13 @@ def run_module_anchoring(analysis: str, region: str | None, variant: str, fdr: f
     )
     if enrich is None:
         print(f"[{analysis}/{region}] no module_enrichment table — skipping", flush=True)
+        _clear_outputs(iso_dir.parent, analysis, region)
         return pd.DataFrame()
     enrich["module_id"] = enrich["module_id"].astype(str)
     sig = enrich[enrich["pheno_fdr"] <= fdr]
     if sig.empty:
         print(f"[{analysis}/{region}] no phenotype-significant modules — skipping", flush=True)
+        _clear_outputs(iso_dir.parent, analysis, region)
         return pd.DataFrame()
 
     sqtl = _qtl_universe(xqtl_dir, tissue, "sQTL", fdr, iso_genes, iso_per_gene)
