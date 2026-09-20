@@ -124,6 +124,7 @@ def test_report_flags_a_dirty_tree():
     t["orthogonal_call"] = "confirmed (2 assays)"
     t["ase_frac_donors_both"] = 0.8
     t["ase_usage_pairs"] = 3
+    t = ags._derived(t)
     prov = dict(generated_utc="2026-09-20T00:00:00+00:00", git_commit="abcdef1234",
                 git_dirty=True, pandas=pd.__version__, numpy=np.__version__,
                 generator="x", thresholds={"PP4_STRONG": 0.8, "MIN_DONORS_BOTH": 30},
@@ -179,6 +180,68 @@ def test_usage_is_a_range_because_the_partner_decides_the_ratio():
         t[c] = "x" if c in ("tissue", "genetics_call", "orthogonal_call") else False
     t["ase_frac_donors_both"] = 0.8
     t["ase_usage_pairs"] = 12
+    t = ags._derived(t)
     md = ags.report(t)
     assert "0.045-0.390" in md
     assert "range" in md.lower()
+
+
+# --------------------------------------------------------------------------- #
+# one assay confirms; more than one is emphasis, not a gate (PI, 2026-09-20)
+# --------------------------------------------------------------------------- #
+def test_one_assay_confirms_and_several_are_only_emphasised():
+    """The assays fail for unrelated reasons, so reach is not the same as strength.
+
+    A gene the long-read arm can see but the recount cannot -- because BrainSEQ never
+    sequenced its tissue -- is less-sampled, not weaker, so it must still read as confirmed.
+    """
+    one = _row(ase_donors_both_forms=0, ase_testable=0, ase_pairs=0,
+               psi_verdict="no BrainSEQ region")
+    assert ags._orthogonal_call(one) == "confirmed (1 assay)"
+    assert ags._n_assays(one) == 1
+
+    two = _row(psi_verdict="no BrainSEQ region")          # long-read + recount
+    assert ags._orthogonal_call(two) == "confirmed (2 assays)"
+
+    t = pd.DataFrame([one, two])
+    for c in ("tissue", "genetics_call"):
+        t[c] = "x"
+    t["go_invisible"] = t["brainseq_switch_replicates"] = False
+    t["ase_frac_donors_both"] = 0.8
+    t["ase_usage_pairs"] = 3
+    t = ags._derived(t)
+    assert list(t["multi_assay"]) == [False, True]
+    md = ags.report(t)
+    assert "**X**" in md                       # the two-assay row is marked
+    assert "Confirmed by more than one assay (1 rows)" in md
+
+
+def test_the_donor_floor_is_reported_as_a_sensitivity_not_taken_on_trust():
+    t = pd.DataFrame([_row(ase_donors_both_forms=50),      # confirmed at 10 and 30, not 100
+                      _row(ase_donors_both_forms=400)])    # confirmed at every floor
+    for c in ("tissue", "genetics_call"):
+        t[c] = "x"
+    t["go_invisible"] = t["brainseq_switch_replicates"] = False
+    t["ase_frac_donors_both"] = 0.8
+    t["ase_usage_pairs"] = 3
+    t = ags._derived(t)
+    assert t["orthogonal_call_donors_100"].iloc[0] != t["orthogonal_call"].iloc[0]
+    assert t["orthogonal_call_donors_100"].iloc[1] == t["orthogonal_call"].iloc[1]
+    md = ags.report(t)
+    assert "Sensitivity to the donor floor" in md
+    assert "30 (primary)" in md
+
+
+def test_a_usage_range_that_touches_zero_is_flagged_indeterminate():
+    """Depth floor and genuine absence are not separable from these counts."""
+    t = pd.DataFrame([_row(ase_usage_min=0.0, ase_usage_max=0.373)])
+    for c in ("tissue", "genetics_call"):
+        t[c] = "x"
+    t["go_invisible"] = t["brainseq_switch_replicates"] = False
+    t["ase_frac_donors_both"] = 0.8
+    t["ase_usage_pairs"] = 3
+    t = ags._derived(t)
+    assert bool(t["usage_floor_indeterminate"].iloc[0])
+    md = ags.report(t)
+    assert "indeterminate" in md.lower()
+    assert "0.000-0.373 !" in md
