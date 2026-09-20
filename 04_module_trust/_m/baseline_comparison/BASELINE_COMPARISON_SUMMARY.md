@@ -47,14 +47,27 @@ used the project Python 3.12 environment with deterministic seeds.
 
 ## Results text
 
-**The switch-only representation carries the highest phenotype rate.** Pooled per-module
-phenotype-significant rate: `wgcna_switch_only` **0.214** > `wgcna_multiplex` **0.189** >
-`wgcna_gene` **0.178** > `isograph` **0.146**. Feeding a classical method switch-only features
-buys the most phenotype sensitivity; adding abundance back dilutes it.
+**The switch-only representation carries the highest phenotype rate — in GTEx.** Pooled
+per-module phenotype-significant rate: `wgcna_switch_only` **0.214** > `wgcna_multiplex`
+**0.189** > `wgcna_gene` **0.178** > `isograph` **0.146**. This pooled figure is the unweighted
+mean of per-analysis fractions over 17 analyses, 13 of which are GTEx, and **the two cohorts
+rank the methods in opposite orders**:
 
-**IsoGraph is NOT superior on any module-level rate.** It ranks last on phenotype rate and has
-the **lowest** "both" (phenotype-sig AND GO) rate (0.052 vs 0.117–0.159), because its GO
-enrichment is low by construction. GO-enriched rate is abundance-dominated: `wgcna_gene`
+| method | BrainSEQ (k=4) | GTEx (k=13) | pooled |
+|---|---|---|---|
+| isograph | **0.176** | 0.137 | 0.146 |
+| wgcna_multiplex | 0.163 | 0.196 | 0.189 |
+| wgcna_gene | 0.094 | 0.203 | 0.178 |
+| wgcna_switch_only | 0.046 | **0.265** | 0.214 |
+
+Quote the split, not the pooled ranking. Two further cautions: 4–8 of the 17 analyses return
+zero phenotype-significant modules for a given method (many GTEx regions are null for every
+method and drag all four means down equally), and module counts per analysis range from 3 to
+35, so one module moves a small-denominator fraction by tens of points.
+
+**IsoGraph is NOT superior on any module-level rate.** It is last on pooled phenotype rate
+(though first in BrainSEQ — see above) and has the **lowest** "both" (phenotype-sig AND GO) rate
+(0.052 vs 0.117–0.159), because its GO enrichment is low by construction. GO-enriched rate is abundance-dominated: `wgcna_gene`
 **0.862** > `wgcna_multiplex` 0.649 ≫ `isograph` 0.253 > `wgcna_switch_only` 0.184. This is
 the expected picture — abundance dominates gene-level GO enrichment — and is honest, not a
 failure.
@@ -72,8 +85,9 @@ advantage — though both beat their permutation null. (Replication covers isogr
 wgcna_gene only; the matched baselines were not run through replication_go.)
 
 **Headline:** *On per-module rates IsoGraph is not superior to WGCNA on any metric —
-phenotype sensitivity comes from the switch representation, GO enrichment is
-abundance-dominated, and no inference-level advantage survives on identical features.
+GO enrichment is abundance-dominated, and no inference-level advantage survives on identical
+features in the pooled mean. Phenotype rate is cohort-dependent and should not be quoted as a
+single ranking: IsoGraph leads in BrainSEQ and the switch-only baseline leads in GTEx.
 IsoGraph's defensible value is therefore the DTU-without-DGE content and the genetic
 anchoring, not module-level enrichment rates.*
 
