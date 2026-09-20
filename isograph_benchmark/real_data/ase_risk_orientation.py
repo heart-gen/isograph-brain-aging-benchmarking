@@ -84,7 +84,8 @@ import numpy as np
 import pandas as pd
 
 from isograph_benchmark.paths import ensure_dir, rel, stage_out
-from isograph_benchmark.real_data.ase_junction_allelic import QVAL_ALLELIC, out_dir
+from isograph_benchmark.real_data.ase_junction_allelic import (
+    QVAL_ALLELIC, module_annotation as _module_annotation, out_dir)
 from isograph_benchmark.real_data.coloc_direction import _gwas_risk
 
 REGIONS: tuple[str, ...] = ("caudate", "dlpfc", "hippocampus")
@@ -396,6 +397,67 @@ def _palindromic(a: pd.Series, b: pd.Series) -> pd.Series:
                       for x, y in zip(a.fillna(""), b.fillna(""))], index=a.index)
 
 
+def projection_guard(t: pd.DataFrame) -> pd.DataFrame:
+    """Decide, per pair, whether the module switch axis means anything for it.
+
+    The pair's polarity is a difference of two transcript-eigengene correlations. It is only
+    an axis worth signing an allelic effect along when (a) the gene is in its module through
+    SWITCHING rather than abundance, and (b) at least one of the two transcripts actually
+    correlates with the module score. KLC1 failed both and produced four significant rows whose
+    `risk_along_module` signs disagreed while the underlying cis effect was a single, coherent
+    one (stage 06a, section 5a). The upstream Quest step now writes
+    `module_projection_status`; this recomputes it where an older table lacks it, so the guard
+    holds without waiting for a re-run on Quest.
+    """
+    from isograph_benchmark.real_data.ase_junction_allelic import (
+        POLARITY_Q, _PROJECTABLE_ROLES)
+
+    if "module_projection_status" in t.columns:
+        return t
+    needed = {"module_id", "module_role", "module_polarity",
+              "transcript_id_1", "transcript_id_2"}
+    if not needed.issubset(t.columns):
+        # A caller that does not carry the module annotation cannot be judged; say so rather
+        # than silently guarding or silently projecting.
+        t["module_projection_status"] = "not_evaluated"
+        return t
+    q_lookup: dict[str, object] = {}
+    for region in sorted(set(t.get("region", pd.Series(dtype=str)).dropna())):
+        try:
+            _, polarity, _ = _module_annotation(region)
+        except Exception as exc:                     # noqa: BLE001 - reported, not raised
+            print(f"  {region}: polarity q unavailable ({exc}); projection guard falls back "
+                  "to the role test only", flush=True)
+            polarity = None
+        q_lookup[region] = polarity
+
+    def _q(region, module, tx):
+        pol = q_lookup.get(region)
+        if pol is None or not isinstance(module, str):
+            return np.nan
+        try:
+            return float(pol.loc[(module, tx), "qvalue"])
+        except (KeyError, TypeError):
+            return np.nan
+
+    q1 = np.array([_q(r, m, a) for r, m, a in
+                   zip(t.get("region", pd.Series(index=t.index)), t["module_id"],
+                       t["transcript_id_1"])], dtype=float)
+    q2 = np.array([_q(r, m, b) for r, m, b in
+                   zip(t.get("region", pd.Series(index=t.index)), t["module_id"],
+                       t["transcript_id_2"])], dtype=float)
+    anchored = (np.nan_to_num(q1, nan=1.0) <= POLARITY_Q) | \
+               (np.nan_to_num(q2, nan=1.0) <= POLARITY_Q)
+    t["pair_polarity_anchored"] = anchored
+    role_ok = t["module_role"].isin(_PROJECTABLE_ROLES)
+    t["module_projection_status"] = np.select(
+        [t["module_id"].isna(), ~role_ok, ~anchored,
+         t["module_polarity"].isna() | (t["module_polarity"] == 0)],
+        ["no_module", "role_not_switching", "pair_polarity_not_anchored", "no_polarity"],
+        default="projected")
+    return t
+
+
 def orient(t: pd.DataFrame, beta_col: str = "beta") -> pd.DataFrame:
     """beta -> beta_risk -> risk_along_module, with the reason when it stays NA.
 
@@ -411,7 +473,9 @@ def orient(t: pd.DataFrame, beta_col: str = "beta") -> pd.DataFrame:
     t["gwas_lead_palindromic"] = pal
     ok = gated & ~pal
     t["beta_risk"] = np.where(ok, b * np.where(on_alt, 1.0, -1.0), np.nan)
-    s = np.sign(t["module_polarity"]).replace(0, np.nan)
+    t = projection_guard(t)
+    s = np.sign(t["module_polarity"]).replace(0, np.nan).where(
+        t["module_projection_status"].isin(("projected", "not_evaluated")))
     t["risk_along_module"] = t["beta_risk"] * s
     t["orientation_status"] = np.select(
         [t["risk_allele"].isna(), t["r_lead_risk"].isna(), pal, ~gated, b.isna()],

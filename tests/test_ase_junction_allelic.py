@@ -145,3 +145,28 @@ def test_module_direction_check_detects_alignment_and_is_null_otherwise():
     assert hit["n_genes_all_sig_pairs_aligned"] >= 0.8 * hit["n_genes_ge2_sig_pairs"]
     miss = aja.module_direction_check(_direction_frame(False, seed=1), n_perm=200)
     assert miss["perm_p"] > 0.05
+
+
+def test_add_module_columns_guards_the_projection_with_polarity_q():
+    """With q-values available, an unanchored pair is not projected (KLC1, stage 06a 5a)."""
+    out = pd.DataFrame({"gene_id": ["G1", "G2"], "transcript_id_1": ["A", "X"],
+                        "transcript_id_2": ["B", "Y"], "beta": [0.5, 0.5],
+                        "beta_risk": [0.5, 0.5]})
+    roles = pd.DataFrame({"gene_id": ["G1", "G2"],
+                          "module_id": ["M001", "M002"],
+                          "module_role": ["coupled", "abundance_only"]})
+    pol = pd.DataFrame(
+        {"r": [0.6, -0.2, 0.11, -0.06], "qvalue": [1e-6, 1e-4, 0.17, 0.46]},
+        index=pd.MultiIndex.from_tuples(
+            [("M001", "A"), ("M001", "B"), ("M002", "X"), ("M002", "Y")],
+            names=["module_id", "transcript_id"]))
+    age = pd.DataFrame({"module_id": ["M001", "M002"],
+                        "module_age_trait": ["Age_linear"] * 2,
+                        "module_age_effect": [0.3, 0.3]})
+    o = aja.add_module_columns(out, roles, pol, age)
+    assert o.loc[0, "module_projection_status"] == "projected"
+    assert not pd.isna(o.loc[0, "beta_along_module"])
+    # G2 joined its module on abundance: no switch axis to project onto
+    assert o.loc[1, "module_projection_status"] == "role_not_switching"
+    assert pd.isna(o.loc[1, "beta_along_module"])
+    assert pd.isna(o.loc[1, "risk_along_module"])

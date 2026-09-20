@@ -287,22 +287,34 @@ def lead_site_distance(counts_dir: Path, pairs: pd.DataFrame, lead_gt: pd.DataFr
 # --------------------------------------------------------------------------- #
 # IsoGraph modules: which co-switching program a pair belongs to, and which way it moves
 # --------------------------------------------------------------------------- #
+# A pair is projected onto its module's switch axis only when that axis means something for
+# it. Two conditions, both learned from KLC1 (2026-09-20): a gene that joined its module on
+# ABUNDANCE carries no switch polarity to project onto, and a pair whose transcripts have no
+# significant correlation with the module score has a polarity set by noise. KLC1's four
+# significant hippocampus rows looked like four contradictory directions purely because the
+# transcript they all contrast (KLC1-213, eigengene q = 0.17) took its polarity from whichever
+# partner it was paired with.
+_PROJECTABLE_ROLES = ("coupled", "switch_only", "discordant")
+POLARITY_Q = 0.05
+
+
 def module_annotation(region: str) -> tuple[pd.DataFrame, pd.Series, pd.DataFrame]:
     """Gene -> module/role, (module, transcript) -> polarity r, module -> age association.
 
     Polarity is `transcript_polarity_table.r`, a transcript's correlation with its module
     score, written by module interpretation for the age-selected modules only (the modules
-    the switch pairs were drawn from).
+    the switch pairs were drawn from). Its q-value travels with it, because a polarity that
+    is not distinguishable from zero must not be used to sign anything.
     """
     root = _store(region) / "isograph_vae"
     roles = pd.read_parquet(root / "module_gene_roles.parquet",
                             columns=["gene_id", "module_id", "module_role"])
-    pol = []
+    pol, qs = [], []
     for f in sorted((root / "module_interpret").glob("M*/transcript_polarity_table.parquet")):
-        p = pd.read_parquet(f, columns=["transcript_id", "r"])
+        p = pd.read_parquet(f, columns=["transcript_id", "r", "qvalue"])
         pol.append(p.assign(module_id=f.parent.name))
-    polarity = (pd.concat(pol).set_index(["module_id", "transcript_id"])["r"] if pol
-                else pd.Series(dtype=float))
+    polarity = (pd.concat(pol).set_index(["module_id", "transcript_id"]) if pol
+                else pd.DataFrame(columns=["r", "qvalue"]))
     age = pd.read_parquet(root / "module_interpret" / "module_selection.parquet",
                           columns=["module_id", "trait", "effect"]).rename(
         columns={"trait": "module_age_trait", "effect": "module_age_effect"})
@@ -320,13 +332,44 @@ def add_module_columns(out: pd.DataFrame, roles: pd.DataFrame, polarity: pd.Seri
     """
     out = out.merge(roles, on="gene_id", how="left").merge(age, on="module_id", how="left")
 
+    # `polarity` is a frame with r and qvalue from module_annotation; a bare Series of r is
+    # accepted for callers that have no q-values, and those rows are marked not_evaluated
+    # rather than guarded on a q that does not exist.
+    has_q = isinstance(polarity, pd.DataFrame) and "qvalue" in polarity.columns
+
+    def _cell(mod, tx, col):
+        if not isinstance(mod, str) or (mod, tx) not in polarity.index:
+            return np.nan
+        cell = polarity.loc[(mod, tx)]
+        return cell[col] if has_q else (cell if col == "r" else np.nan)
+
     def r(mod, tx):
-        return polarity.get((mod, tx), np.nan) if isinstance(mod, str) else np.nan
+        return _cell(mod, tx, "r")
+
+    def q(mod, tx):
+        return _cell(mod, tx, "qvalue")
 
     out["module_polarity"] = [r(m, a) - r(m, b) for m, a, b in
                               zip(out["module_id"], out["transcript_id_1"],
                                   out["transcript_id_2"])]
-    s = np.sign(out["module_polarity"]).replace(0, np.nan)
+    q1 = np.array([q(m, a) for m, a in zip(out["module_id"], out["transcript_id_1"])],
+                  dtype=float)
+    q2 = np.array([q(m, b) for m, b in zip(out["module_id"], out["transcript_id_2"])],
+                  dtype=float)
+    out["pair_polarity_anchored"] = (np.nan_to_num(q1, nan=1.0) <= POLARITY_Q) | \
+                                    (np.nan_to_num(q2, nan=1.0) <= POLARITY_Q)
+    role_ok = out["module_role"].isin(_PROJECTABLE_ROLES)
+    out["module_projection_status"] = np.select(
+        [out["module_id"].isna(),
+         ~role_ok,
+         np.full(len(out), not has_q),
+         ~out["pair_polarity_anchored"],
+         out["module_polarity"].isna() | (out["module_polarity"] == 0)],
+        ["no_module", "role_not_switching", "not_evaluated",
+         "pair_polarity_not_anchored", "no_polarity"],
+        default="projected")
+    ok = out["module_projection_status"].isin(("projected", "not_evaluated"))
+    s = np.sign(out["module_polarity"]).replace(0, np.nan).where(ok)
     out["beta_along_module"] = out["beta"] * s
     out["risk_along_module"] = out["beta_risk"] * s
     return out

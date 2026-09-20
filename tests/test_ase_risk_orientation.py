@@ -102,3 +102,59 @@ def test_palindromic_gwas_lead_is_left_unoriented():
     ]))
     assert list(t["orientation_status"]) == ["palindromic_gwas_lead", "oriented"]
     assert np.isnan(t["beta_risk"].iloc[0])
+
+
+# --------------------------------------------------------------------------- #
+# the module projection is only applied where the module axis means something
+# --------------------------------------------------------------------------- #
+def test_projection_guard_refuses_abundance_only_genes():
+    """KLC1 (stage 06a, 5a): a gene in its module on ABUNDANCE has no switch axis.
+
+    Its four significant pairs produced `risk_along_module` signs that disagreed while the
+    underlying cis effect was one coherent effect on a single transcript. The disagreement
+    came from the projection, so the projection must not be computed for such a gene.
+    """
+    import numpy as np
+    import pandas as pd
+
+    from isograph_benchmark.real_data.ase_risk_orientation import projection_guard
+
+    t = pd.DataFrame({
+        "region": ["hippocampus"] * 3,
+        "module_id": ["M000", "M000", None],
+        "module_role": ["abundance_only", "coupled", "coupled"],
+        "transcript_id_1": ["T1", "T1", "T1"],
+        "transcript_id_2": ["T2", "T2", "T2"],
+        "module_polarity": [0.2, 0.2, 0.2],
+        "pair_polarity_anchored": [True, True, True],
+        "module_projection_status": ["role_not_switching", "projected", "no_module"],
+    })
+    # an already-stamped table is left alone
+    assert list(projection_guard(t)["module_projection_status"]) == [
+        "role_not_switching", "projected", "no_module"]
+
+
+def test_projection_guard_refuses_a_pair_whose_polarity_is_noise(monkeypatch):
+    """Both transcripts uncorrelated with the module score: the polarity is a coin toss."""
+    import numpy as np
+    import pandas as pd
+
+    from isograph_benchmark.real_data import ase_risk_orientation as rio
+
+    polarity = pd.DataFrame(
+        {"r": [0.11, -0.06], "qvalue": [0.17, 0.46]},
+        index=pd.MultiIndex.from_tuples([("M000", "T1"), ("M000", "T2")],
+                                        names=["module_id", "transcript_id"]))
+    monkeypatch.setattr(rio, "_module_annotation",
+                        lambda region: (None, polarity, None))
+    t = pd.DataFrame({
+        "region": ["hippocampus"],
+        "module_id": ["M000"],
+        "module_role": ["coupled"],          # role is fine; the transcripts are not
+        "transcript_id_1": ["T1"],
+        "transcript_id_2": ["T2"],
+        "module_polarity": [0.17],
+    })
+    out = rio.projection_guard(t)
+    assert out["module_projection_status"].iloc[0] == "pair_polarity_not_anchored"
+    assert not bool(out["pair_polarity_anchored"].iloc[0])
