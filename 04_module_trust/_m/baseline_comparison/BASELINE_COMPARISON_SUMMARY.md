@@ -1,8 +1,10 @@
 # Three-baseline module comparison (features vs method; honest scope)
 
-Modular analysis summary for Manubot integration. Generated from
-`04_module_characterization/_m/baseline_comparison/baseline_comparison{,_pooled}.parquet`. Every numeric
-claim is reproduced from those tables; do not edit the numbers by hand — regenerate.
+Modular analysis summary for Manubot integration. **Hand-written** — it is NOT emitted by
+`baseline_comparison.py`, so it does not update when the analysis re-runs. Re-quote it by hand
+against `04_module_trust/_m/baseline_comparison/baseline_comparison{,_pooled}.parquet` and the
+generated `BASELINE_COMPARISON.md` whenever those change. *(Last re-quoted 2026-09-19 against
+the switching-filter re-run at Leiden 2.0; it had carried the legacy expression-filter rates.)*
 
 ## Purpose
 
@@ -31,9 +33,9 @@ isograph/wgcna_switch_only-vs-wgcna_gene isolates representation.
 ## Methods text
 
 For each analysis and method we computed per-module rates rather than totals, because module
-totals scale with module count and IsoGraph runs at a finer resolution (median 35 modules,
-median size 71) than the WGCNA baselines (median 8–18.5 modules, size 127–387), making raw
-counts non-comparable. A module was phenotype-significant at `pheno_fdr ≤ 0.1`, GO-enriched
+totals scale with module count and the four methods partition at different granularity
+(IsoGraph median 25 modules of median size 108; WGCNA baselines median 8–25 modules, size
+159–468), making raw counts non-comparable. A module was phenotype-significant at `pheno_fdr ≤ 0.1`, GO-enriched
 at `n_go_terms > 0`, and "both" if it was phenotype-significant and GO-enriched. Per-module
 fractions were averaged across analyses to give pooled rates per method. The phenotype rate
 contrasts switch-fed (isograph, wgcna_switch_only) against abundance-fed (wgcna_gene,
@@ -45,26 +47,23 @@ used the project Python 3.12 environment with deterministic seeds.
 
 ## Results text
 
-**Phenotype signal lives in the switch features, not the method.** Pooled per-module
-phenotype-significant rate: `wgcna_switch_only` **0.336** > `isograph` **0.268** >
-`wgcna_multiplex` **0.189** ≈ `wgcna_gene` **0.180**. Both switch-fed methods beat both
-abundance-fed methods — representing isoform switching is what buys phenotype sensitivity,
-independent of the network-inference method.
+**The switch-only representation carries the highest phenotype rate.** Pooled per-module
+phenotype-significant rate: `wgcna_switch_only` **0.214** > `wgcna_multiplex` **0.189** >
+`wgcna_gene` **0.178** > `isograph` **0.146**. Feeding a classical method switch-only features
+buys the most phenotype sensitivity; adding abundance back dilutes it.
 
-**IsoGraph is NOT globally superior on module-level metrics.** Classical
-`wgcna_switch_only` matches or exceeds IsoGraph's phenotype-significant rate, and IsoGraph
-has the **lowest** "both" (phenotype-sig AND GO) rate (0.074 vs 0.136–0.196) because its
-GO-enrichment is low by construction. GO-enriched rate is abundance-dominated:
-`wgcna_gene` 0.885 > `wgcna_multiplex` 0.758 ≫ `wgcna_switch_only` 0.381 > `isograph`
-0.217. This is the expected picture — abundance dominates gene-level GO enrichment — and is
-honest, not a failure.
+**IsoGraph is NOT superior on any module-level rate.** It ranks last on phenotype rate and has
+the **lowest** "both" (phenotype-sig AND GO) rate (0.052 vs 0.117–0.159), because its GO
+enrichment is low by construction. GO-enriched rate is abundance-dominated: `wgcna_gene`
+**0.862** > `wgcna_multiplex` 0.649 ≫ `isograph` 0.253 > `wgcna_switch_only` 0.184. This is
+the expected picture — abundance dominates gene-level GO enrichment — and is honest, not a
+failure.
 
-**One clean method effect survives.** On the identical switch+abundance multiplex features,
-`isograph` (0.268) exceeds `wgcna_multiplex` (0.189): VAE + Leiden extracts more
-phenotype-linked switch structure from the full multiplex than classical WGCNA, which
-dilutes the switch signal back toward the abundance baseline when abundance is added. The
-representation+inference combination, not either alone, is where IsoGraph adds module-level
-value.
+**The legacy "one clean method effect" did not survive the re-run.** On the identical
+switch+abundance multiplex features the legacy expression-filter production had `isograph`
+(0.268) above `wgcna_multiplex` (0.189); on the switching filter at Leiden 2.0 the contrast
+inverts (0.146 vs 0.189). There is now no per-module rate on which IsoGraph leads, and the
+manuscript must not claim an inference-level module-rate advantage.
 
 **Cross-cohort GO replication favors abundance.** For preserved aging modules with GO
 overlap, classical `wgcna_gene` carries more cross-cohort GO Jaccard (median 0.077,
@@ -72,11 +71,11 @@ perm p=1e-3) than `isograph` (median 0.0, mean 0.048, perm p=0.013) — again th
 advantage — though both beat their permutation null. (Replication covers isograph vs
 wgcna_gene only; the matched baselines were not run through replication_go.)
 
-**Headline:** *On per-module rates IsoGraph is not globally superior to WGCNA — phenotype
-sensitivity comes from the switch features (both switch-fed methods win), GO enrichment is
-abundance-dominated, and the only clean method effect is that VAE + Leiden beats classical
-multiplex WGCNA on identical features. IsoGraph's defensible value is therefore the
-DTU-without-DGE content, not better module-level enrichment.*
+**Headline:** *On per-module rates IsoGraph is not superior to WGCNA on any metric —
+phenotype sensitivity comes from the switch representation, GO enrichment is
+abundance-dominated, and no inference-level advantage survives on identical features.
+IsoGraph's defensible value is therefore the DTU-without-DGE content and the genetic
+anchoring, not module-level enrichment rates.*
 
 ## Figure and table notes
 
@@ -94,7 +93,7 @@ DTU-without-DGE content, not better module-level enrichment.*
 
 ## Reproducibility information
 
-- Analysis directory: `04_module_characterization/_m/baseline_comparison/`.
+- Analysis directory: `04_module_trust/_m/baseline_comparison/`.
 - Primary script: `isograph_benchmark/real_data/baseline_comparison.py`
   (`python -m isograph_benchmark.real_data.baseline_comparison`; login-node aggregation,
   no SLURM — reads saved module_enrichment + replication_go outputs).
@@ -111,9 +110,9 @@ DTU-without-DGE content, not better module-level enrichment.*
 
 ## Limitations and integration notes
 
-- **Read rates, not totals.** Raw phenotype-sig totals (isograph 158 > wgcna_switch_only 75
-  > wgcna_multiplex 53 > wgcna_gene 34) scale with module count and are NOT a superiority
-  claim; IsoGraph's finer partition inflates totals. Only per-module rates are comparable.
+- **Read rates, not totals.** Raw phenotype-sig totals (wgcna_multiplex 75 >
+  wgcna_switch_only 64 > isograph 54 > wgcna_gene 28) scale with module count and are NOT a
+  superiority claim for anyone. Only per-module rates are comparable.
 - The matched WGCNA baselines were not run through cross-cohort GO replication, so that
   contrast is isograph vs classical abundance WGCNA only.
 - This analysis deliberately **bounds** the claim: it shows IsoGraph does not win

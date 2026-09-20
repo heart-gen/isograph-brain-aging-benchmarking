@@ -21,9 +21,9 @@ Stage 2 (isograph env) made a within-pair site-switch call: for each gene and RB
 
 ### Results Text
 
-*Numbers below are the switching-filter re-run at canonical Leiden resolution 2.0 (2026-09-19).
-The motif-family arm is the exception and is flagged where it appears: its table has not been
-regenerated since 2026-08-29 and still describes the legacy production.*
+*Numbers below are the switching-filter re-run at canonical Leiden resolution 2.0
+(2026-09-19). Every arm — mature, intronic, combined and motif-family — is on that re-run;
+the family arm was regenerated last, on 2026-09-19 22:01.*
 
 Across 16 regions, 11,790 switch genes were scored against 160 ATtRACT human RBP models, yielding 11,040 module × RBP cells. On the unadjusted hypergeometric, **384 module–RBP pairs were significant at BH q < 0.05 (61 of them in GO-invisible modules), spanning 125 distinct RBPs and 36 distinct region × module regulons**. Of the 11,040 cells, 9,955 (90.2%) were estimable under the adjusted GLM; the remainder were dropped for complete separation (510 zero-cell), no variation to model (530), or quasi-separation (45). Resolution 2.0 yields far fewer, larger modules than the legacy res-5.0 production, so the cell count fell roughly threefold and every count below is on that smaller test set.
 
@@ -40,7 +40,7 @@ are in putamen M001: ACO1 (1.60, 1.37–1.85), SRSF10 (1.61, 1.37–1.90) and PA
 1.38–1.92). Cross-region recurrence also differs between the arms: PPRC1 (8 of 16 regions) and
 IGF2BP3 (7) lead the raw test, while RBFOX2 (6) and IGF2BP3 (5) lead the adjusted one.
 
-**The scope arms behave the same way.** Extending to intronic splice-site flanks — the binding niche of splicing regulators, and the scope the neuronal-CLIP arm builds on — gives **488** raw hits (77 GO-invisible) and **188** adjusted-significant. The motif-family arm (136 motif-similarity families instead of individual RBPs) has **not been regenerated on the switching filter**: `rbp_regulon_family.parquet` still dates from 2026-08-29, so its legacy figures (555 raw, 36 adjusted, 97.2% estimable) are not comparable with the counts above and are not quoted as current. Re-run it before it appears in the manuscript.
+**The scope arms behave the same way.** Extending to intronic splice-site flanks — the binding niche of splicing regulators, and the scope the neuronal-CLIP arm builds on — gives **488** raw hits (77 GO-invisible) and **188** adjusted-significant. The motif-family arm (136 motif-similarity families in place of individual RBPs) shows the same pattern on 9,384 module × family cells: **336** hypergeometric hits (41 GO-invisible), 8,833 of 9,384 cells (94.1%) estimable, and **467** adjusted-significant, of which only **99** are also raw-significant — again the adjusted arm is a reordering, not a subset. One family is raw-enriched but adjusted-depleted. Collapsing motifs into families therefore does not rescue factor specificity; it reproduces it at family resolution.
 
 Orthogonal ENCODE eCLIP evidence is consistent with binding *capacity* but does not rescue factor specificity. It also comes from the wrong tissue: ENCODE profiles its ~168 RBPs in **HepG2 and K562, not brain**, so every eCLIP statement below is about whether these factors *can* occupy these intervals in a cell line, not whether they *do* in postmortem cortex or caudate. Read it as a capacity floor, never as brain occupancy: 21 of 35 testable regulon RBPs are binding-supported (preferential switched-interval binding at BH q ≤ 0.05; 31 of 35 show the preference before correction), representing 47 of the 60 motif families among those testable RBPs, with a median switched−constitutive bound-rate gap of only 0.020 — a small, near-universal alternative-exon skew rather than selective occupancy by the predicted factors.
 
