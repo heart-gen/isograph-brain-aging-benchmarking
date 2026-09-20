@@ -9,7 +9,7 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | pd | sQTL | Brain_Amygdala | 0.01 | no | no | no | — | risk allele C increases usage of junction chr8:11844241-11845082(-) (ENST00000530640.7,ENS |
-| pd | sQTL | Brain_Amygdala | 0.01 | yes | yes | no | no annotated structural change | risk allele C decreases usage of junction chr8:11845222-11845661(-) (ENST00000345125.8,ENS |
+| pd | sQTL | Brain_Amygdala | 0.01 | yes | yes | no | biotype switch, cds, first exon, internal exon,  | risk allele C decreases usage of junction chr8:11845222-11845661(-) (ENST00000345125.8,ENS |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CTSB in PD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+Cathepsin B is a lysosomal cysteine protease and an established Parkinson's GWAS gene, functionally tied to the GBA/lysosomal axis and to alpha-synuclein degradation. Which CTSB isoform the risk variant selects is not characterised.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

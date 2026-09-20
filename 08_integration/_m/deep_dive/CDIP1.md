@@ -25,4 +25,6 @@
 CDIP1 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.
 
 ## 6. Literature (known isoform biology)
-CDIP1 (cell-death-inducing p53 target) colocalizes as a two-event splicing-led switch in schizophrenia; its isoform biology in SCZ is uncharacterized -- a novel candidate.
+CDIP1 (cell-death-inducing p53 target) was nominated as a two-event splicing-led switch in schizophrenia; its isoform biology is uncharacterised. Not in the current anchored set.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

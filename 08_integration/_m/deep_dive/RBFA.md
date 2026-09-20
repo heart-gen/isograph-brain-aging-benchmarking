@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele C increases usage of junction chr18:80042219-80044212(+) (ENST00000306735.10,E |
+| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C increases usage of junction chr18:80042219-80044212(+) (ENST00000306735.10,E |
 | scz | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr18:80048193-80069798(+) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele C decreases usage of junction chr18:80067308-80069798(+) (unmapped transcript; |
 
@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for RBFA in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+RBFA is a mitoribosome assembly factor with essentially no brain disease literature; the switch is nominated here on genetics alone and is not measurable in the orthogonal assays.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

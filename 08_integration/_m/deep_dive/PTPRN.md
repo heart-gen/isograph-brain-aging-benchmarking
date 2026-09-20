@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| als | sQTL | Brain_Cerebellum | 0.02 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr2:219295141-219296226(-) (ENST00000295718.7,E |
+| als | sQTL | Brain_Cerebellum | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr2:219295141-219296226(-) (ENST00000295718.7,E |
 | als | sQTL | Brain_Cerebellum | 0.02 | no | — | yes | — | risk allele G increases usage of junction chr2:219295966-219296226(-) (unmapped transcript |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PTPRN in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+PTPRN/IA-2 is a dense-core vesicle transmembrane protein and a well-known autoantigen in type 1 diabetes, with a documented role in neuroendocrine secretion. Its isoform usage in brain, and in ALS, is not characterised.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

@@ -25,4 +25,6 @@
 GGNBP2 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.
 
 ## 6. Literature (known isoform biology)
-GGNBP2/ZNF403 (17q12) is LoF-constrained (LOEUF 0.20) and colocalizes as a splicing-led switch in ALS; its isoform biology in neurodegeneration is uncharacterized -- a novel splicing-led candidate.
+GGNBP2/ZNF403 (17q12) is LoF-constrained and was nominated as a splicing-led switch in ALS on the legacy set; its isoform biology in neurodegeneration is uncharacterised. Not in the current anchored set.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

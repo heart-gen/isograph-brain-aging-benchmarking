@@ -8,20 +8,20 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:89544772-89545872(+) (ENST00000561945.2,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:89544772-89546658(+) (ENST00000268704.7,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:89548113-89550494(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89544772-89545872(+) (ENST00000561945.2,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:89544772-89546658(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89548113-89550494(+) (ENST00000268704.7,EN |
 | scz | sQTL | Brain_Cerebellum | 0.04 | no | no | yes | — | risk allele G increases usage of junction chr16:89549713-89550494(+) (ENST00000569820.6,EN |
 | scz | sQTL | Brain_Cerebellum | 0.04 | no | no | yes | — | risk allele G increases usage of junction chr16:89554563-89555878(+) (ENST00000645063.1,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:89554563-89556887(+) (ENST00000268704.7,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:89556085-89556887(+) (ENST00000565891.2,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr16:89544772-89545872(+) (ENST00000561945.2,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr16:89544772-89546658(+) (ENST00000268704.7,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr16:89548113-89550494(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89554563-89556887(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:89556085-89556887(+) (ENST00000565891.2,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89544772-89545872(+) (ENST00000561945.2,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:89544772-89546658(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89548113-89550494(+) (ENST00000268704.7,EN |
 | scz | sQTL | Brain_Cerebellum | 0.04 | no | no | no | — | risk allele G increases usage of junction chr16:89549713-89550494(+) (ENST00000569820.6,EN |
 | scz | sQTL | Brain_Cerebellum | 0.04 | no | no | no | — | risk allele G increases usage of junction chr16:89554563-89555878(+) (ENST00000645063.1,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr16:89554563-89556887(+) (ENST00000268704.7,EN |
-| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr16:89556085-89556887(+) (ENST00000565891.2,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:89554563-89556887(+) (ENST00000268704.7,EN |
+| scz | sQTL | Brain_Cerebellum | 0.04 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:89556085-89556887(+) (ENST00000565891.2,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -47,3 +47,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for SPG7 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+SPG7/paraplegin is a subunit of the mitochondrial m-AAA protease; biallelic loss causes hereditary spastic paraplegia. The gene is well documented; its isoform biology is not.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

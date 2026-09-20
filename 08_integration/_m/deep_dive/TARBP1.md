@@ -8,9 +8,9 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T increases usage of junction chr1:234401262-234405312(-) (ENST00000468077.5;  |
-| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T decreases usage of junction chr1:234401262-234405903(-) (ENST00000040877.2,E |
-| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T increases usage of junction chr1:234405480-234405903(-) (ENST00000468077.5;  |
+| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr1:234401262-234405312(-) (ENST00000468077.5;  |
+| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T decreases usage of junction chr1:234401262-234405903(-) (ENST00000040877.2,E |
+| scz | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr1:234405480-234405903(-) (ENST00000468077.5;  |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for TARBP1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+TARBP1 is a TRBP-related RNA methyltransferase with no established disease isoform biology; its usage range touches the detection floor here.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

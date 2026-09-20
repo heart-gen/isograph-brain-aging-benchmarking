@@ -10,8 +10,8 @@
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | als | eQTL | Brain_Caudate_basal_ganglia | 0.02 | no | — | no | — | risk allele G decreases CTC1 expression (gene-level; no intron) |
 | als | sQTL | Brain_Cerebellum | 0.05 | no | no | no | — | risk allele G decreases usage of junction chr17:8228629-8229142(-) (ENST00000699853.1; not |
-| als | sQTL | Brain_Cerebellum | 0.05 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr17:8230651-8231276(-) (ENST00000449476.7,ENST |
-| als | sQTL | Brain_Cerebellum | 0.05 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr17:8231469-8231726(-) (ENST00000449476.7,ENST |
+| als | sQTL | Brain_Cerebellum | 0.05 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr17:8230651-8231276(-) (ENST00000449476.7,ENST |
+| als | sQTL | Brain_Cerebellum | 0.05 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr17:8231469-8231726(-) (ENST00000449476.7,ENST |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -27,3 +27,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CTC1 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+CTC1 is part of the CST telomere-maintenance complex; its loss causes Coats plus / cerebroretinal microangiopathy. No isoform-level disease biology is established.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

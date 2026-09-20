@@ -9,8 +9,8 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | no | no | no | — | risk allele T increases usage of junction chr3:197194589-197225857(-) (ENST00000469073.2,E |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | no | no annotated structural change | risk allele T decreases usage of junction chr3:197194589-197282679(-) (ENST00000346964.6,E |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | no | no annotated structural change | risk allele T increases usage of junction chr3:197282845-197296346(-) (ENST00000346964.6,E |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele T decreases usage of junction chr3:197194589-197282679(-) (ENST00000346964.6,E |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr3:197282845-197296346(-) (ENST00000346964.6,E |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -27,6 +27,8 @@
 A splicing QTL colocalizes onto an IsoGraph switch pair for DLG1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
 
 ## 6. Literature (known isoform biology)
-DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal alpha vs beta isoforms, an internal I3 insert and additional cassette exons tune its PDZ/GK synaptic function. A DLG1 splice variant is reported to be expressed at reduced cortical levels in early-onset schizophrenia, and DLG1 sits in the 3q29 schizophrenia locus, so an sQTL that shifts DLG1 isoform choice is a mechanistically plausible splicing-led route to SCZ risk.
+DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal alpha vs beta isoforms, an internal I3 insert and additional cassette exons tune its PDZ/GK synaptic function. A DLG1 splice variant is reported at reduced cortical levels in early-onset schizophrenia, and DLG1 sits in the 3q29 schizophrenia locus, so an sQTL that shifts DLG1 isoform choice is a mechanistically plausible splicing-led route to SCZ risk.
+
+_Curation: isoform_documented._ A disease-relevant isoform program is established for this gene.
 
 _References:_ @doi:10.1038/tp.2015.154

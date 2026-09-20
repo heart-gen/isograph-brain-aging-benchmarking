@@ -8,8 +8,8 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cortex | 0.02 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr17:5426299-5428071(+) (ENST00000381209.8,ENST |
-| scz | sQTL | Brain_Cortex | 0.02 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr17:5428211-5432542(+) (ENST00000381209.8,ENST |
+| scz | sQTL | Brain_Cortex | 0.02 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr17:5426299-5428071(+) (ENST00000381209.8,ENST |
+| scz | sQTL | Brain_Cortex | 0.02 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr17:5428211-5432542(+) (ENST00000381209.8,ENST |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for RPAIN in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+RPAIN/RIP is an RPA-interacting nuclear import factor with no established brain disease isoform biology. Its junction validates in the PSI catalogue and in the recount, so the switch is well measured and the literature is simply absent.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

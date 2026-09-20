@@ -8,11 +8,11 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr22:49921761-49922294(+) (ENST00000404488.7; m |
-| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr22:49921761-49922297(+) (ENST00000404488.7; m |
-| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr22:49921761-49922612(+) (ENST00000328268.9,EN |
-| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr22:49922443-49922612(+) (ENST00000404488.7; m |
-| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr22:49924455-49925417(+) (ENST00000328268.9,EN |
+| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr22:49921761-49922294(+) (ENST00000404488.7; m |
+| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr22:49921761-49922297(+) (ENST00000404488.7; m |
+| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr22:49921761-49922612(+) (ENST00000328268.9,EN |
+| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr22:49922443-49922612(+) (ENST00000404488.7; m |
+| scz | sQTL | Brain_Cerebellum | 0.06 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr22:49924455-49925417(+) (ENST00000328268.9,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -29,3 +29,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for CRELD2 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+CRELD2 is an ER-stress-responsive secreted protein induced through the ATF6 arm of the unfolded protein response. It has the broadest SMR support in the panel (48 of 51 probes) and no documented isoform program.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

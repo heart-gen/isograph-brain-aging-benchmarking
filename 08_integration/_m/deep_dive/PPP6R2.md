@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.06 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr22:50419462-50422254(+) (ENST00000216061.9,EN |
+| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.06 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr22:50419462-50422254(+) (ENST00000216061.9,EN |
 | scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.06 | no | — | no | — | risk allele G increases usage of junction chr22:50419462-50422259(+) (unmapped transcript; |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
@@ -25,4 +25,6 @@
 A splicing QTL colocalizes onto an IsoGraph switch pair for PPP6R2 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
 
 ## 6. Literature (known isoform biology)
-PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both ALS and SCZ (three resolved events, the most in the panel), but disease-specific isoform biology is not established -- a novel cross-trait splicing-led candidate for follow-up.
+PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both ALS and SCZ, the most cross-trait of the panel, but disease-specific isoform biology is not established -- a cross-trait nomination for follow-up. Both long-read and the junction recount confirm the switch, so the evidence is orthogonal even where the literature is not.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

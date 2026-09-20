@@ -9,19 +9,19 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | pd | eQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases TMEM175 expression (gene-level; no intron) |
-| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr4:932540-947709(+) (ENST00000264771.9,ENST000 |
-| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | no annotated structural change | risk allele C increases usage of junction chr4:932540-950421(+) (ENST00000508204.5,ENST000 |
-| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr4:947892-948116(+) (ENST00000264771.9,ENST000 |
+| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr4:932540-947709(+) (ENST00000264771.9,ENST000 |
+| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C increases usage of junction chr4:932540-950421(+) (ENST00000508204.5,ENST000 |
+| als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr4:947892-948116(+) (ENST00000264771.9,ENST000 |
 | als | sQTL | Brain_Cerebellar_Hemisphere | 0.48 | no | no | yes | — | risk allele C increases usage of junction chr4:948615-950424(+) (ENST00000504180.5,ENST000 |
-| pd | sQTL | Brain_Cortex | 0.05 | yes | yes | yes | no annotated structural change | risk allele A decreases usage of junction chr4:932540-947709(+) (ENST00000264771.9,ENST000 |
+| pd | sQTL | Brain_Cortex | 0.05 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele A decreases usage of junction chr4:932540-947709(+) (ENST00000264771.9,ENST000 |
 | pd | sQTL | Brain_Cortex | 0.05 | no | no | yes | — | risk allele A increases usage of junction chr4:948615-950424(+) (ENST00000504180.5,ENST000 |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | no | yes | — | risk allele C decreases usage of junction chr4:932540-945999(+) (ENST00000504850.1,ENST000 |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | no | yes | — | risk allele C decreases usage of junction chr4:946126-947709(+) (ENST00000504850.1,ENST000 |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | no | yes | — | risk allele C increases usage of junction chr4:951258-952367(+) (ENST00000509508.5; not in |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | — | yes | — | risk allele C decreases usage of junction chr4:951258-953190(+) (unmapped transcript; not  |
-| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | yes | no annotated structural change | risk allele C increases usage of junction chr4:951717-952367(+) (ENST00000264771.9,ENST000 |
+| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C increases usage of junction chr4:951717-952367(+) (ENST00000264771.9,ENST000 |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | — | yes | — | risk allele C decreases usage of junction chr4:951717-953190(+) (unmapped transcript; not  |
-| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr4:952450-953190(+) (ENST00000264771.9,ENST000 |
+| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr4:952450-953190(+) (ENST00000264771.9,ENST000 |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | — | yes | — | risk allele C increases usage of junction chr4:952539-953190(+) (unmapped transcript; not  |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
@@ -49,3 +49,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for TMEM175 in AD,ALS,PD — the same switch is genetically anchored across more than one trait. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+TMEM175 is an established Parkinson's risk gene and a lysosomal potassium/proton channel whose coding variant M393T reduces channel function; the locus is one of the best-supported in PD. Isoform-level biology is not established, and in this panel TMEM175's own genetics are weak (sQTL PP4 ~ 0 against a large eCAVIAR CLPP), so it is carried as a documented gene with undocumented and unsupported isoform evidence.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

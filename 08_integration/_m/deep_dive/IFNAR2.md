@@ -8,9 +8,9 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | no | no annotated structural change | risk allele C increases usage of junction chr21:33245074-33246718(+) (ENST00000342101.7,EN |
+| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele C increases usage of junction chr21:33245074-33246718(+) (ENST00000342101.7,EN |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | no | no | — | risk allele C decreases usage of junction chr21:33246482-33246718(+) (ENST00000682044.1,EN |
-| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | no | no annotated structural change | risk allele C decreases usage of junction chr21:33260727-33262793(+) (ENST00000342136.9,EN |
+| ad | sQTL | Brain_Cerebellum | 0.03 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr21:33260727-33262793(+) (ENST00000342136.9,EN |
 | ad | sQTL | Brain_Cerebellum | 0.03 | no | — | no | — | risk allele C increases usage of junction chr21:33276753-33279752(+) (unmapped transcript; |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
@@ -27,3 +27,10 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for IFNAR2 in AD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+IFNAR2 produces functionally distinct products by alternative splicing -- a full-length signalling receptor, a truncated form lacking most of the cytoplasmic domain, and a soluble form -- and the ratio between them sets the cell's type-I interferon response rather than its receptor abundance. IFNAR2 is an established Alzheimer's GWAS locus, and the anchored event is splicing-specific on the genetics (no eQTL instrument at all), so isoform choice is the mechanism this locus most plausibly acts through.
+
+_Curation: isoform_documented._ A disease-relevant isoform program is established for this gene.
+
+_References:_ [citation needed: IFNAR2 transmembrane vs truncated vs soluble isoforms]

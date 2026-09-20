@@ -9,8 +9,8 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | scz | eQTL | Brain_Caudate_basal_ganglia | 0.01 | no | — | yes | — | risk allele A decreases B3GAT1 expression (gene-level; no intron) |
-| scz | sQTL | Brain_Cortex | 0.01 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr11:134380747-134381924(-) (ENST00000312527.9, |
-| scz | sQTL | Brain_Cortex | 0.01 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr11:134381817-134381924(-) (ENST00000524765.1; |
+| scz | sQTL | Brain_Cortex | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:134380747-134381924(-) (ENST00000312527.9, |
+| scz | sQTL | Brain_Cortex | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr11:134381817-134381924(-) (ENST00000524765.1; |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for B3GAT1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+B3GAT1/GlcAT-P makes the HNK-1 glycan carried by neural adhesion molecules and has documented roles in synaptic plasticity. Which isoform a schizophrenia risk variant selects is not known.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.
