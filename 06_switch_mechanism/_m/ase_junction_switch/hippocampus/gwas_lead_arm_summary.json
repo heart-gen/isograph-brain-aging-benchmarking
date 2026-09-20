@@ -1,0 +1,28 @@
+{
+  "rows": 209,
+  "pairs": 202,
+  "genes": 30,
+  "fitted": 145,
+  "anchor_is_fitted_lead": 0,
+  "median_paired_het": 29.0,
+  "significant": 5,
+  "significant_at_bound": 0,
+  "significant_interpretable": 5,
+  "at_bound": 10,
+  "positive_beta": 75,
+  "median_abs_beta": 0.43858174525703003,
+  "status_counts": {
+    "fitted": 145,
+    "anchor_not_in_panel": 27,
+    "too_few_paired_het_donors": 23,
+    "one_isoform_in_het_donors": 13,
+    "no_ea_donors": 1
+  },
+  "frame_check": {
+    "variants_compared": 22,
+    "donor_variant_pairs": 4727,
+    "genotype_agreement": 1.0,
+    "het_pairs": 1477,
+    "frame_agreement": 1.0
+  }
+}
