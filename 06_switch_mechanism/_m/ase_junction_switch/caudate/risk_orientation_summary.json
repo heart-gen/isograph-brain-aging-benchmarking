@@ -1,0 +1,19 @@
+{
+  "variant_pairs_with_ld": 27,
+  "median_abs_r": 0.06211874729945188,
+  "variant_pairs_at_r_gate": 2,
+  "pairs": 250,
+  "genes": 35,
+  "fitted": 189,
+  "oriented": 11,
+  "oriented_genes": 2,
+  "status_counts": {
+    "r_gate": 170,
+    "no_ld": 69,
+    "oriented": 11
+  },
+  "significant_oriented": 0,
+  "significant_genes": 0,
+  "risk_raises_module_score": 0,
+  "risk_lowers_module_score": 0
+}

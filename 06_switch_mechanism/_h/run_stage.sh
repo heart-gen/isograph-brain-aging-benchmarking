@@ -47,4 +47,8 @@ manual_step 02f "Quest only: 02f.ase_junction_count.sh, one task per WASP BAM, a
 manual_step 03b "Quest only: 03b.ase_junction_screen.sh, after 02f"
 manual_step 04a "Quest only: 04a.ase_junction_allelic.sh, after 03b (only if its gate passed)"
 
+## Back on Bridges-2: the risk-allele orientation of the merged allelic tables (needs the GWAS
+## sumstats and the genotype panel, which are here and not on Quest).
+step 05a "" $H/05a.ase_risk_orientation.sh
+
 dag_finish

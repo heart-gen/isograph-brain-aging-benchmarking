@@ -207,8 +207,9 @@ some mapping bias survives WASP.
 
 `beta` is oriented to the switch-QTL lead's **ALT** allele, which says nothing about disease.
 Turning it into "the risk allele shifts the isoforms toward T1/T2, and toward or away from the
-module's direction" needs each lead's GWAS risk allele. The GWAS summary statistics live on
-Bridges-2 (ALS is not on Quest), so this step runs there after the tables come over.
+module's direction" needs the GWAS risk allele of the locus the gene colocalizes in, and the
+LD that ties it to the fitted lead. The GWAS summary statistics live on Bridges-2 (ALS is not
+on Quest), so this step runs there after the tables come over.
 
 1. **Quest → Bridges-2.** Commit `_m/ase_junction_switch/<region>/allelic_test.parquet` (plus
    `allelic_donor_counts.parquet`, `allelic_summary.json`, `ASE_JUNCTION_ALLELIC.md`; parquet is
@@ -216,28 +217,48 @@ Bridges-2 (ALS is not on Quest), so this step runs there after the tables come o
    already carries what orientation needs: `variant_id_all` (lead rsID), `lead_ref`,
    `lead_alt`, `palindromic`, `coloc_traits`, `beta`, `module_polarity`, `module_age_trait`,
    `module_age_effect`.
-2. **Build the risk-allele table on Bridges-2.** For the coloc-nominated rows, take each
-   (trait in `coloc_traits`, `variant_id_all`) and call `coloc_direction._gwas_risk(trait,
-   rsids, tmp_dir)`, which returns `rsid, risk_allele, gwas_other_allele, risk_beta, gwas_p`.
-   Write one TSV per trait (for example `_m/ase_junction_switch/risk_alleles.<trait>.tsv`).
-   A lead can colocalize with several traits whose risk alleles differ, so do not collapse
-   traits into one file.
-3. **Orient.** Either compute it on Bridges-2 directly from `allelic_test.parquet`, or commit
-   the TSV and re-run `04a` on Quest with `--risk-alleles <tsv>`, one trait per run (the flag
-   keeps one risk allele per rsID). The rule is the same either way:
-   `beta_risk = +beta` if `risk_allele == lead_alt`, `-beta` if `risk_allele == lead_ref`,
-   otherwise missing. Then `risk_along_module = beta_risk * sign(module_polarity)`: > 0 means
-   the risk allele shifts the pair's isoforms the way the module score rises. Read it against
-   the module's age association only where `module_age_trait == Age_linear`. An `Age_spline`
+2. **Orient on Bridges-2** (`05a.ase_risk_orientation.sh` -> `real_data/ase_risk_orientation.py`),
+   which reads the merged allelic tables and refits nothing.
+
+   **The risk allele is NOT read at the fitted lead**, which is what this section first
+   planned. The lead is chosen for its QTL signal and is mostly unremarkable in the GWAS:
+   over the nominated leads the median GWAS p is ~0.2 and 5 of 60 are genome-wide
+   significant, so its "trait-increasing allele" would be the sign of noise. The disease
+   evidence sits at the locus the gene colocalizes in, and `candidate_loci.tsv` names that
+   locus's GWAS lead (the loci are built around genome-wide-significant signals). The locus
+   comes from the signal-level hierarchy (sQTL cell at PP4 >= 0.8), falling back to the locus
+   event audit and the BrainSEQ nominations for pairs nominated by another layer.
+
+3. **The flip follows signed LD, because the two variants are not the same variant.**
+   `plink2 --ld` on the BrainSEQ TOPMed panel the QTL mapping used (in-sample donors, so the
+   LD is theirs, not a population average; 1000G EUR only as a fallback for a variant that
+   panel lacks) prints the two-locus haplotype frequency table, which says which lead allele
+   travels with the risk allele. `beta_risk = +beta` when the risk allele rides the lead ALT,
+   `-beta` when it rides the REF, and missing when |r| < 0.8 -- a flip decided at |r| ~ 0.3 is
+   a coin toss. Then `risk_along_module = beta_risk * sign(module_polarity)`: > 0 means the
+   risk allele shifts the pair's isoforms the way the module score rises. Read it against the
+   module's age association only where `module_age_trait == Age_linear`; an `Age_spline`
    effect is a slope at one age point (p25), not an overall direction.
+
+   Outputs: `risk_orientation.parquet`, `risk_orientation_summary.json` and
+   `ASE_RISK_ORIENTATION.md` per region.
+
+   **Result (2026-09-19): the arm ends here.** 11 of 556 nominated pair x trait rows orient,
+   over 2 genes (ARL14EP/SCZ, TTC19/PD), none at q < 0.05. The binding constraint is the LD
+   itself: over the distinct lead x disease-lead variant pairs the median |r| is 0.05 and 2
+   of 64 reach the gate. The within-donor test and the disease association are, for these
+   genes, about different variants. That is consistent with stage 08's finding that the
+   BrainSEQ switch axis rarely colocalizes with disease, and it is the pre-specified negative
+   outcome ("still < 30 testable pairs") rather than a failure of the recount.
+
 4. **Check before believing a sign:**
    - **Allele match.** Drop any lead whose GWAS alleles are neither `lead_ref` nor
      `lead_alt`, and any `palindromic` (A/T, C/G) lead unless the GWAS frequency confirms the
      strand. Report how many were dropped.
-   - **Same variant.** The risk allele must be looked up at the switch-QTL lead
-     (`variant_id_all`, all_samples arm), not at coloc's best SNP. If the GWAS lacks the lead,
-     use an EUR LD proxy and carry the allele across through the phased haplotype, not by
-     frequency; say so for each gene.
+   - **Same variant.** Superseded by step 2: the lead carries no usable GWAS signal, so the
+     risk allele is read at the locus's GWAS lead and carried to the lead through the phased
+     haplotype (signed LD), never by frequency. `r_lead_risk` and `ld_panel` record the tie
+     for every pair, and pairs below the gate stay unoriented.
    - **Arm.** Coloc ran on the ea_only arm. Where the ea_only lead differs (`lead_differs_ea`
      in `pair_feasibility.parquet`), the within-donor test is about a different variant than
      the one coloc paired with the GWAS, so orientation needs LD between the two leads.
