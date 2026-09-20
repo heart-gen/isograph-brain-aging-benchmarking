@@ -88,6 +88,21 @@ The display-item decision rule in ``_REFERENCE_ARM`` stays gene-specific by desi
 asks whether the exact contrast a figure panel draws holds up, which only means anything
 for a gene that has a panel. Genes without one are reported, not decided.
 
+Known limitation of the usage threshold (PI, 2026-09-20)
+--------------------------------------------------------
+``min_usage`` treats a rare minor form as a failure. BrainSEQ and GTEx are neurotypical
+tissue, so an isoform that matters in disease is often a MINORITY form here precisely
+because the disease is what raises it -- and this threshold will call exactly those
+``not_validated``. It was pre-registered against a different failure (SNCA's anchored
+isoform at 0.29% of ONT gene output, where the form was effectively absent rather than
+merely rare), so it is left in place as the pre-registered rule and NOT silently rewritten;
+changing a pre-registered criterion after seeing the numbers is the PI's call.
+
+Read a ``not_validated`` here as "this form is rare in normal brain", not as "this switch
+is not real". ``08_integration/_m/anchored_gene_summary/`` reports the same junctions with
+detection counts (how many donors carry BOTH forms) instead of an abundance gate, which is
+the criterion that survives the argument above.
+
 Outputs land in ``06_switch_mechanism/_m/junction_coloc_confirm/``.
 """
 from __future__ import annotations
