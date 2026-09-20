@@ -22,6 +22,27 @@ genome-wide-significant signals, so this variant always carries real disease evi
 locus is the one where this gene x trait cell colocalizes at the sQTL layer (PP4 >= 0.8, the
 nomination threshold), taken from the signal-level hierarchy.
 
+ANCESTRY: WHY THE FIT AND THE LD ARE BOTH EA-ONLY HERE
+------------------------------------------------------
+BrainSEQ is roughly half African-American (44-49% of the tested donors per region); the GWAS
+are European. Both halves of the orientation break on that.
+
+  * LD does not transfer. Which lead allele carries the risk allele is a property of a
+    haplotype background, and it differs between EA and AA donors. Worse, LD measured in the
+    pooled panel is partly admixture LD -- correlation created by population structure rather
+    than by proximity -- so a pooled estimate is not "the average of the two", it is a third
+    thing that describes neither.
+  * The pooled `beta` is a mixture. The Quest fit pools EA and AA donors, which is right for
+    "is this switch under cis control" (phase is resolved within each donor) but not for
+    "does the EUR risk allele push it", because the EA-derived pairing may be wrong in the AA
+    donors.
+
+So this stage refits the GLMM in EA donors only, from the donor-level counts the recount
+already shipped (`allelic_donor_counts.parquet`), and takes the LD from the EA panel that the
+ea_only QTL arm uses. `beta_ea` is what gets oriented. The AA arm is fitted and reported
+beside it -- never pooled, never used to orient against a EUR GWAS -- because a sign that
+agrees in both ancestries is worth more than one seen in either alone.
+
 WHY SIGNED LD, AND WHY IN-SAMPLE
 --------------------------------
 The risk allele and the fitted lead are two different variants, so the flip is only defined
@@ -40,8 +61,11 @@ OUTPUT
 `risk_orientation.parquet` per region, plus `ASE_RISK_ORIENTATION.md`. Key columns:
 
   risk_allele, risk_gwas_p, risk_beta_gwas  the locus GWAS lead and its trait-increasing allele
-  r_lead_risk                               signed r between lead ALT and the risk allele
-  beta_risk                                 beta oriented to the risk allele (NA when ungated)
+  r_lead_risk                               signed r between lead ALT and the risk allele (EA panel)
+  r_lead_risk_aa                            the same in the AA panel, for disclosure
+  beta_ea, pval_ea, n_paired_ea             the GLMM refitted in EA donors only
+  beta_aa, pval_aa, n_paired_aa             the same in AA donors, never pooled
+  beta_risk                                 beta_ea oriented to the risk allele (NA when ungated)
   risk_along_module                         beta_risk signed by the pair's module polarity:
                                             > 0 when the risk allele shifts the isoforms the
                                             way the module score rises
@@ -72,8 +96,11 @@ PP4_MIN = 0.8
 R_MIN = 0.8
 
 _PLINK2 = Path("/ocean/projects/bio260021p/shared/opt/envs/eqtl/bin/plink2")
-_PANEL = Path("/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl/"
-              "all_samples/TOPMed_LIBD.ALL-merge")
+_GENO = Path("/ocean/projects/bio260021p/shared/resources/processed-data/genotypes/qtl")
+# EA is the GWAS-matched panel and the one the ea_only QTL arm uses; AA is reported beside it.
+_PANELS = {"EA": _GENO / "ea_only" / "TOPMed_LIBD.EA-merge",
+           "AA": _GENO / "aa_only" / "TOPMed_LIBD.AA-merge"}
+_PANEL = _PANELS["EA"]
 # Fallback only: a GWAS lead the QTL panel does not carry (imputation/MAF filtered) still has
 # LD in the reference panel the coloc pipeline uses. Population LD, not these donors', so it
 # is recorded as such in `ld_panel`.
@@ -159,14 +186,72 @@ def build_targets(regions: tuple[str, ...]) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
+# Ancestry: label the donors, refit each arm on its own
+# --------------------------------------------------------------------------- #
+def _panel_donors(panel: Path) -> set[str]:
+    # the panel stem contains dots (TOPMed_LIBD.EA-merge), so with_suffix would eat them
+    psam = Path(str(panel) + ".psam")
+    return {ln.split()[0] for ln in psam.read_text().splitlines()
+            if ln and not ln.startswith("#")}
+
+
+def donor_ancestry(region: str) -> pd.Series:
+    """donor_id -> EA / AA, from membership of the two QTL genotype panels."""
+    s = pd.read_csv(dest_dir(region) / "samples.tsv", sep="\t")
+    gid = s.set_index("donor_id")["genotype_sample_id"].astype(str)
+    gid = gid[~gid.index.duplicated()]
+    ea, aa = _panel_donors(_PANELS["EA"]), _panel_donors(_PANELS["AA"])
+    return gid.map(lambda g: "EA" if g in ea else ("AA" if g in aa else None))
+
+
+def refit_by_ancestry(region: str, pair_ids: set[str]) -> pd.DataFrame:
+    """Refit the pair GLMM within each ancestry, from the shipped donor-level counts.
+
+    Same estimator as the Quest step (`allelic_contrast`), only the donor set changes, so
+    `beta_ea` is comparable with the pooled `beta` and is the one a European GWAS can orient.
+    """
+    from isograph_benchmark.real_data.ase_junction_allelic import allelic_contrast
+
+    counts = pd.read_parquet(dest_dir(region) / "allelic_donor_counts.parquet")
+    counts = counts[counts["pair_id"].isin(pair_ids)]
+    anc = donor_ancestry(region)
+    counts = counts.assign(ancestry=counts["donor_id"].map(anc))
+    rows = []
+    for pair_id, sub in counts.groupby("pair_id"):
+        rec = {"pair_id": pair_id}
+        for arm in ("EA", "AA"):
+            tab, k = sub[sub["ancestry"] == arm], arm.lower()
+            if tab.empty:
+                rec |= {f"beta_{k}": np.nan, f"pval_{k}": np.nan, f"n_paired_{k}": 0,
+                        f"status_{k}": "no_donors"}
+                continue
+            f = allelic_contrast(tab)
+            rec |= {f"beta_{k}": f.get("beta", np.nan), f"pval_{k}": f.get("pval", np.nan),
+                    f"n_paired_{k}": f.get("n_paired_het", 0),
+                    f"status_{k}": f.get("status", "not_fitted"),
+                    # a bound fit is quasi-separation: its sign is informative, its
+                    # magnitude is not, so it is flagged rather than reported as an effect
+                    f"at_bound_{k}": bool(f.get("at_bound", False))}
+        rows.append(rec)
+    out = pd.DataFrame(rows)
+    if out.empty:
+        return out
+    both = out["beta_ea"].notna() & out["beta_aa"].notna()
+    out["sign_agrees_ancestry"] = pd.Series(pd.NA, index=out.index, dtype="boolean")
+    out.loc[both, "sign_agrees_ancestry"] = (np.sign(out.loc[both, "beta_ea"])
+                                             == np.sign(out.loc[both, "beta_aa"]))
+    return out
+
+
+# --------------------------------------------------------------------------- #
 # Signed LD between the fitted lead and the locus GWAS lead
 # --------------------------------------------------------------------------- #
-def _subset_panel(rsids: set[str], tmp: Path) -> Path:
-    """One pass over the 8.7M-variant panel; every --ld call then reads a small pfile."""
+def _subset_panel(rsids: set[str], tmp: Path, panel: Path, tag: str) -> Path:
+    """One pass over the panel; every --ld call then reads a small pfile."""
     keep = tmp / "keep.txt"
     keep.write_text("\n".join(sorted(rsids)) + "\n")
-    out = tmp / "panel"
-    subprocess.run([str(_PLINK2), "--pfile", str(_PANEL), "--extract", str(keep),
+    out = tmp / f"panel_{tag}"
+    subprocess.run([str(_PLINK2), "--pfile", str(panel), "--extract", str(keep),
                     "--make-pgen", "--out", str(out)],
                    check=True, capture_output=True, text=True)
     return out
@@ -184,7 +269,7 @@ def _ld_1kg(a: str, b: str, chrom: str | None, tmp: Path) -> dict | None:
     if not chrom:
         return None
     bfile = _PANEL_1KG / f"1000G.EUR.QC.{chrom}"
-    if not bfile.with_suffix(".bed").exists():
+    if not Path(str(bfile) + ".bed").exists():
         return None
     return _run_ld(["--bfile", str(bfile)], a, b, tmp)
 
@@ -255,36 +340,39 @@ def signed_r(ld: dict, allele_a: str, allele_b: str) -> float | None:
 def ld_table(pairs: pd.DataFrame, tmp: Path) -> pd.DataFrame:
     """Signed r between (lead ALT) and (risk allele) for each distinct variant pair."""
     rsids = set(pairs["variant_id_all"]) | set(pairs["lead_snp"])
-    panel = _subset_panel({r for r in rsids if isinstance(r, str)}, tmp)
+    panels = {tag: _subset_panel({r for r in rsids if isinstance(r, str)}, tmp, path, tag)
+              for tag, path in _PANELS.items()}
     rows = []
     for (lead, gwas), sub in pairs.groupby(["variant_id_all", "lead_snp"]):
         rec = {"variant_id_all": lead, "lead_snp": gwas, "r_lead_risk": np.nan,
-               "ld_status": "ok", "ld_panel": "brainseq_topmed"}
+               "r_lead_risk_aa": np.nan, "ld_status": "ok", "ld_panel": "brainseq_ea"}
         if lead == gwas:
             # the fitted lead IS the locus lead: orientation is direct, r = 1 by definition
-            rec["r_lead_risk"] = 1.0
+            rec["r_lead_risk"] = rec["r_lead_risk_aa"] = 1.0
             rec["ld_status"] = "same_variant"
             rows.append(rec)
             continue
-        rec["ld_panel"] = "brainseq_topmed"
-        ld = _run_ld(["--pfile", str(panel)], lead, gwas, tmp)
-        if ld is None:
-            # the QTL panel is MAF/imputation filtered; fall back to the reference panel
-            # LOCUS_ID is "<locus>_chr<N>", the one chromosome label every source carries
-            loc = str(sub["LOCUS_ID"].iloc[0])
-            ld = _ld_1kg(lead, gwas, loc.split("_chr")[-1] if "_chr" in loc else None, tmp)
-            rec["ld_panel"] = "1000G_EUR" if ld is not None else "none"
-        if ld is None:
+        alt, risk = sub["lead_alt"].iloc[0], sub["risk_allele"].iloc[0]
+        for tag, pf in panels.items():
+            ld = _run_ld(["--pfile", str(pf)], lead, gwas, tmp)
+            if ld is None and tag == "EA":
+                # the QTL panels are MAF/imputation filtered; the EUR reference can still
+                # carry the pair, and it is the ancestry the GWAS was run in
+                # LOCUS_ID is "<locus>_chr<N>", the one chromosome label every source carries
+                loc = str(sub["LOCUS_ID"].iloc[0])
+                ld = _ld_1kg(lead, gwas, loc.split("_chr")[-1] if "_chr" in loc else None,
+                             tmp)
+                rec["ld_panel"] = "1000G_EUR" if ld is not None else "none"
+            if ld is None:
+                continue
+            r = (signed_r(ld, str(alt).upper(), str(risk).upper())
+                 if pd.notna(risk) else None)
+            if r is not None:
+                rec["r_lead_risk" if tag == "EA" else "r_lead_risk_aa"] = r
+            elif tag == "EA":
+                rec["ld_status"] = "allele_mismatch"
+        if np.isnan(rec["r_lead_risk"]) and rec["ld_status"] == "ok":
             rec["ld_status"] = "not_in_panel"
-            rows.append(rec)
-            continue
-        alt = sub["lead_alt"].iloc[0]
-        risk = sub["risk_allele"].iloc[0]
-        r = signed_r(ld, str(alt).upper(), str(risk).upper()) if pd.notna(risk) else None
-        if r is None:
-            rec["ld_status"] = "allele_mismatch"
-        else:
-            rec["r_lead_risk"] = r
         rows.append(rec)
     return pd.DataFrame(rows)
 
@@ -308,8 +396,13 @@ def _palindromic(a: pd.Series, b: pd.Series) -> pd.Series:
                       for x, y in zip(a.fillna(""), b.fillna(""))], index=a.index)
 
 
-def orient(t: pd.DataFrame) -> pd.DataFrame:
-    """beta -> beta_risk -> risk_along_module, with the reason when it stays NA."""
+def orient(t: pd.DataFrame, beta_col: str = "beta") -> pd.DataFrame:
+    """beta -> beta_risk -> risk_along_module, with the reason when it stays NA.
+
+    `beta_col` is the EA-only refit in the pipeline; the pooled `beta` mixes ancestries and
+    cannot be oriented against a European GWAS (see the module docstring).
+    """
+    b = t[beta_col]
     on_alt = t["r_lead_risk"] > 0
     gated = t["r_lead_risk"].abs() >= R_MIN
     other = t["gwas_other_allele"] if "gwas_other_allele" in t else pd.Series(
@@ -317,21 +410,45 @@ def orient(t: pd.DataFrame) -> pd.DataFrame:
     pal = _palindromic(t["risk_allele"], other)
     t["gwas_lead_palindromic"] = pal
     ok = gated & ~pal
-    t["beta_risk"] = np.where(ok, t["beta"] * np.where(on_alt, 1.0, -1.0), np.nan)
+    t["beta_risk"] = np.where(ok, b * np.where(on_alt, 1.0, -1.0), np.nan)
     s = np.sign(t["module_polarity"]).replace(0, np.nan)
     t["risk_along_module"] = t["beta_risk"] * s
     t["orientation_status"] = np.select(
-        [t["risk_allele"].isna(), t["r_lead_risk"].isna(), pal, ~gated, t["beta"].isna()],
-        ["no_gwas_risk_allele", "no_ld", "palindromic_gwas_lead", "r_gate", "not_fitted"],
-        default="oriented")
+        [t["risk_allele"].isna(), t["r_lead_risk"].isna(), pal, ~gated, b.isna()],
+        ["no_gwas_risk_allele", "no_ld", "palindromic_gwas_lead", "r_gate",
+         "not_fitted_in_ea"], default="oriented")
     return t
 
 
-def _summary(t: pd.DataFrame) -> dict:
+def _bh(p: pd.Series) -> pd.Series:
+    p = p.astype(float)
+    order = np.argsort(p.to_numpy())
+    ranked = p.to_numpy()[order] * len(p) / (np.arange(len(p)) + 1)
+    q = np.minimum.accumulate(ranked[::-1])[::-1]
+    out = np.empty(len(p))
+    out[order] = np.clip(q, 0, 1)
+    return pd.Series(out, index=p.index)
+
+
+def _summary(t: pd.DataFrame, region: str) -> dict:
     o = t[t["orientation_status"] == "oriented"]
-    sig = o[o["qval"] < QVAL_ALLELIC]
+    sig = o[(o["qval_ea"] < QVAL_ALLELIC) & ~o["at_bound_ea"].eq(True)]
     vp = t.dropna(subset=["r_lead_risk"]).drop_duplicates(["variant_id_all", "lead_snp"])
+    vp_aa = t.dropna(subset=["r_lead_risk_aa"]).drop_duplicates(["variant_id_all",
+                                                                 "lead_snp"])
+    anc = donor_ancestry(region)
+    # sign agreement is a property of the pair, not of the pair x trait rows
+    pair = t.drop_duplicates("pair_id")
+    cmp_anc = pair["sign_agrees_ancestry"].notna() if "sign_agrees_ancestry" in pair else \
+        pd.Series(False, index=pair.index)
     return {
+        "donors_ea": int((anc == "EA").sum()),
+        "donors_aa": int((anc == "AA").sum()),
+        "donors_other": int(anc.isna().sum()),
+        "median_abs_r_aa": (float(vp_aa["r_lead_risk_aa"].abs().median())
+                            if len(vp_aa) else None),
+        "sign_compared_ancestry": int(cmp_anc.sum()),
+        "sign_agrees_ancestry": int(pair.loc[cmp_anc, "sign_agrees_ancestry"].eq(True).sum()),
         "variant_pairs_with_ld": int(len(vp)),
         "median_abs_r": float(vp["r_lead_risk"].abs().median()) if len(vp) else None,
         "variant_pairs_at_r_gate": int((vp["r_lead_risk"].abs() >= R_MIN).sum()),
@@ -371,20 +488,33 @@ def _report(region: str, t: pd.DataFrame, s: dict, dest: Path) -> None:
           f"- median |r|: **{s['median_abs_r']:.3f}**" if s["median_abs_r"] is not None
           else "- median |r|: n/a",
           f"- at |r| >= {R_MIN}: **{s['variant_pairs_at_r_gate']}**", "",
-          "## Oriented pairs at q < 0.05", "",
+          "## Ancestry", "",
+          "BrainSEQ is roughly half African-American and the GWAS are European, so a pooled "
+          "fit and a pooled LD estimate both mix ancestries. `beta_ea` (EA donors only) is "
+          "what gets oriented, against EA-panel LD; the AA arm is fitted beside it and "
+          "never pooled.", "",
+          f"- donors: EA {s['donors_ea']}, AA {s['donors_aa']}, neither {s['donors_other']}",
+          "- median |r| lead-to-risk-allele: EA "
+          + (f"{s['median_abs_r']:.3f}" if s["median_abs_r"] is not None else "n/a")
+          + (f", AA {s['median_abs_r_aa']:.3f}" if s.get("median_abs_r_aa") is not None
+             else ""),
+          f"- EA and AA betas agree in sign in {s['sign_agrees_ancestry']} of "
+          f"{s['sign_compared_ancestry']} pairs fitted in both", "",
+          "## Oriented pairs at q < 0.05 (EA refit, BH within this family)", "",
           f"- {s['significant_oriented']} pairs over {s['significant_genes']} genes",
           f"- risk allele raises the module score in {s['risk_raises_module_score']}, "
           f"lowers it in {s['risk_lowers_module_score']}", ""]
-    o = t[(t["orientation_status"] == "oriented") & (t["qval"] < QVAL_ALLELIC)]
+    o = t[(t["orientation_status"] == "oriented") & (t["qval_ea"] < QVAL_ALLELIC)
+          & ~t["at_bound_ea"].eq(True)]
     if not o.empty:
         L += ["| gene | trait | lead | risk variant | risk allele | GWAS p | r | beta_risk | "
               "risk_along_module | q |", "|---|---|---|---|---|---:|---:|---:|---:|---:|"]
-        for _, r in o.sort_values("qval").head(25).iterrows():
+        for _, r in o.sort_values("qval_ea").head(25).iterrows():
             L.append(f"| {r.get('symbol') or r['gene']} | {r['trait']} | "
                      f"{r['variant_id_all']} | {r['lead_snp']} | {r['risk_allele']} | "
                      f"{r['risk_gwas_p']:.2g} | {r['r_lead_risk']:+.2f} | "
                      f"{r['beta_risk']:+.2f} | {r['risk_along_module']:+.2f} | "
-                     f"{r['qval']:.2g} |")
+                     f"{r['qval_ea']:.2g} |")
         L.append("")
     L += ["## Caveats", "",
           "- The locus GWAS lead is not necessarily the causal variant; orientation inherits "
@@ -420,12 +550,30 @@ def run(regions: tuple[str, ...]) -> None:
     with tempfile.TemporaryDirectory() as td:
         ld = ld_table(have, Path(td))
     t = t.merge(ld, on=["variant_id_all", "lead_snp"], how="left")
-    t = orient(t)
+
+    # the pooled beta mixes EA and AA donors; refit each ancestry on its own
+    fits = []
+    for region in sorted(t["region"].unique()):
+        ids = set(t.loc[t["region"] == region, "pair_id"])
+        f = refit_by_ancestry(str(region), ids)
+        if not f.empty:
+            fits.append(f.assign(region=region))
+        print(f"  {region}: refit {len(f)} pairs in EA and AA donors separately", flush=True)
+    if fits:
+        t = t.merge(pd.concat(fits, ignore_index=True), on=["pair_id", "region"], how="left")
+    # the Quest q is BH over the pooled gate-family fits; the EA refits are a different
+    # family and need their own correction before anything here is called significant
+    t["qval_ea"] = np.nan
+    ok = t["pval_ea"].notna()
+    uniq = t.loc[ok].drop_duplicates("pair_id")[["pair_id", "pval_ea"]]
+    uniq["q"] = _bh(uniq["pval_ea"])
+    t.loc[ok, "qval_ea"] = t.loc[ok, "pair_id"].map(uniq.set_index("pair_id")["q"])
+    t = orient(t, beta_col="beta_ea")
 
     for region, sub in t.groupby("region"):
         dest = dest_dir(str(region))
         sub.to_parquet(dest / "risk_orientation.parquet", index=False)
-        s = _summary(sub)
+        s = _summary(sub, str(region))
         (dest / "risk_orientation_summary.json").write_text(json.dumps(s, indent=2))
         _report(str(region), sub, s, dest)
         print(f"{region}: {s['oriented']}/{s['pairs']} oriented, "

@@ -11,18 +11,27 @@
 
 | orientation status | rows |
 |---|---:|
-| r_gate | 83 |
-| no_ld | 14 |
+| r_gate | 72 |
+| no_ld | 24 |
+| palindromic_gwas_lead | 1 |
 
 ## LD between the fitted lead and the disease lead
 
 This is what limits the arm. The switch-QTL lead the test is fitted on and the GWAS lead of the locus are usually not on the same haplotype, so the disease allele cannot be placed on the fitted lead at all.
 
-- distinct lead x disease-lead variant pairs with LD: **11**
-- median |r|: **0.071**
-- at |r| >= 0.8: **0**
+- distinct lead x disease-lead variant pairs with LD: **10**
+- median |r|: **0.080**
+- at |r| >= 0.8: **1**
 
-## Oriented pairs at q < 0.05
+## Ancestry
+
+BrainSEQ is roughly half African-American and the GWAS are European, so a pooled fit and a pooled LD estimate both mix ancestries. `beta_ea` (EA donors only) is what gets oriented, against EA-panel LD; the AA arm is fitted beside it and never pooled.
+
+- donors: EA 208, AA 226, neither 64
+- median |r| lead-to-risk-allele: EA 0.080, AA 0.076
+- EA and AA betas agree in sign in 10 of 19 pairs fitted in both
+
+## Oriented pairs at q < 0.05 (EA refit, BH within this family)
 
 - 0 pairs over 0 genes
 - risk allele raises the module score in 0, lowers it in 0
