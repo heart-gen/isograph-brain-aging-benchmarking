@@ -306,7 +306,17 @@ def _summary(t: pd.DataFrame, frame: dict) -> dict:
         "median_paired_het": (float(fitted["n_paired_het"].median())
                               if len(fitted) else None),
         "significant": int((fitted["qval"] < QVAL_ALLELIC).sum()) if len(fitted) else 0,
+        # A fit at the optimiser's bound is quasi-separation -- one haplotype carries one
+        # isoform only. Its SIGN is informative, its magnitude is not, so it is counted apart
+        # rather than reported as an effect. The primary arm applies the same rule.
+        "significant_at_bound": (int(((fitted["qval"] < QVAL_ALLELIC)
+                                      & fitted["at_bound"]).sum()) if len(fitted) else 0),
+        "significant_interpretable": (int(((fitted["qval"] < QVAL_ALLELIC)
+                                           & ~fitted["at_bound"]).sum()) if len(fitted) else 0),
+        "at_bound": int(fitted["at_bound"].sum()) if len(fitted) else 0,
         "positive_beta": int((fitted["beta_risk_direct"] > 0).sum()) if len(fitted) else 0,
+        "median_abs_beta": (float(fitted.loc[~fitted["at_bound"], "beta_risk_direct"]
+                                  .abs().median()) if len(fitted) else None),
     }
     if "status" in t:
         s["status_counts"] = {k: int(v) for k, v in t["status"].value_counts().items()}
@@ -344,8 +354,17 @@ def _report(region: str, t: pd.DataFrame, s: dict, dest: Path) -> None:
          f"**{s['median_paired_het']}**",
          f"- rows whose GWAS lead IS the fitted lead (nothing to re-anchor): "
          f"**{s['anchor_is_fitted_lead']}**",
-         f"- significant at q < {QVAL_ALLELIC}: **{s['significant']}**",
-         f"- risk allele raises T1 in **{s['positive_beta']}** of the fitted rows", ""]
+         f"- significant at q < {QVAL_ALLELIC}: **{s['significant']}** "
+         f"({s['significant_interpretable']} with an interpretable effect size, "
+         f"{s['significant_at_bound']} at the estimator bound)",
+         f"- risk allele raises T1 in **{s['positive_beta']}** of the fitted rows "
+         f"(median |beta| among unbounded fits {s['median_abs_beta']:.3f})"
+         if s.get("median_abs_beta") is not None else
+         f"- risk allele raises T1 in **{s['positive_beta']}** of the fitted rows",
+         "",
+         "A fit **at the bound** is quasi-separation: one haplotype carries one isoform only. "
+         "Its sign is informative and its magnitude is not, so those rows are counted apart "
+         "rather than read as effects.", ""]
     if s.get("status_counts"):
         L += ["| status | rows |", "| --- | ---: |"]
         L += [f"| {k} | {v} |" for k, v in sorted(s["status_counts"].items(),
@@ -357,9 +376,11 @@ def _report(region: str, t: pd.DataFrame, s: dict, dest: Path) -> None:
               "| gene | trait | anchor | risk | beta (risk hap) | p | q | donors paired |",
               "| --- | --- | --- | :---: | ---: | ---: | ---: | ---: |"]
         for _, r in fitted.sort_values("pval").iterrows():
+            beta = ("at bound" if r.get("at_bound")
+                    else f"{r['beta_risk_direct']:.3f}")
             L.append(f"| {r.get('symbol') or r.get('gene')} | {r['trait']} | "
                      f"{r['anchor_variant']} | {r['risk_allele']} | "
-                     f"{r['beta_risk_direct']:.3f} | {r['pval']:.3g} | "
+                     f"{beta} | {r['pval']:.3g} | "
                      f"{r['qval']:.3g} | {int(r['n_paired_het'])} |")
         L.append("")
     L += ["## How to read a null here", "",
