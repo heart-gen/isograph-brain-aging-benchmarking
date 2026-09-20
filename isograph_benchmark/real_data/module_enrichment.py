@@ -53,20 +53,32 @@ def _method_dir(analysis: str, region: str | None, method: str, variant: str):
     raise ValueError(f"unknown method {method!r}")
 
 
-def _phenotype_fdr(analysis: str, method_dir) -> pd.Series:
-    """module_id -> phenotype FDR from the method's saved association table."""
+def _phenotype_assoc(analysis: str, method_dir) -> pd.DataFrame:
+    """module_id -> (phenotype p, phenotype FDR) from the method's association table.
+
+    The raw p is carried alongside the FDR because BH over a small module family can pass a
+    module whose nominal p is above 0.05 -- rare, but it happens (4 of 221 modules at
+    `pheno_fdr <= 0.1` across the panel, all in the WGCNA baselines), and a consumer that
+    only sees the FDR cannot tell. Both columns are written so any gate can be audited.
+
+    For the aging analyses the module-level test is the spline F-test, whose p is constant
+    across a module's percentile rows; for the SCZD analysis it is the diagnosis t-test.
+    """
     if analysis == "brainseq-sczd":
-        f = method_dir / "diagnosis_assoc.parquet"
-        col = "fdr"
+        f, pcol, qcol = method_dir / "diagnosis_assoc.parquet", "pvalue", "fdr"
     else:
-        f = method_dir / "age_spline.parquet"
-        col = "fdr_ftest"
+        f, pcol, qcol = method_dir / "age_spline.parquet", "pvalue_ftest", "fdr_ftest"
+    empty = pd.DataFrame(columns=["pheno_p", "pheno_fdr"], dtype=float)
     if not f.exists():
-        return pd.Series(dtype=float)
+        return empty
     d = pd.read_parquet(f)
-    if "module_id" not in d.columns or col not in d.columns:
-        return pd.Series(dtype=float)
-    return d.drop_duplicates("module_id").set_index("module_id")[col]
+    if "module_id" not in d.columns or qcol not in d.columns:
+        return empty
+    d = d.drop_duplicates("module_id").set_index("module_id")
+    out = pd.DataFrame(index=d.index)
+    out["pheno_p"] = d[pcol] if pcol in d.columns else np.nan
+    out["pheno_fdr"] = d[qcol]
+    return out
 
 
 def _network_metrics(edges: pd.DataFrame, modules: pd.DataFrame) -> dict:
@@ -139,7 +151,7 @@ def characterize_method(analysis, region, method, variant, helper) -> pd.DataFra
     modules = pd.read_parquet(mfile)
     go, go_full = _module_go(modules, helper)
     rows = []
-    pheno = _phenotype_fdr(analysis, md)
+    pheno = _phenotype_assoc(analysis, md)
     net = {}
     if method == "isograph":
         epath = md / "edges.parquet"
@@ -147,7 +159,8 @@ def characterize_method(analysis, region, method, variant, helper) -> pd.DataFra
             net = _network_metrics(pd.read_parquet(epath), modules)
     for mid in sorted(modules["module_id"].unique()):
         row = {"method": method, "module_id": mid, **go[mid]}
-        row["pheno_fdr"] = float(pheno.get(mid, np.nan))
+        row["pheno_p"] = float(pheno["pheno_p"].get(mid, np.nan)) if len(pheno) else np.nan
+        row["pheno_fdr"] = float(pheno["pheno_fdr"].get(mid, np.nan)) if len(pheno) else np.nan
         row.update(net.get(mid, {}))
         rows.append(row)
     df = pd.DataFrame(rows)
