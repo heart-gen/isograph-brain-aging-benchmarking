@@ -187,23 +187,36 @@ strength of the splicing-led set is its **coherence** — cross-disease concorda
 GO-invisibility — not any single high-posterior locus. Schizophrenia produced no GTEx-concordant
 event but five BrainSeq-replicated splicing events (Fig 4C–D).
 
-## The switch layer carries partitioned neurodegenerative heritability
+## The switch layer carries partitioned heritability, and it is splicing-led in one trait
 
 Source: `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` (Fig 4B).
 
 Stratified LD-score regression on baselineLD v2.2 — robust to the gene-size confound that
-inflates MAGMA on giant modules — confirmed that heritability concentrates in the switch layer's
-cis-regulatory variants [@doi:10.1038/ng.3404]; [@doi:10.1038/ng.3954]. In
-single-annotation models the aging switch layer's brain **sQTL** annotation was enriched for
-heritability in every neurodegenerative trait: LBD 7.17× (enrichment p = 0.068), PD 3.80×
-(p = 0.049), AD 3.37× (p = 0.0021), ALS 2.96× (p = 0.0022), and SCZ 1.74× (p = 0.0051); the
-matched eQTL and total-cis annotations were comparably enriched. The one honest asymmetry is
-**disease** SCZ (the BrainSeq-SCZD annotation), where the switch layer is expression-led — sQTL
-enrichment 0.71× (n.s.) versus eQTL 2.04× (tau p = 0.016), and the joint sQTL-vs-eQTL model
-assigns the signal to eQTL (tau p = 0.0064) — matching the coloc verdict that SCZ resolves
+inflates MAGMA on giant modules — asks whether heritability concentrates in the switch layer's
+cis-regulatory variants [@doi:10.1038/ng.3404]; [@doi:10.1038/ng.3954]. *Re-quoted 2026-09-20
+from the switching-filter re-run; the legacy enrichments (LBD 7.17×, PD 3.80×, AD 3.37×) belong
+to the expression-filter production and must not be reused.*
+
+In single-annotation models the aging switch layer's brain **sQTL** annotation is enriched for
+heritability in four of five traits — PD **4.17×** (enrichment p = 0.0013), ALS **2.75×**
+(p = 0.0035), AD **2.26×** (p = 0.0098), SCZ **1.71×** (p = 1.9 × 10⁻⁴) — with LBD enriched
+4.16× but not significant (p = 0.16), as expected from its sample size. Enrichment, however, is
+the weaker of the two tests, because it does not ask whether the annotation adds anything over
+baselineLD. **By the coefficient test the splicing annotation is significant in only two traits,
+PD (coefficient p = 0.0050) and SCZ (p = 0.035)**, and only **PD survives both Bonferroni
+correction across the five traits and the joint model that fits the sQTL and eQTL annotations
+together** (joint sQTL coefficient p = 0.013, against eQTL p = 0.067). PD is therefore the one
+trait in which the aging switch layer is splicing-led on heritability.
+
+The honest asymmetries are two. First, **disease SCZ** (the BrainSeq-SCZD annotation) shows no
+enrichment for either modality (sQTL 1.34×, p = 0.39; eQTL 1.53×, p = 0.072) and no significant
+coefficient, so the disease arm is not anchored by heritability at all. Second, in the aging
+arm SCZ is **expression-led**: the eQTL annotation carries the stronger coefficient
+(p = 0.0013) and retains it in the joint model (p = 0.0059) while the sQTL coefficient does
+not (joint p = 0.38) — which matches the per-gene colocalization verdict that SCZ resolves
 through abundance more than splicing. Because a gene's sQTL and eQTL SNPs overlap, the joint
-model splits and understates each annotation, and bulk GTEx QTLs under-sample cell-type-specific
-splicing, so these enrichments are a floor, not a ceiling.
+model splits and understates each annotation, and bulk GTEx QTLs under-sample
+cell-type-specific splicing, so these enrichments are a floor rather than a ceiling.
 
 ## The switch axis is productive UTR/CDS remodeling, not decay (S-real-5)
 
@@ -290,6 +303,42 @@ output this method is built to produce, and it is reported as such rather than a
 colocalized gene's mechanistic vignette without the hand-written narrative.
 
 ---
+
+## The switch is under cis genetic control within donors; disease orientation is negative
+
+Source: `06_switch_mechanism/_m/ase_junction_switch/<region>/` (`ASE_JUNCTION_ALLELIC.md`,
+`ASE_RISK_ORIENTATION.md`, `GWAS_LEAD_ARM.md`); stage report `reports/pi/06a`.
+
+Colocalization is a population-level statement and inherits every confound bulk tissue carries,
+composition above all. The within-donor test does not: in a donor heterozygous at the gene's
+switch-QTL lead, the two haplotypes share a nucleus, a cell-type mixture and an environment, so
+a difference in isoform usage between them is cis by construction. Counting junction-spanning
+fragments on WASP-tagged BrainSEQ BAMs by phASER haplotype and fitting a beta-binomial GLMM with
+a donor random intercept, **the two haplotypes differ in isoform usage for 185 / 92 / 37 genes**
+(caudate / hippocampus / DLPFC) against a flat null built from donors homozygous at the same
+lead (λ_GC 1.01–1.07). This is the cleanest genetic control in the study: no composition model
+is needed, because composition cannot differ between two haplotypes of one nucleus.
+
+**Tying those effects to disease is a pre-specified negative, and the reason is measurable.**
+Orienting the effect to a GWAS risk allele requires transferring the sign from the switch-QTL
+lead to the locus lead through LD, and the two variants are essentially unlinked: median |r| is
+0.03–0.09, so 336 of 556 nominated pair × trait rows fail an |r| ≥ 0.8 gate and only 20 orient.
+To separate "no linkage" from "no answer" we ran a second arm anchored **on the GWAS lead
+itself**, where orientation is exact by construction and the cost is power. That arm fits
+**371 of 556 rows over 40 genes**, and the direction distribution is indistinguishable from
+chance (214/371 positive). The disease-linkage negative is therefore a measurement rather than
+a gap: where the test can be run at all, the risk allele does not push isoform usage in a
+consistent direction.
+
+One gene is significant in both arms and is reported as a caveat rather than a result.
+**KLC1 × schizophrenia** in hippocampus reaches q < 0.001 under direct anchoring at rs10873538,
+and the four significant pairs are one effect seen four times: each contrasts the short isoform
+**KLC1-213** against a different partner, and the risk haplotype lowers KLC1-213 in every one,
+while every KLC1 pair that does not involve KLC1-213 is null. What it does not support is a
+module-level or mechanistic claim — KLC1 belongs to its module through abundance rather than
+switching, so the module projection is withheld; the effect is one transcript, in one region,
+with no within-cohort replication available. A transcript-level re-test and a non-redundant
+multiplicity treatment are the named follow-ups.
 
 ## Two negative controls bound the genetic claim
 
