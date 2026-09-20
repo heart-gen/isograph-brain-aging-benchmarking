@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | no | no annotated structural change | risk allele T increases usage of junction chr1:6628691-6629643(+) (ENST00000487819.5; matc |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr1:6628691-6629643(+) (ENST00000487819.5; matc |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -21,3 +21,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for THAP3 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+THAP3 is a THAP-domain transcription factor, a family in which THAP1 is the DYT6 dystonia gene; THAP3 itself is little characterised in brain. It is one of the four splicing-specific genes here, which makes it a first-order nomination rather than a footnote.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

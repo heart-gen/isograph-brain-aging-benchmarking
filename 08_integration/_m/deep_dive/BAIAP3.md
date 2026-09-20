@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| als | sQTL | Brain_Hypothalamus | 0.01 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr16:1333749-1338540(+) (ENST00000397488.6,ENST |
+| als | sQTL | Brain_Hypothalamus | 0.01 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:1333749-1338540(+) (ENST00000397488.6,ENST |
 | als | sQTL | Brain_Hypothalamus | 0.01 | no | no | no | — | risk allele G decreases usage of junction chr16:1334756-1338540(+) (ENST00000324385.9,ENST |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for BAIAP3 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+BAIAP3 is a Munc13-family protein controlling dense-core vesicle secretion, so it sits in the same secretory machinery as several other genes in this panel. Isoform biology is not established, and its usage range here touches the detection floor.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

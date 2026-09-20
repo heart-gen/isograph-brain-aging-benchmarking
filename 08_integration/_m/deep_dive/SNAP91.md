@@ -9,7 +9,7 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | scz | sQTL | Brain_Cerebellum | 0.05 | no | no | yes | — | risk allele T increases usage of junction chr6:83593017-83593478(-) (ENST00000518312.5; no |
-| scz | sQTL | Brain_Cerebellum | 0.05 | yes | yes | yes | no annotated structural change | risk allele T increases usage of junction chr6:83607808-83610650(-) (ENST00000195649.10,EN |
+| scz | sQTL | Brain_Cerebellum | 0.05 | yes | yes | yes | cds, first exon, internal exon, last exon, utr | risk allele T increases usage of junction chr6:83607808-83610650(-) (ENST00000195649.10,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for SNAP91 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+SNAP91/AP180 assembles clathrin at the synapse and is an established schizophrenia GWAS gene with reported effects on synaptic development. Its paralogue PICALM has documented disease-relevant isoform biology in Alzheimer's, which makes an isoform-level mechanism plausible here, but SNAP91's own isoform program is not characterised.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

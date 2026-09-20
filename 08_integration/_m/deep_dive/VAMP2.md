@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| als | sQTL | Brain_Cortex | 0.01 | yes | yes | no | no annotated structural change | risk allele C decreases usage of junction chr17:8162369-8162878(-) (ENST00000316509.11,ENS |
+| als | sQTL | Brain_Cortex | 0.01 | yes | yes | no | biotype switch, cds, first exon, internal exon,  | risk allele C decreases usage of junction chr17:8162369-8162878(-) (ENST00000316509.11,ENS |
 | als | sQTL | Brain_Cortex | 0.01 | no | — | no | — | risk allele C increases usage of junction chr17:8174272-8174520(-) (unmapped transcript; n |
 | als | sQTL | Brain_Cortex | 0.01 | no | — | no | — | risk allele C increases usage of junction chr17:8174272-8176200(-) (unmapped transcript; n |
 | als | sQTL | Brain_Cortex | 0.01 | no | — | no | — | risk allele C increases usage of junction chr17:8176026-8176200(-) (unmapped transcript; n |
@@ -27,3 +27,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for VAMP2 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+VAMP2/synaptobrevin-2 is a core SNARE of synaptic vesicle fusion and is strongly LoF-constrained. The gene is textbook; a disease-relevant isoform program is not established.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

@@ -22,6 +22,8 @@
 SNCA has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.
 
 ## 6. Literature (known isoform biology)
-SNCA carries an extensively documented alternative-splicing program that is disease-relevant in synucleinopathy: at least four alternative 5'UTR first exons plus internal exon-3/exon-5 skipping generate transcripts that are differentially expressed across PD and dementia-with-Lewy-bodies brain regions, and the coding splice variants (SNCA-126/112/98) modulate alpha-synuclein aggregation kinetics. The IsoGraph-resolved event here is a 5'-end (alternative first exon) choice, matching the well-established 5'UTR/regulatory arm of this program rather than a coding change -- consistent with a dosage mechanism at a LoF-constrained gene (LOEUF 0.40).
+SNCA carries an extensively documented alternative-splicing program that is disease-relevant in synucleinopathy: at least four alternative 5'UTR first exons plus internal exon-3/exon-5 skipping generate transcripts differentially expressed across PD and dementia-with-Lewy-bodies brain regions, and the coding splice variants (SNCA-126/112/98) modulate alpha-synuclein aggregation kinetics. The event IsoGraph resolved here is a 5'-end (alternative first exon) choice, matching the regulatory arm of that program rather than a coding change. Not in the current anchored set: SNCA is no longer concordant at resolution 2.0.
+
+_Curation: isoform_documented._ A disease-relevant isoform program is established for this gene.
 
 _References:_ @doi:10.3389/fgene.2019.00584; @doi:10.3390/genes9020063

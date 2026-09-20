@@ -8,10 +8,10 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | no annotated structural change | risk allele A increases usage of junction chr10:104275334-104277894(+) (ENST00000338595.7, |
-| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | no annotated structural change | risk allele A decreases usage of junction chr10:104278116-104279370(+) (ENST00000338595.7, |
-| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | no annotated structural change | risk allele A increases usage of junction chr10:104278116-104297578(+) (ENST00000450629.6, |
-| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | no annotated structural change | risk allele A decreases usage of junction chr10:104279471-104297578(+) (ENST00000338595.7, |
+| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele A increases usage of junction chr10:104275334-104277894(+) (ENST00000338595.7, |
+| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele A decreases usage of junction chr10:104278116-104279370(+) (ENST00000338595.7, |
+| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele A increases usage of junction chr10:104278116-104297578(+) (ENST00000450629.6, |
+| scz | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele A decreases usage of junction chr10:104279471-104297578(+) (ENST00000338595.7, |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -27,3 +27,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for GSTO2 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+GSTO2 is a glutathione S-transferase omega-family enzyme with reported associations to age-related phenotypes; its brain isoform biology is not established. The junction here does validate in the PSI catalogue, so the switch is measured even though the literature is silent.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

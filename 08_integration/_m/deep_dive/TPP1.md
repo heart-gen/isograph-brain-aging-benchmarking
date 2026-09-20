@@ -9,7 +9,7 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | als | sQTL | Brain_Cerebellum | 0.48 | no | — | yes | — | risk allele G decreases usage of junction chr11:6611818-6611958(-) (unmapped transcript; n |
-| als | sQTL | Brain_Cerebellum | 0.48 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr11:6614686-6614866(-) (ENST00000299427.12,ENS |
+| als | sQTL | Brain_Cerebellum | 0.48 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:6614686-6614866(-) (ENST00000299427.12,ENS |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,3 +23,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for TPP1 in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+TPP1/CLN2 encodes lysosomal tripeptidyl peptidase 1; its loss causes late-infantile neuronal ceroid lipofuscinosis, and it is one of the best-characterised lysosomal genes in neurodegeneration. What is not established is which TPP1 isoform an ALS risk variant selects -- the disease literature is about enzyme deficiency, not about isoform choice.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

@@ -10,16 +10,16 @@
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | — | yes | — | risk allele G increases usage of junction chr11:71448885-71451690(+) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | — | yes | — | risk allele G decreases usage of junction chr11:71448885-71455110(+) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr11:71453381-71455110(+) (ENST00000319023.7,EN |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr11:71474526-71478395(+) (ENST00000319023.7,EN |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr11:71475622-71476201(+) (ENST00000528509.5; m |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr11:71477438-71478395(+) (ENST00000525200.5,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr11:71453381-71455110(+) (ENST00000319023.7,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr11:71474526-71478395(+) (ENST00000319023.7,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:71475622-71476201(+) (ENST00000528509.5; m |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:71477438-71478395(+) (ENST00000525200.5,EN |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | no | — | risk allele G increases usage of junction chr11:71448885-71451690(+) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | no | — | risk allele G decreases usage of junction chr11:71448885-71455110(+) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr11:71453381-71455110(+) (ENST00000319023.7,EN |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | no annotated structural change | risk allele G decreases usage of junction chr11:71474526-71478395(+) (ENST00000319023.7,EN |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr11:71475622-71476201(+) (ENST00000528509.5; m |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr11:71477438-71478395(+) (ENST00000525200.5,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr11:71453381-71455110(+) (ENST00000319023.7,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr11:71474526-71478395(+) (ENST00000319023.7,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:71475622-71476201(+) (ENST00000528509.5; m |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr11:71477438-71478395(+) (ENST00000525200.5,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -43,3 +43,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for NADSYN1 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+NADSYN1 completes NAD+ synthesis and sits in a locus shared with DHCR7, which complicates gene attribution at the signal. Isoform biology is not established.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

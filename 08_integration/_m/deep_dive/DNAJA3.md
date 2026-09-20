@@ -8,8 +8,8 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:4426092-4434384(+) (ENST00000262375.11,ENS |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:4434517-4437402(+) (ENST00000262375.11,ENS |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:4426092-4434384(+) (ENST00000262375.11,ENS |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:4434517-4437402(+) (ENST00000262375.11,ENS |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,3 +23,10 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for DNAJA3 in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+DNAJA3/Tid1 is a mitochondrial HSP40 co-chaperone with two long-standing splice forms that differ at the C-terminus and have been reported to act in opposite directions on apoptosis, so isoform choice rather than total level is the functional variable. A schizophrenia-specific isoform role is not established.
+
+_Curation: isoform_documented._ A disease-relevant isoform program is established for this gene.
+
+_References:_ [citation needed: Tid1-L / Tid1-S splice forms and opposing apoptotic effects]

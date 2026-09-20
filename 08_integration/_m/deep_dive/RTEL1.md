@@ -23,4 +23,6 @@
 RTEL1 has a colocalizing sQTL, but the junction does not map onto the IsoGraph switch pair for the tissue — splicing-associated but not resolved to a switch; a candidate for deeper transcript-level follow-up.
 
 ## 6. Literature (known isoform biology)
-RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative C-terminal isoforms in other tissues, but a brain disease-specific splice role is not established -- a splicing-led candidate whose isoform choice warrants transcript-level follow-up.
+RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative C-terminal isoforms in other tissues, but a brain disease-specific splice role is not established. Not in the current anchored set.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

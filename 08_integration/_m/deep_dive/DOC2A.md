@@ -10,7 +10,7 @@
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | ad | eQTL | Brain_Cerebellar_Hemisphere | 0.04 | no | — | yes | — | risk allele C decreases DOC2A expression (gene-level; no intron) |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.05 | no | — | yes | — | risk allele C increases usage of junction chr16:30007090-30007179(-) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.05 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr16:30007299-30008996(-) (ENST00000350119.9,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.05 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr16:30007299-30008996(-) (ENST00000350119.9,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for DOC2A in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+DOC2A is a calcium sensor for spontaneous neurotransmitter release and sits in the 16p11.2 locus. It is the most splicing-specific gene in this panel on the genetics -- strong sQTL colocalization in nine tissues with no eQTL instrument at all -- while its isoform biology is uncharacterised, which is exactly the gap this layer is meant to mark.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

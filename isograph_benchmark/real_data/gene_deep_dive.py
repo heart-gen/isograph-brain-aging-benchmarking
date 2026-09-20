@@ -53,110 +53,367 @@ _Q_ENRICH = 0.05
 # Kept as data so the vignettes and the literature supp table regenerate deterministically.
 # `refs` are Manubot citekeys; `[citation needed: ...]` marks a real finding whose exact
 # citekey still needs to be pinned before submission (never fabricate a DOI/PMID).
+#
+# REFRESHED 2026-09-20 onto the current 30-gene anchored set. Genes curated for the legacy
+# set are kept -- curation is knowledge, not a result, and several are still in the 160-gene
+# panel -- and each row now carries whether the gene is in the current anchored set.
+#
+# `kind` says what is known, and the three values are NOT a quality ranking:
+#
+#   isoform_documented  a disease-relevant isoform program is established for this gene
+#   gene_documented     the gene and its disease association are established; which isoform
+#                       the risk variant selects is not characterised
+#   novel_candidate     no established disease-specific isoform biology was found
+#
+# A `novel_candidate` is a NOMINATION, not a null result and not a failed control. The layer
+# exists because the method is built to surface GO-invisible, under-characterised switching;
+# a gene with no isoform literature is the intended output, and its absence from the
+# literature is a statement about the literature, not about the evidence here. Nothing
+# downstream may treat these rows as negatives.
 _LITERATURE: dict[str, dict] = {
     "SNCA": {
+        "kind": "isoform_documented",
         "text": (
             "SNCA carries an extensively documented alternative-splicing program that is "
-            "disease-relevant in synucleinopathy: at least four alternative 5'UTR first "
-            "exons plus internal exon-3/exon-5 skipping generate transcripts that are "
-            "differentially expressed across PD and dementia-with-Lewy-bodies brain regions, "
-            "and the coding splice variants (SNCA-126/112/98) modulate alpha-synuclein "
-            "aggregation kinetics. The IsoGraph-resolved event here is a 5'-end (alternative "
-            "first exon) choice, matching the well-established 5'UTR/regulatory arm of this "
-            "program rather than a coding change -- consistent with a dosage mechanism at a "
-            "LoF-constrained gene (LOEUF 0.40)."),
+            "disease-relevant in synucleinopathy: at least four alternative 5'UTR first exons plus "
+            "internal exon-3/exon-5 skipping generate transcripts differentially expressed across PD "
+            "and dementia-with-Lewy-bodies brain regions, and the coding splice variants "
+            "(SNCA-126/112/98) modulate alpha-synuclein aggregation kinetics. The event IsoGraph "
+            "resolved here is a 5'-end (alternative first exon) choice, matching the regulatory arm "
+            "of that program rather than a coding change. Not in the current anchored set: SNCA is no "
+            "longer concordant at resolution 2.0."),
         "refs": ["@doi:10.3389/fgene.2019.00584", "@doi:10.3390/genes9020063"],
     },
     "DLG1": {
+        "kind": "isoform_documented",
         "text": (
-            "DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal "
-            "alpha vs beta isoforms, an internal I3 insert and additional cassette exons "
-            "tune its PDZ/GK synaptic function. A DLG1 splice variant is reported to be "
-            "expressed at reduced cortical levels in early-onset schizophrenia, and DLG1 "
-            "sits in the 3q29 schizophrenia locus, so an sQTL that shifts DLG1 isoform "
-            "choice is a mechanistically plausible splicing-led route to SCZ risk."),
+            "DLG1/SAP97 is a canonical alternatively-spliced synaptic scaffold: N-terminal alpha vs "
+            "beta isoforms, an internal I3 insert and additional cassette exons tune its PDZ/GK "
+            "synaptic function. A DLG1 splice variant is reported at reduced cortical levels in "
+            "early-onset schizophrenia, and DLG1 sits in the 3q29 schizophrenia locus, so an sQTL "
+            "that shifts DLG1 isoform choice is a mechanistically plausible splicing-led route to SCZ "
+            "risk."),
         "refs": ["@doi:10.1038/tp.2015.154"],
     },
     "CTSH": {
+        "kind": "isoform_documented",
         "text": (
-            "CTSH (cathepsin H) is a protective Alzheimer's-disease GWAS locus; the gene is "
-            "annotated with multiple transcript variants encoding distinct isoforms, and the "
-            "AD-associated coding change (Gly->Arg) affects only a subset of isoforms, so "
-            "isoform choice modulates the functional consequence of the locus. This is the "
-            "highest-CLPP splicing-led case in the panel (CLPP 0.39, AD hippocampus)."),
+            "CTSH has reported brain isoform usage differences relevant to psychiatric phenotypes. "
+            "Not in the current anchored set."),
         "refs": ["@doi:10.1038/s41386-023-01542-2"],
     },
     "ARVCF": {
+        "kind": "gene_documented",
         "text": (
-            "ARVCF lies in the 22q11.2 schizophrenia deletion region (haplotypic SCZ "
-            "association with COMT) and is itself a modulator of pre-mRNA splicing -- it "
-            "interacts with SRSF1, DDX5 and hnRNP H2 and alters alternative-splicing activity "
-            "-- so a splicing-led ARVCF event is consistent with both its locus and its "
-            "molecular role."),
+            "ARVCF sits in the 22q11.2 locus (and carries a reported association with COMT) and is "
+            "itself a modulator of pre-mRNA splicing -- it interacts with SRSF1, DDX5 and hnRNP H2 "
+            "and alters alternative-splicing activity -- so a splicing-led ARVCF event is consistent "
+            "with both its locus and its molecular role. Not in the current anchored set."),
         "refs": ["@doi:10.1038/sj.mp.4001586"],
     },
-    # Resolved splicing-led genes without established disease-specific isoform literature:
-    # honest "novel candidate" entries (the north-star is that IsoGraph surfaces
-    # GO-invisible, under-characterized switching -- these are exactly that).
-    "PPP6R2": {
+    "PRDM2": {
+        "kind": "isoform_documented",
         "text": (
-            "PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both "
-            "ALS and SCZ (three resolved events, the most in the panel), but disease-specific "
-            "isoform biology is not established -- a novel cross-trait splicing-led candidate "
-            "for follow-up."),
+            "PRDM2/RIZ is the clearest documented isoform program in the anchored set: it is "
+            "transcribed from alternative promoters into RIZ1, which carries the PR (SET-like) "
+            "methyltransferase domain, and RIZ2, which lacks it, and the RIZ1:RIZ2 balance -- not "
+            "total PRDM2 -- is what changes in disease states where the gene has been studied. The "
+            "colocalizing ALS event here is a 5'-end choice, which is the same class of event as that "
+            "switch, so the variant plausibly acts by selecting between PR-positive and PR-negative "
+            "products rather than by changing gene dosage. Brain-specific and ALS-specific isoform "
+            "work is not established."),
+        "refs": ["[citation needed: RIZ1/RIZ2 alternative-promoter isoforms and the PR-domain balance]"],
+    },
+    "IFNAR2": {
+        "kind": "isoform_documented",
+        "text": (
+            "IFNAR2 produces functionally distinct products by alternative splicing -- a full-length "
+            "signalling receptor, a truncated form lacking most of the cytoplasmic domain, and a "
+            "soluble form -- and the ratio between them sets the cell's type-I interferon response "
+            "rather than its receptor abundance. IFNAR2 is an established Alzheimer's GWAS locus, and "
+            "the anchored event is splicing-specific on the genetics (no eQTL instrument at all), so "
+            "isoform choice is the mechanism this locus most plausibly acts through."),
+        "refs": ["[citation needed: IFNAR2 transmembrane vs truncated vs soluble isoforms]"],
+    },
+    "DNAJA3": {
+        "kind": "isoform_documented",
+        "text": (
+            "DNAJA3/Tid1 is a mitochondrial HSP40 co-chaperone with two long-standing splice forms "
+            "that differ at the C-terminus and have been reported to act in opposite directions on "
+            "apoptosis, so isoform choice rather than total level is the functional variable. A "
+            "schizophrenia-specific isoform role is not established."),
+        "refs": ["[citation needed: Tid1-L / Tid1-S splice forms and opposing apoptotic effects]"],
+    },
+    "TPP1": {
+        "kind": "gene_documented",
+        "text": (
+            "TPP1/CLN2 encodes lysosomal tripeptidyl peptidase 1; its loss causes late-infantile "
+            "neuronal ceroid lipofuscinosis, and it is one of the best-characterised lysosomal genes "
+            "in neurodegeneration. What is not established is which TPP1 isoform an ALS risk variant "
+            "selects -- the disease literature is about enzyme deficiency, not about isoform choice."),
         "refs": [],
     },
-    "GGNBP2": {
+    "TMEM175": {
+        "kind": "gene_documented",
         "text": (
-            "GGNBP2/ZNF403 (17q12) is LoF-constrained (LOEUF 0.20) and colocalizes as a "
-            "splicing-led switch in ALS; its isoform biology in neurodegeneration is "
-            "uncharacterized -- a novel splicing-led candidate."),
+            "TMEM175 is an established Parkinson's risk gene and a lysosomal potassium/proton channel "
+            "whose coding variant M393T reduces channel function; the locus is one of the "
+            "best-supported in PD. Isoform-level biology is not established, and in this panel "
+            "TMEM175's own genetics are weak (sQTL PP4 ~ 0 against a large eCAVIAR CLPP), so it is "
+            "carried as a documented gene with undocumented and unsupported isoform evidence."),
         "refs": [],
     },
-    "RTEL1": {
+    "CTSB": {
+        "kind": "gene_documented",
         "text": (
-            "RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative "
-            "C-terminal isoforms in other tissues, but a brain disease-specific splice role "
-            "is not established -- a splicing-led candidate whose isoform choice warrants "
-            "transcript-level follow-up."),
+            "Cathepsin B is a lysosomal cysteine protease and an established Parkinson's GWAS gene, "
+            "functionally tied to the GBA/lysosomal axis and to alpha-synuclein degradation. Which "
+            "CTSB isoform the risk variant selects is not characterised."),
+        "refs": [],
+    },
+    "SNAP91": {
+        "kind": "gene_documented",
+        "text": (
+            "SNAP91/AP180 assembles clathrin at the synapse and is an established schizophrenia GWAS "
+            "gene with reported effects on synaptic development. Its paralogue PICALM has documented "
+            "disease-relevant isoform biology in Alzheimer's, which makes an isoform-level mechanism "
+            "plausible here, but SNAP91's own isoform program is not characterised."),
+        "refs": [],
+    },
+    "NT5C2": {
+        "kind": "gene_documented",
+        "text": (
+            "NT5C2 is a cytosolic 5'-nucleotidase, an established schizophrenia GWAS gene, and the "
+            "cause of hereditary spastic paraplegia SPG45 when lost. Isoform choice in brain is not "
+            "characterised."),
+        "refs": [],
+    },
+    "SPG7": {
+        "kind": "gene_documented",
+        "text": (
+            "SPG7/paraplegin is a subunit of the mitochondrial m-AAA protease; biallelic loss causes "
+            "hereditary spastic paraplegia. The gene is well documented; its isoform biology is not."),
+        "refs": [],
+    },
+    "VAMP2": {
+        "kind": "gene_documented",
+        "text": (
+            "VAMP2/synaptobrevin-2 is a core SNARE of synaptic vesicle fusion and is strongly "
+            "LoF-constrained. The gene is textbook; a disease-relevant isoform program is not "
+            "established."),
+        "refs": [],
+    },
+    "DOC2A": {
+        "kind": "gene_documented",
+        "text": (
+            "DOC2A is a calcium sensor for spontaneous neurotransmitter release and sits in the "
+            "16p11.2 locus. It is the most splicing-specific gene in this panel on the genetics -- "
+            "strong sQTL colocalization in nine tissues with no eQTL instrument at all -- while its "
+            "isoform biology is uncharacterised, which is exactly the gap this layer is meant to "
+            "mark."),
+        "refs": [],
+    },
+    "INO80E": {
+        "kind": "gene_documented",
+        "text": (
+            "INO80E is a subunit of the INO80 chromatin-remodelling complex and lies in the 16p11.2 "
+            "schizophrenia locus. Its genetics here colocalize on both modalities and are not "
+            "splicing-specific; isoform biology is not established."),
+        "refs": [],
+    },
+    "PTPRN": {
+        "kind": "gene_documented",
+        "text": (
+            "PTPRN/IA-2 is a dense-core vesicle transmembrane protein and a well-known autoantigen in "
+            "type 1 diabetes, with a documented role in neuroendocrine secretion. Its isoform usage "
+            "in brain, and in ALS, is not characterised."),
+        "refs": [],
+    },
+    "PIGQ": {
+        "kind": "gene_documented",
+        "text": (
+            "PIGQ acts in the first step of GPI-anchor biosynthesis; biallelic variants cause a "
+            "developmental and epileptic encephalopathy. GPI-anchoring is dosage-sensitive, but no "
+            "isoform-level disease biology is established."),
+        "refs": [],
+    },
+    "CTC1": {
+        "kind": "gene_documented",
+        "text": (
+            "CTC1 is part of the CST telomere-maintenance complex; its loss causes Coats plus / "
+            "cerebroretinal microangiopathy. No isoform-level disease biology is established."),
+        "refs": [],
+    },
+    "FLCN": {
+        "kind": "gene_documented",
+        "text": (
+            "FLCN/folliculin is the Birt-Hogg-Dube gene and a GTPase-activating protein in lysosomal "
+            "amino-acid sensing upstream of mTORC1. The gene is well documented; its brain isoform "
+            "biology is not, and its colocalization here is weak."),
+        "refs": [],
+    },
+    "NADSYN1": {
+        "kind": "gene_documented",
+        "text": (
+            "NADSYN1 completes NAD+ synthesis and sits in a locus shared with DHCR7, which "
+            "complicates gene attribution at the signal. Isoform biology is not established."),
+        "refs": [],
+    },
+    "B3GAT1": {
+        "kind": "gene_documented",
+        "text": (
+            "B3GAT1/GlcAT-P makes the HNK-1 glycan carried by neural adhesion molecules and has "
+            "documented roles in synaptic plasticity. Which isoform a schizophrenia risk variant "
+            "selects is not known."),
+        "refs": [],
+    },
+    "BAIAP3": {
+        "kind": "gene_documented",
+        "text": (
+            "BAIAP3 is a Munc13-family protein controlling dense-core vesicle secretion, so it sits "
+            "in the same secretory machinery as several other genes in this panel. Isoform biology is "
+            "not established, and its usage range here touches the detection floor."),
+        "refs": [],
+    },
+    "CRELD2": {
+        "kind": "gene_documented",
+        "text": (
+            "CRELD2 is an ER-stress-responsive secreted protein induced through the ATF6 arm of the "
+            "unfolded protein response. It has the broadest SMR support in the panel (48 of 51 "
+            "probes) and no documented isoform program."),
+        "refs": [],
+    },
+    "GSTO2": {
+        "kind": "gene_documented",
+        "text": (
+            "GSTO2 is a glutathione S-transferase omega-family enzyme with reported associations to "
+            "age-related phenotypes; its brain isoform biology is not established. The junction here "
+            "does validate in the PSI catalogue, so the switch is measured even though the literature "
+            "is silent."),
         "refs": [],
     },
     "TBC1D15": {
+        "kind": "gene_documented",
         "text": (
-            "TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome "
-            "interface, a pathway central to Parkinson's-disease mitophagy; its PD-associated "
-            "splicing-led switch has no established isoform literature -- a mechanistically "
-            "suggestive novel candidate."),
+            "TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome interface, a "
+            "pathway central to Parkinson's mitophagy. Its PD-associated splicing-led switch has no "
+            "established isoform literature -- a mechanistically suggestive nomination rather than a "
+            "confirmation."),
+        "refs": [],
+    },
+    "THAP3": {
+        "kind": "novel_candidate",
+        "text": (
+            "THAP3 is a THAP-domain transcription factor, a family in which THAP1 is the DYT6 "
+            "dystonia gene; THAP3 itself is little characterised in brain. It is one of the four "
+            "splicing-specific genes here, which makes it a first-order nomination rather than a "
+            "footnote."),
+        "refs": [],
+    },
+    "PCGF3": {
+        "kind": "novel_candidate",
+        "text": (
+            "PCGF3 is a Polycomb RING-finger subunit of a non-canonical PRC1 complex; no "
+            "disease-specific isoform biology is established, and its usage range here touches the "
+            "detection floor."),
+        "refs": [],
+    },
+    "RPAIN": {
+        "kind": "novel_candidate",
+        "text": (
+            "RPAIN/RIP is an RPA-interacting nuclear import factor with no established brain disease "
+            "isoform biology. Its junction validates in the PSI catalogue and in the recount, so the "
+            "switch is well measured and the literature is simply absent."),
+        "refs": [],
+    },
+    "TARBP1": {
+        "kind": "novel_candidate",
+        "text": (
+            "TARBP1 is a TRBP-related RNA methyltransferase with no established disease isoform "
+            "biology; its usage range touches the detection floor here."),
+        "refs": [],
+    },
+    "RBFA": {
+        "kind": "novel_candidate",
+        "text": (
+            "RBFA is a mitoribosome assembly factor with essentially no brain disease literature; the "
+            "switch is nominated here on genetics alone and is not measurable in the orthogonal "
+            "assays."),
+        "refs": [],
+    },
+    "GPR135": {
+        "kind": "novel_candidate",
+        "text": (
+            "GPR135 is an orphan G-protein-coupled receptor with minimal functional characterisation, "
+            "which makes any isoform claim premature; the colocalization here is weak."),
+        "refs": [],
+    },
+    "PPP6R2": {
+        "kind": "novel_candidate",
+        "text": (
+            "PPP6R2 (PP6 regulatory subunit) colocalizes as a splicing-led switch across both ALS and "
+            "SCZ, the most cross-trait of the panel, but disease-specific isoform biology is not "
+            "established -- a cross-trait nomination for follow-up. Both long-read and the junction "
+            "recount confirm the switch, so the evidence is orthogonal even where the literature is "
+            "not."),
+        "refs": [],
+    },
+    "GGNBP2": {
+        "kind": "novel_candidate",
+        "text": (
+            "GGNBP2/ZNF403 (17q12) is LoF-constrained and was nominated as a splicing-led switch in "
+            "ALS on the legacy set; its isoform biology in neurodegeneration is uncharacterised. Not "
+            "in the current anchored set."),
+        "refs": [],
+    },
+    "RTEL1": {
+        "kind": "novel_candidate",
+        "text": (
+            "RTEL1 (telomere-maintenance helicase; AD/SCZ locus) has documented alternative "
+            "C-terminal isoforms in other tissues, but a brain disease-specific splice role is not "
+            "established. Not in the current anchored set."),
         "refs": [],
     },
     "PGS1": {
+        "kind": "novel_candidate",
         "text": (
-            "PGS1 (phosphatidylglycerophosphate synthase 1; mitochondrial phospholipid "
-            "biosynthesis) colocalizes as a splicing-led switch in ALS with no established "
-            "disease isoform biology -- a novel candidate."),
+            "PGS1 (mitochondrial phospholipid biosynthesis) was nominated in ALS with no established "
+            "disease isoform biology. Not in the current anchored set."),
         "refs": [],
     },
     "CDIP1": {
+        "kind": "novel_candidate",
         "text": (
-            "CDIP1 (cell-death-inducing p53 target) colocalizes as a two-event splicing-led "
-            "switch in schizophrenia; its isoform biology in SCZ is uncharacterized -- a "
-            "novel candidate."),
+            "CDIP1 (cell-death-inducing p53 target) was nominated as a two-event splicing-led switch "
+            "in schizophrenia; its isoform biology is uncharacterised. Not in the current anchored "
+            "set."),
         "refs": [],
     },
     "PRRC2B": {
+        "kind": "novel_candidate",
         "text": (
-            "PRRC2B is LoF-constrained (LOEUF 0.34) and colocalizes as a splicing-led switch "
-            "in schizophrenia with no established disease isoform literature -- a novel "
-            "candidate."),
+            "PRRC2B is LoF-constrained and was nominated in schizophrenia with no established disease "
+            "isoform literature. Not in the current anchored set."),
         "refs": [],
     },
     "TPCN1": {
+        "kind": "novel_candidate",
         "text": (
-            "TPCN1 (endolysosomal two-pore Ca2+ channel; AD locus) colocalizes as a "
-            "splicing-led switch with no established disease isoform biology -- a novel "
-            "candidate."),
+            "TPCN1 (endolysosomal two-pore calcium channel; AD locus) was nominated with no "
+            "established disease isoform biology. Not in the current anchored set."),
         "refs": [],
     },
+}
+
+
+_KIND_NOTE = {
+    "isoform_documented": "A disease-relevant isoform program is established for this gene.",
+    "gene_documented": ("The gene and its disease association are established; which isoform "
+                        "the risk variant selects is not characterised."),
+    "novel_candidate": ("No established disease-specific isoform biology was found. That is a "
+                        "statement about the literature, not about the evidence here: an "
+                        "under-characterised switch is what this method is built to surface, "
+                        "and this row is a nomination rather than a null result."),
 }
 
 
@@ -165,7 +422,8 @@ def _literature_lines(gene: str) -> list[str]:
     lit = _LITERATURE.get(gene)
     if lit is None:
         return []
-    out = ["## 6. Literature (known isoform biology)", lit["text"]]
+    out = ["## 6. Literature (known isoform biology)", lit["text"], "",
+           f"_Curation: {lit['kind']}._ {_KIND_NOTE[lit['kind']]}"]
     if lit["refs"]:
         out.append("")
         out.append("_References:_ " + "; ".join(lit["refs"]))
@@ -374,7 +632,7 @@ def run(genes: list[str], part: str = "panel") -> pd.DataFrame:
                               ascending=[False, False, False]).reset_index(drop=True)
     panel.to_parquet(out_dir / "deep_dive_panel.parquet", index=False)
     _write_panel_md(panel, out_dir)
-    _write_supp_tables(d, set(panel["ens"]), out_dir)
+    _write_supp_tables(d, set(panel["ens"]), out_dir, panel)
     print(f"deep-dive over {len(panel)} genes -> {out_dir}")
     return panel
 
@@ -406,7 +664,8 @@ def _write_events(d: dict, ens_set: set, out_dir) -> None:
     _emit(events, out_dir, "deep_dive_events")
 
 
-def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
+def _write_supp_tables(d: dict, ens_set: set, out_dir,
+                       panel: pd.DataFrame | None = None) -> None:
     """Machine-readable per-gene tables so readers can reconstruct any gene's deep-dive.
 
     (2) rbp        - per gene, RBP motifs both switched in the gene and enriched in its module;
@@ -445,13 +704,20 @@ def _write_supp_tables(d: dict, ens_set: set, out_dir) -> None:
             ["gene_name", "region", "start"])
         _emit(exons, out_dir, "deep_dive_exon_clinical")
 
-    # (4) curated literature layer (known isoform biology) for the resolved splicing-led genes
+    # (4) curated literature layer (known isoform biology).
+    # `curation` is what is KNOWN about the gene, never how good the evidence here is: a
+    # novel_candidate is a nomination the literature has not reached, which is the output
+    # this method exists to produce. `in_anchored_set` says whether the gene is currently
+    # splicing-led, so a reader can see the layer's coverage without re-deriving it.
     sym_set = set(ens2sym.values())
+    anchored = (set(panel.loc[panel["verdict"].str.startswith("splicing-led"), "gene"])
+                if panel is not None and "verdict" in panel.columns else set())
     lit_rows = [
         {"gene_name": g,
          "literature": v["text"],
          "references": "; ".join(v["refs"]) if v["refs"] else "",
-         "curation": "documented" if v["refs"] else "novel_candidate"}
+         "curation": v["kind"],
+         "in_anchored_set": g in anchored}
         for g, v in _LITERATURE.items() if g in sym_set
     ]
     if lit_rows:
@@ -465,8 +731,10 @@ def _write_panel_md(panel: pd.DataFrame, out_dir) -> None:
          "above single). `resolved events` = colocalizing sQTLs that map onto a concordant "
          "IsoGraph switch pair (the splicing-led, DTU-without-DGE class); `multi-locus` flags "
          "genes with >=2 such events (multiple significant colocalizations, incl. cross-trait). "
-         "Main-figure framing is reserved for the resolved cross-disease headliners (SNCA, "
-         "CTSH); the remainder are supporting vignettes. See `<GENE>.md` for each.", "",
+         "Main-figure framing is a PI decision taken from the anchored gene summary "
+         "(`08_integration/_m/anchored_gene_summary/`), not from this table; as of 2026-09-20 "
+         "Fig 4A provisionally draws PRDM2. The remainder are supporting vignettes. See "
+         "`<GENE>.md` for each.", "",
          "| gene | traits | kinds | max CLPP | LOEUF | resolved events | multi-locus | concordant traits | BrainSeq rep | GO-inv | verdict |",
          "|------|--------|-------|----------|-------|-----------------|-------------|-------------------|--------------|--------|---------|"]
     for r in panel.itertuples():

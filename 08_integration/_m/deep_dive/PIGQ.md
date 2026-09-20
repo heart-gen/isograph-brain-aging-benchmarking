@@ -8,9 +8,9 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:580972-582248(+) (ENST00000321878.10,ENST0 |
-| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:580972-582883(+) (ENST00000026218.9; match |
-| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:582309-582883(+) (ENST00000321878.10,ENST0 |
+| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:580972-582248(+) (ENST00000321878.10,ENST0 |
+| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:580972-582883(+) (ENST00000026218.9; match |
+| als | sQTL | Brain_Putamen_basal_ganglia | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:582309-582883(+) (ENST00000321878.10,ENST0 |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -25,3 +25,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PIGQ in ALS. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+PIGQ acts in the first step of GPI-anchor biosynthesis; biallelic variants cause a developmental and epileptic encephalopathy. GPI-anchoring is dosage-sensitive, but no isoform-level disease biology is established.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

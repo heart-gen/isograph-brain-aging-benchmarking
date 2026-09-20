@@ -1,6 +1,6 @@
 # Per-gene mechanistic deep-dive — panel summary
 
-Every colocalized disease gene, one row each (ranked splicing-led first, multi-locus above single). `resolved events` = colocalizing sQTLs that map onto a concordant IsoGraph switch pair (the splicing-led, DTU-without-DGE class); `multi-locus` flags genes with >=2 such events (multiple significant colocalizations, incl. cross-trait). Main-figure framing is reserved for the resolved cross-disease headliners (SNCA, CTSH); the remainder are supporting vignettes. See `<GENE>.md` for each.
+Every colocalized disease gene, one row each (ranked splicing-led first, multi-locus above single). `resolved events` = colocalizing sQTLs that map onto a concordant IsoGraph switch pair (the splicing-led, DTU-without-DGE class); `multi-locus` flags genes with >=2 such events (multiple significant colocalizations, incl. cross-trait). Main-figure framing is a PI decision taken from the anchored gene summary (`08_integration/_m/anchored_gene_summary/`), not from this table; as of 2026-09-20 Fig 4A provisionally draws PRDM2. The remainder are supporting vignettes. See `<GENE>.md` for each.
 
 | gene | traits | kinds | max CLPP | LOEUF | resolved events | multi-locus | concordant traits | BrainSeq rep | GO-inv | verdict |
 |------|--------|-------|----------|-------|-----------------|-------------|-------------------|--------------|--------|---------|

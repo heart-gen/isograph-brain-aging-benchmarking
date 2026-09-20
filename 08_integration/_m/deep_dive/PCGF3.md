@@ -13,8 +13,8 @@
 | ad | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | — | no | — | risk allele A decreases usage of junction chr4:728628-730630(+) (unmapped transcript; not  |
 | ad | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | no | no | — | risk allele A increases usage of junction chr4:731110-733672(+) (ENST00000362003.10,ENST00 |
 | ad | sQTL | Brain_Cerebellar_Hemisphere | 0.02 | no | no | no | — | risk allele A decreases usage of junction chr4:732498-733672(+) (ENST00000419774.5,ENST000 |
-| pd | sQTL | Brain_Cerebellum | 0.01 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr4:731110-733672(+) (ENST00000362003.10,ENST00 |
-| pd | sQTL | Brain_Cerebellum | 0.01 | yes | yes | no | no annotated structural change | risk allele G increases usage of junction chr4:761416-764984(+) (ENST00000362003.10,ENST00 |
+| pd | sQTL | Brain_Cerebellum | 0.01 | yes | yes | no | biotype switch, cds, first exon, internal exon,  | risk allele G increases usage of junction chr4:731110-733672(+) (ENST00000362003.10,ENST00 |
+| pd | sQTL | Brain_Cerebellum | 0.01 | yes | yes | no | biotype switch, cds, first exon, internal exon,  | risk allele G increases usage of junction chr4:761416-764984(+) (ENST00000362003.10,ENST00 |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -33,3 +33,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for PCGF3 in PD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
+
+## 6. Literature (known isoform biology)
+PCGF3 is a Polycomb RING-finger subunit of a non-canonical PRC1 complex; no disease-specific isoform biology is established, and its usage range here touches the detection floor.
+
+_Curation: novel_candidate._ No established disease-specific isoform biology was found. That is a statement about the literature, not about the evidence here: an under-characterised switch is what this method is built to surface, and this row is a nomination rather than a null result.

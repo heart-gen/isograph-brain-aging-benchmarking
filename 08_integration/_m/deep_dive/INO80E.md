@@ -9,10 +9,10 @@
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
 | scz | eQTL | Brain_Cerebellum | 0.03 | no | — | yes | — | risk allele G increases INO80E expression (gene-level; no intron) |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:30001040-30001212(+) (ENST00000540562.1,EN |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | no annotated structural change | risk allele G decreases usage of junction chr16:30001040-30005221(+) (ENST00000304516.11;  |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:30001040-30001212(+) (ENST00000540562.1,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G decreases usage of junction chr16:30001040-30005221(+) (ENST00000304516.11;  |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | no | — | yes | — | risk allele G increases usage of junction chr16:30001530-30003436(+) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | no annotated structural change | risk allele G increases usage of junction chr16:30004657-30005221(+) (ENST00000540562.1,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.03 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele G increases usage of junction chr16:30004657-30005221(+) (ENST00000540562.1,EN |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -29,3 +29,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for INO80E in SCZ. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+INO80E is a subunit of the INO80 chromatin-remodelling complex and lies in the 16p11.2 schizophrenia locus. Its genetics here colocalize on both modalities and are not splicing-specific; isoform biology is not established.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

@@ -8,7 +8,7 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| pd | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | no | no annotated structural change | risk allele T decreases usage of junction chr12:71918548-71920731(+) (ENST00000319106.12,E |
+| pd | sQTL | Brain_Frontal_Cortex_BA9 | 0.02 | yes | yes | no | biotype switch, cds, coding status change, first | risk allele T decreases usage of junction chr12:71918548-71920731(+) (ENST00000319106.12,E |
 
 ### Signed risk-allele direction (colocalized loci with allele matching)
 | trait | tissue | rsID | risk allele | risk QTL effect | direction |
@@ -23,4 +23,6 @@
 A splicing QTL colocalizes onto an IsoGraph switch pair for TBC1D15 in PD. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage.
 
 ## 6. Literature (known isoform biology)
-TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome interface, a pathway central to Parkinson's-disease mitophagy; its PD-associated splicing-led switch has no established isoform literature -- a mechanistically suggestive novel candidate.
+TBC1D15 is a Rab7 GTPase-activating protein at the mitochondria-lysosome interface, a pathway central to Parkinson's mitophagy. Its PD-associated splicing-led switch has no established isoform literature -- a mechanistically suggestive nomination rather than a confirmation.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.

@@ -8,26 +8,26 @@
 ## 1–3. Genetic anchor → switch → coding consequence
 | trait | kind | tissue | CLPP | in switch pair | concordant | GO-inv | struct. consequence | resolved event |
 |-------|------|--------|------|----------------|------------|--------|---------------------|----------------|
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | no annotated structural change | risk allele C increases usage of junction chr17:17213856-17214985(-) (ENST00000285071.9; m |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C increases usage of junction chr17:17213856-17214985(-) (ENST00000285071.9; m |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C decreases usage of junction chr17:17215316-17217069(-) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17221459-17221537(-) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17224143-17224458(-) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr17:17224143-17226176(-) (ENST00000285071.9,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr17:17224143-17226176(-) (ENST00000285071.9,EN |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17225207-17226176(-) (unmapped transcript; |
-| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | no annotated structural change | risk allele C decreases usage of junction chr17:17228161-17231794(-) (ENST00000285071.9,EN |
+| scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele C decreases usage of junction chr17:17228161-17231794(-) (ENST00000285071.9,EN |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17228821-17229488(-) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17228821-17231794(-) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C decreases usage of junction chr17:17228905-17231794(-) (unmapped transcript; |
 | scz | sQTL | Brain_Cerebellar_Hemisphere | 0.01 | no | — | yes | — | risk allele C increases usage of junction chr17:17229708-17231794(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T increases usage of junction chr17:17207069-17207539(-) (unmapped transcript; |
-| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T decreases usage of junction chr17:17213856-17214985(-) (ENST00000285071.9; m |
+| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T decreases usage of junction chr17:17213856-17214985(-) (ENST00000285071.9; m |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T increases usage of junction chr17:17215316-17217069(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17221459-17221537(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17224143-17224458(-) (unmapped transcript; |
-| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T increases usage of junction chr17:17224143-17226176(-) (ENST00000285071.9,EN |
+| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr17:17224143-17226176(-) (ENST00000285071.9,EN |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17224511-17226176(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17225207-17226176(-) (unmapped transcript; |
-| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | no annotated structural change | risk allele T increases usage of junction chr17:17228161-17231794(-) (ENST00000285071.9,EN |
+| ad | sQTL | Brain_Cerebellum | 0.01 | yes | yes | yes | biotype switch, cds, coding status change, first | risk allele T increases usage of junction chr17:17228161-17231794(-) (ENST00000285071.9,EN |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17228821-17229488(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T decreases usage of junction chr17:17228821-17231794(-) (unmapped transcript; |
 | ad | sQTL | Brain_Cerebellum | 0.01 | no | — | yes | — | risk allele T increases usage of junction chr17:17228905-17231794(-) (unmapped transcript; |
@@ -69,3 +69,8 @@
 
 ## 5. Interpretation
 A splicing QTL colocalizes onto an IsoGraph switch pair for FLCN in AD,SCZ — the same switch is genetically anchored across more than one trait. This is the IsoGraph-unique, DTU-without-DGE class: the disease variant acts through isoform choice, not gene dosage, in a GO-invisible module a pathway-enrichment scan would miss.
+
+## 6. Literature (known isoform biology)
+FLCN/folliculin is the Birt-Hogg-Dube gene and a GTPase-activating protein in lysosomal amino-acid sensing upstream of mTORC1. The gene is well documented; its brain isoform biology is not, and its colocalization here is weak.
+
+_Curation: gene_documented._ The gene and its disease association are established; which isoform the risk variant selects is not characterised.
