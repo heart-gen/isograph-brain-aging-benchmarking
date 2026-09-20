@@ -91,6 +91,10 @@ MIN_DONORS_BOTH = 30
 # Fragments a donor must carry across the pair before its usage ratio is computed at all.
 MIN_PAIR_FRAGS = 10
 
+# Coordinate slack when matching a LeafCutter junction to the recount's intron list: the
+# two name the boundary one base apart. Same value as coloc_isoform_events._JUNC_TOL.
+JUNC_TOL = 2
+
 BRAINSEQ_REGIONS = ("caudate", "dlpfc", "hippocampus")
 
 
@@ -189,23 +193,78 @@ def _longread(spine: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-def _ase(spine: pd.DataFrame) -> pd.DataFrame:
-    """BrainSEQ allele-aware junction recount: is the junction actually used?
+def _anchored_junctions(c: pd.DataFrame) -> dict:
+    """ens -> {(chrom, start, end)} for the junctions that actually colocalized."""
+    out: dict[str, set] = {}
+    for ens, g in c.groupby("ens"):
+        s = set()
+        for j in g["junction"].dropna().astype(str):
+            try:
+                chrom, rest = j.split(":", 1)
+                span = rest.split("(", 1)[0]
+                a, b = span.split("-")
+                s.add((chrom, int(a), int(b)))
+            except ValueError:
+                continue
+        if s:
+            out[ens] = s
+    return out
+
+
+def _pairs_carrying(jn: pd.DataFrame, wanted: set) -> set:
+    """Pair ids whose junction list contains one of ``wanted``.
+
+    LeafCutter names the flanking exon bases while the recount stores the intron itself,
+    so the two conventions differ by one at each end; ``JUNC_TOL`` absorbs that. Matching
+    is on coordinates, never on transcript names, because the two layers version their
+    transcript ids differently.
+    """
+    hits = set()
+    for chrom, a, b in wanted:
+        m = jn[(jn["chrom"] == chrom)
+               & (jn["start"].sub(a).abs() <= JUNC_TOL)
+               & (jn["end"].sub(b).abs() <= JUNC_TOL)]
+        hits |= set(m["pair_id"])
+    return hits
+
+
+def _ase(spine: pd.DataFrame, c: pd.DataFrame) -> pd.DataFrame:
+    """BrainSEQ allele-aware junction recount: is THE ANCHORED junction observed?
+
+    Restricted to the switch pairs that actually carry the colocalizing junction. Without
+    that restriction the columns answer a weaker question -- "does this gene switch
+    somewhere?" -- because the recount enumerates every BrainSEQ switch pair of the gene,
+    most of which have nothing to do with the junction that colocalized. PRDM2 is the case
+    in point: its best-detected pair sits at 0.39 minor-form usage while the pair carrying
+    the anchored junction sits at 0.045.
 
     Usage is computed from the pair's own junction fragments summed over haplotypes, so it
     is the switch ratio directly. Donors below ``MIN_PAIR_FRAGS`` across the pair are
     dropped before the median rather than contributing a ratio built on a handful of reads.
     """
     want = set(spine["ens"])
+    anchored = _anchored_junctions(c)
     feas, usage = [], []
     for region in BRAINSEQ_REGIONS:
         base = stage_out("mechanism", "ase_junction_switch", region)
-        fp = base / "pair_feasibility.parquet"
-        if not fp.exists():
+        fp, jp = base / "pair_feasibility.parquet", base / "junctions.parquet"
+        if not fp.exists() or not jp.exists():
             continue
         f = pd.read_parquet(fp)
         f["ens"] = _bare(f["gene_id"])
         f = f[f["ens"].isin(want)]
+        if f.empty:
+            continue
+        jn = pd.read_parquet(jp, columns=["pair_id", "chrom", "start", "end"])
+        jn = jn[jn["pair_id"].isin(set(f["pair_id"]))]
+        keep: set = set()
+        for ens in f["ens"].unique():
+            w = anchored.get(ens)
+            if not w:
+                continue
+            sub = jn[jn["pair_id"].isin(set(f.loc[f["ens"].eq(ens), "pair_id"]))]
+            keep |= _pairs_carrying(sub, w)
+        f = f[f["pair_id"].isin(keep)]
         if f.empty:
             continue
         f["region"] = region
@@ -242,33 +301,42 @@ def _ase(spine: pd.DataFrame) -> pd.DataFrame:
     out = spine.copy()
     if feas:
         fa = pd.concat(feas, ignore_index=True)
+        # Both counts are over DISTINCT pairs. Summing `testable` across regions instead
+        # double-counts a pair that is testable in two of them, which produced rows with
+        # more testable pairs than pairs.
         agg = fa.groupby("ens").agg(
-            ase_pairs=("pair_id", "nunique"),
-            ase_testable=("testable", lambda x: int(x.eq(True).sum())),
+            ase_pairs=("pair_id", "nunique"),   # pairs CARRYING the anchored junction
             ase_donors=("n_donors", "max"),
         ).reset_index()
-        out = out.merge(agg, on="ens", how="left")
+        tst = (fa[fa["testable"].eq(True)].groupby("ens")["pair_id"].nunique()
+               .rename("ase_testable").reset_index())
+        out = out.merge(agg, on="ens", how="left").merge(tst, on="ens", how="left")
     if usage:
         ua = pd.concat(usage, ignore_index=True)
-        # Select on DETECTION, not on usage: a gene with several switch pairs is observed
-        # if any pair shows both forms in many donors. Selecting the highest minor-form
-        # usage instead would rank a rare-but-real disease isoform below a balanced
-        # housekeeping one, which is the bias this table is built to avoid.
-        best = ua.sort_values(["n_both", "n_donors"], ascending=False).drop_duplicates("ens")
-        out = out.merge(
-            best[["ens", "minor", "n_donors", "n_both", "frac_both", "region"]].rename(
-                columns={"minor": "ase_minor_usage", "n_donors": "ase_usage_donors",
-                         "n_both": "ase_donors_both_forms",
-                         "frac_both": "ase_frac_donors_both",
-                         "region": "ase_region"}),
-            on="ens", how="left")
+        # The junction sits in several switch pairs, and the usage RATIO depends on which
+        # partner it is measured against -- PRDM2's junction is in 12 pairs spanning 0.045
+        # to 0.39 minor-form usage. There is therefore no single "usage of this junction",
+        # so the spread is reported rather than one pair being silently elected to stand
+        # for the rest. Detection (`donors_both`) is well defined and carries the call.
+        agg = ua.groupby("ens").agg(
+            ase_usage_min=("minor", "min"),
+            ase_usage_median=("minor", "median"),
+            ase_usage_max=("minor", "max"),
+            ase_usage_pairs=("pair_id", "nunique"),
+            ase_donors_both_forms=("n_both", "max"),
+            ase_usage_donors=("n_donors", "max"),
+            ase_frac_donors_both=("frac_both", "max"),
+            ase_region=("region", lambda s: ",".join(sorted(set(s)))),
+        ).reset_index()
+        out = out.merge(agg, on="ens", how="left")
     for c in ("ase_pairs", "ase_testable", "ase_donors", "ase_usage_donors",
-              "ase_donors_both_forms"):
+              "ase_donors_both_forms", "ase_usage_pairs"):
         if c in out:
             out[c] = out[c].fillna(0).astype(int)
         else:
             out[c] = 0
-    for c in ("ase_minor_usage", "ase_frac_donors_both"):
+    for c in ("ase_usage_min", "ase_usage_median", "ase_usage_max",
+              "ase_frac_donors_both"):
         if c not in out:
             out[c] = np.nan
     if "ase_region" not in out:
@@ -417,7 +485,7 @@ def build() -> pd.DataFrame:
     t = _coloc(t)
     t = _smr(t)
     t = _longread(t)
-    t = _ase(t)
+    t = _ase(t, c)
     t = _psi(t)
     for col in ("n_tissue_sqtl_coloc", "n_tissue_eqtl_coloc"):
         t[col] = t[col].fillna(0).astype(int)
@@ -497,8 +565,13 @@ def report(t: pd.DataFrame, prov: dict | None = None) -> str:
         "n = 12, Bambu -- do the switching transcripts exist and trade off on an "
         "independent platform? **Junction recount**: allele-aware junction counts from "
         "BrainSEQ BAMs at ~n = 500 -- is the junction itself observed, and in how many "
-        "donors? **PSI**: the LIBD event catalogue, the narrowest of the three -- "
-        "`junction not in catalogue` is a gap in that resource, not a negative.", "",
+        "donors? Restricted to the switch pairs that actually CARRY the colocalizing "
+        "junction, so the columns are about that junction rather than about the gene "
+        "switching somewhere. The junction usually sits in several such pairs and the "
+        "usage ratio depends on which partner it is measured against, so a RANGE over "
+        "those pairs is reported rather than one pair standing for the rest. **PSI**: the LIBD event catalogue, the narrowest of the "
+        "three -- `junction not in catalogue` is a gap in that resource, not a negative.",
+        "",
         "**Minor-form usage is a descriptor, not a criterion.** BrainSEQ and GTEx are "
         "neurotypical tissue, so an isoform that matters in disease is often a minority "
         "form here precisely because disease is what raises it. `usage` is reported for "
@@ -506,19 +579,19 @@ def report(t: pd.DataFrame, prov: dict | None = None) -> str:
         f"donors (`both` >= {MIN_DONORS_BOTH}). "
         f"For reference only, {MIN_USAGE_REFERENCE} is the pre-registered threshold the "
         "separate PSI arm applies.", "",
-        "| gene | trait | LR conf | LR pairs det/switch | ASE pairs test | ASE donors both |"
-        " ASE usage | PSI | switch replicates | call |",
-        "| --- | --- | :---: | :---: | :---: | ---: | ---: | --- | :---: | --- |",
+        "| gene | trait | LR conf | LR pairs det/switch | ASE pairs test/carrying | "
+        "ASE donors both | ASE usage range | PSI | switch replicates | call |",
+        "| --- | --- | :---: | :---: | :---: | ---: | :---: | --- | :---: | --- |",
     ]
     for _, r in t.iterrows():
-        both = int(r["ase_donors_both_forms"])
-        n_d = int(r["ase_usage_donors"])
+        both, n_d = int(r["ase_donors_both_forms"]), int(r["ase_usage_donors"])
+        rng = ("--" if not np.isfinite(pd.to_numeric(r["ase_usage_min"], errors="coerce"))
+               else f"{_f(r['ase_usage_min'], 3)}-{_f(r['ase_usage_max'], 3)}")
         L.append(
             f"| {r['gene']} | {r['trait']} | {'yes' if r['lr_confirmed'] else 'no'} | "
             f"{int(r['lr_pairs_detected'])}/{int(r['lr_pairs_switchlike'])} | "
             f"{int(r['ase_testable'])}/{int(r['ase_pairs'])} | "
-            f"{both}/{n_d} | "
-            f"{_f(r['ase_minor_usage'], 3)} | {r['psi_verdict']} | "
+            f"{both}/{n_d} | {rng} | {r['psi_verdict']} | "
             f"{'yes' if r['brainseq_switch_replicates'] else 'no'} | "
             f"{r['orthogonal_call']} |")
 
