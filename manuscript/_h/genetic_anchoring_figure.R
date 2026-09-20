@@ -28,7 +28,12 @@
 # event whose switch replicates in an independent BrainSEQ cohort (DLPFC). Its honest costs
 # belong in the legend: CLPP is only 0.056, the module is GO-VISIBLE (unlike the legacy SNCA
 # panel), and the junction/switch polarity r is 0.11 -- the junction rides the switch axis
-# weakly. The set-level evidence is panels B-D plus figOrthogonalConfirm.
+# weakly.
+# The short-read junction arm CANNOT confirm this exact contrast: BrainSEQ quantifies PRDM2
+# (19 PSI events in DLPFC) but the LIBD event catalogue stops at ~13,787,067, so the distal
+# terminal exon drawn here is not one of its events (`junction_not_measured`, 2026-09-20).
+# That is a coverage gap in the catalogue, not evidence against the junction -- but the
+# legend must not claim orthogonal confirmation of panel A. The set-level evidence is panels B-D plus figOrthogonalConfirm.
 # Do NOT annotate a structural consequence here from `structural_consequence`: that field
 # flags each transcript against a gene reference, so 63 of 76 concordant events carry all
 # seven flags and it cannot distinguish one event from another. The structure drawn in this
