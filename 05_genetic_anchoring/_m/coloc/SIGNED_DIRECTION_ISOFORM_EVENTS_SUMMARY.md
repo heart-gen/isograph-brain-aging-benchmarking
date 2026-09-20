@@ -46,21 +46,35 @@ from `structure_annotations`. All GWAS effect-allele lookups used name-resolved 
 the registry sumstats; no per-SNP recomputation was performed.
 
 ### Results Text
-Across the five anchoring analyses, 72 of 73 colocalized gene–phenotype events were signed
-for risk-allele direction. Of 55 splicing-QTL events, 42 mapped to at least one GENCODE
-transcript junction, and **9 splicing junctions were concordant with the tissue-matched
-IsoGraph switching transcript pair; all 9 lay in GO-invisible switch modules**. Concordant
-aging events included *SNCA* (α-synuclein), where the risk allele increased usage of junction
-chr4:89,835,692–89,836,127 in both LBD (risk allele A) and PD (risk allele C) in cortex /
-frontal cortex; *CTSH* and *TPCN1* (AD); and *PGS1*, *PPP6R2*, and *GGNBP2* (ALS), with
-*PPP6R2* showing two competing junctions moving in opposite directions — a canonical splice
-switch. Six events replicated the switch in an independent BrainSeq cohort, including *MYO18A*
-(schizophrenia; five junctions in the SCZ-diagnosis caudate cohort) and *MRPS10* (AD, caudate).
-Schizophrenia produced no tissue-matched GTEx concordance but five BrainSeq-replicated events,
-consistent with its switch layer being defined natively in the BrainSeq caudate cohort. This
-is a secondary/interpretive analysis built on the primary colocalization result; concordance
-reflects mapping of a genetically anchored splice change onto an IsoGraph switch, not a formal
-statistical test.
+*(Re-quoted 2026-09-19 against `coloc_direction_combined.parquet` and
+`coloc_isoform_events_{combined,meta}.parquet` from the switching-filter re-run at Leiden
+2.0. This file is hand-written and does not regenerate with the analysis.)*
+
+Across the six anchoring analyses (five traits; SCZ enters twice, from the aging and the
+SCZD switch layers), **all 467** colocalized gene–phenotype events were signed for
+risk-allele direction — 379 splicing-QTL and 88 expression-QTL. Of the 379 sQTL events,
+**267 mapped to at least one GENCODE transcript junction** and **76 junctions in 30 genes
+were concordant with the tissue-matched IsoGraph switching transcript pair**; **49 of the
+76 lie in GO-invisible switch modules**, and **21 replicate the switch in an independent
+BrainSEQ cohort** (CAMK1, CDIP1, FANCL, GPM6A, NMRK1, PRDM2, TMEM107 among them).
+
+Concordance by trait: SCZ 51 (across the aging and SCZD layers), ALS 13 (BAIAP3, CTC1,
+PIGQ, PRDM2, PTPRN, TMEM175, TPP1, VAMP2), AD 7 (FLCN, IFNAR2, TMEM175), PD 5 (CTSB,
+PCGF3, TBC1D15, TMEM175), LBD 0. TMEM175 recurs across AD, ALS and PD — the same junction
+resolved in three neurodegenerative traits.
+
+**SNCA no longer resolves, and is kept as a falsification example.** The LBD risk allele A
+still increases usage of junction chr4:89,835,692–89,836,127 in cortex (risk QTL effect
++0.73), but the junction's transcripts are **not** in the IsoGraph switch pair for that
+tissue, so the event is scored non-concordant. On the legacy expression filter it was
+reported as one of nine concordant events and was the vignette in Fig 4 panel A. That panel
+must not show SNCA as resolved; the PI decision of 2026-09-18 keeps SNCA in the manuscript
+as an example of a nomination the method declines to support, not as evidence for it.
+
+This is a secondary/interpretive analysis built on the primary colocalization result;
+concordance reflects mapping of a genetically anchored splice change onto an IsoGraph
+switch, not a formal statistical test, and the count scales with how many events the
+colocalization layer nominates.
 
 ### Figure and Table Notes
 - Potential supplementary table: `05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet`

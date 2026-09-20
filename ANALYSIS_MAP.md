@@ -28,7 +28,7 @@ submits a stage in that order and `run_pipeline.sh` chains the stages (README "R
 | Analysis | CLI | Wrapper | Outputs | Display |
 |---|---|---|---|---|
 | IsoGraph fits | `real_data/run_models.py` | `02_module_discovery/_h/01a–01c` (same wrappers with `--leiden-resolution 2.0` for `isograph_vae_res2`) | `<cohort>/<region>/_m/isograph_vae/` | all *(switching transcript filter since 2026-09-14; the with-abundance arm is retired to `_h/retired/` — outputs only at tag `legacy_expression_filter`)* |
-| Leiden resolution sweep | `real_data/sweep_leiden.py` | `_h/02a` (BrainSEQ), `_h/02b` (GTEx) | `<store>/isograph_vae/leiden_sweep_results.parquet` | S-real-2 *(disclosed sensitivity; 5.0 stays canonical on the ≥ 900-gene criterion, PI decision 2026-09-12)* |
+| Leiden resolution sweep | `real_data/sweep_leiden.py` | `_h/02a` (BrainSEQ), `_h/02b` (GTEx) | `<store>/isograph_vae/leiden_sweep_results.parquet` | S-real-2 *(disclosed sensitivity; the sweep cannot select a resolution — production is **2.0** since the PI decision of 2026-09-16, on the ≥ 900-gene criterion plus coverage, and 5.0 is the `isograph_vae_res5` arm)* |
 | Classical WGCNA baseline | `_h/01d–01f.wgcna_gene_*.R` | `_h/01d–01f` | `<store>/wgcna_gene/` | S-real-1 |
 | Matched-feature WGCNA baselines | `real_data/run_matched_wgcna.py` | `_h/01g` (BrainSEQ aging), `_h/01h` (`caudate_sczd`, added 2026-09-12), `_h/01i` (GTEx) | `<store>/wgcna_{switch_only,multiplex}/` | Fig 3 (internal control); S-real-1 / Table S1 |
 | Refit / reprojection QC | `real_data/qc_covariate_test.py`, `tier_checks.py` | `_h/retired/{refit_qc_brainseq,refit_qc_gtex,reproject_qc_gtex}.sh` | — | — *(**retired 2026-09-14**: model-design QC, cited nowhere and never full-coverage; outputs only at tag `legacy_expression_filter`)* |
@@ -67,7 +67,7 @@ submits a stage in that order and `run_pipeline.sh` chains the stages (README "R
 | Replication permutation null | `real_data/replication_permutation.py` | `_h/03d` (one array per `--covariates {full,complement,none}`), then `_h/04b` (report) | `_m/replication/`, `REPLICATION_PERMUTATION.md` | Fig 2 |
 | Three-baseline comparison | `real_data/baseline_comparison.py` | `_h/03h` | `_m/baseline_comparison/` | S-real-1, S1/S2 |
 | LR / software robustness | `real_data/stability.py` | `_h/retired/lr_{validation,validation_launch,aggregate}.sh` | — | — *(**retired 2026-09-14**: settled the single-LR promotion; outputs only at tag `legacy_expression_filter`)* |
-| Giant-cap ablation | `real_data/stability.py` | `_h/retired/gcap_ab.sh` | `_m/stability_gcap_ab/` | — *(**retired 2026-09-12**: a resolution-2.0 A/B of a cap never promoted; superseded by resolution 5.0, not cited)* |
+| Giant-cap ablation | `real_data/stability.py` | `_h/retired/gcap_ab.sh` | `_m/stability_gcap_ab/` | — *(**retired 2026-09-12**: an A/B of a cap never promoted, not cited anywhere; note that production has since returned to resolution 2.0, which does not revive it)* |
 
 ## 05 — Genetic anchoring
 

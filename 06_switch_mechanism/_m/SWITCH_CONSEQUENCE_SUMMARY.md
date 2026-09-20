@@ -12,7 +12,40 @@ Characterize *what kind* of transcript remodeling the IsoGraph switch axis encod
 For each region, every phenotype-significant switch gene was decomposed into its IsoGraph switch-pair isoforms, and each pair was annotated for nine mutually informative consequence classes using a GENCODE v47 pairwise comparison: first-exon change, last-exon change, internal-exon difference, UTR change, CDS change, biotype switch, coding-status change, a combined coding consequence (CDS or coding-status change), and an NMD-status switch. NMD status was assigned per isoform with the strand-aware 50-nt rule (a premature termination codon more than 50 nt upstream of the final exon–exon junction), and `nmd_switch` was set when the two isoforms of a pair differed in NMD status. To remove the transcript-count and transcript-length confounds that differ across genes, enrichment was assessed against a *within-gene* permutation null: for each gene we drew the same number of random transcript pairs from that gene's own transcript pool and recomputed each consequence rate, repeating 1,000 times (seed 13). Per region and consequence class we report the observed rate, the null mean, their ratio (enrichment), and a one-sided empirical permutation p-value, stratified into all switch genes, GO-invisible modules, and GO-visible modules. Regions were combined per consequence class and stratum with a Fisher combination of the empirical p-values (floored at 1×10⁻⁶ to respect permutation resolution), reporting the number of regions enriched at empirical p < 0.05, the median enrichment, and the Fisher-combined p.
 
 ### Results Text
-Across all 10 regions the switch axis was consistently a **productive UTR/CDS-remodeling** layer, not a decay-routing one. UTR change was enriched in 10/10 regions (median enrichment 1.27×, observed in 47% of switches; Fisher-combined p = 1.1×10⁻¹⁹), and CDS change — equivalently the combined coding consequence — was enriched in 10/10 regions (median 1.04×, observed rate 76%; Fisher p = 2.1×10⁻¹⁹). In contrast, every consequence associated with loss of a productive coding transcript was **never** enriched in any region: NMD-status switch (median enrichment 0.92, observed in only 15% of switches, 0/10 enriched), coding-status change (0.86, 0/10), and biotype switch (0.87, 0/10) all had Fisher-combined p = 1.00. First-exon, last-exon, and internal-exon differences were near-neutral (median enrichment 0.96–0.99, 0/10 enriched). Critically, the GO-invisible modules carried the *same* signature as GO-visible ones — UTR change median 1.29× vs 1.26×, CDS 1.04× in both, NMD depleted in both — showing that the switch biology missed by pathway analysis is structurally identical productive remodeling rather than an artifact class. The result is exploratory-confirmatory: it is a structural characterization of the switch layer, internally validated by the within-gene null and reproducible across 10 regions, but does not by itself establish downstream functional impact.
+*(Re-quoted 2026-09-19 against `switch_consequence_meta.parquet` from the switching-filter
+re-run at Leiden 2.0. This file is hand-written and does not regenerate with the analysis;
+the aging and disease arms are pooled **separately** here, which the legacy version did not
+do — it pooled 10 regions across both and is superseded.)*
+
+Across the **9 aging** analyses the switch axis is consistently a **productive
+UTR/CDS-remodeling** layer, not a decay-routing one. UTR change is enriched in **9/9**
+regions (pooled RE ratio **1.247**, 95% CI 1.22–1.28, p = 5.1e-81, I² = 0.83; observed in
+50% of switches; Fisher-combined p = 6.3e-18), and CDS change — equivalently the combined
+coding consequence — is enriched in **8/9** (pooled **1.040**, 1.04–1.04, p = 1.4e-126,
+I² = 0.00; observed rate 78%; Fisher p = 3.6e-16). Every consequence associated with loss of
+a productive coding transcript is **never** enriched in any region: NMD-status switch
+(pooled 0.933, observed in only 17% of switches, 0/9 enriched), coding-status change (0.884,
+0/9) and biotype switch (0.896, 0/9), all with Fisher-combined p = 1.00. First-exon,
+last-exon and internal-exon differences are near-neutral (pooled 0.958–0.994, 0/9 enriched).
+
+The **disease** (SCZD caudate) arm gives the same signature on its single analysis: UTR
+change 1.186 (p = 2.6e-31, observed 39%) and CDS change 1.040 (p = 1.2e-12, observed 71%)
+enriched; NMD switch 0.895, coding-status change 0.958 and biotype switch 0.941 all
+depleted. Because it is one analysis, it is reported beside the aging pool, never merged
+into it.
+
+Critically, the GO-invisible modules carry the *same* signature as GO-visible ones — UTR
+change pooled 1.266 vs 1.242, CDS 1.033 vs 1.043, NMD depleted in both (0.915 vs 0.940) —
+showing that the switch biology missed by pathway analysis is structurally identical
+productive remodeling rather than an artifact class. The result is
+exploratory-confirmatory: a structural characterization of the switch layer, internally
+validated by the within-gene null and reproducible across nine aging analyses, but it does
+not by itself establish downstream functional impact.
+
+**A note on the pooled p-values.** The fixed-effect intervals here are extremely tight
+because the per-analysis denominators are large; the effect sizes (1.04 for CDS, 1.25 for
+UTR) are modest and are what should be quoted. Read I² alongside them: the UTR result is
+heterogeneous (0.83) while the CDS result is homogeneous (0.00).
 
 ### Figure and Table Notes
 - Potential supplementary table: `06_switch_mechanism/_m/switch_consequence_meta.parquet` (rendered `06_switch_mechanism/_m/SWITCH_CONSEQUENCE_META.md`)
