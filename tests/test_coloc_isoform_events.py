@@ -91,3 +91,40 @@ def test_cross_tissue_exception_takes_pairs_only_from_regions_carrying_the_junct
     assert regions == ["frontal_cortex_ba9", "hippocampus"]
     assert members == {"T1.1", "T2.1", "T3.1", "T4.1"}
     assert cross_tissue_switch_pairs({"T9.1"}, unc13a, by_region) == ([], set())
+
+
+def test_structural_flags_survive_the_nullable_boolean_dtype():
+    """`structure_annotations` stores flags as pandas `boolean`, not Python bool.
+
+    `itertuples` yields `numpy.bool_` for that dtype, and `numpy.bool_(True) is True`
+    is False, so an identity test drops every flag and every event comes back
+    "no annotated structural change". Missing values must still be rejected, which
+    rules out a bare `bool(v)` because `bool(pd.NA)` raises.
+    """
+    from isograph_benchmark.real_data.coloc_isoform_events import (
+        _flag_true,
+        _switch_struct_label,
+    )
+
+    a = pd.DataFrame({
+        "transcript_id": ["T1.1", "T2.1"],
+        "first_exon_changed": pd.array([True, False], dtype="boolean"),
+        "last_exon_changed": pd.array([False, False], dtype="boolean"),
+        "internal_exon_difference": pd.array([False, True], dtype="boolean"),
+        "cds_changed": pd.array([True, pd.NA], dtype="boolean"),
+        "utr_changed": pd.array([pd.NA, pd.NA], dtype="boolean"),
+        "biotype_switch": pd.array([False, False], dtype="boolean"),
+        "coding_status_change": pd.array([False, False], dtype="boolean"),
+    })
+    row = next(a.itertuples())
+    assert row.first_exon_changed is not True       # the shape of the original bug
+    assert _flag_true(row.first_exon_changed)
+    assert not _flag_true(row.last_exon_changed)
+    assert not _flag_true(pd.NA) and not _flag_true(None)
+
+    class _Ev:
+        struct = {r.transcript_id: r for r in a.itertuples()}
+
+    label = _switch_struct_label(_Ev(), {"T1.1", "T2.1"})
+    assert label == "cds, first exon, internal exon"
+    assert _switch_struct_label(_Ev(), set()) == "no annotated structural change"
