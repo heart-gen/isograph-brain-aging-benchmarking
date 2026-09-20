@@ -1,0 +1,88 @@
+{
+  "generated_utc": "2026-09-20T04:34:26+00:00",
+  "git_commit": "354244601f425f24f4218a6f467bf7c2d68eadc0",
+  "git_dirty": true,
+  "generator": "isograph_benchmark/real_data/anchored_gene_summary.py",
+  "pandas": "2.3.3",
+  "numpy": "2.4.4",
+  "thresholds": {
+    "PP4_STRONG": 0.8,
+    "MIN_DONORS_BOTH": 30,
+    "MIN_PAIR_FRAGS": 10,
+    "MIN_USAGE_REFERENCE": 0.05
+  },
+  "inputs": [
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet",
+      "bytes": 65777,
+      "mtime": "2026-09-20T03:50:44+00:00",
+      "digest": "sha256:da45387a9519175c9d3eac141e10fe9aefa121c02ec2245c66e67dc6762392ab"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/coloc_signal_susie/genes.parquet",
+      "bytes": 888100,
+      "mtime": "2026-09-19T15:21:31+00:00",
+      "digest": "sha256:cd94e45b36342553d772aa3a61a470e8d1f2ce9fa3860049549794ad9f5c0996"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/05_genetic_anchoring/_m/smr_heidi/gtex/smr_results.parquet",
+      "bytes": 288031,
+      "mtime": "2026-09-19T15:21:33+00:00",
+      "digest": "sha256:5ce78ed0c2ad86533bcfd100d92ff041ab89e2494e447cce1c643dc30042e676"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/longread_switch_confirm/gene_confirmation.parquet",
+      "bytes": 89537,
+      "mtime": "2026-09-19T15:21:33+00:00",
+      "digest": "sha256:795f37710c204bab8a6eae32c304bc65f17758857b8f187652a657bedacba7e7"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/longread_switch_confirm/pair_confirmation.parquet",
+      "bytes": 1413387,
+      "mtime": "2026-09-19T15:21:33+00:00",
+      "digest": "sha256:a6b4b0f7b2d36e9a51afb4f694116dc3b6943e300e54929d05ec569529df170e"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/junction_coloc_confirm/junction_confirm.parquet",
+      "bytes": 27877,
+      "mtime": "2026-09-20T04:10:54+00:00",
+      "digest": "sha256:2b54498ef1c4cd9849c7f3e4a54ff28fdb3f615c069e3412651f6fe8fd2ef0ec"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/caudate/pair_feasibility.parquet",
+      "bytes": 2769570,
+      "mtime": "2026-09-19T20:49:23+00:00",
+      "digest": "sha256:389bcac2671053561748bad2b34380482cfff9fd4d928d6775b26c8ae56a9265"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/caudate/junction_allelic_counts.parquet",
+      "bytes": 402553512,
+      "mtime": "2026-09-19T20:49:45+00:00",
+      "digest": "sha256-first67108864:0440f615e6d1f69a33807311544031f421e144b8789ff95a1985037f1af6df8c"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/dlpfc/pair_feasibility.parquet",
+      "bytes": 894995,
+      "mtime": "2026-09-19T20:49:23+00:00",
+      "digest": "sha256:cce29e002e426013d1d9f908c58aa7c7b87b313b9dc6514ad9d7dab6e8ede9b8"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/dlpfc/junction_allelic_counts.parquet",
+      "bytes": 59993539,
+      "mtime": "2026-09-19T20:49:27+00:00",
+      "digest": "sha256:4c9787e498374e9956fd47fb2974cb2218425080d2293a49c9dd8f752fb78697"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/hippocampus/pair_feasibility.parquet",
+      "bytes": 3099714,
+      "mtime": "2026-09-19T20:49:22+00:00",
+      "digest": "sha256:b980c1f817116755197279b42c7b16a04be45c3bd685c6296ee131f1f2319d75"
+    },
+    {
+      "path": "/ocean/projects/bio260021p/kbenjamin/projects/isograph-brain-aging-benchmarking/06_switch_mechanism/_m/ase_junction_switch/hippocampus/junction_allelic_counts.parquet",
+      "bytes": 415206482,
+      "mtime": "2026-09-19T20:49:52+00:00",
+      "digest": "sha256-first67108864:6c2660d9633284767c4ec447f4063c2f36c9f17dff86f722b0a703c32a3ed522"
+    }
+  ]
+}
