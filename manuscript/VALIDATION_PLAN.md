@@ -56,6 +56,12 @@ first drafted went straight to the bench; that was premature.
 
 ### 0.4.1 The anchored gene list was built on the wrong statistic — now re-anchored
 
+> **Superseded 2026-09-20.** The anchored list is no longer CLPP-derived and no longer has 12
+> genes: ranked on colocalization it is **30 genes / 33 gene x trait rows**, of which 4 are
+> splicing-specific and 22 are weak, and CLPP is carried only as a trailing column. The table
+> is `08_integration/_m/anchored_gene_summary/ANCHORED_GENE_SUMMARY.md`. The paragraph below
+> is the record of why the CLPP list was distrusted.
+
 The 12-gene list in §1.1 comes from **CLPP** (eCAVIAR-style), where the best non-CTSH value is
 0.093. *(Rewritten 2026-09-11.)* The first version of this section re-anchored on the
 `coloc.abf` posteriors in `coloc_modality_contrast/` and read the result as splicing-specific
@@ -129,7 +135,7 @@ P = 0.008 in the *expression* direction; conditional-posterior Wilcoxon P = 0.33
 > 2026-09-12** (PI decision): it is an event-naming interpretability layer on swQTL-positive genes
 > only, its within-gene STAR arm found zero QTLs, and restoring it with a local denominator would
 > not change the genetic claim now that splicing specificity is supporting evidence only. The text
-> below is the original rationale, kept as the record. See `reports/pi/08_signal_level_genetics.md`.
+> below is the original rationale, kept as the record. See `reports/pi/05a_signal_level_genetics.md` (numbered `08_` until 2026-09-20).
 
 Counter-line 3 was described in the first draft as unrescuable because it is a GTEx bulk sQTL
 power problem. That is true of GTEx and **false of the project as a whole**: BrainSEQ genotypes

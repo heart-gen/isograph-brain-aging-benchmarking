@@ -114,7 +114,7 @@ corroborating it.
 | Issue | Conflicting sources | Consequence | Required resolution |
 | --- | --- | --- | --- |
 | GO-invisible gate module count: 8 modules (2 GO-visible) vs 4 modules (all GO-invisible) | Pre-refit prose vs post-refit `go_invisible_gate.parquet` (2026-06-29) | Wrong number in older narrative | **Resolved in-repo:** cite the regenerated parquet (4, all GO-invisible). Ensure no drafted prose still says 8/2. |
-| Coloc gene count phrasing: "68 genes" vs "141 events in 68 genes" vs "12+23+33" split | `GENETIC_ANCHORING_RESULTS.md` internal | 12+23+33 = 68 ✓ but "141 colocalized isoform events" vs Fig4D "68 colocalized genes" needs one canonical count in caption | Reconcile event-count vs gene-count wording in Fig 4 caption before submission |
+| ~~Coloc gene count phrasing: "68 genes" vs "141 events in 68 genes" vs "12+23+33" split~~ **RESOLVED 2026-09-20: re-quoted to 160 genes, 30 splicing-led / 70 unresolved / 60 expression-led** | `GENETIC_ANCHORING_RESULTS.md` internal | 12+23+33 = 68 ✓ but "141 colocalized isoform events" vs Fig4D "68 colocalized genes" needs one canonical count in caption | Reconcile event-count vs gene-count wording in Fig 4 caption before submission |
 | Target journal: AGENTS.md header + §5 say Cell Genomics; `FIGURE_ORDERING.md` header still says "Nature Methods" | AGENTS.md vs FIGURE_ORDERING.md | Stale label | Update FIGURE_ORDERING.md header to Cell Genomics |
 | Fig 3 headline (full 17-analysis) vs common-subset | `qtl_anchoring_meta_contrast{,_common}.parquet` (pheno-sig 1.111 full vs 1.112 on the 8 tissues common to all methods) | Both correct for different subsets | State which subset each number is from in the caption |
 
@@ -254,8 +254,8 @@ corroborating it.
 | Proposed claim | Repository evidence | Evidence status | Narrative role | Principal caveat |
 | --- | --- | --- | --- | --- |
 | **IsoGraph makes coordinated isoform switching a measurable layer; in brain aging it is reproducible, abundance-independent, composition-robust in the aging arm, and orthogonally confirmed** | Findings 1, 5, 6; composition bound (Fig 5); long-read + junction confirmation | Established (set level) | **Headline (from 2026-09-12)** | Module-level added value over per-gene DTU tools is the least-established link |
-| At set level, phenotype-associated switch modules are spared at splicing QTL, method-specifically (IsoGraph-only) | Finding 3 | Supported at set level; **not supported per gene** | Supporting (Fig 3) — demoted from headline 2026-09-12 | Estimand is the contrast; does **not** localise to GO-invisible (1.068, p=0.077, vs GO-visible 1.084) |
-| Disease variants colocalize onto GO-invisible switches (SNCA exemplar) | Finding 4 | Supported/set-level | **Payoff (Fig 4); SNCA is the worked example** | Modest posteriors; SNCA is found without IsoGraph (all-genes background pool), so it shows what the layer resolves, not that the method was needed |
+| At set level, phenotype-associated switch modules are spared at splicing QTL | Finding 3 | Supported at set level; **not supported per gene**; **method attribution WITHDRAWN 2026-09-19** — matched `wgcna_multiplex` on identical features shows the contrast more strongly (1.084, p=0.0044) than IsoGraph (1.065, p=0.020), so the effect belongs to the switch+abundance representation rather than to IsoGraph's inference | Supporting (Fig 3) — demoted from headline 2026-09-12 | Estimand is the contrast; does **not** localise to GO-invisible (1.068, p=0.077, vs GO-visible 1.084) |
+| Disease variants colocalize onto isoform switches (PRDM2 worked example) | Finding 4 | Supported/set-level | **Payoff (Fig 4); worked example is PRDM2 from 2026-09-20** | SNCA is **out of the anchored set** on the re-run and is kept only as the falsification example. 30 anchored genes, 4 splicing-specific, 22 weak; 17/30 GO-invisible, so "onto GO-invisible switches" must not be stated unqualified |
 | Disease switch modules are real GO-invisible DTU | Finding 2 | Established | Mechanism bridge | One cohort |
 | Modules are reproducible + replicate aging | Finding 5 | Established | Trust (Fig 2) | — |
 | Method recovers switch modules on truth | Finding 6 | Established | Foundation (Fig 1) | Synthetic |
@@ -311,15 +311,15 @@ Order is dependency-driven: method works → modules trustworthy → modules are
 - Role: mechanism bridge. Transition: "are they genetically real?"
 - Confidence: High (one cohort — say so).
 
-### Results 4: At set level, the phenotype-associated layer is spared at splicing QTL — an IsoGraph method effect that does not hold per gene (Fig 3) [SUPPORTING — demoted from headline 2026-09-12]
-- Evidence: contrast 1.111 pheno-sig (p=3.6e-4) / 1.068 all_modules (p=1.3e-5); IsoGraph-only vs matched WGCNA (no baseline clears 0.05; closest is wgcna_multiplex pheno-sig 1.046, p=0.053, I²=0.75) — the primary internal control. S-LDSC does **not** support it (splicing arm 1 of 6 nominal, uncorrected).
+### Results 4: At set level, the phenotype-associated layer is spared at splicing QTL — a property of the switch representation, not of IsoGraph, and it does not hold per gene (Fig 3) [SUPPORTING — demoted from headline 2026-09-12; method attribution withdrawn 2026-09-19]
+- Evidence: contrast **1.065 (p=0.020)** on the re-run. **Not IsoGraph-only:** the matched `wgcna_multiplex` baseline, fed identical features, gives **1.084 (p=0.0044)**. The internal control therefore says the switch+abundance *representation* carries the contrast and the inference method adds nothing to it; write it that way and do not reuse the legacy "IsoGraph-only, closest baseline p=0.053" sentence. S-LDSC does **not** support it (splicing arm 1 of 6 nominal, uncorrected).
 - **Do not claim GO-invisible localisation here:** GO-invisible (1.068, p=0.077) and GO-visible (1.084, p=0.050) are indistinguishable. The DTU-without-DGE claim is Results 3's content gate, not this genetic one.
 - Per-gene counter-evidence to report beside it: GTEx signal-level 22 splicing-only vs 45 expression-only (P = 0.007); BrainSEQ in-sample 5 switch-only vs 33 abundance-only (P = 4.3e-6).
 - Role: supporting set-level genetic evidence (was: headline orthogonal validation). Transition: "which variants, on which switches?"
 - Confidence: Moderate (set level; control at p = 0.053; per-gene tests run the other way).
 
 ### Results 5: Disease variants colocalize with candidate isoform switches (Fig 4)
-- Evidence: signal-level colocalization (42 nominations, 14 sQTL-preferential; `coloc.susie` > `coloc.abf` > CLPP) with the event audit (0 known mechanisms recovered; UNC13A context-distinct; PICALM disease-locus-linked); SNCA LBD+PD on the same intron at signal level; eCAVIAR layer as sensitivity (12 splicing-led, all GO-invisible); RBP regulons (S-real-6); clinical consequence (S-real-7).
+- Evidence: signal-level colocalization (**121 nominations** over 110 genes on the re-run, 127 in the all-introns arm; `coloc.susie` > `coloc.abf` > CLPP) with the event audit (0 known mechanisms recovered; 119/121 `novel_splice_led_candidate`; UNC13A context-distinct; PICALM disease-locus-linked); SNCA LBD+PD on the same intron at signal level; eCAVIAR layer as sensitivity (12 splicing-led, all GO-invisible); RBP regulons (S-real-6); clinical consequence (S-real-7).
 - Role: biological payoff. Transition: "do risk loci converge as a program in disease?" — answered no: module-level convergence is null for all five traits.
 - Confidence: Moderate (set-level; locus nominations, not causal assignments).
 
@@ -498,7 +498,7 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | STAR Methods conversion + Key Resources Table | Submission-critical | Format compliance | Required for submission | **High** |
 | Pin `[citation needed]` citekeys (eCAVIAR, GTEx v11, SuSiE, gnomAD, baselineLD) | Submission-critical | Missing citations | Removes placeholders | High |
 | Mint Zenodo/protocols.io DOIs | Submission-critical | Data/code availability | Required | High |
-| Reconcile stale counts (8→4 modules; 141 events vs 68 genes; NM→CG header) | Reviewer-defense | Internal inconsistency | Prevents reviewer confusion | Medium |
+| Reconcile stale counts (8→4 modules; NM→CG header) — *the coloc counts were reconciled 2026-09-20* | Reviewer-defense | Internal inconsistency | Prevents reviewer confusion | Medium |
 | Per-run dependency lockfile | Reviewer-defense | Version reproducibility | Strengthens KRT | Low |
 | RBP experimental validation | Out of scope | Motif ≠ binding | Would upgrade "candidate" | Out of scope |
 
