@@ -55,6 +55,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import pathlib
 import subprocess
 
 import numpy as np
@@ -449,8 +450,16 @@ def provenance() -> dict:
     try:
         commit = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                                 text=True, check=True).stdout.strip()
-        dirty = bool(subprocess.run(["git", "status", "--porcelain"], capture_output=True,
-                                    text=True, check=True).stdout.strip())
+        # The run writes into the tree, so its OWN output directory must not count as
+        # dirt -- otherwise every run reports "not reproducible" and the warning that is
+        # supposed to mean something is ignored.
+        own = str(out_dir().relative_to(pathlib.Path.cwd())) if str(
+            out_dir()).startswith(str(pathlib.Path.cwd())) else None
+        status = subprocess.run(["git", "status", "--porcelain"], capture_output=True,
+                                text=True, check=True).stdout.splitlines()
+        dirt = [ln for ln in status
+                if not (own and ln[3:].strip().strip('"').startswith(own))]
+        dirty = bool(dirt)
     except (subprocess.CalledProcessError, FileNotFoundError):
         commit, dirty = "unknown", False
     files = []
