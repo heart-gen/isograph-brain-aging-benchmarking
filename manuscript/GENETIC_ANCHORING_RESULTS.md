@@ -365,18 +365,23 @@ effect is single and coherent.
 A formal guard now enforces this:
 a pair is projected onto its module axis only when the gene joined on switching and at least one
 of its transcripts is anchored to the eigengene. Across the three regions the guard withholds
-151 of 556 rows over 35 genes; only 8 of those rows carried a projected value at all, and all 8
-are KLC1.
+151 of 556 rows over 35 genes in each arm. In the fitted-lead arm only 8 of those rows carried a
+projected value in the first place, and all 8 are KLC1: the rest had already been blanked by the
+LD gate, so the guard replaces a silent NA with a stated reason. The GWAS-lead arm applies no LD
+gate, so there the guard withdraws 111 projections across 22 genes — but only 4 of them are
+significant, and those 4 are again KLC1. No reported number other than KLC1's moves in either
+arm.
 
 **One further per-gene result is reported from the GWAS-lead arm.** At the AD locus lead
 rs10792832, the risk allele G raises within-donor usage of **PICALM-219** (ENST00000532317)
 against the canonical **PICALM-201** (ENST00000356360) in hippocampus (β = +0.42, SE 0.12,
 q = 0.015, 46 informative heterozygous donors). The contrast is internal and coding: PICALM-219
 carries 60-bp and 24-bp cassette exons that PICALM-201 lacks and lacks a 150-bp exon that
-PICALM-201 carries. As with KLC1 the effect is carried by one transcript — all four pairs with
-PICALM-219 on the numerator are positive (+0.42, +0.18, +0.18, +0.18) while every pair among the
-remaining isoforms is null — but only the first survives BH within the gene, so the evidence is
-one contrast and the consistency is a coherence check rather than extra significance.
+PICALM-201 carries. As with KLC1 the effect is carried by one transcript: of the five pairs that
+place PICALM-219 on the numerator, four are positive (+0.42, +0.18, +0.18, +0.18) and the fifth,
+against PICALM-212, is too imprecise to read either way (−0.09, SE 0.29, p = 0.76), while every
+pair among the remaining isoforms is null. Only the first survives BH within the gene, so the
+evidence is one contrast and the consistency is a coherence check rather than extra significance.
 
 This is a single locus in a single region and it is not a mechanistic claim: PICALM's colocalization
 is prior-sensitive (PP4 0.81 only at p12 ≥ 1e-5) and it is one of the loci recovered when the
