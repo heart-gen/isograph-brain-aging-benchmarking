@@ -15,9 +15,17 @@ genetically real and disease-relevant.
 > in-sample colocalization — the discovery cohort, correctly mapped — favours abundance 33 to 5
 > (P = 4.3e-6), so the statement below that the per-gene expression skew is "GTEx eQTL discovery
 > power, not biology" is no longer demonstrated: power is an available explanation, not an
-> established one. SNCA is the worked example of what the layer resolves; it colocalizes
-> identically in the all-genes background pool, so it is not evidence the method was needed to
-> find the locus.
+> established one.
+>
+> **Worked example changed 2026-09-20.** SNCA is **not** a concordant gene under the production
+> re-run at Leiden resolution 2.0: its colocalizing junction no longer resolves onto a
+> tissue-matched switch pair, so it is out of the anchored set entirely and is retained only as
+> the project's falsification example. Every SNCA passage below is kept as the record of what
+> was claimed and is marked; none of it may be re-quoted as a current result. The worked example
+> is now **PRDM2** (ALS, cortex), the only gene that is both splicing-specific on the genetics
+> and confirmed by two independent assays. The per-gene evidence table is
+> `08_integration/_m/anchored_gene_summary/ANCHORED_GENE_SUMMARY.md`; the gene that carries
+> Fig 4A is a PI decision taken from it.
 
 ---
 
@@ -42,6 +50,14 @@ phenotype of each gene (the all-introns arm), **42 gene × trait pairs (40 genes
 PP4_sQTL ≥ 0.8** at the prespecified prior $p_{12} = 10^{-5}$; 17 are headlined by `coloc.susie`
 and 25 by `coloc.abf`. Across the $p_{12}$ sweep, 7 calls hold at $10^{-6}$, 20 from
 $5\times10^{-6}$, and 15 only from the primary prior.
+
+> **Re-quoted 2026-09-20:** the nomination set is **121** (110 genes) on the primary
+> `coloc.susie` arm and 127 (116 genes) in the all-introns arm, not 42 — it roughly tripled on
+> the switching-filter re-run, and 119 of the 121 remain `novel_splice_led_candidate` in the
+> event audit. The paragraphs in this subsection still carry the 42-nomination numbers and the
+> per-locus SNCA detail from the legacy set; they are the record of that analysis, and the
+> current counts are in `05a_signal_level_genetics.md` and
+> `05_genetic_anchoring/_m/locus_event_audit/susie/`.
 
 Fourteen of the 42 are **sQTL-preferential** (PP4_eQTL < 0.5). That count is a selection — a
 strong sQTL posterior is required first — so it nominates loci rather than estimating splicing
@@ -82,7 +98,9 @@ among the 61 pairs whose anchored isoform is usably expressed. The mean usage co
 does not separate from its null (−0.104 vs −0.131, P = 0.50), so the evidence is the rate of
 switch-like pairs read against the compositional background, not the strength of
 anti-correlation. Six genes, SNCA and CTSH among them, never reach usable abundance for the
-anchored isoform, so the confirmation holds for the set, not locus by locus. UNC13A and PICALM
+anchored isoform, so the confirmation holds for the set, not locus by locus. *(Legacy: on the
+re-run the anchored long-read arm confirms 26 of the 30 splicing-led genes, and SNCA and CTSH
+are no longer in the set at all.)* UNC13A and PICALM
 cannot enter this test: neither has an IsoGraph switch pair in the tissue where it colocalizes.
 
 **SMR agrees with most nominations, as expected, and disagrees at one informative locus.** SMR
@@ -103,7 +121,8 @@ causal direction.
 ## Disease variants colocalize onto GO-invisible isoform switches (eCAVIAR CLPP layer)
 
 Source: `05_genetic_anchoring/_m/coloc/SIGNED_DIRECTION_ISOFORM_EVENTS_SUMMARY.md`,
-`08_integration/_m/deep_dive/DEEP_DIVE_SUMMARY.md`.
+`08_integration/_m/deep_dive/DEEP_DIVE_PANEL.md`,
+`08_integration/_m/anchored_gene_summary/ANCHORED_GENE_SUMMARY.md`.
 
 To ask whether the switch layer carries genuine disease genetics rather than technical
 structure, we colocalized brain splicing- and expression-QTL credible sets (GTEx v11 sQTL/eQTL,
@@ -111,17 +130,38 @@ SuSiE) with GWAS credible sets for five traits — schizophrenia (SCZ), Alzheime
 Parkinson's disease (PD), dementia with Lewy bodies (LBD), and amyotrophic lateral sclerosis
 (ALS) — using eCAVIAR CLPP, and mapped each colocalized junction back onto the IsoGraph
 switch-pair structure of the matching tissue [citation needed: eCAVIAR];
-[citation needed: GTEx v11]; [citation needed: SuSiE]. Across 141 colocalized isoform events in
-68 genes, 12 genes were **splicing-led** — a colocalizing sQTL resolving onto a
-GTEx-concordant IsoGraph switch pair (the DTU-without-DGE class) — 23 were splicing-unresolved
-(colocalizing sQTL not mapping onto the tissue's switch pair), and 33 were expression-led
-(gene-level eQTL only). **All 12 splicing-led genes reside in GO-invisible switch modules**:
-every genetically anchored switch sits in a module that gene-level pathway enrichment would
-miss, exactly the complementary biology the method is built to surface. Nine of these were
-GTEx-tissue-matched concordant aging events, again all GO-invisible, a conservative floor
-(concordance requires the sQTL junction to fall within 2 bp of an annotated GENCODE junction).
+[citation needed: GTEx v11]; [citation needed: SuSiE]. Across **160** colocalized genes, **30**
+were **splicing-led** — a colocalizing sQTL resolving onto a GTEx-concordant IsoGraph switch
+pair (the DTU-without-DGE class) — **70** were splicing-unresolved (colocalizing sQTL not
+mapping onto the tissue's switch pair), and **60** were expression-led (gene-level eQTL only).
+**17 of the 30 sit in GO-invisible switch modules**, and 16 carry two or more resolved events.
+Concordance is conservative by construction: it requires the sQTL junction to fall within 2 bp
+of an annotated GENCODE junction in a transcript of the tissue's own switch pair.
 
-The headline case is **SNCA** (α-synuclein), which converges across two synucleinopathies: in
+Ranked on colocalization rather than on eCAVIAR CLPP — CLPP is a per-variant posterior product,
+noisy at a single locus, and in this set its two largest values are contradicted by every other
+layer — the genetics of those 30 genes are mostly modest: of 33 gene × trait rows, **4 are
+splicing-specific** (strong sQTL PP4, more tissues colocalizing on splicing than on expression,
+SMR-supported, and no testable eQTL instrument at all: DOC2A, PRDM2, THAP3, IFNAR2), 6 more are
+splicing-led, and **22 are weak colocalizations**. TMEM175, which the CLPP ranking placed first
+at 0.483, carries an sQTL PP4 of ~0 and sorts to the bottom. This ranking, not CLPP, is what the
+per-gene claims rest on.
+
+**Legacy worked example, superseded 2026-09-20 — retained as the record, not as a result.**
+SNCA is no longer a concordant gene (see the framing note above), so the paragraph that follows
+describes a nomination the production re-run withdrew, and the short-read confirmation it cites
+was run on a target set that no longer contains SNCA or CTSH. The current worked example is
+**PRDM2** (ALS, cortex): sQTL PP4 0.964 against PP4_eQTL 0.494, colocalizing on splicing in six
+tissues and on expression in none, SMR-supported in 7 of 7 instrumented probes with no eQTL
+instrument at all. Its colocalizing junction chr1:13,816,570–13,823,159 resolves onto the switch
+pair ENST00000311066 / ENST00000413440, which ONT long-read confirms as switch-like (usage
+Spearman −0.448), and the allele-aware junction recount measures in 498 of 498 DLPFC donors —
+the only gene in the set that is both splicing-specific and confirmed twice. PRDM2 also has a
+documented isoform program to be read against: the gene is transcribed from alternative
+promoters into PR-domain-containing RIZ1 and PR-less RIZ2, and the anchored event is the same
+class of 5′ choice [citation needed: RIZ1/RIZ2 alternative-promoter isoforms].
+
+*Legacy text:* the headline case was **SNCA** (α-synuclein), which converges across two synucleinopathies: in
 LBD (risk allele A at rs7680557, cortex, CLPP 0.038) and in PD (risk allele C at rs1471483,
 frontal cortex BA9, CLPP 0.025) the risk allele raises usage of the same junction
 chr4:89,835,692–89,836,127, mapping onto one IsoGraph switch pair (ENST00000508895 /
@@ -207,7 +247,9 @@ gnomAD LOEUF 0.72 vs 0.94; Fisher-combined MWU p = 1.1×10⁻⁹³; GO-invisible
 pathogenic/likely-pathogenic (P/LP) density than the same genes' constitutive exons in 10/10
 regions (median ratio 0.18, robust to a coding-only CDS scope at 0.21) — the expected
 alternative-exon biology and a clean statement that the switch consequence is regulatory, not
-Mendelian-coding. SNCA instantiates this precisely: its alternative first exon and other 5′
+Mendelian-coding. SNCA instantiated this precisely on the legacy nomination set (it is no
+longer a concordant gene, so this is an illustration rather than a current anchored example):
+its alternative first exon and other 5′
 switched exons are non-coding (`cds_overlap = False`) with zero ClinVar P/LP, whereas SNCA's
 four P/LP variants sit in a constitutive, isoform-shared coding exon outside the switched region.
 The common-variant switch mechanism (isoform choice at a dosage-sensitive gene, SNCA LOEUF 0.40)
@@ -219,18 +261,27 @@ synucleinopathy.
 Source: `08_integration/_m/deep_dive/DEEP_DIVE_PANEL.md`, `deep_dive_literature.parquet`.
 
 A deterministic per-gene join (`gene_deep_dive.py`) assembles all six layers into one vignette
-per colocalized gene, classifies the verdict (12 splicing-led / 23 splicing-unresolved /
-33 expression-led), and attaches a curated literature layer. Four splicing-led genes have
-established disease isoform biology that matches their resolved switch: **SNCA**'s multi-5′UTR /
-exon-skipping program in synucleinopathy [@doi:10.3389/fgene.2019.00584;
-@doi:10.3390/genes9020063]; **DLG1/SAP97**, whose alternatively-spliced synaptic isoforms
-include a variant reported down-regulated in early-onset schizophrenia at the 3q29 locus
-[@doi:10.1038/tp.2015.154]; **CTSH**, the protective AD locus whose coding change affects only a
-subset of transcript isoforms [@doi:10.1038/s41386-023-01542-2]; and **ARVCF**, a 22q11.2 SCZ gene
-that is itself a splicing modulator [@doi:10.1038/sj.mp.4001586]. The remaining eight
-(PPP6R2, GGNBP2, PGS1, CDIP1, PRRC2B, RTEL1, TBC1D15, TPCN1) lack established disease-specific
-isoform literature and stand as **novel splicing-led candidates** — the under-characterized,
-GO-invisible switching the method is designed to nominate. Machine-readable per-gene tables
+per colocalized gene, classifies the verdict (**30 splicing-led / 70 splicing-unresolved /
+60 expression-led**), and attaches a curated literature layer covering all 30 anchored genes.
+The curation says what the literature holds, in three classes, and they are not a ranking of the
+evidence here. **Four have a documented disease-relevant isoform program**: **PRDM2**, whose
+alternative promoters produce PR-domain-containing RIZ1 and PR-less RIZ2 and whose anchored
+event is the same 5′ class [citation needed: RIZ1/RIZ2 alternative-promoter isoforms];
+**IFNAR2**, which splices into full-length, truncated and soluble receptors whose ratio sets the
+type-I interferon response [citation needed: IFNAR2 receptor isoforms]; **DNAJA3/Tid1**, with
+long and short forms reported to act oppositely on apoptosis [citation needed: Tid1-L/Tid1-S];
+and **DLG1/SAP97**, whose alternatively-spliced synaptic isoforms include a variant reported
+down-regulated in early-onset schizophrenia at the 3q29 locus [@doi:10.1038/tp.2015.154].
+**Nineteen** are established genes — TPP1/CLN2, TMEM175, CTSB, SNAP91, NT5C2, SPG7, VAMP2 and
+others — whose disease relevance is documented while the isoform the risk variant selects is
+not. **Seven** have no established disease-specific isoform biology: THAP3, PCGF3, RPAIN,
+TARBP1, RBFA, GPR135 and PPP6R2.
+
+That last class is a **nomination, not a null result and not a failed control.** The absence is
+in the literature, not in the evidence: several of these genes carry the strongest genetics in
+the panel — THAP3 is one of the four splicing-specific rows — and several are orthogonally
+confirmed, PPP6R2 by two independent assays. Under-characterized, GO-invisible switching is the
+output this method is built to produce, and it is reported as such rather than as a gap. Machine-readable per-gene tables
 (events S9, RBP regulators S10, exon-clinical S11, literature S12) let a reader reconstruct any
 colocalized gene's mechanistic vignette without the hand-written narrative.
 
