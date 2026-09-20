@@ -55,13 +55,23 @@ SCZD switch layers), **all 467** colocalized gene–phenotype events were signed
 risk-allele direction — 379 splicing-QTL and 88 expression-QTL. Of the 379 sQTL events,
 **267 mapped to at least one GENCODE transcript junction** and **76 junctions in 30 genes
 were concordant with the tissue-matched IsoGraph switching transcript pair**; **49 of the
-76 lie in GO-invisible switch modules**, and **21 replicate the switch in an independent
-BrainSEQ cohort** (CAMK1, CDIP1, FANCL, GPM6A, NMRK1, PRDM2, TMEM107 among them).
+76 lie in GO-invisible switch modules**. Independent BrainSEQ replication of the switch is
+recorded for 21 events over 7 genes (CAMK1, CDIP1, FANCL, GPM6A, NMRK1, PRDM2, TMEM107),
+but **only 1 of those 21 is also concordant** (PRDM2, ALS, cortex); the other 20 replicate a
+switch whose junction did not map into the tissue-matched switch pair. Concordance and
+independent replication are therefore very nearly disjoint, which limits how strongly any
+single concordant event can be presented as validated.
 
 Concordance by trait: SCZ 51 (across the aging and SCZD layers), ALS 13 (BAIAP3, CTC1,
 PIGQ, PRDM2, PTPRN, TMEM175, TPP1, VAMP2), AD 7 (FLCN, IFNAR2, TMEM175), PD 5 (CTSB,
-PCGF3, TBC1D15, TMEM175), LBD 0. TMEM175 recurs across AD, ALS and PD — the same junction
-resolved in three neurodegenerative traits.
+PCGF3, TBC1D15, TMEM175), LBD 0. TMEM175 appears under AD, ALS and PD, but not as one
+junction resolved three times: ALS and PD share chr4:932540-947709(+) (different tissues,
+different leads rs873786 / rs77060135), while the AD events are two other junctions
+(chr4:951717-952367, chr4:952450-953190) at a third lead, rs11552301. Its eCAVIAR CLPP of
+0.483 is also not corroborated by the other genetic layers — coloc.abf PP4_sQTL is ~0 in
+every trait (4.3e-12 PD, 1.7e-5 AD, 1.7e-4 ALS), no tissue reaches the sQTL or eQTL coloc
+call, and SMR supports only 6 of 36 instrumented sQTL probes with its single eQTL signal
+HEIDI-rejected. TMEM175 must not be used as a worked example on the strength of CLPP alone.
 
 **SNCA no longer resolves, and is kept as a falsification example.** The LBD risk allele A
 still increases usage of junction chr4:89,835,692–89,836,127 in cortex (risk QTL effect
@@ -87,9 +97,12 @@ colocalization layer nominates.
 - Potential supplementary table: `05_genetic_anchoring/_m/coloc/coloc_isoform_events_meta.parquet`
   (rendered `COLOC_ISOFORM_EVENTS_META.md`) — per-analysis rollup of concordant / GO-invisible
   / BrainSeq-replicated counts.
-- Candidate main-figure vignette: *SNCA* signed splice event concordant in both LBD and PD —
-  the strongest single illustration that the switch layer is genetically anchored to a known
-  neurodegeneration gene; pair with the coloc CLPP panel.
+- Candidate main-figure vignette: **not SNCA** (it no longer resolves; see above). On the
+  re-run the best-supported worked example is *PRDM2* (ALS, cortex): sQTL PP4 0.964 vs eQTL
+  0.494, colocalizing in 6 tissues on splicing and 0 on expression, SMR 7/7 supported with no
+  HEIDI rejection and no eQTL instrument, and the only concordant event that replicates the
+  switch in an independent BrainSEQ cohort. Its weaknesses are a modest CLPP (0.056), a
+  GO-visible module, and a junction/switch polarity r of only 0.11.
 
 ### Reproducibility Information
 - Analysis directory: `05_genetic_anchoring/_m/coloc/`
@@ -116,7 +129,16 @@ colocalization layer nominates.
 Concordance requires the GTEx sQTL junction to fall within 2 bp of an annotated GENCODE
 intron of a named IsoGraph switch-pair isoform; genuine but unannotated or novel junctions,
 and switches whose top pair excludes the junction-containing transcript, are counted as
-non-concordant, so the 9 concordant events are a conservative floor. The IsoGraph `::switch`
+non-concordant, so the 76 concordant events are a conservative floor. Conversely the test is
+permissive in a way that cuts the other direction: `n_switch_pairs` is at its cap of 15 for
+the median concordant event, so "concordant" means the junction transcript appears in one of
+up to 15 reported switch pairs, and the junction-to-switch polarity r is below 0.15 for 24 of
+the 30 concordant genes -- membership in the pair list is not evidence that the junction
+drives the switch axis. Separately, `structural_consequence` is `no annotated structural
+change` for all 76 concordant events on this re-run and empty for the other 391, where the
+legacy run carried UTR/CDS remodeling; this looks like a join defect in
+`coloc_isoform_events.py` rather than a biological result, and it should be checked before
+any figure panel relies on the structural layer. The IsoGraph `::switch`
 feature is a gene-level composite over the gene's transcripts; transcript-pair identity is
 supplied by the structural-annotation layer, not the VAE. This analysis should integrate with
 (i) the eCAVIAR colocalization summary (which it signs and resolves), (ii) the S-LDSC
