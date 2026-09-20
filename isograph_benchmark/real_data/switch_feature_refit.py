@@ -28,6 +28,8 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 
+from isograph_benchmark.real_data.partition_provenance import partition_fingerprint
+
 from isograph.io.artifacts import load_dataset_bundle
 from isograph_benchmark.paths import ensure_dir, rel
 from isograph_benchmark.real_data.run_models import (
@@ -178,13 +180,16 @@ def fit_one(args) -> None:
     age.to_parquet(out / "age_linear.parquet", index=False)
 
     art = _artifact_dir(args.cohort, args.region)
-    comparison = compare_partitions(
-        pd.read_parquet(art / "modules.parquet"), modules,
-        pd.read_parquet(art / "age_linear.parquet"), age, fdr=args.fdr,
-    )
+    pub_modules = pd.read_parquet(art / "modules.parquet")
+    pub_age = pd.read_parquet(art / "age_linear.parquet")
+    comparison = compare_partitions(pub_modules, modules, pub_age, age, fdr=args.fdr)
     record = {
         "cohort": args.cohort, "region": args.region, "index": args.index,
         "axis": entry["axis"], "setting": entry["label"], **entry["setting"],
+        # Which committed fit this row was compared against. Every row in an aggregate must
+        # carry the same one: the reference is replaced whenever production is re-fit, and a
+        # row computed before that replacement is comparing with a different paper.
+        "published_fingerprint": partition_fingerprint(pub_modules),
         "fit_seconds": round(elapsed, 1),
         "selected_alpha_abundance": (artifacts.calibration or {}).get("selected_alpha_abundance"),
         **comparison,
@@ -199,6 +204,35 @@ def aggregate(args) -> None:
     if not rows:
         raise SystemExit(f"no refit comparisons under {root}")
     df = pd.DataFrame(rows).sort_values("index")
+
+    # The published reference is re-fit whenever production changes, and these rows are
+    # written by separate array tasks that may be months apart. Mixing them produces a table
+    # whose `n_age_sig_published` column varies row to row while claiming to describe one
+    # committed fit -- which is what happened here before 2026-09-20, when four retired
+    # expression settings and two minor-isoform settings were left at the legacy reference
+    # (20 age-significant modules) beside twelve rows at the current one (1).
+    grid_labels = {e["label"] for e in setting_grid(args.cohort)}
+    retired = sorted(set(df["setting"]) - grid_labels)
+    if retired:
+        raise SystemExit(
+            f"{len(retired)} setting(s) in {root} are not in the current grid: "
+            + ", ".join(retired)
+            + ".\nThey are results for a design that no longer exists. Remove their "
+              "directories (git rm) or restore them to the grid; do not aggregate both.")
+    fps = set(df.get("published_fingerprint", pd.Series(dtype=str)).dropna())
+    if "published_fingerprint" not in df.columns or df["published_fingerprint"].isna().any():
+        missing = df.loc[df.get("published_fingerprint", pd.Series(index=df.index)).isna(),
+                         "setting"].tolist()
+        raise SystemExit(
+            f"{len(missing)} row(s) in {root} predate the reference fingerprint and cannot be "
+            "shown to describe the current committed fit: " + ", ".join(missing)
+            + ".\nRe-run those indices before aggregating.")
+    if len(fps) > 1:
+        by_fp = df.groupby("published_fingerprint")["setting"].apply(list)
+        raise SystemExit(
+            "rows were compared against %d different committed fits:\n" % len(fps)
+            + "\n".join(f"  {fp[:12]}: {', '.join(v)}" for fp, v in by_fp.items())
+            + "\nRe-run the minority group; a mixed table is not interpretable.")
     df.to_parquet(root / "refit_summary.parquet", index=False)
     floor = df[df["axis"] == "published"]
     cols = ["axis", "setting", "n_modules_refit", "n_genes_both", "ari", "nmi",
