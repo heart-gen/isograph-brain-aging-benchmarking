@@ -1,15 +1,22 @@
 {
-  "variant_pairs_with_ld": 11,
-  "median_abs_r": 0.07058469701403641,
-  "variant_pairs_at_r_gate": 0,
+  "donors_ea": 208,
+  "donors_aa": 226,
+  "donors_other": 64,
+  "median_abs_r_aa": 0.07605839274766578,
+  "sign_compared_ancestry": 19,
+  "sign_agrees_ancestry": 10,
+  "variant_pairs_with_ld": 10,
+  "median_abs_r": 0.07963252096002492,
+  "variant_pairs_at_r_gate": 1,
   "pairs": 97,
   "genes": 13,
   "fitted": 69,
   "oriented": 0,
   "oriented_genes": 0,
   "status_counts": {
-    "r_gate": 83,
-    "no_ld": 14
+    "r_gate": 72,
+    "no_ld": 24,
+    "palindromic_gwas_lead": 1
   },
   "significant_oriented": 0,
   "significant_genes": 0,
