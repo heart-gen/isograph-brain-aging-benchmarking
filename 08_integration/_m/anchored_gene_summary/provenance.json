@@ -1,7 +1,7 @@
 {
-  "generated_utc": "2026-09-20T04:34:26+00:00",
-  "git_commit": "354244601f425f24f4218a6f467bf7c2d68eadc0",
-  "git_dirty": true,
+  "generated_utc": "2026-09-20T04:35:27+00:00",
+  "git_commit": "993285869102ed638eece0a86eabf15cf9ab009a",
+  "git_dirty": false,
   "generator": "isograph_benchmark/real_data/anchored_gene_summary.py",
   "pandas": "2.3.3",
   "numpy": "2.4.4",
