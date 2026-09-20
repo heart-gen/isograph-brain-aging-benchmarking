@@ -494,10 +494,10 @@ Figure order already follows the argument (`FIGURE_ORDERING.md`). **Main display
 | Proposed work | Category | Evidence gap addressed | Effect | Priority |
 | --- | --- | --- | --- | --- |
 | ~~Decide Results-6 / SCZ-panel placement~~ — **CLOSED 2026-09-03** | Impact-enhancing | Disease-convergence sub-claim **withdrawn** (ascertainment) | Fig 4E now shows the size-matched-null test; S-real-10 keeps the full treatment | — |
-| Retrieve + reconcile Cell Genomics author instructions | Submission-critical | Unverified requirements | Unblocks formatting | **High** |
-| STAR Methods conversion + Key Resources Table | Submission-critical | Format compliance | Required for submission | **High** |
-| Pin `[citation needed]` citekeys (eCAVIAR, GTEx v11, SuSiE, gnomAD, baselineLD) | Submission-critical | Missing citations | Removes placeholders | High |
-| Mint Zenodo/protocols.io DOIs | Submission-critical | Data/code availability | Required | High |
+| Retrieve + reconcile Cell Genomics author instructions — requirements recorded in §7 from the search index (2026-07-20); **re-checked 2026-09-20 and cell.com still returns HTTP 403 to direct fetch**, so §7 remains the working spec and must be eyeballed against the live pages at final formatting | Submission-critical | Unverified requirements | Unblocks formatting | **High** |
+| ~~STAR Methods conversion + Key Resources Table~~ **DRAFTED 2026-09-20** in `STAR_METHODS.md`: all five required sections in order, KRT with 40+ entries and versions read from the execution environments, DACA written. **Two fields need a human**: the lead contact's name and email, and the BrainSEQ dbGaP accession | Submission-critical | Format compliance | Required for submission | **High** |
+| ~~Pin `[citation needed]` citekeys~~ **DONE 2026-09-20** — coloc, eCAVIAR, SuSiE, S-LDSC, baselineLD, gnomAD, GTEx and the three isoform-biology claims all carry DOIs verified against PubMed records; 0 markers remain | Submission-critical | Missing citations | Removes placeholders | High |
+| Mint Zenodo/protocols.io DOIs — **blocked on account access, not on preparation**: `zenodo/MANIFEST.tsv` lists the deposit and `STAR_METHODS.md` carries the DACA with DOI placeholders in the three places they must appear | Submission-critical | Data/code availability | Required | High |
 | Reconcile stale counts (8→4 modules; NM→CG header) — *the coloc counts were reconciled 2026-09-20* | Reviewer-defense | Internal inconsistency | Prevents reviewer confusion | Medium |
 | Per-run dependency lockfile | Reviewer-defense | Version reproducibility | Strengthens KRT | Low |
 | RBP experimental validation | Out of scope | Motif ≠ binding | Would upgrade "candidate" | Out of scope |
