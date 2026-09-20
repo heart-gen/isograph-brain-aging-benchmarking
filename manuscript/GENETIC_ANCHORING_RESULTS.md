@@ -5,8 +5,12 @@ Manubot-ready synthesis folding the genetic-anchoring and downstream-biology lay
 consequence → per-gene deep-dive + literature) into one Results narrative. It backs main
 **Fig 3** (`figQtlSpecificity`) and **Fig 4** (`figGeneticAnchoring`) and supplements
 **S-real-5/6/7**. Numbers are traceable to the per-analysis summaries cited at each subsection;
-citekeys are Manubot-formatted, with `[citation needed: …]` where a standard tool/resource
-citekey still needs pinning (never fabricated). North-star: IsoGraph is a **complementary
+citekeys are Manubot-formatted. **All tool and resource citekeys were pinned 2026-09-20**
+against PubMed records: coloc [@doi:10.1371/journal.pgen.1004383], eCAVIAR
+[@doi:10.1016/j.ajhg.2016.10.003], SuSiE [@doi:10.1111/rssb.12388], S-LDSC
+[@doi:10.1038/ng.3404], baselineLD [@doi:10.1038/ng.3954], gnomAD
+[@doi:10.1038/s41586-020-2308-7], GTEx [@doi:10.1126/science.aaz1776]. GTEx v11 has no release
+paper of its own; the v8 atlas is cited for the resource and the version is named in Methods. North-star: IsoGraph is a **complementary
 DTU-without-DGE layer**, and this section is the orthogonal-evidence payoff that the layer is
 genetically real and disease-relevant.
 
@@ -129,8 +133,8 @@ structure, we colocalized brain splicing- and expression-QTL credible sets (GTEx
 SuSiE) with GWAS credible sets for five traits — schizophrenia (SCZ), Alzheimer's disease (AD),
 Parkinson's disease (PD), dementia with Lewy bodies (LBD), and amyotrophic lateral sclerosis
 (ALS) — using eCAVIAR CLPP, and mapped each colocalized junction back onto the IsoGraph
-switch-pair structure of the matching tissue [citation needed: eCAVIAR];
-[citation needed: GTEx v11]; [citation needed: SuSiE]. Across **160** colocalized genes, **30**
+switch-pair structure of the matching tissue [@doi:10.1016/j.ajhg.2016.10.003];
+[@doi:10.1126/science.aaz1776]; [@doi:10.1111/rssb.12388]. Across **160** colocalized genes, **30**
 were **splicing-led** — a colocalizing sQTL resolving onto a GTEx-concordant IsoGraph switch
 pair (the DTU-without-DGE class) — **70** were splicing-unresolved (colocalizing sQTL not
 mapping onto the tissue's switch pair), and **60** were expression-led (gene-level eQTL only).
@@ -159,7 +163,7 @@ Spearman −0.448), and the allele-aware junction recount measures in 498 of 498
 the only gene in the set that is both splicing-specific and confirmed twice. PRDM2 also has a
 documented isoform program to be read against: the gene is transcribed from alternative
 promoters into PR-domain-containing RIZ1 and PR-less RIZ2, and the anchored event is the same
-class of 5′ choice [citation needed: RIZ1/RIZ2 alternative-promoter isoforms].
+class of 5′ choice [@doi:10.1074/jbc.272.5.2984].
 
 *Legacy text:* the headline case was **SNCA** (α-synuclein), which converges across two synucleinopathies: in
 LBD (risk allele A at rs7680557, cortex, CLPP 0.038) and in PD (risk allele C at rs1471483,
@@ -189,7 +193,7 @@ Source: `05_genetic_anchoring/_m/ldsc/LDSC_SUMMARY.md` (Fig 4B).
 
 Stratified LD-score regression on baselineLD v2.2 — robust to the gene-size confound that
 inflates MAGMA on giant modules — confirmed that heritability concentrates in the switch layer's
-cis-regulatory variants [citation needed: S-LDSC/LDSC]; [citation needed: baselineLD v2.2]. In
+cis-regulatory variants [@doi:10.1038/ng.3404]; [@doi:10.1038/ng.3954]. In
 single-annotation models the aging switch layer's brain **sQTL** annotation was enriched for
 heritability in every neurodegenerative trait: LBD 7.17× (enrichment p = 0.068), PD 3.80×
 (p = 0.049), AD 3.37× (p = 0.0021), ALS 2.96× (p = 0.0022), and SCZ 1.74× (p = 0.0051); the
@@ -243,7 +247,7 @@ Source: `06_switch_mechanism/_m/CLINICAL_CONSEQUENCE_META.md` (`figClinicalConse
 
 Switch genes are more loss-of-function constrained than genome-wide in every region (median
 gnomAD LOEUF 0.72 vs 0.94; Fisher-combined MWU p = 1.1×10⁻⁹³; GO-invisible 0.700, p = 1.8×10⁻⁹²)
-[citation needed: gnomAD LOEUF]. Yet the switched exons themselves carry **lower** ClinVar
+[@doi:10.1038/s41586-020-2308-7]. Yet the switched exons themselves carry **lower** ClinVar
 pathogenic/likely-pathogenic (P/LP) density than the same genes' constitutive exons in 10/10
 regions (median ratio 0.18, robust to a coding-only CDS scope at 0.21) — the expected
 alternative-exon biology and a clean statement that the switch consequence is regulatory, not
@@ -266,10 +270,10 @@ per colocalized gene, classifies the verdict (**30 splicing-led / 70 splicing-un
 The curation says what the literature holds, in three classes, and they are not a ranking of the
 evidence here. **Four have a documented disease-relevant isoform program**: **PRDM2**, whose
 alternative promoters produce PR-domain-containing RIZ1 and PR-less RIZ2 and whose anchored
-event is the same 5′ class [citation needed: RIZ1/RIZ2 alternative-promoter isoforms];
+event is the same 5′ class [@doi:10.1074/jbc.272.5.2984];
 **IFNAR2**, which splices into full-length, truncated and soluble receptors whose ratio sets the
-type-I interferon response [citation needed: IFNAR2 receptor isoforms]; **DNAJA3/Tid1**, with
-long and short forms reported to act oppositely on apoptosis [citation needed: Tid1-L/Tid1-S];
+type-I interferon response [@doi:10.1042/BJ20020105; @doi:10.3389/fimmu.2021.778204]; **DNAJA3/Tid1**, with
+long and short forms reported to act oppositely on apoptosis [@doi:10.1038/sj.onc.1207732];
 and **DLG1/SAP97**, whose alternatively-spliced synaptic isoforms include a variant reported
 down-regulated in early-onset schizophrenia at the 3q29 locus [@doi:10.1038/tp.2015.154].
 **Nineteen** are established genes — TPP1/CLN2, TMEM175, CTSB, SNAP91, NT5C2, SPG7, VAMP2 and
@@ -298,8 +302,7 @@ survives at finer resolution. Neither does, and we report both.
 
 **At per-gene resolution there is no modality preference attributable to module membership.**
 We ran `coloc.abf` on GTEx v11 all-pairs for every gene at each GWAS locus, once against the
-gene's sQTL and once against its eQTL — 126,390 fits over 13 brain tissues [citation needed:
-coloc]. Because the two modalities are compared *within* a gene, module membership cancels, so
+gene's sQTL and once against its eQTL — 126,390 fits over 13 brain tissues [@doi:10.1371/journal.pgen.1004383]. Because the two modalities are compared *within* a gene, module membership cancels, so
 the only channel by which a module-detection method can move the statistic is which genes it
 selects. We therefore ran four gene pools: IsoGraph switch genes, all testable genes at the same
 loci, and the two matched-feature WGCNA baselines. The splicing share of discordant genes is

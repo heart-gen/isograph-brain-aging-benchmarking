@@ -219,10 +219,15 @@ def _resolve_one(tok: str, stage_dir: str | None) -> list[Path]:
     if stage_dir and not tok.startswith(tuple(STAGE_DIRS.values())):
         bases.insert(0, root() / stage_dir)
     if "*" in tok:
+        # The wildcard may be in ANY segment -- `_m/ase_junction_switch/<region>/x.parquet`
+        # becomes `.../*/x.parquet` -- so glob the whole relative pattern from each base
+        # rather than only the final name. Globbing `parent.name` under a parent that itself
+        # contains `*` finds nothing, which is what made the per-region allelic outputs read
+        # as `not_run` until 2026-09-20.
         hits: list[Path] = []
         for base in bases:
-            parent = base / tok
-            hits.extend(sorted(parent.parent.glob(parent.name)) if parent.parent.exists() else [])
+            if base.exists():
+                hits.extend(sorted(base.glob(tok)))
         return hits
     existing = [b / tok for b in bases if (b / tok).exists()]
     return existing or [bases[0] / tok]
@@ -264,9 +269,7 @@ def _candidate_outputs(row: Row) -> tuple[list[Path], int, list[str]]:
             tok = re.sub(r"<[^>]+>", "*", tok)
             for cand in _resolve_one(tok, stage_dir):
                 if "*" in str(cand):
-                    hits = sorted(cand.parent.glob(cand.name)) if cand.parent.exists() else []
-                    out.extend(hits)
-                    continue
+                    continue          # _resolve_one already globbed; a leftover * found nothing
                 resolved, note = _resolve_with_fallback(cand)
                 out.append(resolved)
                 if note:
