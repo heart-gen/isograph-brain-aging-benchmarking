@@ -73,6 +73,17 @@ from isograph_benchmark.real_data.ase_risk_orientation import (
 # The per-sample phASER VCFs that define the `PW` haplotypes the counts are phased on.
 _PHASER = Path("/ocean/projects/bio260021p/shared/resources/processed-data/ase-files")
 
+
+def _bcftools() -> str:
+    """bcftools is not on the default PATH on the login nodes; resolve it once, loudly."""
+    import os
+    import shutil
+    for c in (os.environ.get("BCFTOOLS"), shutil.which("bcftools"),
+              "/ocean/projects/bio250020p/shared/opt/env/ml_dev/bin/bcftools"):
+        if c and Path(c).exists():
+            return c
+    raise SystemExit("bcftools not found: set BCFTOOLS, or `module load bcftools`")
+
 # Agreement between the fitted lead as this code reads it and as the counts carry it. This
 # is a self-check, not a phase transfer: both sides are phASER `PW`, so anything below this
 # means the two are not reading the same donors or the same variants.
@@ -119,6 +130,7 @@ def phaser_gt(region: str, sites: pd.DataFrame, samples: pd.DataFrame) -> pd.Dat
     vdir = _PHASER / region / "phASER"
     if not vdir.is_dir():
         raise SystemExit(f"no phASER VCFs for {region} under {vdir}")
+    _BCF = _bcftools()
     rows, missing = [], 0
     with tempfile.TemporaryDirectory() as td:
         reg = Path(td) / "sites.txt"
@@ -130,7 +142,7 @@ def phaser_gt(region: str, sites: pd.DataFrame, samples: pd.DataFrame) -> pd.Dat
                 missing += 1
                 continue
             q = subprocess.run(
-                ["bcftools", "query", "-R", str(reg),
+                [_BCF, "query", "-R", str(reg),
                  "-f", "%ID\t%REF\t%ALT[\t%GT\t%PW]\n", str(vcf)],
                 capture_output=True, text=True)
             if q.returncode != 0:
