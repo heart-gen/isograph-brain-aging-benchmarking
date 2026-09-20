@@ -37,9 +37,28 @@
 #   BrainSEQ allele-aware junction recount (ase_junction_switch/dlpfc): the junction drawn
 #     here is present as an isoform-1-specific junction of this very pair, testable over
 #     292 donors / 4,095 fragments, with 495 of 498 donors carrying BOTH forms. Minor-form
-#     usage is 0.045 -- the early-3'-end form is a real but minority form. Against the other
-#     early-terminating transcript (ENST00000343137) minor-form usage is 0.108, but ONT does
-#     not detect that one, so the pair drawn here is the better-supported switch.
+#     usage is 0.045 -- the early-3'-end form is a real but minority form.
+# WHICH early-terminating transcript to draw (resolved 2026-09-20; see reports/pi/08_integration
+# section 6b). ENST00000413440 (PRDM2-206) and ENST00000343137 (PRDM2-203) are the SAME FORM,
+# not competing candidates. Both start at the internal promoter (~13,749.4 kb), both terminate
+# ~28 kb before the colocalizing junction's donor, so NEITHER can carry it and both sit on the
+# alternative arm; and their CDS is IDENTICAL (3 coding exons, chr1:13,773,170-13,786,524).
+# They differ only by a 56-bp cassette exon at chr1:13,769,118-13,769,173 that PRDM2-203
+# includes and PRDM2-206 skips, and by 422 bp of 3' UTR (13,788,079 vs 13,787,657).
+# That difference is also why the two assays 'disagree': against MANE, PRDM2-203 contributes 3
+# transcript-specific introns to PRDM2-206's 1 (the cassette supplies two), so the short-read
+# recount has more unique evidence for it (median minor-form usage 0.108 vs 0.045 over 498
+# donors), while ONT assigns it essentially nothing (mean isoform fraction 2.8e-09 vs 0.192)
+# and every long-read pair containing it is undetected. Each assay favours the form its own
+# resolution can distinguish; they are not disagreeing measurements of one quantity.
+# So this panel draws the alternative arm as THE EARLY-TERMINATING FORM with PRDM2-206 as its
+# representative -- the only one ONT can attribute, the coordinate `_REFERENCE_ARM` already
+# uses for this gene (13,788,079), and the form in the single ONT-confirmed switch-like pair
+# against MANE. The legend must say that PRDM2-203 is the same form carrying an additional
+# 56-bp 5' UTR cassette. Do NOT redraw this as a choice between two partners, and do not
+# describe the anchored event as PRDM2's RIZ1/RIZ2 promoter choice: it is a 3' terminus choice
+# nested inside that program and independent of it (the distal junction is carried by both
+# RIZ1-type transcripts, CDS from 13,715,606, and by two RIZ2-type ones, CDS from 13,773,170).
 # The LIBD PSI arm (`junction_coloc_confirm`) returns `junction_not_measured` for PRDM2 --
 # its event catalogue stops at ~13,787,067 and never reaches the distal terminal exon. That
 # is a gap in THAT catalogue only, and must not be reported as a failure to confirm. The set-level evidence is panels B-D plus figOrthogonalConfirm.
@@ -107,15 +126,17 @@ sig_star <- function(p) ifelse(p < 1e-3, "***", ifelse(p < 1e-2, "**",
 # ===========================================================================
 # Panel A - PRDM2 switch vignette (ALS, cortex)
 # ===========================================================================
-# The colocalizing junction chr1:13816570-13823159 is the last intron of the forms that
-# reach PRDM2's distal terminal exon. Transcripts carrying it (MANE …311066 and the
-# internal-promoter form …505823) end at 13,823,159+; …413440 lacks it and terminates early
-# at 13,788,079. The ALS risk allele A at rs2744682 DECREASES usage of the junction
-# (risk_qtl_effect -1.10), i.e. shifts PRDM2 toward the early-terminating form.
+# The colocalizing event is an ALTERNATIVE 3' ACCEPTOR at a shared donor, chr1:13,816,570.
+# The junction drawn here, chr1:13816570-13823159, is the last intron of the forms that reach
+# PRDM2's distal terminal exon; the ALS risk allele A at rs2744682 DECREASES its usage
+# (risk_qtl_effect -1.10) and raises an UNANNOTATED proximal acceptor at 13,821,649 (no GENCODE
+# transcript has an exon there), i.e. it shifts PRDM2 toward the early-terminating form.
+# Transcripts carrying the drawn junction (MANE …311066 and the internal-promoter form …505823)
+# end at 13,823,159+; …413440 lacks it and terminates early at 13,788,079.
 ex <- read.delim(file.path(DD_DIR, "prdm2_transcript_exons.tsv"))
-TX <- c(ENST00000413440 = "…413440\n(early 3' end)",
-        ENST00000505823 = "…505823\n(switch)",
-        ENST00000311066 = "…311066\n(MANE Select)")
+TX <- c(ENST00000413440 = "PRDM2-206 (…413440)\nearly 3' terminus",
+        ENST00000505823 = "PRDM2-214 (…505823)\ndistal 3' end",
+        ENST00000311066 = "PRDM2-202 (…311066)\nMANE Select, distal 3' end")
 ex <- ex |> filter(transcript %in% names(TX))
 ex$ty <- match(ex$transcript, names(TX))            # 1 early-3'end .. 3 MANE
 W_LO <- 13772.0; W_HI <- 13826.5                     # kb window on the 3' half of the gene

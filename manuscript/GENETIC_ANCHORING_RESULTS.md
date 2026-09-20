@@ -157,13 +157,22 @@ describes a nomination the production re-run withdrew, and the short-read confir
 was run on a target set that no longer contains SNCA or CTSH. The current worked example is
 **PRDM2** (ALS, cortex): sQTL PP4 0.964 against PP4_eQTL 0.494, colocalizing on splicing in six
 tissues and on expression in none, SMR-supported in 7 of 7 instrumented probes with no eQTL
-instrument at all. Its colocalizing junction chr1:13,816,570–13,823,159 resolves onto the switch
-pair ENST00000311066 / ENST00000413440, which ONT long-read confirms as switch-like (usage
-Spearman −0.448), and the allele-aware junction recount measures in 498 of 498 DLPFC donors —
-the only gene in the set that is both splicing-specific and confirmed twice. PRDM2 also has a
-documented isoform program to be read against: the gene is transcribed from alternative
-promoters into PR-domain-containing RIZ1 and PR-less RIZ2, and the anchored event is the same
-class of 5′ choice [@doi:10.1074/jbc.272.5.2984].
+instrument at all. The colocalizing event is an **alternative 3′ acceptor at a shared donor**,
+chr1:13,816,570: the ALS risk allele A at rs2744682 lowers usage of the distal junction
+chr1:13,816,570–13,823,159 and raises an unannotated proximal acceptor at 13,821,649. The distal
+junction is carried by the transcripts that extend to the gene's 3′ end (ENST00000311066 (MANE),
+ENST00000235372, ENST00000376048, ENST00000503842, ENST00000505823); the alternative arm is a
+form that terminates early, at ~13,788 kb. The panel draws that arm as **ENST00000413440**
+(PRDM2-206), the pair ONT long-read confirms as switch-like against MANE (usage Spearman
+−0.448); the allele-aware junction recount measures the same junction in 498 of 498 DLPFC
+donors. PRDM2 is the only gene in the set that is both splicing-specific and confirmed twice.
+
+PRDM2 also has a documented isoform program to be read against: the gene is transcribed from
+alternative promoters into PR-domain-containing RIZ1 and PR-less RIZ2
+[@doi:10.1074/jbc.272.5.2984]. The anchored event is **not** that promoter choice — it is a 3′
+terminus choice nested inside it, and the two are independent here: the distal junction is
+carried by both RIZ1-type transcripts (CDS from chr1:13,715,606) and by two RIZ2-type ones (CDS
+from chr1:13,773,170).
 
 *Legacy text:* the headline case was **SNCA** (α-synuclein), which converges across two synucleinopathies: in
 LBD (risk allele A at rs7680557, cortex, CLPP 0.038) and in PD (risk allele C at rs1471483,
@@ -339,6 +348,49 @@ module-level or mechanistic claim — KLC1 belongs to its module through abundan
 switching, so the module projection is withheld; the effect is one transcript, in one region,
 with no within-cohort replication available. A transcript-level re-test and a non-redundant
 multiplicity treatment are the named follow-ups.
+
+That withholding is itself informative, and it is the clearest case in the study for what the
+**abundance channel** contributes beyond being a fallback. A gene enters an IsoGraph module
+through whichever of its two features carries the association; when that is abundance
+(`module_role = abundance_only`), the usual reading is that the gene had no usable switch axis.
+KLC1 shows that reading is too narrow. The abundance channel placed KLC1 in a module it
+genuinely belongs to, and at the same time recorded that the module's switch axis is not an
+instrument for this gene: KLC1-213 — the transcript that carries the effect — does not track the
+module eigengene (r = 0.110, q = 0.17), while its partners do (r = +0.31, −0.27, −0.06, −0.46),
+so each pair's polarity is set by the partner rather than by the transcript under test.
+Projecting anyway is what produced four significant rows with disagreeing signs. Read as a
+routing signal instead, the same annotation says to drop to the transcript level, and there the
+effect is single and coherent.
+
+A formal guard now enforces this:
+a pair is projected onto its module axis only when the gene joined on switching and at least one
+of its transcripts is anchored to the eigengene. Across the three regions the guard withholds
+151 of 556 rows over 35 genes; only 8 of those rows carried a projected value at all, and all 8
+are KLC1.
+
+**One further per-gene result is reported from the GWAS-lead arm.** At the AD locus lead
+rs10792832, the risk allele G raises within-donor usage of **PICALM-219** (ENST00000532317)
+against the canonical **PICALM-201** (ENST00000356360) in hippocampus (β = +0.42, SE 0.12,
+q = 0.015, 46 informative heterozygous donors). The contrast is internal and coding: PICALM-219
+carries 60-bp and 24-bp cassette exons that PICALM-201 lacks and lacks a 150-bp exon that
+PICALM-201 carries. As with KLC1 the effect is carried by one transcript — all four pairs with
+PICALM-219 on the numerator are positive (+0.42, +0.18, +0.18, +0.18) while every pair among the
+remaining isoforms is null — but only the first survives BH within the gene, so the evidence is
+one contrast and the consistency is a coherence check rather than extra significance.
+
+This is a single locus in a single region and it is not a mechanistic claim: PICALM's colocalization
+is prior-sensitive (PP4 0.81 only at p12 ≥ 1e-5) and it is one of the loci recovered when the
+coloc SNP cap is relaxed, so both the population-level nomination and the within-donor effect
+should be read together with those caveats. It is reported because it is the only disease-allele
+orientation in the panel that lands on an established late-onset Alzheimer's locus with an
+allele-aware, composition-free measurement behind it. It remains what the event audit called it,
+`disease_locus_splice_linked` — **not** a recovered known mechanism, and it must not be reported
+as one.
+
+Two further genes clear q < 0.05 in DLPFC, both repeating the single-transcript pattern — **NEK4 × schizophrenia** (risk lowers
+ENST00000383721 against two partners, q = 0.035, 92 donors) and **NT5C2 × schizophrenia**
+(β = +1.31, q = 0.026, 29 donors) — and one caudate row, **RPS6KL1 × ALS**, is significant only
+at the estimator bound, where the sign is informative and the magnitude is not.
 
 ## Two negative controls bound the genetic claim
 

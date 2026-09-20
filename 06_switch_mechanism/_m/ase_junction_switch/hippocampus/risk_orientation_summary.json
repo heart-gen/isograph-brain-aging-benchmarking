@@ -22,6 +22,6 @@
   },
   "significant_oriented": 4,
   "significant_genes": 1,
-  "risk_raises_module_score": 1,
-  "risk_lowers_module_score": 3
+  "risk_raises_module_score": 0,
+  "risk_lowers_module_score": 0
 }
