@@ -172,6 +172,18 @@ def _get_evidence(cache: dict, root: Path, region: str) -> _RegionEvidence:
     return cache[key]
 
 
+def _flag_true(v) -> bool:
+    """True only for a definite True, whatever container the flag arrived in.
+
+    `structure_annotations` stores these columns as the pandas nullable `boolean`
+    dtype, so `itertuples` hands back `numpy.bool_`. `numpy.bool_(True) is True` is
+    False, so an identity test silently dropped every flag and labelled all 76
+    concordant events "no annotated structural change". A missing value must still be
+    rejected without being coerced, because `bool(pd.NA)` raises.
+    """
+    return bool(pd.notna(v) and bool(v))
+
+
 def _switch_struct_label(ev: "_RegionEvidence", members: set[str]) -> str:
     """Structural nature of a switch = union of True flags across its pair isoforms."""
     flags: set[str] = set()
@@ -181,7 +193,7 @@ def _switch_struct_label(ev: "_RegionEvidence", members: set[str]) -> str:
             continue
         d = sr._asdict()
         for f in _STRUCT_FLAGS:
-            if d.get(f) is True:
+            if _flag_true(d.get(f)):
                 flags.add(f.replace("_changed", "").replace("_difference", "")
                           .replace("_", " "))
     return ", ".join(sorted(flags)) if flags else "no annotated structural change"
