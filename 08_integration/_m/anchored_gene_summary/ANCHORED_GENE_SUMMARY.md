@@ -4,7 +4,7 @@
 
 Sorted on **coloc**, which is the primary genetic evidence. eCAVIAR **CLPP is secondary** and is carried as a trailing column only: it is noisy per locus and, for the two largest values in this set, contradicted by every other layer. It does not enter `genetics_call`.
 
-Generated 2026-09-20T04:34:26+00:00 from commit `35424460` **with a dirty working tree -- not reproducible from that commit alone**, pandas 2.3.3, numpy 2.4.4, over 12 input files. Digests, sizes and mtimes are in `provenance.json`; re-run `python -m isograph_benchmark.real_data.anchored_gene_summary` to regenerate. Do not edit any number here by hand.
+Generated 2026-09-20T04:35:27+00:00 from commit `99328586`, pandas 2.3.3, numpy 2.4.4, over 12 input files. Digests, sizes and mtimes are in `provenance.json`; re-run `python -m isograph_benchmark.real_data.anchored_gene_summary` to regenerate. Do not edit any number here by hand.
 
 ## Genetics
 
