@@ -122,7 +122,7 @@ _LITERATURE: dict[str, dict] = {
             "switch, so the variant plausibly acts by selecting between PR-positive and PR-negative "
             "products rather than by changing gene dosage. Brain-specific and ALS-specific isoform "
             "work is not established."),
-        "refs": ["[citation needed: RIZ1/RIZ2 alternative-promoter isoforms and the PR-domain balance]"],
+        "refs": ["@doi:10.1074/jbc.272.5.2984"],
     },
     "IFNAR2": {
         "kind": "isoform_documented",
@@ -133,7 +133,7 @@ _LITERATURE: dict[str, dict] = {
             "rather than its receptor abundance. IFNAR2 is an established Alzheimer's GWAS locus, and "
             "the anchored event is splicing-specific on the genetics (no eQTL instrument at all), so "
             "isoform choice is the mechanism this locus most plausibly acts through."),
-        "refs": ["[citation needed: IFNAR2 transmembrane vs truncated vs soluble isoforms]"],
+        "refs": ["@doi:10.1042/BJ20020105", "@doi:10.3389/fimmu.2021.778204"],
     },
     "DNAJA3": {
         "kind": "isoform_documented",
@@ -142,7 +142,7 @@ _LITERATURE: dict[str, dict] = {
             "that differ at the C-terminus and have been reported to act in opposite directions on "
             "apoptosis, so isoform choice rather than total level is the functional variable. A "
             "schizophrenia-specific isoform role is not established."),
-        "refs": ["[citation needed: Tid1-L / Tid1-S splice forms and opposing apoptotic effects]"],
+        "refs": ["@doi:10.1038/sj.onc.1207732"],
     },
     "TPP1": {
         "kind": "gene_documented",
