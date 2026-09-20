@@ -27,6 +27,7 @@
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/concept_overview_figure.R
 suppressPackageStartupMessages({
+  library(jsonlite); library(tibble)
   library(arrow)
   library(dplyr)
   library(tidyr)
@@ -102,10 +103,11 @@ pA <- ggplot() +
     breaks = c("Isoform A usage", "Isoform B usage", "Total gene abundance (scaled)"),
     name = NULL) +
   scale_y_continuous(limits = c(0, 1.12), breaks = c(0, 0.5, 1)) +
-  guides(colour = guide_legend(nrow = 3, override.aes = list(linetype = c("solid", "solid", "22")))) +
+  guides(colour = guide_legend(nrow = 1, override.aes = list(linetype = c("solid", "solid", "22")))) +
   labs(x = "Age (years)", y = "Fraction of gene output") +
   theme_pub() +
-  theme(legend.position = "bottom", legend.margin = margin(0, 0, 0, 0))
+  theme(legend.position = "bottom", legend.margin = margin(0, 0, 0, 0),
+        legend.text = element_text(size = 6.8), legend.key.width = unit(0.5, "cm"))
 
 # ===========================================================================
 # Panel B - what abundance pipelines cover, and what is left
@@ -213,18 +215,111 @@ cat(sprintf("  benchmark panels: %d runs, %d methods, %d scenarios\n",
             nrow(b), dplyr::n_distinct(b$method), dplyr::n_distinct(b$scenario)))
 
 # ===========================================================================
+# Panel F - what the real data showed, as observed vs its own comparator
+# ===========================================================================
+# The PI asked Fig 1 to preview the paper's RESULTS, not only its method. The honest way
+# to do that in one panel is to put every real-data claim on a common fraction scale
+# beside the thing it must beat -- a matched WGCNA baseline where the question is "does
+# the method add anything", a permutation/abundance-matched null where the question is
+# "is this above chance". Claims whose natural unit is not a fraction (the switch-unique
+# partial-R2 ratio, the within-donor cis-control counts) are named in the caption rather
+# than forced onto this axis.
+#
+# Every value is read from a result file. Nothing here is typed in by hand, because this
+# panel is the one a reader checks first.
+
+# -- trusted-module rate, both methods ---------------------------------------
+stab_dir <- rel("04_module_trust", "_m", "stability", "module_trust")
+trusted_rate <- function(meth) {
+  fs <- list.files(stab_dir, pattern = paste0("^module_stability__.*__", meth, "\\.parquet$"),
+                   full.names = TRUE)
+  d <- bind_rows(lapply(fs, function(f) as.data.frame(read_parquet(f))))
+  sum(d$trusted) / nrow(d)
+}
+
+# -- within-cohort split-half age sign concordance ---------------------------
+within_conc <- function(meth) {
+  fs <- list.files(stab_dir, pattern = paste0("^within_cohort__.*__", meth, "\\.parquet$"),
+                   full.names = TRUE)
+  d <- bind_rows(lapply(fs, function(f) as.data.frame(read_parquet(f))))
+  d <- d[d$both_age_sig, ]
+  sum(d$sign_concordant) / nrow(d)
+}
+
+# -- cross-cohort eigengene projection ---------------------------------------
+proj <- as.data.frame(read_parquet(rel("04_module_trust", "_m", "stability",
+                                       "eigengene_projection",
+                                       "eigengene_projection_summary.parquet")))
+proj_rate <- function(meth, dir) {
+  r <- proj[proj$method == meth & proj$direction == dir, ]
+  r$sign_match / r$n_age_testable
+}
+
+# -- long-read confirmation, observed vs its abundance-matched null ----------
+lr <- function(f, field) {
+  j <- jsonlite::fromJSON(rel("06_switch_mechanism", "_m", "switch_orthogonal_confirm", f))
+  j$matched_null$switch_like_rate[[field]]
+}
+
+ev <- tibble::tribble(
+  ~claim,                                            ~observed,                             ~comparator,                           ~ctype,
+  "Modules chance-trusted",                          trusted_rate("isograph"),              trusted_rate("wgcna"),                 "WGCNA baseline",
+  "Split-half age sign concordance",                 within_conc("isograph"),               within_conc("wgcna"),                  "WGCNA baseline",
+  "Aging transfers, BrainSEQ\u2192GTEx",               proj_rate("isograph", "brainseq_to_gtex"), proj_rate("wgcna", "brainseq_to_gtex"), "WGCNA baseline",
+  "Aging transfers, GTEx\u2192BrainSEQ",               proj_rate("isograph", "gtex_to_brainseq"), proj_rate("wgcna", "gtex_to_brainseq"), "WGCNA baseline",
+  "Long-read switch-like, anchored pairs",           lr("anchored_summary.json", "observed"),   lr("anchored_summary.json", "null_mean"),   "Matched null",
+  "Long-read switch-like, all pairs",                lr("global_null_summary.json", "observed"), lr("global_null_summary.json", "null_mean"), "Matched null"
+) |>
+  mutate(claim = factor(claim, rev(claim)))
+
+ev_long <- bind_rows(
+  transmute(ev, claim, value = observed,   what = "IsoGraph / observed"),
+  transmute(ev, claim, value = comparator, what = ctype)
+) |>
+  mutate(what = factor(what, c("IsoGraph / observed", "WGCNA baseline", "Matched null")))
+
+pF <- ggplot(ev, aes(y = claim)) +
+  geom_segment(aes(x = comparator, xend = observed, yend = claim),
+               colour = "grey70", linewidth = 0.45) +
+  geom_point(data = ev_long, aes(x = value, colour = what), size = 1.9) +
+  geom_text(aes(x = observed, label = sprintf("%.2f", observed)),
+            vjust = -1.05, size = 2.2, colour = HILITE) +
+  scale_colour_manual(values = c(`IsoGraph / observed` = HILITE,
+                                 `WGCNA baseline` = "#0072B2",
+                                 `Matched null` = "grey45"), name = NULL) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     expand = expansion(mult = c(0.02, 0.04))) +
+  labs(x = "Fraction (rate, or concordant modules)", y = NULL) +
+  theme_pub() +
+  theme(axis.text.y = element_text(size = 6.8),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"),
+        legend.position = "bottom", legend.text = element_text(size = 6.8),
+        legend.key.size = unit(0.3, "cm"))
+
+cat("  results panel:\n")
+for (i in seq_len(nrow(ev))) cat(sprintf("    %-38s %.3f vs %.3f (%s)\n",
+    ev$claim[i], ev$observed[i], ev$comparator[i], ev$ctype[i]))
+
+# ===========================================================================
 # Assemble: schematic row on top (the definition), benchmark rows beneath
 # ===========================================================================
+# F sits last: definition (A-C), synthetic validation (D-E), then what the real data
+# showed (F). A reader who stops after Fig 1 should still know what was found.
 design <- "AAABBB
            AAABBB
            CCCCCC
            DDDDDD
            DDDDDD
            EEEEEE
-           EEEEEE"
-fig <- wrap_plots(pA, pB, pC, pD, pE, design = design) +
+           EEEEEE
+           FFFFFF
+           FFFFFF"
+fig <- wrap_plots(pA, pB, pC, pD, pE, pF, design = design) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figConceptOverview", width = 7.2, height = 8.2)
+# Nature Communications caps a figure at 180 x 247 mm, i.e. 7.09 x 9.72 in. 9.5 leaves a
+# margin for the caption block without shrinking the benchmark panels further.
+save_fig(fig, "figConceptOverview", width = 7.09, height = 9.5)
 cat("Done. Output in", FIG_DIR, "\n")
