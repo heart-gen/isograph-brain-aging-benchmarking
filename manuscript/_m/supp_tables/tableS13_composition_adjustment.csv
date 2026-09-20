@@ -1,13 +1,13 @@
 cohort,region,n_tested,comp_unique_base,comp_unique_adj,retained_frac,both_base,both_adj,n_cell_types,samples_covered,marker_depleted,marker_enriched
-BrainSEQ,SCZD (caudate),17193,34,2,0.06,16,1,8,390,0,1
-BrainSEQ,aging caudate,11648,43,17,0.4,34,22,8,238,0,0
-BrainSEQ,aging hippocampus,11114,0,0,,0,0,8,238,0,0
-BrainSEQ,aging DLPFC,11554,8,15,1.88,4,18,8,222,0,1
-GTEx,GTEx amygdala,16351,7,6,0.86,2,0,8,181,0,4
-GTEx,GTEx anterior_cingulate_cortex_ba24,16250,545,88,0.16,107,2,6,233,0,6
-GTEx,GTEx frontal_cortex_ba9,16362,531,0,0.0,175,0,8,269,0,6
-GTEx,GTEx cortex,16480,438,0,0.0,72,0,8,270,0,1
-GTEx,GTEx hippocampus,16500,61,21,0.34,14,3,8,255,0,3
-GTEx,GTEx caudate_basal_ganglia,16543,32,10,0.31,7,1,8,300,0,4
-GTEx,GTEx putamen_basal_ganglia,16158,4,3,0.75,1,1,8,254,0,5
-GTEx,GTEx nucleus_accumbens_basal_ganglia,16529,1,4,4.0,0,0,8,285,0,2
+BrainSEQ,SCZD (caudate),13222,60,11,0.18,37,9,8,390,0,0
+BrainSEQ,aging caudate,13177,45,14,0.31,39,18,8,238,0,1
+BrainSEQ,aging hippocampus,13130,1,1,1.0,0,0,8,238,0,1
+BrainSEQ,aging DLPFC,12931,22,28,1.27,8,26,8,222,0,1
+GTEx,GTEx amygdala,12042,33,5,0.15,6,0,8,181,0,1
+GTEx,GTEx anterior_cingulate_cortex_ba24,12190,928,365,0.39,198,14,6,233,0,2
+GTEx,GTEx frontal_cortex_ba9,12322,797,2,0.0,320,0,8,269,0,0
+GTEx,GTEx cortex,12426,1169,2,0.0,152,0,8,270,0,1
+GTEx,GTEx hippocampus,12313,44,29,0.66,6,2,8,255,0,2
+GTEx,GTEx caudate_basal_ganglia,12424,87,50,0.57,4,6,8,300,0,2
+GTEx,GTEx putamen_basal_ganglia,12100,2,4,2.0,1,2,8,254,0,0
+GTEx,GTEx nucleus_accumbens_basal_ganglia,12492,2,2,1.0,0,0,8,285,0,1

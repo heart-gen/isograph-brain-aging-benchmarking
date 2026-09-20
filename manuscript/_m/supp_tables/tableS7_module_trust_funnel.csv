@@ -1,7 +1,7 @@
 cohort,region,n_modules,n_trusted,frac_trusted,median_driver_rho,frac_positive_rho,n_replication_pairs,n_concordant,median_frac_dtu_without_dge,median_frac_in_wgcna_age
-brainseq,caudate,46,44,0.957,0.755,0.955,44.0,2.0,0.0,0.391
-brainseq,dlpfc,39,36,0.923,0.66,0.954,36.0,8.0,0.0,0.502
-brainseq,hippocampus,50,50,1.0,0.746,0.937,50.0,13.0,0.0,1.0
-gtex,caudate_basal_ganglia,42,40,0.952,0.876,1.0,,,0.0,0.0
-gtex,frontal_cortex_ba9,48,43,0.896,0.862,0.993,,,0.0,0.942
-gtex,hippocampus,41,37,0.902,0.856,1.0,,,0.0,0.936
+brainseq,caudate,13,12,0.923,0.75,1.0,12.0,1.0,0.0041,0.429
+brainseq,dlpfc,10,10,1.0,0.717,1.0,10.0,0.0,0.0015,0.364
+brainseq,hippocampus,16,16,1.0,0.745,0.974,16.0,0.0,0.0,0.996
+gtex,caudate_basal_ganglia,28,22,0.786,0.808,1.0,,,0.0,0.0
+gtex,frontal_cortex_ba9,21,12,0.571,0.822,0.974,,,0.0,0.655
+gtex,hippocampus,30,21,0.7,0.794,0.945,,,0.0,0.904

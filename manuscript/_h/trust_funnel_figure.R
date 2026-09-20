@@ -1,6 +1,7 @@
 # Publication figure for the IsoGraph module trust funnel (real data).
-# Q1 stability -> Q2 driver reproducibility -> Q3 cross-cohort aging replication ->
-# Q4 structural-switch drivers. Reads 04_module_trust/_m/stability/module_trust/*.parquet and
+# Q1 stability -> Q2 driver reproducibility -> Q3 within-cohort split-half aging
+# concordance -> Q4 structural-switch drivers. (Q3 was cross-cohort until 2026-09-19; see
+# the panel C header and crosscohort_replication_figure.R.) Reads 04_module_trust/_m/stability/module_trust/*.parquet and
 # writes figTrustFunnel.{pdf,png} to 04_module_trust/_m/stability/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/trust_funnel_figure.R
@@ -124,51 +125,47 @@ pB <- ggplot(wc, aes(region_lab, driver_load_rho)) +
   theme_pub() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # ---------------------------------------------------------------------------
-# Panel C - Q3 cross-cohort aging concordance (paired BrainSEQ vs GTEx age effect).
-# Plots the linear/covariate-free arm; the linear-vs-spline asymmetry is reported in
-# REPLICATION_PERMUTATION.md rather than by switching the panel's model.
+# Panel C - Q3 WITHIN-cohort split-half aging concordance.
+#
+# This panel used to be the BrainSEQ -> GTEx cross-cohort scatter. The PI ruled on
+# 2026-09-19 that the cross-cohort comparison is not a fair replication test: BrainSEQ
+# transcripts are Salmon-quantified and GTEx RSEM, so a failure there confounds pipeline
+# with biology. It moved to the supplement (crosscohort_replication_figure.R) and the
+# within-cohort split-half analogue took its place -- same question, same visual grammar,
+# one cohort and one quantifier at a time.
+#
+# Gene-Jaccard would be the wrong statistic here: it is granularity-confounded (a method
+# with a few giant modules wins by construction), which is why Q1 above uses gene-level
+# co-assignment. This panel conditions on the pairs where the age effect is detectable in
+# BOTH halves and asks only whether the two halves agree on its direction.
 # ---------------------------------------------------------------------------
-rep <- load_stage("module_aging_replication__") |>
-  filter(is.finite(age_effect_bs), is.finite(age_effect_gtex))
-rep$method_lab <- METHOD_LABELS[rep$method]
-# Permutation P for the arm this panel actually plots: the linear/Pearson statistic
-# against the `matching` null (the stricter of the two nulls -- it holds every age
-# statistic fixed and permutes only which GTEx module each BrainSEQ module is matched to).
-# Read from the stats JSON rather than transcribed, so the annotation cannot drift from
-# replication_permutation.py's output.
-perm_p <- function(method) {
-  f <- file.path(MT_DIR, sprintf(
-    "replication_permutation__%s__pearson__matching__stats.json", method))
-  if (!file.exists(f)) return(NA_real_)
-  jsonlite::fromJSON(f)$p_emp
-}
-# "concordant", not "replicate": the pre-registered decision rule in
-# REPLICATION_PERMUTATION.md forbids the word "replication" for this count, which does not
-# separate from the matching null under the covariate-adjusted model.
-rep_counts <- rep |> group_by(method) |>
-  summarise(rep = sum(replicates), M = n(), .groups = "drop") |>
-  mutate(p_emp = vapply(method, perm_p, numeric(1)),
-         lab = sprintf("%s  %d/%d, P = %s", METHOD_LABELS[method], rep, M,
-                       ifelse(is.finite(p_emp), sprintf("%.3f", p_emp), "NA")))
-# Keep every annotation line short. The previous format ran ~46 characters and was
-# clipped by the panel edge, so BOTH permutation p-values were invisible in the
-# rendered figure. Header carries the word the counts mean; the rows carry the numbers.
-rep_lab <- paste(c("Cross-cohort concordant modules", rep_counts$lab), collapse = "\n")
-lim <- max(abs(c(rep$age_effect_bs, rep$age_effect_gtex)), na.rm = TRUE)
-lim_pad <- lim * 1.04   # slack so the longest annotation line cannot touch the edge
+wc <- load_stage("within_cohort__") |>
+  filter(is.finite(age_effect_a), is.finite(age_effect_b))
+wc$method_lab <- METHOD_LABELS[wc$method]
+wc$detected <- wc$both_age_sig
 
-pC <- ggplot(rep, aes(age_effect_bs, age_effect_gtex)) +
+conc_counts <- wc |> group_by(method) |>
+  summarise(both = sum(both_age_sig),
+            conc = sum(both_age_sig & sign_concordant),
+            M = n(), .groups = "drop") |>
+  mutate(lab = sprintf("%s  %d/%d", METHOD_LABELS[method], conc, both))
+conc_lab <- paste(c("Same age direction in both halves", conc_counts$lab), collapse = "\n")
+
+wlim <- max(abs(c(wc$age_effect_a, wc$age_effect_b)), na.rm = TRUE) * 1.04
+
+pC <- ggplot(wc, aes(age_effect_a, age_effect_b)) +
   geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey80") +
   geom_vline(xintercept = 0, linewidth = 0.3, colour = "grey80") +
-  geom_abline(slope = 1, intercept = 0, linewidth = 0.3, linetype = "dotted", colour = "grey60") +
-  geom_point(aes(colour = method, alpha = replicates, size = replicates)) +
+  geom_abline(slope = 1, intercept = 0, linewidth = 0.3, linetype = "dotted",
+              colour = "grey60") +
+  geom_point(aes(colour = method, alpha = detected, size = detected)) +
   scale_colour_manual(values = METHOD_COLORS, labels = METHOD_LABELS) +
   scale_alpha_manual(values = c(`TRUE` = 0.95, `FALSE` = 0.3), guide = "none") +
   scale_size_manual(values = c(`TRUE` = 1.5, `FALSE` = 0.7), guide = "none") +
-  annotate("text", x = -lim_pad, y = lim_pad, hjust = 0, vjust = 1, size = 2.3,
-           lineheight = 0.95, label = rep_lab) +
-  coord_equal(xlim = c(-lim_pad, lim_pad), ylim = c(-lim_pad, lim_pad)) +
-  labs(x = "BrainSEQ age effect", y = "GTEx age effect") +
+  annotate("text", x = -wlim, y = wlim, hjust = 0, vjust = 1, size = 2.3,
+           lineheight = 0.95, label = conc_lab) +
+  coord_equal(xlim = c(-wlim, wlim), ylim = c(-wlim, wlim)) +
+  labs(x = "Age effect, split half A", y = "Age effect, split half B") +
   theme_pub() + theme(legend.position = "bottom")
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 analysis,cohort,region,trait,caller,n_genes,n_switch_genes,n_background_genes,median_evidence_switch,median_evidence_background,rank_biserial,mwu_p,adjusted_or,adjusted_p
-brainseq_caudate_age,brainseq,caudate,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11648,876,10772,1.7272,1.3257,0.1447,0.0,1.1655,0.0
-brainseq_caudate_dx,brainseq,caudate,dx,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11563,171,11392,1.2862,0.9349,0.242,0.0,1.2669,0.0
-brainseq_dlpfc_age,brainseq,dlpfc,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11554,0,11554,,1.0408,,,,
-brainseq_hippocampus_age,brainseq,hippocampus,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),11114,0,11114,,0.9301,,,,
+brainseq_caudate_age,brainseq,caudate,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),13177,604,12573,1.8761,0.9218,0.4494,0.0,1.5214,0.0
+brainseq_caudate_dx,brainseq,caudate,dx,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),13222,1552,11670,0.8292,0.777,0.035,0.0123,1.1508,0.0
+brainseq_dlpfc_age,brainseq,dlpfc,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),12931,0,12931,,0.8223,,,,
+brainseq_hippocampus_age,brainseq,hippocampus,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),13130,73,13057,1.2617,0.8163,0.3072,0.0,1.5394,0.0
 gtex_amygdala_age,gtex,amygdala,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10031,1031,9000,1.776,1.2186,0.2386,0.0,1.3007,0.0
 gtex_anterior_cingulate_cortex_ba24_age,gtex,anterior_cingulate_cortex_ba24,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10403,2805,7598,2.1587,1.5678,0.1711,0.0,1.1633,0.0
 gtex_caudate_basal_ganglia_age,gtex,caudate_basal_ganglia,age,satuRn (DTU test used by IsoformSwitchAnalyzeR v2),10607,0,10607,,0.9722,,,,
