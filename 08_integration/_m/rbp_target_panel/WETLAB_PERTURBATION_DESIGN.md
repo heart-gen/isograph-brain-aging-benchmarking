@@ -1,9 +1,12 @@
 # RBP perturbation experiment — design specification
 
-**Three-arm knockdown test of the IsoGraph co-switch regulon hypothesis.**
-Generated 2026-08-26 from `rbp_regulon.parquet` (SLURM 44484238) and
-`rbp_target_panel.py` (`--rank-by adjusted`, the default). Every number below is
-traceable to `07_rbp_regulation/_m/rbp/` and `07_rbp_regulation/_m/rbp_target_panel/<RBP>/`.
+**Two-arm knockdown test of the IsoGraph co-switch regulon hypothesis.**
+Generated 2026-08-26 from `rbp_regulon.parquet` (SLURM 44484238) and `rbp_target_panel.py`
+(`--rank-by adjusted`, the default); **amended 2026-09-20** for the switching-filter re-run —
+the KHDRBS1 arm is removed (§2, §2a) and Section 7 is re-quoted from SLURM 46448488. Sections
+1, 3–6 and 8–11 are otherwise at their 2026-08-26 numbers and are marked where a re-run number
+is known to differ. Everything is traceable to `07_rbp_regulation/_m/rbp/` and
+`08_integration/_m/rbp_target_panel/<RBP>/`.
 
 ---
 
@@ -18,18 +21,34 @@ ratios **specifically in its predicted regulon genes** and not in matched non-re
 The computational analysis nominates candidate regulons two ways: an unadjusted
 hypergeometric test, and a binomial GLM adjusting for motif *opportunity* (transcript
 length, GC, 5'UTR/CDS/3'UTR composition, transcript count). The two disagree sharply —
-714 module x RBP pairs are significant unadjusted, only 43 survive adjustment. **This
-experiment is designed to adjudicate that disagreement**, not merely to confirm a regulon.
+714 module x RBP pairs were significant unadjusted and only 43 survived adjustment, with 43
+shared. **The experiment was designed to adjudicate that disagreement**, not merely to confirm
+a regulon.
 
-## 2. Three arms, chosen to span the evidence axis
+> **Re-quoted 2026-09-20.** On the switching-filter re-run the two sets are **384 raw and 416
+> adjusted, sharing 89** — the adjusted arm is now *larger* than the raw one and is a
+> reordering of it rather than a subset, so "714, then 43 after adjustment" must not be reused.
+> The disagreement the experiment addresses is therefore no longer nesting but *ordering*: which
+> cells each method puts at the top. With the promiscuity arm removed (§2a), this experiment can
+> no longer settle that on its own.
+
+## 2. Two arms, and the control that was removed
+
+> **Amended 2026-09-20 (PI): the KHDRBS1 arm is removed from the design.** On the
+> switching-filter re-run its panel returns **0 measurable-and-responsive switch pairs**
+> (against 47 measurable-but-age-static and 6 not assayable, over 134 pairs in 14 genes).
+> Section 7(b) below set the condition for keeping a negative control: it is only
+> interpretable if its targets are measurable, because otherwise a flat result is absence of
+> assay rather than evidence of absence. That condition no longer holds, so the arm is cut
+> rather than run uninterpretably. What this costs the design is stated in §2a — it is not
+> nothing, and the matched non-regulon controls of Section 8 now carry the specificity
+> argument alone.
 
 | arm | RBP | raw hits | regions | adj. CI>1 | contradicted | median adj. OR | adj. q<=0.05 | role |
 |---|---|---|---|---|---|---|---|---|
 | **A** | **NONO** | 5 | 3 | 4 | 0 | 1.52 | **2** | focal positive |
 | **B** | **ELAVL1** | 11 | 6 | 6 | 0 | 1.68 | **1** | broad positive |
-| **C** | **KHDRBS1** | 21 | 8 | 5 | **1** | 1.33 | **0** | promiscuity negative control |
-
-The three-way contrast is the point of the design:
+| ~~C~~ | ~~KHDRBS1~~ | ~~21~~ | ~~8~~ | ~~5~~ | ~~1~~ | ~~1.33~~ | ~~0~~ | **removed 2026-09-20 — no assayable responsive pair** |
 
 - **NONO** — few modules, but every one strong and internally consistent. Its best module
   (`frontal_cortex_ba9/M008`, adjusted OR 2.09, 95% CI 1.60-2.73, adjusted q = 1.9e-4) is
@@ -37,22 +56,35 @@ The three-way contrast is the point of the design:
   *Prediction: strong, module-restricted switch response.*
 - **ELAVL1** (HuR) — broad **and** strong: 11 modules over 6 regions, median adjusted OR
   1.68, none contradicted. eCLIP-supported. *Prediction: response across several modules.*
-- **KHDRBS1** (SAM68) — **the negative control.** It has the widest raw footprint of any
-  RBP (21 modules, 8/14 regions), which is why it was the original wet-lab candidate. But
-  **no KHDRBS1 module survives opportunity adjustment** (best adjusted q = 0.126 pooled,
-  0.102 under the permissive within-RBP correction), its median adjusted OR is 1.33 (rank
-  32/59 among RBPs with >=5 raw hits), and its module-level directions are inconsistent —
-  5 of 21 modules have OR<1, including `anterior_cingulate_cortex_ba24/M011` at OR 0.558
-  (0.380-0.819), i.e. significantly **depleted** after adjustment.
-  *Prediction: NO coherent module-restricted response.*
 
-KHDRBS1 is a control for a specific artifact: a degenerate, AU-rich, promiscuous binder
-whose motif appears in many switch pairs by chance, producing broad unadjusted
-significance without any real shared regulation. If KHDRBS1 knockdown moves its predicted
-targets as strongly as NONO's, the opportunity adjustment is over-conservative and the
-larger unadjusted regulon set should be trusted. If it does not, the adjusted arm is the
-correct read and the manuscript claim narrows accordingly. **Both outcomes are publishable
-and the design is powered to distinguish them** — this is not a formality.
+### 2a. What the removal costs, stated plainly
+
+KHDRBS1 was not decoration. It was the arm that made the experiment adjudicate rather than
+confirm: a degenerate, AU-rich, promiscuous binder whose motif appears in many switch pairs
+by chance, producing broad unadjusted significance without real shared regulation. A flat
+KHDRBS1 response would have been evidence that the opportunity adjustment is the correct
+read; a strong one would have been evidence that the adjustment is over-conservative and the
+larger unadjusted set should be trusted.
+
+Without it, **this experiment can confirm predicted regulons but cannot by itself adjudicate
+between the adjusted and unadjusted regulon sets.** Two things partly substitute, and neither
+fully:
+
+1. **The matched non-regulon controls (Section 8)** — 10-12 per arm, drawn from the same
+   modules and matched on assay class and expression. They test specificity *within* an arm,
+   which is the question that matters most for a positive result, but they are not a
+   promiscuous-binder control.
+2. **The internal control inside the NONO arm** — pairs in `frontal_cortex_ba9/M005`, whose
+   adjusted OR (0.85, CI 0.69-1.04) does *not* support the module. If NONO knockdown moves
+   its supported modules and not M005, the adjustment is tracking something real at module
+   resolution, on pairs of comparable assay quality.
+
+If a promiscuity control is wanted later, it must be re-selected on the current panel against
+the stated criterion — a candidate with a wide unadjusted footprint, no module surviving
+adjustment, **and at least a handful of measurable, age-responsive pairs**. KHDRBS1 met the
+first two and fails the third, which is why it is out rather than kept with a caveat. Its
+panel and assayability tables are left in `rbp_target_panel/KHDRBS1/` as the record of that
+judgement.
 
 ## 3. Model system
 
@@ -64,7 +96,7 @@ regions and BrainSEQ DLPFC/caudate/hippocampus), and the eCLIP support layer is 
   iPSC-derived cortical neurons (NGN2, DIV 21+) if available. NGN2 neurons are preferred
   for the cortical modules; SH-SY5Y is acceptable and faster.
 - **Rationale for a cortical model:** 7 of the 12 modules carrying tier-1 targets across the
-  three arms are cortical (`frontal_cortex_ba9`, `cortex`, `anterior_cingulate_cortex_ba24`).
+  arms are cortical (`frontal_cortex_ba9`, `cortex`, `anterior_cingulate_cortex_ba24`).
 - Confirm baseline expression of every assay target in the chosen line **before** committing
   (`expression_check_list.tsv` in each panel directory lists the genes to check).
 
@@ -77,11 +109,10 @@ control for off-target effects, analysed separately and required to agree in dir
 |---|---|---|
 | A | NONO (ENSG00000147140) | >=70% mRNA, confirmed by protein |
 | B | ELAVL1 (ENSG00000066044) | >=70% |
-| C | KHDRBS1 (ENSG00000121774) | >=70% |
 
 Controls: non-targeting scrambled siRNA (primary comparator), and mock transfection.
 Knockdown efficiency by RT-qPCR **and** western blot; a failed knockdown invalidates that
-arm's null result, so protein-level confirmation is mandatory before interpreting arm C.
+arm's null result, so protein-level confirmation is mandatory before interpreting any null.
 
 **Design:** 3 RBPs x 2 siRNAs + 2 controls = 8 conditions, **n = 4 biological replicates**
 (independent differentiations/passages, not technical replicates). Randomise plate position
@@ -119,9 +150,10 @@ tier 2-3 = secondary. `pairs` = number of annotated switch pairs available for p
 Each RBP's full ranked universe is in `rbp_target_candidates.tsv`.
 
 **Assay at minimum: every measurable + responsive pair in Section 7**, plus matched
-non-regulon controls (Section 8). The tier-1 sets below (13 NONO, 14 ELAVL1, 14 KHDRBS1)
-are the nomination universe, not the plate list — Section 7 shows that only 9, 5 and 5 of
-them respectively carry a pair an assay can actually resolve.
+non-regulon controls (Section 8). The tier-1 sets below are the nomination universe, not the
+plate list — Section 7, re-quoted 2026-09-20, shows that only 2 of 4 tier-1 NONO genes and 4
+of 7 tier-1 ELAVL1 genes carry a pair an assay can resolve, and one each carries a responsive
+one. *(The KHDRBS1 nomination table that stood here is removed with its arm; see §2a.)*
 
 #### NONO
 
@@ -168,43 +200,6 @@ them respectively carry a pair an assay can actually resolve.
 | 3 | **TMEM63B** | ENSG00000137216 | 2 | 7 | 1.39 (0.90-2.16) | caudate/M003 |  |
 | 3 | **CDC37** | ENSG00000105401 | 1 | 5 | 1.39 (0.90-2.16) | caudate/M003 |  |
 
-#### KHDRBS1
-
-| tier | gene | ENSG | regions | pairs | adj. OR (95% CI) | module | module GO |
-|---|---|---|---|---|---|---|---|
-| 1 | **SOCS3** | ENSG00000184557 | 5 | 2 | 3.13 (1.38-7.07) | caudate_sczd/M012 | response to stimulus, protein refolding, regul |
-| 1 | **IRF1** | ENSG00000125347 | 5 | 11 | 3.13 (1.38-7.07) | caudate_sczd/M012 | response to stimulus, protein refolding, regul |
-| 1 | **OSMR-DT** | ENSG00000249740 | 5 | 11 | 3.13 (1.38-7.07) | caudate_sczd/M012 | response to stimulus, protein refolding, regul |
-| 1 | **RPL7** | ENSG00000147604 | 4 | 14 | 1.60 (1.09-2.35) | cortex/M004 |  |
-| 1 | **SHROOM3** | ENSG00000138771 | 4 | 13 | 1.60 (1.09-2.35) | cortex/M004 |  |
-| 1 | **KXD1** | ENSG00000105700 | 4 | 11 | 1.60 (1.09-2.35) | cortex/M004 |  |
-| 1 | **ALOX5AP** | ENSG00000132965 | 4 | 3 | 1.57 (1.09-2.27) | amygdala/M006 | immune system process, immune response, regula |
-| 1 | **SLC2A5** | ENSG00000142583 | 4 | 8 | 1.57 (1.09-2.27) | amygdala/M006 | immune system process, immune response, regula |
-| 1 | **LAIR1** | ENSG00000167613 | 4 | 10 | 1.57 (1.09-2.27) | amygdala/M006 | immune system process, immune response, regula |
-| 1 | **ADAM28** | ENSG00000042980 | 3 | 5 | 1.60 (1.03-2.48) | hypothalamus/M006 | immune system process, immune response, positi |
-| 1 | **LAT2** | ENSG00000086730 | 3 | 10 | 1.60 (1.03-2.48) | hypothalamus/M006 | immune system process, immune response, positi |
-| 1 | **TNFRSF12A** | ENSG00000006327 | 3 | 5 | 1.60 (1.03-2.48) | hypothalamus/M006 | immune system process, immune response, positi |
-| 1 | **MAST1** | ENSG00000105613 | 3 | 12 | 1.37 (1.03-1.83) | frontal_cortex_ba9/M008 | synaptic signaling, trans-synaptic signaling,  |
-| 1 | **CEP170B** | ENSG00000099814 | 3 | 2 | 1.85 (0.96-3.53) | cortex/M021 |  |
-| 2 | **GABBR2** | ENSG00000136928 | 2 | 30 | 1.37 (1.03-1.83) | frontal_cortex_ba9/M008 | synaptic signaling, trans-synaptic signaling,  |
-| 2 | **PTPRN** | ENSG00000054356 | 2 | 13 | 1.37 (1.03-1.83) | frontal_cortex_ba9/M008 | synaptic signaling, trans-synaptic signaling,  |
-| 2 | **CDIP1** | ENSG00000089486 | 3 | 9 | 1.33 (0.92-1.93) | frontal_cortex_ba9/M016 | protein folding |
-| 2 | **TPCN1** | ENSG00000186815 | 1 | 6 | 1.06 (0.84-1.33) | anterior_cingulate_cortex_ba24/M001 | immune system process, immune response, regula |
-| 3 | **MLF2** | ENSG00000089693 | 2 | 10 | 1.85 (0.96-3.53) | cortex/M021 |  |
-| 3 | **PPP2R1A** | ENSG00000105568 | 2 | 19 | 1.85 (0.96-3.53) | cortex/M021 |  |
-| 3 | **UBE2O** | ENSG00000175931 | 2 | 10 | 1.55 (0.92-2.61) | anterior_cingulate_cortex_ba24/M023 | export from cell, modulation of chemical synap |
-| 3 | **TECPR1** | ENSG00000205356 | 2 | 13 | 1.55 (0.92-2.61) | anterior_cingulate_cortex_ba24/M023 | export from cell, modulation of chemical synap |
-| 3 | **PPP2R5B** | ENSG00000068971 | 2 | 6 | 1.55 (0.92-2.61) | anterior_cingulate_cortex_ba24/M023 | export from cell, modulation of chemical synap |
-
-### A caveat on three NONO tier-1 genes
-
-`DDX24`, `ATP5F1B` and `VDAC3` are reported under `frontal_cortex_ba9/M005`, whose adjusted
-OR is **0.85 (0.69-1.04)** — below 1 and not supported by the adjustment. They entered the
-panel on hypergeometric eligibility. Treat them as a **within-arm internal control**: if
-NONO knockdown moves the M008/M007 targets but not these, that is direct evidence the
-adjusted OR is tracking something real at module resolution. Do not count them toward the
-NONO success criterion.
-
 ## 7. Which switch pairs are actually assayable
 
 Section 6 lists the genes; this section lists the **transcript pairs you can put on a plate**.
@@ -228,86 +223,72 @@ regulatable — not that this RBP is what regulates it. That is what the experim
 
 ### Where the pairs are lost
 
-| | NONO | ELAVL1 | KHDRBS1 |
-|---|---|---|---|
-| prespecified pairs | 145 | 129 | 236 |
-| structurally measurable | **143 (99%)** | **122 (95%)** | **229 (97%)** |
-| — of which `junction` (cheapest design) | 116 | 95 | 193 |
-| not discriminable by any internal feature | 2 | 7 | 7 |
-| no GTEx quantification (BrainSEQ-only region) | 1 | 19 | 15 |
-| measurable (structure + expression) | 48 | 30 | 56 |
-| **measurable + responsive** | **11** | **6** | **8** |
-| genes with ≥1 measurable + responsive pair | **6 / 15** | **2 / 20** | **4 / 24** |
+> **Re-quoted 2026-09-20** from `rbp_pair_assayability.parquet` as regenerated on the
+> switching-filter re-run (SLURM 46448488, 2026-09-19). The legacy numbers below this line
+> were from SLURM 44532443 and do not describe the current panel: the prespecified pair
+> counts fell by roughly a third to a half, and **the responsive targets are different genes**.
 
-**Structure is not the bottleneck; expression is.** Nearly every prespecified pair is
-resolvable in principle — 97% overall. What removes them is that one member is barely
-transcribed: of the pairs scored in GTEx but failing, an isoform stays under 1 TPM in *every*
-region for 85/94 (NONO), 67/80 (ELAVL1) and 143/164 (KHDRBS1). The motif-differential
-partner is frequently a retained-intron or processed-transcript annotation that is real in
-the catalogue but near-absent in tissue. This is a property of the switch-pair definition,
-not of the RBP nomination, and it applies to all three arms about equally.
+| | NONO | ELAVL1 | ~~KHDRBS1~~ |
+|---|---|---|---|
+| prespecified pairs | 53 | 90 | ~~134~~ |
+| structurally measurable | **53 (100%)** | **89 (99%)** | ~~128 (96%)~~ |
+| — of which `junction` (cheapest design) | 38 | 66 | ~~94~~ |
+| not discriminable by any internal feature | 0 | 1 | ~~6~~ |
+| no GTEx quantification (BrainSEQ-only region) | 4 | 15 | ~~—~~ |
+| measurable (structure + expression) | 20 | 29 | ~~47~~ |
+| **measurable + responsive** | **6** | **5** | **~~0~~** |
+| genes with >=1 measurable + responsive pair | **3 / 7** | **1 / 9** | **~~0 / 14~~** |
+
+**Structure is not the bottleneck; expression is.** Essentially every prespecified pair is
+resolvable in principle. What removes them is that one member is barely transcribed — the
+motif-differential partner is frequently a retained-intron or processed-transcript annotation
+that is real in the catalogue but near-absent in tissue. This is a property of the switch-pair
+definition rather than of the RBP nomination, and it applied to all three arms about equally;
+it is why the removed KHDRBS1 arm ended with no responsive pair at all.
 
 ### The pairs to assay
 
 One row per gene — the highest-dynamic-range responsive pair. `carrier` names which member
 carries the motif; that is the numerator of the ratio. Full per-pair and per-region detail,
-including the second- and third-choice pairs, is in `rbp_pair_assayability.tsv` and
+including second- and third-choice pairs, is in `rbp_pair_assayability.tsv` and
 `rbp_pair_assayability_by_region.tsv`.
 
-**NONO** (tier-1 throughout)
+**NONO** — 6 responsive pairs over 3 genes
 
-| tier | gene | transcript 1 / transcript 2 | carrier | assay | best region | median frac | IQR | age β | age q |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | **ATP6V0B** | `ENST00000236067.8` / `ENST00000468183.5` | tx2 | junction | hippocampus | 0.18 | 0.18 | +0.033 | 0.0099 |
-| 1 | **CAPNS1** | `ENST00000629983.2` / `ENST00000590049.5` | tx2 | junction | frontal_cortex_ba9 | 0.30 | 0.17 | -0.014 | 0.040 |
-| 1 | **DDX24** | `ENST00000555054.1` / `ENST00000553400.1` | tx1 | junction | frontal_cortex_ba9 | 0.35 | 0.26 | -0.020 | 0.0035 |
-| 1 | **DSTN** | `ENST00000474024.5` / `ENST00000449141.2` | tx1 | junction | frontal_cortex_ba9 | 0.78 | 0.08 | +0.009 | 0.0086 |
-| 1 | **PGK1** | `ENST00000476531.1` / `ENST00000491291.1` | tx2 | junction | anterior_cingulate_cortex_ba24 | 0.36 | 0.50 | -0.054 | 0.016 |
-| 1 | **VDAC3** | `ENST00000521348.5` / `ENST00000524291.1` | tx1 | junction | frontal_cortex_ba9 | 0.40 | 0.17 | -0.014 | 0.037 |
+| gene | transcript 1 / transcript 2 | carrier | assay | best region | median frac | IQR | age β | age q |
+|---|---|---|---|---|---|---|---|---|
+| **CAMK1** | `ENST00000482803.1` / `ENST00000411972.1` | tx1 | junction | anterior_cingulate_cortex_ba24 | 0.62 | 0.34 | +0.038 | 3.6e-4 |
+| **VIRMA** | `ENST00000297591.10` / `ENST00000522196.1` | tx1 | junction_and_segment | cerebellum | 0.42 | 0.15 | -0.008 | 0.050 |
+| **RNH1** | `ENST00000397604.7` / `ENST00000525522.5` | tx2 | junction | cortex | 0.15 | 0.068 | -0.007 | 0.026 |
 
-**ELAVL1**
+**ELAVL1** — 5 responsive pairs, all in one gene
 
-| tier | gene | transcript 1 / transcript 2 | carrier | assay | best region | median frac | IQR | age β | age q |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | **PPP2R1A** | `ENST00000454220.7` / `ENST00000462990.5` | tx2 | junction | frontal_cortex_ba9 | 0.37 | 0.53 | +0.041 | 0.046 |
-| 1 | **SYP** | `ENST00000479808.5` / `ENST00000376303.6` | tx1 | junction | anterior_cingulate_cortex_ba24 | 0.66 | 0.39 | +0.049 | 0.00036 |
-
-**KHDRBS1** (negative-control arm)
-
-| tier | gene | transcript 1 / transcript 2 | carrier | assay | best region | median frac | IQR | age β | age q |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | **KXD1** | `ENST00000599319.5` / `ENST00000539106.5` | tx2 | junction | frontal_cortex_ba9 | 0.59 | 0.72 | +0.071 | 0.026 |
-| 2 | **CDIP1** | `ENST00000562334.5` / `ENST00000399599.7` | tx2 | junction | frontal_cortex_ba9 | 0.62 | 0.56 | +0.072 | 0.0016 |
-| 2 | **PTPRN** | `ENST00000295718.7` / `ENST00000443981.5` | tx1 | junction | anterior_cingulate_cortex_ba24 | 0.42 | 0.29 | -0.022 | 0.00064 |
-| 3 | **PPP2R1A** | `ENST00000391791.4` / `ENST00000454220.7` | tx1 | junction_and_segment | frontal_cortex_ba9 | 0.64 | 0.53 | +0.047 | 0.016 |
-
-Every first-choice pair but one is `junction` class, so a single junction-spanning primer per
-isoform suffices. `PPP2R1A` in the KHDRBS1 arm needs one junction primer and one internal
-amplicon.
+| gene | transcript 1 / transcript 2 | carrier | assay | best region | median frac | IQR | age β | age q |
+|---|---|---|---|---|---|---|---|---|
+| **NAA10** | `ENST00000464845.6` / `ENST00000393710.7` | tx1 | junction | cerebellum | 0.71 | 0.53 | +0.068 | 0.013 |
 
 ### Three consequences for the design
 
-**(a) "Assay all tier-1 genes" is not executable as Section 6 states it.** Restricting to
-tier 1, the genes with at least one *measurable* pair are 9/13 (NONO), 5/14 (ELAVL1) and
-5/14 (KHDRBS1); with a *responsive* pair, 6/13, 2/14 and 1/14. The minimum panel should be
-the responsive pairs above, with the remaining measurable-but-static tier-1 pairs assayed as
-secondary endpoints — they can still move under knockdown even though age does not move them.
+**(a) "Assay all tier-1 genes" is not executable as Section 6 states it, and the gap widened.**
+Restricting to tier 1, the genes with at least one *measurable* pair are 2/4 (NONO) and 4/7
+(ELAVL1); with a *responsive* pair, 1 and 1. The minimum panel is the responsive pairs above,
+with the measurable-but-age-static pairs (20 NONO, 29 ELAVL1 measurable in total) as secondary
+endpoints — they can still move under knockdown even though age does not move them.
 
-**(b) The negative control is not handicapped.** KHDRBS1 retains 8 responsive pairs over 4
-genes, comparable to NONO's 11 over 6. This matters more than it looks: had the KHDRBS1
-targets been unmeasurable, a flat KHDRBS1 result would have been uninterpretable — absence of
-assay rather than absence of effect. They are measurable and their ratios demonstrably move
-with age, so a null under KHDRBS1 knockdown is genuine evidence.
+**(b) The experiment is now narrower than a three-arm adjudication.** ELAVL1's responsive
+panel collapses to a single gene, so its arm tests one ratio with several pairs rather than
+breadth across modules; NONO carries the design. Read §2a before treating a positive result as
+evidence about the regulon set as a whole.
 
-**(c) `PPP2R1A` is shared between the ELAVL1 and KHDRBS1 panels** and is responsive in both.
-It cannot contribute to the arm contrast. Assay it, but exclude it from the primary
-regulon-versus-control comparison in both arms and report it separately.
+**(c) `PPP2R1A` is no longer a shared-target problem.** It was responsive in both the ELAVL1
+and the removed KHDRBS1 panels and had to be excluded from the arm contrast; with KHDRBS1 gone
+and PPP2R1A no longer among ELAVL1's responsive pairs, that carve-out lapses.
 
-One further note on Section 6's caveat: `DDX24` and `VDAC3` — two of the three
-adjusted-OR-0.85 internal-control genes — are among NONO's *best* assayable pairs, and
-`ATP5F1B` is measurable but static. The internal control is therefore a real test rather
-than a technical dead end: if NONO knockdown moves ATP6V0B/CAPNS1/DSTN/PGK1 but not
-DDX24/VDAC3, that contrast is measured on pairs of comparable assay quality.
+One further note on Section 6's caveat: the adjusted-OR-0.85 internal-control genes in
+`frontal_cortex_ba9/M005` remain the within-arm control for NONO. Verify against the current
+`rbp_pair_assayability.tsv` which of them still carries a measurable pair before writing them
+into the success criterion — the legacy text named `DDX24` and `VDAC3`, neither of which is in
+the current responsive set.
 
 ## 8. Matched non-regulon controls
 
@@ -327,14 +308,17 @@ generic effect of perturbing any abundant RBP.
 
 ## 9. Prespecified analysis and success criteria
 
-Register these before unblinding. The negative-control arm makes prespecification essential
-— otherwise a weak KHDRBS1 response is trivially reinterpretable as a positive.
+Register these before unblinding. With the negative-control arm removed (§2a),
+prespecification matters *more* rather than less: the surviving arms can only produce
+confirmations, so the comparison against matched non-regulon controls is the only thing
+standing between a positive result and a generic consequence of depleting an abundant RBP.
 
 **Per gene:** Δ(isoform ratio) = log2(ratio_knockdown / ratio_control), averaged over the two
 siRNAs (required to agree in sign; disagreement = that gene is uninformative, report as such).
 
 **Per arm:** compare mean |Δ| in tier-1 regulon genes versus matched controls by
-Mann-Whitney U (genes are the unit, n ~ 13 vs ~ 11). Report effect size and CI, not only p.
+Mann-Whitney U (genes are the unit; on the current panel n is 4 vs ~11 for NONO and 7 vs ~11
+for ELAVL1, which is thin — power should be recomputed before registering). Report effect size and CI, not only p.
 
 **Success criteria:**
 
@@ -342,19 +326,20 @@ Mann-Whitney U (genes are the unit, n ~ 13 vs ~ 11). Report effect size and CI, 
 |---|---|
 | A — NONO | tier-1 |Δ| significantly > matched controls (p<0.05), **and** the M008 targets (MATK, KIAA0513, GABBR2) shift consistently in sign |
 | B — ELAVL1 | tier-1 |Δ| significantly > matched controls (p<0.05) |
-| C — KHDRBS1 | **expected to FAIL the above.** Passing it falsifies the opportunity adjustment |
 
-**Interpretation grid:**
+**Interpretation grid.** With arm C removed, the grid collapses to one axis and the design
+no longer adjudicates the adjusted-versus-unadjusted question by itself (§2a).
 
-| A/B | C | conclusion |
-|---|---|---|
-| pass | fail | Adjusted arm is correct. Report the 43 adjusted-significant regulons; the 714 unadjusted are opportunity-inflated. **Expected outcome.** |
-| pass | pass | Adjustment is over-conservative. Broader unadjusted regulon set is defensible; revisit the covariate model (it may absorb real length/composition-linked biology). |
-| fail | fail | No arm supports the trans-regulon hypothesis at this power. Report as a negative result; the module coordination mechanism is not shared-RBP binding, or the model system is wrong. |
-| fail | pass | Anomalous — suspect knockdown efficiency, model-system mismatch, or assay artifact before reinterpreting. |
+| A/B vs matched controls | conclusion |
+|---|---|
+| pass | The predicted regulon targets respond where matched non-regulon pairs from the same modules do not. Supports the nominated regulon; **does not** by itself decide whether the adjusted or the unadjusted regulon set is the right one, because the promiscuity control is gone. |
+| fail | No support for the trans-regulon hypothesis at this power. Report as a negative; either module coordination is not shared-RBP binding, or the model system is wrong. Check knockdown at protein level before concluding. |
 
-**Power.** With n=4 and ~13 vs ~11 genes per arm, this design detects a difference of
-roughly 1 standard deviation in |Δ| between regulon and control sets at ~80% power. It is
+**Power.** The legacy calculation assumed ~13 vs ~11 genes per arm at n=4, which detects a
+difference of roughly 1 standard deviation in |Δ| at ~80% power. **The current panel is
+smaller** — 4 tier-1 NONO genes and 7 ELAVL1, one responsive gene each — so this must be
+recomputed before registering; on these counts the arm-level Mann-Whitney is underpowered and
+the informative comparison may have to be per pair within gene. It is
 **not** powered to detect per-gene effects — do not interpret single genes. If per-gene
 resolution is needed, increase to n=6 and pre-register the specific genes.
 
@@ -367,7 +352,7 @@ resolution is needed, increase to n=6 and pre-register the specific genes.
   near-universal), not neuronal occupancy. It cannot corroborate a brain regulon.
 - **The covariates correlate with the biology.** An RBP genuinely acting on long, AU-rich
   3'UTRs is partly adjusted away by construction. The adjusted set is therefore a *lower
-  bound*; this is precisely why arm C exists as an empirical check rather than an assumption.
+  bound*. Arm C was the empirical check on this and is removed (§2a), so the point now stands as an assumption the experiment cannot test.
 - **Modules are region-specific.** Targets are assayed in one cell model but nominated from
   brain regions; a null in a specific gene may reflect region mismatch rather than a false
   nomination.
@@ -382,10 +367,10 @@ resolution is needed, increase to n=6 and pre-register the specific genes.
 | module x RBP regulons (both arms) | `07_rbp_regulation/_m/rbp/rbp_regulon.parquet`, SLURM 44484238, 2026-08-26 |
 | motif scan | `rbp_scan.py`, ATtRACT PWMs, p<1e-4, 20 GC x 2 purine composition bins |
 | adjusted GLM | `rbp_regulon.py::_regulon_glm`, covariates log_length, gc, frac_5utr, frac_cds, frac_3utr, log_n_transcripts; BH over 31,452 estimable cells |
-| target panels | `rbp_target_panel.py --rbp {NONO,ELAVL1,KHDRBS1}`, rank-by adjusted |
+| target panels | `rbp_target_panel.py --rbp {NONO,ELAVL1}`, rank-by adjusted |
 | switch pairs / primer targets | `07_rbp_regulation/_m/rbp_target_panel/<RBP>/rbp_target_switch_pairs.parquet` |
 | expression pre-check | `07_rbp_regulation/_m/rbp_target_panel/<RBP>/expression_check_list.tsv` |
-| pair assayability + age response | `rbp_pair_assayability.py --rbp {NONO,ELAVL1,KHDRBS1}`, SLURM 44532443, 2026-08-26 |
+| pair assayability + age response | `rbp_pair_assayability.py --rbp {NONO,ELAVL1}`, SLURM 46448488, 2026-09-19 (legacy: 44532443, 2026-08-26) |
 | — isoform ratios | GTEx v11 RSEM transcript TPM, 13 brain regions (`inputs/processed/gtex_v11/`) |
 | — age model | logit(carrier fraction) ~ AGE + SEX + SMRIN + SMTSISCH, OLS, BH within RBP |
 | annotation | GENCODE v47 — use the same release for RNA-seq quantification |
