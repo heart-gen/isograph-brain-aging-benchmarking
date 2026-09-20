@@ -23,6 +23,20 @@ not look like a locus that was never nominated. The ceiling on how much of the c
 set this arm can ever confirm is therefore set by GTEx's tissue-wise power -- cerebellum has
 the largest brain sample size -- not by the genes.
 
+This is the NARROWEST of the three junction-level resources in the repository, and a
+``junction_not_measured`` or ``no_matched_brainseq_region`` verdict here is not the last
+word on a gene. Over the 30 concordant genes (2026-09-20):
+
+  this arm (LIBD PSI events)            9 genes reach a region, 6 have the junction measured
+  ONT long-read (longread_switch_confirm)          15 genes ``confirmed`` at gene level
+  BrainSEQ junction recount (ase_junction_switch)  18 genes with >=1 testable switch pair
+  none of the three                                 8 genes
+
+PRDM2 is the case in point: this arm returns ``junction_not_measured`` because the LIBD
+event catalogue stops at ~13,787,067, while ONT detects both transcripts of the drawn pair
+(usage Spearman -0.448, ``switch_like``) and the allele-aware recount measures that exact
+junction over 292 donors. Report the three together; do not cite this arm's silence alone.
+
 What is tested
 --------------
 A colocalizing sQTL says the risk allele moves usage of one junction. For that to be a

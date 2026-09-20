@@ -29,11 +29,20 @@
 # belong in the legend: CLPP is only 0.056, the module is GO-VISIBLE (unlike the legacy SNCA
 # panel), and the junction/switch polarity r is 0.11 -- the junction rides the switch axis
 # weakly.
-# The short-read junction arm CANNOT confirm this exact contrast: BrainSEQ quantifies PRDM2
-# (19 PSI events in DLPFC) but the LIBD event catalogue stops at ~13,787,067, so the distal
-# terminal exon drawn here is not one of its events (`junction_not_measured`, 2026-09-20).
-# That is a coverage gap in the catalogue, not evidence against the junction -- but the
-# legend must not claim orthogonal confirmation of panel A. The set-level evidence is panels B-D plus figOrthogonalConfirm.
+# Orthogonal support for this exact pair, from the two assays that do cover it:
+#   ONT long-read (switch_orthogonal_confirm / longread_switch_confirm, DLPFC BA9 n = 12):
+#     ENST00000311066 and ENST00000413440 are BOTH detected and co-expressed, usage
+#     Spearman -0.448, `switch_like = True`, `coding_consequence = True`; PRDM2 is
+#     `confirmed = True` at gene level in frontal_cortex_ba9 and cortex.
+#   BrainSEQ allele-aware junction recount (ase_junction_switch/dlpfc): the junction drawn
+#     here is present as an isoform-1-specific junction of this very pair, testable over
+#     292 donors / 4,095 fragments, with 495 of 498 donors carrying BOTH forms. Minor-form
+#     usage is 0.045 -- the early-3'-end form is a real but minority form. Against the other
+#     early-terminating transcript (ENST00000343137) minor-form usage is 0.108, but ONT does
+#     not detect that one, so the pair drawn here is the better-supported switch.
+# The LIBD PSI arm (`junction_coloc_confirm`) returns `junction_not_measured` for PRDM2 --
+# its event catalogue stops at ~13,787,067 and never reaches the distal terminal exon. That
+# is a gap in THAT catalogue only, and must not be reported as a failure to confirm. The set-level evidence is panels B-D plus figOrthogonalConfirm.
 # Do NOT annotate a structural consequence here from `structural_consequence`: that field
 # flags each transcript against a gene reference, so 63 of 76 concordant events carry all
 # seven flags and it cannot distinguish one event from another. The structure drawn in this
