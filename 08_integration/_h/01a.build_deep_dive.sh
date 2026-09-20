@@ -47,17 +47,31 @@ conda activate /ocean/projects/bio260021p/shared/opt/envs/isograph
 log "gene_deep_dive.py --part panel (vignettes + panel + supplementary tables)"
 python -m isograph_benchmark.real_data.gene_deep_dive --part panel "$@"
 
-# ---- 2. SNCA switch-pair transcript exons for figure panel A ----
-log "extracting SNCA transcript exons from ${GENCODE_GTF##*/}"
+# ---- 2. vignette switch-pair transcript exons for figure panel A ----
+# PRDM2 replaced SNCA on 2026-09-19: SNCA's junction is not in the tissue-matched switch
+# pair on the switching-filter re-run, so it is the falsification example, not the vignette.
+# PRDM2 (ALS, cortex) is the only concordant event corroborated by coloc.abf, SMR/HEIDI and
+# independent BrainSEQ replication at once. SNCA's exons are still emitted because the
+# falsification text refers to them.
+log "extracting vignette transcript exons from ${GENCODE_GTF##*/}"
 mkdir -p "${DD_DIR}"
-{
-    printf "transcript\tfeature\tstart\tend\tstrand\n"
-    # ENST…508895 / …618500 = the alternative-first-exon switch pair; …336904 = canonical
-    for tx in ENST00000508895 ENST00000618500 ENST00000336904; do
-        grep -F "${tx}" "${GENCODE_GTF}" \
-          | awk -F'\t' -v tx="${tx}" '$3=="exon"{print tx"\t"$3"\t"$4"\t"$5"\t"$7}'
-    done
-} > "${DD_DIR}/snca_transcript_exons.tsv"
+extract_exons () {  # $1 = output tsv, $2.. = versionless transcript ids
+    local out="$1"; shift
+    {
+        printf "transcript\tfeature\tstart\tend\tstrand\n"
+        for tx in "$@"; do
+            grep -F "${tx}" "${GENCODE_GTF}" \
+              | awk -F'\t' -v tx="${tx}" '$3=="exon"{print tx"\t"$3"\t"$4"\t"$5"\t"$7}'
+        done
+    } > "${out}"
+}
+# PRDM2: …311066 = MANE Select and …505823 = internal-promoter form, both carrying the
+# colocalizing junction chr1:13816570-13823159; …413440 terminates early and lacks it.
+extract_exons "${DD_DIR}/prdm2_transcript_exons.tsv" \
+    ENST00000311066 ENST00000505823 ENST00000413440
+# SNCA (falsification example): …508895 / …618500 alternative-first-exon pair, …336904 canonical
+extract_exons "${DD_DIR}/snca_transcript_exons.tsv" \
+    ENST00000508895 ENST00000618500 ENST00000336904
 
 # ---- 3. figures ----
 log "rendering figures"

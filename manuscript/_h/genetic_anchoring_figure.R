@@ -1,6 +1,7 @@
 # Main real-data figure: genetic anchoring resolves disease variants to isoform switches.
-# (A) SNCA cross-disease vignette - LBD and PD risk alleles both raise usage of the SAME
-#     alternative-first-exon junction, mapping onto one IsoGraph switch pair (GO-invisible);
+# (A) PRDM2 vignette - the ALS risk allele lowers usage of the junction that joins PRDM2's
+#     distal terminal exon, shifting the gene toward an early-terminating form; the junction
+#     maps onto the tissue-matched IsoGraph switch pair in cortex;
 # (B) S-LDSC partitioned heritability of the aging switch layer across five traits
 #     (single-annot cis/sQTL/eQTL enrichment) - splicing- vs expression-lean by trait;
 # (C) the splicing-led coloc genes resolved to a switch pair (max CLPP, coloured by trait;
@@ -16,15 +17,24 @@
 #     anchored-rich. Against ALL module genes SCZ/GTEx gives P = 0.0095; against the
 #     tested pool the same counts give P = 0.30. This panel now shows the honest
 #     all-trait test instead, which is null in all 10 (trait, cohort) cells.
-# NOTE on panel A: SNCA is the WORKED EXAMPLE, not proof the method was needed -- it
-# colocalizes identically in the all-genes background pool (PP4_sQTL 0.975). Its switch is
-# confirmed on the exact contrast drawn here by BrainSEQ short-read junctions (minor-form
-# usage 0.189 DLPFC / 0.234 caudate; 06_switch_mechanism/_m/junction_coloc_confirm). The
-# ONT long-read 0.29% (max_anchored_if = 0.0029) measured a whole-transcript proxy and is an
-# assay limitation; never cite it against SNCA. The set-level evidence is panels B-D plus
-# figOrthogonalConfirm; the legend must say so.
+# NOTE on panel A: PRDM2 replaced SNCA on 2026-09-19. SNCA's LBD junction is NOT in the
+# tissue-matched switch pair under the switching filter, so it is scored non-concordant and
+# is kept in the manuscript as the falsification example (PI, 2026-09-18) -- never redraw it
+# here as resolved.
+# PRDM2 is the WORKED EXAMPLE, not proof the method was needed. It is the only one of the 30
+# concordant genes corroborated by every genetic layer at once: coloc.abf PP4_sQTL 0.964 vs
+# PP4_eQTL 0.494, colocalizing in 6 tissues on splicing and 0 on expression; SMR 7/7 probes
+# supported with no HEIDI rejection and no eQTL instrument at all; and the only concordant
+# event whose switch replicates in an independent BrainSEQ cohort (DLPFC). Its honest costs
+# belong in the legend: CLPP is only 0.056, the module is GO-VISIBLE (unlike the legacy SNCA
+# panel), and the junction/switch polarity r is 0.11 -- the junction rides the switch axis
+# weakly. The set-level evidence is panels B-D plus figOrthogonalConfirm.
+# Do NOT annotate a structural consequence here from `structural_consequence`: that field
+# flags each transcript against a gene reference, so 63 of 76 concordant events carry all
+# seven flags and it cannot distinguish one event from another. The structure drawn in this
+# panel comes from the GENCODE exon coordinates directly.
 # Reads 05_genetic_anchoring/_m/coloc/coloc_isoform_events_combined.parquet,
-#       08_integration/_m/deep_dive/{snca_transcript_exons.tsv,deep_dive_panel.parquet},
+#       08_integration/_m/deep_dive/{prdm2_transcript_exons.tsv,deep_dive_panel.parquet},
 #       05_genetic_anchoring/_m/ldsc/ldsc_partitioned.parquet,
 #       05_genetic_anchoring/_m/module_coloc_convergence/global.parquet;
 #       writes figGeneticAnchoring.{pdf,png}.
@@ -53,7 +63,7 @@ dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 TRAIT_COLORS <- c(AD = "#E69F00", ALS = "#0072B2", LBD = "#009E73",
                   PD = "#CC79A7", SCZ = "#D55E00")
 ANNOT_COLORS <- c(cis = "#000000", sQTL = "#D55E00", eQTL = "#56B4E9")
-ANCHOR_COLORS <- c(LBD = "#009E73", PD = "#CC79A7")
+ANCHOR_COLORS <- c(LBD = "#009E73", PD = "#CC79A7", ALS = "#0072B2")
 
 theme_pub <- function(base_size = 8.5) {
   theme_classic(base_size = base_size) +
@@ -81,22 +91,26 @@ sig_star <- function(p) ifelse(p < 1e-3, "***", ifelse(p < 1e-2, "**",
                         ifelse(p < 0.05, "*", "")))
 
 # ===========================================================================
-# Panel A - SNCA cross-disease switch vignette
+# Panel A - PRDM2 switch vignette (ALS, cortex)
 # ===========================================================================
-ex <- read.delim(file.path(DD_DIR, "snca_transcript_exons.tsv"))
-# transcript rows (canonical at bottom, the two switch isoforms above)
-TX <- c(ENST00000336904 = "…336904\n(canonical)",
-        ENST00000508895 = "…508895\n(switch)",
-        ENST00000618500 = "…618500\n(switch)")
+# The colocalizing junction chr1:13816570-13823159 is the last intron of the forms that
+# reach PRDM2's distal terminal exon. Transcripts carrying it (MANE …311066 and the
+# internal-promoter form …505823) end at 13,823,159+; …413440 lacks it and terminates early
+# at 13,788,079. The ALS risk allele A at rs2744682 DECREASES usage of the junction
+# (risk_qtl_effect -1.10), i.e. shifts PRDM2 toward the early-terminating form.
+ex <- read.delim(file.path(DD_DIR, "prdm2_transcript_exons.tsv"))
+TX <- c(ENST00000413440 = "…413440\n(early 3' end)",
+        ENST00000505823 = "…505823\n(switch)",
+        ENST00000311066 = "…311066\n(MANE Select)")
 ex <- ex |> filter(transcript %in% names(TX))
-ex$ty <- match(ex$transcript, names(TX))            # 1 canonical .. 3 switch
-W_LO <- 89835.3; W_HI <- 89838.6                     # kb window on the switch region
+ex$ty <- match(ex$transcript, names(TX))            # 1 early-3'end .. 3 MANE
+W_LO <- 13772.0; W_HI <- 13826.5                     # kb window on the 3' half of the gene
 ex$s_kb <- ex$start / 1000; ex$e_kb <- ex$end / 1000
 exon_win <- ex |> filter(e_kb >= W_LO, s_kb <= W_HI)
 intron <- exon_win |> group_by(transcript, ty) |>
   summarise(lo = min(s_kb), hi = max(e_kb), .groups = "drop")
-# shared differential junction chr4:89835692-89836127 (switch transcripts only)
-JUNC_LO <- 89835.692; JUNC_HI <- 89836.127
+# colocalizing junction, drawn only on the transcripts that actually splice it
+JUNC_LO <- 13816.570; JUNC_HI <- 13823.159
 JUNC_MID <- (JUNC_LO + JUNC_HI) / 2
 junc_df <- data.frame(ty = c(2, 3), x = JUNC_LO, xend = JUNC_HI)
 
@@ -107,22 +121,19 @@ pA <- ggplot() +
                colour = "#D55E00", linewidth = 1.2) +
   geom_rect(data = exon_win, aes(xmin = s_kb, xmax = e_kb, ymin = ty - 0.2, ymax = ty + 0.2),
             fill = "grey30", colour = NA) +
-  # junction callout in the open intronic space
-  annotate("text", x = 89837.05, y = 3.42, size = 2.5, fontface = "italic", colour = "#D55E00",
-           label = "alt. first-exon junction\n(5' UTR switch, GO-invisible)") +
-  annotate("segment", x = 89836.38, xend = JUNC_MID + 0.02, y = 3.36, yend = 3.04,
+  annotate("text", x = JUNC_MID, y = 3.46, size = 2.5, fontface = "italic", colour = "#D55E00",
+           label = "colocalizing junction\n(distal terminal exon)") +
+  annotate("segment", x = JUNC_MID, xend = JUNC_MID, y = 3.30, yend = 3.06,
            arrow = arrow(length = unit(0.1, "cm")), colour = "#D55E00", linewidth = 0.4) +
-  # disease anchors: both risk alleles raise junction usage
-  annotate("text", x = 89838.05, y = 2.5, hjust = 0, size = 2.5, fontface = "bold",
-           colour = "grey20", label = "risk alleles increase junction usage:") +
-  annotate("text", x = 89838.05, y = 2.16, hjust = 0, size = 2.5,
-           colour = ANCHOR_COLORS[["LBD"]], label = "LBD  rs7680557 (A)") +
-  annotate("text", x = 89838.05, y = 1.86, hjust = 0, size = 2.5,
-           colour = ANCHOR_COLORS[["PD"]],  label = "PD   rs1471483 (C)") +
-  scale_x_reverse(limits = c(W_HI + 0.05, W_LO - 0.05),
-                  breaks = c(89836, 89837, 89838)) +
-  scale_y_continuous(breaks = 1:3, labels = unname(TX[names(TX)]), limits = c(0.6, 3.7)) +
-  labs(x = "SNCA, chr4 position (kb)", y = NULL) +
+  annotate("text", x = W_LO + 1.0, y = 2.58, hjust = 0, size = 2.5, fontface = "bold",
+           colour = "grey20", label = "ALS risk allele rs2744682 (A)") +
+  annotate("text", x = W_LO + 1.0, y = 2.30, hjust = 0, size = 2.5,
+           colour = ANCHOR_COLORS[["ALS"]],
+           label = "decreases usage of the junction \u2192 shifts to the early 3' end") +
+  scale_x_continuous(limits = c(W_LO - 0.5, W_HI + 0.5),
+                     breaks = c(13780, 13800, 13820)) +
+  scale_y_continuous(breaks = 1:3, labels = unname(TX[names(TX)]), limits = c(0.6, 3.75)) +
+  labs(x = "PRDM2, chr1 position (kb)", y = NULL) +
   theme_pub() +
   theme(axis.text.y = element_text(size = 6.8, lineheight = 0.85),
         axis.ticks.y = element_blank(), panel.grid.major.y = element_blank())
