@@ -76,6 +76,10 @@ OUTPUT_DIRS: dict[str, tuple[str, ...]] = {
     # PI-facing review reports and their frozen evidence inventory
     "reports": ("reports", "pi"),
     "reports.evidence": ("reports", "pi", "_evidence"),
+    # collaborator-facing results report built from the PI review (reports.results.figures
+    # holds the staged PNGs so the tree is portable to the manuscript repo)
+    "reports.results": ("reports", "results"),
+    "reports.results.figures": ("reports", "results", "figures"),
     # shared gitignored scratch (GTF parse cache, id maps)
     "tmp": ("03_module_characterization", "_m", "tmp"),
 }
