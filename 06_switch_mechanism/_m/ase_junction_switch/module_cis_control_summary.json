@@ -1,0 +1,57 @@
+{
+  "regions": {
+    "caudate": {
+      "min_genes": 1,
+      "n_modules": 7,
+      "n_modules_ranked": 7,
+      "n_genes": 481,
+      "n_genes_cis": 185,
+      "rate_min": 0.3,
+      "rate_max": 0.5,
+      "rho": -0.6910233190806424,
+      "null_mean_rho": 0.0070804606081886715,
+      "null_q025": -0.7273929674533078,
+      "null_q975": 0.7273929674533078,
+      "perm_p_two_sided": 0.06989301069893011,
+      "n_perm": 10000,
+      "seed": 13
+    },
+    "dlpfc": {
+      "min_genes": 1,
+      "n_modules": 3,
+      "n_modules_ranked": 2,
+      "note": "too few modules in a multi-module trait stratum to correlate"
+    },
+    "hippocampus": {
+      "min_genes": 1,
+      "n_modules": 15,
+      "n_modules_ranked": 14,
+      "n_genes": 279,
+      "n_genes_cis": 89,
+      "rate_min": 0.0,
+      "rate_max": 1.0,
+      "rho": 0.3259919802256391,
+      "null_mean_rho": 0.0039183734747181434,
+      "null_q025": -0.5736263736263736,
+      "null_q975": 0.5982398261552024,
+      "perm_p_two_sided": 0.28617138286171384,
+      "n_perm": 10000,
+      "seed": 15
+    }
+  },
+  "n_perm": 10000,
+  "seed": 13,
+  "min_genes": 1,
+  "qval_threshold": 0.05,
+  "pooled": {
+    "regions": [
+      "caudate",
+      "hippocampus"
+    ],
+    "mean_rho": -0.18251566942750166,
+    "null_mean": 0.005499417041453409,
+    "null_q025": -0.4595411119573324,
+    "null_q975": 0.4729242647387056,
+    "perm_p_two_sided": 0.46965303469653036
+  }
+}

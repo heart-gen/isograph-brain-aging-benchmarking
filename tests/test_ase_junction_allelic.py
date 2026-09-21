@@ -170,3 +170,114 @@ def test_add_module_columns_guards_the_projection_with_polarity_q():
     assert o.loc[1, "module_projection_status"] == "role_not_switching"
     assert pd.isna(o.loc[1, "beta_along_module"])
     assert pd.isna(o.loc[1, "risk_along_module"])
+
+
+# --------------------------------------------------------------------------- #
+# Module-level cis control (06a P2 item 2)
+# --------------------------------------------------------------------------- #
+def _cis_frame(spec, trait="Age_linear"):
+    """spec: {module_id: (age_effect, n_genes, n_cis)} -> a fitted gate-family frame."""
+    rows, g = [], 0
+    for mod, (eff, n, cis) in spec.items():
+        for i in range(n):
+            g += 1
+            rows.append({"gene_id": f"G{g}", "module_id": mod, "module_age_trait": trait,
+                         "module_age_effect": eff, "status": "fitted", "gate_family": True,
+                         "qval": 0.001 if i < cis else 0.9})
+    return pd.DataFrame(rows)
+
+
+def test_gene_level_counts_a_gene_once_and_any_significant_pair_makes_it_cis():
+    # two pairs of one gene: only the second clears q, so the gene is cis exactly once
+    f = pd.DataFrame({"gene_id": ["G1", "G1", "G2", "G2"], "module_id": "M0",
+                      "module_age_trait": "Age_linear", "module_age_effect": 1.0,
+                      "status": "fitted", "gate_family": True,
+                      "qval": [0.9, 0.001, 0.9, 0.9]})
+    out = aja._gene_level(f).set_index("gene_id")
+    assert len(out) == 2
+    assert bool(out.loc["G1", "cis"]) and not bool(out.loc["G2", "cis"])
+
+
+def test_gene_level_drops_unfitted_and_non_gate_rows():
+    f = pd.DataFrame({"gene_id": ["A", "B", "C"], "module_id": "M0",
+                      "module_age_trait": "Age_linear", "module_age_effect": 1.0,
+                      "status": ["fitted", "too_few_paired_het_donors", "fitted"],
+                      "gate_family": [True, True, False], "qval": 0.001})
+    assert aja._gene_level(f)["gene_id"].tolist() == ["A"]
+
+
+def test_aging_rank_is_within_trait_and_drops_singleton_strata():
+    mods = pd.DataFrame({
+        "module_id": ["M0", "M1", "M2", "M3"],
+        "module_age_trait": ["Age_linear", "Age_linear", "Age_spline", "Age_spline"],
+        # spline effects are an order of magnitude larger; ranking must not mix the scales
+        "module_age_effect": [0.1, 0.2, 3.0, 9.0],
+        "genes_fitted": 10, "genes_cis": 5, "rate": 0.5})
+    r = aja._aging_rank(mods).set_index("module_id")
+    assert r.loc["M0", "aging_rank"] == 0.0 and r.loc["M1", "aging_rank"] == 1.0
+    assert r.loc["M2", "aging_rank"] == 0.0 and r.loc["M3", "aging_rank"] == 1.0
+
+    singleton = mods[mods["module_id"].isin(["M0", "M2", "M3"])]
+    kept = aja._aging_rank(singleton)["module_id"].tolist()
+    assert "M0" not in kept and set(kept) == {"M2", "M3"}
+
+
+def test_module_cis_control_recovers_a_planted_positive_association():
+    # cis-control rate rises with the age effect: 10% -> 90%
+    spec = {f"M{i}": (float(i), 20, 2 * i + 2) for i in range(5)}
+    ranked, stats, null = aja.module_cis_control(_cis_frame(spec), n_perm=2000, seed=13)
+    assert stats["n_modules_ranked"] == 5
+    assert stats["rho"] > 0.9
+    assert stats["perm_p_two_sided"] < 0.05
+    assert abs(stats["null_mean_rho"]) < 0.1
+    assert len(null) > 0
+
+
+def test_module_cis_control_is_null_when_rate_varies_without_tracking_age():
+    # rates differ but are unrelated to the age ordering
+    spec = {"M0": (1.0, 20, 4), "M1": (2.0, 20, 14), "M2": (3.0, 20, 6),
+            "M3": (4.0, 20, 12), "M4": (5.0, 20, 8)}
+    _, stats, _ = aja.module_cis_control(_cis_frame(spec), n_perm=2000, seed=13)
+    assert stats["perm_p_two_sided"] > 0.2
+
+
+def test_module_cis_control_calls_a_constant_rate_undefined_rather_than_null():
+    # every module the same rate: Spearman has no defined value, and a p-value computed
+    # against a NaN statistic would be worse than saying so
+    spec = {f"M{i}": (float(i), 20, 10) for i in range(5)}
+    _, stats, null = aja.module_cis_control(_cis_frame(spec), n_perm=200, seed=13)
+    assert "note" in stats and "perm_p_two_sided" not in stats
+    assert null.size == 0
+
+
+def test_module_cis_control_permutation_holds_sizes_and_cis_count_fixed():
+    # the null must not change how many genes are cis, only which module they sit in
+    spec = {"M0": (1.0, 10, 3), "M1": (2.0, 6, 5), "M2": (3.0, 4, 0)}
+    frame = _cis_frame(spec)
+    ranked, stats, _ = aja.module_cis_control(frame, n_perm=200, seed=13)
+    assert stats["n_genes"] == 20 and stats["n_genes_cis"] == 8
+    assert ranked["genes_fitted"].tolist() == [10, 6, 4]
+
+
+def test_module_cis_control_min_genes_drops_small_modules():
+    spec = {"M0": (1.0, 20, 10), "M1": (2.0, 20, 10), "M2": (3.0, 2, 2)}
+    all_mods, _, _ = aja.module_cis_control(_cis_frame(spec), n_perm=100, seed=13)
+    floored, stats, _ = aja.module_cis_control(_cis_frame(spec), n_perm=100, seed=13,
+                                               min_genes=5)
+    assert "M2" in all_mods["module_id"].tolist()
+    assert "M2" not in floored["module_id"].tolist()
+    assert stats["min_genes"] == 5
+
+
+def test_module_cis_control_reports_a_note_when_too_few_modules_are_rankable():
+    # one module per trait: neither stratum can be ranked
+    a = _cis_frame({"M0": (1.0, 10, 5)}, trait="Age_linear")
+    b = _cis_frame({"M1": (2.0, 10, 5)}, trait="Age_spline")
+    _, stats, null = aja.module_cis_control(pd.concat(a_b for a_b in (a, b)),
+                                            n_perm=100, seed=13)
+    assert "note" in stats and "rho" not in stats
+    assert null.size == 0
+
+
+def test_arm_suffix_keeps_the_primary_name_bare():
+    assert aja._arm(1) == "" and aja._arm(5) == "_min5"

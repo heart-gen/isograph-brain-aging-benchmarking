@@ -432,6 +432,145 @@ def module_table(out: pd.DataFrame) -> list[dict]:
     return rows
 
 
+# --------------------------------------------------------------------------- #
+# Is cis control concentrated in the modules that carry the aging signal?
+# --------------------------------------------------------------------------- #
+# `module_direction_check` asks whether the lead moves a gene's isoforms ALONG its module's
+# switch axis. This asks a different question at the level above: do the modules with
+# proportionally more cis-controlled genes tend to be the modules with the stronger age
+# association? It is an aggregation of the test already fitted -- nothing is refitted, and
+# no module eigengene is mapped (module-level eigen-QTL was rejected on power).
+#
+# Two things make the naive version wrong, and both are handled here:
+#
+#   * `module_age_effect` is not comparable across modules. Some modules are selected on
+#     `Age_linear` and others on `Age_spline`, whose effects live on different scales, so
+#     strength is ranked WITHIN (region, trait) and a trait with one module carries no rank
+#     information and is dropped.
+#   * There are only 3-15 modules per region, so a p-value from a module-level correlation
+#     against its parametric null would be meaningless. The reference is instead a
+#     permutation over GENES: the gene -> module labels are shuffled, which preserves both
+#     the module sizes and the number of cis-controlled genes, and asks only whether
+#     cis-control status is independent of which module a gene sits in.
+CIS_CONTROL_SEED = 13
+CIS_CONTROL_N_PERM = 10_000
+MIN_MODULES_FOR_RHO = 3
+# A module with a handful of fitted genes has a rate of 0.00 or 1.00 by arithmetic, not by
+# biology. The primary arm keeps every module and the sensitivity arm applies this floor;
+# both are reported, because dropping small modules also drops real ones.
+CIS_CONTROL_MIN_GENES = 5
+
+
+def _gene_level(fitted: pd.DataFrame, qval: float = QVAL_ALLELIC) -> pd.DataFrame:
+    """One row per gene: its module, its module's age association, and whether it is cis-controlled.
+
+    A gene counts as cis-controlled if ANY of its fitted pairs clears `qval`, which is the
+    same rule `module_table` uses for `genes_q05`.
+    """
+    f = fitted[(fitted["status"] == "fitted") & fitted["gate_family"]]
+    f = f.dropna(subset=["module_id"])
+    return (f.groupby("gene_id")
+             .agg(module_id=("module_id", "first"),
+                  module_age_trait=("module_age_trait", "first"),
+                  module_age_effect=("module_age_effect", "first"),
+                  cis=("qval", lambda s: bool((s < qval).any())))
+             .reset_index())
+
+
+def _aging_rank(mods: pd.DataFrame) -> pd.DataFrame:
+    """Rank |age effect| within trait; drop traits carrying a single module.
+
+    Ranks are scaled to [0, 1] within their stratum so strata of different sizes are on one
+    scale before they are pooled into a single correlation.
+    """
+    from scipy.stats import rankdata
+    keep = []
+    for trait, g in mods.groupby("module_age_trait"):
+        if len(g) < 2:
+            continue
+        r = rankdata(g["module_age_effect"].abs())
+        keep.append(g.assign(aging_rank=(r - 1) / (len(g) - 1), trait_n=len(g)))
+    return pd.concat(keep).reset_index(drop=True) if keep else mods.iloc[:0].assign(
+        aging_rank=[], trait_n=[])
+
+
+def _rho(rate: np.ndarray, aging: np.ndarray) -> float:
+    """Spearman on values already carrying their own ranks where it matters."""
+    from scipy.stats import rankdata
+    if len(rate) < MIN_MODULES_FOR_RHO:
+        return float("nan")
+    a, b = rankdata(rate), rankdata(aging)
+    if not np.isfinite(a).all() or not np.isfinite(b).all():
+        return float("nan")
+    # Spearman is undefined when either side is constant (every module the same rate, or a
+    # single tied age stratum); say so rather than dividing by a zero spread.
+    if a.std() == 0 or b.std() == 0:
+        return float("nan")
+    a = (a - a.mean()) / a.std()
+    b = (b - b.mean()) / b.std()
+    return float((a * b).mean())
+
+
+def _rates(labels: np.ndarray, cis: np.ndarray, order: list[str]) -> np.ndarray:
+    """Per-module fraction of genes that are cis-controlled, in `order`."""
+    n = pd.Series(cis).groupby(labels).agg(["sum", "size"])
+    n = n.reindex(order)
+    return (n["sum"] / n["size"]).to_numpy(dtype=float)
+
+
+def module_cis_control(fitted: pd.DataFrame, n_perm: int = CIS_CONTROL_N_PERM,
+                       seed: int = CIS_CONTROL_SEED, min_genes: int = 1
+                       ) -> tuple[pd.DataFrame, dict, np.ndarray]:
+    """Per-module cis-control rate, and whether it tracks the module's age association.
+
+    Returns the ranked module table, the statistics, and the permutation null itself, so a
+    caller pooling several regions reuses these draws instead of generating a second set.
+    """
+    genes = _gene_level(fitted)
+    mods = (genes.groupby(["module_id", "module_age_trait"], as_index=False)
+                 .agg(module_age_effect=("module_age_effect", "first"),
+                      genes_fitted=("gene_id", "size"), genes_cis=("cis", "sum")))
+    mods["rate"] = mods["genes_cis"] / mods["genes_fitted"]
+    mods = mods[mods["genes_fitted"] >= min_genes]
+    ranked = _aging_rank(mods)
+    if len(ranked) < MIN_MODULES_FOR_RHO:
+        return mods.assign(aging_rank=np.nan), {
+            "min_genes": min_genes,
+            "n_modules": int(len(mods)), "n_modules_ranked": int(len(ranked)),
+            "note": "too few modules in a multi-module trait stratum to correlate"
+        }, np.empty(0)
+
+    order = ranked["module_id"].tolist()
+    keep = genes[genes["module_id"].isin(order)]
+    labels, cis = keep["module_id"].to_numpy(), keep["cis"].to_numpy()
+    aging = ranked["aging_rank"].to_numpy()
+    obs = _rho(_rates(labels, cis, order), aging)
+    if not np.isfinite(obs):
+        return ranked, {
+            "min_genes": min_genes,
+            "n_modules": int(len(mods)), "n_modules_ranked": int(len(ranked)),
+            "n_genes": int(len(keep)), "n_genes_cis": int(cis.sum()),
+            "note": "rate or age rank is constant, so the correlation is undefined"
+        }, np.empty(0)
+
+    rng = np.random.default_rng(seed)
+    null = np.array([_rho(_rates(rng.permutation(labels), cis, order), aging)
+                     for _ in range(n_perm)])
+    null = null[np.isfinite(null)]
+    stats = {
+        "min_genes": min_genes,
+        "n_modules": int(len(mods)), "n_modules_ranked": int(len(ranked)),
+        "n_genes": int(len(keep)), "n_genes_cis": int(cis.sum()),
+        "rate_min": float(ranked["rate"].min()), "rate_max": float(ranked["rate"].max()),
+        "rho": obs, "null_mean_rho": float(null.mean()),
+        "null_q025": float(np.quantile(null, 0.025)),
+        "null_q975": float(np.quantile(null, 0.975)),
+        "perm_p_two_sided": float((1 + (np.abs(null) >= abs(obs)).sum()) / (1 + len(null))),
+        "n_perm": int(len(null)), "seed": seed,
+    }
+    return ranked, stats, null
+
+
 def _coloc_traits() -> dict[str, str]:
     """Bare gene id -> comma-joined GWAS traits it colocalizes with (BrainSEQ S_g coloc
     nominations and the GTEx locus-event audit, the same sources as `coloc_nominated`)."""
@@ -707,9 +846,115 @@ def _write_report(dest: Path, region: str, out: pd.DataFrame, s: dict) -> None:
     (dest / "ASE_JUNCTION_ALLELIC.md").write_text("\n".join(L) + "\n")
 
 
+def run_module_cis_control(regions: list[str], n_perm: int, seed: int,
+                           min_genes: int = 1) -> None:
+    """Aggregate the fitted allelic test to module level, per region and pooled.
+
+    Reads `allelic_test.parquet` and refits nothing. The pooled statistic is the mean of the
+    per-region rho over the regions that have enough ranked modules to carry one, and its
+    null is built from the same draws, permuted independently within each region.
+    """
+    per_region, nulls, rows = {}, {}, []
+    for i, region in enumerate(regions):
+        f = out_dir(region) / "allelic_test.parquet"
+        if not f.exists():
+            per_region[region] = {"note": f"no allelic_test.parquet at {f}"}
+            continue
+        # a distinct stream per region, so the pooled null is not the same draws reused
+        ranked, stats, null = module_cis_control(pd.read_parquet(f), n_perm, seed + i,
+                                                 min_genes)
+        ranked.insert(0, "region", region)
+        ranked.to_parquet(out_dir(region) / f"module_cis_control{_arm(min_genes)}.parquet",
+                          index=False)
+        per_region[region] = stats
+        rows.append(ranked)
+        if null.size:
+            nulls[region] = null
+
+    summary = {"regions": per_region, "n_perm": n_perm, "seed": seed,
+               "min_genes": min_genes, "qval_threshold": QVAL_ALLELIC}
+    usable = [r for r in nulls if np.isfinite(per_region[r].get("rho", np.nan))]
+    if usable:
+        obs = float(np.mean([per_region[r]["rho"] for r in usable]))
+        n = min(len(nulls[r]) for r in usable)
+        stack = np.vstack([nulls[r][:n] for r in usable])
+        pooled = stack.mean(axis=0)
+        summary["pooled"] = {
+            "regions": usable, "mean_rho": obs,
+            "null_mean": float(pooled.mean()),
+            "null_q025": float(np.quantile(pooled, 0.025)),
+            "null_q975": float(np.quantile(pooled, 0.975)),
+            "perm_p_two_sided": float((1 + (np.abs(pooled) >= abs(obs)).sum()) / (1 + len(pooled))),
+        }
+
+    dest = out_dir(regions[0]).parent
+    arm = _arm(min_genes)
+    if rows:
+        pd.concat(rows).to_parquet(dest / f"module_cis_control{arm}.parquet", index=False)
+    (dest / f"module_cis_control_summary{arm}.json").write_text(json.dumps(summary, indent=2))
+    _write_module_report(dest, pd.concat(rows) if rows else pd.DataFrame(), summary, arm)
+
+
+def _arm(min_genes: int) -> str:
+    """Filename suffix: the primary arm keeps the bare name."""
+    return "" if min_genes <= 1 else f"_min{min_genes}"
+
+
+def _write_module_report(dest: Path, tab: pd.DataFrame, s: dict, arm: str = "") -> None:
+    L = ["# Module-level cis control of isoform choice", "",
+         "Does the allele-specific signal concentrate in the co-switching modules that carry",
+         "the aging association? Aggregation of the fitted within-donor allelic test; nothing",
+         "is refitted and no module eigengene is mapped.", "",
+         f"Gene counts as cis-controlled if any fitted pair clears q < {s['qval_threshold']}.",
+         (f"**Sensitivity arm:** modules with fewer than {s['min_genes']} fitted genes are"
+          " excluded." if s.get("min_genes", 1) > 1 else
+          "**Primary arm:** every module with a fitted gene is kept."),
+         f"Module age strength is ranked within (region, trait); null is {s['n_perm']:,} "
+         f"permutations of the gene -> module labels (seed {s['seed']}), which hold module",
+         "sizes and the number of cis-controlled genes fixed.", ""]
+    A = L.append
+    A("## Per region")
+    A("")
+    A("| region | modules | ranked | genes | cis genes | rate range | rho | null mean | perm p |")
+    A("| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |")
+    for r, st in s["regions"].items():
+        if "rho" not in st:
+            A(f"| {r} | {st.get('n_modules', 0)} | {st.get('n_modules_ranked', 0)} | "
+              f"— | — | — | — | — | *{st.get('note', 'not run')}* |")
+            continue
+        A(f"| {r} | {st['n_modules']} | {st['n_modules_ranked']} | {st['n_genes']} | "
+          f"{st['n_genes_cis']} | {st['rate_min']:.2f}–{st['rate_max']:.2f} | "
+          f"{st['rho']:+.3f} | {st['null_mean_rho']:+.3f} | {st['perm_p_two_sided']:.3f} |")
+    A("")
+    if "pooled" in s:
+        p = s["pooled"]
+        A("## Pooled")
+        A("")
+        A(f"Mean rho over {', '.join(p['regions'])}: **{p['mean_rho']:+.3f}** against a null "
+          f"mean of {p['null_mean']:+.3f} (95% {p['null_q025']:+.3f} to {p['null_q975']:+.3f}), "
+          f"permutation p = **{p['perm_p_two_sided']:.3f}**.")
+        A("")
+    if not tab.empty:
+        A("## Modules")
+        A("")
+        A("| region | module | trait | age effect | genes fitted | cis | rate | aging rank |")
+        A("| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |")
+        for _, r in tab.sort_values(["region", "module_id"]).iterrows():
+            A(f"| {r['region']} | {r['module_id']} | {r['module_age_trait']} | "
+              f"{r['module_age_effect']:+.2f} | {int(r['genes_fitted'])} | "
+              f"{int(r['genes_cis'])} | {r['rate']:.2f} | {r['aging_rank']:.2f} |")
+        A("")
+    A("**Reading.** A positive rho means the modules with the stronger age association also")
+    A("carry proportionally more cis-controlled genes. With 3-15 modules per region this arm")
+    A("is descriptive: the permutation null is the only honest reference, and an interval")
+    A("spanning zero means the data do not separate the two possibilities.")
+    (dest / f"MODULE_CIS_CONTROL{arm.upper()}.md").write_text("\n".join(L) + "\n")
+
+
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--stage", required=True, choices=("test",))
+    ap.add_argument("--stage", required=True, choices=("test", "module"),
+                    help="test: fit the allelic model; module: aggregate it to module level")
     ap.add_argument("--region", choices=REGIONS, default="dlpfc")
     ap.add_argument("--min-paired-het-donors", type=int, default=MIN_PAIRED_HET_DONORS)
     ap.add_argument("--min-reads", type=int, default=MIN_READS_PER_DONOR,
@@ -717,7 +962,17 @@ def main(argv=None) -> None:
     ap.add_argument("--risk-alleles", type=Path, default=None,
                     help="TSV with rsid, risk_allele (the GWAS risk allele per lead rsID)")
     ap.add_argument("--threads", type=int, default=1, help="worker processes")
+    ap.add_argument("--regions", nargs="+", choices=REGIONS, default=list(REGIONS),
+                    help="--stage module: regions to aggregate (default: all)")
+    ap.add_argument("--n-perm", type=int, default=CIS_CONTROL_N_PERM)
+    ap.add_argument("--seed", type=int, default=CIS_CONTROL_SEED)
+    ap.add_argument("--min-genes", type=int, default=1,
+                    help="--stage module: drop modules with fewer fitted genes "
+                         f"(sensitivity arm uses {CIS_CONTROL_MIN_GENES})")
     args = ap.parse_args(argv)
+    if args.stage == "module":
+        run_module_cis_control(args.regions, args.n_perm, args.seed, args.min_genes)
+        return
     run_test(args.region, args.min_paired_het_donors, args.min_reads, args.risk_alleles,
              args.threads)
 
