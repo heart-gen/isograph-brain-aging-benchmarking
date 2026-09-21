@@ -93,6 +93,10 @@ inputs/processed/gtex_v11/*/junction_usage.parquet
 07_rbp_regulation/_m/rbp/rbp_counts_intronic_flatbg.parquet
 reports/markdowns/
 reports/pi/
+# Collaborator-facing results report: same class as reports/pi/ above. The shareable
+# copy is the manuscript repository's drafts/results-report/, synced by
+# `python -m isograph_benchmark.reporting.results_report sync`.
+reports/results/
 
 # Per-tissue coloc.abf shards from the 13-task SLURM array, across all four gene-pool
 # arms (166 MB). Each arm's committed `cells.parquet` is the merge of its own shards,
