@@ -164,3 +164,4 @@ reports/results/
 05_genetic_anchoring/_m/brainseq_switch_qtl/*/*/qtl/*cis_qtl_pairs*.parquet
 05_genetic_anchoring/_m/brainseq_switch_qtl/*/*/phenotypes_*.bed.gz*
 05_genetic_anchoring/_m/coloc_signal_susie/gwas_susie/
+.claude/
