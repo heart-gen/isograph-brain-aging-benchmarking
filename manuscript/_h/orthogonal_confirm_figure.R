@@ -7,18 +7,23 @@
 # 2024 NBT; ONT DLPFC BA9/46; Bambu; n = 12), against an abundance-matched null drawn
 # from 67,167 non-splicing-led IsoGraph switch pairs.
 #
-# (A) observed switch-like rate vs the matched null, for all detected anchored pairs and
-#     for the abundance-qualified subset; the unmatched background rate is drawn as a
-#     reference so the reader can see what the matching is correcting for.
-# (B) per-gene confirmation for the twelve splicing-led genes, with the genes that FAIL
-#     the abundance qualification marked rather than dropped -- their anchored isoform is
-#     too lowly expressed in long-read for any usage correlation to be interpretable.
+# (A) observed switch-like rate vs the matched null, for three sets: every IsoGraph
+#     switch pair scored genome-wide (the global arm, where the margin over its own null
+#     is thin), all detected anchored pairs, and the abundance-qualified anchored subset.
+#     The genome-wide row moved here from figConceptOverview on 2026-09-22, so the two
+#     long-read rows that panel carried now sit beside the analysis that produced them.
+#     The unmatched background rate is drawn under the anchored sets so the reader can
+#     see what the matching is correcting for.
+# (B) per-gene confirmation for the splicing-led genes, with the genes that FAIL the
+#     abundance qualification marked rather than dropped -- their anchored isoform is too
+#     lowly expressed in long-read for any usage correlation to be interpretable.
 #
 # Matching is on the abundance decile of the better-expressed pair member, because at
 # n = 12 that is what governs whether a usage correlation is estimable at all.
 #
 # Reads 06_switch_mechanism/_m/switch_orthogonal_confirm/{anchored_summary.json,
-#       anchored_gene_confirmation.parquet}; writes figOrthogonalConfirm.{pdf,png}.
+#       global_null_summary.json, anchored_gene_confirmation.parquet};
+#       writes figOrthogonalConfirm.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/orthogonal_confirm_figure.R
 suppressPackageStartupMessages({
@@ -69,46 +74,71 @@ save_fig <- function(p, name, width, height) {
 }
 
 s <- fromJSON(file.path(OC_DIR, "anchored_summary.json"))
+g0 <- fromJSON(file.path(OC_DIR, "global_null_summary.json"))
 
 # ---------------------------------------------------------------------------
 # Panel A - observed switch-like rate against the abundance-matched null
 # ---------------------------------------------------------------------------
-# Every number is read from the summary JSON rather than transcribed, so the annotation
-# cannot drift from switch_orthogonal_confirm.py's output.
-mk_row <- function(key, label) {
-  m <- s$matched_null[[key]]
-  data.frame(set = label, n = m$n_focal, observed = m$observed,
+# Every number is read from the summary JSONs rather than transcribed, so the annotation
+# cannot drift from switch_orthogonal_confirm.py's output. The genome-wide row comes from
+# the --mode global-null run, whose null is drawn from a different background than the
+# anchored arm's; the two arms are shown on one axis because the reader needs to see that
+# the anchored margin (observed minus null) is an order of magnitude larger than the
+# genome-wide one, not that either beats the other's null.
+mk_row <- function(src, key, label, arm) {
+  m <- src$matched_null[[key]]
+  data.frame(set = label, arm = arm, n = m$n_focal, observed = m$observed,
              null_mean = m$null_mean, lo = m$null_q025, hi = m$null_q975,
              p = m$p_empirical_two_sided)
 }
 a <- bind_rows(
-  mk_row("switch_like_rate",
-         sprintf("All detected pairs\n(n = %d)", s$matched_null$switch_like_rate$n_focal)),
-  mk_row("switch_like_rate_usable_only",
-         sprintf("Anchored isoform usably\nexpressed (n = %d)",
-                 s$matched_null$switch_like_rate_usable_only$n_focal)))
+  mk_row(g0, "switch_like_rate",
+         sprintf("Genome-wide,\nall switch pairs\n(n = %s)",
+                 format(g0$matched_null$switch_like_rate$n_focal, big.mark = ",")),
+         "global"),
+  mk_row(s, "switch_like_rate",
+         sprintf("Anchored,\nall detected\n(n = %d)", s$matched_null$switch_like_rate$n_focal),
+         "anchored"),
+  mk_row(s, "switch_like_rate_usable_only",
+         sprintf("Anchored, isoform\nusably expressed\n(n = %d)",
+                 s$matched_null$switch_like_rate_usable_only$n_focal),
+         "anchored"))
 a$set <- factor(a$set, levels = a$set)
 a$plab <- sprintf("P = %s", formatC(a$p, format = "g", digits = 2))
+a$margin <- a$observed - a$null_mean
+bg_unmatched <- s$background$switch_like_rate_unmatched
+anchored_x <- range(as.integer(a$set[a$arm == "anchored"])) + c(-0.4, 0.4)
 
 pA <- ggplot(a, aes(set)) +
-  # unmatched background: what the rate would be compared against WITHOUT matching
-  geom_hline(yintercept = s$background$switch_like_rate_unmatched,
-             linewidth = 0.35, linetype = "dotted", colour = "grey45") +
   geom_linerange(aes(ymin = lo, ymax = hi), colour = NULL_COL,
                  linewidth = 2.6, alpha = 0.35) +
+  # unmatched background of the ANCHORED arm: what its rate would be compared against
+  # WITHOUT matching; drawn under the anchored sets only, since the global arm has its
+  # own background. These numeric-x annotations must follow a discrete-x layer, or
+  # ggplot trains the x scale as continuous and the discrete `set` column then fails.
+  annotate("segment", x = anchored_x[1], xend = anchored_x[2],
+           y = bg_unmatched, yend = bg_unmatched,
+           linewidth = 0.35, linetype = "dotted", colour = "grey45") +
+  annotate("text", x = anchored_x[1] + 0.05, y = bg_unmatched,
+           label = "unmatched background", hjust = 0, vjust = -0.5,
+           size = 2.1, colour = "grey45") +
   geom_point(aes(y = null_mean), colour = NULL_COL, size = 1.9, shape = 18) +
   geom_point(aes(y = observed), colour = OBS_COL, size = 2.6) +
   geom_text(aes(y = observed, label = sprintf("%.2f", observed)),
             colour = OBS_COL, size = 2.5, hjust = -0.45) +
-  geom_text(aes(y = hi, label = plab), size = 2.4, colour = "grey25",
+  geom_text(aes(y = null_mean, label = sprintf("null %.2f", null_mean)),
+            colour = NULL_COL, size = 2.1, hjust = 1.25) +
+  geom_text(aes(y = pmax(hi, observed), label = plab), size = 2.3, colour = "grey25",
             vjust = -0.9) +
-  annotate("text", x = 0.55, y = s$background$switch_like_rate_unmatched,
-           label = "unmatched background", hjust = 0, vjust = -0.5,
-           size = 2.2, colour = "grey45") +
-  scale_y_continuous(limits = c(0, 0.72), breaks = seq(0, 0.7, 0.1)) +
+  scale_y_continuous(limits = c(0, 0.86), breaks = seq(0, 0.8, 0.2)) +
   labs(x = NULL, y = "Switch-like rate in long-read") +
   theme_pub() +
-  theme(panel.grid.major.x = element_blank())
+  theme(panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 6.5, lineheight = 0.9))
+
+cat("  long-read rates (observed vs matched null):\n")
+for (i in seq_len(nrow(a))) cat(sprintf("    %-40s %.3f vs %.3f (margin %+.3f, %s)\n",
+    gsub("\n", " ", a$set[i]), a$observed[i], a$null_mean[i], a$margin[i], a$plab[i]))
 
 # ---------------------------------------------------------------------------
 # Panel B - per-gene confirmation, with the abundance-disqualified genes named
@@ -127,21 +157,29 @@ g <- as.data.frame(read_parquet(file.path(OC_DIR, "anchored_gene_confirmation.pa
 # correlation is interpretable at all; carry it as an explicit right-hand annotation
 # rather than leaving it to the caption.
 g$if_lab <- sprintf("%.3f", g$max_anchored_if)
+# The gene count is read from the table, not assumed: the legacy expression-filter run
+# had 12 genes and a fixed 13.6 y-limit clipped the 30-gene switching-filter result.
+n_genes <- nrow(g)
+max_n   <- max(4, max(g$n_switch_like, na.rm = TRUE))
+x_max   <- max_n * 1.22 + 1          # room for the right-hand IF column past the longest bar
+x_step  <- if (max_n > 8) 5 else 1
+cat(sprintf("  per-gene panel: %d genes, %d confirmed (%d at usable abundance)\n",
+            n_genes, sum(g$orthogonally_confirmed), sum(g$confirmed_at_usable_abundance)))
 
 pB <- ggplot(g, aes(n_switch_like, gene_name)) +
   geom_segment(aes(x = 0, xend = n_switch_like, yend = gene_name, colour = status),
                linewidth = 0.55) +
   geom_point(aes(colour = status), size = 2) +
-  geom_text(aes(x = 5.35, label = if_lab), hjust = 1, size = 2.2, colour = "grey35") +
-  annotate("text", x = 5.35, y = 12.9, label = "anchored\nisoform IF",
+  geom_text(aes(x = x_max - 0.1, label = if_lab), hjust = 1, size = 2.2, colour = "grey35") +
+  annotate("text", x = x_max - 0.1, y = n_genes + 0.9, label = "anchored\nisoform IF",
            hjust = 1, vjust = 0.5, size = 2.1, colour = "grey35", lineheight = 0.9) +
   scale_colour_manual(values = c(Confirmed = OBS_COL,
                                  `Anchored isoform too lowly expressed` = "#E69F00",
                                  `Not confirmed` = FAIL_COL),
                       name = NULL, drop = FALSE) +
-  scale_x_continuous(limits = c(0, 5.45), breaks = 0:4,
+  scale_x_continuous(limits = c(0, x_max), breaks = seq(0, max_n, by = x_step),
                      expand = expansion(mult = c(0.01, 0))) +
-  coord_cartesian(ylim = c(0.5, 13.6), clip = "off") +
+  coord_cartesian(ylim = c(0.5, n_genes + 1.6), clip = "off") +
   guides(colour = guide_legend(nrow = 2)) +
   labs(x = "Switch-like anchored pairs in long-read", y = NULL) +
   theme_pub() +
@@ -154,10 +192,12 @@ pB <- ggplot(g, aes(n_switch_like, gene_name)) +
 # ---------------------------------------------------------------------------
 # Assemble
 # ---------------------------------------------------------------------------
-fig <- (pA | pB) +
+# Panel B grows with the gene list (30 genes on the switching filter); A stays at a
+# fixed height above an empty spacer so it is not stretched into a tall, narrow dot plot.
+fig <- (pA / plot_spacer() + plot_layout(heights = c(1, 0.6)) | pB) +
   plot_layout(widths = c(1, 1.25)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figOrthogonalConfirm", width = 7.2, height = 3.5)
+save_fig(fig, "figOrthogonalConfirm", width = 7.2, height = 3.2 + 0.11 * n_genes)
 cat("Done. Output in", FIG_DIR, "\n")

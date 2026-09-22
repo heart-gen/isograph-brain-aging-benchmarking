@@ -10,24 +10,33 @@
 # and stay in the supplement (S1-S12), built in place by
 # isograph_benchmark/figures/synthetic_benchmark.R; two summary panels are retained here.
 #
-# (A) DEFINITION. One gene, two isoforms, usage crossing over with age while total
-#     gene-level abundance stays flat -- the event a DGE pipeline cannot see.
+# (A) DEFINITION. One gene, two isoforms, usage shifting continuously with age while
+#     total gene-level abundance stays flat -- the event a DGE pipeline cannot see. The
+#     shift is deliberately NOT a dominance reversal (0.80 -> 0.60 against 0.20 -> 0.40):
+#     a switch is a change in usage, and requiring the minor isoform to overtake the major
+#     one would define the object more narrowly than the method measures it.
 # (B) WHAT IS MISSED. The DGE x DTU quadrant map: abundance pipelines cover the top row,
 #     IsoGraph's contribution is the DTU-without-DGE quadrant.
 # (C) METHOD. Per-gene switch features -> VAE latent -> gene-gene graph -> co-switch
 #     modules.
 # (D) Module recovery on synthetic ground truth, six core scenarios, six main methods.
 # (E) Switch-gene detection on the same runs.
+# (F) Synthetic ground-truth genetics: module recovery on identical features, the matched
+#     IsoGraph-versus-WGCNA separator.
+# (G) The same runs: recovery of the planted cis-variants and the null-variant false
+#     positive rate, comparable across methods -- the genetic signal is detectable by all
+#     of them once a module is recovered at all; what differs is the module.
 #
 # Panels A-C are drawn from explicit coordinates -- they are illustrations of a
-# definition, and carry no data. Panels D-E are read from the committed benchmark ledger.
+# definition, and carry no data. Panels D-G are read from the committed benchmark ledger.
+# (The real-data summary panel that closed this figure until 2026-09-22 now opens
+# figTrustFunnel; its long-read rows moved to figOrthogonalConfirm.)
 #
 # Reads 01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet.
 # Writes manuscript/_m/figures/figConceptOverview.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/concept_overview_figure.R
 suppressPackageStartupMessages({
-  library(jsonlite); library(tibble)
   library(arrow)
   library(dplyr)
   library(tidyr)
@@ -78,31 +87,43 @@ save_fig <- function(p, name, width, height) {
 }
 
 # ===========================================================================
-# Panel A - the definition: usage crosses over, total abundance does not
+# Panel A - the definition: usage shifts continuously, total abundance does not
 # ===========================================================================
 age <- seq(20, 80, length.out = 200)
-# A logistic crossover in usage; the total is deliberately flat so the panel makes the
-# single point it exists to make.
-u_b <- 1 / (1 + exp(-(age - 50) / 7))
+# A smooth, monotone shift in usage: isoform A 0.80 -> 0.60, isoform B 0.20 -> 0.40. The
+# two isoforms never trade dominance -- the earlier draft crossed them at 0.5, which reads
+# as if a switch REQUIRED a reversal (and even a 0.75 -> 0.45 / 0.25 -> 0.55 shift would
+# still technically cross). The total is deliberately flat so the panel makes the single
+# point it exists to make.
+ramp <- 1 / (1 + exp(-(age - 50) / 8))          # 0 -> 1, centred on age 50
+USAGE_A <- c(from = 0.80, to = 0.60)
+USAGE_B <- c(from = 0.20, to = 0.40)
+u_a <- USAGE_A[["from"]] + (USAGE_A[["to"]] - USAGE_A[["from"]]) * ramp
+u_b <- USAGE_B[["from"]] + (USAGE_B[["to"]] - USAGE_B[["from"]]) * ramp
 defn <- bind_rows(
-  data.frame(age = age, value = 1 - u_b, series = "Isoform A usage"),
-  data.frame(age = age, value = u_b,     series = "Isoform B usage"))
-tot <- data.frame(age = age, value = rep(0.5, length(age)),
+  data.frame(age = age, value = u_a, series = "Isoform A usage"),
+  data.frame(age = age, value = u_b, series = "Isoform B usage"))
+tot <- data.frame(age = age, value = rep(1.0, length(age)),
                   series = "Total gene abundance (scaled)")
 
 pA <- ggplot() +
   geom_line(data = defn, aes(age, value, colour = series), linewidth = 0.85) +
   geom_line(data = tot, aes(age, value, colour = series), linewidth = 0.7,
             linetype = "22") +
-  annotate("segment", x = 50, xend = 50, y = 0, yend = 1.0,
-           linewidth = 0.3, colour = "grey70") +
-  annotate("text", x = 50, y = 1.06, label = "switch", size = 2.5, colour = "grey35") +
+  # the size of the shift, drawn once at the old end so the reader sees it is a change
+  # in usage and not a change of the dominant isoform
+  annotate("segment", x = 79, xend = 79, y = USAGE_A[["to"]], yend = USAGE_A[["from"]],
+           linewidth = 0.3, colour = "grey45",
+           arrow = arrow(length = unit(0.04, "in"), ends = "both", type = "closed")) +
+  annotate("text", x = 21, y = 0.915, hjust = 0, size = 2.2, colour = "grey35",
+           label = sprintf("usage shifts by %.2f with age; the dominant isoform is unchanged",
+                           USAGE_A[["from"]] - USAGE_A[["to"]])) +
   scale_colour_manual(
     values = c(`Isoform A usage` = ISO_A, `Isoform B usage` = ISO_B,
                `Total gene abundance (scaled)` = TOTAL),
     breaks = c("Isoform A usage", "Isoform B usage", "Total gene abundance (scaled)"),
     name = NULL) +
-  scale_y_continuous(limits = c(0, 1.12), breaks = c(0, 0.5, 1)) +
+  scale_y_continuous(limits = c(0, 1.08), breaks = c(0, 0.5, 1)) +
   guides(colour = guide_legend(nrow = 1, override.aes = list(linetype = c("solid", "solid", "22")))) +
   labs(x = "Age (years)", y = "Fraction of gene output") +
   theme_pub() +
@@ -215,97 +236,97 @@ cat(sprintf("  benchmark panels: %d runs, %d methods, %d scenarios\n",
             nrow(b), dplyr::n_distinct(b$method), dplyr::n_distinct(b$scenario)))
 
 # ===========================================================================
-# Panel F - what the real data showed, as observed vs its own comparator
+# Panels F/G - synthetic ground-truth genetics: the matched IsoGraph-vs-WGCNA separator
 # ===========================================================================
-# The PI asked Fig 1 to preview the paper's RESULTS, not only its method. The honest way
-# to do that in one panel is to put every real-data claim on a common fraction scale
-# beside the thing it must beat -- a matched WGCNA baseline where the question is "does
-# the method add anything", a permutation/abundance-matched null where the question is
-# "is this above chance". Claims whose natural unit is not a fraction (the switch-unique
-# partial-R2 ratio, the within-donor cis-control counts) are named in the caption rather
-# than forced onto this axis.
+# The genetic_anchoring scenario plants one bi-allelic cis-variant per co-switching module
+# (dosage shifts that module's switch latent) plus an equal number of unlinked null
+# variants, and runs four methods on the IDENTICAL switch+abundance feature matrix. The
+# per-allele effect is modest, so the genotype -> usage signal is only recoverable by
+# pooling a recovered module into an eigengene. Two things are therefore read from the
+# same runs, and they must be shown together or the panel overclaims:
 #
-# Every value is read from a result file. Nothing here is typed in by hand, because this
-# panel is the one a reader checks first.
+#   F  module recovery -- the decisive separator. WGCNA's correlation network dilutes the
+#      planted modules on the same input; the VAE, its multiplex variant and the
+#      Spearman-Leiden control all recover them.
+#   G  genetic-signal detection -- NOT a separator. A diluted-but-nonzero module still
+#      clears the Bonferroni threshold at n = 200, so every method recovers ~all planted
+#      variants at a calibrated null-variant rate. The claim the pair supports is "only the
+#      switch-aware network recovers the MODULE the genetic signal rides on", not "only
+#      IsoGraph finds the genetics".
+#
+# Every number is read from the ledger; the paired test is recomputed here on the
+# dataset_id pairing so the annotation cannot drift from the data it sits above.
+GEN_METHODS <- c(isograph_vae = "IsoGraph VAE", isograph_vae_multiplex = "IsoGraph multiplex",
+                 isograph_spearman_leiden = "Spearman-Leiden", wgcna_gene = "WGCNA")
+gen <- raw |>
+  filter(run_scenario == "genetic_anchoring", run_method %in% names(GEN_METHODS),
+         is.finite(metrics_module_recovery)) |>
+  mutate(method = factor(unname(GEN_METHODS[run_method]), unname(GEN_METHODS)),
+         is_vae = run_method == "isograph_vae")
 
-# -- trusted-module rate, both methods ---------------------------------------
-stab_dir <- rel("04_module_trust", "_m", "stability", "module_trust")
-trusted_rate <- function(meth) {
-  fs <- list.files(stab_dir, pattern = paste0("^module_stability__.*__", meth, "\\.parquet$"),
-                   full.names = TRUE)
-  d <- bind_rows(lapply(fs, function(f) as.data.frame(read_parquet(f))))
-  sum(d$trusted) / nrow(d)
+# paired one-sided test, IsoGraph VAE > WGCNA, on the datasets both methods completed
+pair <- gen |>
+  filter(run_method %in% c("isograph_vae", "wgcna_gene")) |>
+  select(run_dataset_id, run_method, metrics_module_recovery) |>
+  pivot_wider(names_from = run_method, values_from = metrics_module_recovery) |>
+  filter(is.finite(isograph_vae), is.finite(wgcna_gene))
+wt <- wilcox.test(pair$isograph_vae, pair$wgcna_gene, paired = TRUE, alternative = "greater")
+delta <- mean(pair$isograph_vae - pair$wgcna_gene)
+f_lab <- sprintf("IsoGraph VAE vs WGCNA, same features\n\u0394 = %+.2f, paired P = %s, n = %d",
+                 delta, formatC(wt$p.value, format = "g", digits = 2), nrow(pair))
+
+gen_box <- function(df, yvar, ylab) {
+  ggplot(df, aes(method, .data[[yvar]], fill = is_vae)) +
+    geom_boxplot(outlier.size = 0.25, outlier.alpha = 0.35, linewidth = 0.28,
+                 width = 0.7, colour = "grey25") +
+    scale_fill_manual(values = c(`FALSE` = MUTED, `TRUE` = HILITE), guide = "none") +
+    labs(x = NULL, y = ylab) +
+    theme_pub() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1, size = 6.4),
+          strip.text = element_text(size = 7, lineheight = 0.9),
+          strip.background = element_blank(),
+          panel.spacing.x = unit(6, "pt"))
 }
 
-# -- within-cohort split-half age sign concordance ---------------------------
-within_conc <- function(meth) {
-  fs <- list.files(stab_dir, pattern = paste0("^within_cohort__.*__", meth, "\\.parquet$"),
-                   full.names = TRUE)
-  d <- bind_rows(lapply(fs, function(f) as.data.frame(read_parquet(f))))
-  d <- d[d$both_age_sig, ]
-  sum(d$sign_concordant) / nrow(d)
-}
+pF <- gen_box(gen, "metrics_module_recovery", "Module recovery\n(AUC; 1 = perfect)") +
+  annotate("text", x = 0.55, y = 1.2, hjust = 0, vjust = 1, size = 2.1,
+           lineheight = 0.95, colour = "grey25", label = f_lab) +
+  scale_y_continuous(limits = c(0, 1.22), breaks = c(0, 0.5, 1))
 
-# -- cross-cohort eigengene projection ---------------------------------------
-proj <- as.data.frame(read_parquet(rel("04_module_trust", "_m", "stability",
-                                       "eigengene_projection",
-                                       "eigengene_projection_summary.parquet")))
-proj_rate <- function(meth, dir) {
-  r <- proj[proj$method == meth & proj$direction == dir, ]
-  r$sign_match / r$n_age_testable
-}
+gen_long <- gen |>
+  select(method, is_vae, metrics_genetic_anchor_recall, metrics_genetic_anchor_fpr) |>
+  pivot_longer(starts_with("metrics_"), names_to = "metric", values_to = "value") |>
+  mutate(metric = factor(recode(metric,
+                                metrics_genetic_anchor_recall = "Planted cis-variants recovered\n(recall)",
+                                metrics_genetic_anchor_fpr    = "Null variants flagged\n(false-positive rate)"),
+                         c("Planted cis-variants recovered\n(recall)",
+                           "Null variants flagged\n(false-positive rate)")))
+pG <- gen_box(gen_long, "value", "Fraction of variants") +
+  geom_hline(data = data.frame(metric = factor("Null variants flagged\n(false-positive rate)",
+                                               levels(gen_long$metric)), y = 0.05),
+             aes(yintercept = y), linetype = "22", linewidth = 0.3, colour = "grey45") +
+  facet_wrap(~ metric, nrow = 1) +
+  scale_y_continuous(limits = c(0, 1.22), breaks = c(0, 0.5, 1))
 
-# -- long-read confirmation, observed vs its abundance-matched null ----------
-lr <- function(f, field) {
-  j <- jsonlite::fromJSON(rel("06_switch_mechanism", "_m", "switch_orthogonal_confirm", f))
-  j$matched_null$switch_like_rate[[field]]
-}
-
-ev <- tibble::tribble(
-  ~claim,                                            ~observed,                             ~comparator,                           ~ctype,
-  "Modules chance-trusted",                          trusted_rate("isograph"),              trusted_rate("wgcna"),                 "WGCNA baseline",
-  "Split-half age sign concordance",                 within_conc("isograph"),               within_conc("wgcna"),                  "WGCNA baseline",
-  "Aging transfers, BrainSEQ\u2192GTEx",               proj_rate("isograph", "brainseq_to_gtex"), proj_rate("wgcna", "brainseq_to_gtex"), "WGCNA baseline",
-  "Aging transfers, GTEx\u2192BrainSEQ",               proj_rate("isograph", "gtex_to_brainseq"), proj_rate("wgcna", "gtex_to_brainseq"), "WGCNA baseline",
-  "Long-read switch-like, anchored pairs",           lr("anchored_summary.json", "observed"),   lr("anchored_summary.json", "null_mean"),   "Matched null",
-  "Long-read switch-like, all pairs",                lr("global_null_summary.json", "observed"), lr("global_null_summary.json", "null_mean"), "Matched null"
-) |>
-  mutate(claim = factor(claim, rev(claim)))
-
-ev_long <- bind_rows(
-  transmute(ev, claim, value = observed,   what = "IsoGraph / observed"),
-  transmute(ev, claim, value = comparator, what = ctype)
-) |>
-  mutate(what = factor(what, c("IsoGraph / observed", "WGCNA baseline", "Matched null")))
-
-pF <- ggplot(ev, aes(y = claim)) +
-  geom_segment(aes(x = comparator, xend = observed, yend = claim),
-               colour = "grey70", linewidth = 0.45) +
-  geom_point(data = ev_long, aes(x = value, colour = what), size = 1.9) +
-  geom_text(aes(x = observed, label = sprintf("%.2f", observed)),
-            vjust = -1.05, size = 2.2, colour = HILITE) +
-  scale_colour_manual(values = c(`IsoGraph / observed` = HILITE,
-                                 `WGCNA baseline` = "#0072B2",
-                                 `Matched null` = "grey45"), name = NULL) +
-  scale_x_continuous(limits = c(0, 1.05), breaks = c(0, 0.25, 0.5, 0.75, 1),
-                     expand = expansion(mult = c(0.02, 0.04))) +
-  labs(x = "Fraction (rate, or concordant modules)", y = NULL) +
-  theme_pub() +
-  theme(axis.text.y = element_text(size = 6.8),
-        panel.grid.major.y = element_blank(),
-        panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"),
-        legend.position = "bottom", legend.text = element_text(size = 6.8),
-        legend.key.size = unit(0.3, "cm"))
-
-cat("  results panel:\n")
-for (i in seq_len(nrow(ev))) cat(sprintf("    %-38s %.3f vs %.3f (%s)\n",
-    ev$claim[i], ev$observed[i], ev$comparator[i], ev$ctype[i]))
+gen_sum <- gen |> group_by(run_method) |>
+  summarise(n = n(), module_recovery = mean(metrics_module_recovery),
+            recall = mean(metrics_genetic_anchor_recall),
+            fpr = mean(metrics_genetic_anchor_fpr),
+            best_r2 = mean(metrics_genetic_anchor_best_r2_mean), .groups = "drop")
+cat("  synthetic-genetics panels (genetic_anchoring scenario):\n")
+for (i in seq_len(nrow(gen_sum))) cat(sprintf(
+  "    %-26s n=%3d  module recovery %.3f  recall %.3f  FPR %.3f  best R2 %.3f\n",
+  gen_sum$run_method[i], gen_sum$n[i], gen_sum$module_recovery[i], gen_sum$recall[i],
+  gen_sum$fpr[i], gen_sum$best_r2[i]))
+cat(sprintf("    paired IsoGraph VAE - WGCNA module recovery: delta %+.3f, one-sided P %s, n %d\n",
+            delta, formatC(wt$p.value, format = "g", digits = 3), nrow(pair)))
 
 # ===========================================================================
 # Assemble: schematic row on top (the definition), benchmark rows beneath
 # ===========================================================================
-# F sits last: definition (A-C), synthetic validation (D-E), then what the real data
-# showed (F). A reader who stops after Fig 1 should still know what was found.
+# Definition (A-C), synthetic validation on the core grid (D-E), then the synthetic
+# genetics arm (F-G): the one benchmark that isolates network inference from feature
+# representation, and the ground-truth warrant for the real-data genetic anchoring.
 design <- "AAABBB
            AAABBB
            CCCCCC
@@ -313,9 +334,9 @@ design <- "AAABBB
            DDDDDD
            EEEEEE
            EEEEEE
-           FFFFFF
-           FFFFFF"
-fig <- wrap_plots(pA, pB, pC, pD, pE, pF, design = design) +
+           FFGGGG
+           FFGGGG"
+fig <- wrap_plots(pA, pB, pC, pD, pE, pF, pG, design = design) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 

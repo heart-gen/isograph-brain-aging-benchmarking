@@ -19,8 +19,8 @@ Numbers are never hand-edited here: each item regenerates from committed ledgers
 
 | Item | Builder | Reads from |
 | --- | --- | --- |
-| Fig 1 `figConceptOverview` | `_h/concept_overview_figure.R` | `01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet` |
-| Fig 2 `figTrustFunnel` | `_h/trust_funnel_figure.R` | `04_module_trust/_m/stability/module_trust/` |
+| Fig 1 `figConceptOverview` | `_h/concept_overview_figure.R` | `01_synthetic_benchmark/01_synthetic/_m/synthetic_results.parquet` (core scenarios for D–E; the `genetic_anchoring` scenario for F–G) |
+| Fig 2 `figTrustFunnel` | `_h/trust_funnel_figure.R` | `04_module_trust/_m/stability/module_trust/`, `04_module_trust/_m/stability/eigengene_projection/eigengene_projection_summary.parquet` (panel A) |
 | Fig 3 `figQtlSpecificity` | `_h/qtl_specificity_figure.R` | `05_genetic_anchoring/_m/qtl_anchoring_meta/` |
 | Fig 4 `figGeneticAnchoring` | `_h/genetic_anchoring_figure.R` | `05_genetic_anchoring/_m/{deep_dive,ldsc,scz_age_projection}/` |
 | Fig 5 `figCompositionRobustness` | `_h/composition_robustness_figure.R` | `03_module_characterization/_m/`, `02_module_discovery/gtex/_m/composition/` |
@@ -44,7 +44,7 @@ as supplementary material, not as Fig 1.
 | S-real-5 `figSwitchConsequence` | `_h/switch_consequence_figure.R` | `06_switch_mechanism/_m/` |
 | S-real-6 `figRbpRegulon` | `_h/rbp_regulon_figure.R` | `07_rbp_regulation/_m/rbp/` |
 | S-real-7 `figClinicalConsequence` | `_h/clinical_consequence_figure.R` | `06_switch_mechanism/_m/`, `08_integration/_m/deep_dive/` |
-| S-real-8 `figOrthogonalConfirm` | `_h/orthogonal_confirm_figure.R` | `06_switch_mechanism/_m/switch_orthogonal_confirm/` |
+| S-real-8 `figOrthogonalConfirm` | `_h/orthogonal_confirm_figure.R` | `06_switch_mechanism/_m/switch_orthogonal_confirm/` (`anchored_summary.json`, `global_null_summary.json`, `anchored_gene_confirmation.parquet`) |
 | S-real-9 `figIsaConcordance` | `_h/isa_concordance_figure.R` | `06_switch_mechanism/_m/isa_concordance/` |
 
 `_h/scz_convergence_figure.R` builds `figSczConvergence`, which is **folded into Fig 4E**
