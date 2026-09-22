@@ -1,8 +1,15 @@
 # Publication figure for the IsoGraph module trust funnel (real data).
-# Q1 stability -> Q2 driver reproducibility -> Q3 within-cohort split-half aging
-# concordance -> Q4 structural-switch drivers. (Q3 was cross-cohort until 2026-09-19; see
-# the panel C header and crosscohort_replication_figure.R.) Reads 04_module_trust/_m/stability/module_trust/*.parquet and
-# writes figTrustFunnel.{pdf,png} to 04_module_trust/_m/stability/figures/.
+# (A) the funnel in one panel: every reproducibility claim beside the matched WGCNA
+#     baseline it must be read against -- trusted-module rate, split-half age sign
+#     concordance, and cross-cohort eigengene projection in both directions. This panel
+#     closed figConceptOverview until 2026-09-22; it opens this figure now because the
+#     split-half (D) and projection results it summarises are this figure's content.
+# (B) Q1 stability -> (C) Q2 driver reproducibility -> (D) Q3 within-cohort split-half
+# aging concordance -> (E) Q4 structural-switch drivers. (Q3 was cross-cohort until
+# 2026-09-19; see the panel D header and crosscohort_replication_figure.R.)
+# Reads 04_module_trust/_m/stability/module_trust/*.parquet and
+# 04_module_trust/_m/stability/eigengene_projection/eigengene_projection_summary.parquet;
+# writes figTrustFunnel.{pdf,png} to manuscript/_m/figures/.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/trust_funnel_figure.R
 suppressPackageStartupMessages({
@@ -73,9 +80,87 @@ REGION_LABELS <- c(
 relabel_region <- function(x) ifelse(x %in% names(REGION_LABELS), REGION_LABELS[x], x)
 
 # ---------------------------------------------------------------------------
-# Panel A - Q1 stability: per-module co-assignment density vs permutation null
+# Panel A - the funnel as observed vs the matched WGCNA baseline
+#
+# Every real-data reproducibility claim on a common fraction scale beside the thing it
+# must be read against. The panel is deliberately unflattering where the data are:
+# IsoGraph sits BELOW WGCNA on the first two rows and above it on the transfer rows, and
+# both counts are printed so the annotation cannot imply a difference the data do not
+# contain. Every value is read from a result file; nothing is typed in by hand.
 # ---------------------------------------------------------------------------
 stab <- load_stage("module_stability__")
+wc_all <- load_stage("within_cohort__")
+proj <- as.data.frame(read_parquet(rel("04_module_trust", "_m", "stability",
+                                       "eigengene_projection",
+                                       "eigengene_projection_summary.parquet")))
+
+frac <- function(num, den) list(num = as.integer(num), den = as.integer(den))
+trusted_frac <- function(meth) {
+  d <- stab[stab$method == meth, ]
+  frac(sum(d$trusted), nrow(d))
+}
+within_frac <- function(meth) {
+  d <- wc_all[wc_all$method == meth & wc_all$both_age_sig, ]
+  frac(sum(d$sign_concordant), nrow(d))
+}
+proj_frac <- function(meth, dir) {
+  r <- proj[proj$method == meth & proj$direction == dir, ]
+  stopifnot(nrow(r) == 1)
+  frac(r$sign_match, r$n_age_testable)
+}
+claim_row <- function(claim, iso, wg) {
+  data.frame(claim = claim,
+             method = c("isograph", "wgcna"),
+             num = c(iso$num, wg$num), den = c(iso$den, wg$den))
+}
+ev <- bind_rows(
+  claim_row("Modules chance-trusted",
+            trusted_frac("isograph"), trusted_frac("wgcna")),
+  # plain "to" rather than an arrow glyph: the export font drops U+2192 in axis text
+  claim_row("Split-half age sign\nconcordance",
+            within_frac("isograph"), within_frac("wgcna")),
+  claim_row("Aging axis transfers,\nBrainSEQ to GTEx",
+            proj_frac("isograph", "brainseq_to_gtex"), proj_frac("wgcna", "brainseq_to_gtex")),
+  claim_row("Aging axis transfers,\nGTEx to BrainSEQ",
+            proj_frac("isograph", "gtex_to_brainseq"), proj_frac("wgcna", "gtex_to_brainseq"))
+) |>
+  mutate(value = num / den,
+         claim = factor(claim, rev(unique(claim))),
+         lab = sprintf("%d/%d", num, den),
+         # IsoGraph labels above the point, WGCNA below, so both counts are always legible
+         vjust = ifelse(method == "isograph", -0.9, 1.9))
+ev_seg <- ev |> select(claim, method, value) |>
+  pivot_wider(names_from = method, values_from = value)
+
+pA <- ggplot(ev, aes(y = claim)) +
+  geom_segment(data = ev_seg, aes(x = wgcna, xend = isograph, yend = claim),
+               colour = "grey70", linewidth = 0.45) +
+  geom_point(aes(x = value, colour = method), size = 2) +
+  geom_text(aes(x = value, label = lab, colour = method, vjust = vjust),
+            size = 2.15, show.legend = FALSE) +
+  scale_colour_manual(values = METHOD_COLORS, labels = METHOD_LABELS, guide = "none") +
+  scale_x_continuous(limits = c(0, 1.02), breaks = c(0, 0.25, 0.5, 0.75, 1),
+                     expand = expansion(mult = c(0.02, 0.03))) +
+  scale_y_discrete(expand = expansion(add = 0.7)) +
+  labs(x = "Fraction of modules (split-half concordance: of both-significant pairs; projection: of age-testable modules)",
+       y = NULL) +
+  theme_pub() +
+  theme(axis.text.y = element_text(size = 7, lineheight = 0.9),
+        axis.title.x = element_text(size = 7.5),
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
+
+cat("  funnel summary panel:\n")
+for (cl in levels(ev$claim)) {
+  r <- ev[ev$claim == cl, ]
+  cat(sprintf("    %-58s IsoGraph %s (%.3f)  WGCNA %s (%.3f)\n", gsub("\n", " ", cl),
+              r$lab[r$method == "isograph"], r$value[r$method == "isograph"],
+              r$lab[r$method == "wgcna"], r$value[r$method == "wgcna"]))
+}
+
+# ---------------------------------------------------------------------------
+# Panel B - Q1 stability: per-module co-assignment density vs permutation null
+# ---------------------------------------------------------------------------
 trust_counts <- stab |>
   group_by(method) |>
   summarise(trusted = sum(trusted), M = n(), .groups = "drop") |>
@@ -84,12 +169,12 @@ trust_counts <- stab |>
   # modules are trustworthy in absolute terms at ~3.6x finer granularity, NOT that
   # IsoGraph beats WGCNA on trust. Showing the percentage keeps the annotation honest
   # against the paper's own not-globally-superior framing.
-  mutate(lab = sprintf("%s\n%d / %d trusted (%.0f%%)",
+  mutate(lab = sprintf("%s\n%d/%d trusted\n(%.0f%%)",
                        METHOD_LABELS[method], trusted, M, 100 * trusted / M))
 null_band <- stab |> group_by(method) |>
   summarise(null = median(null_mean, na.rm = TRUE), .groups = "drop")
 
-pA <- ggplot(stab, aes(method, coassign_density)) +
+pB <- ggplot(stab, aes(method, coassign_density)) +
   geom_violin(aes(fill = method), colour = NA, alpha = 0.18, scale = "width") +
   geom_jitter(aes(colour = trusted), width = 0.18, height = 0, size = 0.5, alpha = 0.7) +
   geom_crossbar(data = null_band, aes(x = method, y = null, ymin = null, ymax = null),
@@ -100,21 +185,21 @@ pA <- ggplot(stab, aes(method, coassign_density)) +
   scale_colour_manual(values = TRUST_COLORS, labels = c(`TRUE` = "Trusted (FDR<0.05)",
                                                         `FALSE` = "Not trusted")) +
   scale_x_discrete(labels = METHOD_LABELS) +
-  coord_cartesian(ylim = c(0, 1.18), clip = "off") +
+  coord_cartesian(ylim = c(0, 1.24), clip = "off") +
   labs(x = NULL, y = "Co-assignment density") +
   theme_pub() + theme(legend.position = "bottom",
-                      plot.margin = margin(12, 6, 4, 4, "pt"))
+                      plot.margin = margin(14, 6, 4, 4, "pt"))
 
 # ---------------------------------------------------------------------------
-# Panel B - Q2 driver-loading reproducibility (IsoGraph only; WGCNA has no tx drivers)
+# Panel C - Q2 driver-loading reproducibility (IsoGraph only; WGCNA has no tx drivers)
 # ---------------------------------------------------------------------------
-wc <- load_stage("within_cohort__") |> filter(method == "isograph", is.finite(driver_load_rho))
+wc <- wc_all |> filter(method == "isograph", is.finite(driver_load_rho))
 wc$region_lab <- factor(relabel_region(wc$region),
                         levels = relabel_region(names(REGION_LABELS)))
 wc_med <- wc |> group_by(region_lab) |>
   summarise(med = median(driver_load_rho), .groups = "drop")
 
-pB <- ggplot(wc, aes(region_lab, driver_load_rho)) +
+pC <- ggplot(wc, aes(region_lab, driver_load_rho)) +
   geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey70") +
   geom_violin(fill = METHOD_COLORS[["isograph"]], colour = NA, alpha = 0.22, scale = "width") +
   geom_boxplot(width = 0.16, outlier.size = 0.3, linewidth = 0.3, fill = "white") +
@@ -125,7 +210,7 @@ pB <- ggplot(wc, aes(region_lab, driver_load_rho)) +
   theme_pub() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # ---------------------------------------------------------------------------
-# Panel C - Q3 WITHIN-cohort split-half aging concordance.
+# Panel D - Q3 WITHIN-cohort split-half aging concordance.
 #
 # This panel used to be the BrainSEQ -> GTEx cross-cohort scatter. The PI ruled on
 # 2026-09-19 that the cross-cohort comparison is not a fair replication test: BrainSEQ
@@ -139,7 +224,7 @@ pB <- ggplot(wc, aes(region_lab, driver_load_rho)) +
 # co-assignment. This panel conditions on the pairs where the age effect is detectable in
 # BOTH halves and asks only whether the two halves agree on its direction.
 # ---------------------------------------------------------------------------
-wc <- load_stage("within_cohort__") |>
+wc <- wc_all |>
   filter(is.finite(age_effect_a), is.finite(age_effect_b))
 wc$method_lab <- METHOD_LABELS[wc$method]
 wc$detected <- wc$both_age_sig
@@ -153,7 +238,7 @@ conc_lab <- paste(c("Same age direction in both halves", conc_counts$lab), colla
 
 wlim <- max(abs(c(wc$age_effect_a, wc$age_effect_b)), na.rm = TRUE) * 1.04
 
-pC <- ggplot(wc, aes(age_effect_a, age_effect_b)) +
+pD <- ggplot(wc, aes(age_effect_a, age_effect_b)) +
   geom_hline(yintercept = 0, linewidth = 0.3, colour = "grey80") +
   geom_vline(xintercept = 0, linewidth = 0.3, colour = "grey80") +
   geom_abline(slope = 1, intercept = 0, linewidth = 0.3, linetype = "dotted",
@@ -169,7 +254,7 @@ pC <- ggplot(wc, aes(age_effect_a, age_effect_b)) +
   theme_pub() + theme(legend.position = "bottom")
 
 # ---------------------------------------------------------------------------
-# Panel D - Q4 structural class of driver isoform switches (age-significant modules)
+# Panel E - Q4 structural class of driver isoform switches (age-significant modules)
 # ---------------------------------------------------------------------------
 comp <- load_stage("module_complementarity__") |> filter(method == "isograph", age_sig)
 SWITCH_COLS <- c(drv_cds_changed = "CDS change", drv_utr_changed = "UTR change",
@@ -183,7 +268,7 @@ dd <- comp |>
   summarise(mean_frac = mean(frac), se = sd(frac) / sqrt(n()), .groups = "drop") |>
   mutate(switch = factor(SWITCH_COLS[switch], levels = unname(SWITCH_COLS)))
 
-pD <- ggplot(dd, aes(switch, mean_frac)) +
+pE <- ggplot(dd, aes(switch, mean_frac)) +
   geom_col(fill = METHOD_COLORS[["isograph"]], width = 0.68, alpha = 0.9) +
   geom_errorbar(aes(ymin = pmax(0, mean_frac - se), ymax = pmin(1, mean_frac + se)),
                 width = 0.2, linewidth = 0.3) +
@@ -192,14 +277,25 @@ pD <- ggplot(dd, aes(switch, mean_frac)) +
   theme_pub() + theme(axis.text.x = element_text(angle = 30, hjust = 1))
 
 # ---------------------------------------------------------------------------
-# Assemble: (A | B) / (C | D), full width
+# Assemble: summary row A full width, then (B | C) / (D | E)
 # ---------------------------------------------------------------------------
-fig <- (pA | pB) / (pC | pD) +
-  plot_layout(guides = "collect") +
+design <- "AAAA
+           BBCC
+           BBCC
+           DDEE
+           DDEE"
+# A's row labels are wide; if its panel were axis-aligned with B's, B would be squeezed
+# until its two count annotations collide. free() (patchwork >= 1.2) releases A from
+# that alignment; older patchwork falls back to the aligned layout.
+pA_cell <- if (exists("free", where = asNamespace("patchwork"), inherits = FALSE)) {
+  patchwork::free(pA)
+} else pA
+fig <- wrap_plots(pA_cell, pB, pC, pD, pE, design = design) +
+  plot_layout(guides = "collect", heights = c(1.5, 1, 1, 1, 1)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"),
         legend.position = "bottom", legend.box = "horizontal",
         legend.margin = margin(0, 8, 0, 0, "pt"))
 
-save_fig(fig, "figTrustFunnel", width = 7.2, height = 6.6)
+save_fig(fig, "figTrustFunnel", width = 7.2, height = 9.0)
 cat("Done. Output in", FIG_DIR, "\n")

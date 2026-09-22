@@ -5,7 +5,7 @@
 # GTEx by RSEM -- so a module whose age effect fails to carry across them has failed a test
 # that confounds quantification with biology. The PI ruled on 2026-09-19 that this is not a
 # fair replication test; within-cohort split-half concordance carries the reproducibility
-# claim (figTrustFunnel panel C) and this figure documents the cross-cohort attempt.
+# claim (figTrustFunnel panel D) and this figure documents the cross-cohort attempt.
 #
 # (A) paired age effects, BrainSEQ vs GTEx, for matched modules of both methods.
 # (B) the observed concordant-module count against its permutation null: neither method
