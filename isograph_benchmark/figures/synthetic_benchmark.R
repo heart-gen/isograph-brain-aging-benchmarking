@@ -218,7 +218,7 @@ SCENARIO_LABELS <- c(
 # best-match Jaccard it charges a method for splitting one planted module across many
 # predicted ones, so a method cannot buy recovery with over-partitioning.
 MAIN_METRICS <- c(
-  metrics_module_recovery            = "Module recovery\n(AUC; 1 = perfect)",
+  metrics_module_recovery            = "Module recovery\n(best-match Jaccard; 1 = perfect)",
   metrics_ari_planted                = "Adjusted Rand index\n(planted genes)",
   metrics_switch_gene_detection_rate = "Switching gene detection\n(recall; 1 = all recovered)",
   metrics_nonswitch_gene_module_rate = "Non-switching gene exclusion\n(1 - false-positive rate)"
@@ -722,7 +722,7 @@ response_dot_fig <- function(long_df, scenario, x_col, facet_col,
     coord_cartesian(ylim = c(0, 1.08), clip = "off") +
     labs(
       x = x_label,
-      y = "Module recovery (AUC; 1 = perfect)",
+      y = "Module recovery (best-match Jaccard; 1 = perfect)",
       color = NULL
     ) +
     theme_pub() +
@@ -1135,7 +1135,7 @@ make_confound_robustness_fig <- function(long_df, methods = CONFOUND_METHOD_ORDE
       expand = expansion(mult = c(0.02, 0.04))
     ) +
     labs(x = "Confound severity",
-         y = "Module recovery (AUC; 1 = perfect)",
+         y = "Module recovery (best-match Jaccard; 1 = perfect)",
          color = NULL) +
     theme_pub() +
     theme(legend.position = "right")
@@ -1202,7 +1202,7 @@ make_degradation_fallback_fig <- function(long_df,
       expand = expansion(mult = c(0.02, 0.04))
     ) +
     labs(x = "3' degradation bias",
-         y = "Module recovery (AUC; 1 = perfect)",
+         y = "Module recovery (best-match Jaccard; 1 = perfect)",
          color = NULL) +
     theme_pub() +
     theme(legend.position = "right")
@@ -1233,7 +1233,7 @@ specificity_box_panel <- function(long_df, methods = MAIN_METHOD_ORDER, tag = "A
     sub, x = "method", y = "value", fill = "method",
     palette = METHOD_COLORS[methods], width = 0.62,
     outlier.size = 0.45, outlier.alpha = 0.25, color = "grey25",
-    xlab = FALSE, ylab = "False module recovery (AUC; 0 = ideal)",
+    xlab = FALSE, ylab = "False module recovery (best-match Jaccard; 0 = ideal)",
     ggtheme = theme_pub()
   ) +
     facet_wrap(~ noise_label, nrow = 1) +
@@ -1767,7 +1767,7 @@ tryCatch({
     metric_names = c("metrics_module_recovery",
                      "metrics_nonswitch_gene_module_rate"),
     metric_labels = c(
-      metrics_module_recovery = "Module recovery (AUC; 1 = perfect)",
+      metrics_module_recovery = "Module recovery (best-match Jaccard; 1 = perfect)",
       metrics_nonswitch_gene_module_rate =
         "Non-switching gene exclusion (1 - false-positive rate)"
     )
@@ -1783,7 +1783,7 @@ tryCatch({
     metric_names = c("metrics_module_recovery",
                      "metrics_switch_gene_detection_rate"),
     metric_labels = c(
-      metrics_module_recovery = "Module recovery (AUC; 1 = perfect)",
+      metrics_module_recovery = "Module recovery (best-match Jaccard; 1 = perfect)",
       metrics_switch_gene_detection_rate =
         "Switching gene detection (recall; 1 = all recovered)"
     )
