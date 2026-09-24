@@ -226,7 +226,7 @@ mk_box <- function(df, yvar, ylab) {
           panel.spacing.x = unit(3, "pt"))
 }
 
-pD <- mk_box(b, "metrics_module_recovery", "Module recovery\n(AUC; 1 = perfect)") +
+pD <- mk_box(b, "metrics_module_recovery", "Module recovery\n(best-match Jaccard; 1 = perfect)") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())
 pE <- mk_box(b, "metrics_switch_gene_detection_rate",
              "Switch-gene detection\n(recall)") +
@@ -288,7 +288,7 @@ gen_box <- function(df, yvar, ylab) {
           panel.spacing.x = unit(6, "pt"))
 }
 
-pF <- gen_box(gen, "metrics_module_recovery", "Module recovery\n(AUC; 1 = perfect)") +
+pF <- gen_box(gen, "metrics_module_recovery", "Module recovery\n(best-match Jaccard; 1 = perfect)") +
   annotate("text", x = 0.55, y = 1.2, hjust = 0, vjust = 1, size = 2.1,
            lineheight = 0.95, colour = "grey25", label = f_lab) +
   scale_y_continuous(limits = c(0, 1.22), breaks = c(0, 0.5, 1))

@@ -70,7 +70,7 @@ criterion, precisely because Jaccard is granularity-confounded
 
 **Q2 — driver reproducibility** *(recomputed 2026-09-12)*. Across split-half module pairs the
 switch-axis driver loadings agree: over every matched pair with a shared-gene driver-loading
-Spearman ρ (the definition Table S7 and Fig 2B use), the median ρ is **0.66–0.88** with 94–100% of
+Spearman ρ (the definition Table S7 and Fig 2C use), the median ρ is **0.66–0.88** with 94–100% of
 pairs positive — BrainSEQ caudate 0.76, DLPFC 0.66, hippocampus 0.75; GTEx caudate_basal_ganglia
 0.88, frontal_cortex_ba9 0.86, hippocampus 0.86. Restricted to reproducible pairs (gene Jaccard
 ≥ 0.25) it is 0.72–0.89 and positive in every pair, but on few pairs in BrainSEQ DLPFC (5) and

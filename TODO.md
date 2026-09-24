@@ -1,6 +1,9 @@
 # Open issues found during manuscript review (2026-09-22)
 
-## 1. Module-recovery axes are labelled "AUC" but the metric is best-match Jaccard
+## 1. ~~Module-recovery axes are labelled "AUC" but the metric is best-match Jaccard~~ DONE 2026-09-23
+
+Both scripts relabelled to "best-match Jaccard" (nine axis strings) and Fig 1 plus the
+synthetic supplement regenerated. Kept for the record:
 
 `metrics_module_recovery` is the best-match Jaccard between each planted module and
 its closest inferred module (`isograph_benchmark/benchmark/partition_metrics.py`,
