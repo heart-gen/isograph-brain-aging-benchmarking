@@ -46,6 +46,9 @@ submits a stage in that order and `run_pipeline.sh` chains the stages (README "R
 | GO-invisible gate | `real_data/go_invisible_gate.py` | `_h/02a` | `<caudate_sczd store>/go_invisible_gate.parquet` | S-real-3, S6 |
 | Composition-unique genes | `real_data/characterize_composition_unique.py` | `_h/02b` | `_m/composition_adjustment.parquet` | S-real-4 |
 | Abundance/switch separation | `real_data/abundance_structure_separation.py` | `_h/03a` | `_m/incremental_effect_sizes.parquet` | S-real-4 |
+| Composition-vs-age coupling | `real_data/composition_age_coupling.py` | `03_module_characterization/_h/04b` *(local, no scheduler)* | `_m/composition_age_coupling.parquet`, `_m/COMPOSITION_AGE_COUPLING.md` | `figCompositionAgeCoupling` (Fig S14) |
+| Donor sharing across analyses | `real_data/donor_structure.py` | `02_module_discovery/_h/03a` *(local, no scheduler)* | `02_module_discovery/_m/donor_structure/` | `figDonorStructure` (Fig S11) |
+| Switch-unique threshold sensitivity | `real_data/switch_unique_threshold.py` | `03_module_characterization/_h/04c` *(local, no scheduler)* | `_m/switch_unique_threshold{.parquet,_rank.csv,_calls.csv}`, `_m/SWITCH_UNIQUE_THRESHOLD.md` | `figSwitchUniqueThreshold` (Fig S15) |
 | Tier projection | `real_data/project_tiers.py` | `_h/retired/{project_tiers_pilot,tiers_fanout}.sh` | — | — *(**retired 2026-09-14**: channel-tier ablation, cited nowhere, 6/17 coverage; outputs only at tag `legacy_expression_filter`)* |
 
 ## 04 — Module trust

@@ -4,16 +4,21 @@
 # "Is this just shifting cell-type proportions?" is the first objection put to any bulk
 # brain DTU result, and the repository answers it -- but until now only in prose
 # (03_module_characterization/_m/COMPOSITION_ADJUSTMENT_SUMMARY.md). The answer also moves
-# a headline number: the SCZD composition-unique count falls 34 -> 2 under adjustment,
+# a headline number: the SCZD switch-unique count falls 60 -> 11 under adjustment,
 # while the aging layer largely survives and GTEx replicates it only partially.
 #
 # The figure is deliberately built so the losses are as visible as the survivals. A test
 # that always survives is not evidence; this one plainly does not always survive.
 #
-# (A) base -> composition-adjusted composition-unique gene counts, paired within
-#     cohort x region (log1p count axis: the counts span 0-545);
-# (B) retained fraction per analysis, with the five GTEx regions that have no defensibly
-#     matched snRNA reference shown as EXCLUDED rather than silently absent;
+# (A) base -> composition-adjusted switch-unique gene counts, paired within
+#     cohort x region (pseudo-log count axis: the counts span 0 to >1,000);
+# (B) gene-level persistence per analysis -- the fraction of the UNADJUSTED switch-unique
+#     genes that are still switch-unique after adjustment (n_overlap / comp_unique_base),
+#     annotated with how many genes adjustment newly introduced (n_new). The count ratio
+#     comp_unique_adj / comp_unique_base is deliberately not plotted: adjustment adds as
+#     well as drops genes, so the adjusted set is not nested in the unadjusted one and a
+#     count ratio would overstate persistence. The five GTEx regions with no defensibly
+#     matched snRNA reference are shown as EXCLUDED rather than silently absent;
 # (C) the marker cut -- module member genes are not over-represented for cell-type
 #     markers, so the modules are not simply bags of marker genes.
 #
@@ -115,9 +120,9 @@ dat <- bind_rows(bs, gt) |>
          label  = paste0(unname(PRETTY[region]), " (", cohort, ")"),
          cohort = factor(cohort, names(COHORT_SHAPE)))
 
-# Hippocampus in BrainSEQ has zero composition-unique genes before adjustment, so there
-# is nothing for adjustment to remove. Keep it in panel A (an honest zero) but drop it
-# from the retained-fraction panel, where 0/0 is undefined rather than a loss.
+# An analysis with zero switch-unique genes before adjustment has nothing for adjustment
+# to remove. Keep it in panel A (an honest zero) but drop it from the persistence panel,
+# where 0/0 is undefined rather than a loss.
 stopifnot(all(!is.na(dat$class)))
 
 # ---------------------------------------------------------------------------
@@ -137,7 +142,7 @@ pA <- ggplot(pa, aes(stage, n, group = label, colour = class)) +
   # log1p keeps the two collapses to zero visible alongside the 545-gene ACC arm.
   scale_y_continuous(trans = scales::pseudo_log_trans(base = 10),
                      breaks = c(0, 1, 3, 10, 30, 100, 300)) +
-  labs(x = NULL, y = "Composition-unique genes") +
+  labs(x = NULL, y = "Switch-unique genes") +
   guides(colour = guide_legend(order = 1, nrow = 2),
          shape  = guide_legend(order = 2, nrow = 2)) +
   theme_pub() +
@@ -146,7 +151,7 @@ pA <- ggplot(pa, aes(stage, n, group = label, colour = class)) +
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey92"))
 
 # ---------------------------------------------------------------------------
-# Panel B - retained fraction, with the non-deconvolved regions named as excluded
+# Panel B - gene-level persistence, with the non-deconvolved regions named as excluded
 # ---------------------------------------------------------------------------
 # The five GTEx regions without a defensibly matched Tran/LIBD snRNA reference
 # (cerebellum, cerebellar hemisphere, hypothalamus, spinal cord, substantia nigra) were
@@ -156,26 +161,36 @@ pA <- ggplot(pa, aes(stage, n, group = label, colour = class)) +
 NOT_DECONVOLVED <- c("Cerebellum", "Cerebellar hem.", "Hypothalamus",
                      "Spinal cord C1", "Substantia nigra")
 
+# n_overlap / comp_unique_base is a genuine fraction (the numerator is a subset of the
+# denominator), unlike a ratio of the two counts. n_new is carried as an annotation so the
+# turnover adjustment introduces is on the same row, not hidden.
 pb <- dat |>
-  filter(is.finite(retained_frac)) |>
-  select(label, class, retained_frac) |>
-  arrange(retained_frac)
+  filter(comp_unique_base > 0, is.finite(n_overlap)) |>
+  mutate(persist = n_overlap / comp_unique_base,
+         ann = paste0(n_overlap, "/", comp_unique_base, " kept, +", n_new)) |>
+  select(label, class, persist, ann) |>
+  arrange(persist)
 pb_excl <- data.frame(label = paste0(NOT_DECONVOLVED, " (GTEx)"),
-                      class = NA_character_, retained_frac = NA_real_)
+                      class = NA_character_, persist = NA_real_, ann = NA_character_)
 pb_all <- bind_rows(pb, pb_excl)
 pb_all$label <- factor(pb_all$label, levels = pb_all$label)
 
-pB <- ggplot(pb_all, aes(retained_frac, label)) +
-  geom_vline(xintercept = 1, linewidth = 0.3, linetype = "dashed", colour = "grey55") +
-  geom_segment(aes(x = 0, xend = retained_frac, yend = label, colour = class),
+pB <- ggplot(pb_all, aes(persist, label)) +
+  geom_segment(aes(x = 0, xend = persist, yend = label, colour = class),
                linewidth = 0.5, na.rm = TRUE) +
   geom_point(aes(colour = class), size = 1.8, na.rm = TRUE) +
-  geom_text(data = subset(pb_all, is.na(retained_frac)),
-            aes(x = 0.06, label = "not deconvolved"),
+  # Rows near 1 would push their annotation off the panel, so flip it inside the segment.
+  geom_text(data = subset(pb_all, !is.na(persist)),
+            aes(x = ifelse(persist > 0.6, persist - 0.03, persist + 0.03), label = ann,
+                hjust = ifelse(persist > 0.6, 1, 0)),
+            size = 2.1, colour = "grey35") +
+  geom_text(data = subset(pb_all, is.na(persist)),
+            aes(x = 0.02, label = "not deconvolved"),
             hjust = 0, size = 2.2, colour = "grey45") +
   scale_colour_manual(values = CLASS_COLORS, na.value = "grey70", guide = "none") +
-  scale_x_continuous(limits = c(0, 4.15), breaks = c(0, 1, 2, 3, 4)) +
-  labs(x = "Retained fraction after adjustment", y = NULL) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  labs(x = "Unadjusted switch-unique genes still\nswitch-unique after adjustment",
+       y = NULL) +
   theme_pub() +
   theme(axis.text.y = element_text(size = 6.8),
         panel.grid.major.y = element_blank(),

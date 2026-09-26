@@ -1,0 +1,17 @@
+region,cohort,n_donors,n_tissue_samples,n_analyses
+BrainSEQ DLPFC,BrainSEQ,222,222,1
+BrainSEQ caudate,BrainSEQ,390,390,2
+BrainSEQ hippocampus,BrainSEQ,238,238,1
+GTEx ACC BA24,GTEx,233,233,1
+GTEx amygdala,GTEx,181,181,1
+GTEx caudate,GTEx,300,300,1
+GTEx cerebellar hem.,GTEx,277,277,1
+GTEx cerebellum,GTEx,266,266,1
+GTEx cortex,GTEx,270,270,1
+GTEx frontal ctx BA9,GTEx,269,269,1
+GTEx hippocampus,GTEx,255,255,1
+GTEx hypothalamus,GTEx,257,257,1
+GTEx n. accumbens,GTEx,285,285,1
+GTEx putamen,GTEx,254,254,1
+GTEx spinal cord C1,GTEx,204,204,1
+GTEx substantia nigra,GTEx,183,183,1

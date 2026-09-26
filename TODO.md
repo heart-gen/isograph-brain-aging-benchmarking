@@ -21,7 +21,9 @@ extended benchmark, non-switching background, unequal abundance, degradation fal
 Fix: relabel as "Module recovery\n(best-match Jaccard; 1 = perfect)" and regenerate the
 figures. The manuscript text and the S1 caption already call it best-match Jaccard.
 
-## 2. Gene-level overlap of switch-unique sets before/after composition adjustment is not in the pipeline
+## 2. ~~Gene-level overlap of switch-unique sets before/after composition adjustment is not in the pipeline~~ DONE 2026-09-26
+
+`_contrast_rows` now derives `n_overlap`/`n_new` from the base and adjusted `gene_level.parquet` for both the BrainSEQ and GTEx arms, `retained_frac` is gone, and the rollup, `tableS13_composition_adjustment.csv` and `figCompositionRobustness` were regenerated. All twelve rows of the table below reproduce exactly. Kept for the record:
 
 The manuscript's aging-composition paragraph now reports how many unadjusted
 switch-unique genes stay switch-unique after cell-type adjustment. For example,
@@ -63,3 +65,63 @@ Fix: add `n_overlap` and `n_new` columns to the meta rollup in
 equivalent). Drop or rename `retained_frac`, re-run `03_module_characterization/_h/02c`,
 propagate the result to `tableS13_composition_adjustment.csv`, and confirm the numbers
 above reproduce.
+
+Done by: `_switch_unique_genes()` + the two new columns in `_contrast_rows`;
+`composition_robustness_figure.R` panel B replotted as `n_overlap / comp_unique_base`
+(a real fraction, unlike a ratio of the two counts) annotated with `n_new`; the narrative
+in `COMPOSITION_ADJUSTMENT_SUMMARY.md` and `GTEX_COMPOSITION_SUMMARY.md` re-derived from
+the rollup rather than from the superseded hard-coded counts.
+
+## 3. The switch–abundance separation claim is general, but only one analysis is behind it
+
+Results subsection 2 says the switch and abundance channels capture partly distinct
+within-gene variation and quotes `median |r| = 0.12`, `42% of genes |r| < 0.1`
+(Fig 2b). Those numbers come from a single store:
+`02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/axis_orthogonality.parquet`
+has 13,222 rows, which is that analysis's `n_tested` — the BrainSEQ caudate
+**schizophrenia** analysis. No other store has an `abundance_structure/` directory, so the
+other 16 analyses contribute nothing to the claim. The manuscript text and the Fig 2b
+legend were corrected on 2026-09-26 to name the single analysis, which is honest but
+narrow: a reviewer will reasonably ask whether the channels are separable in the aging
+analyses that the rest of the section is about.
+
+`isograph_benchmark/real_data/abundance_structure_separation.py` already takes
+`analysis` + `--region`, so no new estimator is needed.
+
+Fix: add a stage script that runs `abundance_structure` across all 17 stores (the same
+loop shape as `03_module_characterization/_h/01e`/`01f`), roll the per-analysis
+`axis_orthogonality.parquet` up into one table with each analysis's median |r| and
+fraction below 0.1, and facet `manuscript/_h/abundance_structure_figure.R` panel A by
+analysis. Then either restore the general wording in the manuscript or keep the
+single-analysis wording and cite the new supplement for the rest.
+
+## 4. ~~The switch-unique definition has no threshold-sensitivity check~~ DONE 2026-09-26
+
+`switch_unique_threshold.py` recounts all 17 analyses at FDR 0.05 / 0.10 / 0.20, before and after composition adjustment, and `figSwitchUniqueThreshold` (Fig S15) reports it. **The answer is mixed, and the manuscript was updated to say so.** The count ranking is essentially threshold-free (Spearman 0.97-0.98 against alpha = 0.10), and the two claims the text leans on hold at every alpha: GTEx cortex and frontal cortex BA9 collapse (persistence <= 0.004 throughout) while ACC BA24 and BrainSEQ DLPFC retain (>= 0.26 throughout). But the persistence *ordering* in the middle of the range is not stable (0.50 at alpha = 0.05 even after dropping analyses with fewer than 10 unadjusted genes), and GTEx hippocampus in particular runs 0.04 -> 0.48 -> 0.55 across the three alphas, so its "about half" is a property of alpha = 0.10. Kept for the record:
+
+A gene is called switch-unique when its switch coordinate reaches FDR < 0.10 conditional
+on abundance **and** the abundance test conditional on the switch coordinate does not.
+That is an asymmetric use of one threshold: the second half is an acceptance of the null,
+so a gene can move in or out of the class because its abundance test sits just either side
+of 0.10. The manuscript already says the classification does not test whether the two
+conditional effects differ, but nothing shows how much the regional pattern depends on
+where the line is drawn — and the regional pattern is the result of the subsection.
+
+Everything needed is already on disk: `incremental_association/gene_level.parquet` and
+`incremental_association_composition/gene_level.parquet` carry `fdr_switch_given_abund`
+and `fdr_abund_given_switch` per gene for all 17 analyses, so this is a recount, not a
+refit.
+
+Fix: add a CLI that recounts switch-unique genes at FDR ∈ {0.05, 0.10, 0.20} for every
+analysis, before and after composition adjustment, together with `n_overlap`/`n_new` at
+each threshold; report it as a supplementary figure (counts and gene-level persistence
+versus threshold, one line per analysis) plus a supplementary table. The claim to support
+is that the *ordering* of regions — and the cortical collapse in particular — is not an
+artifact of the 0.10 cut. If it turns out to be threshold-sensitive, that belongs in the
+text.
+
+Done by: `real_data/switch_unique_threshold.py` + `_h/04c` (local, no scheduler) +
+`manuscript/_h/switch_unique_threshold_figure.R`. The rollup reports rank stability both
+over all analyses and restricted to those with at least 10 unadjusted switch-unique genes,
+because persistence is a ratio and several analyses sit at 1-2 genes; and a per-analysis
+call that is only made when it holds at every alpha.

@@ -167,12 +167,16 @@ def trust_table() -> None:
 
 # --- S13  cell-type composition adjustment ----------------------------------
 def composition_table() -> None:
-    """Base vs composition-adjusted composition-unique counts, both cohorts.
+    """Base vs composition-adjusted switch-unique counts, both cohorts.
 
     This is the ledger behind figCompositionRobustness. Both arms are reported
     together, and the five GTEx regions without a defensibly matched snRNA reference
     are absent by design (not deconvolved rather than forced against a mismatched
     panel) -- the figure names them; this table covers only what was tested.
+
+    `n_overlap`/`n_new` are the gene-level turnover the counts alone hide: adjustment
+    both drops and adds genes, so the adjusted set is not nested in the unadjusted one
+    and no ratio of the two counts is reported.
     """
     bs = pd.read_parquet(COMP / "composition_adjustment.parquet")
     bs.insert(0, "cohort", "BrainSEQ")
