@@ -20,7 +20,7 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S10 | `deep_dive/deep_dive_rbp.tsv` | `_m/rbp/{rbp_switch_calls,rbp_regulon}.parquet` | per-gene switched + module-enriched RBP regulators |
 | S11 | `deep_dive/deep_dive_exon_clinical.tsv` | per-region `clinical_consequence/exon_clinvar.parquet` | per-gene/exon switched-vs-constitutive ClinVar & CDS annotation |
 | S12 | `deep_dive/deep_dive_literature.tsv` | `deep_dive/deep_dive_literature.parquet` | curated known-isoform-biology literature per resolved splicing-led gene (with Manubot citekeys) |
-| S13 | `tableS13_composition_adjustment.csv` | `composition_adjustment.parquet` + `composition_adjustment_gtex.parquet` | how much of the DTU-without-DGE layer survives cell-type adjustment (backs Fig 5) |
+| S13 | `tableS13_composition_adjustment.csv` | `composition_adjustment.parquet` + `composition_adjustment_gtex.parquet` | how much of the DTU-without-DGE layer survives cell-type adjustment, with the gene-level overlap (`n_overlap`) and newly detected genes (`n_new`) (backs Fig 5) |
 | S14 | `tableS14_longread_orthogonal_confirmation.csv` | `switch_orthogonal_confirm/anchored_gene_confirmation.parquet` | per-gene long-read confirmation of the anchored switch pairs (backs S-real-8) |
 | S15 | `tableS15_isa_concordance.csv` | `isa_concordance/*/summary.json` | independent-caller (satuRn) DTU concordance across all 17 analyses (backs S-real-9) |
 | S16 | `tableS16_module_genetic_anchoring.csv` | `module_genetic_anchoring_meta/` | per-module splicing anchoring vs a size-matched permutation null — **a table on purpose, not a figure** |

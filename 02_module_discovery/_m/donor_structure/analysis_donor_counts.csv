@@ -1,0 +1,18 @@
+analysis,region,cohort,phenotype,n_samples,n_donors
+BrainSEQ caudate (aging),BrainSEQ caudate,BrainSEQ,aging,238,238
+BrainSEQ caudate (SCZD),BrainSEQ caudate,BrainSEQ,diagnosis,390,390
+BrainSEQ hippocampus,BrainSEQ hippocampus,BrainSEQ,aging,238,238
+BrainSEQ DLPFC,BrainSEQ DLPFC,BrainSEQ,aging,222,222
+GTEx amygdala,GTEx amygdala,GTEx,aging,181,181
+GTEx ACC BA24,GTEx ACC BA24,GTEx,aging,233,233
+GTEx caudate,GTEx caudate,GTEx,aging,300,300
+GTEx cerebellar hem.,GTEx cerebellar hem.,GTEx,aging,277,277
+GTEx cerebellum,GTEx cerebellum,GTEx,aging,266,266
+GTEx cortex,GTEx cortex,GTEx,aging,270,270
+GTEx frontal ctx BA9,GTEx frontal ctx BA9,GTEx,aging,269,269
+GTEx hippocampus,GTEx hippocampus,GTEx,aging,255,255
+GTEx hypothalamus,GTEx hypothalamus,GTEx,aging,257,257
+GTEx n. accumbens,GTEx n. accumbens,GTEx,aging,285,285
+GTEx putamen,GTEx putamen,GTEx,aging,254,254
+GTEx spinal cord C1,GTEx spinal cord C1,GTEx,aging,204,204
+GTEx substantia nigra,GTEx substantia nigra,GTEx,aging,183,183

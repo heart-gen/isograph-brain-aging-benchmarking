@@ -1,0 +1,13 @@
+label,n_alphas,min_persistence,max_persistence,min_base,call
+GTEx cortex,3,0.0,0.0024052916416115455,835,collapses at every alpha
+aging hippocampus,3,0.0,1.0,1,threshold-dependent (small set)
+GTEx frontal_cortex_ba9,3,0.0012547051442910915,0.0035460992907801418,512,collapses at every alpha
+GTEx hippocampus,3,0.038461538461538464,0.5471698113207547,26,threshold-dependent
+SCZD (caudate),3,0.042105263157894736,0.15,20,threshold-dependent
+GTEx amygdala,3,0.12121212121212122,0.3333333333333333,12,threshold-dependent
+GTEx caudate_basal_ganglia,3,0.13157894736842105,0.21839080459770116,42,threshold-dependent
+aging caudate,3,0.16,0.27906976744186046,25,threshold-dependent
+GTEx putamen_basal_ganglia,3,0.2,1.0,2,retains at every alpha (small set)
+GTEx anterior_cingulate_cortex_ba24,3,0.25754884547069273,0.3998569384835479,563,retains at every alpha
+aging DLPFC,3,0.3333333333333333,0.4722222222222222,18,retains at every alpha
+GTEx nucleus_accumbens_basal_ganglia,3,0.5,1.0,1,retains at every alpha (small set)

@@ -277,9 +277,41 @@ _META_REGIONS = [
 ]
 
 
+def _persistence_phrase(df: pd.DataFrame, regions: list[str]) -> str:
+    """``(label base→adj, n_overlap kept)`` for the named rows, for the narrative text."""
+    parts = []
+    for label in regions:
+        row = df[df["region"] == label]
+        if row.empty:
+            continue
+        r = row.iloc[0]
+        parts.append(f"{label.removeprefix('GTEx ')} {int(r['comp_unique_base'])}\u2192"
+                     f"{int(r['comp_unique_adj'])}, {int(r['n_overlap'])} kept")
+    return "(" + "; ".join(parts) + ")" if parts else ""
+
+
+def _switch_unique_genes(gene_level_p: Path) -> set[str] | None:
+    """The switch-unique gene ids from an incremental_association gene table.
+
+    Returned as a set so the base and adjusted calls can be intersected. ``None`` when the
+    per-gene table is absent, in which case only the counts are reported.
+    """
+    if not gene_level_p.exists():
+        return None
+    gl = pd.read_parquet(gene_level_p, columns=["gene_id", "category"])
+    return set(gl.loc[gl["category"] == "composition_unique", "gene_id"])
+
+
 def _contrast_rows(specs: list[tuple[str, str | None, str]], variant: str) -> pd.DataFrame:
     """base vs composition-adjusted gene-level contrast + marker cut for each (analysis,
-    region, label); skips any region whose base/adjusted summaries are not both on disk."""
+    region, label); skips any region whose base/adjusted summaries are not both on disk.
+
+    The counts alone understate turnover, because adjustment both drops and adds genes: the
+    adjusted set is not a subset of the unadjusted one. ``n_overlap``/``n_new`` therefore
+    report the gene-level intersection and the genes detected only after adjustment, and are
+    what the manuscript quotes. No ratio of the two counts is reported, since dividing them
+    implies a nesting that does not hold.
+    """
     rows = []
     for analysis, region, label in specs:
         art = _artifact_dir(analysis, region, variant)
@@ -292,13 +324,23 @@ def _contrast_rows(specs: list[tuple[str, str | None, str]], variant: str) -> pd
         base = json.loads(base_p.read_text())["gene_level"]
         adj = json.loads(adj_p.read_text())["gene_level"]
         comp = json.loads(comp_p.read_text()) if comp_p.exists() else {}
+        base_set = _switch_unique_genes(art / "incremental_association" / "gene_level.parquet")
+        adj_set = _switch_unique_genes(
+            art / "incremental_association_composition" / "gene_level.parquet")
+        if base_set is None or adj_set is None:
+            print(f"[meta] {label}: no gene-level table, overlap columns left missing",
+                  flush=True)
+            n_overlap = n_new = np.nan
+        else:
+            n_overlap = len(base_set & adj_set)
+            n_new = len(adj_set - base_set)
         rows.append({
             "region": label,
             "n_tested": base["n_tested"],
             "comp_unique_base": base["composition_unique"],
             "comp_unique_adj": adj["composition_unique"],
-            "retained_frac": (round(adj["composition_unique"] / base["composition_unique"], 2)
-                              if base["composition_unique"] else np.nan),
+            "n_overlap": n_overlap,
+            "n_new": n_new,
             "both_base": base["both"], "both_adj": adj["both"],
             "n_cell_types": len(comp.get("cell_types", [])),
             "samples_covered": comp.get("n_samples_covered"),
@@ -329,6 +371,7 @@ def meta(variant: str) -> None:
     if not gt.empty:
         n_survive = int((gt["comp_unique_adj"] > 0).sum())
         n_collapse = int((gt["comp_unique_adj"] == 0).sum())
+        n_persist = int((gt["n_overlap"] > 0).sum())
         gt.to_parquet(GTEX_MUSIC_DIR / "composition_adjustment_gtex.parquet",
                       index=False, compression="zstd")
         gtex_lines = [
@@ -340,14 +383,19 @@ def meta(variant: str) -> None:
             "are not deconvolved.", "",
             _md_table(gt), "",
             "## Interpretation — a region-dependent, honestly partial replication", "",
-            f"**{n_survive}/{len(gt)} regions retain ≥1 composition-robust DTU-without-DGE "
-            f"gene, but {n_collapse}/{len(gt)} collapse to zero and the retained fraction "
-            "varies enormously (0.0–0.86).** This is the confounder-vs-mediator caveat made "
-            "concrete rather than a clean win:", "",
+            f"**{n_survive}/{len(gt)} regions retain ≥1 switch-unique gene after adjustment "
+            f"and {n_persist}/{len(gt)} retain ≥1 of the genes they detected before it "
+            f"({n_collapse}/{len(gt)} fall to zero outright), but persistence at the gene "
+            "level spans essentially none to about half.** Read `n_overlap`, not the ratio of "
+            "the two counts: adjustment both drops and adds genes, so the adjusted set is not "
+            "a subset of the unadjusted one and a count ratio would overstate persistence. "
+            "This is the confounder-vs-mediator caveat made concrete rather than a clean win:",
+            "",
             "- **Limbic/striatal regions retain** (amygdala, hippocampus, caudate, putamen, "
             "NAc): the aging switch signal there is not merely a proportion artifact.",
-            "- **The two cortical regions collapse to 0** (frontal_cortex_ba9 531→0, cortex "
-            "438→0) — despite BrainSEQ *DLPFC* surviving adjustment. Cortical composition is "
+            "- **The two cortical regions all but collapse** "
+            + _persistence_phrase(gt, ["GTEx frontal_cortex_ba9", "GTEx cortex"])
+            + " — despite BrainSEQ *DLPFC* surviving adjustment. Cortical composition is "
             "the most strongly age-coupled, and these are the weakest reference matches "
             "(GTEx cortex/BA9 → DLPFC snRNA), so the collapse is consistent with genuine "
             "composition-confounding of cortical aging switches **and/or over-adjustment** "
@@ -365,10 +413,11 @@ def meta(variant: str) -> None:
               f"({n_survive}/{len(gt)} regions survive)", flush=True)
         lines += ["", "## GTEx (aging replication arm)", "",
                   f"In-repo MuSiC re-run; {n_survive}/{len(gt)} deconvolved regions retain a "
-                  f"composition-robust switch signal and {n_collapse}/{len(gt)} collapse to "
-                  "zero — a **region-dependent, partial** replication: limbic/striatal aging "
-                  "DTU reproduces as composition-robust, while the two cortical regions "
-                  "collapse (composition-entangled and/or over-adjusted). Full breakdown + "
+                  f"composition-robust switch signal and {n_persist}/{len(gt)} retain ≥1 of "
+                  "the genes detected before adjustment — a **region-dependent, partial** "
+                  "replication: limbic/striatal aging DTU reproduces as composition-robust, "
+                  "while the two cortical regions all but collapse (composition-entangled "
+                  "and/or over-adjusted). Full breakdown + "
                   "caveats in `02_module_discovery/gtex/_m/composition/GTEX_COMPOSITION_SUMMARY.md`.", "",
                   _md_table(gt)]
 
@@ -376,6 +425,11 @@ def meta(variant: str) -> None:
               "- The composition-adjusted `comp_unique_adj` is the honest, composition-robust "
               "count that should anchor the DTU-without-DGE claim; report it alongside the "
               "unadjusted number rather than in place of it.",
+              "- `n_overlap` (genes switch-unique both before and after adjustment) and "
+              "`n_new` (switch-unique only after it) are the gene-level turnover, and are what "
+              "the manuscript quotes as \"x of y remained\". Adjustment adds as well as drops "
+              "genes, so `comp_unique_adj / comp_unique_base` is not a retention rate and is "
+              "deliberately not reported.",
               "- A large base→adj drop (e.g. SCZD) means much of that switch signal co-varies "
               "with cell-type proportion. **Confounder vs mediator matters:** if disease/age "
               "*causes* the composition shift that drives the switch, covariate adjustment "

@@ -1,0 +1,141 @@
+{
+  "variant": "standard",
+  "alphas": [
+    0.05,
+    0.1,
+    0.2
+  ],
+  "reference_alpha": 0.1,
+  "n_analyses": 17,
+  "n_composition_adjusted": 12,
+  "rank_stability": [
+    {
+      "alpha": 0.05,
+      "n_analyses": 17,
+      "spearman_switch_unique_base": 0.9840105844683763,
+      "n_switch_unique_base": 17,
+      "spearman_persistence": 0.4014109391253182,
+      "n_persistence": 12,
+      "spearman_persistence_large": 0.5020964452534339,
+      "n_persistence_large": 9
+    },
+    {
+      "alpha": 0.1,
+      "n_analyses": 17,
+      "spearman_switch_unique_base": 0.9999999999999998,
+      "n_switch_unique_base": 17,
+      "spearman_persistence": 1.0,
+      "n_persistence": 12,
+      "spearman_persistence_large": 1.0,
+      "n_persistence_large": 9
+    },
+    {
+      "alpha": 0.2,
+      "n_analyses": 17,
+      "spearman_switch_unique_base": 0.972375873823167,
+      "n_switch_unique_base": 17,
+      "spearman_persistence": 0.8056054385890983,
+      "n_persistence": 12,
+      "spearman_persistence_large": 0.9833333333333333,
+      "n_persistence_large": 9
+    }
+  ],
+  "calls": [
+    {
+      "label": "GTEx cortex",
+      "n_alphas": 3,
+      "min_persistence": 0.0,
+      "max_persistence": 0.0024052916416115455,
+      "min_base": 835,
+      "call": "collapses at every alpha"
+    },
+    {
+      "label": "aging hippocampus",
+      "n_alphas": 3,
+      "min_persistence": 0.0,
+      "max_persistence": 1.0,
+      "min_base": 1,
+      "call": "threshold-dependent (small set)"
+    },
+    {
+      "label": "GTEx frontal_cortex_ba9",
+      "n_alphas": 3,
+      "min_persistence": 0.0012547051442910915,
+      "max_persistence": 0.0035460992907801418,
+      "min_base": 512,
+      "call": "collapses at every alpha"
+    },
+    {
+      "label": "GTEx hippocampus",
+      "n_alphas": 3,
+      "min_persistence": 0.038461538461538464,
+      "max_persistence": 0.5471698113207547,
+      "min_base": 26,
+      "call": "threshold-dependent"
+    },
+    {
+      "label": "SCZD (caudate)",
+      "n_alphas": 3,
+      "min_persistence": 0.042105263157894736,
+      "max_persistence": 0.15,
+      "min_base": 20,
+      "call": "threshold-dependent"
+    },
+    {
+      "label": "GTEx amygdala",
+      "n_alphas": 3,
+      "min_persistence": 0.12121212121212122,
+      "max_persistence": 0.3333333333333333,
+      "min_base": 12,
+      "call": "threshold-dependent"
+    },
+    {
+      "label": "GTEx caudate_basal_ganglia",
+      "n_alphas": 3,
+      "min_persistence": 0.13157894736842105,
+      "max_persistence": 0.21839080459770116,
+      "min_base": 42,
+      "call": "threshold-dependent"
+    },
+    {
+      "label": "aging caudate",
+      "n_alphas": 3,
+      "min_persistence": 0.16,
+      "max_persistence": 0.27906976744186046,
+      "min_base": 25,
+      "call": "threshold-dependent"
+    },
+    {
+      "label": "GTEx putamen_basal_ganglia",
+      "n_alphas": 3,
+      "min_persistence": 0.2,
+      "max_persistence": 1.0,
+      "min_base": 2,
+      "call": "retains at every alpha (small set)"
+    },
+    {
+      "label": "GTEx anterior_cingulate_cortex_ba24",
+      "n_alphas": 3,
+      "min_persistence": 0.25754884547069273,
+      "max_persistence": 0.3998569384835479,
+      "min_base": 563,
+      "call": "retains at every alpha"
+    },
+    {
+      "label": "aging DLPFC",
+      "n_alphas": 3,
+      "min_persistence": 0.3333333333333333,
+      "max_persistence": 0.4722222222222222,
+      "min_base": 18,
+      "call": "retains at every alpha"
+    },
+    {
+      "label": "GTEx nucleus_accumbens_basal_ganglia",
+      "n_alphas": 3,
+      "min_persistence": 0.5,
+      "max_persistence": 1.0,
+      "min_base": 1,
+      "call": "retains at every alpha (small set)"
+    }
+  ]
+}

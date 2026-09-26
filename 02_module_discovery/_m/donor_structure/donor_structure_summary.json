@@ -1,0 +1,27 @@
+{
+  "n_regions": 16,
+  "n_analyses": 17,
+  "n_sample_analysis_rows": 4322,
+  "n_unique_tissue_samples": 4084,
+  "n_unique_donors": 844,
+  "max_pairwise_shared_donors_regions": 249,
+  "by_cohort": [
+    {
+      "cohort": "BrainSEQ",
+      "n_donors": 451,
+      "median_regions": 2.0,
+      "max_regions": 3,
+      "n_in_one_region_only": 213
+    },
+    {
+      "cohort": "GTEx",
+      "n_donors": 393,
+      "median_regions": 9.0,
+      "max_regions": 13,
+      "n_in_one_region_only": 20
+    }
+  ],
+  "identifier_notes": [
+    "BrainSEQ caudate (aging) and BrainSEQ caudate (SCZD) share 238 tissue samples within BrainSEQ caudate"
+  ]
+}

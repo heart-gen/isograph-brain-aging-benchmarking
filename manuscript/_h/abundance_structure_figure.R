@@ -2,7 +2,7 @@
 # NON-REDUNDANT information — the two channels can be separated computationally and the
 # separation adds information. (A) per-gene abundance-vs-switch axis correlation piles up
 # near 0 -> the inferred axes are largely orthogonal. (B) the de-confounded incremental
-# test finds, in every cohort/region, a small specific set of composition-unique genes
+# test finds, in every cohort/region, a small specific set of switch-unique genes
 # whose switch channel carries phenotype signal that total abundance cannot -> separation
 # adds information. (C) one such gene: total abundance flat across diagnosis while the
 # isoform-switch score shifts. Reads
@@ -31,7 +31,7 @@ FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # Okabe-Ito. IsoGraph vermillion is reused for the switch channel throughout the manuscript.
-ISO_COL    <- "#D55E00"   # switch / composition-unique
+ISO_COL    <- "#D55E00"   # switch / switch-unique
 AB_COL     <- "#999999"   # abundance channel
 COHORT_COL <- c(`BrainSEQ SCZD` = "#D55E00", `BrainSEQ aging` = "#E69F00",
                 `GTEx aging` = "#0072B2")
@@ -91,7 +91,7 @@ pA <- ggplot(ortho, aes(pearson_r)) +
   theme_pub()
 
 # ---------------------------------------------------------------------------
-# Panel B - composition-unique genes: switch adds phenotype signal beyond abundance
+# Panel B - switch-unique genes: switch adds phenotype signal beyond abundance
 # ---------------------------------------------------------------------------
 clean_region <- function(x) {
   x <- gsub("_basal_ganglia", "", x)
@@ -111,7 +111,9 @@ pB <- ggplot(datB, aes(composition_unique, row_lab, fill = cohort)) +
   scale_fill_manual(values = COHORT_COL) +
   scale_x_sqrt(expand = expansion(mult = c(0, 0.10)),
                breaks = c(0, 10, 50, 150, 300, 545)) +
-  labs(x = "Composition-unique genes (switch-sig, abundance-not)", y = NULL) +
+  # "switch-unique", not "composition-unique": the latter reads as cell composition,
+  # which is the confounder this layer is defended against, not what the class means.
+  labs(x = "Switch-unique genes (switch-significant, abundance not)", y = NULL) +
   theme_pub() +
   theme(panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"),
