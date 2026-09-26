@@ -30,7 +30,9 @@ parallel.
 | 02a | `go_invisible_gate` | 01a, 01c | The GO-invisible disease-module gate (BrainSEQ SCZD) |
 | 02b | `characterize_composition_unique` | 01c, 01e | Composition-unique gene sets |
 | 02c | `composition_meta` | 01g, 01h | With-vs-without composition adjustment rollup across BrainSEQ + GTEx (`celltype_composition meta`) |
-| 03a | `abundance_structure` | 01e, 01f, 02b | Abundance/switch orthogonality |
+| 03a | `abundance_structure` | 01e, 01f, 02b | Abundance/switch orthogonality for the BrainSEQ SCZD store, the pooled incremental summary and the example gene (figSeparation B-C) |
+| 03b | `abundance_structure_all` | 03a | Abundance/switch orthogonality for **all 17** stores (array; `--orthogonality-only`) |
+| 03c | `abundance_structure_rollup` | 03a, 03b | *Local, not in the DAG.* Pools the 17 tables into `_m/axis_orthogonality_{all,summary}.parquet` + `AXIS_ORTHOGONALITY.md` and rebuilds figSeparation (panel A faceted by analysis) |
 
 Retired (`_h/retired/`; outputs only at tag `legacy_expression_filter`): `project_tiers_pilot`,
 `tiers_fanout` (tier projection, cited nowhere).
@@ -49,7 +51,8 @@ network, and trait inference happens downstream on raw `feature_scores`
   partial and M020 (4/30) weak. The two GO-visible disease modules switch comparably (M012
   40/58, M011 59/65), so GO-invisibility reflects GO's gene-level bias, not low module quality.
   *(Corrected 2026-09-12 from a stale "4/4"; see `GO_INVISIBLE_GATE_SUMMARY.md`.)*
-- Abundance and switch axes are near-orthogonal (median |r| ≈ 0.13); 34 SCZD / 43
+- Abundance and switch axes are near-orthogonal in every analysis, not only the SCZD store
+  (per-analysis median |r| and fraction |r| < 0.1 in `_m/AXIS_ORTHOGONALITY.md`); 34 SCZD / 43
   aging-caudate composition-unique genes carry phenotype signal total abundance misses.
 
 **CLIs:** `isograph_benchmark/real_data/{interpret_modules,module_enrichment,go_enrichment,go_invisible_gate,incremental_association,abundance_structure_separation,characterize_composition_unique,celltype_composition}.py`.

@@ -40,7 +40,7 @@ as supplementary material, not as Fig 1.
 | S-real-1 `figBaselineRates` | `_h/baseline_rates_figure.R` | `04_module_trust/_m/baseline_comparison/` |
 | S-real-2 `figGwasResolution` | `_h/gwas_resolution_figure.R` | `05_genetic_anchoring/_m/gwas/` |
 | S-real-3 `figGoInvisible` | `_h/go_invisible_figure.R` | `02_module_discovery/brainseq/caudate_sczd/_m/` |
-| S-real-4 `figSeparation` | `_h/abundance_structure_figure.R` | `02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/` |
+| S-real-4 `figSeparation` | `_h/abundance_structure_figure.R` | `03_module_characterization/_m/axis_orthogonality_{all,summary}.parquet` (A, all 17 analyses); `02_module_discovery/brainseq/caudate_sczd/_m/isograph_vae/abundance_structure/` (B-C) |
 | S-real-5 `figSwitchConsequence` | `_h/switch_consequence_figure.R` | `06_switch_mechanism/_m/` |
 | S-real-6 `figRbpRegulon` | `_h/rbp_regulon_figure.R` | `07_rbp_regulation/_m/rbp/` |
 | S-real-7 `figClinicalConsequence` | `_h/clinical_consequence_figure.R` | `06_switch_mechanism/_m/`, `08_integration/_m/deep_dive/` |
