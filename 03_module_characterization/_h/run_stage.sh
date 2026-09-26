@@ -27,5 +27,6 @@ step 02c "01g 01h" $H/02c.composition_meta.sh
 
 ## 03
 step 03a "01e 01f 02b" $H/03a.abundance_structure.sh
+step 03b "03a" $H/03b.abundance_structure_all.sh   # orthogonality for all 17 stores; pool with _h/03c (local)
 
 dag_finish

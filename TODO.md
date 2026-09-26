@@ -72,7 +72,9 @@ Done by: `_switch_unique_genes()` + the two new columns in `_contrast_rows`;
 in `COMPOSITION_ADJUSTMENT_SUMMARY.md` and `GTEX_COMPOSITION_SUMMARY.md` re-derived from
 the rollup rather than from the superseded hard-coded counts.
 
-## 3. The switch–abundance separation claim is general, but only one analysis is behind it
+## 3. ~~The switch–abundance separation claim is general, but only one analysis is behind it~~ DONE 2026-09-26
+
+`_h/03b` (array, `--orthogonality-only`) now derives the per-gene axis correlation for all 17 stores and `_h/03c` (local, `--rollup`) pools them into `03_module_characterization/_m/axis_orthogonality_{all,summary}.parquet` + `AXIS_ORTHOGONALITY.md`; figSeparation panel A is faceted by analysis. **The claim generalises:** per-analysis median |r| 0.11–0.24 and 23–46% of genes with |r| < 0.1 (BrainSEQ 0.11–0.13 / 40–46%; GTEx 0.15–0.24 / 23–35%; GTEx nucleus accumbens is the least orthogonal at 0.24 / 23%). The SCZD store reproduced exactly (13,222 genes, 0.124, 42%). The manuscript now quotes the SCZD numbers and the all-analyses range. Kept for the record:
 
 Results subsection 2 says the switch and abundance channels capture partly distinct
 within-gene variation and quotes `median |r| = 0.12`, `42% of genes |r| < 0.1`

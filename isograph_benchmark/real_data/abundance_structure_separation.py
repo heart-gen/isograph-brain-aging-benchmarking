@@ -20,6 +20,21 @@ Outputs land in <artifact_dir>/abundance_structure/:
    switch score by phenotype group for one composition-unique gene (default: the
    smallest p_switch_given_abund with a clearly non-significant p_abund_given_switch,
    i.e. stable total abundance but real switching), for the concrete illustration.
+
+Two further modes serve the *general* form of the separability claim, which must not
+rest on the one analysis that happens to carry the example gene:
+
+``--orthogonality-only``
+    Writes only (1) for the named analysis/region. Run as an array over all 17 stores
+    (``03_module_characterization/_h/03b``); it needs feature_scores.parquet and the
+    bundle's sample table, nothing from the incremental test.
+
+``--rollup``
+    Reads every store's axis_orthogonality.parquet and writes, under the stage-03 ``_m``:
+    ``axis_orthogonality_all.parquet`` (one row per gene per analysis),
+    ``axis_orthogonality_summary.{parquet,csv}`` (per-analysis n, median |r|, quartiles,
+    fraction |r| < 0.1 and > 0.5) and ``AXIS_ORTHOGONALITY.md``. The faceted panel A of
+    figSeparation and the manuscript's range statement read the rollup, not one store.
 """
 from __future__ import annotations
 
@@ -241,6 +256,109 @@ def _write_effect_report(eff: pd.DataFrame) -> None:
     out.write_text("\n".join(lines) + "\n")
 
 
+def _analysis_label(analysis: str, region: str | None) -> tuple[str, str, str]:
+    """(cohort, region, label) exactly as incremental_summary() labels them."""
+    cohort = _LABELS.get(analysis, analysis)
+    reg = region or "caudate"
+    return cohort, reg, f"{cohort}: {reg}"
+
+
+def _summarise_orthogonality(ortho: pd.DataFrame) -> dict:
+    a = ortho["abs_r"].to_numpy(float)
+    return {
+        "n_genes": int(len(a)),
+        "median_abs_r": float(np.median(a)),
+        "q25_abs_r": float(np.quantile(a, 0.25)),
+        "q75_abs_r": float(np.quantile(a, 0.75)),
+        "frac_abs_r_lt_0.1": float((a < 0.1).mean()),
+        "frac_abs_r_lt_0.3": float((a < 0.3).mean()),
+        "frac_abs_r_gt_0.5": float((a > 0.5).mean()),
+        "median_r": float(ortho["pearson_r"].median()),
+    }
+
+
+def write_orthogonality(analysis: str, region: str | None, variant: str) -> pd.DataFrame:
+    """Derive + write axis_orthogonality.parquet for one store; returns the table."""
+    artifact_dir, fs, _modules, bundle = _load(analysis, region, variant)
+    out = ensure_dir(artifact_dir / "abundance_structure")
+    ortho = axis_orthogonality(fs, bundle)
+    ortho.to_parquet(out / "axis_orthogonality.parquet", index=False, compression="zstd")
+    s = _summarise_orthogonality(ortho)
+    print(f"[{analysis}{'/' + region if region else ''}] axis_orthogonality: "
+          f"n={s['n_genes']} genes, median|r|={s['median_abs_r']:.3f}, "
+          f"frac|r|<0.1={s['frac_abs_r_lt_0.1']:.2f}")
+    return ortho
+
+
+def rollup_orthogonality(variant: str) -> pd.DataFrame:
+    """Pool every store's axis_orthogonality.parquet; write the long table + summary."""
+    long_rows, summ_rows, missing = [], [], []
+    for analysis, region in _INCREMENTAL_TARGETS:
+        p = _artifact_dir(analysis, region, variant) / "abundance_structure" / "axis_orthogonality.parquet"
+        cohort, reg, label = _analysis_label(analysis, region)
+        if not p.exists():
+            missing.append(label)
+            continue
+        o = pd.read_parquet(p)
+        o.insert(0, "label", label)
+        o.insert(0, "region", reg)
+        o.insert(0, "cohort", cohort)
+        o.insert(0, "analysis", analysis)
+        long_rows.append(o)
+        summ_rows.append({"analysis": analysis, "cohort": cohort, "region": reg,
+                          "label": label, **_summarise_orthogonality(o)})
+    if not long_rows:
+        raise SystemExit("rollup: no axis_orthogonality.parquet found in any store "
+                         "(run --orthogonality-only over the stores first)")
+    long = pd.concat(long_rows, ignore_index=True)
+    summ = pd.DataFrame(summ_rows)
+
+    out = ensure_dir(stage_out("characterize"))
+    long.to_parquet(out / "axis_orthogonality_all.parquet", index=False, compression="zstd")
+    summ.to_parquet(out / "axis_orthogonality_summary.parquet", index=False, compression="zstd")
+    summ.to_csv(out / "axis_orthogonality_summary.csv", index=False, float_format="%.4f")
+    _write_orthogonality_report(summ, missing, out)
+    print(f"[rollup] {len(summ)} analyses, {len(long):,} gene rows; "
+          f"median|r| {summ['median_abs_r'].min():.3f}-{summ['median_abs_r'].max():.3f}, "
+          f"frac|r|<0.1 {summ['frac_abs_r_lt_0.1'].min():.2f}-{summ['frac_abs_r_lt_0.1'].max():.2f}"
+          + (f"; MISSING: {', '.join(missing)}" if missing else ""))
+    return summ
+
+
+def _write_orthogonality_report(summ: pd.DataFrame, missing: list[str], out) -> None:
+    """AXIS_ORTHOGONALITY.md — the per-analysis separability numbers behind figSeparation A."""
+    s = summ
+    lines = [
+        "# Abundance-vs-switch axis orthogonality, all analyses", "",
+        "Per gene, the Pearson correlation across samples between IsoGraph's abundance "
+        "channel and its switch channel (`feature_scores.parquet`), computed by "
+        "`abundance_structure_separation.py --orthogonality-only` for every store and pooled "
+        "by `--rollup`. Genes with a constant channel are dropped. The manuscript's "
+        "separability statement quotes the range of the per-analysis medians and of the "
+        "fraction of genes with |r| < 0.1; it does not quote one analysis.", "",
+        f"- analyses: {len(s)} of {len(_INCREMENTAL_TARGETS)}"
+        + (f" (missing: {', '.join(missing)})" if missing else ""),
+        f"- genes per analysis: {int(s['n_genes'].min()):,}-{int(s['n_genes'].max()):,}",
+        f"- median |r|: {s['median_abs_r'].min():.3f}-{s['median_abs_r'].max():.3f} "
+        f"(median of medians {s['median_abs_r'].median():.3f})",
+        f"- fraction |r| < 0.1: {s['frac_abs_r_lt_0.1'].min():.2f}-{s['frac_abs_r_lt_0.1'].max():.2f}",
+        f"- fraction |r| < 0.3: {s['frac_abs_r_lt_0.3'].min():.2f}-{s['frac_abs_r_lt_0.3'].max():.2f}",
+        f"- fraction |r| > 0.5: {s['frac_abs_r_gt_0.5'].min():.3f}-{s['frac_abs_r_gt_0.5'].max():.3f}",
+        "",
+        "| analysis | region | n genes | median \\|r\\| | IQR | \\|r\\| < 0.1 | \\|r\\| < 0.3 | \\|r\\| > 0.5 | median r |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for _, r in s.iterrows():
+        lines.append(
+            f"| {r['analysis']} | {r['region']} | {int(r['n_genes']):,} | {r['median_abs_r']:.3f} | "
+            f"{r['q25_abs_r']:.3f}-{r['q75_abs_r']:.3f} | {r['frac_abs_r_lt_0.1']:.2f} | "
+            f"{r['frac_abs_r_lt_0.3']:.2f} | {r['frac_abs_r_gt_0.5']:.3f} | {r['median_r']:+.3f} |")
+    lines += ["", "Outputs: `axis_orthogonality_all.parquet` (per gene per analysis), "
+              "`axis_orthogonality_summary.{parquet,csv}` (this table). Figure: "
+              "`manuscript/_h/abundance_structure_figure.R` panel A (S-real-4).", ""]
+    (out / "AXIS_ORTHOGONALITY.md").write_text("\n".join(lines))
+
+
 def run(analysis: str, region: str | None, variant: str, gene: str | None) -> None:
     artifact_dir, fs, _modules, bundle = _load(analysis, region, variant)
     out = ensure_dir(artifact_dir / "abundance_structure")
@@ -285,10 +403,23 @@ def main() -> None:
     parser.add_argument("--gene", default=None,
                         help="Example gene id/prefix (default: auto-pick the cleanest "
                              "composition-unique gene).")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--orthogonality-only", action="store_true",
+                      help="Write only axis_orthogonality.parquet for this analysis/region "
+                           "(the per-store step of the all-analyses array).")
+    mode.add_argument("--rollup", action="store_true",
+                      help="Pool every store's axis_orthogonality.parquet into the stage _m "
+                           "(ignores the analysis/region arguments).")
     args = parser.parse_args()
+    if args.rollup:
+        rollup_orthogonality(args.variant)
+        return
     region = args.region
     if args.analysis != "brainseq-sczd" and region is None:
         region = "caudate"
+    if args.orthogonality_only:
+        write_orthogonality(args.analysis, region, args.variant)
+        return
     run(args.analysis, region, args.variant, args.gene)
 
 
