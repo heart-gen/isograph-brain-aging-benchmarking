@@ -1,0 +1,13 @@
+method,model,measure,n_pairs,n_concordant,median_gene_jaccard,n_finite,mean_matched,null_mean,null_sd,p_emp,mean_concordant,mean_discordant,n_permutations,seed
+isograph,linear,celltype_r,38,1,0.0376,38,0.2081,0.0396,0.0681,0.006,0.271,0.2064,1000,13
+isograph,linear,go_jaccard,38,1,0.0376,24,0.0971,0.0296,0.0189,0.001,0.4273,0.0828,1000,13
+isograph,linear,structure_r,38,1,0.0376,0,,,,,,,1000,13
+wgcna,linear,celltype_r,52,2,0.0708,0,,,,,,,1000,13
+wgcna,linear,go_jaccard,52,2,0.0708,52,0.1356,0.1393,0.0,1.0,0.0857,0.1376,1000,13
+wgcna,linear,structure_r,52,2,0.0708,0,,,,,,,1000,13
+isograph,spline,celltype_r,38,0,0.0376,38,0.2081,0.0396,0.0681,0.006,,0.2081,1000,13
+isograph,spline,go_jaccard,38,0,0.0376,24,0.0971,0.0296,0.0189,0.001,,0.0971,1000,13
+isograph,spline,structure_r,38,0,0.0376,0,,,,,,,1000,13
+wgcna,spline,celltype_r,52,1,0.0708,0,,,,,,,1000,13
+wgcna,spline,go_jaccard,52,1,0.0708,52,0.1356,0.1393,0.0,1.0,0.0,0.1383,1000,13
+wgcna,spline,structure_r,52,1,0.0708,0,,,,,,,1000,13

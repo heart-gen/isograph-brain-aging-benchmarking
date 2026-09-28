@@ -1,3 +1,9 @@
+# NO LONGER A MANUSCRIPT DISPLAY ITEM (2026-09-28). Its panels were redistributed: A was a
+# duplicate of main Fig. 2c; B is main Fig. 2d, rendered on its own by
+# composition_persistence_panel.R; C (the marker cut) is panel D of
+# figCompositionAgeCoupling. Kept because it still renders and documents the three panels
+# side by side, but nothing in the manuscript reads its output.
+#
 # Main real-data figure: how much of the DTU-without-DGE layer survives cell-type
 # composition adjustment.
 #

@@ -22,8 +22,10 @@ OUT = ensure_dir(stage_out("manuscript", "supp_tables"))
 QTL = stage_out("anchoring", "qtl_anchoring_meta")
 BASE = stage_out("trust", "baseline_comparison")
 TRUST = stage_out("trust.stability", "module_trust")
+TRUST_TABLES = stage_out("trust.stability", "module_trust_tables")
 GATE = region_store("brainseq", "caudate_sczd")
 COMP = stage_out("characterize")                      # composition adjustment (BrainSEQ)
+CHAR = stage_out("characterize")                      # axis separation rollup
 COMP_GTEX = stage_out("modules", "gtex", "_m", "composition")
 MECH = stage_out("mechanism")                         # switch-mechanism stage
 RBP = stage_out("regulation", "rbp")
@@ -112,57 +114,86 @@ def gate_table() -> None:
     write(round_num(g), "tableS6_go_invisible_gate.csv")
 
 
-# --- S7  per-region module trust funnel ------------------------------------
+# --- S7  module trust ledgers -----------------------------------------------
+# All five S7 tables are copied from the CSVs written by
+# `isograph_benchmark/real_data/module_trust_tables.py` (stage 04 `_h/04e`) rather than
+# re-derived from the parquets here. One assembler owning the arithmetic is what keeps the
+# figure, the tables and the Results text quoting the same numbers.
 def trust_table() -> None:
-    rows = []
-    for stab in sorted(TRUST.iterdir()):
-        if not stab.name.startswith("module_stability__") or "isograph" not in stab.name:
-            continue
-        # module_stability__<cohort>__<region>__isograph.parquet
-        parts = stab.stem.split("__")
-        cohort, region = parts[1], parts[2]
-        s = pd.read_parquet(stab)
-        n_mod = len(s)
-        n_trust = int(s.trusted.sum())
+    """S7 -- per-region funnel, and S7a-S7d, the per-module ledgers behind it.
 
-        wfile = TRUST / f"within_cohort__{cohort}__{region}__isograph.parquet"
-        rho_med = pos_frac = None
-        if wfile.exists():
-            w = pd.read_parquet(wfile)
-            rho = w.driver_load_rho.dropna()
-            if len(rho):
-                rho_med = float(rho.median())
-                pos_frac = float((rho > 0).mean())
+    S7 carries BOTH methods. The reproducibility subsection is a matched contrast
+    throughout, and an IsoGraph-only table cannot be checked against the baseline the text
+    quotes beside every claim.
+    """
+    if not TRUST_TABLES.exists():
+        print("  skip tableS7*: run 04_module_trust/_h/04e.module_trust_tables.sh first")
+        return
 
-        cfile = TRUST / f"module_complementarity__{cohort}__{region}__isograph.parquet"
-        dtu_med = wgage_med = None
-        if cfile.exists():
-            c = pd.read_parquet(cfile)
-            dtu_med = float(c.frac_dtu_without_dge.median())
-            wgage_med = float(c.frac_in_wgcna_age_modules.median())
+    def _read(name: str) -> pd.DataFrame:
+        return pd.read_csv(TRUST_TABLES / f"{name}.csv")
 
-        n_pairs = n_rep = None
-        if cohort == "brainseq":
-            # replication keys BrainSEQ DLPFC as dlpfc_ba9 (paired GTEx region name)
-            rep_region = "dlpfc_ba9" if region == "dlpfc" else region
-            rfile = TRUST / f"module_aging_replication__{rep_region}__isograph.parquet"
-            if rfile.exists():
-                r = pd.read_parquet(rfile)
-                n_pairs = len(r)
-                n_rep = int(r.replicates.sum())
+    write(round_num(_read("region_funnel")), "tableS7_module_trust_funnel.csv")
 
-        rows.append(dict(
-            cohort=cohort, region=region,
-            n_modules=n_mod, n_trusted=n_trust,
-            frac_trusted=round(n_trust / n_mod, 3) if n_mod else None,
-            median_driver_rho=round(rho_med, 3) if rho_med is not None else None,
-            frac_positive_rho=round(pos_frac, 3) if pos_frac is not None else None,
-            n_replication_pairs=n_pairs, n_concordant=n_rep,
-            median_frac_dtu_without_dge=round(dtu_med, 4) if dtu_med is not None else None,
-            median_frac_in_wgcna_age=round(wgage_med, 3) if wgage_med is not None else None,
-        ))
-    df = pd.DataFrame(rows).sort_values(["cohort", "region"]).reset_index(drop=True)
-    write(df, "tableS7_module_trust_funnel.csv")
+    stab = _read("split_half_modules")
+    cols = ["cohort", "region", "method", "module_id", "n_genes", "n_genes_assigned",
+            "coassign_density", "null_mean", "best_match_jaccard", "perm_p", "fdr",
+            "trusted"]
+    write(round_num(stab[[c for c in cols if c in stab.columns]]),
+          "tableS7a_split_half_module_ledger.csv")
+
+    proj = _read("projection_modules")
+    # raw_* stay in: they are the evidence that the raw projected age correlation is a
+    # property of the target cohort, which is why the reported statistic is standardised.
+    pcols = ["pair", "method", "direction", "module_id", "status", "n_features",
+             "n_switch_features", "signed_kme", "kme_null_mean", "kme_perm_p",
+             "kme_perm_q", "preservation_r_native_pc1", "age_r_source", "age_r_target",
+             "age_z_source", "age_z_target", "sign_match", "both_sig", "raw_sign_match",
+             "raw_both_sig"]
+    write(round_num(proj[[c for c in pcols if c in proj.columns]]),
+          "tableS7b_projection_module_ledger.csv")
+
+    perm = _read("crosscohort_permutation")
+    write(round_num(perm), "tableS7c_crosscohort_permutation.csv")
+
+    func = _read("functional_preservation")
+    write(round_num(func), "tableS7d_functional_preservation.csv")
+
+    # S7e/S7f answer the two questions the subsection's claims invite and the other
+    # tables cannot: whether split-half agreement is a property of the chosen Leiden
+    # resolution, and why the projected-age statistic is standardised rather than raw.
+    res_f = TRUST_TABLES / "resolution_sensitivity.csv"
+    if res_f.exists():
+        write(round_num(_read("resolution_sensitivity")),
+              "tableS7e_resolution_sensitivity.csv")
+    else:
+        print("  skip tableS7e: no resolution_sensitivity.csv (sweep not run)")
+
+    write(round_num(_read("projection_sign_scale")),
+          "tableS7f_projection_sign_scale.csv")
+
+
+# --- S13a  switch vs abundance axis separation ------------------------------
+def separation_table() -> None:
+    """Per-analysis separation of the switch and abundance coordinates.
+
+    The ledger behind figSeparation panel a and the median |r| range the manuscript
+    quotes. All 17 analyses are here, including the five GTEx regions that the
+    composition table (S13) cannot cover for want of a matched snRNA reference: the
+    separation test needs no deconvolution, so this is the one per-analysis table that
+    spans the whole set.
+
+    Quartiles and the three tail fractions are kept beside the median, because the claim
+    is about the bulk of the distribution ("largely distinct"), not about a central value:
+    a median |r| near 0.12 with 40% of genes under 0.1 and 4% over 0.5 says something a
+    median alone does not.
+    """
+    f = CHAR / "axis_orthogonality_summary.parquet"
+    if not f.exists():
+        print("  skip tableS13a: no axis_orthogonality_summary.parquet")
+        return
+    df = pd.read_parquet(f)
+    write(round_num(df), "tableS13a_axis_orthogonality.csv")
 
 
 # --- S13  cell-type composition adjustment ----------------------------------
@@ -183,7 +214,58 @@ def composition_table() -> None:
     gt = pd.read_parquet(COMP_GTEX / "composition_adjustment_gtex.parquet")
     gt.insert(0, "cohort", "GTEx")
     df = pd.concat([bs, gt], ignore_index=True)
+    # The stage writes these columns as `comp_unique_*`, from before the criterion was
+    # renamed: the manuscript calls these genes switch-unique, because "composition-unique"
+    # reads as a statement about cell composition rather than about isoform usage. Renamed
+    # here, in the display layer, so the published table matches the text without touching
+    # the canonical column names the analysis stages share.
+    df = df.rename(columns={"comp_unique_base": "switch_unique_base",
+                            "comp_unique_adj": "switch_unique_adj"})
+    df = _with_marker_denominator(df)
     write(round_num(df), "tableS13_composition_adjustment.csv")
+
+
+# Stage directory -> the `region` label the composition ledgers use. GTEx labels are
+# "GTEx <region dir>"; BrainSEQ's are hand-named, so they are spelled out.
+_BRAINSEQ_REGION = {"caudate": "aging caudate", "caudate_sczd": "SCZD (caudate)",
+                    "dlpfc": "aging DLPFC", "hippocampus": "aging hippocampus"}
+
+
+def _with_marker_denominator(df: pd.DataFrame) -> pd.DataFrame:
+    """Add `n_marker_tests`, the module x cell-type tests behind the marker counts.
+
+    The ledgers carry `marker_enriched` / `marker_depleted` as bare counts. A count with no
+    denominator cannot be read -- the number of tests differs ~3x between regions with the
+    module count and the reference panel -- so the denominator is counted here from the
+    same per-region files, and the counts are re-derived from them as a consistency check
+    rather than trusted.
+    """
+    rows = []
+    for f in sorted(stage_out("modules").glob(
+            "*/*/_m/isograph_vae/celltype_composition/marker_enrichment.parquet")):
+        cohort_dir, region_dir = f.parts[-6], f.parts[-5]
+        region = (_BRAINSEQ_REGION[region_dir] if cohort_dir == "brainseq"
+                  else f"GTEx {region_dir}")
+        mk = pd.read_parquet(f)
+        rows.append(dict(region=region, n_marker_tests=len(mk),
+                         _enr=int((mk["fdr_enrich"] < 0.05).sum()),
+                         _dep=int((mk["fdr_deplete"] < 0.05).sum())))
+    if not rows:
+        print("  note: no marker_enrichment.parquet found; n_marker_tests left empty")
+        return df.assign(n_marker_tests=pd.NA)
+    mk = pd.DataFrame(rows)
+    out = df.merge(mk, on="region", how="left", validate="one_to_one")
+    have = out["n_marker_tests"].notna()
+    bad = have & ((out["_enr"] != out["marker_enriched"])
+                  | (out["_dep"] != out["marker_depleted"]))
+    if bad.any():
+        raise SystemExit("marker counts disagree with marker_enrichment.parquet for: "
+                         + ", ".join(out.loc[bad, "region"]))
+    out = out.drop(columns=["_enr", "_dep"])
+    # Denominator directly before the two counts it belongs to.
+    cols = [c for c in out.columns if c != "n_marker_tests"]
+    i = cols.index("marker_depleted")
+    return out[cols[:i] + ["n_marker_tests"] + cols[i:]]
 
 
 # --- S14  long-read orthogonal confirmation ---------------------------------
@@ -360,6 +442,7 @@ def main() -> None:
     coloc_convergence_table()
     gate_table()
     trust_table()
+    separation_table()
     composition_table()
     orthogonal_table()
     isa_table()

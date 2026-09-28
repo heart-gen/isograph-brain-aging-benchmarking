@@ -4,5 +4,8 @@
   "n_celltype_tests": 94,
   "n_celltype_age_fdr05": 29,
   "median_max_abs_rho_cortical": 0.29762371917754155,
-  "median_max_abs_rho_limbic": 0.19473211983748598
+  "median_max_abs_rho_limbic": 0.19473211983748598,
+  "n_marker_tests": 2061,
+  "n_marker_enriched": 12,
+  "n_marker_depleted": 0
 }

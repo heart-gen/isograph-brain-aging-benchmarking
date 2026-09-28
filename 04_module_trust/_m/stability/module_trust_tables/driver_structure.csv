@@ -1,0 +1,5 @@
+switch_class,column,n_modules,mean_frac,se_frac,median_frac
+CDS change,drv_cds_changed,19,0.9631578947368421,0.027794700908341855,1.0
+UTR change,drv_utr_changed,19,0.856140350877193,0.060162905963095585,1.0
+Biotype switch,drv_biotype_switch,19,0.8657894736842104,0.059487655555038495,1.0
+Coding-status change,drv_coding_status_change,19,0.7377192982456141,0.0744684663309608,0.8
