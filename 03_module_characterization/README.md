@@ -59,6 +59,6 @@ network, and trait inference happens downstream on raw `feature_scores`
 
 ## Display items
 
-S-real-3 `figGoInvisible`, S-real-4 `figSeparation`, **Fig 5** `figCompositionRobustness`;
+S-real-3 `figGoInvisible`, S-real-4 `figSeparation`, Fig 2c,d (`figCompositionPersistence` for d; `figCompositionRobustness` retired from the manuscript, its marker panel now `figCompositionAgeCoupling` D);
 supplementary table S6 (GO-invisible modules), S13 (composition). S-real-1 `figBaselineRates` and
 tables S1/S2 come from the baseline comparison in stage 04.

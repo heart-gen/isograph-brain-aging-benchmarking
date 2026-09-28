@@ -17,11 +17,18 @@
 # (C) gene-level persistence of the switch-unique set against the region's median |rho|.
 #     Cortical panels are the most age-coupled, yet ACC BA24 and DLPFC retain while BA9
 #     and cortex do not -- coupling bounds the over-adjustment risk, it does not settle it.
+# (D) the marker cut: module x cell-type marker tests significant for enrichment and for
+#     depletion, per cohort. This is the one control here that does not depend on the
+#     covariate model. It was panel C of figCompositionRobustness until that figure's other
+#     two panels moved into main Fig. 2; it is folded in here because it answers the same
+#     question as A-C -- is this cell composition rather than isoform usage? -- and the
+#     stage report already told the reader to read the two side by side.
 #
-# Reads 03_module_characterization/_m/composition_age_{coupling,persistence}.csv and
-#       composition_age_samples.csv.gz
+# Reads 03_module_characterization/_m/composition_age_{coupling,persistence}.csv,
+#       composition_age_samples.csv.gz and composition_marker_tests.csv
 # (CSV, not parquet, so the figure builds with an `arrow` compiled without zstd).
-# Writes manuscript/_m/figures/figCompositionAgeCoupling.{pdf,png}.
+# Writes manuscript/_m/figures/figCompositionAgeCoupling.{pdf,png}, and panel D alone as
+# figCompositionMarkerPanel.{pdf,png} for compositing into a hand-finished layout.
 # Run: bash 03_module_characterization/_h/04b.composition_age_coupling.sh
 suppressPackageStartupMessages({
   library(dplyr)
@@ -91,6 +98,12 @@ save_fig <- function(p, name, width, height) {
 coup <- read.csv(file.path(COMP, "composition_age_coupling.csv"))
 samp <- read.csv(gzfile(file.path(COMP, "composition_age_samples.csv.gz")))
 pers <- read.csv(file.path(COMP, "composition_age_persistence.csv"))
+mk_f <- file.path(COMP, "composition_marker_tests.csv")
+if (!file.exists(mk_f)) {
+  stop("missing ", mk_f, "\nRun: bash 03_module_characterization/_h/04b.composition_age_coupling.sh",
+       call. = FALSE)
+}
+mkr  <- read.csv(mk_f)
 
 label_of <- function(x) unname(PRETTY[x])
 cohort_tag <- function(x) ifelse(x == "BrainSEQ", "BrainSEQ", "GTEx")
@@ -176,7 +189,7 @@ pC <- ggplot(datC, aes(median_abs_rho_age, persistence)) +
                            min.segment.length = 0, segment.size = 0.22,
                            segment.colour = "grey60", box.padding = 0.55,
                            point.padding = 0.3, max.overlaps = Inf, seed = 13,
-                           max.time = 2, max.iter = 20000,
+                           max.time = 6, max.iter = 100000, force = 2,
                            show.legend = FALSE) +
   scale_colour_manual(values = CLASS_COLORS, name = NULL) +
   scale_shape_manual(values = COHORT_SHAPE, name = NULL) +
@@ -190,10 +203,47 @@ pC <- ggplot(datC, aes(median_abs_rho_age, persistence)) +
   theme(legend.position = "bottom", legend.box = "horizontal",
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey92"))
 
-fig <- (pA / ((pB | pC) + plot_layout(widths = c(0.78, 1)))) +
-  plot_layout(heights = c(1.1, 1)) +
+# ---------------------------------------------------------------------------
+# Panel D - marker cut: modules are not collections of cell-type marker genes
+# ---------------------------------------------------------------------------
+# Rate, not count: the number of module x cell-type tests differs ~3x between regions, so
+# raw counts would compare granularity rather than marker content. Cohort is carried in
+# neutral greys, not the Okabe-Ito blue/orange of the old panel -- here blue already means
+# limbic/striatal, and a blue GTEx bar would read as an anatomical class.
+COHORT_FILL <- c(BrainSEQ = "grey35", GTEx = "grey70")
+datD <- mkr |>
+  summarise(n_tests = sum(n_marker_tests), enriched = sum(marker_enriched),
+            depleted = sum(marker_depleted), .by = cohort) |>
+  pivot_longer(c(enriched, depleted), names_to = "dir", values_to = "n") |>
+  mutate(rate = n / n_tests,
+         dir  = factor(dir, c("enriched", "depleted"),
+                       labels = c("Marker-enriched", "Marker-depleted")),
+         cohort = factor(cohort, names(COHORT_FILL)))
+
+pD <- ggplot(datD, aes(dir, rate, fill = cohort)) +
+  geom_col(position = position_dodge(width = 0.72), width = 0.62, colour = NA) +
+  geom_text(aes(label = sprintf("%d/%d", n, n_tests)),
+            position = position_dodge(width = 0.72), vjust = -0.4, size = 2.1) +
+  scale_fill_manual(values = COHORT_FILL, name = NULL) +
+  scale_y_continuous(limits = c(0, 0.019),
+                     labels = scales::percent_format(accuracy = 0.5),
+                     expand = expansion(mult = c(0, 0.04))) +
+  labs(x = NULL, y = "Module x cell-type\ntests at FDR < 0.05") +
+  theme_pub() +
+  theme(legend.position = "right")
+
+# Panel D goes under C rather than taking a column of its own, so C keeps the width its
+# repelled labels need; the extra height is added to the sheet, not taken from C. free()
+# stops B aligning to A's long row labels, which otherwise leaves B's axis title stranded
+# at the far left of the sheet.
+right <- pC / pD + plot_layout(heights = c(1, 0.36))
+fig <- (pA / ((free(pB) | right) + plot_layout(widths = c(0.78, 1)))) +
+  plot_layout(heights = c(1.1, 1.36)) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figCompositionAgeCoupling", width = 7.4, height = 7.2)
+save_fig(fig, "figCompositionAgeCoupling", width = 7.4, height = 9.2)
+# Panel D alone, at the width of the right-hand column, for dropping into the hand-finished
+# composite without re-laying the other panels.
+save_fig(pD, "figCompositionMarkerPanel", width = 3.9, height = 1.9)
 cat("Done. Output in ", FIG_DIR, "\n", sep = "")

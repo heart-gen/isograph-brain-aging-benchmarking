@@ -43,6 +43,7 @@ plan). The leading number of a wrapper is its tier; steps in one tier run in par
 | 04b | `replication_permutation_report` | 03d | `REPLICATION_PERMUTATION.md` over all three covariate modes |
 | 04c | `eigengene_projection_aggregate` | 03f | Cross-pair eigengene-projection summary |
 | 04d | `dtu_added_value_summarize` | 03i | BH across regions, the pre-registered verdict, `DTU_ADDED_VALUE.md` |
+| 04e | `module_trust_tables` | 02c, 03b, 03d, 04c, `08_integration/_h/01c` | Display CSVs under `_m/stability/module_trust_tables/`, then `figTrustFunnel` and `figDriverStructure`. **Local, no scheduler** — it counts and copies, it fits nothing. Re-run after any of the steps it waits on, or the figure carries stale counts |
 
 Retired (`_h/retired/`): `lr_validation`, `lr_validation_launch`, `lr_aggregate` (learning-rate /
 software-robustness validation, retired 2026-09-14 — settled the single-LR promotion; outputs only
@@ -54,7 +55,9 @@ resolution-2.0 A/B of a cap never promoted, superseded by resolution 5.0 and cit
 LR validation outputs were removed from the live tree on 2026-09-14 and survive only at tag
 `legacy_expression_filter`.
 
-**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,age_model_curvature,eigengene_projection,baseline_comparison,module_dtu_added_value}.py`.
+**CLIs:** `isograph_benchmark/real_data/{stability,module_trust,replication,replication_go,replication_permutation,age_model_curvature,eigengene_projection,baseline_comparison,module_dtu_added_value,module_trust_tables}.py`.
+
+> **`_m/stability/module_trust/MODULE_TRUST_SUMMARY.md` is stale.** It was written against the Leiden-5.0 fits (250/266 trusted, driver rho 0.66–0.88, 211/250 projections) and has not been rebuilt since production moved to 2.0 on 2026-09-16. The current numbers are 93/118, 0.72–0.82 and 37/38 + 53/55; take them from `module_trust_tables/` or `EIGENGENE_PROJECTION.md`, never from that file.
 
 ## Module context and held-out DTU evidence (PI review item 12a)
 

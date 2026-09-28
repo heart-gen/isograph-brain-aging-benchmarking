@@ -1,0 +1,13 @@
+label,cohort,class,n_marker_tests,marker_enriched,marker_depleted
+aging caudate,BrainSEQ,Limbic / striatal,91,1,0
+SCZD (caudate),BrainSEQ,Disease (SCZD),84,0,0
+aging DLPFC,BrainSEQ,Cortical,80,1,0
+aging hippocampus,BrainSEQ,Limbic / striatal,128,1,0
+GTEx amygdala,GTEx,Limbic / striatal,264,1,0
+GTEx anterior_cingulate_cortex_ba24,GTEx,Cortical,150,2,0
+GTEx caudate_basal_ganglia,GTEx,Limbic / striatal,224,2,0
+GTEx cortex,GTEx,Cortical,200,1,0
+GTEx frontal_cortex_ba9,GTEx,Cortical,168,0,0
+GTEx hippocampus,GTEx,Limbic / striatal,240,2,0
+GTEx nucleus_accumbens_basal_ganglia,GTEx,Limbic / striatal,216,1,0
+GTEx putamen_basal_ganglia,GTEx,Limbic / striatal,216,0,0

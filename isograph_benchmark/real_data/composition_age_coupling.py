@@ -24,6 +24,11 @@ Three outputs, all keyed by the same analysis labels the composition rollup uses
    ``comp_unique_base`` from the composition rollup). This is the panel that makes the
    confounder-vs-mediator caveat concrete: the regions that lose the most are the regions
    whose composition moves most with age.
+4. ``composition_marker_tests.csv`` -- per analysis, how many module x cell-type marker
+   tests were run and how many reached FDR < 0.05 for enrichment and for depletion. This
+   is the control that does not depend on the covariate model at all: if the modules were
+   collections of cell-type markers, adjustment would be removing the modules' own
+   definition rather than a confounder.
 
 Correlation, not causation: a strong rho does not establish that composition drives the
 switch signal, and a weak rho does not license a cell-intrinsic reading. The panel bounds
@@ -200,6 +205,35 @@ def _persistence(coupling: pd.DataFrame) -> pd.DataFrame:
     return out.sort_values("max_abs_rho_age", ascending=False, ignore_index=True)
 
 
+def _marker_tests(variant: str, root: Path | None = None) -> pd.DataFrame:
+    """Per-analysis module x cell-type marker tests: how many, and how many significant.
+
+    Read from each store's ``celltype_composition/marker_enrichment.parquet`` (one row per
+    module x cell type, with BH-adjusted enrichment and depletion p values). The number of
+    tests is carried with the two counts because it differs ~3x between regions -- with the
+    module count and the size of the reference panel -- so a bare count of significant
+    tests would compare granularity rather than marker content.
+    """
+    subdir = "isograph_vae_with_abundance" if variant == "with-abundance" else "isograph_vae"
+    root = stage_out("modules") if root is None else root
+    rows = []
+    for f in sorted(root.glob(f"*/*/_m/{subdir}/celltype_composition/"
+                              "marker_enrichment.parquet")):
+        cohort, region = f.parts[-6], f.parts[-5]
+        mk = pd.read_parquet(f, columns=["fdr_enrich", "fdr_deplete"])
+        label = _label(cohort, region)
+        rows.append(dict(
+            label=label, cohort="GTEx" if cohort == "gtex" else "BrainSEQ",
+            **{"class": CLASS_OF.get(label)},
+            n_marker_tests=int(len(mk)),
+            marker_enriched=int((mk["fdr_enrich"] < 0.05).sum()),
+            marker_depleted=int((mk["fdr_deplete"] < 0.05).sum()),
+        ))
+    cols = ["label", "cohort", "class", "n_marker_tests", "marker_enriched",
+            "marker_depleted"]
+    return pd.DataFrame(rows, columns=cols)
+
+
 def _md_table(df: pd.DataFrame) -> str:
     head = "| " + " | ".join(df.columns) + " |"
     rule = "| " + " | ".join("---" for _ in df.columns) + " |"
@@ -229,6 +263,8 @@ def run(variant: str) -> None:
     # .csv.gz directly, so there is no reason to keep it uncompressed in the repo.
     tidy.to_csv(out / "composition_age_samples.csv.gz", index=False, compression="gzip")
     persist.to_csv(out / "composition_age_persistence.csv", index=False)
+    markers = _marker_tests(variant)
+    markers.to_csv(out / "composition_marker_tests.csv", index=False)
 
     n_sig = int((coupling["fdr_age"] < 0.05).sum())
     cortical = persist[persist["class"] == "Cortical"]["max_abs_rho_age"]
@@ -239,6 +275,9 @@ def run(variant: str) -> None:
         "n_celltype_age_fdr05": n_sig,
         "median_max_abs_rho_cortical": float(cortical.median()) if len(cortical) else None,
         "median_max_abs_rho_limbic": float(limbic.median()) if len(limbic) else None,
+        "n_marker_tests": int(markers["n_marker_tests"].sum()),
+        "n_marker_enriched": int(markers["marker_enriched"].sum()),
+        "n_marker_depleted": int(markers["marker_depleted"].sum()),
     }
     (out / "composition_age_coupling_summary.json").write_text(json.dumps(summary, indent=2))
 
@@ -272,8 +311,14 @@ def run(variant: str) -> None:
         "over-adjustment story, not a sufficient one; the reference match matters too "
         "(GTEx cortex/BA9 are deconvolved against a DLPFC snRNA panel).",
         "- Correlation is not causation in either direction. Read this panel next to the "
-        "marker-depletion cut in `COMPOSITION_ADJUSTMENT_SUMMARY.md`, which does not "
-        "depend on the covariate model at all.",
+        "marker cut below, which does not depend on the covariate model at all.",
+        "",
+        "## Are the modules collections of cell-type markers?", "",
+        f"{int(markers['marker_enriched'].sum())} of {int(markers['n_marker_tests'].sum())} "
+        "module x cell-type tests reach FDR < 0.05 for marker enrichment and "
+        f"{int(markers['marker_depleted'].sum())} for depletion "
+        "(`composition_marker_tests.csv`).", "",
+        _md_table(markers),
     ]
     (out / "COMPOSITION_AGE_COUPLING.md").write_text("\n".join(lines))
     print(f"[coupling] {coupling['label'].nunique()} analyses, {n_sig}/{len(coupling)} "

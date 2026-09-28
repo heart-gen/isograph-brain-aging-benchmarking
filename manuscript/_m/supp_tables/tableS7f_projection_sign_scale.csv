@@ -1,0 +1,13 @@
+method,direction,pair,n_modules,raw_n_both_sig,raw_sign_match_both_sig,raw_sign_match_all,std_n_both_sig,std_sign_match_all,median_age_r_target,median_age_z_target,n_shared_genes,n_orientable,n_flipped,frac_flipped,median_abs_cosine,median_abs_cosine_orientable
+isograph,brainseq_to_gtex,caudate,12,8,8,11,8,11,-0.1379,-2.4688,11476.0,5739.0,2616.0,0.4558,0.5,0.7951
+isograph,brainseq_to_gtex,dlpfc_ba9,10,8,8,10,4,9,-0.2039,-2.0241,11340.0,5660.0,2522.0,0.4456,0.4988,0.8066
+isograph,brainseq_to_gtex,hippocampus,16,13,0,1,7,13,-0.1542,-1.6798,10944.0,5450.0,2505.0,0.4596,0.4974,0.797
+isograph,gtex_to_brainseq,caudate,22,1,1,7,7,20,0.1606,-0.6815,11476.0,5739.0,2616.0,0.4558,0.5,0.7951
+isograph,gtex_to_brainseq,dlpfc_ba9,12,2,2,9,5,11,-0.0509,-1.8635,11340.0,5660.0,2522.0,0.4456,0.4988,0.8066
+isograph,gtex_to_brainseq,hippocampus,21,14,0,1,5,13,0.4258,-2.3301,10944.0,5450.0,2505.0,0.4596,0.4974,0.797
+wgcna,brainseq_to_gtex,caudate,23,1,1,13,16,14,-0.0223,1.9291,,,,,,
+wgcna,brainseq_to_gtex,dlpfc_ba9,24,3,3,14,13,12,-0.0133,4.7292,,,,,,
+wgcna,brainseq_to_gtex,hippocampus,5,4,1,1,3,2,-0.1265,-3.9736,,,,,,
+wgcna,gtex_to_brainseq,caudate,6,1,1,4,5,1,0.155,-6.08,,,,,,
+wgcna,gtex_to_brainseq,dlpfc_ba9,3,1,1,2,2,1,-0.0109,-7.0651,,,,,,
+wgcna,gtex_to_brainseq,hippocampus,1,1,0,0,1,1,0.4413,-39.1731,,,,,,

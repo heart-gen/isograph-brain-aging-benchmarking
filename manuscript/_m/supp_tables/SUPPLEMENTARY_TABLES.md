@@ -14,13 +14,20 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S4 | `tableS4_qtl_specificity_matched_baseline.csv` | `qtl_anchoring_meta/qtl_anchoring_meta_contrast_common.parquet` | the specificity effect is IsoGraph-only (clean method effect) |
 | S5 | `tableS5_qtl_raw_enrichment_or.csv` | `qtl_anchoring_meta/qtl_anchoring_meta.parquet` | shared cis-QTL depletion baseline the ratio removes |
 | S6 | `tableS6_go_invisible_gate.csv` | `brainseq/caudate_sczd/_m/go_invisible_gate.parquet` | disease switch modules are real DTU-without-DGE biology |
-| S7 | `tableS7_module_trust_funnel.csv` | `stability/_m/module_trust/*` | per-module trust scaffold (stability→drivers→replication→complementarity) |
+| S7 | `tableS7_module_trust_funnel.csv` | `stability/module_trust_tables/region_funnel.csv` | per-region funnel, **both methods** (stability→drivers→split-half aging→complementarity) |
+| S7a | `tableS7a_split_half_module_ledger.csv` | `module_stability__*.parquet` | every module behind the 93/118 and 62/72 trusted counts, with its permutation null |
+| S7b | `tableS7b_projection_module_ledger.csv` | `eigengene_projection/eigengene_projection_all.parquet` | every module behind the frozen-eigengene transfer counts, standardised **and** raw |
+| S7c | `tableS7c_crosscohort_permutation.csv` | `replication_permutation__*__stats.json` | the matched-pair count under all three covariate modes × three statistics × two nulls |
+| S7d | `tableS7d_functional_preservation.csv` | `functional_preservation__*__stats.json` | what matched cross-cohort pairs still share when the gene partition does not replicate |
+| S7e | `tableS7e_resolution_sensitivity.csv` | `stability_summary.parquet` | split-half ARI/NMI per region across Leiden 0.5–20, production 2.0 flagged, WGCNA beside it |
+| S7f | `tableS7f_projection_sign_scale.csv` | `eigengene_projection_all.parquet`, `switch_axis_alignment__*.parquet` | raw vs null-standardised projected-age sign agreement, with the switch-axis sign convention |
 | S8 | `deep_dive/deep_dive_panel.tsv` | `deep_dive/deep_dive_panel.parquet` | per-gene verdict for every colocalized gene (splicing-led vs expression-led) |
 | S9 | `deep_dive/deep_dive_events.tsv` | `coloc/_m/coloc_isoform_events_combined.parquet` (+direction) | per-event anchor→switch→consequence for every colocalized gene |
 | S10 | `deep_dive/deep_dive_rbp.tsv` | `_m/rbp/{rbp_switch_calls,rbp_regulon}.parquet` | per-gene switched + module-enriched RBP regulators |
 | S11 | `deep_dive/deep_dive_exon_clinical.tsv` | per-region `clinical_consequence/exon_clinvar.parquet` | per-gene/exon switched-vs-constitutive ClinVar & CDS annotation |
 | S12 | `deep_dive/deep_dive_literature.tsv` | `deep_dive/deep_dive_literature.parquet` | curated known-isoform-biology literature per resolved splicing-led gene (with Manubot citekeys) |
-| S13 | `tableS13_composition_adjustment.csv` | `composition_adjustment.parquet` + `composition_adjustment_gtex.parquet` | how much of the DTU-without-DGE layer survives cell-type adjustment, with the gene-level overlap (`n_overlap`) and newly detected genes (`n_new`) (backs Fig 5) |
+| S13a | `tableS13a_axis_orthogonality.csv` | `axis_orthogonality_summary.parquet` | per-analysis switch vs abundance separation for all 17 analyses (the one per-analysis table that needs no deconvolution, so it spans the five GTEx regions S13 cannot) |
+| S13 | `tableS13_composition_adjustment.csv` | `composition_adjustment.parquet` + `composition_adjustment_gtex.parquet` | how much of the DTU-without-DGE layer survives cell-type adjustment, with the gene-level overlap (`n_overlap`) and newly detected genes (`n_new`), and the marker counts with their denominator (`n_marker_tests`) (backs Fig 2c,d and `figCompositionAgeCoupling` D) |
 | S14 | `tableS14_longread_orthogonal_confirmation.csv` | `switch_orthogonal_confirm/anchored_gene_confirmation.parquet` | per-gene long-read confirmation of the anchored switch pairs (backs S-real-8) |
 | S15 | `tableS15_isa_concordance.csv` | `isa_concordance/*/summary.json` | independent-caller (satuRn) DTU concordance across all 17 analyses (backs S-real-9) |
 | S16 | `tableS16_module_genetic_anchoring.csv` | `module_genetic_anchoring_meta/` | per-module splicing anchoring vs a size-matched permutation null — **a table on purpose, not a figure** |
@@ -124,19 +131,100 @@ pathway enrichment (biology gate PASS, complementary form).
 
 ## Table S7 — Per-region module trust funnel
 
-One row per region × method (IsoGraph) summarising the four-question funnel: Q1 stability
-(`n_modules`, `n_trusted`, `frac_trusted` above a size-matched permutation null at FDR<0.05),
-Q2 drivers (`median_driver_rho`, `frac_positive_rho` of shared-gene switch-loading Spearman ρ
-across split halves), Q3 cross-cohort aging concordance (`n_concordant`/`n_replication_pairs`,
-BrainSEQ↔GTEx, sign-concordant and jointly significant in both cohorts; BrainSEQ rows
-only; counted on the linear covariate-free arm — see REPLICATION_PERMUTATION.md for the
-permutation null and the linear-vs-spline asymmetry), and Q4
-complementarity (`median_frac_dtu_without_dge`, `median_frac_in_wgcna_age`). Across six
-regions: 250/266 modules trusted; driver ρ medians 0.66–0.88 with 94–100% positive; 23/130
-BrainSEQ modules replicate cross-cohort (caudate 2/44, DLPFC 8/36, hippocampus 13/50). *(Requoted
-2026-09-12 after the split-half re-fit and the `modules_meta` rebuild; the earlier 236/266, 0.77–0.82
-and 25/130 are stale.)*
-Supports: the per-module trust scaffold the biological claims rest on.
+One row per cohort × region × method. Q1 stability (`n_modules`, `n_trusted`,
+`frac_trusted` above a size-matched permutation null at FDR<0.05, with the median
+co-assignment density and its null); Q2 drivers (`median_driver_rho`, `frac_positive_rho`
+of the shared-gene switch-loading Spearman ρ across split halves, IsoGraph only — WGCNA has
+no transcript drivers); within-cohort split-half aging concordance
+(`n_sign_concordant`/`n_both_age_sig` of `n_split_half_pairs`); and Q4 complementarity
+(`median_frac_dtu_without_dge`, `median_frac_in_wgcna_age`, IsoGraph only). Across the six
+regions: **93/118** IsoGraph modules trusted against **62/72** for the matched WGCNA
+baseline — IsoGraph is *not* the higher trusted fraction, it is trustworthy at a much finer
+granularity; driver ρ medians **0.72–0.82** with 94–100% of pairs positive; split-half age
+direction agrees in **22/23** IsoGraph and **14/14** WGCNA both-significant pairs.
+Cross-cohort counts are in S7b (transfer) and S7c (membership matching), not here, because
+they are not per-region quantities. Supports: the per-module trust scaffold the biological
+claims rest on.
+
+*Regenerated 2026-09-28 from the Leiden-2.0 production fits. The earlier 250/266, 0.66–0.88
+and 23/130 in this legend were computed at Leiden 5.0 and are stale; so is
+`MODULE_TRUST_SUMMARY.md`, which has not been rebuilt.*
+
+## Table S7a — Split-half module ledger
+
+One row per module per method (190 rows): size, co-assignment density, the size-matched
+permutation null mean, permutation *p*, BH *q* and the trusted flag, plus
+`best_match_jaccard`. The Jaccard column is descriptive only — it is granularity-confounded,
+which is why the trust criterion is the chance-calibrated co-assignment test and not this
+column. Supports: the trusted counts in Fig 3a,b are auditable module by module.
+
+## Table S7b — Cross-cohort eigengene projection ledger
+
+One row per trusted module per direction (155 rows): the frozen-weight signed kME against
+its type-matched null with BH *q*, the module's age correlation in each cohort, that
+correlation expressed as a *z* against same-weight random projections, and the sign match.
+The `raw_sign_match` and `raw_both_sig` columns are the point of the table: on the raw
+projected correlations the three BrainSEQ→GTEx pairs give 44/44, 1/50 and 32/36 sign
+agreement — a property of each target cohort's own age-correlated structure, not of the
+modules. Supports: the transfer claim is reported on the standardised statistic, and the
+raw one is shown rather than omitted.
+
+## Table S7c — Cross-cohort matched-pair count against its permutation nulls
+
+The full grid: 2 methods × 3 statistics (covariate-free Pearson, covariate-adjusted linear,
+covariate-adjusted spline F) × 3 covariate modes × 2 nulls (`age`, Freedman–Lane on the age
+association; `matching`, permuting which target module each source module is matched to —
+the stricter). `is_published_statistic` flags the covariate-free Pearson arm the Results
+text quotes. **Read the two arms together:** against the matching null the Pearson arm gives
+1/38 (*p* = 0.91) for IsoGraph and 2/52 (*p* = 0.15) for WGCNA, while the stage's
+pre-registered covariate-adjusted spline arm gives 0/38 (*p* = 1) and 5/52 (*p* = 0.16).
+Neither clears. Per the decision rule in `REPLICATION_PERMUTATION.md` the word *replication*
+must not be used for this arm; the honest wording is "matched modules with concordant age
+effects". Supports: the membership-matching null result, reported in full rather than at its
+most favourable setting.
+
+## Table S7d — Functional preservation of matched cross-cohort pairs
+
+Matched BrainSEQ↔GTEx module pairs against a null that re-pairs each module with a random
+target module **from the same gene-count decile** (all of these similarities grow with
+module size). Median gene Jaccard is 0.038 — the overlap these measures are asked to look
+past. IsoGraph clears on both computable measures (GO-term Jaccard 0.097 vs 0.030,
+*p* = 0.001; cell-type profile *r* = 0.208 vs 0.040, *p* = 0.006), while the WGCNA baseline
+sits on its own null (GO Jaccard 0.136 vs 0.139, *p* = 1). Rows with `n_finite = 0` are
+**untested, not negative**: transcript structure had no computable pair, and cell-type
+profiles are produced only in the IsoGraph artifact tree. Supports: the cohorts recover
+related biological programs at a higher level of organisation than gene identity — the
+positive half of a paragraph whose first half is a null result.
+
+## Table S7e — Split-half agreement across the Leiden resolution sweep
+
+Mean adjusted Rand index and normalised mutual information between the two halves of each
+donor split, over five seeds, at eight Leiden resolutions (0.5, 1, 2, 3, 5, 8, 12, 20).
+Production is 2.0 (PI decision, 2026-09-16) and is flagged in `is_production`; the WGCNA
+rows carry no resolution, because there is none to set, and are kept so the sweep is read
+against the fixed baseline rather than against itself. Mean ARI across regions is 0.37–0.47
+over the whole sweep (production 0.42), and the per-region best resolution is 0.5, 0.5, 1, 3, 20
+and 20 — that is, no resolution is uniformly best and nothing singles out 2.0 as
+tuned-to-fit. Per-region production values span ARI 0.19–0.57, against 0.29–0.71 for WGCNA
+on the same splits, which is the granularity contrast the funnel reports throughout: WGCNA
+agrees with itself more readily on a partition roughly 3.6× coarser. Supports: the
+stability claim is a property of the representation, not of the resolution chosen for it.
+
+## Table S7f — Raw against null-standardised projected-age sign agreement
+
+One row per method × direction × region, with the switch-axis sign convention for the
+IsoGraph rows. The raw and standardised arms are counted over different denominators and
+both are written: `raw_sign_match_both_sig` over modules whose projected age correlation is
+significant in both cohorts, `std_sign_match_all` over every age-testable module. The raw
+arm is why the reported statistic is standardised — among raw both-significant modules the
+three BrainSEQ→GTEx regions give 8/8, 8/8 and **0/13**: two regions agree unanimously and
+one disagrees unanimously, which is a property of each target cohort's own age-correlated
+structure (RNA quality, ischemic time, composition), not of the modules. About 45% of
+orientable genes have their switch axis fitted with the opposite sign in the two cohorts
+(2,505–2,616 of 5,450–5,739 per region; median |cosine| 0.50 over all shared genes, 0.80
+among orientable ones), so a raw projected coefficient carries a sign the projection did
+not earn. Supports: the standardisation in the projection result is a stated method
+choice with its own evidence, not a post-hoc rescue.
 
 ## Table S8 — Per-gene deep-dive panel (all colocalized genes)
 
@@ -190,6 +278,18 @@ deterministically; no DOI/PMID is fabricated. Supports: the literature layer (la
 resolved vignette and the deep-dive Results paragraph.
 
 ---
+
+## Table S13a — Switch against abundance axis separation, per analysis
+
+One row per analysis (17): genes tested, the median absolute correlation between the
+gene-abundance and isoform-switch coordinates with its quartiles, and the fraction of genes
+below 0.1, below 0.3 and above 0.5. Median |*r*| runs 0.111 (BrainSEQ aging hippocampus) to
+0.243 (GTEx nucleus accumbens), with 23–46% of genes under 0.1 and 1.1–16.8% over 0.5, over
+12,042–13,222 genes per analysis. The quartiles and tail fractions are kept because the
+claim is about the bulk of the distribution rather than a central value. Unlike S13, this
+test needs no deconvolution, so it covers all 17 analyses including the five GTEx regions
+with no matched snRNA reference. Supports: the switch coordinate is not a re-description of
+abundance in any analysis, while being far from orthogonal in some.
 
 ## Reproducibility
 

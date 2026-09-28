@@ -1,0 +1,9 @@
+claim,method,num,den,value
+modules_chance_trusted,isograph,93,118,0.788135593220339
+modules_chance_trusted,wgcna,62,72,0.8611111111111112
+split_half_age_sign_concordance,isograph,22,23,0.9565217391304348
+split_half_age_sign_concordance,wgcna,14,14,1.0
+aging_axis_transfers__brainseq_to_gtex,isograph,33,38,0.868421052631579
+aging_axis_transfers__brainseq_to_gtex,wgcna,28,52,0.5384615384615384
+aging_axis_transfers__gtex_to_brainseq,isograph,44,55,0.8
+aging_axis_transfers__gtex_to_brainseq,wgcna,3,10,0.3

@@ -26,4 +26,23 @@ Spearman correlation of each MuSiC cell-type proportion with donor age, per anal
 - `persistence` is `n_overlap / comp_unique_base`: the share of a region's unadjusted switch-unique genes that are still switch-unique after adjustment. It is a real fraction; the ratio of the two counts is not, because adjustment adds genes as well as dropping them.
 - **A strong `top_rho_age` marks a region where adjustment and the age term compete for the same variance.** In those regions a collapse in switch-unique genes is equally consistent with composition confounding the signal and with over-adjustment removing real signal; this table bounds the risk rather than resolving it.
 - **Age-coupling alone does not predict the collapse.** Cortical regions do carry the most age-coupled reference panels, but ACC BA24 and BrainSEQ DLPFC are cortical and retain a third of their switch-unique genes, while GTEx BA9 and cortex retain almost none. Composition-age coupling is a necessary part of the over-adjustment story, not a sufficient one; the reference match matters too (GTEx cortex/BA9 are deconvolved against a DLPFC snRNA panel).
-- Correlation is not causation in either direction. Read this panel next to the marker-depletion cut in `COMPOSITION_ADJUSTMENT_SUMMARY.md`, which does not depend on the covariate model at all.
+- Correlation is not causation in either direction. Read this panel next to the marker cut below, which does not depend on the covariate model at all.
+
+## Are the modules collections of cell-type markers?
+
+12 of 2061 module x cell-type tests reach FDR < 0.05 for marker enrichment and 0 for depletion (`composition_marker_tests.csv`).
+
+| label | cohort | class | n_marker_tests | marker_enriched | marker_depleted |
+| --- | --- | --- | --- | --- | --- |
+| aging caudate | BrainSEQ | Limbic / striatal | 91 | 1 | 0 |
+| SCZD (caudate) | BrainSEQ | Disease (SCZD) | 84 | 0 | 0 |
+| aging DLPFC | BrainSEQ | Cortical | 80 | 1 | 0 |
+| aging hippocampus | BrainSEQ | Limbic / striatal | 128 | 1 | 0 |
+| GTEx amygdala | GTEx | Limbic / striatal | 264 | 1 | 0 |
+| GTEx anterior_cingulate_cortex_ba24 | GTEx | Cortical | 150 | 2 | 0 |
+| GTEx caudate_basal_ganglia | GTEx | Limbic / striatal | 224 | 2 | 0 |
+| GTEx cortex | GTEx | Cortical | 200 | 1 | 0 |
+| GTEx frontal_cortex_ba9 | GTEx | Cortical | 168 | 0 | 0 |
+| GTEx hippocampus | GTEx | Limbic / striatal | 240 | 2 | 0 |
+| GTEx nucleus_accumbens_basal_ganglia | GTEx | Limbic / striatal | 216 | 1 | 0 |
+| GTEx putamen_basal_ganglia | GTEx | Limbic / striatal | 216 | 0 | 0 |
