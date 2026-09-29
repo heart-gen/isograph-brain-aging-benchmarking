@@ -600,6 +600,40 @@ def signal_coloc_tables() -> None:
           "tableS26_coloc_modality_contrast.csv")
 
 
+def coloc_event_table() -> None:
+    """S28 — every colocalization event (nomination x tissue) of the all-introns arm,
+    mapped to transcripts and to the tissue-matched IsoGraph switch pair. Fig 5b,c.
+
+    `signal_level_nomination` is True when coloc.susie scored the gene x trait in at least
+    one tissue (33 of 119); the rest rest on the coloc.abf fallback, whose rows name GTEx's
+    representative intron only. `clpp_resolves_switch` marks gene x trait cells that the
+    CLPP layer (S24) also resolves to a switch pair. No risk-allele direction here: that is
+    resolved only in the CLPP layer. `structural_consequence` is left out for the reason
+    given under S24.
+    """
+    e = pd.read_parquet(SUSIE_ALL / "coloc_isoform_events.parquet")
+    e["junction_in_switch_pair"] = e.junction_in_switch_pair.fillna(False).astype(bool)
+    key = ["gene_name", "trait"]
+    nom = e.groupby(key).estimator.agg(lambda s: (s == "susie").any())
+    e = e.join(nom.rename("signal_level_nomination"), on=key)
+    c = pd.read_parquet(COLOC / "coloc_isoform_events_combined.parquet")
+    c = c[c.junction_in_switch_pair.fillna(False).astype(bool)]
+    ck = set(zip(c.gene_name, c.trait))
+    e["clpp_resolves_switch"] = [k in ck for k in zip(e.gene_name, e.trait)]
+    assert e.groupby(key).ngroups == 119 and nom.sum() == 33
+    e["estimator"] = e.estimator.map({"susie": "coloc.susie", "abf": "coloc.abf"})
+    cols = ["analysis", "trait", "gene_name", "gene", "tissue", "signal_level_nomination",
+            "estimator", "PP4_sQTL", "PP4_eQTL", "prior_robustness", "fallback_reason",
+            "phenotype_id", "junction", "junction_transcripts", "go_invisible",
+            "junction_in_switch_pair", "switch_pair", "n_switch_pairs",
+            "junction_transcript_polarity_r", "brainseq_region", "brainseq_switch_pair",
+            "brainseq_replicates_switch", "switch_pair_scope", "clpp_resolves_switch"]
+    e = (e[cols].sort_values(["junction_in_switch_pair", "signal_level_nomination",
+                              "PP4_sQTL"], ascending=[False, False, False])
+         .reset_index(drop=True))
+    write(round_num(e), "tableS28_coloc_isoform_events.csv")
+
+
 def ldsc_table() -> None:
     """S27 — partitioned heritability of the switch-derived QTL annotations.
 
@@ -635,6 +669,7 @@ def main() -> None:
     allelic_tables()
     clpp_event_table()
     signal_coloc_tables()
+    coloc_event_table()
     ldsc_table()
     print("done.")
 

@@ -3,10 +3,13 @@
 # (a) within-donor allelic test (BrainSEQ recount): nominal P < 0.05 rate for the
 #     lead-heterozygous test against the lead-homozygous null, with the q < 0.05 counts;
 #     shared with the supplementary allelic figure through allelic_panels.R;
-# (b) the CLPP-nominated genes by QTL support (sQTL only / both / eQTL only), with the
-#     genes whose sQTL junction resolves to a tissue-matched switch pair filled;
-# (c) those resolved genes by max CLPP, coloured by trait (TMEM175 / TPP1 at the top are
-#     the discordance examples the text discusses);
+# (b) the 119 sQTL colocalization nominations by estimator tier (coloc.susie signal level /
+#     coloc.abf fallback only), with those whose colocalizing intron lands on a
+#     tissue-matched switch-pair isoform filled;
+# (c) the 20 signal-level nominations on a switch-pair isoform by max PP4, coloured by trait,
+#     filled where the CLPP layer resolves the same gene x trait to a switch pair.
+#     (b, c) were CLPP-based until 2026-09-29; colocalization now leads, following the
+#     estimator hierarchy susie > abf > CLPP, and CLPP sits in Table S24 as corroboration;
 # (d) PRDM2 vignette - the ALS risk allele lowers usage of the junction that joins PRDM2's
 #     distal terminal exon, shifting the gene toward an early-terminating form;
 # (e) S-LDSC partitioned heritability of the aging switch layer across five traits
@@ -66,8 +69,10 @@
 # flags each transcript against a gene reference, so 63 of 76 concordant events carry all
 # seven flags and it cannot distinguish one event from another. The structure drawn in this
 # panel comes from the GENCODE exon coordinates directly.
-# Reads 08_integration/_m/deep_dive/{prdm2_transcript_exons.tsv,deep_dive_panel.parquet}
+# Reads 08_integration/_m/deep_dive/prdm2_transcript_exons.tsv,
+#       05_genetic_anchoring/_m/coloc_signal_susie/all_introns/coloc_isoform_events.parquet
 #       and manuscript/_m/supp_tables/{tableS22_allelic_imbalance_regions,
+#       tableS24_clpp_isoform_events,
 #       tableS27_ldsc_partitioned}.csv (LDSC through its table CSV: the ledger parquet is
 #       zstd, which an `arrow` built without it cannot read);
 #       writes figGeneticAnchoring.{pdf,png}.
@@ -89,6 +94,7 @@ find_root <- function() {
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
 DD_DIR  <- rel("08_integration", "_m", "deep_dive")
+SUSIE_DIR <- rel("05_genetic_anchoring", "_m", "coloc_signal_susie", "all_introns")
 TAB_DIR <- rel("manuscript", "_m", "supp_tables")
 FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
@@ -211,51 +217,85 @@ pB <- ggplot(lb, aes(trait, enrichment, fill = annot)) +
                       legend.margin = margin(0, 0, 0, 0), legend.box.spacing = unit(2, "pt"))
 
 # ===========================================================================
-# Panel C - the resolved splicing-led coloc genes (max CLPP, by trait span)
+# Coloc-layer events (reorganised 2026-09-29: colocalization leads, CLPP corroborates).
+# One row per (nomination x tissue) from the all-introns signal-level arm; a nomination is
+# signal-level when coloc.susie scored it in at least one tissue, and coloc.abf-only
+# otherwise (the fallback tier the Methods keep separate).
 # ===========================================================================
-panel <- as.data.frame(read_parquet(file.path(DD_DIR, "deep_dive_panel.parquet")))
-pc <- panel |>
-  filter(resolved_to_switch_pair) |>
-  mutate(trait_span = ifelse(grepl(",", concordant_traits), "multiple traits", concordant_traits),
-         trait_span = factor(trait_span, intersect(c(names(TRAIT_COLORS), "multiple traits"),
-                                                   trait_span)),
-         gene = reorder(gene, max_clpp)) |>
-  arrange(desc(max_clpp))
+ev <- as.data.frame(read_parquet(file.path(SUSIE_DIR, "coloc_isoform_events.parquet"))) |>
+  mutate(ev_switch = junction_in_switch_pair %in% TRUE, trait = toupper(trait))
+# summarise() sees earlier summaries under their new names, so the per-event flag keeps a
+# name of its own.
+nom <- ev |>
+  group_by(gene_name, trait) |>
+  summarise(signal = any(estimator == "susie"),
+            on_switch_signal = any(ev_switch & estimator == "susie"),
+            pp4_switch_signal = suppressWarnings(max(PP4_sQTL[ev_switch & estimator == "susie"])),
+            on_switch = any(ev_switch),
+            .groups = "drop")
+# The numbers the Results quote; fail loudly if the ledger moves under the text.
+# 21 signal-level nominations reach a switch pair, 20 through a coloc.susie event itself;
+# GPM6A (SCZ) is signal-level in caudate/ACC but switch-mapped only in a coloc.abf tissue.
+stopifnot(nrow(nom) == 119, sum(nom$signal) == 33, sum(nom$on_switch) == 56,
+          sum(nom$signal & nom$on_switch) == 21, sum(nom$on_switch_signal) == 20)
 
-pC <- ggplot(pc, aes(max_clpp, gene)) +
-  geom_segment(aes(x = 0, xend = max_clpp, yend = gene), colour = "grey80", linewidth = 0.4) +
-  geom_point(aes(colour = trait_span, shape = multi_locus), size = 2) +
-  scale_colour_manual(values = c(TRAIT_COLORS, "multiple traits" = "grey35"),
-                      name = "concordant trait(s)") +
-  scale_shape_manual(values = c(`FALSE` = 16, `TRUE` = 18),
-                     labels = c("single", "multi-locus"), name = NULL) +
-  # square-root axis: a few high-CLPP genes would otherwise crush the rest against zero
-  scale_x_sqrt(breaks = c(0, 0.05, 0.25, 0.5)) +
-  labs(x = "Max CLPP (square-root scale)", y = NULL) +
+# CLPP corroboration: the same gene x trait also resolves to a switch pair in the CLPP layer.
+clpp <- need_tab("tableS24_clpp_isoform_events.csv") |>
+  filter(as.character(junction_in_switch_pair) %in% c("True", "TRUE")) |>
+  distinct(gene_name, trait = toupper(trait))
+clpp_key <- paste(clpp$gene_name, clpp$trait)
+
+# ===========================================================================
+# Panel C - the signal-level nominations that land on a switch-pair isoform (max PP4)
+# ===========================================================================
+# TMEM175 and SNCA head this panel. Earlier vignette decisions (see the header) rejected both
+# on the representative-intron abf and CLPP layers; in the all-introns coloc.susie arm drawn
+# here both are signal-level and switch-mapped (TMEM175: cortex and cerebellum; SNCA:
+# hypothalamus and cerebellum, not cortex). The legend carries their SMR caveats (TMEM175
+# 6/36 supported; SNCA LBD 12 supported vs 11 HEIDI-rejected). PRDM2 is abf-only and so is
+# absent here by construction.
+pc <- nom |>
+  filter(on_switch_signal) |>
+  mutate(dup = duplicated(gene_name) | duplicated(gene_name, fromLast = TRUE),
+         label = ifelse(dup, sprintf("%s (%s)", gene_name, trait), gene_name),
+         label = reorder(label, pp4_switch_signal),
+         trait = factor(trait, intersect(names(TRAIT_COLORS), trait)),
+         clpp_too = factor(ifelse(paste(gene_name, trait) %in% clpp_key,
+                                  "also CLPP-resolved", "coloc only"),
+                           c("also CLPP-resolved", "coloc only")))
+
+pC <- ggplot(pc, aes(pp4_switch_signal, label)) +
+  geom_segment(aes(x = 0.8, xend = pp4_switch_signal, yend = label), colour = "grey80",
+               linewidth = 0.4) +
+  geom_point(aes(colour = trait, shape = clpp_too), size = 2, stroke = 0.7) +
+  scale_colour_manual(values = TRAIT_COLORS, name = "trait") +
+  scale_shape_manual(values = c("also CLPP-resolved" = 16, "coloc only" = 1), name = NULL) +
+  scale_x_continuous(limits = c(0.8, 1), breaks = c(0.8, 0.9, 1),
+                     expand = expansion(mult = c(0, 0.03))) +
+  labs(x = expression("Max sQTL PP"[4] * " (coloc.susie)"), y = NULL) +
   theme_pub() +
-  theme(axis.text.y = element_text(size = 7),
-        # inside, over the empty low-CLPP corner: a side legend starved panel d of width
-        legend.position = c(0.97, 0.03), legend.justification = c(1, 0),
+  theme(axis.text.y = element_text(size = 7, face = "italic"),
+        # inside, over the empty low-PP4 corner: a side legend starved panel d of width
+        # lower right: the bottom rows sit at PP4 0.80-0.90, so that corner is empty
+        legend.position = c(0.99, 0.01), legend.justification = c(1, 0),
         legend.box = "vertical", legend.box.just = "right",
+        legend.background = element_blank(),
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ===========================================================================
-# Panel B (drawn as pD) - the CLPP-nominated genes by QTL support, resolved subset filled.
-# Same 160 genes as before; the split now follows the text (sQTL only / both / eQTL only)
-# instead of the verdict classes, so the 82 / 18 / 60 and the 30 resolved genes can both be
-# read off one panel.
+# Panel B (drawn as pD) - the 119 sQTL colocalization nominations by estimator tier, with
+# those whose colocalizing intron lands on a tissue-matched switch-pair isoform filled.
 # ===========================================================================
-SUPPORT <- c(sQTL = "sQTL only", "eQTL,sQTL" = "sQTL and eQTL", eQTL = "eQTL only")
-RES <- c("Resolves to a switch pair", "Does not resolve")
-vd <- panel |>
-  mutate(support = factor(unname(SUPPORT[kinds]), rev(unname(SUPPORT))),
-         res = factor(ifelse(resolved_to_switch_pair, RES[1], RES[2]), rev(RES))) |>
+TIER <- c("coloc.susie\n(signal level)", "coloc.abf\nfallback only")
+RES <- c("On a switch-pair isoform", "Not on a switch pair")
+vd <- nom |>
+  mutate(support = factor(ifelse(signal, TIER[1], TIER[2]), rev(TIER)),
+         res = factor(ifelse(on_switch, RES[1], RES[2]), rev(RES))) |>
   count(support, res, .drop = FALSE)
-stopifnot(!anyNA(vd$support))
 tot <- vd |> group_by(support) |>
   summarise(n_res = sum(n[res == RES[1]]), n = sum(n), .groups = "drop") |>
-  mutate(label = ifelse(n_res > 0, sprintf("%d (%d resolve)", n, n_res), as.character(n)))
+  mutate(label = sprintf("%d (%d on switch pair)", n, n_res))
 
 pD <- ggplot(vd, aes(n, support, fill = res)) +
   geom_col(width = 0.68, colour = NA) +
@@ -263,10 +303,10 @@ pD <- ggplot(vd, aes(n, support, fill = res)) +
             hjust = -0.08, size = 2.6, colour = "grey15") +
   scale_fill_manual(values = setNames(c("#D55E00", "grey80"), RES), breaks = RES,
                     name = NULL) +
-  scale_x_continuous(expand = expansion(mult = c(0.02, 0.55))) +
+  scale_x_continuous(expand = expansion(mult = c(0.02, 0.75))) +
   coord_cartesian(clip = "off") +
   guides(fill = guide_legend(nrow = 2)) +
-  labs(x = sprintf("CLPP-nominated genes (n = %d)", sum(vd$n)), y = NULL) +
+  labs(x = sprintf("sQTL coloc nominations (n = %d)", sum(vd$n)), y = NULL) +
   theme_pub() +
   theme(legend.position = "top", legend.justification = "left",
         legend.margin = margin(0, 0, 0, 0), legend.box.spacing = unit(2, "pt"),
