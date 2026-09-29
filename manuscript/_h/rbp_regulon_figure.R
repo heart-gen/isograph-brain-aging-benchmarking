@@ -1,6 +1,7 @@
 # Supplementary real-data figure: RBP regulons of the switch modules.
-# (A) recurrent regulators - RBP motifs whose switched-exon enrichment recurs across regions;
-# (B) breadth of significant module x RBP enrichments per region, split by GO-invisibility.
+# (a) per region, module x RBP cells significant by the hypergeometric test, split by
+#     whether they survive the opportunity-adjusted GLM; (b) RBPs whose supported cells
+#     recur across regions; (c) ENCODE eCLIP binding capacity, switched vs constitutive.
 # Reads 07_rbp_regulation/_m/rbp/rbp_regulon.parquet; writes figRbpRegulon.{pdf,png}.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/rbp_regulon_figure.R
@@ -31,20 +32,22 @@ save_fig <- function(p, name, width, height) {
 rb <- as.data.frame(read_parquet(rel("07_rbp_regulation", "_m", "rbp", "rbp_regulon.parquet")))
 sig <- rb |> filter(q < 0.05)
 
-# ---- Panel A: recurrent regulators (regions with a significant enrichment) ----
-rec <- sig |> group_by(rbp) |>
-  summarise(n_regions = n_distinct(region),
-            n_go_invisible = n_distinct(region[go_invisible]), .groups = "drop") |>
-  slice_max(n_regions, n = 14, with_ties = FALSE) |>
-  arrange(n_regions) |> mutate(rbp = factor(rbp, rbp))
-pA <- ggplot(rec, aes(n_regions, rbp)) +
-  geom_col(fill = "#009E73", width = 0.72, colour = NA) +
-  scale_x_continuous(expand = expansion(mult = c(0, 0.06)),
-                     breaks = scales::breaks_width(2)) +
-  labs(x = "Regions with significant\nswitched-exon enrichment (of 10)", y = NULL) +
-  theme_pub()
+# ---- Panels A/B redrawn 2026-09-29 on the opportunity-adjusted arm ----
+# A cell is "supported" when it is significant by the hypergeometric test (q < 0.05) AND
+# survives the opportunity-adjusted binomial GLM (qvalue_glm < 0.05, OR > 1). The raw
+# test alone is confounded by transcript length, GC and UTR composition, so it is drawn
+# only as the denominator. Every count is read from the parquet, including the region total.
+n_regions <- n_distinct(rb$region)
+rb <- rb |> mutate(supported = q < 0.05 & !is.na(qvalue_glm) & qvalue_glm < 0.05 &
+                     odds_ratio > 1)
+sig <- rb |> filter(q < 0.05)
+sup <- rb |> filter(supported)
+stopifnot(nrow(rb) == 11040, nrow(sig) == 384, nrow(sup) == 89)
+cat(sprintf("  regulon cells: %d tested in %d regions; %d hypergeometric q<0.05 (%d RBPs); %d survive adjustment (%d RBPs, %d regulons)\n",
+            nrow(rb), n_regions, nrow(sig), n_distinct(sig$rbp), nrow(sup),
+            n_distinct(sup$rbp), nrow(distinct(sup, region, module_id))))
 
-# ---- Panel B: significant module x RBP enrichments per region, by GO-invisibility ----
+# ---- Panel A: per region, raw hits and those that survive adjustment ----
 PRETTY_REGION <- c(
   frontal_cortex_ba9 = "Frontal ctx BA9", anterior_cingulate_cortex_ba24 = "ACC BA24",
   cerebellar_hemisphere = "Cerebellar hem.", caudate_basal_ganglia = "Caudate (GTEx)",
@@ -55,22 +58,33 @@ PRETTY_REGION <- c(
   nucleus_accumbens_basal_ganglia = "N. accumbens",
   spinal_cord_cervical_c_1 = "Spinal cord C1")
 relabel <- function(x) ifelse(x %in% names(PRETTY_REGION), PRETTY_REGION[x], x)
-
+CLS <- c("Survives opportunity adjustment", "Hypergeometric only")
 perreg <- sig |>
   mutate(region = unname(relabel(region)),
-         cls = ifelse(go_invisible, "GO-invisible", "GO-visible")) |>
+         cls = factor(ifelse(supported, CLS[1], CLS[2]), rev(CLS))) |>
   count(region, cls) |>
   group_by(region) |> mutate(tot = sum(n)) |> ungroup() |>
-  mutate(region = reorder(region, tot),
-         cls = factor(cls, c("GO-visible", "GO-invisible")))
-pB <- ggplot(perreg, aes(n, region, fill = cls)) +
+  mutate(region = reorder(region, tot))
+pA <- ggplot(perreg, aes(n, region, fill = cls)) +
   geom_col(width = 0.72, colour = NA) +
-  scale_fill_manual(values = c(`GO-invisible` = "#0072B2", `GO-visible` = "#E69F00"), name = NULL) +
+  scale_fill_manual(values = setNames(c("#D55E00", "grey80"), CLS), breaks = CLS, name = NULL) +
   scale_x_continuous(expand = expansion(mult = c(0, 0.06))) +
-  labs(x = "Significant module x RBP enrichments (q < 0.05)", y = NULL) +
+  guides(fill = guide_legend(nrow = 2)) +
+  labs(x = "Module x RBP cells, hypergeometric q < 0.05", y = NULL) +
   theme_pub() + theme(legend.position = "bottom",
                       legend.margin = margin(0, 0, 0, 0),
                       axis.text.y = element_text(size = 6.8))
+
+# ---- Panel B: RBPs whose supported cells recur across regions ----
+rec <- sup |> group_by(rbp) |>
+  summarise(n_regions = n_distinct(region), .groups = "drop") |>
+  slice_max(n_regions, n = 14, with_ties = FALSE) |>
+  arrange(n_regions) |> mutate(rbp = factor(rbp, rbp))
+pB <- ggplot(rec, aes(n_regions, rbp)) +
+  geom_col(fill = "#D55E00", width = 0.72, colour = NA) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.06)), breaks = scales::breaks_width(1)) +
+  labs(x = sprintf("Regions with a supported cell (of %d)", n_regions), y = NULL) +
+  theme_pub()
 
 # ---- Panel C: ENCODE eCLIP binding CAPACITY at switched vs constitutive exons ----
 # The motif panels above are sequence predictions. This panel adds the only measured
@@ -88,7 +102,7 @@ pB <- ggplot(perreg, aes(n, region, fill = cls)) +
 # binding CAPACITY at alternative-exon sequence, and the legend must say so.
 #
 # One two-sided exact McNemar per RBP over its unique nominated regulon genes (deduped
-# across regions), BH across the 38 testable RBPs -- NOT one test per region x module,
+# across regions), BH across the testable RBPs (35 in this run) -- NOT one test per region x module,
 # which would count the same region-invariant binding fact up to five times.
 bs <- as.data.frame(read_parquet(
   rel("07_rbp_regulation", "_m", "rbp", "rbp_binding_support.parquet")))
@@ -114,7 +128,7 @@ pC <- ggplot(bc, aes(rate_diff, rbp, colour = supported)) +
            label = "median", hjust = -0.12, vjust = 0.5, size = 2.1, colour = "grey45") +
   scale_colour_manual(values = c(`q < 0.05` = "#D55E00",
                                  `not significant` = "#999999"), name = NULL) +
-  scale_x_continuous(limits = c(0, 0.125), breaks = c(0, 0.05, 0.10)) +
+  scale_x_continuous(limits = c(0, max(bc$rate_diff) * 1.08), breaks = scales::breaks_width(0.05)) +
   coord_cartesian(clip = "off") +
   labs(x = "eCLIP binding rate,\nswitched - constitutive exons", y = NULL) +
   theme_pub() +
@@ -123,9 +137,9 @@ pC <- ggplot(bc, aes(rate_diff, rbp, colour = supported)) +
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
-fig <- (pA | pC) / pB +
-  plot_layout(heights = c(1.15, 1)) +
-  plot_annotation(tag_levels = "A") &
+fig <- (pA | (pB / pC)) +
+  plot_layout(widths = c(1, 1)) +
+  plot_annotation(tag_levels = "a") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 save_fig(fig, "figRbpRegulon", width = 7.2, height = 6.4)
 cat("Done.\n")
