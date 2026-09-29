@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from isograph_benchmark.paths import ensure_dir, region_store, stage_out  # noqa: E402
+from isograph_benchmark.paths import ensure_dir, region_store, rel, stage_out  # noqa: E402
 
 OUT = ensure_dir(stage_out("manuscript", "supp_tables"))
 QTL = stage_out("anchoring", "qtl_anchoring_meta")
@@ -723,8 +723,127 @@ def ldsc_table() -> None:
                                                    "coef_p")), "tableS27_ldsc_partitioned.csv")
 
 
+# --- S34  cohort description (Methods) ---------------------------------------
+# One row per discovery analysis, read from the bundle sample tables and manifests that
+# every IsoGraph fit consumed. GTEx exact age is released top-coded at 70.
+BUNDLES = rel("inputs", "bundles")
+BUNDLE_ANALYSES = (  # (bundle suite, region, cohort, analysis)
+    ("brainseq_v1", "caudate", "BrainSEQ", "Aging"),
+    ("brainseq_v1", "dlpfc", "BrainSEQ", "Aging"),
+    ("brainseq_v1", "hippocampus", "BrainSEQ", "Aging"),
+    ("brainseq_sczd", "caudate", "BrainSEQ", "Schizophrenia"),
+)
+GTEX_RACE = {1: "Asian", 2: "Black", 3: "White", 4: "American Indian", 98: "Unknown",
+             99: "Unknown"}
+BSEQ_RACE = {"AA": "Black", "CAUC": "White", "HISP": "Hispanic", "AS": "Asian",
+             "Multi-Racial": "Multiracial"}
+HARDY = {0: "ventilator", 1: "violent/fast", 2: "fast natural", 3: "intermediate",
+         4: "slow"}
+MUSIC_REF = {  # Tran/LIBD reference per analysis (celltype_composition.GTEX_REF + BrainSEQ)
+    ("BrainSEQ", "caudate"): "Caudate (direct)", ("BrainSEQ", "dlpfc"): "DLPFC (direct)",
+    ("BrainSEQ", "hippocampus"): "Hippocampus (direct)",
+    ("GTEx", "amygdala"): "Amygdala (direct)",
+    ("GTEx", "anterior_cingulate_cortex_ba24"): "sACC (direct)",
+    ("GTEx", "frontal_cortex_ba9"): "DLPFC (cortical proxy)",
+    ("GTEx", "cortex"): "DLPFC (cortical proxy)",
+    ("GTEx", "hippocampus"): "Hippocampus (direct)",
+    ("GTEx", "caudate_basal_ganglia"): "NAc (striatal proxy)",
+    ("GTEx", "putamen_basal_ganglia"): "NAc (striatal proxy)",
+    ("GTEx", "nucleus_accumbens_basal_ganglia"): "NAc (direct)",
+}
+
+
+def _counts(s: pd.Series, labels: dict) -> str:
+    vc = s.map(lambda v: labels.get(v, "Unknown") if pd.notna(v) else "Unknown").value_counts()
+    return "; ".join(f"{k} {v}" for k, v in vc.items())
+
+
+def _med_range(s: pd.Series, n: int = 1) -> str:
+    s = s.dropna()
+    return f"{s.median():.{n}f} [{s.min():.{n}f}-{s.max():.{n}f}]"
+
+
+def _med_iqr(s: pd.Series, n: int = 1) -> str:
+    s = s.dropna()
+    return f"{s.median():.{n}f} [{s.quantile(.25):.{n}f}-{s.quantile(.75):.{n}f}]"
+
+
+def cohort_table() -> None:
+    import json
+    specs = list(BUNDLE_ANALYSES) + [
+        ("gtex_v11_brain", p.name, "GTEx", "Aging")
+        for p in sorted((BUNDLES / "gtex_v11_brain").iterdir()) if p.is_dir()]
+    rows = []
+    for suite, region, cohort, analysis in specs:
+        d = BUNDLES / suite / region
+        s = pd.read_parquet(d / "samples.parquet")
+        prov = json.loads((d / "manifest.json").read_text())["provenance"]
+        bseq = cohort == "BrainSEQ"
+        donor = s["BrNum"] if bseq else s["SUBJID"]
+        female = (s["Sex"] == "F") if bseq else (s["SEX"] == 2)
+        mod = {m: m for m in s["MoD"].dropna().unique()} if bseq else HARDY
+        rows.append({
+            "cohort": cohort, "region": region, "analysis": analysis,
+            "library": (
+                "; ".join(f"{k} {v}" for k, v in s["Protocol"].value_counts().items())
+                if bseq else "poly(A) (GTEx v11)"),
+            "n_samples": len(s), "n_donors": donor.nunique(),
+            "n_control": int((s["Dx"] == "Control").sum()) if bseq else len(s),
+            "n_schizophrenia": int((s["Dx"] == "SCZD").sum()) if bseq else 0,
+            "n_female": int(female.sum()), "pct_female": round(100 * female.mean(), 1),
+            "age_median_range": _med_range(s["Age" if bseq else "AGE"]),
+            "ancestry": _counts(s["Race" if bseq else "RACE"], BSEQ_RACE if bseq else GTEX_RACE),
+            "rin_median_iqr": _med_iqr(s["RIN" if bseq else "SMRIN"]),
+            "pmi_h_median_iqr": _med_iqr(s["PMI"]) if bseq else "",
+            "ischemic_time_min_median_iqr": "" if bseq else _med_iqr(s["SMTSISCH"], 0),
+            "death_classification": (("Manner " if bseq else "Hardy ")
+                                     + _counts(s["MoD" if bseq else "DTHHRDY"], mod)),
+            "genes_before_filter": int(prov["n_genes_before_expression_filter"]),
+            "genes_after_filter": int(prov["n_genes_after_expression_filter"]),
+            "transcripts_before_filter": int(prov["n_transcripts_before_expression_filter"]),
+            "transcripts_after_filter": int(prov["n_transcripts_after_expression_filter"]),
+            "expression_filter": prov["expression_filter"],
+            "music_reference": MUSIC_REF.get((cohort, region), "none (no matched reference)"),
+        })
+    df = pd.DataFrame(rows)
+    assert len(df) == 17 and (df.n_samples == df.n_donors).all(), "one sample per donor"
+    write(df, "tableS34_cohort_description.csv")
+
+
+# --- S35  synthetic scenario grid (Methods) --------------------------------
+# Seed rule mirrors isograph_benchmark/benchmark/run_synthetic.py.
+SCALE_SCENARIOS = {"scale", "scale_realistic"}
+
+
+def synthetic_grid_table() -> None:
+    import yaml
+    cfg = yaml.safe_load(rel("configs", "synthetic_grid.yaml").read_text())
+    rows = []
+    for name, sc in cfg["scenarios"].items():
+        grid = {k: v for k, v in sc.items() if k != "seed_count"}
+        n_cells = 1
+        for v in grid.values():
+            n_cells *= len(v)
+        seeds = sc.get("seed_count", cfg["seed_count_scale"] if name in SCALE_SCENARIOS
+                       else cfg["seed_count_core"])
+        other = {k: v for k, v in grid.items() if k not in ("n_genes", "n_samples")}
+        rows.append({
+            "scenario": name,
+            "n_genes": "; ".join(map(str, sc["n_genes"])),
+            "n_samples": "; ".join(map(str, sc["n_samples"])),
+            "swept_parameters": "; ".join(f"{k} = {', '.join(map(str, v))}"
+                                          for k, v in other.items() if len(v) > 1),
+            "fixed_parameters": "; ".join(f"{k} = {v[0]}"
+                                          for k, v in other.items() if len(v) == 1),
+            "grid_cells": n_cells, "seeds_per_cell": seeds, "datasets": n_cells * seeds,
+        })
+    write(pd.DataFrame(rows), "tableS35_synthetic_scenarios.csv")
+
+
 def main() -> None:
     print(f"Writing supplementary tables to {OUT}")
+    cohort_table()
+    synthetic_grid_table()
     baseline_tables()
     qtl_tables()
     qtl_sensitivity_table()
