@@ -32,6 +32,11 @@ MECH = stage_out("mechanism")                         # switch-mechanism stage
 RBP = stage_out("regulation", "rbp")
 ANCHOR = stage_out("anchoring", "module_genetic_anchoring_meta")
 SCZ = stage_out("integration", "scz_age_projection")
+ASE = stage_out("mechanism", "ase_junction_switch")    # within-donor allelic test
+ASE_REGIONS = ("caudate", "hippocampus", "dlpfc")
+COLOC = stage_out("anchoring", "coloc")                # CLPP isoform events
+SUSIE_ALL = stage_out("anchoring", "coloc_signal_susie", "all_introns")
+LDSC = stage_out("anchoring", "ldsc")
 
 
 def write(df: pd.DataFrame, name: str) -> None:
@@ -39,13 +44,15 @@ def write(df: pd.DataFrame, name: str) -> None:
     print(f"  wrote {name:32s} {df.shape[0]:>4d} x {df.shape[1]}")
 
 
-def round_num(df: pd.DataFrame, n: int = 4) -> pd.DataFrame:
+def round_num(df: pd.DataFrame, n: int = 4, sig_cols: tuple[str, ...] = ()) -> pd.DataFrame:
     """Round numeric columns to n decimals, but p-values to 3 significant figures
-    so small p's (e.g. 8e-6) survive instead of collapsing to 0.0."""
+    so small p's (e.g. 8e-6) survive instead of collapsing to 0.0. `sig_cols` names
+    extra columns to keep at 3 significant figures (p-values the default tokens miss,
+    and tiny coefficients such as LDSC tau)."""
     df = df.copy()
     p_like = ("p_value", "p_fe", "p_re", "pheno_fdr", "mwu_p", "adjusted_p")
     for col in df.select_dtypes("number").columns:
-        if any(tok in col for tok in p_like):
+        if col in sig_cols or any(tok in col for tok in p_like):
             df[col] = df[col].apply(
                 lambda x: float(f"{x:.3g}") if pd.notna(x) else x)
         else:
@@ -477,6 +484,138 @@ def coloc_convergence_table() -> None:
     write(round_num(c[ccols]), "tableS20b_coloc_convergence_per_module.csv")
 
 
+def allelic_tables() -> None:
+    """S22 / S23 — within-donor allelic test of isoform choice (BrainSEQ recount).
+
+    S22 is one row per region for the BH-tested gate family, with the calibration the
+    claim rests on (homozygous-at-lead null, lambda_GC), the agreement checks (score test,
+    between-donor sign) and the module-level cis-control correlation. S23 is the
+    per-module ledger behind that correlation. Read straight from the stage summaries.
+    """
+    import json
+
+    cis = json.loads((ASE / "module_cis_control_summary.json").read_text())
+    rows = []
+    for region in ASE_REGIONS:
+        s = json.loads((ASE / region / "allelic_summary.json").read_text())
+        g, c = s["families"]["gate_family"], s["families"]["coloc_nominated"]
+        m, md = cis["regions"].get(region, {}), s["module_direction"]
+        rows.append({
+            "region": region,
+            "pairs": g["n_pairs"], "pairs_fitted": g["n_fitted"],
+            "genes_fitted": g["n_genes_fitted"], "pairs_nominal_p05": g["n_nominal_p05"],
+            "pairs_q05": g["n_q05"], "genes_q05": g["n_genes_q05"],
+            "sign_agree_between_all": g["sign_agreement_between"],
+            "sign_agree_between_q05": g["sign_agreement_between_q05"],
+            "not_converged": g["n_not_converged"], "at_bound": g["n_at_bound"],
+            "at_bound_q05": g["n_at_bound_q05"],
+            "hom_null_fits": s["hom_null"]["n_fitted"],
+            "hom_null_frac_p05": s["hom_null"]["frac_p05"],
+            "hom_null_lambda_gc": s["hom_null"]["lambda_gc"],
+            "het_lambda_gc": s["lambda_gc_het"],
+            "score_vs_glmm_spearman": s["score_vs_glmm_spearman"],
+            "median_lead_site_kb": s["median_lead_site_kb"],
+            "module_axis_genes": md["n_genes"],
+            "module_axis_median_abs_rho": md["median_abs_rho"],
+            "module_axis_null_median": md["null_median_abs_rho"],
+            "module_axis_perm_p": md["perm_p"],
+            "module_cis_modules_ranked": m.get("n_modules_ranked"),
+            "module_cis_rho": m.get("rho"),
+            "module_cis_perm_p": m.get("perm_p_two_sided"),
+            "coloc_nominated_fitted": c["n_fitted"],
+            "coloc_nominated_nominal_p05": c["n_nominal_p05"],
+        })
+    pooled = cis["pooled"]
+    rows.append({"region": "pooled (" + ", ".join(pooled["regions"]) + ")",
+                 "module_cis_rho": pooled["mean_rho"],
+                 "module_cis_perm_p": pooled["perm_p_two_sided"]})
+    out = pd.DataFrame(rows)
+    counts = [c for c in out.columns if c.startswith(("pairs", "genes", "hom_null_fits",
+                                                      "not_converged", "at_bound",
+                                                      "module_axis_genes",
+                                                      "module_cis_modules",
+                                                      "coloc_nominated"))]
+    out[counts] = out[counts].astype("Int64")
+    write(round_num(out, sig_cols=("module_axis_perm_p", "module_cis_perm_p")),
+          "tableS22_allelic_imbalance_regions.csv")
+
+    mod = pd.read_parquet(ASE / "module_cis_control.parquet")
+    mod = mod.rename(columns={"genes_cis": "genes_cis_q05", "rate": "cis_rate",
+                              "aging_rank": "age_rank_within_trait",
+                              "trait_n": "modules_in_trait"})
+    write(round_num(mod), "tableS23_module_cis_control.csv")
+
+
+def clpp_event_table() -> None:
+    """S24 — every CLPP-nominated sQTL/eQTL isoform event, with whether its junction
+    maps into the tissue-matched IsoGraph switch pair (the 76 events / 30 genes).
+
+    `structural_consequence` is left out on purpose: it flags each transcript against a
+    gene reference, so almost every mapped event carries every flag.
+    """
+    e = pd.read_parquet(COLOC / "coloc_isoform_events_combined.parquet")
+    cols = ["analysis", "trait", "case", "gene_name", "gene", "kind", "tissue",
+            "best_rsid", "risk_allele", "risk_qtl_effect", "junction", "clpp",
+            "go_invisible", "junction_in_switch_pair", "switch_pair", "n_switch_pairs",
+            "junction_transcripts", "junction_transcript_polarity_r", "brainseq_region",
+            "brainseq_switch_pair", "brainseq_replicates_switch"]
+    e = (e[cols].sort_values(["junction_in_switch_pair", "clpp"], ascending=[False, False])
+         .reset_index(drop=True))
+    write(round_num(e), "tableS24_clpp_isoform_events.csv")
+
+
+def signal_coloc_tables() -> None:
+    """S25 / S26 — signal-level colocalization, all-introns arm.
+
+    S25: every analysis x gene with PP4_sQTL >= 0.8, with its eQTL PP4, tissue
+    consistency, and the estimator and prior robustness of the headline cell
+    (coloc.susie where both traits could be fine-mapped, coloc.abf otherwise). The aging
+    and SCZD schizophrenia gene sets overlap, so rows are analysis x gene; collapse on
+    (gene, trait) for gene-by-trait cells. `sqtl_preferential` (PP4_eQTL < 0.5) is a
+    selection on the sQTL call, not a splicing-specificity estimate -- S26 is the
+    unbiased paired contrast.
+    """
+    g = pd.read_parquet(SUSIE_ALL / "genes.parquet")
+    h = pd.read_parquet(SUSIE_ALL / "cells_hierarchy.parquet",
+                        columns=["analysis", "gene", "modality", "tissue", "phenotype_id",
+                                 "PP4", "estimator", "prior_robustness"])
+    best = (h[h.modality == "sQTL"].sort_values("PP4", ascending=False)
+            .drop_duplicates(["analysis", "gene"]))
+    s = g[g.PP4_sQTL >= 0.8].merge(best, on=["analysis", "gene"], how="left")
+    assert (s.tissue == s.max_tissue_sQTL).all(), "headline cell is not the max tissue"
+    s["sqtl_preferential"] = s.PP4_eQTL < 0.5
+    s = s.rename(columns={"phenotype_id": "headline_intron",
+                          "estimator": "headline_estimator"})
+    s["headline_estimator"] = s.headline_estimator.map(
+        {"susie": "coloc.susie", "abf": "coloc.abf"})
+    cols = ["analysis", "trait", "symbol", "gene", "module_id", "go_invisible",
+            "PP4_sQTL", "PP4_eQTL", "sqtl_preferential", "n_tissue",
+            "n_tissue_sQTL_coloc", "n_tissue_eQTL_coloc", "max_tissue_sQTL",
+            "headline_intron", "headline_estimator", "prior_robustness"]
+    s = s[cols].sort_values("PP4_sQTL", ascending=False).reset_index(drop=True)
+    write(round_num(s), "tableS25_signal_coloc_nominations.csv")
+
+    c = pd.read_parquet(SUSIE_ALL / "contrast.parquet")
+    write(round_num(c, sig_cols=("mcnemar_p", "wilcoxon_cond_p", "wilcoxon_pp4_p")),
+          "tableS26_coloc_modality_contrast.csv")
+
+
+def ldsc_table() -> None:
+    """S27 — partitioned heritability of the switch-derived QTL annotations.
+
+    `coef_p` is the one-sided test that the annotation's per-SNP coefficient exceeds 0,
+    conditional on baselineLD (single-annotation models) or on baselineLD plus the other
+    QTL layer (`joint`); it is the statistic the text quotes. Fig 5e reads this CSV.
+    """
+    ld = pd.read_parquet(LDSC / "ldsc_partitioned.parquet")
+    order = {"cis_only": 0, "sqtl_only": 1, "eqtl_only": 2, "joint": 3}
+    ld = (ld.assign(_o=ld.model.map(order))
+          .sort_values(["annotation", "trait", "_o", "annot"]).drop(columns="_o")
+          .reset_index(drop=True))
+    write(round_num(ld, sig_cols=("enrichment_p", "coef", "coef_se",
+                                                   "coef_p")), "tableS27_ldsc_partitioned.csv")
+
+
 def main() -> None:
     print(f"Writing supplementary tables to {OUT}")
     baseline_tables()
@@ -493,6 +632,10 @@ def main() -> None:
     module_anchoring_table()
     rbp_binding_table()
     scz_convergence_table()
+    allelic_tables()
+    clpp_event_table()
+    signal_coloc_tables()
+    ldsc_table()
     print("done.")
 
 
