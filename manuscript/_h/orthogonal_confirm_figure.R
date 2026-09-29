@@ -21,11 +21,15 @@
 # Matching is on the abundance decile of the better-expressed pair member, because at
 # n = 12 that is what governs whether a usage correlation is estimable at all.
 #
-# Reads 06_switch_mechanism/_m/switch_orthogonal_confirm/{anchored_summary.json,
-#       global_null_summary.json, anchored_gene_confirmation.parquet};
-#       writes figOrthogonalConfirm.{pdf,png}.
+# Event layer (2026-09-29): the anchored sets now default to the signal-level
+# colocalization layer (`signal_coloc/`: 55 genes whose colocalizing junction is carried by
+# a tissue-matched switch-pair isoform), matching the coloc-led genetics section. The CLPP
+# layer (30 genes) stays available with `--events clpp` and writes a separate file.
+# Reads 06_switch_mechanism/_m/switch_orthogonal_confirm/{global_null_summary.json,
+#       [signal_coloc/]{anchored_summary.json, anchored_gene_confirmation.parquet}};
+#       writes figOrthogonalConfirm.{pdf,png} (coloc) or figOrthogonalConfirm_clpp (CLPP).
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
-#        manuscript/_h/orthogonal_confirm_figure.R
+#        manuscript/_h/orthogonal_confirm_figure.R [--events signal|clpp]
 suppressPackageStartupMessages({
   library(arrow)
   library(dplyr)
@@ -43,6 +47,11 @@ find_root <- function() {
 ROOT    <- find_root()
 rel     <- function(...) file.path(ROOT, ...)
 OC_DIR  <- rel("06_switch_mechanism", "_m", "switch_orthogonal_confirm")
+args    <- commandArgs(trailingOnly = TRUE)
+EVENTS  <- if (length(args) >= 2 && args[1] == "--events") args[2] else "signal"
+stopifnot(EVENTS %in% c("signal", "clpp"))
+EV_DIR   <- if (EVENTS == "signal") file.path(OC_DIR, "signal_coloc") else OC_DIR
+FIG_NAME <- if (EVENTS == "signal") "figOrthogonalConfirm" else "figOrthogonalConfirm_clpp"
 FIG_DIR <- rel("manuscript", "_m", "figures")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
@@ -73,7 +82,7 @@ save_fig <- function(p, name, width, height) {
   cat("  ", name, " saved\n", sep = "")
 }
 
-s <- fromJSON(file.path(OC_DIR, "anchored_summary.json"))
+s <- fromJSON(file.path(EV_DIR, "anchored_summary.json"))
 g0 <- fromJSON(file.path(OC_DIR, "global_null_summary.json"))
 
 # ---------------------------------------------------------------------------
@@ -143,7 +152,7 @@ for (i in seq_len(nrow(a))) cat(sprintf("    %-40s %.3f vs %.3f (margin %+.3f, %
 # ---------------------------------------------------------------------------
 # Panel B - per-gene confirmation, with the abundance-disqualified genes named
 # ---------------------------------------------------------------------------
-g <- as.data.frame(read_parquet(file.path(OC_DIR, "anchored_gene_confirmation.parquet"))) |>
+g <- as.data.frame(read_parquet(file.path(EV_DIR, "anchored_gene_confirmation.parquet"))) |>
   mutate(status = case_when(
            confirmed_at_usable_abundance ~ "Confirmed",
            orthogonally_confirmed        ~ "Anchored isoform too lowly expressed",
@@ -199,5 +208,5 @@ fig <- (pA / plot_spacer() + plot_layout(heights = c(1, 0.6)) | pB) +
   plot_annotation(tag_levels = "A") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
-save_fig(fig, "figOrthogonalConfirm", width = 7.2, height = 3.2 + 0.11 * n_genes)
+save_fig(fig, FIG_NAME, width = 7.2, height = 3.2 + 0.11 * n_genes)
 cat("Done. Output in", FIG_DIR, "\n")

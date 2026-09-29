@@ -634,6 +634,79 @@ def coloc_event_table() -> None:
     write(round_num(e), "tableS28_coloc_isoform_events.csv")
 
 
+def longread_coloc_table() -> None:
+    """S29 — per-gene long-read confirmation of the colocalization-anchored switch pairs.
+
+    The coloc-layer counterpart of S14 (CLPP layer), behind Fig 4a,b: the 55 genes whose
+    colocalizing junction is carried by a tissue-matched switch-pair isoform. Genes whose
+    anchored isoform never reaches 0.05 mean isoform fraction stay in the table with
+    confirmed_at_usable_abundance = False.
+    """
+    d = pd.read_parquet(MECH / "switch_orthogonal_confirm" / "signal_coloc"
+                        / "anchored_gene_confirmation.parquet")
+    assert len(d) == 55, len(d)
+    d = d.sort_values(["confirmed_at_usable_abundance", "n_switch_like"],
+                      ascending=[False, False]).reset_index(drop=True)
+    write(round_num(d), "tableS29_longread_coloc_confirmation.csv")
+
+
+def smr_table() -> None:
+    """S30 — SMR/HEIDI on the colocalization nominations (GTEx QTLs).
+
+    One row per probe in the primary confirmatory family (one pre-designated probe per
+    gene and QTL class), with its coloc PP4, SMR estimate and P, HEIDI P, instrument
+    strength, status and agreement with coloc. The secondary event-localization family
+    (a gene's other introns) is corrected apart and left in the analysis ledger.
+    `no_instrument` means untested, not negative.
+    """
+    s = pd.read_parquet(stage_out("anchoring", "smr_heidi", "gtex", "smr_results.parquet"))
+    s = s[s.probe_family == "primary"]
+    cols = ["analysis", "trait", "symbol", "gene", "modality", "probeID", "tissue",
+            "topSNP", "coloc_PP4_probe", "coloc_estimator_probe", "b_SMR", "se_SMR",
+            "p_SMR", "smr_threshold", "p_HEIDI", "nsnp_HEIDI", "F_instrument",
+            "weak_instrument", "smr_status", "agreement"]
+    s = s[cols].sort_values(["modality", "trait", "p_SMR"]).reset_index(drop=True)
+    write(round_num(s, sig_cols=("b_SMR", "se_SMR", "p_SMR", "p_HEIDI")),
+          "tableS30_smr_heidi.csv")
+
+
+def brainseq_coloc_table() -> None:
+    """S31 — BrainSEQ switch- (S_g) versus abundance-axis (A_g) colocalization.
+
+    Same-cohort genetic anchoring, not replication (BrainSEQ is the discovery cohort).
+    One row per analysis plus a pooled row: genes testable on both axes, calls per axis,
+    the discordant counts and the exact McNemar P, and paired Wilcoxon tests of the
+    conditional and raw PP4.
+    """
+    c = pd.read_parquet(stage_out("anchoring", "coloc_brainseq", "ea_only",
+                                  "contrast.parquet"))
+    write(round_num(c, sig_cols=("mcnemar_p", "wilcoxon_cond_p", "wilcoxon_pp4_p")),
+          "tableS31_brainseq_axis_coloc_contrast.csv")
+
+
+def rbp_tables() -> None:
+    """S32 / S33 — candidate RBP regulons of the switch modules.
+
+    S32: every module x RBP cell (mature-transcript scope, per RBP) with the
+    hypergeometric over-representation test and the opportunity-adjusted binomial GLM
+    (length, GC, UTR/CDS composition, transcript count). `supported` = hypergeometric
+    q < 0.05 and adjusted q < 0.05 with OR > 1. Member-gene lists are left in the ledger.
+    S33: ENCODE eCLIP (HepG2/K562) binding at switched versus constitutive exon intervals,
+    one exact McNemar per RBP over its unique nominated genes, BH across testable RBPs.
+    """
+    r = pd.read_parquet(RBP / "rbp_regulon.parquet")
+    r["supported"] = (r.q < 0.05) & (r.qvalue_glm < 0.05) & (r.odds_ratio > 1)
+    assert len(r) == 11040 and (r.q < 0.05).sum() == 384 and r.supported.sum() == 89
+    r = r.drop(columns=["module_genes", "universe_genes"], errors="ignore")
+    r = r.sort_values(["supported", "q"], ascending=[False, True]).reset_index(drop=True)
+    write(round_num(r, sig_cols=("p", "q", "pvalue_glm", "qvalue_glm")),
+          "tableS32_rbp_regulons.csv")
+    b = pd.read_parquet(RBP / "rbp_binding_support.parquet")
+    assert len(b) == 35 and b.binding_supported.sum() == 21
+    b = b.sort_values("mcnemar_fdr").reset_index(drop=True)
+    write(round_num(b, sig_cols=("mcnemar_p", "mcnemar_fdr")), "tableS33_rbp_eclip_binding.csv")
+
+
 def ldsc_table() -> None:
     """S27 — partitioned heritability of the switch-derived QTL annotations.
 
@@ -670,6 +743,10 @@ def main() -> None:
     clpp_event_table()
     signal_coloc_tables()
     coloc_event_table()
+    longread_coloc_table()
+    smr_table()
+    brainseq_coloc_table()
+    rbp_tables()
     ldsc_table()
     print("done.")
 
