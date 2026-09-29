@@ -185,7 +185,7 @@ pB <- ggplot(pb, aes(set, med, group = label)) +
 
 fig <- (pA | pB) +
   plot_layout(widths = c(1.55, 1)) +
-  plot_annotation(tag_levels = "A") &
+  plot_annotation(tag_levels = "a") &
   theme(plot.tag = element_text(size = 10, face = "bold"))
 
 save_fig(fig, "figIsaConcordance", width = 7.2, height = 4.4)

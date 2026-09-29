@@ -23,6 +23,7 @@ QTL = stage_out("anchoring", "qtl_anchoring_meta")
 BASE = stage_out("trust", "baseline_comparison")
 TRUST = stage_out("trust.stability", "module_trust")
 TRUST_TABLES = stage_out("trust.stability", "module_trust_tables")
+DTU = stage_out("trust", "dtu_added_value")           # module context, held-out DTU
 GATE = region_store("brainseq", "caudate_sczd")
 COMP = stage_out("characterize")                      # composition adjustment (BrainSEQ)
 CHAR = stage_out("characterize")                      # axis separation rollup
@@ -42,7 +43,7 @@ def round_num(df: pd.DataFrame, n: int = 4) -> pd.DataFrame:
     """Round numeric columns to n decimals, but p-values to 3 significant figures
     so small p's (e.g. 8e-6) survive instead of collapsing to 0.0."""
     df = df.copy()
-    p_like = ("p_value", "p_fe", "p_re", "pheno_fdr")
+    p_like = ("p_value", "p_fe", "p_re", "pheno_fdr", "mwu_p", "adjusted_p")
     for col in df.select_dtypes("number").columns:
         if any(tok in col for tok in p_like):
             df[col] = df[col].apply(
@@ -268,6 +269,48 @@ def _with_marker_denominator(df: pd.DataFrame) -> pd.DataFrame:
     return out[cols[:i] + ["n_marker_tests"] + cols[i:]]
 
 
+# --- S21  module context and held-out DTU evidence --------------------------
+def dtu_context_table() -> None:
+    """One row per split-half analysis: the held-out DTU test, before and after the
+    co-expression comparator, the sub-threshold reading and the giant-module check.
+
+    The two permutation q values are BH across the six analyses, as in the source
+    summary. The giant-module columns are post hoc (means over the ten directions).
+    """
+    s = pd.read_parquet(DTU / "region_summary.parquet")
+    g = pd.read_parquet(DTU / "giant_module_sensitivity.parquet")
+    giant = g.groupby(["cohort", "region"], as_index=False).agg(
+        r_without_giant_modules=("r_no_giant", "mean"),
+        r_without_largest_module=("r_no_largest", "mean"),
+        n_giant_modules_median=("n_giant_modules", "median"),
+        frac_tested_in_largest_median=("frac_tested_in_largest", "median"))
+    cols = {
+        "cohort": "cohort", "region": "region", "n_replicates": "n_split_directions",
+        "n_genes_median": "n_genes_median", "coverage": "coverage",
+        "n_modules_median": "n_modules_median",
+        "r_module": "r_module_mean", "r_module_median": "r_module_median",
+        "r_module_min": "r_module_min", "r_module_max": "r_module_max",
+        "r_module_n_positive": "r_module_n_positive",
+        "p_strat": "r_module_perm_p_value", "q_strat": "r_module_perm_q_value",
+        "r_module_given_abund": "r_given_coexpr_mean",
+        "r_module_given_abund_median": "r_given_coexpr_median",
+        "r_module_given_abund_min": "r_given_coexpr_min",
+        "r_module_given_abund_max": "r_given_coexpr_max",
+        "r_module_given_abund_n_positive": "r_given_coexpr_n_positive",
+        "p_given_abund_strat": "r_given_coexpr_perm_p_value",
+        "q_given_abund_strat": "r_given_coexpr_perm_q_value",
+        "r_abund": "r_coexpr_context_alone_mean",
+        "region_class": "pattern",
+        "n_subthreshold": "n_subthreshold_genes",
+        "subthr_rate_top": "subthreshold_replication_top_tertile",
+        "subthr_rate_bottom": "subthreshold_replication_bottom_tertile",
+        "subthr_or_median": "subthreshold_adjusted_or_median",
+        "subthr_or_n_above_1": "subthreshold_or_n_above_1",
+    }
+    d = s[list(cols)].rename(columns=cols).merge(giant, on=["cohort", "region"], how="left")
+    write(round_num(d), "tableS21_module_context_heldout_dtu.csv")
+
+
 # --- S14  long-read orthogonal confirmation ---------------------------------
 def orthogonal_table() -> None:
     """Per-gene long-read confirmation of the genetically anchored switch pairs.
@@ -444,6 +487,7 @@ def main() -> None:
     trust_table()
     separation_table()
     composition_table()
+    dtu_context_table()
     orthogonal_table()
     isa_table()
     module_anchoring_table()

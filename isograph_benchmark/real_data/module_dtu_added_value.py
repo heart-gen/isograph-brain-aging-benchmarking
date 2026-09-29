@@ -79,6 +79,8 @@ Outputs (``04_module_trust/_m/dtu_added_value/``):
     and permutation nulls, stamped with the partition fingerprint of every half used.
   * ``giant_module_sensitivity.parquet`` -- from ``giant-sensitivity`` (supplement).
   * ``region_summary.parquet``, ``summary.json``, ``DTU_ADDED_VALUE.md`` -- from ``summarize``.
+  * ``region_summary.csv``, ``replicates.csv`` -- CSV copies for the supplementary figure
+    (``manuscript/_h/dtu_added_value_figure.R``), also from ``summarize``.
 
 Usage:
     python -m isograph_benchmark.real_data.module_dtu_added_value saturn \\
@@ -689,6 +691,28 @@ def verdict(summary: pd.DataFrame) -> str:
     return "NOT SUPPORTED"
 
 
+DISPLAY_REPLICATE_COLUMNS = [
+    "cohort", "region", "seed", "discovery", "replication", "n_genes", "n_modules",
+    "r_module", "r_module_given_abund", "r_abund", "beta_per_sd",
+    "n_subthreshold", "subthr_rate_top", "subthr_rate_bottom", "subthr_or_top_vs_bottom",
+]
+
+
+def write_display_csvs(out: Path, s: pd.DataFrame) -> None:
+    """CSV copies of the region summary and the per-direction statistics, for the figure.
+
+    CSV, not parquet, so ``dtu_added_value_figure.R`` builds with an R ``arrow`` compiled
+    without zstd.
+    """
+    s.to_csv(out / "region_summary.csv", index=False)
+    reps = []
+    for cohort, regions in REGIONS.items():
+        for region in regions:
+            r = pd.read_parquet(out / f"{cohort}__{region}__replicates.parquet")
+            reps.append(r[[c for c in DISPLAY_REPLICATE_COLUMNS if c in r.columns]])
+    pd.concat(reps, ignore_index=True).to_csv(out / "replicates.csv", index=False)
+
+
 def summarize() -> pd.DataFrame:
     out = _root()
     rows = []
@@ -705,6 +729,7 @@ def summarize() -> pd.DataFrame:
     s["region_class"] = [region_class(a, b) for a, b in zip(s["q_strat"], s["q_given_abund_strat"])]
     v = verdict(s)
     s.to_parquet(out / "region_summary.parquet", index=False, compression="zstd")
+    write_display_csvs(out, s)
 
     giant_path = out / "giant_module_sensitivity.parquet"
     giant = pd.read_parquet(giant_path) if giant_path.exists() else None
