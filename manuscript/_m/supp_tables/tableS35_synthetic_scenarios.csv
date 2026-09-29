@@ -1,0 +1,17 @@
+scenario,n_genes,n_samples,swept_parameters,fixed_parameters,grid_cells,seeds_per_cell,datasets
+idealized_switching,400,160,"switching_fraction = 0.1, 0.25, 0.5, 0.75; noise_sd = 0.1, 0.25, 0.4",,12,30,360
+unequal_isoform_abundance,400,160,"abundance_imbalance = 1, 4, 10, 25",switching_fraction = 0.25; noise_sd = 0.2,4,20,80
+non_switching_background,400,160,"switching_fraction = 0.05, 0.1, 0.25, 0.5",noise_sd = 0.25,4,20,80
+noise_stress,400,160,"count_dispersion = 3, 7, 15, 30; noise_sd = 0.05, 0.1, 0.25, 0.5",switching_fraction = 0.25,16,20,320
+feature_space_interactions,400,160,"interaction_strength = 0.0, 0.5, 1.0, 2.0, 3.0; interaction_fraction = 0.25, 0.5, 0.75",switching_fraction = 0.25; noise_sd = 0.25,15,20,300
+abundance_switch_mixed,200; 500,100; 200,"abundance_fraction = 0.0, 0.3, 0.5, 0.7, 1.0",switching_fraction = 0.25; noise_sd = 0.25,20,20,400
+negative_control_noise,400,160,"noise_sd = 0.5, 1.0",switching_fraction = 0.0,2,20,40
+rna_degradation,400,160,"degradation_3p_bias = 0.0, 0.5, 1.0, 2.0",switching_fraction = 0.25; noise_sd = 0.25,4,20,80
+rna_degradation_coupled,400,160,"degradation_3p_bias = 0.0, 0.5, 1.0, 2.0",switching_fraction = 0.25; abundance_fraction = 0.4; dual_signal_fraction = 0.5; noise_sd = 0.25,4,20,80
+multi_isoform_switch,400,160,"noise_sd = 0.1, 0.25",switching_fraction = 0.25; n_transcripts_per_gene = 4,2,20,40
+cell_composition,400,160,"cell_composition_cv = 0.0, 0.1, 0.2, 0.3",switching_fraction = 0.25; noise_sd = 0.25,4,20,80
+batch_effects,400,160,"batch_effect_sd = 0.0, 0.25, 0.5, 1.0",switching_fraction = 0.25; noise_sd = 0.25,4,20,80
+library_depth,400,160,"library_depth_cv = 0.25, 0.5, 0.75, 1.0",switching_fraction = 0.25; noise_sd = 0.25,4,20,80
+genetic_anchoring,400,200,"noise_sd = 0.25, 0.4; genetic_effect = 0.5, 1.0, 2.0",switching_fraction = 0.25; genetic_module_fraction = 1.0; genetic_maf = 0.3,6,20,120
+scale,1000; 3000; 6000; 12000,240,"switching_fraction = 0.15, 0.25",noise_sd = 0.25,8,15,120
+scale_realistic,16000,300,"switching_fraction = 0.15, 0.25",noise_sd = 0.25,2,15,30

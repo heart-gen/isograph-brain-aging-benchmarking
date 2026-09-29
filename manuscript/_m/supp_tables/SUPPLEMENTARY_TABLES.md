@@ -43,6 +43,8 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S25 | `tableS25_signal_coloc_nominations.csv` | `coloc_signal_susie/all_introns/{genes,cells_hierarchy}.parquet` | signal-level sQTL nominations (PP4_sQTL >= 0.8), all-introns arm, with the headline estimator — 127 rows, 119 gene x trait cells, 116 genes (manuscript Table S19) |
 | S26 | `tableS26_coloc_modality_contrast.csv` | `coloc_signal_susie/all_introns/contrast.parquet` | paired sQTL vs eQTL colocalization contrast, the unbiased check on the sQTL-preferential selection (manuscript Table S20) |
 | S27 | `tableS27_ldsc_partitioned.csv` | `ldsc/ldsc_partitioned.parquet` | partitioned heritability of the switch-derived QTL annotations, single and joint models (backs Fig 5e, which reads this CSV; manuscript Table S21) |
+| S34 | `tableS34_cohort_description.csv` | `inputs/bundles/*/*/{samples.parquet,manifest.json}` | per-analysis discovery cohort: donors, diagnosis, sex, age (GTEx top-coded at 70), ancestry, library kit, RIN, PMI or ischemic time, death classification, feature counts around the expression filter and MuSiC reference (manuscript Table S29; Methods) |
+| S35 | `tableS35_synthetic_scenarios.csv` | `configs/synthetic_grid.yaml` | synthetic scenario grid: dimensions, swept and fixed parameters, seeds and datasets per scenario (manuscript Table S30; Methods) |
 
 Tables S8–S12 (the per-gene deep-dive) live under `05_genetic_anchoring/_m/deep_dive/` and are regenerated
 by `05_genetic_anchoring/_h/15.build_deep_dive.sh` (not the `assemble_supp_tables.py` assembler). Together they
