@@ -27,7 +27,8 @@
 # layer (30 genes) stays available with `--events clpp` and writes a separate file.
 # Reads 06_switch_mechanism/_m/switch_orthogonal_confirm/{global_null_summary.json,
 #       [signal_coloc/]{anchored_summary.json, anchored_gene_confirmation.parquet}};
-#       writes figOrthogonalConfirm.{pdf,png} (coloc) or figOrthogonalConfirm_clpp (CLPP).
+#       writes figOrthogonalConfirm_{a,b}.{pdf,png} (coloc) or figOrthogonalConfirm_clpp_{a,b}
+#       (CLPP), one file per panel at final print size for the hand-composed Fig. 4.
 # Run: /ocean/projects/bio260021p/shared/opt/envs/rnaseq/bin/Rscript \
 #        manuscript/_h/orthogonal_confirm_figure.R [--events signal|clpp]
 suppressPackageStartupMessages({
@@ -175,38 +176,54 @@ x_step  <- if (max_n > 8) 5 else 1
 cat(sprintf("  per-gene panel: %d genes, %d confirmed (%d at usable abundance)\n",
             n_genes, sum(g$orthogonally_confirmed), sum(g$confirmed_at_usable_abundance)))
 
-pB <- ggplot(g, aes(n_switch_like, gene_name)) +
+# Only the long-read-confirmed genes get a row, so the panel keeps a fixed per-row pitch
+# and a height close to the 30-gene layout the composed Fig. 4 was built around; the
+# unconfirmed genes are named in one wrapped line under the axis rather than dropped.
+gb <- g |> filter(status != "Not confirmed") |> droplevels() |>
+  mutate(gene_name = reorder(as.character(gene_name), n_switch_like))
+not_conf <- g |> filter(status == "Not confirmed") |> arrange(as.character(gene_name)) |>
+  pull(gene_name) |> as.character()
+n_rows <- nrow(gb)
+stopifnot(n_rows + length(not_conf) == n_genes)
+nc_lab <- paste(strwrap(sprintf("Not confirmed (%d): %s", length(not_conf),
+                                paste(not_conf, collapse = ", ")), width = 70),
+                collapse = "\n")
+
+pB <- ggplot(gb, aes(n_switch_like, gene_name)) +
   geom_segment(aes(x = 0, xend = n_switch_like, yend = gene_name, colour = status),
                linewidth = 0.55) +
   geom_point(aes(colour = status), size = 2) +
   geom_text(aes(x = x_max - 0.1, label = if_lab), hjust = 1, size = 2.2, colour = "grey35") +
-  annotate("text", x = x_max - 0.1, y = n_genes + 0.9, label = "anchored\nisoform IF",
+  annotate("text", x = x_max - 0.1, y = n_rows + 0.9, label = "anchored\nisoform IF",
            hjust = 1, vjust = 0.5, size = 2.1, colour = "grey35", lineheight = 0.9) +
   scale_colour_manual(values = c(Confirmed = OBS_COL,
-                                 `Anchored isoform too lowly expressed` = "#E69F00",
-                                 `Not confirmed` = FAIL_COL),
-                      name = NULL, drop = FALSE) +
+                                 `Anchored isoform too lowly expressed` = "#E69F00"),
+                      name = NULL) +
   scale_x_continuous(limits = c(0, x_max), breaks = seq(0, max_n, by = x_step),
                      expand = expansion(mult = c(0.01, 0))) +
-  coord_cartesian(ylim = c(0.5, n_genes + 1.6), clip = "off") +
-  guides(colour = guide_legend(nrow = 2)) +
-  labs(x = "Switch-like anchored pairs in long-read", y = NULL) +
+  coord_cartesian(ylim = c(0.5, n_rows + 1.6), clip = "off") +
+  guides(colour = guide_legend(nrow = 1)) +
+  labs(x = "Switch-like anchored pairs in long-read", y = NULL, caption = nc_lab) +
   theme_pub() +
   theme(legend.position = "bottom",
         legend.margin = margin(0, 0, 0, 0),
         axis.text.y = element_text(size = 7),
+        plot.caption = element_text(size = 6.5, hjust = 0, colour = "grey30",
+                                    lineheight = 1.05),
+        plot.caption.position = "plot",
         panel.grid.major.y = element_blank(),
         panel.grid.major.x = element_line(linewidth = 0.3, colour = "grey88"))
 
 # ---------------------------------------------------------------------------
-# Assemble
+# Save each panel at its final printed size
 # ---------------------------------------------------------------------------
-# Panel B grows with the gene list (30 genes on the switching filter); A stays at a
-# fixed height above an empty spacer so it is not stretched into a tall, narrow dot plot.
-fig <- (pA / plot_spacer() + plot_layout(heights = c(1, 0.6)) | pB) +
-  plot_layout(widths = c(1, 1.25)) +
-  plot_annotation(tag_levels = "A") &
-  theme(plot.tag = element_text(size = 10, face = "bold"))
-
-save_fig(fig, FIG_NAME, width = 7.2, height = 3.2 + 0.11 * n_genes)
+# Fig. 4 is composed by hand, so a and b are written as separate PDFs at the size they
+# occupy in the 180-mm figure (fonts at print size); place them at 100% with no rescaling.
+# Panel a matches the column width of panel c below it; panel b's height follows a fixed
+# 3.4-mm row pitch plus room for the axis, legend and not-confirmed line. No tags: the
+# composed figure carries the panel letters.
+MM <- 1 / 25.4
+save_fig(pA, paste0(FIG_NAME, "_a"), width = 82 * MM, height = 78 * MM)
+save_fig(pB, paste0(FIG_NAME, "_b"), width = 100 * MM,
+         height = (34 + 3.4 * n_rows) * MM)
 cat("Done. Output in", FIG_DIR, "\n")
