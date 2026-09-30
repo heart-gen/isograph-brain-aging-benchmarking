@@ -1,0 +1,11 @@
+method,module_set,n_analyses,sqtl_eqtl_ratio,ratio_ci_low,ratio_ci_high,p_value,I2
+isograph,all_modules,17.0,1.0332,1.0056,1.0615,0.0179,0.6036
+isograph,pheno_sig_modules,10.0,1.0648,1.01,1.1226,0.0198,0.104
+wgcna_switch_only,pheno_sig_modules,6.0,0.9273,0.856,1.0046,0.0646,0.4648
+wgcna_multiplex,pheno_sig_modules,8.0,1.0841,1.0254,1.146,0.00444,0.6386
+isograph,go_invisible_modules,7.0,1.0802,0.9873,1.1817,0.0927,0.0
+wgcna_switch_only,go_invisible_modules,6.0,0.9292,0.8567,1.0078,0.0762,0.4589
+wgcna_multiplex,go_invisible_modules,4.0,1.006,0.9121,1.1095,0.905,0.6106
+isograph,go_visible_modules,9.0,1.0492,0.9866,1.1159,0.126,0.3384
+wgcna_switch_only,go_visible_modules,2.0,0.9694,0.7851,1.197,0.773,0.0
+wgcna_multiplex,go_visible_modules,8.0,1.0949,1.0362,1.1569,0.00126,0.5034

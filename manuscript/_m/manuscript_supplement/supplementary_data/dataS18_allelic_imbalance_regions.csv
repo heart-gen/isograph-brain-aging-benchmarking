@@ -1,0 +1,5 @@
+region,pairs,pairs_fitted,genes_fitted,pairs_nominal_p05,pairs_q05,genes_q05,sign_agree_between_all,sign_agree_between_q05,not_converged,at_bound,at_bound_q05,hom_null_fits,hom_null_frac_p05,hom_null_lambda_gc,het_lambda_gc,score_vs_glmm_spearman,median_lead_site_kb,module_axis_genes,module_axis_median_abs_rho,module_axis_null_median,module_axis_perm_p,module_cis_modules_ranked,module_cis_rho,module_cis_perm_p,coloc_nominated_fitted,coloc_nominated_nominal_p05
+caudate,3865,3361,481,898,590,185,0.6525,0.8729,35,132,19,3190,0.0589,1.0665,2.9762,0.8552,18.035,417,0.4,0.3198,0.000999,7,-0.691,0.0699,189,32
+hippocampus,2213,1892,291,448,247,92,0.6284,0.8623,48,61,5,1802,0.056,1.034,2.6565,0.8702,22.07,239,0.4182,0.3294,0.000999,14,0.326,0.286,114,10
+dlpfc,1014,853,115,189,98,37,0.5932,0.8163,13,21,6,851,0.0435,1.011,2.61,0.8726,18.185,104,0.4,0.3066,0.00599,2,,,69,7
+"pooled (caudate, hippocampus)",,,,,,,,,,,,,,,,,,,,,,,-0.1825,0.47,,

@@ -6,6 +6,11 @@ this directory, regenerated from the committed analysis parquet ledgers by
 verbatim from the source ledger — do not hand-edit a CSV; rerun the assembler. Each table is
 tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4).
 
+The manuscript-facing export (Supplementary Tables that stay in the PDF, and one Excel
+workbook per Data S item) is written by `manuscript/_h/build_supplementary_data.py` to
+`manuscript/_m/manuscript_supplement/`; its `MANIFEST.md` maps every manuscript item to the
+repo CSV listed here.
+
 | Table | File | Source ledger | Honest claim it supports |
 | --- | --- | --- | --- |
 | S1 | `tableS1_baseline_pooled.csv` | `baseline_comparison/baseline_comparison_pooled.parquet` | IsoGraph is **not** globally superior on module metrics |
@@ -36,15 +41,24 @@ tied to one honest claim from the real-data analysis spine (AGENTS.md §§1–4)
 | S19 | `tableS19_qtl_anchoring_sensitivity.csv` | `qtl_anchoring_meta/` + `qtl_anchoring_meta/sensitivity/<arm>/` | splicing-specificity contrast under the primary arm and the three pre-specified sensitivities — constraint-adjusted (gnomAD LOEUF + missense z + log expression, both covariate sets on the identical constraint-complete subset), threshold-free continuous (rank-INT of -log10 pval_beta), and SuSiE credible-set dose (backs Fig 3) |
 | S20a | `tableS20a_coloc_convergence_global.csv` | `module_coloc_convergence/global.parquet` | per (trait, source) coloc concentration vs a size-matched null, and anchored-module enrichment under BOTH denominators (all module genes vs the CLPP-tested pool) — backs S-real-10A/C |
 | S20b | `tableS20b_coloc_convergence_per_module.csv` | `module_coloc_convergence/convergence.parquet` | per-module colocalizing gene and locus counts for all five traits, with the `testable` flag and the leave-one-locus-out worst case — backs S-real-10B |
-| S21 | `tableS21_module_context_heldout_dtu.csv` | `dtu_added_value/region_summary.parquet` + giant-module arm | module context against held-out satuRn DTU evidence, per analysis, before and after the co-expression comparator (backs figDtuAddedValue; manuscript Table S15) |
-| S22 | `tableS22_allelic_imbalance_regions.csv` | `ase_junction_switch/<region>/allelic_summary.json` + `module_cis_control_summary.json` | within-donor allelic test per region, with its homozygous-at-lead calibration, estimator and between-donor agreement, and the module cis-control correlation (backs Fig 5a / Fig S19; manuscript Table S16) |
-| S23 | `tableS23_module_cis_control.csv` | `ase_junction_switch/module_cis_control.parquet` | per-module cis-controlled-gene rate against age-association rank (backs Fig S19e; manuscript Table S17) |
-| S24 | `tableS24_clpp_isoform_events.csv` | `coloc/coloc_isoform_events_combined.parquet` | every CLPP isoform event and whether its junction maps into the tissue-matched switch pair — the 76 events / 30 genes (backs Fig 5b,c; manuscript Table S18) |
-| S25 | `tableS25_signal_coloc_nominations.csv` | `coloc_signal_susie/all_introns/{genes,cells_hierarchy}.parquet` | signal-level sQTL nominations (PP4_sQTL >= 0.8), all-introns arm, with the headline estimator — 127 rows, 119 gene x trait cells, 116 genes (manuscript Table S19) |
-| S26 | `tableS26_coloc_modality_contrast.csv` | `coloc_signal_susie/all_introns/contrast.parquet` | paired sQTL vs eQTL colocalization contrast, the unbiased check on the sQTL-preferential selection (manuscript Table S20) |
-| S27 | `tableS27_ldsc_partitioned.csv` | `ldsc/ldsc_partitioned.parquet` | partitioned heritability of the switch-derived QTL annotations, single and joint models (backs Fig 5e, which reads this CSV; manuscript Table S21) |
-| S34 | `tableS34_cohort_description.csv` | `inputs/bundles/*/*/{samples.parquet,manifest.json}` | per-analysis discovery cohort: donors, diagnosis, sex, age (GTEx top-coded at 70), ancestry, library kit, RIN, PMI or ischemic time, death classification, feature counts around the expression filter and MuSiC reference (manuscript Table S29; Methods) |
-| S35 | `tableS35_synthetic_scenarios.csv` | `configs/synthetic_grid.yaml` | synthetic scenario grid: dimensions, swept and fixed parameters, seeds and datasets per scenario (manuscript Table S30; Methods) |
+| S21 | `tableS21_module_context_heldout_dtu.csv` | `dtu_added_value/region_summary.parquet` + giant-module arm | module context against held-out satuRn DTU evidence, per analysis, before and after the co-expression comparator (backs figDtuAddedValue; manuscript Data S13) |
+| S22 | `tableS22_allelic_imbalance_regions.csv` | `ase_junction_switch/<region>/allelic_summary.json` + `module_cis_control_summary.json` | within-donor allelic test per region, with its homozygous-at-lead calibration, estimator and between-donor agreement, and the module cis-control correlation (backs Fig 5a / Fig S19; manuscript Data S18) |
+| S23 | `tableS23_module_cis_control.csv` | `ase_junction_switch/module_cis_control.parquet` | per-module cis-controlled-gene rate against age-association rank (backs Fig S19e; manuscript Table S6) |
+| S24 | `tableS24_clpp_isoform_events.csv` | `coloc/coloc_isoform_events_combined.parquet` | every CLPP isoform event and whether its junction maps into the tissue-matched switch pair — the 76 events / 30 genes (backs Fig 5b,c; manuscript Data S24) |
+| S25 | `tableS25_signal_coloc_nominations.csv` | `coloc_signal_susie/all_introns/{genes,cells_hierarchy}.parquet` | signal-level sQTL nominations (PP4_sQTL >= 0.8), all-introns arm, with the headline estimator — 127 rows, 119 gene x trait cells, 116 genes (manuscript Data S19) |
+| S26 | `tableS26_coloc_modality_contrast.csv` | `coloc_signal_susie/all_introns/contrast.parquet` | paired sQTL vs eQTL colocalization contrast, the unbiased check on the sQTL-preferential selection (manuscript Data S20) |
+| S27 | `tableS27_ldsc_partitioned.csv` | `ldsc/ldsc_partitioned.parquet` | partitioned heritability of the switch-derived QTL annotations, single and joint models (backs Fig 5e, which reads this CSV; manuscript Data S25) |
+| S34 | `tableS34_cohort_description.csv` | `inputs/bundles/*/*/{samples.parquet,manifest.json}` | per-analysis discovery cohort: donors, diagnosis, sex, age (GTEx top-coded at 70), ancestry, library kit, RIN, PMI or ischemic time, death classification, feature counts around the expression filter and MuSiC reference (manuscript Data S1; Methods) |
+| S35 | `tableS35_synthetic_scenarios.csv` | `configs/synthetic_grid.yaml` | synthetic scenario grid: dimensions, swept and fixed parameters, seeds and datasets per scenario (manuscript Table S9; Methods) |
+| S36 | `tableS36_magma_module_gwas.csv` | `gwas/magma_results_combined{,_res5}.parquet` | every MAGMA module × trait competitive test at IsoGraph resolutions 2.0 and 5.0 and for gene-level WGCNA, with the ≥ 900-gene flag: whole-module GWAS enrichment is size-confounded in every pipeline (manuscript Data S27; backs manuscript Fig. S24) |
+| S37 | `tableS37_clinical_consequence.csv` | `06_switch_mechanism/_m/clinical_consequence_meta.parquet` | switch-gene LOEUF and switched-exon ClinVar density rollup by stratum and exon scope (manuscript Table S5; backs manuscript Fig. S25) |
+| S38 | `tableS38_psi_gene_corroboration.csv` | `switch_validation/*/summary_{module,marginal}.json` | gene-level PSI / junction-usage corroboration of the switch layer per analysis, rolled up from the committed JSON summaries (manuscript Data S12) |
+| S39 | `tableS39_psi_junction_confirmation.csv` | `junction_coloc_confirm/junction_confirm.parquet` | per-event BrainSEQ PSI confirmation of the 30 CLPP-anchored switch pairs, untestable tissues kept explicit (manuscript Data S15) |
+
+Manuscript Tables S7 and S8 are copies of S3 and S4 (the splicing-QTL specificity
+contrast, all analyses and shared analyses), and manuscript Figs. S23–S25 are
+`manuscript/_m/figures/figQtlSpecificity.png`, `figGwasResolution.png` and
+`figClinicalConsequence.png` copied unchanged.
 
 Tables S8–S12 (the per-gene deep-dive) live under `05_genetic_anchoring/_m/deep_dive/` and are regenerated
 by `05_genetic_anchoring/_h/15.build_deep_dive.sh` (not the `assemble_supp_tables.py` assembler). Together they

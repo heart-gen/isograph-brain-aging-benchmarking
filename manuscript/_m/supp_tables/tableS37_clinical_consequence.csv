@@ -1,0 +1,7 @@
+stratum,scope,n_analyses,n_analyses_enriched_p05,n_analyses_depleted_p05,median_density_ratio,median_switched_per_kb,median_bg_per_kb,density_fisher_p,median_loeuf_switch,loeuf_fisher_p
+all,all_exons,10,0,10,0.1601,2.5088,16.7041,4.51e-17,0.729,1.28e-89
+go_invisible,all_exons,7,0,6,0.1618,3.3209,15.6273,8.17e-11,0.765,2.31e-54
+go_visible,all_exons,9,0,8,0.1619,2.3826,12.7134,5.67e-14,0.7145,1.24e-64
+all,cds,10,0,10,0.1822,2.9651,17.1115,5.83e-16,0.729,1.28e-89
+go_invisible,cds,7,0,7,0.1808,3.9211,16.16,1.29e-10,0.765,2.31e-54
+go_visible,cds,9,0,8,0.1858,2.7396,13.4593,4.04e-14,0.7145,1.24e-64

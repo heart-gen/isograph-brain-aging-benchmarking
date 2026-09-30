@@ -1,0 +1,13 @@
+cohort,region,method,n_modules,n_trusted,frac_trusted,median_coassign_density,median_null_density,median_best_match_jaccard,n_split_half_pairs,n_both_age_sig,n_sign_concordant,median_driver_rho,frac_positive_rho,median_frac_dtu_without_dge,median_frac_in_wgcna_age
+brainseq,caudate,isograph,13,12,0.9231,0.4112,0.1243,0.317,67,6,5,0.75,1.0,0.0041,0.4285
+brainseq,caudate,wgcna,23,23,1.0,0.5064,0.1391,0.3469,118,6,6,0.8165,1.0,,
+brainseq,dlpfc,isograph,10,10,1.0,0.4465,0.1101,0.2981,77,0,0,0.7172,1.0,0.0015,0.3641
+brainseq,dlpfc,wgcna,24,24,1.0,0.4277,0.0877,0.2802,128,2,2,0.8252,1.0,,
+brainseq,hippocampus,isograph,16,16,1.0,0.3469,0.0953,0.1654,85,0,0,0.745,0.9744,0.0,0.9962
+brainseq,hippocampus,wgcna,9,5,0.5556,0.6385,0.5534,0.3883,44,0,0,0.7955,1.0,,
+gtex,caudate_basal_ganglia,isograph,28,22,0.7857,0.3089,0.124,0.1836,156,0,0,0.8078,1.0,0.0,0.0
+gtex,caudate_basal_ganglia,wgcna,6,6,1.0,0.8113,0.6347,0.6095,37,0,0,0.8117,1.0,,
+gtex,frontal_cortex_ba9,isograph,21,12,0.5714,0.2383,0.1546,0.1375,109,8,8,0.8216,0.9737,0.0,0.655
+gtex,frontal_cortex_ba9,wgcna,7,3,0.4286,0.569,0.5761,0.5051,40,0,0,0.793,1.0,,
+gtex,hippocampus,isograph,30,21,0.7,0.2337,0.128,0.1192,147,9,9,0.7942,0.9451,0.0,0.9043
+gtex,hippocampus,wgcna,3,1,0.3333,0.6294,0.6893,0.6143,25,6,6,0.7763,1.0,,
