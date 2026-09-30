@@ -199,7 +199,8 @@ lb <- ld |>
   mutate(annot = recode(model, cis_only = "cis", sqtl_only = "sQTL", eqtl_only = "eQTL"),
          annot = factor(annot, c("cis", "sQTL", "eQTL")),
          trait = factor(toupper(trait), c("AD", "PD", "LBD", "ALS", "SCZ")),
-         star = sig_star(coef_p))
+         star = sig_star(coef_q_bh))  # BH q over these 15 tests (Table S27)
+if (anyNA(lb$coef_q_bh) || nrow(lb) != 15) stop("Fig 5e needs the 15 BH-corrected LDSC tests")
 
 pB <- ggplot(lb, aes(trait, enrichment, fill = annot)) +
   geom_hline(yintercept = 1, linewidth = 0.3, linetype = "dashed", colour = "grey55") +

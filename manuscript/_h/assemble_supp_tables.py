@@ -741,15 +741,24 @@ def ldsc_table() -> None:
 
     `coef_p` is the one-sided test that the annotation's per-SNP coefficient exceeds 0,
     conditional on baselineLD (single-annotation models) or on baselineLD plus the other
-    QTL layer (`joint`); it is the statistic the text quotes. Fig 5e reads this CSV.
+    QTL layer (`joint`). `coef_q_bh` is its Benjamini-Hochberg q over the one testing
+    family: the 15 single-annotation models of the aging switch layer (5 traits x
+    cis/sQTL/eQTL). Joint and SCZD-module rows stay descriptive and have no q. The text
+    and Fig 5e quote the q.
     """
     ld = pd.read_parquet(LDSC / "ldsc_partitioned.parquet")
     order = {"cis_only": 0, "sqtl_only": 1, "eqtl_only": 2, "joint": 3}
     ld = (ld.assign(_o=ld.model.map(order))
           .sort_values(["annotation", "trait", "_o", "annot"]).drop(columns="_o")
           .reset_index(drop=True))
-    write(round_num(ld, sig_cols=("enrichment_p", "coef", "coef_se",
-                                                   "coef_p")), "tableS27_ldsc_partitioned.csv")
+    fam = (ld.annotation == "aging") & ld.model.isin(["cis_only", "sqtl_only", "eqtl_only"])
+    if fam.sum() != 15:
+        raise ValueError(f"expected 15 single-annotation aging tests, found {fam.sum()}")
+    p = ld.loc[fam, "coef_p"].sort_values(ascending=False)
+    rank = pd.Series(range(len(p), 0, -1), index=p.index)
+    ld["coef_q_bh"] = (p * len(p) / rank).cummin().clip(upper=1).reindex(ld.index)
+    write(round_num(ld, sig_cols=("enrichment_p", "coef", "coef_se", "coef_p",
+                                  "coef_q_bh")), "tableS27_ldsc_partitioned.csv")
 
 
 # --- S34  cohort description (Methods) ---------------------------------------
