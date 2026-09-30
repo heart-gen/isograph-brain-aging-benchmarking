@@ -84,6 +84,14 @@ save_fig <- function(p, name, width, height) {
 }
 
 s <- fromJSON(file.path(EV_DIR, "anchored_summary.json"))
+# Anchored sets are drawn on distinct transcript pairs, the primary unit: a pair anchored from
+# both sides is two orientations with one long-read outcome. Run
+# `switch_orthogonal_confirm --mode distinct --events <layer>` if the summary lacks them.
+if (is.null(s$distinct_pairs)) {
+  stop("anchored_summary.json has no distinct_pairs; run switch_orthogonal_confirm ",
+       "--mode distinct --events ", EVENTS, call. = FALSE)
+}
+sd <- s$distinct_pairs
 g0 <- fromJSON(file.path(OC_DIR, "global_null_summary.json"))
 
 # ---------------------------------------------------------------------------
@@ -106,12 +114,12 @@ a <- bind_rows(
          sprintf("Genome-wide,\nall switch pairs\n(n = %s)",
                  format(g0$matched_null$switch_like_rate$n_focal, big.mark = ",")),
          "global"),
-  mk_row(s, "switch_like_rate",
-         sprintf("Anchored,\nall detected\n(n = %d)", s$matched_null$switch_like_rate$n_focal),
+  mk_row(sd, "switch_like_rate",
+         sprintf("Anchored,\nall detected\n(n = %d)", sd$matched_null$switch_like_rate$n_focal),
          "anchored"),
-  mk_row(s, "switch_like_rate_usable_only",
-         sprintf("Anchored, isoform\nusably expressed\n(n = %d)",
-                 s$matched_null$switch_like_rate_usable_only$n_focal),
+  mk_row(sd, "switch_like_rate_usable_only",
+         sprintf("Anchored, isoform\nwell expressed\n(n = %d)",
+                 sd$matched_null$switch_like_rate_usable_only$n_focal),
          "anchored"))
 a$set <- factor(a$set, levels = a$set)
 a$plab <- sprintf("P = %s", formatC(a$p, format = "g", digits = 2))
@@ -153,7 +161,13 @@ for (i in seq_len(nrow(a))) cat(sprintf("    %-40s %.3f vs %.3f (margin %+.3f, %
 # ---------------------------------------------------------------------------
 # Panel B - per-gene confirmation, with the abundance-disqualified genes named
 # ---------------------------------------------------------------------------
+# Bars count distinct switch-like pairs; gene status is unit-invariant (a gene has a
+# switch-like orientation exactly when it has a switch-like distinct pair).
+dp_gene <- as.data.frame(read_parquet(file.path(EV_DIR, "distinct_pair_confirmation.parquet"))) |>
+  group_by(gene) |>
+  summarise(n_distinct_switch_like = sum(pair_detected & switch_like), .groups = "drop")
 g <- as.data.frame(read_parquet(file.path(EV_DIR, "anchored_gene_confirmation.parquet"))) |>
+  left_join(dp_gene, by = "gene") |>
   mutate(status = case_when(
            confirmed_at_usable_abundance ~ "Confirmed",
            orthogonally_confirmed        ~ "Anchored isoform too lowly expressed",
@@ -161,7 +175,7 @@ g <- as.data.frame(read_parquet(file.path(EV_DIR, "anchored_gene_confirmation.pa
          status = factor(status, c("Confirmed",
                                    "Anchored isoform too lowly expressed",
                                    "Not confirmed")),
-         gene_name = reorder(gene_name, n_switch_like))
+         gene_name = reorder(gene_name, n_distinct_switch_like))
 
 # The anchored isoform fraction is the qualification that decides whether a gene's
 # correlation is interpretable at all; carry it as an explicit right-hand annotation
@@ -170,7 +184,7 @@ g$if_lab <- sprintf("%.3f", g$max_anchored_if)
 # The gene count is read from the table, not assumed: the legacy expression-filter run
 # had 12 genes and a fixed 13.6 y-limit clipped the 30-gene switching-filter result.
 n_genes <- nrow(g)
-max_n   <- max(4, max(g$n_switch_like, na.rm = TRUE))
+max_n   <- max(4, max(g$n_distinct_switch_like, na.rm = TRUE))
 x_max   <- max_n * 1.22 + 1          # room for the right-hand IF column past the longest bar
 x_step  <- if (max_n > 8) 5 else 1
 cat(sprintf("  per-gene panel: %d genes, %d confirmed (%d at usable abundance)\n",
@@ -180,7 +194,7 @@ cat(sprintf("  per-gene panel: %d genes, %d confirmed (%d at usable abundance)\n
 # and a height close to the 30-gene layout the composed Fig. 4 was built around; the
 # unconfirmed genes are named in one wrapped line under the axis rather than dropped.
 gb <- g |> filter(status != "Not confirmed") |> droplevels() |>
-  mutate(gene_name = reorder(as.character(gene_name), n_switch_like))
+  mutate(gene_name = reorder(as.character(gene_name), n_distinct_switch_like))
 not_conf <- g |> filter(status == "Not confirmed") |> arrange(as.character(gene_name)) |>
   pull(gene_name) |> as.character()
 n_rows <- nrow(gb)
@@ -189,8 +203,8 @@ nc_lab <- paste(strwrap(sprintf("Not confirmed (%d): %s", length(not_conf),
                                 paste(not_conf, collapse = ", ")), width = 70),
                 collapse = "\n")
 
-pB <- ggplot(gb, aes(n_switch_like, gene_name)) +
-  geom_segment(aes(x = 0, xend = n_switch_like, yend = gene_name, colour = status),
+pB <- ggplot(gb, aes(n_distinct_switch_like, gene_name)) +
+  geom_segment(aes(x = 0, xend = n_distinct_switch_like, yend = gene_name, colour = status),
                linewidth = 0.55) +
   geom_point(aes(colour = status), size = 2) +
   geom_text(aes(x = x_max - 0.1, label = if_lab), hjust = 1, size = 2.2, colour = "grey35") +
@@ -203,7 +217,7 @@ pB <- ggplot(gb, aes(n_switch_like, gene_name)) +
                      expand = expansion(mult = c(0.01, 0))) +
   coord_cartesian(ylim = c(0.5, n_rows + 1.6), clip = "off") +
   guides(colour = guide_legend(nrow = 1)) +
-  labs(x = "Switch-like anchored pairs in long-read", y = NULL, caption = nc_lab) +
+  labs(x = "Switch-like transcript pairs in long-read", y = NULL, caption = nc_lab) +
   theme_pub() +
   theme(legend.position = "bottom",
         legend.margin = margin(0, 0, 0, 0),

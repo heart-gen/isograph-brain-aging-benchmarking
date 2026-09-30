@@ -15,6 +15,14 @@ The splicing-led genes are the manuscript's DTU-without-DGE class, and every cal
 - **26 of 30 genes** have at least one orthogonally confirmed anchored pair.
 - Restricting to pairs whose *anchored* isoform reaches 0.05 mean isoform fraction: 88 of 215 pairs, and **25 of 30 genes**.
 
+### Distinct transcript pairs (primary unit)
+
+The 583 anchored orientations are 377 distinct transcript pairs; 206 are anchored from both sides because both members carry the colocalizing junction. The long-read outcome is symmetric in the two transcripts, so each pair is counted once here. 131 distinct pairs are detected and **92 are switch-like (0.702)** against a matched-null mean of 0.243 (95% null interval 0.176-0.313, p = 0.0005).
+Restricted to the 94 detected pairs with a usably expressed anchored isoform: 69 switch-like (**0.734**, null 0.276, p = 0.0005).
+Mean usage correlation -0.180 against a null of -0.114 (p = 0.088).
+
+The orientation-level results below are the sensitivity analysis.
+
 Against an abundance-matched background of 58125 non-splicing-led IsoGraph switch pairs, the anchored switch-like rate is **0.675** versus a matched-null mean of 0.243 (95% null interval 0.189-0.301, empirical two-sided p = 0.0005, n = 206 testable pairs).
 
 Matching is on the abundance decile of the better-expressed member, because at n=12 that is what governs whether a usage correlation is estimable at all.

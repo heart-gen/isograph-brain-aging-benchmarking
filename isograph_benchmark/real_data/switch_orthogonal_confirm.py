@@ -28,6 +28,11 @@ Modes
     Score the anchored switch pairs of the splicing-led genes against the matched
     background. Answers "is the genetically anchored switch corroborated orthogonally?".
 
+``distinct``
+    Collapse a finished anchored run to distinct transcript pairs (a pair anchored from
+    both sides is scored twice by ``anchored``) and add their matched nulls to its summary.
+    ``anchored`` runs this step too; the separate mode reuses the saved scores.
+
 ``global-null``
     The matched null for the *overall* long-read switch-like rate that
     ``longread_switch_confirm`` reports without one: are IsoGraph switch pairs more
@@ -277,6 +282,91 @@ def qualify_abundance(scored: pd.DataFrame, min_if: float) -> pd.DataFrame:
     return out
 
 
+def distinct_pairs(scored: pd.DataFrame) -> pd.DataFrame:
+    """Collapse anchored orientations to one row per unordered transcript pair.
+
+    When both members of a pair carry the colocalizing junction, ``anchored_pairs`` scores the
+    pair once from each side. Detection, the usage correlation and the better-expressed
+    member's abundance are symmetric in the two transcripts, so both rows carry the same
+    outcome, and counting both weights such pairs twice in a set-level rate. The distinct
+    pair is the unit of the long-read outcome; it is usable when either orientation's
+    anchored isoform reaches the abundance threshold.
+    """
+    d = scored.copy()
+    d["tx_a"] = d[["t1", "t2"]].min(axis=1)
+    d["tx_b"] = d[["t1", "t2"]].max(axis=1)
+    keys = ["gene", "tx_a", "tx_b"]
+    sym = d.groupby(keys)[["pair_detected", "switch_like", "max_mean_if"]].nunique(dropna=False)
+    if (sym > 1).any().any():
+        raise ValueError("orientation-dependent long-read outcome for a distinct pair")
+    return d.groupby(keys, as_index=False).agg(
+        gene_name=("gene_name", "first"),
+        pair_detected=("pair_detected", "first"),
+        switch_like=("switch_like", "first"),
+        usage_spearman=("usage_spearman", "first"),
+        max_mean_if=("max_mean_if", "first"),
+        anchored_usable=("anchored_usable", "any"),
+        n_orientations=("t1", "size"),
+    )
+
+
+def distinct_pair_summary(scored: pd.DataFrame, bg: pd.DataFrame, args,
+                          out_dir: Path) -> dict:
+    """Set-level long-read test on distinct transcript pairs, the primary unit.
+
+    The same abundance-matched null as the orientation-level test, applied to one row per
+    pair; the orientation-level result is kept as the sensitivity analysis.
+    """
+    dp = distinct_pairs(scored)
+    dp.to_parquet(out_dir / "distinct_pair_confirmation.parquet", index=False)
+    tested = dp[dp["pair_detected"]]
+    usable = tested[tested["anchored_usable"]]
+    nulls = {
+        s: matched_null(tested, bg, s, args.n_draws, args.seed)
+        for s in ("switch_like_rate", "mean_usage_spearman")
+    }
+    nulls["switch_like_rate_usable_only"] = matched_null(
+        usable, bg, "switch_like_rate", args.n_draws, args.seed
+    )
+    return {
+        "n_pairs": int(len(dp)),
+        "n_pairs_two_orientations": int((dp["n_orientations"] > 1).sum()),
+        "n_detected": int(len(tested)),
+        "n_switch_like": int(tested["switch_like"].sum()),
+        "n_detected_usable": int(len(usable)),
+        "n_switch_like_usable": int(usable["switch_like"].sum()),
+        "n_genes_with_detected_pair": int(tested["gene"].nunique()),
+        "n_genes_switch_like": int(tested.loc[tested["switch_like"], "gene"].nunique()),
+        "n_genes_switch_like_usable": int(usable.loc[usable["switch_like"], "gene"].nunique()),
+        "matched_null": nulls,
+    }
+
+
+def run_distinct(args) -> None:
+    """Add the distinct-pair test to an existing anchored run without rescoring long-read.
+
+    Reads the saved per-orientation scores, so it needs neither the long-read matrix nor a
+    rerun of the orientation-level nulls. The background is rebuilt exactly as
+    ``run_anchored`` builds it (anchored and cross-tissue-exception genes excluded).
+    """
+    out_dir = _out_dir(args.events)
+    summ_path = out_dir / "anchored_summary.json"
+    summary = json.loads(summ_path.read_text())
+    scored = pd.read_parquet(out_dir / "anchored_pair_confirmation.parquet")
+    exclude = set(scored["gene"])
+    ex_path = out_dir / "exception_pair_confirmation.parquet"
+    if ex_path.exists():
+        exclude |= set(pd.read_parquet(ex_path, columns=["gene"])["gene"])
+    bg = background_switch_pairs(exclude)
+    if len(bg) != summary["background"]["n_pairs"]:
+        raise SystemExit("rebuilt background does not match the anchored run's; rerun anchored")
+    summary["distinct_pairs"] = distinct_pair_summary(scored, bg, args, out_dir)
+    summ_path.write_text(json.dumps(summary, indent=2, default=str))
+    per_gene = pd.read_parquet(out_dir / "anchored_gene_confirmation.parquet")
+    _write_anchored_report(out_dir, scored, per_gene, summary)
+    print(json.dumps(summary["distinct_pairs"], indent=2, default=str))
+
+
 # --------------------------------------------------------------------------- #
 # Abundance-matched background
 # --------------------------------------------------------------------------- #
@@ -517,6 +607,7 @@ def run_anchored(args) -> None:
         usable, bg, "switch_like_rate", args.n_draws, args.seed
     )
     exceptions = score_exceptions(ex_pairs, tx, frac, bg, args, out_dir)
+    distinct = distinct_pair_summary(scored, bg, args, out_dir)
 
     summary = {
         "mode": "anchored",
@@ -548,6 +639,7 @@ def run_anchored(args) -> None:
             "switch_like_rate_unmatched": float(bg["switch_like"].mean()),
         },
         "matched_null": nulls,
+        "distinct_pairs": distinct,
         "thresholds": {
             "min_count": args.min_count,
             "min_samples": args.min_samples,
@@ -673,6 +765,35 @@ def _write_anchored_report(
         f"**{summary['n_genes_confirmed_at_usable_abundance']} of {n_tested} genes**.",
         "",
     ]
+    dp = summary.get("distinct_pairs") or {}
+    dsl = dp.get("matched_null", {}).get("switch_like_rate", {})
+    dsu = dp.get("matched_null", {}).get("switch_like_rate_usable_only", {})
+    if isinstance(dsl.get("observed"), float):
+        lines += [
+            "### Distinct transcript pairs (primary unit)",
+            "",
+            f"The {summary['n_anchored_pairs']} anchored orientations are "
+            f"{dp['n_pairs']} distinct transcript pairs; {dp['n_pairs_two_orientations']} are "
+            "anchored from both sides because both members carry the colocalizing junction. "
+            "The long-read outcome is symmetric in the two transcripts, so each pair is "
+            f"counted once here. {dp['n_detected']} distinct pairs are detected and "
+            f"**{dp['n_switch_like']} are switch-like ({dsl['observed']:.3f})** against a "
+            f"matched-null mean of {dsl['null_mean']:.3f} (95% null interval "
+            f"{dsl['null_q025']:.3f}-{dsl['null_q975']:.3f}, p = "
+            f"{dsl['p_empirical_two_sided']:.3g}).",
+        ]
+        if isinstance(dsu.get("observed"), float):
+            lines.append(
+                f"Restricted to the {dp['n_detected_usable']} detected pairs with a usably "
+                f"expressed anchored isoform: {dp['n_switch_like_usable']} switch-like "
+                f"(**{dsu['observed']:.3f}**, null {dsu['null_mean']:.3f}, "
+                f"p = {dsu['p_empirical_two_sided']:.3g}).")
+        dus = dp["matched_null"].get("mean_usage_spearman", {})
+        if isinstance(dus.get("observed"), float):
+            lines.append(
+                f"Mean usage correlation {dus['observed']:.3f} against a null of "
+                f"{dus['null_mean']:.3f} (p = {dus['p_empirical_two_sided']:.3g}).")
+        lines += ["", "The orientation-level results below are the sensitivity analysis.", ""]
     su = summary["matched_null"].get("switch_like_rate_usable_only", {})
     if isinstance(sl.get("observed"), float):
         lines += [
@@ -858,7 +979,8 @@ def _write_global_null_report(out_dir: Path, summary: dict) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--mode", choices=["anchored", "global-null"], default="anchored")
+    ap.add_argument("--mode", choices=["anchored", "distinct", "global-null"],
+                    default="anchored")
     ap.add_argument("--events", choices=EVENT_LAYERS, default="clpp",
                     help="anchored mode: coloc layer supplying the anchored events. clpp "
                          "(default; S-real-8 / Table S14) or signal (coloc.susie all-introns "
@@ -881,6 +1003,8 @@ def main() -> None:
 
     if args.mode == "anchored":
         run_anchored(args)
+    elif args.mode == "distinct":
+        run_distinct(args)
     else:
         run_global_null(args)
 

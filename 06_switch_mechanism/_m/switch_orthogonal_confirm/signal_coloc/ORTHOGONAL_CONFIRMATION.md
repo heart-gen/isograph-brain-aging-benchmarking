@@ -15,6 +15,14 @@ The anchored events here come from the signal-level colocalization layer (`coloc
 - **39 of 55 genes** have at least one orthogonally confirmed anchored pair.
 - Restricting to pairs whose *anchored* isoform reaches 0.05 mean isoform fraction: 109 of 292 pairs, and **32 of 55 genes**.
 
+### Distinct transcript pairs (primary unit)
+
+The 740 anchored orientations are 541 distinct transcript pairs; 199 are anchored from both sides because both members carry the colocalizing junction. The long-read outcome is symmetric in the two transcripts, so each pair is counted once here. 191 distinct pairs are detected and **111 are switch-like (0.581)** against a matched-null mean of 0.245 (95% null interval 0.188-0.304, p = 0.0005).
+Restricted to the 140 detected pairs with a usably expressed anchored isoform: 86 switch-like (**0.614**, null 0.275, p = 0.0005).
+Mean usage correlation -0.097 against a null of -0.097 (p = 0.995).
+
+The orientation-level results below are the sensitivity analysis.
+
 Against an abundance-matched background of 57893 non-anchored IsoGraph switch pairs, the anchored switch-like rate is **0.583** versus a matched-null mean of 0.248 (95% null interval 0.201-0.303, empirical two-sided p = 0.0005, n = 264 testable pairs).
 
 Matching is on the abundance decile of the better-expressed member, because at n=12 that is what governs whether a usage correlation is estimable at all.

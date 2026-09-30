@@ -642,10 +642,39 @@ def longread_coloc_table() -> None:
     anchored isoform never reaches 0.05 mean isoform fraction stay in the table with
     confirmed_at_usable_abundance = False.
     """
-    d = pd.read_parquet(MECH / "switch_orthogonal_confirm" / "signal_coloc"
-                        / "anchored_gene_confirmation.parquet")
+    import json
+
+    oc = MECH / "switch_orthogonal_confirm" / "signal_coloc"
+    d = pd.read_parquet(oc / "anchored_gene_confirmation.parquet")
     assert len(d) == 55, len(d)
-    d = d.sort_values(["confirmed_at_usable_abundance", "n_switch_like"],
+    # Distinct transcript pairs are the primary unit (a pair anchored from both sides is two
+    # orientations with one outcome); the orientation counts stay as the sensitivity columns.
+    dp = pd.read_parquet(oc / "distinct_pair_confirmation.parquet")
+    det = dp[dp["pair_detected"]]
+    per = pd.DataFrame({
+        "n_distinct_pairs": dp.groupby("gene").size(),
+        "n_distinct_detected": det.groupby("gene").size(),
+        "n_distinct_switch_like": det.groupby("gene")["switch_like"].sum(),
+        "n_distinct_detected_usable": det[det["anchored_usable"]].groupby("gene").size(),
+        "n_distinct_switch_like_usable":
+            det[det["anchored_usable"]].groupby("gene")["switch_like"].sum(),
+    }).fillna(0).astype(int).reset_index()
+    d = d.merge(per, on="gene", how="left")
+    assert d["n_distinct_pairs"].notna().all()
+    summ = json.loads((oc / "anchored_summary.json").read_text())["distinct_pairs"]
+    assert d["n_distinct_detected"].sum() == summ["n_detected"]
+    assert d["n_distinct_switch_like"].sum() == summ["n_switch_like"]
+    assert d["n_distinct_switch_like_usable"].sum() == summ["n_switch_like_usable"]
+    d = d.rename(columns={
+        "n_anchored_pairs": "n_orientations",
+        "n_pairs_detected": "n_orientations_detected",
+        "n_switch_like": "n_orientations_switch_like",
+        "n_pairs_usable": "n_orientations_usable",
+        "n_switch_like_usable": "n_orientations_switch_like_usable",
+    })
+    lead = ["gene", "gene_name", "traits", "max_PP4_sQTL"] + list(per.columns[1:])
+    d = d[lead + [c for c in d.columns if c not in lead]]
+    d = d.sort_values(["confirmed_at_usable_abundance", "n_distinct_switch_like"],
                       ascending=[False, False]).reset_index(drop=True)
     write(round_num(d), "tableS29_longread_coloc_confirmation.csv")
 
