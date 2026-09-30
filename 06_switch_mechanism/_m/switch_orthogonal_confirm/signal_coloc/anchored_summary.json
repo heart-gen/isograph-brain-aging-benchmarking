@@ -74,6 +74,58 @@
       "n_draws": 2000
     }
   },
+  "distinct_pairs": {
+    "n_pairs": 541,
+    "n_pairs_two_orientations": 199,
+    "n_detected": 191,
+    "n_switch_like": 111,
+    "n_detected_usable": 140,
+    "n_switch_like_usable": 86,
+    "n_genes_with_detected_pair": 41,
+    "n_genes_switch_like": 39,
+    "n_genes_switch_like_usable": 32,
+    "matched_null": {
+      "switch_like_rate": {
+        "statistic": "switch_like_rate",
+        "n_focal": 191,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 57893,
+        "observed": 0.581151832460733,
+        "null_mean": 0.24474607329842932,
+        "null_sd": 0.02999467152499835,
+        "null_q025": 0.18848167539267016,
+        "null_q975": 0.3036649214659686,
+        "p_empirical_two_sided": 0.0004997501249375312,
+        "n_draws": 2000
+      },
+      "mean_usage_spearman": {
+        "statistic": "mean_usage_spearman",
+        "n_focal": 191,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 57893,
+        "observed": -0.09656697956290247,
+        "null_mean": -0.09674096493572526,
+        "null_sd": 0.03246392351816585,
+        "null_q025": -0.1599167249997831,
+        "null_q975": -0.033423365112961005,
+        "p_empirical_two_sided": 0.9945027486256871,
+        "n_draws": 2000
+      },
+      "switch_like_rate_usable_only": {
+        "statistic": "switch_like_rate",
+        "n_focal": 140,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 57893,
+        "observed": 0.6142857142857143,
+        "null_mean": 0.27471428571428574,
+        "null_sd": 0.03592466607573495,
+        "null_q025": 0.20714285714285716,
+        "null_q975": 0.35,
+        "p_empirical_two_sided": 0.0004997501249375312,
+        "n_draws": 2000
+      }
+    }
+  },
   "thresholds": {
     "min_count": 5.0,
     "min_samples": 3,
