@@ -878,6 +878,109 @@ def synthetic_grid_table() -> None:
     write(pd.DataFrame(rows), "tableS35_synthetic_scenarios.csv")
 
 
+# --- S36  MAGMA competitive module gene-set tests -----------------------------
+def magma_table() -> None:
+    """S36 -- every MAGMA module x trait competitive test, both IsoGraph resolutions and the
+    gene-level WGCNA baseline (manuscript Table S33; backs Fig. S24).
+
+    The load-bearing column is `giant_module` (>= 900 genes): the manuscript reports that
+    most FDR-significant sets are giant in every pipeline, so the table must carry the size
+    beside the P value rather than only the hits.
+    """
+    gwas = stage_out("anchoring", "gwas")
+    prod, r5 = gwas / "magma_results_combined.parquet", gwas / "magma_results_combined_res5.parquet"
+    if not (prod.exists() and r5.exists()):
+        print("  skip tableS36: MAGMA combined outputs absent")
+        return
+    p = pd.read_parquet(prod).assign(resolution="2.0")
+    s = pd.read_parquet(r5).assign(resolution="5.0")
+    # The resolution-5.0 file re-lists the resolution-independent WGCNA rows; keep them once.
+    s = s[s["backend"] != "wgcna_gene"]
+    d = pd.concat([p, s], ignore_index=True)
+    d.loc[d["backend"] == "wgcna_gene", "resolution"] = "n/a"
+    parts = d["VARIABLE"].str.split("__", n=2, expand=True)
+    d["cohort"], d["region"], d["module_id"] = parts[0], parts[1], parts[2]
+    d["giant_module"] = d["NGENES"] >= 900
+    d = d.rename(columns={"NGENES": "n_genes", "BETA": "beta", "BETA_STD": "beta_std",
+                          "SE": "se", "P": "p_value", "FDR": "fdr"})
+    d = d[["backend", "resolution", "trait", "cohort", "region", "module_id", "n_genes",
+           "giant_module", "beta", "beta_std", "se", "p_value", "fdr"]]
+    d = d.sort_values(["backend", "resolution", "trait", "fdr"]).reset_index(drop=True)
+    write(round_num(d, sig_cols=("fdr",)), "tableS36_magma_module_gwas.csv")
+
+
+# --- S37  gnomAD constraint and ClinVar density of switched exons ------------
+def clinical_table() -> None:
+    """S37 -- cross-analysis rollup of switch-gene LOEUF and switched-exon ClinVar density
+    (manuscript Table S34; backs Fig. S25a,b). One row per (exon scope, module stratum).
+    """
+    f = MECH / "clinical_consequence_meta.parquet"
+    if not f.exists():
+        print("  skip tableS37: clinical_consequence_meta.parquet absent")
+        return
+    d = pd.read_parquet(f)
+    d = d.rename(columns={"n_regions": "n_analyses",
+                          "n_ratio_gt1_p05": "n_analyses_enriched_p05",
+                          "n_ratio_lt1_p05": "n_analyses_depleted_p05",
+                          "median_ratio": "median_density_ratio",
+                          "fisher_p": "density_fisher_p"})
+    write(round_num(d, sig_cols=("density_fisher_p", "loeuf_fisher_p")),
+          "tableS37_clinical_consequence.csv")
+
+
+# --- S38 / S39  short-read PSI corroboration ---------------------------------
+def psi_tables() -> None:
+    """S38 -- gene-level PSI corroboration of the switch layer, one row per analysis and
+    switch set (manuscript Table S35); S39 -- per-event short-read junction confirmation of
+    the CLPP-anchored switch pairs (manuscript Table S36).
+
+    S38 is rolled up from the committed `summary_<set>.json` files, which are the source of
+    record for `validate_switch_splicing.py`; the older SWITCH_VALIDATION_SUMMARY.md predates
+    the switching-filter re-run and is not read.
+    """
+    import json
+
+    sv = MECH / "switch_validation"
+    rows = []
+    for f in sorted(sv.glob("*/summary_*.json")):
+        j = json.loads(f.read_text())
+        g = j["gene_corroboration"]
+        e = j.get("event_resolved") or {}
+        rows.append({
+            "cohort": j["cohort"], "region": j["region"], "trait": j["trait"],
+            "switch_set": j["switch_set"], "n_genes_tested": g["n_genes"],
+            "n_switch_positive": g["n_switch_pos"], "n_psi_positive": g["n_psi_pos"],
+            "n_both": g["contingency"]["switch_psi"],
+            "psi_positive_rate_switch": g["psi_pos_rate_in_switch_genes"],
+            "psi_positive_rate_background": g["psi_pos_rate_in_background"],
+            "fisher_or": g["fisher_or"], "fisher_p": g["fisher_p"],
+            "adjusted_or": g["adjusted_or"], "adjusted_p": g["adjusted_p"],
+            "n_resolved_junctions": e.get("n_resolved_junctions"),
+            "n_matched_to_psi": e.get("n_matched_to_psi"),
+            "n_both_significant": e.get("n_both_significant"),
+            "n_concordant": e.get("n_concordant"),
+        })
+    if rows:
+        d = pd.DataFrame(rows).sort_values(["switch_set", "cohort", "region", "trait"])
+        write(round_num(d.reset_index(drop=True), sig_cols=("fisher_p",)),
+              "tableS38_psi_gene_corroboration.csv")
+    else:
+        print("  skip tableS38: no switch_validation summaries")
+
+    jc = MECH / "junction_coloc_confirm" / "junction_confirm.parquet"
+    if not jc.exists():
+        print("  skip tableS39: junction_confirm.parquet absent")
+        return
+    d = pd.read_parquet(jc)
+    cols = [c for c in ("gene_name", "ens", "trait", "tissue", "region", "match",
+                        "anchored_junction", "clpp", "risk_allele", "mode", "event_id",
+                        "event_type", "is_reference_contrast", "n_samples", "median_psi",
+                        "minor_form_usage", "psi_iqr", "frac_samples_minor_ge_thresh",
+                        "verdict", "verdict_reason") if c in d.columns]
+    d = d[cols].sort_values(["gene_name", "trait", "region", "event_id"], na_position="last")
+    write(round_num(d.reset_index(drop=True)), "tableS39_psi_junction_confirmation.csv")
+
+
 def main() -> None:
     print(f"Writing supplementary tables to {OUT}")
     cohort_table()
@@ -905,6 +1008,9 @@ def main() -> None:
     brainseq_coloc_table()
     rbp_tables()
     ldsc_table()
+    magma_table()
+    clinical_table()
+    psi_tables()
     print("done.")
 
 
