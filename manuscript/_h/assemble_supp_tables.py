@@ -981,6 +981,28 @@ def psi_tables() -> None:
     write(round_num(d.reset_index(drop=True)), "tableS39_psi_junction_confirmation.csv")
 
 
+def junction_pair_table() -> None:
+    """Data S: pair-discriminating short-read junction support for the
+    signal-colocalization-prioritized transcript pairs (Figure 6c). One row per
+    nominated pair and primary BrainSEQ region, including unmeasured rows so the
+    coverage ledger travels with the measured values."""
+    src = MECH / "junction_pair_corroboration" / "primary_pair_results.csv"
+    if not src.exists():
+        print("  skip tableS40: primary_pair_results.csv absent")
+        return
+    d = pd.read_csv(src)
+    cols = [c for c in ("gene_name", "gene", "event_id", "trait", "traits", "qtl_tissue",
+                        "qtl_tissues", "iso_region", "PP4_sQTL", "junction", "t1", "t2",
+                        "region", "match", "anchor_specific", "two_sided",
+                        "n_nominating_events", "min_total_fragments",
+                        "min_fragments_per_form", "n_completed_donors", "n_covered",
+                        "n_both", "fraction_both", "median_total_fragments",
+                        "median_minor_usage", "measurement_status", "n_concordance",
+                        "rho_raw", "rho_adjusted", "concordance_status") if c in d.columns]
+    d = d[cols].sort_values(["gene_name", "region", "t1", "t2"], na_position="last")
+    write(round_num(d.reset_index(drop=True)), "tableS40_junction_pair_corroboration.csv")
+
+
 def main() -> None:
     print(f"Writing supplementary tables to {OUT}")
     cohort_table()
@@ -1010,6 +1032,7 @@ def main() -> None:
     ldsc_table()
     magma_table()
     clinical_table()
+    junction_pair_table()
     psi_tables()
     print("done.")
 
