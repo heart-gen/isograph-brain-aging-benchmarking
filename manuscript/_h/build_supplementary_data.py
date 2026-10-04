@@ -166,10 +166,10 @@ ITEMS: list[Item] = _number([
        "Long-read confirmation of colocalization-anchored switch pairs."),
     _d("s-junction-pairs", "junction_pair_corroboration", SUPP_TABLES / "tableS40_junction_pair_corroboration.csv",
        "Short-read junction corroboration of colocalization-prioritized transcript pairs."),
-    _d("s-psi-junctions", "psi_junction_confirmation", SUPP_TABLES / "tableS39_psi_junction_confirmation.csv",
-       "Short-read junction confirmation of the CLPP-anchored switch pairs."),
     _d("s-sign-scale", "projection_sign_scale", SUPP_TABLES / "tableS7f_projection_sign_scale.csv",
        "Raw against null-standardized projected-age sign agreement, per region."),
+    _d("s-psi-junctions", "psi_junction_confirmation", SUPP_TABLES / "tableS39_psi_junction_confirmation.csv",
+       "Short-read junction confirmation of the CLPP-anchored switch pairs."),
 ])
 
 
