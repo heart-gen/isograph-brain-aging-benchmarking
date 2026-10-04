@@ -1,0 +1,85 @@
+{
+  "primary_min_total_fragments": 10,
+  "min_covered_donors": 30,
+  "depth_sensitivity": [
+    5,
+    10,
+    20
+  ],
+  "primary_min_fragments_per_form": 1,
+  "per_form_sensitivity": 2,
+  "primary_matches": [
+    "cortex_proxy",
+    "exact"
+  ],
+  "match_mappings": {
+    "Brain_Frontal_Cortex_BA9": [
+      [
+        "dlpfc",
+        "exact"
+      ],
+      [
+        "caudate",
+        "secondary"
+      ]
+    ],
+    "Brain_Cortex": [
+      [
+        "dlpfc",
+        "cortex_proxy"
+      ],
+      [
+        "caudate",
+        "secondary"
+      ]
+    ],
+    "Brain_Hippocampus": [
+      [
+        "hippocampus",
+        "exact"
+      ]
+    ],
+    "Brain_Caudate_basal_ganglia": [
+      [
+        "caudate",
+        "exact"
+      ]
+    ],
+    "Brain_Anterior_cingulate_cortex_BA24": [
+      [
+        "dlpfc",
+        "adjacent"
+      ]
+    ],
+    "Brain_Putamen_basal_ganglia": [
+      [
+        "caudate",
+        "adjacent"
+      ]
+    ],
+    "Brain_Nucleus_accumbens_basal_ganglia": [
+      [
+        "caudate",
+        "adjacent"
+      ]
+    ]
+  },
+  "covariates": [
+    "Age",
+    "Sex",
+    "MoD",
+    "RIN",
+    "mapping_rate",
+    "mito_rate",
+    "SNP_PC1",
+    "SNP_PC2",
+    "SNP_PC3",
+    "SNP_PC4",
+    "SNP_PC5"
+  ],
+  "age_adjustment": "centered_scaled_cubic",
+  "transcript_identity": "exact_versioned_unordered_pair",
+  "junction_coordinates": "LeafCutter_exon_flanks_to_closed_intron_plus1_minus1",
+  "batch_size": 250000,
+  "no_allelic_significance_filter": true
+}

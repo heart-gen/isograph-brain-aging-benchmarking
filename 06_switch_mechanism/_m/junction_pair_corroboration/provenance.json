@@ -1,0 +1,274 @@
+{
+  "parameters": {
+    "primary_min_total_fragments": 10,
+    "min_covered_donors": 30,
+    "depth_sensitivity": [
+      5,
+      10,
+      20
+    ],
+    "primary_min_fragments_per_form": 1,
+    "per_form_sensitivity": 2,
+    "primary_matches": [
+      "cortex_proxy",
+      "exact"
+    ],
+    "match_mappings": {
+      "Brain_Frontal_Cortex_BA9": [
+        [
+          "dlpfc",
+          "exact"
+        ],
+        [
+          "caudate",
+          "secondary"
+        ]
+      ],
+      "Brain_Cortex": [
+        [
+          "dlpfc",
+          "cortex_proxy"
+        ],
+        [
+          "caudate",
+          "secondary"
+        ]
+      ],
+      "Brain_Hippocampus": [
+        [
+          "hippocampus",
+          "exact"
+        ]
+      ],
+      "Brain_Caudate_basal_ganglia": [
+        [
+          "caudate",
+          "exact"
+        ]
+      ],
+      "Brain_Anterior_cingulate_cortex_BA24": [
+        [
+          "dlpfc",
+          "adjacent"
+        ]
+      ],
+      "Brain_Putamen_basal_ganglia": [
+        [
+          "caudate",
+          "adjacent"
+        ]
+      ],
+      "Brain_Nucleus_accumbens_basal_ganglia": [
+        [
+          "caudate",
+          "adjacent"
+        ]
+      ]
+    },
+    "covariates": [
+      "Age",
+      "Sex",
+      "MoD",
+      "RIN",
+      "mapping_rate",
+      "mito_rate",
+      "SNP_PC1",
+      "SNP_PC2",
+      "SNP_PC3",
+      "SNP_PC4",
+      "SNP_PC5"
+    ],
+    "age_adjustment": "centered_scaled_cubic",
+    "transcript_identity": "exact_versioned_unordered_pair",
+    "junction_coordinates": "LeafCutter_exon_flanks_to_closed_intron_plus1_minus1",
+    "batch_size": 250000,
+    "no_allelic_significance_filter": true
+  },
+  "python": "3.14.7",
+  "packages": {
+    "numpy": "2.4.4",
+    "pandas": "2.3.3",
+    "pyarrow": "24.0.0",
+    "scipy": "1.17.1"
+  },
+  "git_commit": "ae4b9aaf395d5d4861f41b53b9b5f7d8ec5e0401",
+  "git_status": "?? 06_switch_mechanism/JUNCTION_PAIR_CORROBORATION.md\n?? 06_switch_mechanism/_h/02g.junction_pair_corroboration.sh\n?? 06_switch_mechanism/_m/junction_pair_corroboration/\n?? isograph_benchmark/real_data/junction_pair_corroboration.py\n?? manuscript/_h/junction_pair_corroboration_figure.R\n?? manuscript/_m/figures/figJunctionPairCorroboration_c.pdf\n?? manuscript/_m/figures/figJunctionPairCorroboration_c.png\n?? tests/test_junction_pair_corroboration.py",
+  "inputs_and_scripts": [
+    {
+      "path": "02_module_discovery/gtex/amygdala/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 140126,
+      "sha256": "fec48bc14f68c13c49edac2783b2601604c5749ca36a750c24c546bc7a98b1f7"
+    },
+    {
+      "path": "02_module_discovery/gtex/anterior_cingulate_cortex_ba24/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 298400,
+      "sha256": "8da2fb425e0e10cba6eb1f6d039bcaa00c00737d5d6fa5b9064a2e1725265b30"
+    },
+    {
+      "path": "02_module_discovery/gtex/cerebellar_hemisphere/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 427324,
+      "sha256": "8da1b9f093c5b44ffa776421e0a5a1b89e0d6d653ff086698587e4901888eb9e"
+    },
+    {
+      "path": "02_module_discovery/gtex/cerebellum/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 449632,
+      "sha256": "978ca28f8037288fd8e7885c4005e3aa7dd4d8dbc03e946e48bc0be83a06d6a8"
+    },
+    {
+      "path": "02_module_discovery/gtex/cortex/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 402137,
+      "sha256": "2316c8b2736a479b017e1f7b513e69a63effb7078f6d008a342b68646ae17561"
+    },
+    {
+      "path": "02_module_discovery/gtex/frontal_cortex_ba9/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 435552,
+      "sha256": "030b796d1953f5008455626e3a2ee6efd964d5a06a3fbefe59191366c968e241"
+    },
+    {
+      "path": "02_module_discovery/gtex/hippocampus/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 150841,
+      "sha256": "271aef5c3dc36f2eb9de33b2c7378cb78026475aab990824eba5de479f826a93"
+    },
+    {
+      "path": "02_module_discovery/gtex/hypothalamus/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 300677,
+      "sha256": "7084ee13d7c40cc797e7fefd48dad8458b784d7a8c32d4e381528dac5df43c75"
+    },
+    {
+      "path": "02_module_discovery/gtex/putamen_basal_ganglia/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 253923,
+      "sha256": "5b777af23ac5b5f4a872b39a93234a02f789404d23037fca8f6beee5ac88a7b1"
+    },
+    {
+      "path": "02_module_discovery/gtex/spinal_cord_cervical_c_1/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 39188,
+      "sha256": "24687a45a63f2ffecdd211674c20170ada5570545497e1ab2f6ac0682fd9bb21"
+    },
+    {
+      "path": "02_module_discovery/gtex/substantia_nigra/_m/isograph_vae/module_interpret/structure_switch_pairs.parquet",
+      "bytes": 269345,
+      "sha256": "af66204692d43654ff28ff1d7da8a46b2d17a8708936757867da5bb9d6f8595f"
+    },
+    {
+      "path": "05_genetic_anchoring/_m/coloc_signal_susie/all_introns/coloc_isoform_events.parquet",
+      "bytes": 73204,
+      "sha256": "c129eb439f9465dff096dfb169a7dcd31d41cba6c4ac441590389ac74ae4a148"
+    },
+    {
+      "path": "06_switch_mechanism/JUNCTION_PAIR_CORROBORATION.md",
+      "bytes": 5795,
+      "sha256": "cc028fccaade471061fa10fec3926343c5390b051352517d8682dc79f304208d"
+    },
+    {
+      "path": "06_switch_mechanism/_h/02g.junction_pair_corroboration.sh",
+      "bytes": 931,
+      "sha256": "c9a3d4ac54f1dff787a38aac7523b3d033563ff9aacfc6c1e9f875cb217cb913"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/caudate/count_qc.parquet",
+      "bytes": 51400,
+      "sha256": "f2f48c107b4160ac2154b67bb222a6af0416b7e2d6e58a389a70c3f960a11890"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/caudate/junction_allelic_counts.parquet",
+      "bytes": 402553512,
+      "sha256": "c74342c5935e07942c0d0102724ca263fa8416e4731d09a8577f31744979ae48"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/caudate/junctions.parquet",
+      "bytes": 3294971,
+      "sha256": "0fcdc0be04b4ef3fc6cb7699f43e6e9e7e1d8af709050ddd3bd9c3d4c206d747"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/caudate/pairs.parquet",
+      "bytes": 1726073,
+      "sha256": "2721dfeb46f1eabcae0c72815269f46d827b98aef884d69601bb90ec74dc0eb4"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/dlpfc/count_qc.parquet",
+      "bytes": 51518,
+      "sha256": "7f5c0c20503d32daccf2158b9e262b10cceb5b753ba80e8a38792c184f9d792b"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/dlpfc/junction_allelic_counts.parquet",
+      "bytes": 59993539,
+      "sha256": "4c9787e498374e9956fd47fb2974cb2218425080d2293a49c9dd8f752fb78697"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/dlpfc/junctions.parquet",
+      "bytes": 1079574,
+      "sha256": "4841dff42816ee8eabbdeff3440c7ad0fcd5e3cd82cc4e4f6d43da65276ac1fd"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/dlpfc/pairs.parquet",
+      "bytes": 579639,
+      "sha256": "86092551de77be531446b7f66c04842adc78bf1aac29c93e1b4be0256c0fcc5b"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/hippocampus/count_qc.parquet",
+      "bytes": 48494,
+      "sha256": "69d914f7a78b5cba0d90cdbd1195b024090222956eb0c047ed463580bf77e5da"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/hippocampus/junction_allelic_counts.parquet",
+      "bytes": 415206482,
+      "sha256": "c45f8719ef9fc77078281ece1e3ffea9d4bea090006786ad9fc8ad7b9c50ed18"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/hippocampus/junctions.parquet",
+      "bytes": 4105409,
+      "sha256": "7b8c38c0c2de310f9b64f923a98b8b0bc58efbcd5508e8ef9f7988e14c9168f3"
+    },
+    {
+      "path": "06_switch_mechanism/_m/ase_junction_switch/hippocampus/pairs.parquet",
+      "bytes": 1966111,
+      "sha256": "6eb482ac6d4b02934852479974a1995e37faf661b12d94e5234cc2e50ea26153"
+    },
+    {
+      "path": "inputs/bundles/brainseq_v1/caudate/samples.parquet",
+      "bytes": 49465,
+      "sha256": "b808677f006e9bb2ccc461e864114187795974d7bc1ecee03ab31b3f1df08c46"
+    },
+    {
+      "path": "inputs/bundles/brainseq_v1/dlpfc/samples.parquet",
+      "bytes": 46690,
+      "sha256": "d38d35bd1b907263732b0ffeeb0e2133139e0baad81d743519d4ce6cfc7f1a96"
+    },
+    {
+      "path": "inputs/bundles/brainseq_v1/hippocampus/samples.parquet",
+      "bytes": 48990,
+      "sha256": "2670a541b98d660a25dcbada29733c07b908b3ef68526e6956c6193e9567b733"
+    },
+    {
+      "path": "inputs/processed/brainseq/caudate/tx_counts.parquet",
+      "bytes": 356760494,
+      "sha256": "80dcc62ec84c70d264961f04517c3a2864daf42df025384a755912c7daac1a72"
+    },
+    {
+      "path": "inputs/processed/brainseq/dlpfc/tx_counts.parquet",
+      "bytes": 355500117,
+      "sha256": "686d4d17dc32f84d23bea92375dd93e3314dbe51e2ad700a55e3f02fb949b86e"
+    },
+    {
+      "path": "inputs/processed/brainseq/hippocampus/tx_counts.parquet",
+      "bytes": 316933373,
+      "sha256": "8ba9c1e5b656d93398069d49fdd2aaaa5bf291b7ba88bb9d921dcbe2ef8df4fe"
+    },
+    {
+      "path": "isograph_benchmark/real_data/junction_pair_corroboration.py",
+      "bytes": 29498,
+      "sha256": "3fcfd2713bef7798c7e4c6aac9334fa0e9dbe46d850ce5d327eb1c4c4966f82c"
+    },
+    {
+      "path": "manuscript/_h/junction_pair_corroboration_figure.R",
+      "bytes": 4829,
+      "sha256": "a1bdd6ddcbd05d392c2f6e0a8ac90ac444d1bd89c605b9a07d521705be6030b1"
+    },
+    {
+      "path": "tests/test_junction_pair_corroboration.py",
+      "bytes": 3865,
+      "sha256": "ad0eb6d9a0e23ecd39466886e4ce04505ff0aa70a30f2263dcb5b06bbde41b3f"
+    }
+  ],
+  "elapsed_seconds": 37.79
+}

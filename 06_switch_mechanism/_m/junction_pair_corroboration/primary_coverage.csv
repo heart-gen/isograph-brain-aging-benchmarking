@@ -1,0 +1,5 @@
+measurement_status,pair_regions,genes
+insufficient_coverage,1,1
+measured,30,7
+not_two_sided,5,2
+pair_not_counted,224,24
