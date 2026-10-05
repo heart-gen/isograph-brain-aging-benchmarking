@@ -4,9 +4,9 @@
 ##
 ##   bash 08_integration/_h/run_stage.sh --dry-run
 ##   bash 08_integration/_h/run_stage.sh --after <stage 07 job ids>
-## Options: scripts/slurm_dag.sh.
+## Options: 00_scripts/slurm_dag.sh.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 08_integration "$@"
 H=08_integration/_h
 

@@ -6,9 +6,9 @@
 # bytes [, sha256]) listing exactly what to upload, and optionally a single tar.
 #
 # Usage:
-#   scripts/stage_zenodo_bundle.sh                 # manifest with sizes (fast)
-#   scripts/stage_zenodo_bundle.sh --checksums     # add sha256 (slower)
-#   scripts/stage_zenodo_bundle.sh --tar           # also build the upload tarball
+#   00_scripts/stage_zenodo_bundle.sh                 # manifest with sizes (fast)
+#   00_scripts/stage_zenodo_bundle.sh --checksums     # add sha256 (slower)
+#   00_scripts/stage_zenodo_bundle.sh --tar           # also build the upload tarball
 set -euo pipefail
 
 PROJECT_ROOT="${ISOGRAPH_BENCHMARK_ROOT:-${PWD}}"

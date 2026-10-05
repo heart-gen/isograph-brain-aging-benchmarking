@@ -2,10 +2,10 @@
 ## Submit the real-data analysis, stage by stage. Each stage's root steps wait on every job the
 ## previous stage submitted, and each stage's internal order comes from <stage>/_h/run_stage.sh.
 ##
-##   bash run_pipeline.sh --dry-run                        # print every stage's plan
-##   bash run_pipeline.sh                                  # stages 02-08
-##   bash run_pipeline.sh --stages 05,06,07,08 --after <job ids of work already queued>
-##   bash run_pipeline.sh --login-done 06:01f,07:03b       # login-node steps already run
+##   bash 00_scripts/run_pipeline.sh --dry-run                        # print every stage's plan
+##   bash 00_scripts/run_pipeline.sh                                  # stages 02-08
+##   bash 00_scripts/run_pipeline.sh --stages 05,06,07,08 --after <job ids of work already queued>
+##   bash 00_scripts/run_pipeline.sh --login-done 06:01f,07:03b       # login-node steps already run
 ##
 ## A stage with held steps (a login-node step not yet done) ends the chain there: later stages
 ## read those outputs. Run the login step, re-run that stage with --login-done, then continue
@@ -14,7 +14,7 @@
 ## Not covered: inputs/ (inputs/_h/build_data_pipeline.sh) and the archived synthetic benchmark in
 ## 01_synthetic_benchmark. Memory on Bridges-2 is --cpus-per-task x 2000MB throughout.
 set -euo pipefail
-cd "$(dirname "${BASH_SOURCE[0]}")"
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 [[ -f .here ]] || { echo "ERROR: run from the repo"; exit 1; }
 
 STAGES=(02_module_discovery 03_module_characterization 04_module_trust 05_genetic_anchoring

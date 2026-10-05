@@ -4,14 +4,14 @@
 ##
 ##   bash 06_switch_mechanism/_h/run_stage.sh --dry-run
 ##   bash 06_switch_mechanism/_h/run_stage.sh --after <stage 05 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: stage-03 structure_switch_pairs, stage-05 coloc events
+## Options: 00_scripts/slurm_dag.sh. Inputs: stage-03 structure_switch_pairs, stage-05 coloc events
 ## (04b), deep_dive_events (05c) and signal-layer events (08a); GTEx junction usage from
 ## inputs/_h/build_gtex_junction_usage.sh.
 ##
 ## 01f downloads ClinVar/gnomAD. It runs as an ordinary batch step -- compute nodes do reach
 ## the network -- and skips files already present, so re-running the stage is cheap.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 06_switch_mechanism "$@"
 H=06_switch_mechanism/_h
 

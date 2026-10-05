@@ -4,9 +4,9 @@
 ##
 ##   bash 03_module_characterization/_h/run_stage.sh --dry-run
 ##   bash 03_module_characterization/_h/run_stage.sh --after <stage 02 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: every stage-02 fit.
+## Options: 00_scripts/slurm_dag.sh. Inputs: every stage-02 fit.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 03_module_characterization "$@"
 H=03_module_characterization/_h
 

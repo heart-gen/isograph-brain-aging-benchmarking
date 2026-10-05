@@ -5,7 +5,7 @@
 ##
 ##   bash 05_genetic_anchoring/_h/run_stage.sh --dry-run
 ##   bash 05_genetic_anchoring/_h/run_stage.sh --after <stage 04 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: stage-02 fits (incl. isograph_vae_res5 and the matched
+## Options: 00_scripts/slurm_dag.sh. Inputs: stage-02 fits (incl. isograph_vae_res5 and the matched
 ## WGCNA baselines), stage-03 module_enrichment and structure_switch_pairs.
 ##
 ## Re-running over an existing tree: several steps SKIP outputs that already exist or glob-collect
@@ -15,7 +15,7 @@
 ## Not submitted here: 08d.locus_ld_robustness (per locus, arguments chosen from the nominations),
 ## and 10a/11a, which 09a submits once prep has sized the SMR arrays.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 05_genetic_anchoring "$@"
 H=05_genetic_anchoring/_h
 COLOC=(aging__ad aging__als aging__lbd aging__pd aging__scz brainseq-sczd__scz)

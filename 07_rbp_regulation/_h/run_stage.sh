@@ -4,13 +4,13 @@
 ##
 ##   bash 07_rbp_regulation/_h/run_stage.sh --dry-run
 ##   bash 07_rbp_regulation/_h/run_stage.sh --after <stage 06 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: stage-03 structure_switch_pairs, GENCODE v47, ATtRACT,
+## Options: 00_scripts/slurm_dag.sh. Inputs: stage-03 structure_switch_pairs, GENCODE v47, ATtRACT,
 ## and the neuronal CLIP downloads from inputs/_h/download_neuronal_clip.sh.
 ##
 ## 03b fetches ENCODE eCLIP peaks for the RBPs 02a nominates. It is an ordinary batch step
 ## chained after 02a -- compute nodes reach the network -- and skips peaks already present.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 07_rbp_regulation "$@"
 H=07_rbp_regulation/_h
 
