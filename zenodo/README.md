@@ -23,9 +23,17 @@ etc.) are derived from them.
 ## Staging for upload
 
 ```
-scripts/stage_zenodo_bundle.sh --checksums   # writes MANIFEST.tsv (path, bytes, sha256)
-scripts/stage_zenodo_bundle.sh --tar         # also build the upload tarball
+bash 00_scripts/stage_zenodo_bundle.sh --checksums   # writes MANIFEST.tsv (path, bytes, sha256)
+bash 00_scripts/stage_zenodo_bundle.sh --tar         # also build the upload tarball
 ```
+
+Run from the repo root. The script scans stages 02–07 for the four artifact names above.
+The committed `MANIFEST.tsv` currently has only `path` and `bytes` columns (530 files,
+all under `02_module_discovery/`, ~8.4 GB); it was staged without `--checksums`, so
+re-run with `--checksums` after the final pipeline run and before upload. Note the bundle
+holds only these heavy outputs — the raw inputs described in `inputs/README.md` are not
+in the manifest and need to be added to the deposit (or a separate one) if they are to be
+archived.
 
 ## Deposition metadata
 
@@ -39,7 +47,7 @@ body so the record is consistent with the manuscript.
 ## Two DOIs to mint (both feed the manuscript Data Availability section)
 
 1. **Dataset-bundle DOI** — this deposition (the heavy artifacts above). Fills the
-   `TODO: Zenodo DOI` placeholders in `content/05.methods.md` (Key resources table +
+   `TODO: Zenodo DOI` placeholders in the manuscript's methods (Key resources table +
    Data-and-code-availability list).
 2. **Benchmark-repository DOI** — archive of this analysis repo. Easiest path: enable the
    GitHub↔Zenodo integration for `heart-gen/isograph-brain-aging-benchmarking`, cut a
