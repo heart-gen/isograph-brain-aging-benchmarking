@@ -4,23 +4,40 @@ Analysis and benchmarking repository for **IsoGraph resolves coordinated transcr
 choice and gene abundance in the aging human brain**, by Alexis Bennett, Elisa Kain
 Johnson, and Kynon J. M. Benjamin.
 
-- [Manuscript source](https://github.com/heart-gen/isograph-brain-manuscript)
-- [Read the manuscript](https://heart-gen.github.io/isograph-brain-manuscript/) · [PDF](https://heart-gen.github.io/isograph-brain-manuscript/manuscript.pdf)
 - [IsoGraph software](https://github.com/heart-gen/IsoGraph) · [software archive cited in the manuscript](https://doi.org/10.5281/zenodo.21707653)
+<!-- - [Read the manuscript](https://heart-gen.github.io/isograph-brain-manuscript/) · [PDF](https://heart-gen.github.io/isograph-brain-manuscript/manuscript.pdf) -->
 
-Release **v1.0.0** captures the initial manuscript submission. The companion
-manuscript metadata and framing are aligned to manuscript commit
-[`14a74b1fa6faf32c9b2c008ab467236f70a30136`](https://github.com/heart-gen/isograph-brain-manuscript/tree/14a74b1fa6faf32c9b2c008ab467236f70a30136).
+Release **v1.0.0** captures the initial manuscript submission.
 See [release notes](RELEASE_NOTES.md) and [archiving instructions](zenodo/README.md).
 Preprint and analysis-archive DOIs are pending.
 
-IsoGraph represents relative transcript usage and gene abundance as paired network
-channels. The analyses evaluate synthetic recovery, brain aging associations,
-module stability and transfer, held-out differential transcript usage (DTU),
-transcript structure, and genetic and orthogonal support. Recovery depends on the
-signal regime: abundance and degradation settings can favor abundance-based methods.
-Disease analyses prioritize candidate transcript events, including alternative
-terminal-exon usage at **PRDM2** associated with amyotrophic lateral sclerosis.
+## Abstract
+
+Relative transcript usage can change without a corresponding change in total
+gene expression, but resolving coordinated transcript choice across genes while
+separating it from abundance remains challenging. We present IsoGraph, a
+gene-centered framework that represents isoform usage and abundance as paired
+network channels, identifies gene modules, and quantifies their channel-specific
+contributions. In synthetic benchmarks, IsoGraph preferentially recovered
+network structure when coordinated transcript usage carried the planted signal,
+whereas abundance-based representations were more informative in
+abundance-dominated and RNA-degradation settings. Applied to BrainSEQ and GTEx
+adult brain transcriptomes, IsoGraph identified age-associated transcript-usage
+signals that persisted after conditioning on gene abundance and, in a
+region-dependent manner, after adjustment for estimated cellular composition.
+Modules were stable across donor subsets, and frozen module axes retained age
+associations across cohorts even when exact gene partitions differed. IsoGraph
+module context captured predictive information about held-out differential
+transcript usage beyond gene-wise evidence and conventional co-expression.
+Convergent evidence from structural annotation, short-read junction usage,
+independent long-read sequencing, and within-donor allelic analyses supported
+constituent transcript events. Disease colocalization further prioritized
+candidate isoform events at neurological and psychiatric disease loci, including
+an alternative terminal-exon event at *PRDM2* associated with amyotrophic lateral
+sclerosis. Together, these results establish coordinated transcript usage as a
+reproducible component of transcriptomic organization and provide a framework
+for resolving its contribution alongside gene abundance and for tracing
+network-level signals to candidate transcript events.
 
 ## Analyses
 
