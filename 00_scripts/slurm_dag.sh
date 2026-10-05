@@ -6,7 +6,7 @@
 # prefix (`03d`), optionally with a variant suffix (`03d.complement`); a dependency on `03d`
 # means every submitted variant of it.
 #
-#   source scripts/slurm_dag.sh
+#   source 00_scripts/slurm_dag.sh
 #   dag_init 04_module_trust "$@"
 #   step 01a ""        04_module_trust/_h/01a.stability_isograph.sh
 #   step 02c "01a 01b" 04_module_trust/_h/02c.trust_gate.sh

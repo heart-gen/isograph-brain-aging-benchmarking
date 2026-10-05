@@ -1,7 +1,7 @@
 {
   "upload_type": "dataset",
   "title": "IsoGraph brain-aging benchmark: heavy deterministic output artifacts (feature scores, VAE reconstructions, network edges, module interpretation tables)",
-  "description": "<p>Heavy, regenerable output artifacts from the IsoGraph brain aging and disease study (see companion manuscript and analysis repository). The GitHub analysis repository (with Git LFS) carries the lean result artifacts needed to reproduce every figure and statistic; the large deterministic intermediates that exceed practical Git/LFS limits are deposited here instead.</p><p>Contents (listed with byte sizes and SHA-256 checksums in <code>MANIFEST.tsv</code>): per-sample switch/abundance <code>feature_scores.parquet</code>, VAE <code>feature_reconstruction.parquet</code>, IsoGraph network <code>edges.parquet</code>, and per-module <code>high_vs_low_table.parquet</code> interpretation tables, across all BrainSEQ and GTEx v11 brain-region analyses at the canonical Leiden resolution 5.0. Every file is a deterministic output of the committed, config-driven pipeline and can be regenerated from the source bundles with the pinned analysis environment (<code>env/environment.lock.txt</code>) and IsoGraph v0.1.5.</p><p>No controlled-access source data are redistributed. BrainSEQ source data remain under the original controlled-access terms; GTEx v11 data are publicly available at the GTEx Portal.</p>",
+  "description": "<p>Heavy, regenerable output artifacts supporting IsoGraph resolves coordinated transcript choice and gene abundance in the aging human brain. The planned dataset deposit complements the analysis repository and its Git LFS result artifacts. MANIFEST.tsv currently records paths and byte sizes; regenerate it with SHA-256 checksums against the final artifacts before upload. Contents include feature scores, VAE reconstructions, network edges and module interpretation tables. See the committed configurations and environment snapshots for analysis settings. Controlled-access source data are not redistributed.</p>",
   "creators": [
     {
       "name": "Bennett, Alexis",
@@ -9,9 +9,14 @@
       "affiliation": "Department of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern University"
     },
     {
+      "name": "Johnson, Elisa Kain",
+      "orcid": "0009-0009-2187-3728",
+      "affiliation": "Weinberg College of Arts and Sciences, Northwestern University; Department of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern University"
+    },
+    {
       "name": "Benjamin, Kynon J. M.",
       "orcid": "0000-0003-2016-4646",
-      "affiliation": "Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School of Medicine, Northwestern University"
+      "affiliation": "Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School of Medicine, Northwestern University; Department of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern University"
     }
   ],
   "access_right": "open",
@@ -38,8 +43,8 @@
       "scheme": "url"
     },
     {
-      "relation": "isDerivedFrom",
-      "identifier": "10.5281/zenodo.20007826",
+      "relation": "references",
+      "identifier": "10.5281/zenodo.21707653",
       "resource_type": "software",
       "scheme": "doi"
     },
@@ -48,7 +53,12 @@
       "identifier": "10.5281/zenodo.8180677",
       "resource_type": "dataset",
       "scheme": "doi"
+    },
+    {
+      "relation": "isSupplementTo",
+      "identifier": "https://github.com/heart-gen/isograph-brain-manuscript",
+      "scheme": "url"
     }
   ],
-  "notes": "Companion deposition to the IsoGraph brain-aging manuscript. Software (IsoGraph) is archived separately at doi:10.5281/zenodo.20007826. Populate the manuscript Data Availability 'Zenodo DOI' placeholders with the DOI minted for this deposition."
+  "notes": "Dataset deposit metadata for the initial manuscript submission. Dataset and analysis-repository archive DOIs are pending. The IsoGraph package is archived separately."
 }

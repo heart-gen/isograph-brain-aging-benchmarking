@@ -1,31 +1,43 @@
-# IsoGraph — brain aging benchmarking
+# IsoGraph brain analysis
 
-Benchmarking and brain-aging analysis for **IsoGraph**, an isoform-switch network
-method. The repository is laid out as the manuscript's argument: each numbered stage
-answers one question and feeds the next.
+Analysis and benchmarking repository for **IsoGraph resolves coordinated transcript
+choice and gene abundance in the aging human brain**, by Alexis Bennett, Elisa Kain
+Johnson, and Kynon J. M. Benjamin.
 
-> **North star.** IsoGraph is a **complementary isoform-switch network method**, not a
-> globally superior one. The de-confounded gene-level test shows abundance dominates;
-> IsoGraph's defensible value is a small, specific **DTU-without-DGE** layer that is
-> structurally invisible to any DGE/WGCNA pipeline. Every claim in this repo is written
-> to that bound.
+- [Manuscript source](https://github.com/heart-gen/isograph-brain-manuscript)
+- [Read the manuscript](https://heart-gen.github.io/isograph-brain-manuscript/) · [PDF](https://heart-gen.github.io/isograph-brain-manuscript/manuscript.pdf)
+- [IsoGraph software](https://github.com/heart-gen/IsoGraph) · [software archive cited in the manuscript](https://doi.org/10.5281/zenodo.21707653)
 
-## Stages
+Release **v1.0.0** captures the initial manuscript submission. The companion
+manuscript metadata and framing are aligned to manuscript commit
+[`14a74b1fa6faf32c9b2c008ab467236f70a30136`](https://github.com/heart-gen/isograph-brain-manuscript/tree/14a74b1fa6faf32c9b2c008ab467236f70a30136).
+See [release notes](RELEASE_NOTES.md) and [archiving instructions](zenodo/README.md).
+Preprint and analysis-archive DOIs are pending.
 
-| Stage | Question | Headline output |
-|---|---|---|
-| [`01_synthetic_benchmark/`](01_synthetic_benchmark/README.md) | Does the method recover switch modules where truth is known? | Wins where switching dominates, loses when abundance-dominated or degraded: module recovery favours IsoGraph in **7 of 15 scenarios** — **Fig 1** |
-| [`02_module_discovery/`](02_module_discovery/README.md) | What modules exist in postmortem human brain? | IsoGraph fits + 3 matched WGCNA baselines; the cohort × region artifact store |
-| [`03_module_characterization/`](03_module_characterization/README.md) | What are they, and do they add signal beyond abundance? | 6 of 8 disease modules GO-invisible, 4 with near-complete switch coverage; axes near-orthogonal |
-| [`04_module_trust/`](04_module_trust/README.md) | Are they reproducible, or is a fine partition noise? | 250/266 chance-trusted; 23 aging replications — **Fig 2**; the three-baseline rate comparison (**the scope bound**) |
-| [`05_genetic_anchoring/`](05_genetic_anchoring/README.md) | Are they genetically real? Where does disease risk land? | Supporting, set level: splicing-specificity contrast 1.111, IsoGraph-only, **not supported per gene**; 42 signal-level coloc nominations (SNCA the worked example) — **Fig 3, Fig 4** |
-| [`06_switch_mechanism/`](06_switch_mechanism/README.md) | Are the switches real, and what do they do? | Productive UTR/CDS remodeling, not decay |
-| [`07_rbp_regulation/`](07_rbp_regulation/README.md) | What trans factors could drive the co-switching? | 714 module × RBP hits on raw counts, 310 under the opportunity-adjusted GLM — but only 43 in common (candidates, not binding data) |
-| [`08_integration/`](08_integration/README.md) | What do the layers say together about specific genes and programs? | Per-gene deep dive (**Table 2**), SCZ age projection (**Fig 4E**), functional preservation, RBP perturbation panel |
-| [`manuscript/`](manuscript/README.md) | — | Every display item + its builder |
+IsoGraph represents relative transcript usage and gene abundance as paired network
+channels. The analyses evaluate synthetic recovery, brain aging associations,
+module stability and transfer, held-out differential transcript usage (DTU),
+transcript structure, and genetic and orthogonal support. Recovery depends on the
+signal regime: abundance and degradation settings can favor abundance-based methods.
+Disease analyses prioritize candidate transcript events, including alternative
+terminal-exon usage at **PRDM2** associated with amyotrophic lateral sclerosis.
 
-[`ANALYSIS_MAP.md`](ANALYSIS_MAP.md) is the one-row-per-analysis index:
-analysis → CLI → wrapper → outputs → display item.
+## Analyses
+
+| Stage | Contents |
+|---|---|
+| [`01_synthetic_benchmark/`](01_synthetic_benchmark/README.md) | Synthetic module recovery, interpretation, robustness, genetics and scale benchmarks |
+| [`02_module_discovery/`](02_module_discovery/README.md) | BrainSEQ and GTEx module fits and matched co-expression baselines |
+| [`03_module_characterization/`](03_module_characterization/README.md) | Usage and abundance contributions, enrichment and module interpretation |
+| [`04_module_trust/`](04_module_trust/README.md) | Donor-subset stability, cross-cohort transfer and functional preservation |
+| [`05_genetic_anchoring/`](05_genetic_anchoring/README.md) | QTL anchoring, allelic evidence and disease colocalization |
+| [`06_switch_mechanism/`](06_switch_mechanism/README.md) | Transcript architecture, junction and independent long-read support |
+| [`07_rbp_regulation/`](07_rbp_regulation/README.md) | Candidate RBP regulation and binding-support analyses |
+| [`08_integration/`](08_integration/README.md) | Integrated gene/event evidence and held-out DTU analyses |
+| [`manuscript/`](manuscript/README.md) | Figure and table builders, results and supplementary exports |
+
+Final display numbering and legends are maintained in the companion manuscript.
+Stage READMEs also describe historical analyses and intermediate outputs.
 
 ## Supporting directories
 
@@ -34,7 +46,7 @@ analysis → CLI → wrapper → outputs → display item.
 - `isograph_benchmark/` — the Python package: every analysis is a committed,
   parametrized CLI module here, invoked by a stage wrapper.
 - `configs/` — single source of truth for grids, covariates and traits.
-- `scripts/` — including `slurm_dag.sh`, the dependency-graph submitter behind every `run_stage.sh`.
+- `00_scripts/` — including `slurm_dag.sh`, the dependency-graph submitter behind every `run_stage.sh`.
 - `env/`, `tests/`, `zenodo/`, `develop/` (local scratch, gitignored).
 
 ## Conventions
@@ -54,7 +66,7 @@ live unnumbered in `_h/retired/`; their outputs survive only at the git tag name
 stage README.
 
 **The run order is committed, not described.** `<stage>/_h/run_stage.sh` submits that
-stage as a SLURM dependency graph, and `run_pipeline.sh` chains the stages.
+stage as a SLURM dependency graph, and `00_scripts/run_pipeline.sh` chains the stages.
 
 **Paths are never hardcoded.** `isograph_benchmark/paths.py` holds `OUTPUT_DIRS`, the
 single definition of where each stage writes; code addresses stages by logical bucket
@@ -62,7 +74,7 @@ single definition of where each stage writes; code addresses stages by logical b
 
 Heavy regenerable artifacts (`feature_scores`, `feature_reconstruction`,
 `high_vs_low_table`, `edges`, coloc/LDSC per-locus intermediates) are gitignored and
-distributed via Zenodo — see `zenodo/`. Lean result tables are tracked in git-LFS.
+intended for a separate Zenodo deposit — see `zenodo/`. Lean result tables are tracked in git-LFS.
 
 ## Running
 
@@ -71,8 +83,8 @@ so do not pass `--mem`). Login nodes are for reads, small aggregation and plotti
 Run from the repo root, or set `ISOGRAPH_BENCHMARK_ROOT`:
 
 ```bash
-bash run_pipeline.sh --dry-run                      # every stage's plan, nothing submitted
-bash run_pipeline.sh --stages 05,06,07,08           # submit stages, each waiting on the last
+bash 00_scripts/run_pipeline.sh --dry-run                      # every stage's plan, nothing submitted
+bash 00_scripts/run_pipeline.sh --stages 05,06,07,08           # submit stages, each waiting on the last
 bash 05_genetic_anchoring/_h/run_stage.sh --dry-run # one stage's plan
 bash 05_genetic_anchoring/_h/run_stage.sh --from 06 # resume a stage at a tier
 sbatch 05_genetic_anchoring/_h/01a.qtl_anchoring.sh # a single step
@@ -81,10 +93,10 @@ sbatch 05_genetic_anchoring/_h/01a.qtl_anchoring.sh # a single step
 Two steps need a login node because compute nodes have no outbound network
 (`06_switch_mechanism/_h/01f`, `07_rbp_regulation/_h/03b`). The runners hold whatever
 waits on them and print the command; rerun with `--login-done <id>` once it has run.
-Options for every runner are documented in `scripts/slurm_dag.sh`.
+Options for every runner are documented in `00_scripts/slurm_dag.sh`.
 
 Inputs are built by `inputs/_h/build_data_pipeline.sh`; the synthetic benchmark in
-`01_synthetic_benchmark/` is archived and not part of `run_pipeline.sh`.
+`01_synthetic_benchmark/` is archived and not part of `00_scripts/run_pipeline.sh`.
 
 Interpreters:
 
@@ -96,3 +108,32 @@ Interpreters:
 
 Terminology: synthetic *nonlinear* settings are interactions in feature space; real-data
 *spline aging* analyses are spline models of age against module eigengenes.
+
+## Citation and licensing
+
+[CITATION.cff](CITATION.cff) provides the repository version, author order, ORCIDs,
+and companion manuscript reference. Cite this repository and the manuscript;
+add the version-specific archive DOI to citations once the archive is deposited.
+The IsoGraph package DOI above identifies the separate software package.
+
+Original analysis code is licensed under [Apache-2.0](LICENSE). Original derived
+data, tables, figures and documentation are licensed under
+[CC-BY-4.0](LICENSE-DATA.md). Third-party resources and controlled-access inputs
+retain their original terms; these licenses do not grant rights to redistribute them.
+
+## Obtaining result artifacts
+
+Clone with Git LFS installed, then retrieve the tracked artifacts:
+
+```bash
+git clone https://github.com/heart-gen/isograph-brain-aging-benchmarking.git
+cd isograph-brain-aging-benchmarking
+git checkout v1.0.0
+git lfs pull
+```
+
+Environment snapshots are in [`env/`](env/). Source-data access and preparation
+are described in [`inputs/README.md`](inputs/README.md). A Git source archive may
+contain LFS pointers rather than artifact contents; see the archive instructions
+for verifying a complete deposit. Large ignored intermediates require the separate
+data deposit or regeneration from authorized source inputs.

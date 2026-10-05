@@ -1,0 +1,70 @@
+cff-version: 1.2.0
+message: Please cite this version of the analysis repository and the companion manuscript
+  when using this work.
+type: software
+title: 'IsoGraph brain analysis: IsoGraph resolves coordinated transcript choice and
+  gene abundance in the aging human brain'
+authors:
+- family-names: Bennett
+  given-names: Alexis
+  orcid: https://orcid.org/0000-0002-5384-7657
+  affiliation: Department of Psychiatry and Behavioral Sciences, Feinberg School of
+    Medicine, Northwestern University
+- family-names: Johnson
+  given-names: Elisa Kain
+  orcid: https://orcid.org/0009-0009-2187-3728
+  affiliation: Weinberg College of Arts and Sciences, Northwestern University; Department
+    of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern
+    University
+- family-names: Benjamin
+  given-names: Kynon J. M.
+  orcid: https://orcid.org/0000-0003-2016-4646
+  affiliation: Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School
+    of Medicine, Northwestern University; Department of Psychiatry and Behavioral
+    Sciences, Feinberg School of Medicine, Northwestern University
+version: 1.0.0
+repository-code: https://github.com/heart-gen/isograph-brain-aging-benchmarking
+url: https://github.com/heart-gen/isograph-brain-aging-benchmarking
+license:
+- Apache-2.0
+- CC-BY-4.0
+abstract: Analysis and benchmarking code, figure and table builders, and tracked results
+  supporting the initial manuscript submission. IsoGraph resolves coordinated transcript
+  usage alongside gene abundance in BrainSEQ and GTEx adult brain transcriptomes.
+  Archive and preprint DOIs have not yet been assigned.
+keywords:
+- IsoGraph
+- transcript isoforms
+- alternative splicing
+- isoform switching
+- brain aging
+- splicing QTL
+- feature-space interactions
+- brain transcriptomics
+- network analysis
+- variational autoencoder
+- co-expression network
+references:
+- type: unpublished
+  title: IsoGraph resolves coordinated transcript choice and gene abundance in the
+    aging human brain
+  authors:
+  - family-names: Bennett
+    given-names: Alexis
+    orcid: https://orcid.org/0000-0002-5384-7657
+    affiliation: Department of Psychiatry and Behavioral Sciences, Feinberg School
+      of Medicine, Northwestern University
+  - family-names: Johnson
+    given-names: Elisa Kain
+    orcid: https://orcid.org/0009-0009-2187-3728
+    affiliation: Weinberg College of Arts and Sciences, Northwestern University; Department
+      of Psychiatry and Behavioral Sciences, Feinberg School of Medicine, Northwestern
+      University
+  - family-names: Benjamin
+    given-names: Kynon J. M.
+    orcid: https://orcid.org/0000-0003-2016-4646
+    affiliation: Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School
+      of Medicine, Northwestern University; Department of Psychiatry and Behavioral
+      Sciences, Feinberg School of Medicine, Northwestern University
+  url: https://github.com/heart-gen/isograph-brain-manuscript
+  notes: Companion manuscript; preprint DOI pending.

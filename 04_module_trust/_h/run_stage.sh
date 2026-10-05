@@ -4,10 +4,10 @@
 ##
 ##   bash 04_module_trust/_h/run_stage.sh --dry-run
 ##   bash 04_module_trust/_h/run_stage.sh --after <stage 03 job ids>
-## Options: scripts/slurm_dag.sh. Inputs: stage-02 fits; stage-03 interpretation, enrichment and
+## Options: 00_scripts/slurm_dag.sh. Inputs: stage-02 fits; stage-03 interpretation, enrichment and
 ## composition-unique genes (read by 03c-03h).
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 04_module_trust "$@"
 H=04_module_trust/_h
 TRUST=(brainseq:caudate brainseq:hippocampus brainseq:dlpfc

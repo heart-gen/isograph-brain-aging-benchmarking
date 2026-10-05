@@ -5,10 +5,10 @@
 ##   bash 02_module_discovery/_h/run_stage.sh --dry-run     # print the plan, submit nothing
 ##   bash 02_module_discovery/_h/run_stage.sh               # submit
 ##   bash 02_module_discovery/_h/run_stage.sh --only 02     # e.g. only the tier-02 steps
-## Options (--after, --from/--to, --only/--skip, --login-done): scripts/slurm_dag.sh.
+## Options (--after, --from/--to, --only/--skip, --login-done): 00_scripts/slurm_dag.sh.
 ## Inputs: the IsoGraph bundles from inputs/_h/build_data_pipeline.sh.
 set -euo pipefail
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/scripts/slurm_dag.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)/00_scripts/slurm_dag.sh"
 dag_init 02_module_discovery "$@"
 H=02_module_discovery/_h
 
