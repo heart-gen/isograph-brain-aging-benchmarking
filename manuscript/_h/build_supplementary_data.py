@@ -56,7 +56,7 @@ class Item:
     number: int      # manuscript number within its kind
     ref_id: str      # pandoc identifier used in the manuscript (tbl:<ref_id>)
     slug: str        # file-name stem
-    source: Path     # repo CSV
+    source: Path | None  # repo CSV; None for a table entered by hand in the supplement
     title: str
 
     @property
@@ -82,6 +82,12 @@ def _d(ref: str, slug: str, src: Path, title: str) -> tuple:
     return ("data", ref, slug, src, title)
 
 
+def _manual_t(ref: str, slug: str, title: str) -> tuple:
+    """A supplementary table entered by hand in the supplement: it takes its
+    number in the sequence but has no repo CSV, so no file is exported."""
+    return ("table", ref, slug, None, title)
+
+
 def _number(entries: list[tuple]) -> list[Item]:
     counters = {"table": 0, "data": 0}
     items = []
@@ -92,36 +98,40 @@ def _number(entries: list[tuple]) -> list[Item]:
 
 
 ITEMS: list[Item] = _number([
-    # Entries are in order of first citation (Results, Discussion, Methods,
-    # Supplement); numbers are assigned from that order within each kind.
+    # Entries are in order of first citation in the manuscript (Summary through
+    # back matter, then the supplement), as checked by the manuscript's
+    # build/check-crossrefs.py; numbers are assigned from that order within each
+    # kind. A hand-entered table (_manual_t) takes its number but exports no file.
     # ---- Supplementary Tables (rendered in the PDF) --------------------------
     _t("s-benchmark", "benchmark_summary", BENCH_TABLES / "tableS_benchmark_summary.csv",
        "Synthetic benchmark performance across scenarios and methods."),
     _t("s-scale-compute", "scale_compute_summary", BENCH_TABLES / "tableS_scale_compute_summary.csv",
        "Runtime and memory use across network sizes and compute settings."),
-    _t("s-separation-axis", "axis_orthogonality", SUPP_TABLES / "tableS13a_axis_orthogonality.csv",
-       "Separation of the switch and abundance coordinates, per analysis."),
     _t("s-baseline-pooled", "baseline_pooled", SUPP_TABLES / "tableS1_baseline_pooled.csv",
        "Pooled per-module association rates across the 17 applications."),
-    _t("s-clinical", "clinical_consequence", SUPP_TABLES / "tableS37_clinical_consequence.csv",
-       "Constraint and ClinVar density of switch genes and switched exons."),
+    _t("s-separation-axis", "axis_orthogonality", SUPP_TABLES / "tableS13a_axis_orthogonality.csv",
+       "Separation of the switch and abundance coordinates, per analysis."),
     _t("s-qtl-contrast", "qtl_specificity_contrast", SUPP_TABLES / "tableS3_qtl_specificity_contrast.csv",
        "Splicing-QTL specificity contrast, all analyses."),
     _t("s-qtl-baseline", "qtl_specificity_matched_baseline", SUPP_TABLES / "tableS4_qtl_specificity_matched_baseline.csv",
        "Splicing-QTL specificity contrast on the analyses shared by all methods."),
+    _manual_t("s-switch-role", "switch_role_sensitivity",
+              "Genetic nominations retained under nested switch-gene tiers."),
     _t("s-module-cis", "module_cis_control", SUPP_TABLES / "tableS23_module_cis_control.csv",
        "Module-level cis control of isoform choice."),
+    _t("s-clinical", "clinical_consequence", SUPP_TABLES / "tableS37_clinical_consequence.csv",
+       "Constraint and ClinVar density of switch genes and switched exons."),
     _t("s-synthetic", "synthetic_scenarios", SUPP_TABLES / "tableS35_synthetic_scenarios.csv",
        "Synthetic benchmark scenarios."),
     # ---- Supplementary Data (separate files) ---------------------------------
+    _d("s-baseline-region", "baseline_per_region", SUPP_TABLES / "tableS2_baseline_per_region.csv",
+       "Per-analysis module association rates for all four module sets."),
     _d("s-cohorts", "cohort_description", SUPP_TABLES / "tableS34_cohort_description.csv",
        "Discovery cohorts."),
     _d("s-composition-adj", "composition_adjustment", SUPP_TABLES / "tableS13_composition_adjustment.csv",
        "Switch-unique genes before and after adjustment for estimated cellular composition."),
     _d("s-trust-funnel", "module_trust_funnel", SUPP_TABLES / "tableS7_module_trust_funnel.csv",
        "Per-region module trust funnel."),
-    _d("s-baseline-region", "baseline_per_region", SUPP_TABLES / "tableS2_baseline_per_region.csv",
-       "Per-analysis module association rates for all four module sets."),
     _d("s-split-half", "split_half_module_ledger", SUPP_TABLES / "tableS7a_split_half_module_ledger.csv",
        "Split-half module ledger."),
     _d("s-resolution", "resolution_sensitivity", SUPP_TABLES / "tableS7e_resolution_sensitivity.csv",
@@ -138,10 +148,6 @@ ITEMS: list[Item] = _number([
        "Gene-level corroboration of the switch layer by junction usage."),
     _d("s-heldout-dtu", "module_context_heldout_dtu", SUPP_TABLES / "tableS21_module_context_heldout_dtu.csv",
        "Module context and held-out DTU evidence, per analysis."),
-    _d("s-rbp-regulons", "rbp_regulons", SUPP_TABLES / "tableS32_rbp_regulons.csv",
-       "RNA-binding-protein motif regulons of the switch modules."),
-    _d("s-rbp-eclip", "rbp_eclip_binding", SUPP_TABLES / "tableS33_rbp_eclip_binding.csv",
-       "ENCODE eCLIP binding at switched and constitutive exons."),
     _d("s-allelic", "allelic_imbalance_regions", SUPP_TABLES / "tableS22_allelic_imbalance_regions.csv",
        "Within-donor allelic test of isoform choice, per region."),
     _d("s-signal-coloc", "signal_coloc_nominations", SUPP_TABLES / "tableS25_signal_coloc_nominations.csv",
@@ -152,10 +158,6 @@ ITEMS: list[Item] = _number([
        "BrainSEQ switch- and abundance-axis colocalization contrast."),
     _d("s-coloc-events", "coloc_isoform_events", SUPP_TABLES / "tableS28_coloc_isoform_events.csv",
        "Colocalization events and their mapping to IsoGraph switch pairs."),
-    _d("s-smr", "smr_heidi", SUPP_TABLES / "tableS30_smr_heidi.csv",
-       "SMR and HEIDI for the colocalization nominations."),
-    _d("s-clpp-events", "clpp_isoform_events", SUPP_TABLES / "tableS24_clpp_isoform_events.csv",
-       "CLPP-nominated isoform events and their mapping to IsoGraph switch pairs."),
     _d("s-ldsc", "ldsc_partitioned", SUPP_TABLES / "tableS27_ldsc_partitioned.csv",
        "Partitioned heritability of the switch-derived QTL annotations."),
     _d("s-coloc-convergence", "coloc_convergence", SUPP_TABLES / "tableS20a_coloc_convergence_global.csv",
@@ -166,10 +168,18 @@ ITEMS: list[Item] = _number([
        "Long-read confirmation of colocalization-anchored switch pairs."),
     _d("s-junction-pairs", "junction_pair_corroboration", SUPP_TABLES / "tableS40_junction_pair_corroboration.csv",
        "Short-read junction corroboration of colocalization-prioritized transcript pairs."),
+    _d("s-rbp-regulons", "rbp_regulons", SUPP_TABLES / "tableS32_rbp_regulons.csv",
+       "RNA-binding-protein motif regulons of the switch modules."),
+    _d("s-rbp-eclip", "rbp_eclip_binding", SUPP_TABLES / "tableS33_rbp_eclip_binding.csv",
+       "ENCODE eCLIP binding at switched and constitutive exons."),
     _d("s-sign-scale", "projection_sign_scale", SUPP_TABLES / "tableS7f_projection_sign_scale.csv",
        "Raw against null-standardized projected-age sign agreement, per region."),
     _d("s-psi-junctions", "psi_junction_confirmation", SUPP_TABLES / "tableS39_psi_junction_confirmation.csv",
        "Short-read junction confirmation of the CLPP-anchored switch pairs."),
+    _d("s-clpp-events", "clpp_isoform_events", SUPP_TABLES / "tableS24_clpp_isoform_events.csv",
+       "CLPP-nominated isoform events and their mapping to IsoGraph switch pairs."),
+    _d("s-smr", "smr_heidi", SUPP_TABLES / "tableS30_smr_heidi.csv",
+       "SMR and HEIDI for the colocalization nominations."),
 ])
 
 
@@ -223,6 +233,19 @@ def read_legends(supplement: Path | None) -> dict[str, str]:
     return legends
 
 
+def read_titles(supplement: Path | None) -> dict[str, str]:
+    """Return {ref_id: plain title} of supplementary tables and Data items."""
+    if supplement is None or not supplement.exists():
+        return {}
+    text = supplement.read_text()
+    titles: dict[str, str] = {}
+    for m in re.finditer(r"^Table: \*\*(.+?)\*\*.*?\{#tbl:([\w-]+)[^}]*\}", text, re.S | re.M):
+        titles[m.group(2)] = re.sub(r"\s+", " ", m.group(1).replace("*", "")).strip()
+    for m in re.finditer(r"^::: \{#data:([\w-]+)\}\n\*\*(.+?)\*\*", text, re.S | re.M):
+        titles[m.group(1)] = re.sub(r"\s+", " ", m.group(2).replace("*", "")).strip()
+    return titles
+
+
 def check_order(supplement: Path | None) -> None:
     """Warn when the manuscript numbering would not match ITEMS.
 
@@ -258,12 +281,12 @@ def check_order(supplement: Path | None) -> None:
 # --------------------------------------------------------------------------
 # Writers
 # --------------------------------------------------------------------------
-def write_workbook(item: Item, df: pd.DataFrame, legend: str, path: Path) -> None:
+def write_workbook(item: Item, df: pd.DataFrame, legend: str, path: Path, title: str = "") -> None:
     generated = dt.date.today().isoformat()
     readme = pd.DataFrame(
         [
             ("Item", item.label),
-            ("Title", item.title),
+            ("Title", title or item.title),
             ("Legend", legend or "(see Supplementary Information)"),
             ("Rows", len(df)),
             ("Columns", df.shape[1]),
@@ -304,6 +327,7 @@ def main() -> None:
     args = parser.parse_args()
 
     legends = read_legends(args.supplement)
+    titles = read_titles(args.supplement)
     check_order(args.supplement)
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -316,6 +340,11 @@ def main() -> None:
                 "Supplementary Data are separate Excel workbooks (README + Data sheets) with CSV copies.", "",
                 "| Item | Manuscript file | Source CSV | Rows | Columns | Title |", "| --- | --- | --- | --- | --- | --- |"]
     for item in ITEMS:
+        title = titles.get(item.ref_id, item.title)
+        if item.source is None:
+            manifest.append(f"| {item.label} | (none) | entered by hand in the supplement | | | {title} |")
+            print(f"{item.label:22} {'(entered in the supplement; no file)':55}")
+            continue
         if not item.source.exists():
             raise SystemExit(f"missing source for {item.label}: {item.source}")
         df = pd.read_csv(item.source)
@@ -324,10 +353,10 @@ def main() -> None:
         dest_dir = OUT / item.subdir
         shutil.copyfile(item.source, dest_dir / f"{item.stem}.csv")
         if item.kind == "data":
-            write_workbook(item, df, legends.get(item.ref_id, ""), dest_dir / f"{item.stem}.xlsx")
+            write_workbook(item, df, legends.get(item.ref_id, ""), dest_dir / f"{item.stem}.xlsx", title)
         manifest.append(f"| {item.label} | `{item.subdir}/{item.stem}"
                         f"{'.xlsx' if item.kind == 'data' else '.csv'}` | "
-                        f"`{item.source.relative_to(REPO)}` | {len(df)} | {df.shape[1]} | {item.title} |")
+                        f"`{item.source.relative_to(REPO)}` | {len(df)} | {df.shape[1]} | {title} |")
         print(f"{item.label:22} {item.stem:55} {len(df):6} x {df.shape[1]:2}"
               f"{'' if legends.get(item.ref_id) else '  (no legend found)'}")
     (OUT / "MANIFEST.md").write_text("\n".join(manifest) + "\n")
