@@ -23,6 +23,7 @@ the plan). The leading number of a wrapper is its tier; steps in one tier run in
 | 02a | `switch_consequence_meta` | 01a | Cross-region consequence meta |
 | 02b | `switch_orthogonal_confirm` | 01e; stage-05 coloc events | `--mode anchored` then `--mode global-null` against the compositional-closure baseline, then `--events signal` for the `coloc.susie` nominations (from `05_genetic_anchoring/_h/08a`) into `signal_coloc/` — one after another, they share a directory. The CLPP arm backs S-real-8 / S14 |
 | 02c | `clinical_consequence` | 01a, 01f | gnomAD LOEUF constraint + ClinVar pathogenic density, per region |
+| 02f | `longread_driver_confirm` | 01e; stage-02 `module_interpret` | **Local bash, no scheduler.** Top-k module driver transcripts (same rule as `module_trust`) scored on the 01e long-read pairs against the 02b abundance-matched null; distinct pairs pooled across the two cortical regions. `--k 1, 10` sensitivity into `sensitivity/` |
 | 02d | `switch_feature_sensitivity_aggregate` | 01h, 01i | Cross-region report; runs the quantification axis once, beside a same-quantifier reference |
 | 02e | `switch_feature_refit_aggregate` | 01j | `refit/brainseq/caudate/REFIT_SENSITIVITY.md` |
 | 03a | `clinical_consequence_meta` | 02c | Cross-region clinical-consequence rollup |

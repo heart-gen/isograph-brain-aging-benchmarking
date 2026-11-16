@@ -1,0 +1,162 @@
+{
+  "analysis": "Long-read confirmation of IsoGraph module driver switches",
+  "question": "Do the top-k driver transcripts of the age-associated GTEx cortical co-switch modules exist, and behave as switches, in orthogonal ONT long-read DLPFC data?",
+  "longread_dataset": "Aguzzoli-Heberle 2024 NBT; Bambu; Zenodo 8180677; n=12 DLPFC BA9/46",
+  "regions": [
+    "frontal_cortex_ba9",
+    "cortex"
+  ],
+  "driver_rule": "top-5 transcripts by |r| per module (transcript_polarity_table); modules at age spline F-test FDR <= 0.05",
+  "switch_like_definition": "both members detected and within-gene usage Spearman rho < 0 (switch_orthogonal_confirm definition); *_strict additionally requires both mean IF >= min_if (longread_switch_confirm column)",
+  "thresholds": {
+    "k": 5,
+    "alpha": 0.05,
+    "min_if": 0.05,
+    "n_draws": 2000,
+    "seed": 13,
+    "variant": "standard"
+  },
+  "driver_transcripts": {
+    "n_distinct": 49,
+    "n_in_coding_switch_pairs": 44,
+    "n_detected_longread": 35,
+    "detection_rate_of_in_pairs": 0.7954545454545454
+  },
+  "driver_pairs": {
+    "n_distinct": 183,
+    "n_in_both_regions": 133,
+    "n_genes": 37,
+    "n_detected": 83,
+    "detection_rate": 0.453551912568306,
+    "n_switch_like": 51,
+    "switch_like_rate_of_detected": 0.6144578313253012,
+    "n_switch_like_strict": 20,
+    "switch_like_strict_rate_of_detected": 0.24096385542168675,
+    "n_detected_usable": 66,
+    "n_switch_like_usable": 42,
+    "switch_like_rate_usable_only": 0.6363636363636364,
+    "n_genes_with_detected_pair": 30,
+    "n_genes_switch_like": 27,
+    "n_genes_switch_like_usable": 21
+  },
+  "matched_null": {
+    "nondriver_switch_pairs": {
+      "n_background_pairs": 57386,
+      "n_background_detected": 15596,
+      "background_detection_rate": 0.2717736033178824,
+      "background_switch_like_rate_unmatched": 0.6484996152859708,
+      "switch_like_rate": {
+        "statistic": "switch_like_rate",
+        "n_focal": 83,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 15596,
+        "observed": 0.6144578313253012,
+        "null_mean": 0.6743373493975903,
+        "null_sd": 0.047495100632798014,
+        "null_q025": 0.5783132530120482,
+        "null_q975": 0.7590361445783133,
+        "p_empirical_two_sided": 0.255872063968016,
+        "n_draws": 2000
+      },
+      "mean_usage_spearman": {
+        "statistic": "mean_usage_spearman",
+        "n_focal": 83,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 15596,
+        "observed": -0.20490746900395362,
+        "null_mean": -0.2291760568757098,
+        "null_sd": 0.045538999972664716,
+        "null_q025": -0.31922545922862977,
+        "null_q975": -0.14083781240353724,
+        "p_empirical_two_sided": 0.5922038980509745,
+        "n_draws": 2000
+      },
+      "switch_like_rate_usable_only": {
+        "statistic": "switch_like_rate",
+        "n_focal": 66,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 15596,
+        "observed": 0.6363636363636364,
+        "null_mean": 0.700878787878788,
+        "null_sd": 0.05268161555115684,
+        "null_q025": 0.5909090909090909,
+        "null_q975": 0.803030303030303,
+        "p_empirical_two_sided": 0.24737631184407796,
+        "n_draws": 2000
+      }
+    },
+    "nondriver_pairs_same_genes": {
+      "n_background_pairs": 326,
+      "n_background_detected": 87,
+      "background_detection_rate": 0.2668711656441718,
+      "background_switch_like_rate_unmatched": 0.5517241379310345,
+      "switch_like_rate": {
+        "statistic": "switch_like_rate",
+        "n_focal": 83,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 87,
+        "observed": 0.6144578313253012,
+        "null_mean": 0.5357951807228915,
+        "null_sd": 0.04309845695969377,
+        "null_q025": 0.4578313253012048,
+        "null_q975": 0.6265060240963856,
+        "p_empirical_two_sided": 0.07146426786606697,
+        "n_draws": 2000
+      },
+      "mean_usage_spearman": {
+        "statistic": "mean_usage_spearman",
+        "n_focal": 83,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 87,
+        "observed": -0.20490746900395362,
+        "null_mean": -0.04850507047156353,
+        "null_sd": 0.04052189286908556,
+        "null_q025": -0.13112593713939397,
+        "null_q975": 0.03135810084313284,
+        "p_empirical_two_sided": 0.0009995002498750624,
+        "n_draws": 2000
+      },
+      "switch_like_rate_usable_only": {
+        "statistic": "switch_like_rate",
+        "n_focal": 66,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 87,
+        "observed": 0.6363636363636364,
+        "null_mean": 0.5485,
+        "null_sd": 0.04631161420909419,
+        "null_q025": 0.45454545454545453,
+        "null_q975": 0.6363636363636364,
+        "p_empirical_two_sided": 0.06946526736631684,
+        "n_draws": 2000
+      }
+    }
+  },
+  "per_region": [
+    {
+      "region": "cortex",
+      "n_age_modules": 4,
+      "n_driver_transcripts": 20,
+      "n_drivers_in_coding_pairs": 20,
+      "n_drivers_detected_longread": 15,
+      "n_driver_pairs": 79,
+      "n_driver_pairs_detected": 39,
+      "driver_pair_detection_rate": 0.4936708860759494,
+      "n_driver_pairs_switch_like": 26,
+      "driver_switch_like_rate_of_detected": 0.6666666666666666,
+      "nondriver_pair_detection_rate": 0.2917655965039056
+    },
+    {
+      "region": "frontal_cortex_ba9",
+      "n_age_modules": 7,
+      "n_driver_transcripts": 33,
+      "n_drivers_in_coding_pairs": 30,
+      "n_drivers_detected_longread": 26,
+      "n_driver_pairs": 123,
+      "n_driver_pairs_detected": 57,
+      "driver_pair_detection_rate": 0.4634146341463415,
+      "n_driver_pairs_switch_like": 34,
+      "driver_switch_like_rate_of_detected": 0.5964912280701754,
+      "nondriver_pair_detection_rate": 0.2678966943875632
+    }
+  ]
+}
