@@ -679,6 +679,60 @@ def longread_coloc_table() -> None:
     write(round_num(d), "tableS29_longread_coloc_confirmation.csv")
 
 
+def longread_null_table() -> None:
+    """S29a — set-level long-read tests behind Fig 6a, the second sheet of the S29 workbook.
+
+    One row per set x unit x statistic x null: the observed switch-like rate (and mean usage
+    correlation) of the colocalization-anchored pairs and of every IsoGraph switch pair,
+    against the abundance-decile null and the stricter joint null. Distinct pairs are the
+    primary anchored unit; orientations are the sensitivity analysis. Every value is copied
+    from the 02b summaries, never recomputed.
+    """
+    import json
+
+    oc = MECH / "switch_orthogonal_confirm"
+    anchored = json.loads((oc / "signal_coloc" / "anchored_summary.json").read_text())
+    genome = json.loads((oc / "global_null_summary.json").read_text())
+    nulls = (("matched_null", "abundance-matched"), ("matched_null_joint", "joint-matched"))
+    stats = (("switch_like_rate", "all detected", "switch-like rate"),
+             ("switch_like_rate_usable_only", "well expressed", "switch-like rate"),
+             ("mean_usage_spearman", "all detected", "mean usage Spearman"))
+    anchored_bg = ("IsoGraph switch pairs of non-anchored genes "
+                   f"({anchored['background']['n_pairs']} pairs)")
+    sets = (
+        ("colocalization-anchored", "distinct pairs (primary)", anchored["distinct_pairs"],
+         anchored_bg),
+        ("colocalization-anchored", "orientations (sensitivity)", anchored, anchored_bg),
+        ("genome-wide IsoGraph switch pairs", "pairs", genome,
+         "detected non-switch transcript pairs of the same genes"),
+    )
+    rows = []
+    for set_name, unit, src, background in sets:
+        for key, subset, statistic in stats:
+            for null_key, null_name in nulls:
+                r = src.get(null_key, {}).get(key)
+                if r is None:
+                    continue
+                rows.append({
+                    "set": set_name, "unit": unit, "subset": subset,
+                    "statistic": statistic, "null": null_name,
+                    "match_keys": "; ".join(r.get("match_keys", ["max_mean_if"])),
+                    "match_bins": "; ".join(map(str, r.get("match_bins", [10]))),
+                    "background": background,
+                    "n_background_matchable": r["n_background"],
+                    "n_focal": r["n_focal"],
+                    "n_focal_dropped_no_stratum": r["n_focal_dropped_no_stratum"],
+                    "observed": r["observed"], "null_mean": r["null_mean"],
+                    "null_sd": r["null_sd"], "null_q025": r["null_q025"],
+                    "null_q975": r["null_q975"],
+                    "p_empirical_two_sided": r["p_empirical_two_sided"],
+                    "n_draws": r["n_draws"],
+                })
+    d = pd.DataFrame(rows)
+    assert {"joint-matched"} <= set(d["null"]), "rerun 02b: summaries lack the joint null"
+    write(round_num(d), "tableS29a_longread_coloc_set_level.csv")
+
+
 def smr_table() -> None:
     """S30 — SMR/HEIDI on the colocalization nominations (GTEx QTLs).
 
@@ -1026,6 +1080,7 @@ def main() -> None:
     signal_coloc_tables()
     coloc_event_table()
     longread_coloc_table()
+    longread_null_table()
     smr_table()
     brainseq_coloc_table()
     rbp_tables()

@@ -58,6 +58,9 @@ class Item:
     slug: str        # file-name stem
     source: Path | None  # repo CSV; None for a table entered by hand in the supplement
     title: str
+    # Further workbook sheets after "Data" (Data items only), as (sheet name, repo CSV).
+    # The item's CSV copy stays the "Data" sheet; the checker expects one CSV per item.
+    extra: tuple[tuple[str, Path], ...] = ()
 
     @property
     def label(self) -> str:
@@ -78,8 +81,9 @@ def _t(ref: str, slug: str, src: Path, title: str) -> tuple:
     return ("table", ref, slug, src, title)
 
 
-def _d(ref: str, slug: str, src: Path, title: str) -> tuple:
-    return ("data", ref, slug, src, title)
+def _d(ref: str, slug: str, src: Path, title: str,
+       extra: tuple[tuple[str, Path], ...] = ()) -> tuple:
+    return ("data", ref, slug, src, title, extra)
 
 
 def _manual_t(ref: str, slug: str, title: str) -> tuple:
@@ -91,9 +95,10 @@ def _manual_t(ref: str, slug: str, title: str) -> tuple:
 def _number(entries: list[tuple]) -> list[Item]:
     counters = {"table": 0, "data": 0}
     items = []
-    for kind, ref, slug, src, title in entries:
+    for kind, ref, slug, src, title, *extra in entries:
         counters[kind] += 1
-        items.append(Item(kind, counters[kind], ref, slug, src, title))
+        items.append(Item(kind, counters[kind], ref, slug, src, title,
+                          extra[0] if extra else ()))
     return items
 
 
@@ -165,7 +170,8 @@ ITEMS: list[Item] = _number([
     _d("s-magma", "magma_module_gwas", SUPP_TABLES / "tableS36_magma_module_gwas.csv",
        "MAGMA competitive gene-set tests of every module."),
     _d("s-longread", "longread_coloc_confirmation", SUPP_TABLES / "tableS29_longread_coloc_confirmation.csv",
-       "Long-read confirmation of colocalization-anchored switch pairs."),
+       "Long-read confirmation of colocalization-anchored switch pairs.",
+       extra=(("Set-level tests", SUPP_TABLES / "tableS29a_longread_coloc_set_level.csv"),)),
     _d("s-junction-pairs", "junction_pair_corroboration", SUPP_TABLES / "tableS40_junction_pair_corroboration.csv",
        "Short-read junction corroboration of colocalization-prioritized transcript pairs."),
     _d("s-rbp-regulons", "rbp_regulons", SUPP_TABLES / "tableS32_rbp_regulons.csv",
@@ -281,25 +287,42 @@ def check_order(supplement: Path | None) -> None:
 # --------------------------------------------------------------------------
 # Writers
 # --------------------------------------------------------------------------
+def _format_data_sheet(ws, df: pd.DataFrame) -> None:
+    ws.freeze_panes = "A2"
+    for j, col in enumerate(df.columns, start=1):
+        ws.cell(row=1, column=j).font = Font(bold=True)
+        sample = df[col].astype(str).head(200).map(len).max() if len(df) else 0
+        ws.column_dimensions[get_column_letter(j)].width = min(60, max(10, int(max(len(str(col)), sample) * 1.1) + 2))
+
+
 def write_workbook(item: Item, df: pd.DataFrame, legend: str, path: Path, title: str = "") -> None:
     generated = dt.date.today().isoformat()
-    readme = pd.DataFrame(
-        [
-            ("Item", item.label),
-            ("Title", title or item.title),
-            ("Legend", legend or "(see Supplementary Information)"),
-            ("Rows", len(df)),
-            ("Columns", df.shape[1]),
-            ("Column names", "; ".join(map(str, df.columns))),
-            ("Source file", str(item.source.relative_to(REPO))),
-            ("Analysis repository", REPO_URL),
-            ("Generated", f"{generated} by manuscript/_h/build_supplementary_data.py"),
-        ],
-        columns=["Field", "Value"],
-    )
+    extra = [(name, pd.read_csv(src), src) for name, src in item.extra]
+    rows = [
+        ("Item", item.label),
+        ("Title", title or item.title),
+        ("Legend", legend or "(see Supplementary Information)"),
+        ("Rows", len(df)),
+        ("Columns", df.shape[1]),
+        ("Column names", "; ".join(map(str, df.columns))),
+        ("Source file", str(item.source.relative_to(REPO))),
+    ]
+    if extra:
+        # Rows/Columns above describe the Data sheet; each further sheet is listed here.
+        rows.append(("Sheets", "; ".join(
+            ["Data"] + [f"{name} ({len(x)} rows, from {src.relative_to(REPO)})"
+                        for name, x, src in extra])))
+    rows += [
+        ("Analysis repository", REPO_URL),
+        ("Generated", f"{generated} by manuscript/_h/build_supplementary_data.py"),
+    ]
+    readme = pd.DataFrame(rows, columns=["Field", "Value"])
     with pd.ExcelWriter(path, engine="openpyxl") as xl:
         readme.to_excel(xl, sheet_name="README", index=False)
         df.to_excel(xl, sheet_name="Data", index=False)
+        for name, x, _ in extra:
+            x.to_excel(xl, sheet_name=name, index=False)
+            _format_data_sheet(xl.sheets[name], x)
         ws = xl.sheets["README"]
         ws.column_dimensions["A"].width = 22
         ws.column_dimensions["B"].width = 110
@@ -308,12 +331,7 @@ def write_workbook(item: Item, df: pd.DataFrame, legend: str, path: Path, title:
             row[0].alignment = Alignment(vertical="top")
             row[0].font = Font(bold=True)
         ws["A1"].font = ws["B1"].font = Font(bold=True)
-        ws = xl.sheets["Data"]
-        ws.freeze_panes = "A2"
-        for j, col in enumerate(df.columns, start=1):
-            ws.cell(row=1, column=j).font = Font(bold=True)
-            sample = df[col].astype(str).head(200).map(len).max() if len(df) else 0
-            ws.column_dimensions[get_column_letter(j)].width = min(60, max(10, int(max(len(str(col)), sample) * 1.1) + 2))
+        _format_data_sheet(xl.sheets["Data"], df)
 
 
 def main() -> None:
@@ -345,8 +363,9 @@ def main() -> None:
             manifest.append(f"| {item.label} | (none) | entered by hand in the supplement | | | {title} |")
             print(f"{item.label:22} {'(entered in the supplement; no file)':55}")
             continue
-        if not item.source.exists():
-            raise SystemExit(f"missing source for {item.label}: {item.source}")
+        for src in [item.source] + [x for _, x in item.extra]:
+            if not src.exists():
+                raise SystemExit(f"missing source for {item.label}: {src}")
         df = pd.read_csv(item.source)
         if item.kind == "table" and (len(df) > MAX_ROWS or df.shape[1] > MAX_COLS):
             raise SystemExit(f"{item.label} is {df.shape} and no longer fits the PDF; move it to Supplementary Data")
@@ -356,7 +375,9 @@ def main() -> None:
             write_workbook(item, df, legends.get(item.ref_id, ""), dest_dir / f"{item.stem}.xlsx", title)
         manifest.append(f"| {item.label} | `{item.subdir}/{item.stem}"
                         f"{'.xlsx' if item.kind == 'data' else '.csv'}` | "
-                        f"`{item.source.relative_to(REPO)}` | {len(df)} | {df.shape[1]} | {title} |")
+                        f"`{item.source.relative_to(REPO)}`"
+                        + "".join(f" (+ sheet {name}: `{x.relative_to(REPO)}`)" for name, x in item.extra)
+                        + f" | {len(df)} | {df.shape[1]} | {title} |")
         print(f"{item.label:22} {item.stem:55} {len(df):6} x {df.shape[1]:2}"
               f"{'' if legends.get(item.ref_id) else '  (no legend found)'}")
     (OUT / "MANIFEST.md").write_text("\n".join(manifest) + "\n")

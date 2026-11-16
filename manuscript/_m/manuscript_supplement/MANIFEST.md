@@ -1,6 +1,6 @@
 # Manuscript supplementary items
 
-Written by `manuscript/_h/build_supplementary_data.py` on 2026-11-07.
+Written by `manuscript/_h/build_supplementary_data.py` on 2026-11-16.
 Supplementary Tables stay in the PDF (<= 40 rows and <= 12 columns); Supplementary Data are separate Excel workbooks (README + Data sheets) with CSV copies.
 
 | Item | Manuscript file | Source CSV | Rows | Columns | Title |
@@ -35,7 +35,7 @@ Supplementary Tables stay in the PDF (<= 40 rows and <= 12 columns); Supplementa
 | Data S18 | `supplementary_data/dataS18_ldsc_partitioned.xlsx` | `manuscript/_m/supp_tables/tableS27_ldsc_partitioned.csv` | 30 | 14 | Partitioned heritability of the switch-derived QTL annotations. |
 | Data S19 | `supplementary_data/dataS19_coloc_convergence.xlsx` | `manuscript/_m/supp_tables/tableS20a_coloc_convergence_global.csv` | 10 | 14 | Module concentration of posterior-overlap-supported genes. |
 | Data S20 | `supplementary_data/dataS20_magma_module_gwas.xlsx` | `manuscript/_m/supp_tables/tableS36_magma_module_gwas.csv` | 8064 | 13 | MAGMA competitive gene-set tests of every module. |
-| Data S21 | `supplementary_data/dataS21_longread_coloc_confirmation.xlsx` | `manuscript/_m/supp_tables/tableS29_longread_coloc_confirmation.csv` | 55 | 18 | Long-read transcript detection and reciprocal usage of colocalization-anchored pairs. |
+| Data S21 | `supplementary_data/dataS21_longread_coloc_confirmation.xlsx` | `manuscript/_m/supp_tables/tableS29_longread_coloc_confirmation.csv` (+ sheet Set-level tests: `manuscript/_m/supp_tables/tableS29a_longread_coloc_set_level.csv`) | 55 | 18 | Long-read transcript detection and reciprocal usage of colocalization-anchored pairs. |
 | Data S22 | `supplementary_data/dataS22_junction_pair_corroboration.xlsx` | `manuscript/_m/supp_tables/tableS40_junction_pair_corroboration.csv` | 260 | 30 | Short-read junction corroboration of colocalization-prioritized transcript pairs. |
 | Data S23 | `supplementary_data/dataS23_rbp_regulons.xlsx` | `manuscript/_m/supp_tables/tableS32_rbp_regulons.csv` | 11040 | 24 | RNA-binding-protein motif regulons of the switch modules. |
 | Data S24 | `supplementary_data/dataS24_rbp_eclip_binding.xlsx` | `manuscript/_m/supp_tables/tableS33_rbp_eclip_binding.csv` | 35 | 19 | ENCODE eCLIP binding at switched and constitutive exons. |
