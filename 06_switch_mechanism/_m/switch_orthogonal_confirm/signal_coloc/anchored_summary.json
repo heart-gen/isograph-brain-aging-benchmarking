@@ -40,10 +40,10 @@
       "n_focal_dropped_no_stratum": 0,
       "n_background": 57893,
       "observed": 0.5833333333333334,
-      "null_mean": 0.24756818181818183,
-      "null_sd": 0.026196635599110438,
-      "null_q025": 0.20075757575757575,
-      "null_q975": 0.30303030303030304,
+      "null_mean": 0.24719507575757574,
+      "null_sd": 0.02538561637838833,
+      "null_q025": 0.19696969696969696,
+      "null_q975": 0.29924242424242425,
       "p_empirical_two_sided": 0.0004997501249375312,
       "n_draws": 2000
     },
@@ -53,11 +53,11 @@
       "n_focal_dropped_no_stratum": 0,
       "n_background": 57893,
       "observed": -0.10597649882037904,
-      "null_mean": -0.09975030055418165,
-      "null_sd": 0.02698578420554766,
-      "null_q025": -0.15269745779921187,
-      "null_q975": -0.047413572717179574,
-      "p_empirical_two_sided": 0.8185907046476761,
+      "null_mean": -0.09964417965305325,
+      "null_sd": 0.026496023023082606,
+      "null_q025": -0.15129195258848116,
+      "null_q975": -0.04727339634446973,
+      "p_empirical_two_sided": 0.815592203898051,
       "n_draws": 2000
     },
     "switch_like_rate_usable_only": {
@@ -66,12 +66,92 @@
       "n_focal_dropped_no_stratum": 0,
       "n_background": 57893,
       "observed": 0.630057803468208,
-      "null_mean": 0.27787861271676295,
-      "null_sd": 0.03417239697121438,
-      "null_q025": 0.20809248554913296,
+      "null_mean": 0.2780491329479769,
+      "null_sd": 0.033686080777629385,
+      "null_q025": 0.2138728323699422,
       "null_q975": 0.3468208092485549,
       "p_empirical_two_sided": 0.0004997501249375312,
       "n_draws": 2000
+    }
+  },
+  "matched_null_joint": {
+    "switch_like_rate": {
+      "statistic": "switch_like_rate",
+      "n_focal": 264,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 56289,
+      "observed": 0.5833333333333334,
+      "null_mean": 0.4650852272727273,
+      "null_sd": 0.02896506322050753,
+      "null_q025": 0.4090909090909091,
+      "null_q975": 0.5227272727272727,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000,
+      "match_keys": [
+        "max_mean_if",
+        "detect_rate",
+        "n_iso",
+        "usage_sd"
+      ],
+      "match_bins": [
+        5,
+        3,
+        3,
+        3
+      ],
+      "n_strata_focal": 38
+    },
+    "mean_usage_spearman": {
+      "statistic": "mean_usage_spearman",
+      "n_focal": 264,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 56289,
+      "observed": -0.10597649882037904,
+      "null_mean": -0.12018661156661477,
+      "null_sd": 0.025016747836521885,
+      "null_q025": -0.16797989351186632,
+      "null_q975": -0.07164886983712301,
+      "p_empirical_two_sided": 0.5857071464267866,
+      "n_draws": 2000,
+      "match_keys": [
+        "max_mean_if",
+        "detect_rate",
+        "n_iso",
+        "usage_sd"
+      ],
+      "match_bins": [
+        5,
+        3,
+        3,
+        3
+      ],
+      "n_strata_focal": 38
+    },
+    "switch_like_rate_usable_only": {
+      "statistic": "switch_like_rate",
+      "n_focal": 173,
+      "n_focal_dropped_no_stratum": 0,
+      "n_background": 56289,
+      "observed": 0.630057803468208,
+      "null_mean": 0.5201271676300577,
+      "null_sd": 0.03658538360732437,
+      "null_q025": 0.4508670520231214,
+      "null_q975": 0.5895953757225434,
+      "p_empirical_two_sided": 0.0034982508745627187,
+      "n_draws": 2000,
+      "match_keys": [
+        "max_mean_if",
+        "detect_rate",
+        "n_iso",
+        "usage_sd"
+      ],
+      "match_bins": [
+        5,
+        3,
+        3,
+        3
+      ],
+      "n_strata_focal": 20
     }
   },
   "distinct_pairs": {
@@ -124,6 +204,86 @@
         "p_empirical_two_sided": 0.0004997501249375312,
         "n_draws": 2000
       }
+    },
+    "matched_null_joint": {
+      "switch_like_rate": {
+        "statistic": "switch_like_rate",
+        "n_focal": 191,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 56289,
+        "observed": 0.581151832460733,
+        "null_mean": 0.4704188481675393,
+        "null_sd": 0.03390006872686048,
+        "null_q025": 0.4031413612565445,
+        "null_q975": 0.5392670157068062,
+        "p_empirical_two_sided": 0.0014992503748125937,
+        "n_draws": 2000,
+        "match_keys": [
+          "max_mean_if",
+          "detect_rate",
+          "n_iso",
+          "usage_sd"
+        ],
+        "match_bins": [
+          5,
+          3,
+          3,
+          3
+        ],
+        "n_strata_focal": 35
+      },
+      "mean_usage_spearman": {
+        "statistic": "mean_usage_spearman",
+        "n_focal": 191,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 56289,
+        "observed": -0.09656697956290247,
+        "null_mean": -0.11680483355312328,
+        "null_sd": 0.029089740079689935,
+        "null_q025": -0.17407521685916189,
+        "null_q975": -0.0590368500525906,
+        "p_empirical_two_sided": 0.48225887056471767,
+        "n_draws": 2000,
+        "match_keys": [
+          "max_mean_if",
+          "detect_rate",
+          "n_iso",
+          "usage_sd"
+        ],
+        "match_bins": [
+          5,
+          3,
+          3,
+          3
+        ],
+        "n_strata_focal": 35
+      },
+      "switch_like_rate_usable_only": {
+        "statistic": "switch_like_rate",
+        "n_focal": 140,
+        "n_focal_dropped_no_stratum": 0,
+        "n_background": 56289,
+        "observed": 0.6142857142857143,
+        "null_mean": 0.5155321428571429,
+        "null_sd": 0.0411183271058003,
+        "null_q025": 0.4357142857142857,
+        "null_q975": 0.5928571428571429,
+        "p_empirical_two_sided": 0.017991004497751123,
+        "n_draws": 2000,
+        "match_keys": [
+          "max_mean_if",
+          "detect_rate",
+          "n_iso",
+          "usage_sd"
+        ],
+        "match_bins": [
+          5,
+          3,
+          3,
+          3
+        ],
+        "n_strata_focal": 21
+      }
     }
   },
   "thresholds": {
@@ -132,6 +292,18 @@
     "min_samples_corr": 4,
     "min_anchored_if": 0.05,
     "n_strata": 10,
+    "joint_keys": [
+      "max_mean_if",
+      "detect_rate",
+      "n_iso",
+      "usage_sd"
+    ],
+    "joint_bins": [
+      5,
+      3,
+      3,
+      3
+    ],
     "n_draws": 2000,
     "seed": 13
   }

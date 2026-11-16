@@ -35,12 +35,78 @@
       "n_draws": 2000
     }
   },
+  "matched_null_joint": {
+    "switch_like_rate": {
+      "statistic": "switch_like_rate",
+      "n_focal": 16010,
+      "n_focal_dropped_no_stratum": 6,
+      "n_background": 5117,
+      "observed": 0.6485946283572767,
+      "null_mean": 0.6211782011242974,
+      "null_sd": 0.003723095666550936,
+      "null_q025": 0.6141161773891318,
+      "null_q975": 0.6281730168644597,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000,
+      "match_keys": [
+        "max_mean_if",
+        "detect_rate",
+        "n_iso",
+        "usage_sd"
+      ],
+      "match_bins": [
+        5,
+        3,
+        3,
+        3
+      ],
+      "n_strata_focal": 120
+    },
+    "mean_usage_spearman": {
+      "statistic": "mean_usage_spearman",
+      "n_focal": 16010,
+      "n_focal_dropped_no_stratum": 6,
+      "n_background": 5117,
+      "observed": -0.19444803291495286,
+      "null_mean": -0.1564997312630138,
+      "null_sd": 0.003174961590871717,
+      "null_q025": -0.16266441052296704,
+      "null_q975": -0.15029473182828976,
+      "p_empirical_two_sided": 0.0004997501249375312,
+      "n_draws": 2000,
+      "match_keys": [
+        "max_mean_if",
+        "detect_rate",
+        "n_iso",
+        "usage_sd"
+      ],
+      "match_bins": [
+        5,
+        3,
+        3,
+        3
+      ],
+      "n_strata_focal": 120
+    }
+  },
   "thresholds": {
     "min_count": 5.0,
     "min_samples": 3,
     "min_samples_corr": 4,
     "max_pairs_per_gene": 20,
     "n_strata": 10,
+    "joint_keys": [
+      "max_mean_if",
+      "detect_rate",
+      "n_iso",
+      "usage_sd"
+    ],
+    "joint_bins": [
+      5,
+      3,
+      3,
+      3
+    ],
     "n_draws": 2000,
     "seed": 13
   }

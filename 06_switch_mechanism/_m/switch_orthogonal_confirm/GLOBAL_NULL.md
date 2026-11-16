@@ -15,6 +15,11 @@ Is the long-read switch-like rate of IsoGraph switch pairs above that of abundan
 - Empirical two-sided p = 0.0005; the difference is **+0.0258**.
 - Mean usage correlation: -0.1945 vs a null of -0.1546 (p = 0.0005).
 
+Against the stricter joint null, matched on the abundance quintile of the better-expressed member and the tertiles of the pair's mean detection rate, the gene's long-read isoform count and the anchored transcript's usage SD (here the first transcript of each pair):
+
+- Switch-like rate: **0.649** against a null mean of 0.621 (95% null interval 0.614-0.628, p = 0.0005; n = 16010, 6 dropped for an empty stratum).
+- Mean usage correlation: **-0.194** against a null mean of -0.156 (95% null interval -0.163--0.150, p = 0.0005; n = 16010, 6 dropped for an empty stratum).
+
 **Read the effect size, not the p-value.** With ~18,000 focal pairs a difference of under one percentage point clears significance easily while meaning almost nothing. The honest statement is that IsoGraph switch pairs are *barely* more anti-correlated in long-read than arbitrary transcript pairs from the same genes.
 
 ## Why the null rate is so high, and what it costs the switch-like criterion

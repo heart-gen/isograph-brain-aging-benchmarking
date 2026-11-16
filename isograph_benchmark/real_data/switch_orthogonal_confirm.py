@@ -20,7 +20,9 @@ Two things make this a real test rather than a lookup:
   2. **The comparison is against a matched background**, not against zero. Whether two
      isoforms look anti-correlated in n=12 samples depends overwhelmingly on how abundant
      they are, so anchored pairs are compared with switch pairs matched on the abundance
-     of their better-expressed member (decile strata), drawn ``--n-draws`` times.
+     of their better-expressed member (decile strata), drawn ``--n-draws`` times. A
+     stricter joint null (``matched_null_joint``) also matches on detection rate,
+     long-read isoform count and anchored usage SD (``JOINT_KEYS``/``JOINT_BINS``).
 
 Modes
 -----
@@ -65,6 +67,8 @@ from isograph_benchmark.real_data.longread_switch_confirm import (
 from isograph_benchmark.real_data.validate_switch_splicing import _strip_ver
 from isograph_benchmark.real_data.longread_null import (  # noqa: F401 (re-exported)
     _N_STRATA,
+    JOINT_BINS,
+    JOINT_KEYS,
     _md_table,
     assign_strata,
     matched_null,
@@ -181,8 +185,10 @@ def anchored_pairs(events: pd.DataFrame, ev_col: str = "clpp") -> pd.DataFrame:
     out = pd.DataFrame(rows)
     if out.empty:
         return out
-    # One row per (gene, anchored, partner); keep the strongest supporting event.
-    out = out.sort_values(ev_col, ascending=False)
+    # One row per (gene, anchored, partner); keep the strongest supporting event. The sort
+    # is stable so tied posteriors keep event-table order on every numpy version: the
+    # orientation-level nulls draw in row order, so a different tie order changes them.
+    out = out.sort_values(ev_col, ascending=False, kind="stable")
     keep = out.drop_duplicates(subset=["gene", "anchored_tx", "partner_tx"], keep="first")
     grouped = (
         out.groupby(["gene", "anchored_tx", "partner_tx"])
@@ -247,6 +253,48 @@ def score_pairs(
     out["max_mean_if"] = out[["t1_mean_if", "t2_mean_if"]].max(axis=1)
     out["min_mean_if"] = out[["t1_mean_if", "t2_mean_if"]].min(axis=1)
     out["switch_like"] = out["pair_detected"] & (out["usage_spearman"] < 0)
+    return add_match_keys(out, tx, frac)
+
+
+def add_match_keys(pairs: pd.DataFrame, tx: pd.DataFrame, frac: pd.DataFrame) -> pd.DataFrame:
+    """Attach the joint-null matching keys to ``pairs`` (columns ``gene``/``t1``/``t2``).
+
+    ``detect_rate`` is the mean over the two transcripts of the fraction of long-read samples
+    at ``--min-count`` or more; ``n_iso`` is the number of transcripts the gene has in the
+    long-read matrix, detected or not; ``usage_sd`` is the across-sample SD (n - 1
+    denominator, samples with zero gene counts skipped) of ``t1``'s within-gene fraction
+    (``t1`` is the anchored transcript in anchored mode). A transcript absent from the
+    long-read matrix leaves its pair's ``detect_rate`` and ``usage_sd`` NaN, which keeps the
+    pair out of the joint null as a non-finite ``max_mean_if`` keeps it out of the
+    abundance null. ``tx`` and ``frac`` share their index, as ``_load_matrix`` returns them.
+    """
+    stat = pd.DataFrame(
+        {
+            "rate": tx["n_detected_samples"].to_numpy() / frac.shape[1],
+            "sd": frac.std(axis=1, skipna=True).to_numpy(),
+        },
+        index=pd.MultiIndex.from_arrays([tx["gene"], tx["tx"]]),
+    )
+    stat = stat[~stat.index.duplicated(keep="last")]   # last wins, as in score_pairs' lookup
+    s1 = stat.reindex(pd.MultiIndex.from_arrays([pairs["gene"], pairs["t1"]]))
+    s2 = stat.reindex(pd.MultiIndex.from_arrays([pairs["gene"], pairs["t2"]]))
+    out = pairs.copy()
+    out["t1_detect_rate"] = s1["rate"].to_numpy()
+    out["t2_detect_rate"] = s2["rate"].to_numpy()
+    out["detect_rate"] = (out["t1_detect_rate"] + out["t2_detect_rate"]) / 2
+    out["n_iso"] = out["gene"].map(tx.groupby("gene").size()).astype(float)
+    out["usage_sd"] = s1["sd"].to_numpy()
+    return out
+
+
+def joint_nulls(focal: pd.DataFrame, usable: pd.DataFrame, bg: pd.DataFrame, args) -> dict:
+    """The stricter null: ``matched_null`` on ``JOINT_KEYS`` cut into ``JOINT_BINS``."""
+    def run(frame, statistic):
+        return matched_null(frame, bg, statistic, args.n_draws, args.seed,
+                            keys=JOINT_KEYS, bins=JOINT_BINS)
+    out = {s: run(focal, s) for s in ("switch_like_rate", "mean_usage_spearman")}
+    if usable is not None:
+        out["switch_like_rate_usable_only"] = run(usable, "switch_like_rate")
     return out
 
 
@@ -274,13 +322,16 @@ def distinct_pairs(scored: pd.DataFrame) -> pd.DataFrame:
     member's abundance are symmetric in the two transcripts, so both rows carry the same
     outcome, and counting both weights such pairs twice in a set-level rate. The distinct
     pair is the unit of the long-read outcome; it is usable when either orientation's
-    anchored isoform reaches the abundance threshold.
+    anchored isoform reaches the abundance threshold. ``usage_sd`` belongs to the anchored
+    transcript, so a pair anchored from both sides takes the mean of its two anchored
+    transcripts' values: the pair is unordered, and no orientation is privileged.
     """
     d = scored.copy()
     d["tx_a"] = d[["t1", "t2"]].min(axis=1)
     d["tx_b"] = d[["t1", "t2"]].max(axis=1)
     keys = ["gene", "tx_a", "tx_b"]
-    sym = d.groupby(keys)[["pair_detected", "switch_like", "max_mean_if"]].nunique(dropna=False)
+    symmetric = ["pair_detected", "switch_like", "max_mean_if", "detect_rate", "n_iso"]
+    sym = d.groupby(keys)[symmetric].nunique(dropna=False)
     if (sym > 1).any().any():
         raise ValueError("orientation-dependent long-read outcome for a distinct pair")
     return d.groupby(keys, as_index=False).agg(
@@ -289,6 +340,9 @@ def distinct_pairs(scored: pd.DataFrame) -> pd.DataFrame:
         switch_like=("switch_like", "first"),
         usage_spearman=("usage_spearman", "first"),
         max_mean_if=("max_mean_if", "first"),
+        detect_rate=("detect_rate", "first"),
+        n_iso=("n_iso", "first"),
+        usage_sd=("usage_sd", "mean"),
         anchored_usable=("anchored_usable", "any"),
         n_orientations=("t1", "size"),
     )
@@ -323,20 +377,24 @@ def distinct_pair_summary(scored: pd.DataFrame, bg: pd.DataFrame, args,
         "n_genes_switch_like": int(tested.loc[tested["switch_like"], "gene"].nunique()),
         "n_genes_switch_like_usable": int(usable.loc[usable["switch_like"], "gene"].nunique()),
         "matched_null": nulls,
+        "matched_null_joint": joint_nulls(tested, usable, bg, args),
     }
 
 
 def run_distinct(args) -> None:
     """Add the distinct-pair test to an existing anchored run without rescoring long-read.
 
-    Reads the saved per-orientation scores, so it needs neither the long-read matrix nor a
-    rerun of the orientation-level nulls. The background is rebuilt exactly as
-    ``run_anchored`` builds it (anchored and cross-tissue-exception genes excluded).
+    Reads the saved per-orientation scores, so it needs no rerun of the orientation-level
+    nulls. The background is rebuilt exactly as ``run_anchored`` builds it (anchored and
+    cross-tissue-exception genes excluded); the long-read matrix is loaded only to give the
+    background its joint-null matching keys.
     """
     out_dir = _out_dir(args.events)
     summ_path = out_dir / "anchored_summary.json"
     summary = json.loads(summ_path.read_text())
     scored = pd.read_parquet(out_dir / "anchored_pair_confirmation.parquet")
+    if not set(JOINT_KEYS) <= set(scored.columns):
+        raise SystemExit("saved scores predate the joint-null keys; rerun --mode anchored")
     exclude = set(scored["gene"])
     ex_path = out_dir / "exception_pair_confirmation.parquet"
     if ex_path.exists():
@@ -344,6 +402,13 @@ def run_distinct(args) -> None:
     bg = background_switch_pairs(exclude)
     if len(bg) != summary["background"]["n_pairs"]:
         raise SystemExit("rebuilt background does not match the anchored run's; rerun anchored")
+    tx, frac, _ = _load_matrix(
+        Path(args.data_dir) if args.data_dir else _default_data_dir(),
+        set(bg["gene"]),
+        args.min_count,
+        args.min_samples,
+    )
+    bg = add_match_keys(bg, tx, frac)
     summary["distinct_pairs"] = distinct_pair_summary(scored, bg, args, out_dir)
     summ_path.write_text(json.dumps(summary, indent=2, default=str))
     per_gene = pd.read_parquet(out_dir / "anchored_gene_confirmation.parquet")
@@ -473,6 +538,7 @@ def run_anchored(args) -> None:
         args.min_count,
         args.min_samples,
     )
+    bg = add_match_keys(bg, tx, frac)
 
     scored = score_pairs(
         pairs.assign(t1=pairs["anchored_tx"], t2=pairs["partner_tx"]),
@@ -512,6 +578,7 @@ def run_anchored(args) -> None:
     nulls["switch_like_rate_usable_only"] = matched_null(
         usable, bg, "switch_like_rate", args.n_draws, args.seed
     )
+    nulls_joint = joint_nulls(tested, usable, bg, args)
     exceptions = score_exceptions(ex_pairs, tx, frac, bg, args, out_dir)
     distinct = distinct_pair_summary(scored, bg, args, out_dir)
 
@@ -545,6 +612,7 @@ def run_anchored(args) -> None:
             "switch_like_rate_unmatched": float(bg["switch_like"].mean()),
         },
         "matched_null": nulls,
+        "matched_null_joint": nulls_joint,
         "distinct_pairs": distinct,
         "thresholds": {
             "min_count": args.min_count,
@@ -552,6 +620,8 @@ def run_anchored(args) -> None:
             "min_samples_corr": args.min_samples_corr,
             "min_anchored_if": args.min_anchored_if,
             "n_strata": _N_STRATA,
+            "joint_keys": list(JOINT_KEYS),
+            "joint_bins": list(JOINT_BINS),
             "n_draws": args.n_draws,
             "seed": args.seed,
         },
@@ -580,12 +650,14 @@ def run_global_null(args) -> None:
         raise SystemExit("no non-switch transcript pairs available for the null")
     ns = score_pairs(ns, tx, frac, args.min_samples_corr)
     ns.to_parquet(out_dir / "nonswitch_pair_scores.parquet", index=False)
+    switch = add_match_keys(switch, tx, frac)
 
     tested = switch[switch["pair_detected"]]
     nulls = {
         s: matched_null(tested, ns[ns["pair_detected"]], s, args.n_draws, args.seed)
         for s in ("switch_like_rate", "mean_usage_spearman")
     }
+    nulls_joint = joint_nulls(tested, None, ns[ns["pair_detected"]], args)
     summary = {
         "mode": "global-null",
         "question": (
@@ -601,12 +673,15 @@ def run_global_null(args) -> None:
             ns[ns["pair_detected"]]["switch_like"].mean()
         ),
         "matched_null": nulls,
+        "matched_null_joint": nulls_joint,
         "thresholds": {
             "min_count": args.min_count,
             "min_samples": args.min_samples,
             "min_samples_corr": args.min_samples_corr,
             "max_pairs_per_gene": args.max_pairs_per_gene,
             "n_strata": _N_STRATA,
+            "joint_keys": list(JOINT_KEYS),
+            "joint_bins": list(JOINT_BINS),
             "n_draws": args.n_draws,
             "seed": args.seed,
         },
@@ -621,6 +696,35 @@ def run_global_null(args) -> None:
 # --------------------------------------------------------------------------- #
 # Report
 # --------------------------------------------------------------------------- #
+_JOINT_DESC = (
+    "joint null, matched on the abundance quintile of the better-expressed member and the "
+    "tertiles of the pair's mean detection rate, the gene's long-read isoform count and the "
+    "anchored transcript's usage SD"
+)
+
+
+def _joint_lines(joint: dict, labels: dict[str, str]) -> list[str]:
+    """One bullet per joint-null result, in ``labels`` order."""
+    out = []
+    for key, label in labels.items():
+        r = joint.get(key) or {}
+        if isinstance(r.get("observed"), float):
+            out.append(
+                f"- {label}: **{r['observed']:.3f}** against a null mean of "
+                f"{r['null_mean']:.3f} (95% null interval {r['null_q025']:.3f}-"
+                f"{r['null_q975']:.3f}, p = {r['p_empirical_two_sided']:.3g}; n = "
+                f"{r['n_focal']}, {r['n_focal_dropped_no_stratum']} dropped for an empty "
+                "stratum).")
+    return out
+
+
+_JOINT_LABELS = {
+    "switch_like_rate": "Switch-like rate",
+    "switch_like_rate_usable_only": "Switch-like rate, usably expressed anchored isoform",
+    "mean_usage_spearman": "Mean usage correlation",
+}
+
+
 def _write_anchored_report(
     out_dir: Path, scored: pd.DataFrame, per_gene: pd.DataFrame, summary: dict
 ) -> None:
@@ -699,6 +803,9 @@ def _write_anchored_report(
             lines.append(
                 f"Mean usage correlation {dus['observed']:.3f} against a null of "
                 f"{dus['null_mean']:.3f} (p = {dus['p_empirical_two_sided']:.3g}).")
+        dj = _joint_lines(dp.get("matched_null_joint") or {}, _JOINT_LABELS)
+        if dj:
+            lines += ["", f"Against the stricter {_JOINT_DESC}:", "", *dj]
         lines += ["", "The orientation-level results below are the sensitivity analysis.", ""]
     su = summary["matched_null"].get("switch_like_rate_usable_only", {})
     if isinstance(sl.get("observed"), float):
@@ -715,6 +822,9 @@ def _write_anchored_report(
             "n=12 that is what governs whether a usage correlation is estimable at all.",
             "",
         ]
+        oj = _joint_lines(summary.get("matched_null_joint") or {}, _JOINT_LABELS)
+        if oj:
+            lines += [f"Against the stricter {_JOINT_DESC}:", "", *oj, ""]
     if isinstance(su.get("observed"), float):
         # The CLPP prose was written against that layer's measured result; the signal layer
         # states the same comparison without presuming which way it came out.
@@ -847,6 +957,10 @@ def _write_global_null_report(out_dir: Path, summary: dict) -> None:
         f"**{obs - null:+.4f}**.",
         f"- Mean usage correlation: {us['observed']:.4f} vs a null of "
         f"{us['null_mean']:.4f} (p = {us['p_empirical_two_sided']:.3g}).",
+        "",
+        f"Against the stricter {_JOINT_DESC} (here the first transcript of each pair):",
+        "",
+        *_joint_lines(summary.get("matched_null_joint") or {}, _JOINT_LABELS),
         "",
         "**Read the effect size, not the p-value.** With ~18,000 focal pairs a difference "
         "of under one percentage point clears significance easily while meaning almost "
