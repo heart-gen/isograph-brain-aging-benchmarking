@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: Please cite this version of the analysis repository and the companion manuscript
   when using this work.
 type: software
-title: 'IsoGraph brain analysis: IsoGraph resolves coordinated transcript choice and
-  gene abundance in the aging human brain'
+title: 'IsoGraph brain analysis: IsoGraph separates transcript-usage and abundance
+  contributions to aging brain networks'
 authors:
 - family-names: Bennett
   given-names: Alexis
@@ -22,16 +22,18 @@ authors:
   affiliation: Stephen M. Stahl Center for Psychiatric Neuroscience, Feinberg School
     of Medicine, Northwestern University; Department of Psychiatry and Behavioral
     Sciences, Feinberg School of Medicine, Northwestern University
-version: 1.0.0
+version: 1.1.0
+doi: 10.5281/zenodo.23149043
 repository-code: https://github.com/heart-gen/isograph-brain-aging-benchmarking
 url: https://github.com/heart-gen/isograph-brain-aging-benchmarking
 license:
 - Apache-2.0
 - CC-BY-4.0
 abstract: Analysis and benchmarking code, figure and table builders, and tracked results
-  supporting the initial manuscript submission. IsoGraph resolves coordinated transcript
-  usage alongside gene abundance in BrainSEQ and GTEx adult brain transcriptomes.
-  Archive and preprint DOIs have not yet been assigned.
+  supporting the Cell Genomics submission. IsoGraph separates transcript-usage and
+  abundance contributions to network organization in BrainSEQ and GTEx adult brain
+  transcriptomes. The archive DOI 10.5281/zenodo.23149043 resolves to the latest
+  release; the preprint DOI has not yet been assigned.
 keywords:
 - IsoGraph
 - transcript isoforms
@@ -46,8 +48,8 @@ keywords:
 - co-expression network
 references:
 - type: unpublished
-  title: IsoGraph resolves coordinated transcript choice and gene abundance in the
-    aging human brain
+  title: IsoGraph separates transcript-usage and abundance contributions to aging
+    brain networks
   authors:
   - family-names: Bennett
     given-names: Alexis

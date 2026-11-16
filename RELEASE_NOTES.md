@@ -1,3 +1,33 @@
+# v1.1.0 — IsoGraph brain analysis -- Cell Genomics submission
+
+Release notes for the Cell Genomics submission of **IsoGraph separates
+transcript-usage and abundance contributions to aging brain networks**, the
+retitled manuscript. Changes since v1.0.0:
+
+- A stricter long-read null for the colocalization-anchored and genome-wide switch
+  pairs, matched jointly on the abundance quintile and the tertiles of detection
+  rate, long-read isoform count and anchored usage SD (`longread_null.JOINT_KEYS`),
+  reported beside the abundance-only null (06/02b). A pair anchored from both
+  transcripts takes the mean of the two anchored usage SDs. Anchored distinct
+  pairs: 58.1% switch-like against 47.0% under the joint null (P = 0.0015).
+- `06_switch_mechanism/_h/02b.switch_orthogonal_confirm.local.sh` reruns those arms
+  locally with the locked package versions; a stable sort makes the
+  orientation-level draws independent of the numpy build.
+- Long-read confirmation of module driver switches (06/02f).
+- Fig. 6a redrawn with the joint null as the primary comparison; Data S21 gains a
+  Set-level tests sheet with both nulls, and the supplementary builder writes
+  extra workbook sheets.
+- Supplementary tables and Data renumbered by first citation, with workbook titles
+  and legends taken from the manuscript supplement.
+
+Archive: all-versions DOI
+[10.5281/zenodo.23149043](https://doi.org/10.5281/zenodo.23149043); v1.0.0 is
+[10.5281/zenodo.23149044](https://doi.org/10.5281/zenodo.23149044). As for
+v1.0.0, verify materialized Git LFS contents before publishing. Citation and
+license terms are unchanged.
+
+---
+
 # v1.0.0 — IsoGraph brain analysis -- initial manuscript submission
 
 Draft release notes for the initial manuscript submission of **IsoGraph resolves

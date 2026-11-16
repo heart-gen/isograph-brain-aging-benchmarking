@@ -1,15 +1,17 @@
 # IsoGraph brain analysis
 
-Analysis and benchmarking repository for **IsoGraph resolves coordinated transcript
-choice and gene abundance in the aging human brain**, by Alexis Bennett, Elisa Kain
+Analysis and benchmarking repository for **IsoGraph separates transcript-usage and
+abundance contributions to aging brain networks**, by Alexis Bennett, Elisa Kain
 Johnson, and Kynon J. M. Benjamin.
 
 - [IsoGraph software](https://github.com/heart-gen/IsoGraph) · [software archive cited in the manuscript](https://doi.org/10.5281/zenodo.21707653)
 <!-- - [Read the manuscript](https://heart-gen.github.io/isograph-brain-manuscript/) · [PDF](https://heart-gen.github.io/isograph-brain-manuscript/manuscript.pdf) -->
 
-Release **v1.0.0** captures the initial manuscript submission.
-See [release notes](RELEASE_NOTES.md) and [archiving instructions](zenodo/README.md).
-Preprint and analysis-archive DOIs are pending.
+Release **v1.1.0** accompanies the Cell Genomics submission; v1.0.0 captured the
+initial submission. See [release notes](RELEASE_NOTES.md) and
+[archiving instructions](zenodo/README.md). The analysis archive is
+[10.5281/zenodo.23149043](https://doi.org/10.5281/zenodo.23149043) (all
+versions); the preprint DOI is pending.
 
 ## Abstract
 
@@ -145,7 +147,7 @@ Clone with Git LFS installed, then retrieve the tracked artifacts:
 ```bash
 git clone https://github.com/heart-gen/isograph-brain-aging-benchmarking.git
 cd isograph-brain-aging-benchmarking
-git checkout v1.0.0
+git checkout v1.1.0
 git lfs pull
 ```
 

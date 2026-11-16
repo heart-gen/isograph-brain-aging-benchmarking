@@ -1,7 +1,7 @@
 {
   "upload_type": "software",
-  "title": "IsoGraph brain analysis: IsoGraph resolves coordinated transcript choice and gene abundance in the aging human brain",
-  "description": "<p>Version 1.0.0 of the analysis and benchmarking repository accompanying IsoGraph resolves coordinated transcript choice and gene abundance in the aging human brain. Includes analysis code, configurations, environment snapshots, figure and table builders, and tracked result artifacts. Original code: Apache-2.0; original derived data, figures and documentation: CC-BY-4.0. Third-party resources retain their original terms. Large ignored intermediates are intended for a separate data deposit.</p>",
+  "title": "IsoGraph brain analysis: IsoGraph separates transcript-usage and abundance contributions to aging brain networks",
+  "description": "<p>Version 1.1.0 of the analysis and benchmarking repository accompanying IsoGraph separates transcript-usage and abundance contributions to aging brain networks (Cell Genomics submission). Adds the joint-matched long-read null and its pinned local runner, long-read confirmation of module driver switches, the redrawn Fig. 6a, a set-level sheet in Data S21, and supplementary items renumbered by first citation. Includes analysis code, configurations, environment snapshots, figure and table builders, and tracked result artifacts. Original code: Apache-2.0; original derived data, figures and documentation: CC-BY-4.0. Third-party resources retain their original terms. Large ignored intermediates are intended for a separate data deposit.</p>",
   "creators": [
     {
       "name": "Bennett, Alexis",
@@ -22,7 +22,7 @@
   "access_right": "open",
   "license": "Apache-2.0",
   "language": "eng",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "keywords": [
     "IsoGraph",
     "isoform switching",
@@ -48,5 +48,5 @@
       "resource_type": "software"
     }
   ],
-  "notes": "Initial manuscript submission. Verify Git LFS artifact inclusion before publishing the archive. Preprint and analysis-archive DOIs pending."
+  "notes": "Cell Genomics submission. Verify Git LFS artifact inclusion before publishing the archive. Preprint and data-bundle DOIs pending."
 }

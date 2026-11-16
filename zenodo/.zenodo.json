@@ -1,7 +1,7 @@
 {
   "upload_type": "dataset",
   "title": "IsoGraph brain-aging benchmark: heavy deterministic output artifacts (feature scores, VAE reconstructions, network edges, module interpretation tables)",
-  "description": "<p>Heavy, regenerable output artifacts supporting IsoGraph resolves coordinated transcript choice and gene abundance in the aging human brain. The planned dataset deposit complements the analysis repository and its Git LFS result artifacts. MANIFEST.tsv currently records paths and byte sizes; regenerate it with SHA-256 checksums against the final artifacts before upload. Contents include feature scores, VAE reconstructions, network edges and module interpretation tables. See the committed configurations and environment snapshots for analysis settings. Controlled-access source data are not redistributed.</p>",
+  "description": "<p>Heavy, regenerable output artifacts supporting IsoGraph separates transcript-usage and abundance contributions to aging brain networks. The planned dataset deposit complements the analysis repository and its Git LFS result artifacts. MANIFEST.tsv currently records paths and byte sizes; regenerate it with SHA-256 checksums against the final artifacts before upload. Contents include feature scores, VAE reconstructions, network edges and module interpretation tables. See the committed configurations and environment snapshots for analysis settings. Controlled-access source data are not redistributed.</p>",
   "creators": [
     {
       "name": "Bennett, Alexis",

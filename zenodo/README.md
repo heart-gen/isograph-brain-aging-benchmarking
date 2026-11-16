@@ -1,22 +1,30 @@
-# Archiving the initial manuscript submission
+# Archiving the analysis releases
 
-The analysis release is **v1.0.0**, accompanying
-[IsoGraph resolves coordinated transcript choice and gene abundance in the aging human brain](https://github.com/heart-gen/isograph-brain-manuscript).
-The analysis archive and data-bundle DOIs are pending. The manuscript currently
-states that they will be provided at publication.
+The current analysis release is **v1.1.0**, accompanying the Cell Genomics
+submission of
+[IsoGraph separates transcript-usage and abundance contributions to aging brain networks](https://github.com/heart-gen/isograph-brain-manuscript).
+Release v1.0.0 accompanied the initial submission, under the earlier title
+*IsoGraph resolves coordinated transcript choice and gene abundance in the aging
+human brain*, and is archived as
+[10.5281/zenodo.23149044](https://doi.org/10.5281/zenodo.23149044). The
+manuscript cites the all-versions DOI
+[10.5281/zenodo.23149043](https://doi.org/10.5281/zenodo.23149043), which
+resolves to the newest release. The data-bundle DOI is pending.
 
 ## Analysis repository archive
 
 The repository-root [`.zenodo.json`](../.zenodo.json) describes the software
 archive; [`CITATION.cff`](../CITATION.cff) records the authors and release version.
-The tag annotation is `IsoGraph brain analysis -- initial manuscript submission`.
-[Release notes](../RELEASE_NOTES.md) provide the draft GitHub release body.
+Tag annotations are `IsoGraph brain analysis -- initial manuscript submission`
+(v1.0.0) and `IsoGraph brain analysis -- Cell Genomics submission` (v1.1.0).
+[Release notes](../RELEASE_NOTES.md) provide the GitHub release body for each.
 
-To publish, push the release commit and tag, enable the repository's GitHub–Zenodo
-integration, and publish the GitHub release. After deposition, record the assigned
-DOI in the repository citation metadata and companion manuscript availability
-statement. Preserve the submission tag; subsequent metadata changes belong in a
-new commit and, if archived, a new release.
+The GitHub–Zenodo integration is enabled. To publish a new version, push the
+release commit and tag and publish the GitHub release; Zenodo deposits it as a new
+version under the all-versions DOI, which the citation metadata and the companion
+manuscript's availability statements cite and which does not change between
+releases. Preserve earlier tags; subsequent metadata changes belong in a new
+commit and, if archived, a new release.
 
 Tracked lean results and figures use Git LFS. Before finalizing an archive,
 verify that it contains artifact bytes rather than LFS pointer files. In a full
@@ -51,7 +59,7 @@ dataset bundles and other planned public artifacts require separate inventory an
 staging. Follow [`inputs/README.md`](../inputs/README.md) for source provenance;
 do not include controlled-access source files in the public deposit.
 
-The manuscript cites the separate IsoGraph software archive as
-`10.5281/zenodo.21707653` and the independent long-read dataset as
-`10.5281/zenodo.8180677`. Neither DOI identifies this analysis release or its data
-bundle. Add the preprint DOI to related identifiers when it is assigned.
+The manuscript also cites the separate IsoGraph software archive
+(`10.5281/zenodo.21707653`) and the independent long-read dataset
+(`10.5281/zenodo.8180677`); neither DOI identifies this analysis release or its
+data bundle. Add the preprint DOI to related identifiers when it is assigned.
